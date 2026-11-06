@@ -32,7 +32,7 @@ function storePortalSession(portal: "admin" | "lms", token = `${portal}-token`) 
 test("fetches the LMS notification inbox from the v1 self API", async () => {
   vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
   storePortalSession("lms");
-  const fetchMock = vi.fn(async () =>
+  const fetchMock = vi.fn(async (_url?: string | URL | Request, _init?: RequestInit) =>
     new Response(
       JSON.stringify({
         data: {
@@ -136,7 +136,7 @@ test("resolves notification query scope from the active portal session", () => {
 test("registers PWA devices against the notification device registry", async () => {
   vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
   storePortalSession("lms");
-  const fetchMock = vi.fn(async () =>
+  const fetchMock = vi.fn(async (_url?: string | URL | Request, _init?: RequestInit) =>
     new Response(
       JSON.stringify({
         data: {
@@ -175,7 +175,7 @@ test("registers PWA devices against the notification device registry", async () 
 test("uses the admin portal for admin notification endpoints", async () => {
   vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
   storePortalSession("admin");
-  const fetchMock = vi.fn(async (url: string | URL | Request) => {
+  const fetchMock = vi.fn(async (url: string | URL | Request, _init?: RequestInit) => {
     if (String(url).endsWith("/api/v1/admin/notifications/stats")) {
       return new Response(JSON.stringify({ data: { dead: 0, pending: 0, retry: 0, sent: 1 } }), {
         status: 200,

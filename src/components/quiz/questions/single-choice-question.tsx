@@ -1,12 +1,10 @@
 import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import type { ReactNode } from "react";
 
-import { ChoiceOption, EditableChoiceOption } from "@/components/quiz/questions/choice-option";
+import { ChoiceOption } from "@/components/quiz/questions/choice-option";
 import { QuestionContentImage } from "@/components/quiz/questions/shared";
 import type { QuestionComponentProps } from "@/components/quiz/questions/types";
-import type { Choice, Question } from "@/lib/types";
+import type { Question } from "@/domain/quiz/types";
 
 export function SingleChoiceQuestion({
   question,
@@ -14,88 +12,9 @@ export function SingleChoiceQuestion({
   onChange,
   submitted = false,
   reviewMode = false,
-  editable = false,
-  onQuestionChange,
 }: QuestionComponentProps) {
   const selectedId = value.choiceId;
   const choices = question.choices ?? [];
-
-  function emitChoices(nextChoices: Choice[]) {
-    onQuestionChange?.({ ...question, choices: nextChoices });
-  }
-
-  function updateChoice(choiceId: string, patch: Partial<Choice>) {
-    emitChoices(choices.map((choice) => (choice.id === choiceId ? { ...choice, ...patch } : choice)));
-  }
-
-  function toggleCorrect(choiceId: string) {
-    emitChoices(choices.map((choice) => ({ ...choice, correct: choice.id === choiceId })));
-  }
-
-  function removeChoice(choiceId: string) {
-    emitChoices(choices.filter((choice) => choice.id !== choiceId));
-  }
-
-  function addChoice() {
-    emitChoices([
-      ...choices,
-      {
-        id: createChoiceId("choice"),
-        label: `Phương án ${choices.length + 1}`,
-        correct: choices.length === 0,
-      },
-    ]);
-  }
-
-  if (editable && onQuestionChange) {
-    return (
-      <QuestionChoiceLayout question={question}>
-        <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 2, sm: 2.5 } }}>
-          {choices.map((choice) => (
-            <EditableChoiceOption
-              key={choice.id}
-              correct={choice.correct}
-              label={choice.label}
-              mode="single"
-              onCorrectToggle={() => toggleCorrect(choice.id)}
-              onLabelChange={(label) => updateChoice(choice.id, { label })}
-              onRemove={choices.length > 2 ? () => removeChoice(choice.id) : undefined}
-            />
-          ))}
-          <Button
-            className="quiz-runtime-edit-add"
-            variant="outlined"
-            onClick={addChoice}
-            startIcon={<AddRoundedIcon sx={{ fontSize: 18 }} />}
-            sx={{
-              alignSelf: "flex-start",
-              bgcolor: "rgba(15, 108, 189, 0.05)",
-              borderColor: "#0F6CBD",
-              borderStyle: "dashed",
-              borderWidth: "1.5px",
-              borderRadius: "10px",
-              color: "#0F6CBD",
-              fontSize: 13.5,
-              fontWeight: 750,
-              minHeight: 42,
-              px: 2.5,
-              py: 0.75,
-              boxShadow: "0 1px 3px rgba(15, 23, 42, 0.04)",
-              transition: "all 140ms ease",
-              "&:hover": {
-                bgcolor: "rgba(15, 108, 189, 0.12)",
-                borderColor: "#0B5CAB",
-                boxShadow: "0 4px 14px rgba(15, 108, 189, 0.14)",
-                transform: "translateY(-1px)",
-              },
-            }}
-          >
-            Thêm phương án
-          </Button>
-        </Box>
-      </QuestionChoiceLayout>
-    );
-  }
 
   return (
     <QuestionChoiceLayout question={question}>
@@ -108,6 +27,7 @@ export function SingleChoiceQuestion({
             <ChoiceOption
               key={choice.id}
               disabled={submitted}
+              image={choice.image}
               mode="single"
               onClick={() => {
                 onChange({ choiceId: choice.id });
@@ -139,8 +59,4 @@ function QuestionChoiceLayout({
       {question.contentImage ? <Box sx={{ position: { lg: "sticky" }, top: { lg: 0 } }}><QuestionContentImage question={question} /></Box> : null}
     </Box>
   );
-}
-
-function createChoiceId(prefix: string) {
-  return `${prefix}-${Date.now()}-${Math.round(Math.random() * 1000)}`;
 }

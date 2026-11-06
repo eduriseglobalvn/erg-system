@@ -1,4 +1,4 @@
-import { classroomStudents } from "@/features/lms/classroom/api/mock-classroom-data";
+import { classroomStudents } from "@/features/lms/classroom/api/classroom-defaults";
 
 export const allGroupSourcesFilterValue = "all-groups";
 

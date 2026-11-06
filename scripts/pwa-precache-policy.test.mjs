@@ -15,7 +15,7 @@ test("extracts entry and modulepreload assets from the generated shell", () => {
 test("keeps shell JavaScript and static files but removes lazy JavaScript", async () => {
   const temp = new URL(`./.pwa-policy-${Date.now()}.html`, import.meta.url);
   const { writeFile, rm } = await import("node:fs/promises");
-  await writeFile(temp, '<script src="/assets/index-hash.js"></script><link rel="modulepreload" href="/assets/auth-hash.js">');
+  await writeFile(temp, '<script src="/assets/index-hash.js"></script><link rel="modulepreload" href="/assets/auth-hash.js"><link rel="stylesheet" href="/assets/index-hash.css">');
   try {
     const result = await filterPwaPrecacheManifest([
       { url: "index.html", revision: "index" },
@@ -44,6 +44,44 @@ test("fails closed when the generated shell has no JavaScript entry", async () =
   await writeFile(temp, "<html><link rel=stylesheet href=/assets/index.css></html>");
   try {
     await assert.rejects(() => filterPwaPrecacheManifest([], temp), /found no JavaScript/);
+  } finally {
+    await rm(temp, { force: true });
+  }
+});
+
+test("filterPwaPrecacheManifest drops lazy route CSS but keeps shell CSS", async () => {
+  const temp = new URL(`./.pwa-policy-css-${Date.now()}.html`, import.meta.url);
+  const { writeFile, rm } = await import("node:fs/promises");
+  await writeFile(temp, '<script src="/assets/index-hash.js"></script><link rel="stylesheet" href="/assets/index-hash.css">');
+  try {
+  const result = await filterPwaPrecacheManifest(
+    [
+      { url: "assets/index-hash.js", revision: null },
+      { url: "assets/index-hash.css", revision: null },
+      { url: "assets/quiz-editor-hash.css", revision: null },
+    ],
+    temp,
+  );
+  assert.deepEqual(result.manifest.map((entry) => entry.url), ["assets/index-hash.js", "assets/index-hash.css"]);
+  } finally {
+    await rm(temp, { force: true });
+  }
+});
+
+test("filterPwaPrecacheManifest keeps one entry per URL", async () => {
+  const temp = new URL(`./.pwa-policy-dup-${Date.now()}.html`, import.meta.url);
+  const { writeFile, rm } = await import("node:fs/promises");
+  await writeFile(temp, '<script src="/assets/index-hash.js"></script>');
+  try {
+    const result = await filterPwaPrecacheManifest(
+      [
+        { url: "assets/index-hash.js", revision: null },
+        { url: "icon.png", revision: "a" },
+        { url: "icon.png", revision: "a" },
+      ],
+      temp,
+    );
+    assert.deepEqual(result.manifest.map((entry) => entry.url), ["assets/index-hash.js", "icon.png"]);
   } finally {
     await rm(temp, { force: true });
   }

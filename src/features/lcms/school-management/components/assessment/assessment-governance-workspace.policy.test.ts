@@ -12,6 +12,6 @@ describe("assessment governance contract boundary", () => {
     expect(source).not.toContain("mock-training-monitoring");
     expect(source).not.toContain("assessmentCampaigns");
     expect(source).not.toContain("setRequests");
-    expect(source).toContain("Chờ contract backend");
+    expect(source).toContain("Sắp ra mắt");
   });
 });

@@ -2,7 +2,7 @@ import type {
   ClassroomSnapshot,
   ClassroomStudent,
   StudentStatus,
-} from "@/features/lms/classroom/types/classroom-types";
+} from "@/domain/school/classroom-types";
 import { getDefaultTenantId, graphQlRequest, type GraphQlPage } from "@/lib/graphql-client";
 import {
   isLmsEntity,
@@ -12,6 +12,7 @@ import {
   type LmsStudent,
 } from "@/features/lms/api/lms-graphql-shared";
 import { isObject, validateResponse } from "@/lib/validate-response";
+import { formatShortDateTimeVi } from "@/features/lms/api/lms-date-label";
 
 export type LmsClassWorkspaceInput = {
   tenantId?: string;
@@ -182,28 +183,29 @@ export function mapClassWorkspaceToStudents(
       className,
       gradeLabel,
       avatarSeed: initials(student.fullName || student.username || student.studentCode || student.id),
-      currentAssignment: workspace.assignments.items[0]?.quizId ? `Bai tap ${workspace.assignments.items[0].quizId}` : "Chua co bai dang giao",
-      currentStage: student.updatedAt ? `Cap nhat ${formatDateLabel(student.updatedAt)}` : "San sang hoc tap",
+      currentAssignment: workspace.assignments.items[0]?.quizId ? `Bài tập ${workspace.assignments.items[0].quizId}` : "Chưa có bài đang giao",
+      currentStage: student.updatedAt ? `Cập nhật ${formatDateLabel(student.updatedAt)}` : "Sẵn sàng học tập",
+      // The API has no per-student progress; this is a status-based placeholder, so the UI shows "—" (hasProgressData=false).
       progressRate: status === "ahead" ? 88 : status === "steady" ? 62 : 28,
+      hasProgressData: false,
       averageScore: Math.round(workspace.scoreSummary?.averagePercent ?? 0),
       streakDays: 0,
       completedAssignments: Math.round(workspace.scoreSummary?.completedAttemptCount ?? 0),
       status,
-      mentorNote: student.status === "inactive" ? "Can kiem tra trang thai tai khoan hoc sinh." : "Theo doi tien do hoc tap theo lop hien tai.",
-      lastActivity: student.updatedAt ? formatDateLabel(student.updatedAt) : "Chua co du lieu",
+      mentorNote: student.status === "inactive" ? "Cần kiểm tra trạng thái tài khoản học sinh." : "Theo dõi tiến độ học tập theo lớp hiện tại.",
+      lastActivity: student.updatedAt ? formatDateLabel(student.updatedAt) : "Chưa có dữ liệu",
     };
   });
 }
 
-function formatDateLabel(value: string) {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "Moi cap nhat";
-  return date.toLocaleString("vi-VN", { day: "2-digit", hour: "2-digit", minute: "2-digit", month: "2-digit" });
+export function formatDateLabel(value: string) {
+  return formatShortDateTimeVi(value) || "Mới cập nhật";
 }
 
-function gradeLabelFor(value?: string | null, fallback?: string) {
-  if (!value) return fallback ?? "ERG";
-  const grade = value.replace(/^grade[-_]?/i, "");
+function gradeLabelFor(value?: string | number | null, fallback?: string) {
+  if (value == null || value === "") return fallback ?? "ERG";
+  const str = String(value);
+  const grade = str.replace(/^grade[-_]?/i, "");
   return grade ? `Khoi ${grade}` : fallback ?? "ERG";
 }
 

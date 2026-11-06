@@ -27,7 +27,7 @@ export function LearningStandardsPackageTable({ packages, isLoading, isError, ca
       {isLoading ? (
         <ErgLoadingSkeleton rows={6} />
       ) : isError ? (
-        <ErgEmptyState title="Không tải được package" description="Kiểm tra quyền learning.standards.read hoặc thử lại sau." action={<Button onClick={onRetry}>Thử lại</Button>} />
+        <ErgEmptyState title="Không tải được package" description="Kiểm tra quyền learning.standards.read hoặc thử lại sau." action={<Button variant="contained" onClick={onRetry}>Thử lại</Button>} />
       ) : packages.length === 0 ? (
         <ErgEmptyState title="Chưa có SCORM package" description="Đăng ký metadata trước, sau đó upload artifact qua pipeline storage của backend." />
       ) : (
@@ -46,7 +46,7 @@ export function LearningStandardsPackageTable({ packages, isLoading, isError, ca
             {packages.map((value) => (
               <TableRow hover key={value.id}>
                 <TableCell>
-                  <Typography sx={{ fontWeight: 800 }} variant="body2">{value.title}</Typography>
+                  <Typography sx={{ fontWeight: 600 }} variant="body2">{value.title}</Typography>
                   <Typography color="text.secondary" variant="caption">{value.id} · {value.packageVersion}</Typography>
                   {value.quarantineReason ? <Typography color="error.main" variant="caption">{value.quarantineReason}</Typography> : null}
                 </TableCell>
@@ -55,8 +55,8 @@ export function LearningStandardsPackageTable({ packages, isLoading, isError, ca
                 <TableCell align="right">{formatBytes(value.byteSize)}</TableCell>
                 <TableCell align="right">v{value.recordVersion}</TableCell>
                 <TableCell align="right">
-                  {canManage ? <Button size="small" startIcon={<FactCheckRoundedIcon />} onClick={() => onValidate(value)}>Kiểm tra</Button> : null}
-                  {value.status === "READY" ? <Button size="small" startIcon={<PlayArrowRoundedIcon />} onClick={() => onLaunch(value)}>Mở</Button> : null}
+                  {canManage ? <Button variant="contained" size="small" startIcon={<FactCheckRoundedIcon />} onClick={() => onValidate(value)}>Kiểm tra</Button> : null}
+                  {value.status === "READY" ? <Button variant="contained" size="small" startIcon={<PlayArrowRoundedIcon />} onClick={() => onLaunch(value)}>Mở</Button> : null}
                 </TableCell>
               </TableRow>
             ))}

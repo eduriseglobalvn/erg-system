@@ -1,4 +1,4 @@
-import type { ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
+import type { ClassroomStudent } from "@/domain/school/classroom-types";
 
 export type ScoreColumn = {
   id: string;
@@ -93,7 +93,7 @@ export function getClassificationBg(classification: Classification) {
 export function getClassificationColor(classification: Classification) {
   const colors: Record<Classification, string> = {
     A: "#16a34a",
-    B: "#2563eb",
+    B: "#0071E3",
     C: "#d97706",
     D: "#ea580c",
     E: "#dc2626",
@@ -116,7 +116,7 @@ export function getClassificationChipSx(classification: Classification) {
   return {
     backgroundColor: getClassificationBg(classification),
     color: getClassificationColor(classification),
-    fontWeight: 700,
+    fontWeight: 600,
     fontSize: 14,
   };
 }

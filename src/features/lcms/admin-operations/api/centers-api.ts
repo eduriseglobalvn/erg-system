@@ -1,6 +1,6 @@
 import { API_ENDPOINTS } from "@/lib/api/api-endpoints";
 import { apiRequest, getBackOfficePortal, hasApiBase } from "@/lib/api-client";
-import type { ClassroomSchool } from "@/features/lms/classroom/types/classroom-types";
+import type { ClassroomSchool } from "@/domain/school/classroom-types";
 
 /**
  * Fetches the list of all education units (centers/schools) from the Go backend.

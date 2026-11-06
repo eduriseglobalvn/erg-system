@@ -13,8 +13,8 @@ import {
 } from "@/features/lms/api/lms-academic-record-api";
 import type { UpsertAttendanceInput, UpsertGradebookScoreInput } from "@/lib/api/generated/graphql";
 import { getDefaultTenantId } from "@/lib/graphql-client";
-import { QUERY_POLICIES } from "@/lib/query-policy";
-import { readStoredAuthSession } from "@/platform/auth/api/auth-token-storage";
+import { persistedQueryMeta, QUERY_POLICIES } from "@/lib/query-policy";
+import { getAuthScope } from "@/platform/auth/api/auth-storage";
 import {
   createOfflineTeachingCommandAdapter,
   type OfflineTeachingCommandResult,
@@ -60,7 +60,7 @@ export const lmsAcademicRecordQueryKeys = {
 };
 
 export function resolveAcademicRecordIdentity() {
-  const session = readStoredAuthSession("lms") as { accountId?: string | null; tenantId?: string | null } | null;
+  const session = getAuthScope("lms").session as { accountId?: string | null; tenantId?: string | null } | null;
   return {
     accountId: normalizeAccount(session?.accountId),
     tenantId: normalizeTenant(session?.tenantId),
@@ -71,7 +71,8 @@ export function attendanceQueryOptions(scope: AttendanceQueryScope) {
   const normalized = normalizeScope(scope);
   return {
     enabled: hasConcreteScope(normalized) && Boolean(normalized.from && normalized.to),
-    gcTime: QUERY_POLICIES.transactional.gcTime,
+    gcTime: QUERY_POLICIES.offlineCore.gcTime,
+    meta: persistedQueryMeta(normalized.tenantId, normalized.accountId),
     queryFn: ({ signal }: { signal: AbortSignal }) => loadAttendanceWorkspace({
       classId: normalized.classId!,
       from: normalized.from,
@@ -89,7 +90,8 @@ export function gradebookQueryOptions(scope: AcademicRecordScope) {
   const normalized = normalizeScope(scope);
   return {
     enabled: hasConcreteScope(normalized),
-    gcTime: QUERY_POLICIES.transactional.gcTime,
+    gcTime: QUERY_POLICIES.offlineCore.gcTime,
+    meta: persistedQueryMeta(normalized.tenantId, normalized.accountId),
     queryFn: ({ signal }: { signal: AbortSignal }) => loadGradebookWorkspace({
       classId: normalized.classId!,
       schoolId: normalized.schoolId || undefined,

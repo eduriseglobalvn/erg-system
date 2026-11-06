@@ -1,4 +1,3 @@
-import { USE_LEARNING_RESOURCE_AUTHORING_MOCK } from "@/features/lcms/admin-operations/api/mock-learning-resource-authoring-data";
 import type { LearningResourceResource } from "@/features/lms/learning-resources/api/learning-resource-domain-types";
 import { isApiLaunchUrl, normalizeViewerUrl } from "@/features/lms/learning-resources/api/learning-resource-normalizers";
 import { hasApiBase } from "@/lib/api-client";
@@ -14,7 +13,6 @@ export const offlineLearningResourceCache = new OfflineResourceCache(
 );
 
 export async function loadLearningResourceResourceForViewer(resource: LearningResourceResource): Promise<LearningResourceResource> {
-  if (USE_LEARNING_RESOURCE_AUTHORING_MOCK && resource.id.startsWith("mock-")) return resource;
   if (!hasApiBase()) return resource;
   if (resource.viewer.launchUrl) {
     if (!isApiLaunchUrl(resource.viewer.launchUrl)) {

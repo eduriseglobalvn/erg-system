@@ -1,5 +1,6 @@
 import { DesktopExerciseBankView } from "@/features/lms/components/exercise-bank/desktop-exercise-bank-view";
 import { MobileExerciseBankView } from "@/features/lms/components/exercise-bank/mobile-exercise-bank-view";
+import { QuickAssignDialog } from "@/features/lms/components/exercise-bank/quick-assign-dialog";
 import { useExerciseBankController } from "@/features/lms/components/exercise-bank/use-exercise-bank-controller";
 import { useLmsMobileBreakpoint } from "@/features/lms/mobile/hooks/use-lms-mobile-breakpoint";
 import { PortablePackageCatalogDialog } from "@/features/portable-package-export/components/portable-package-catalog-dialog";
@@ -25,10 +26,20 @@ export function ExerciseBankPage({ onBack, onAssign }: ExerciseBankPageProps) {
   return (
     <>
       {isMobile ? (
-        <MobileExerciseBankView controller={controller} onAssign={onAssign} onOpenPortable={openPortableCatalog} />
+        <MobileExerciseBankView controller={controller} onAssign={controller.setQuickAssignTitle} onOpenPortable={openPortableCatalog} />
       ) : (
-        <DesktopExerciseBankView controller={controller} onAssign={onAssign} onBack={onBack} onOpenPortable={openPortableCatalog} />
+        <DesktopExerciseBankView controller={controller} onAssign={controller.setQuickAssignTitle} onBack={onBack} onOpenPortable={openPortableCatalog} />
       )}
+      {controller.quickAssignExercise ? (
+        <QuickAssignDialog
+          exercise={controller.quickAssignExercise}
+          onClose={() => controller.setQuickAssignTitle("")}
+          onDone={(title) => {
+            controller.setQuickAssignTitle("");
+            onAssign(title);
+          }}
+        />
+      ) : null}
       {controller.portableCatalogOpen ? (
         <PortablePackageCatalogDialog onClose={() => controller.setPortableCatalogOpen(false)} portal="lms" />
       ) : null}

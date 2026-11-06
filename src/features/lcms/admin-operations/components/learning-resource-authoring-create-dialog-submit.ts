@@ -1,8 +1,9 @@
-import { createLearningResourceTaxonomy, uploadLearningResourceResource, type CreateTaxonomyPayload } from "@/features/lcms/admin-operations/api/learning-resource-authoring-api";
+import { createLearningResourceTaxonomy, uploadLearningResourceResource, type CreateTaxonomyPayload } from "@/features/lms/learning-resources/api/learning-resource-authoring-api";
 import { apiKindForNodeKind, normalizeTaxonomyOption, parsePositiveInteger } from "@/features/lcms/admin-operations/components/learning-resource-authoring-utils";
 import { getTaxonomyIconColor, getTaxonomyIconId, type TaxonomyRole } from "@/features/lcms/admin-operations/components/learning-resource-authoring-icons";
 import type { StudioNode, StudioSubject, TaxonomyCreateKind, TaxonomyDialogState } from "@/features/lcms/admin-operations/types/learning-resource-authoring";
 import { normalizeGoogleSlidesUrl, normalizeGoogleViewerUrl, type ContentDialogOptionId, type ExerciseLibraryItem } from "@/features/lcms/admin-operations/utils/learning-resource-content-dialog";
+import type { AuthoringItemType } from "./learning-resource-authoring-create-dialog-presentation";
 import type { ResolvedTaxonomyMode } from "./learning-resource-authoring-create-dialog-config";
 import type { TaxonomyCreateDialogProps } from "./learning-resource-authoring-create-dialog-types";
 
@@ -10,9 +11,12 @@ interface SubmissionInput {
   description: string;
   draftLevelId: string;
   draftSubjectId: string;
+  draftTopicId?: string;
+  draftTopicOptions?: StudioNode[];
   filteredExercises: ExerciseLibraryItem[];
   iconColor: string;
   iconId: string;
+  itemType?: AuthoringItemType;
   label: string;
   onClose: TaxonomyCreateDialogProps["onClose"];
   onCreateLecture: TaxonomyCreateDialogProps["onCreateLecture"];
@@ -27,6 +31,7 @@ interface SubmissionInput {
   selectedNode?: StudioNode;
   selectedOption: ContentDialogOptionId | null;
   selectedSubject?: StudioSubject;
+  subjects?: StudioSubject[];
   slidesUrl: string;
   state: TaxonomyDialogState;
   status: string;
@@ -46,7 +51,25 @@ async function submitTaxonomy(mode: TaxonomyRole, input: SubmissionInput) {
     throw new Error(mode === "subject" ? "Vui lòng nhập tên môn học." : mode === "level" ? "Vui lòng nhập tên level." : "Vui lòng nhập tên chủ đề.");
   }
   if ((mode === "level" || mode === "topic") && !input.draftSubjectId) throw new Error("Vui lòng chọn môn học.");
-  if (mode === "topic" && !input.draftLevelId) throw new Error("Vui lòng chọn level cha.");
+  let targetLevelId = input.draftLevelId;
+  if (mode === "topic" && !targetLevelId) {
+    const existing = input.selectedSubject?.tree.find((node) => node.optionId)
+      ?? input.subjects?.find((s) => s.id === input.draftSubjectId)?.tree.find((node) => node.optionId);
+    if (existing?.optionId) {
+      targetLevelId = existing.optionId;
+    } else if (input.draftSubjectId) {
+      const createdLevel = normalizeTaxonomyOption(
+        await createLearningResourceTaxonomy("levels", {
+          label: "Chung",
+          description: "Chương trình chung",
+          subjectId: input.draftSubjectId,
+          status: "active",
+          metadata: { taxonomyRole: "level" },
+        }),
+      );
+      targetLevelId = createdLevel?.id ?? "";
+    }
+  }
 
   const resolvedKind: TaxonomyCreateKind = mode === "topic" ? "section" : "category";
   const payload: CreateTaxonomyPayload = {
@@ -60,7 +83,7 @@ async function submitTaxonomy(mode: TaxonomyRole, input: SubmissionInput) {
     },
   };
   if (mode === "level" || mode === "topic") payload.subjectId = input.draftSubjectId;
-  if (mode === "topic") payload.categoryId = input.draftLevelId;
+  if (mode === "topic" && targetLevelId) payload.categoryId = targetLevelId;
 
   const created = normalizeTaxonomyOption(
     await createLearningResourceTaxonomy(mode === "subject" ? "subjects" : apiKindForNodeKind(resolvedKind), payload),
@@ -76,24 +99,83 @@ async function submitTaxonomy(mode: TaxonomyRole, input: SubmissionInput) {
   input.onClose();
 }
 
+async function resolveTargetTopicAndLevel(input: SubmissionInput): Promise<{
+  subjectId: string;
+  targetLevelId: string;
+  targetTopicId: string;
+}> {
+  const subjectId = input.draftSubjectId || input.selectedSubject?.id || input.subjects?.[0]?.id;
+  if (!subjectId) throw new Error("Vui lòng chọn môn học.");
+
+  // Resolve targetLevelId
+  let targetLevelId = input.draftLevelId || input.resourceLocation.categoryId || "";
+  if (!targetLevelId) {
+    const existingLevel = input.selectedSubject?.tree.find((node) => node.optionId)
+      ?? input.subjects?.find((s) => s.id === subjectId)?.tree.find((node) => node.optionId);
+    if (existingLevel?.optionId) {
+      targetLevelId = existingLevel.optionId;
+    }
+  }
+
+  // Resolve targetTopicId
+  let targetTopicId = input.draftTopicId || "";
+  if (!targetTopicId) {
+    if (input.selectedNode?.optionId && (input.selectedNode.kind === "lesson" || input.selectedNode.kind === "section" || input.selectedNode.kind === "topic")) {
+      targetTopicId = input.selectedNode.optionId;
+    } else if (input.draftTopicOptions?.length) {
+      targetTopicId = input.draftTopicOptions[0].optionId || input.draftTopicOptions[0].id;
+    }
+  }
+
+  // If still no topic, auto-create level (if none) and default topic
+  if (!targetTopicId) {
+    if (!targetLevelId) {
+      const createdLevel = normalizeTaxonomyOption(
+        await createLearningResourceTaxonomy("levels", {
+          label: "Chung",
+          description: "Chương trình chung",
+          subjectId,
+          status: "active",
+          metadata: { taxonomyRole: "level" },
+        }),
+      );
+      targetLevelId = createdLevel?.id ?? "";
+    }
+
+    const createdTopic = normalizeTaxonomyOption(
+      await createLearningResourceTaxonomy("sections", {
+        label: "Chủ đề chung",
+        description: "Chủ đề học tập",
+        subjectId,
+        categoryId: targetLevelId,
+        status: "active",
+        metadata: { taxonomyRole: "topic" },
+      }),
+    );
+    targetTopicId = createdTopic?.id ?? "";
+  }
+
+  return { subjectId, targetLevelId, targetTopicId };
+}
+
 async function submitLecture(input: SubmissionInput) {
   const trimmedLabel = input.label.trim();
   const normalizedSlidesUrl = normalizeGoogleSlidesUrl(input.slidesUrl);
   if (!trimmedLabel) throw new Error("Vui lòng nhập tên bài giảng.");
-  if (!input.selectedSubject || !input.selectedNode?.optionId) throw new Error("Vui lòng chọn chủ đề trước khi thêm bài giảng.");
   if (!normalizedSlidesUrl) throw new Error("Vui lòng dán link Google Slides.");
-  if (!input.resourceLocation.categoryId) throw new Error("Vị trí hiện tại chưa xác định được level để gắn bài giảng.");
+
+  const { subjectId, targetLevelId, targetTopicId } = await resolveTargetTopicAndLevel(input);
 
   await input.onCreateLecture({
     title: trimmedLabel,
     subtitle: "Google Slides",
     upstreamUrl: normalizedSlidesUrl,
-    programSlug: input.selectedSubject.id,
-    subjectId: input.selectedSubject.id,
-    categoryId: input.resourceLocation.categoryId,
-    sectionId: input.resourceLocation.sectionId,
-    bookSeriesId: input.resourceLocation.bookSeriesId,
-    topicId: input.resourceLocation.topicId,
+    programSlug: subjectId,
+    subjectId,
+    categoryId: targetLevelId,
+    sectionId: targetTopicId,
+    bookSeriesId: "",
+    topicId: targetTopicId,
     documentTypeId: "lecture",
     selectedFileType: "PPTX",
     status: input.status,
@@ -103,18 +185,18 @@ async function submitLecture(input: SubmissionInput) {
 }
 
 async function submitExercises(input: SubmissionInput) {
-  const parentOptionId = input.selectedNode?.optionId;
-  if (!input.selectedSubject || !input.selectedNode || !parentOptionId) throw new Error("Vui lòng chọn chủ đề trước khi gắn bài tập.");
   if (!input.selectedExerciseIds.length) throw new Error("Vui lòng chọn ít nhất một bài tập từ Quiz bank.");
+
+  const { subjectId, targetTopicId } = await resolveTargetTopicAndLevel(input);
 
   const selectedExercises = input.filteredExercises.filter((item) => input.selectedExerciseIds.includes(item.id));
   const timestamp = Date.now();
   await input.onCreateLocalContent(selectedExercises.map((item) => ({
     id: `exercise-${item.id}-${timestamp}`,
     kind: "exercise",
-    subjectId: input.selectedSubject!.id,
-    parentNodeId: input.selectedNode!.id,
-    parentOptionId,
+    subjectId,
+    parentNodeId: targetTopicId,
+    parentOptionId: targetTopicId,
     title: item.title,
     description: input.description.trim() || [item.topicLabel, item.sectionLabel].filter(Boolean).join(" / "),
     topicLabel: item.topicLabel,
@@ -131,24 +213,24 @@ async function submitExercises(input: SubmissionInput) {
 
 async function submitResource(input: SubmissionInput) {
   const normalizedResourceUrl = normalizeGoogleViewerUrl(input.resourceUrl);
-  if (!input.selectedSubject || !input.selectedNode) throw new Error("Vui lòng chọn chủ đề cần gắn tài liệu.");
-  if (!input.resourceLocation.categoryId) throw new Error("Vị trí hiện tại chưa xác định được level để gắn tài liệu.");
   if (!normalizedResourceUrl) throw new Error("Vui lòng dán link Google Drive hoặc Google Slides.");
   const parsedTotalSlides = parsePositiveInteger(input.resourceTotalSlides);
   if (input.resourceFileType === "PPTX" && input.resourceTotalSlides.trim() && !parsedTotalSlides) {
     throw new Error("Tổng số slide phải là số nguyên lớn hơn 0.");
   }
 
+  const { subjectId, targetLevelId, targetTopicId } = await resolveTargetTopicAndLevel(input);
+
   await uploadLearningResourceResource({
     title: input.label.trim() || "Tài liệu Google Drive",
     description: input.description.trim(),
     selectedFileType: input.resourceFileType,
-    subjectId: input.selectedSubject.id,
-    programSlug: input.selectedSubject.id,
-    categoryId: input.resourceLocation.categoryId,
-    sectionId: input.resourceLocation.sectionId,
-    bookSeriesId: input.resourceLocation.bookSeriesId,
-    topicId: input.resourceLocation.topicId,
+    subjectId,
+    programSlug: subjectId,
+    categoryId: targetLevelId,
+    sectionId: targetTopicId,
+    bookSeriesId: "",
+    topicId: targetTopicId,
     documentTypeId: input.resourceFileType,
     status: input.status,
     visibility: input.status === "hidden" ? "private" : "public",
@@ -158,4 +240,3 @@ async function submitResource(input: SubmissionInput) {
   });
   await input.onUploadResource();
 }
-

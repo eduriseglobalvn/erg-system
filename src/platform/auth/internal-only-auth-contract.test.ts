@@ -23,13 +23,12 @@ describe("internal-only authentication contract", () => {
   test("auth UI does not load Google Identity or offer registration", () => {
     const authHook = source("./hooks/use-auth-session.ts");
     const desktopForm = source("./components/auth-form-panel.tsx");
-    const mobileForm = source("./components/portal-mobile-login-form.tsx");
 
     expect(authHook).not.toContain("requestGoogleIdToken");
     expect(authHook).not.toContain("registerMutation");
     expect(authHook).not.toContain("loginByProvider");
     expect(desktopForm).not.toContain("GoogleSignInButton");
-    expect(mobileForm).not.toContain("GoogleSignInButton");
+    expect(desktopForm).not.toContain("allowGoogle");
   });
 
   test("browser account model does not retain password credentials or local password authentication", () => {

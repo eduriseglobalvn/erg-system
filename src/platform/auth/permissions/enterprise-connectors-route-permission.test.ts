@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { ADMIN_ENTERPRISE_CONNECTORS_PATH } from "@/app/portal-route-registry";
+import { ADMIN_ENTERPRISE_CONNECTORS_PATH } from "@/platform/auth/permissions/portal-route-registry";
 import { routePermissionForPath } from "@/platform/auth/permissions/route-permission-matrix";
 
 describe("enterprise connector route authorization", () => {

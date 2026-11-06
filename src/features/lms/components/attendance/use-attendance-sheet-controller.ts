@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
-import type { ClassroomSnapshot, ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
+import type { ClassroomSnapshot, ClassroomStudent } from "@/domain/school/classroom-types";
 import { useCurriculumTeachingPlanQuery } from "@/features/lms/api/curriculum-teaching-plan-query";
 import { useCurriculumTreeQuery } from "@/features/lms/api/curriculum-tree-api";
 import { useCurriculumProgramReader } from "@/features/lms/api/curriculum-program-query-reader";
@@ -15,10 +15,13 @@ import {
 } from "@/features/lms/api/lms-academic-record-query";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useVirtualList } from "@/hooks/use-virtual-list";
+import { getAuthScope } from "@/platform/auth/api/auth-storage";
+import { hasAdminLikeClaims } from "@/platform/auth/permissions/admin-like";
 import { runtimeFixturesEnabled } from "@/lib/runtime-fixtures";
 import {
   attendanceSummary,
   attendanceText,
+  bulkPresentTargets,
   buildAttendanceColumns,
   clampInputDateToToday,
   countLessonsThroughDate,
@@ -54,6 +57,10 @@ export function useAttendanceSheetController({ selectedClass, students }: Attend
   const tableScrollRef = useRef<HTMLDivElement>(null);
   const debouncedSearchQuery = useDebouncedValue(searchQuery);
 
+  const isAdmin = useMemo(() => {
+    const scope = getAuthScope();
+    return hasAdminLikeClaims(scope.roles, scope.permissions);
+  }, []);
   const todayInputDate = getTodayInputDate();
   const curriculumTreeQuery = useCurriculumTreeQuery();
   const canonicalSubjects = curriculumTreeQuery.data?.subjects ?? [];
@@ -177,6 +184,15 @@ export function useAttendanceSheetController({ selectedClass, students }: Attend
     });
   }
 
+  function markAllPresent() {
+    const focusColumns = dateColumns.filter((column) => column.isFocusDate && !column.isFutureDate);
+    const targets = bulkPresentTargets(filteredStudents, focusColumns, statusFor);
+    for (const target of targets) setAttendanceStatus(target.studentId, target.columnId, "present");
+    const message = targets.length ? `Đã đánh dấu có mặt ${targets.length} lượt. Chạm ô để đổi ngoại lệ.` : "Tất cả học sinh đã được điểm danh.";
+    setNotice(message);
+    toast.info(message);
+  }
+
   function openStudentDetail(student: ClassroomStudent) {
     setSelectedStudentId(student.id);
     setStudentDrafts((current) => ({
@@ -214,6 +230,8 @@ export function useAttendanceSheetController({ selectedClass, students }: Attend
     dateColumns,
     exportXlsx,
     filteredStudents,
+    isAdmin,
+    markAllPresent,
     measuredVirtualRows,
     virtualTotalSize,
     notice,

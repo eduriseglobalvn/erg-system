@@ -2,11 +2,13 @@ import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import Box from "@mui/material/Box";
 import ButtonBase from "@mui/material/ButtonBase";
-import { useEffect, useRef, type CSSProperties, type ReactNode } from "react";
+import type { QuestionImage } from "@/domain/quiz/types";
+import type { CSSProperties, ReactNode } from "react";
 
 type ChoiceOptionProps = {
   children: ReactNode;
   disabled?: boolean;
+  image?: QuestionImage;
   mode: "single" | "multiple";
   onClick: () => void;
   reviewMode?: boolean;
@@ -15,21 +17,12 @@ type ChoiceOptionProps = {
   showWrong?: boolean;
 };
 
-type EditableChoiceOptionProps = {
-  correct: boolean;
-  disabled?: boolean;
-  label: string;
-  mode: "single" | "multiple";
-  onCorrectToggle: () => void;
-  onLabelChange: (value: string) => void;
-  onRemove?: () => void;
-};
-
 const visuallyHiddenSx = { border: 0, clip: "rect(0 0 0 0)", height: 1, margin: -1, overflow: "hidden", p: 0, position: "absolute", whiteSpace: "nowrap", width: 1 } as const;
 
 export function ChoiceOption({
   children,
   disabled = false,
+  image,
   mode,
   onClick,
   reviewMode = false,
@@ -66,7 +59,7 @@ export function ChoiceOption({
         borderStyle: "solid",
         borderWidth: markerChecked ? "3px" : "1.5px",
       };
-  const textColor = reviewMode ? showCorrect ? successColor : showWrong ? dangerColor : "#82b8cb" : selectedResting ? selectedAccent : "#172033";
+  const textColor = reviewMode ? showCorrect ? successColor : showWrong ? dangerColor : "#82b8cb" : selectedResting ? selectedAccent : "#1D1D1F";
 
   return (
     <ButtonBase
@@ -109,58 +102,10 @@ export function ChoiceOption({
         {isMultiple && markerChecked ? <CheckIcon sx={{ color: "common.white", fontSize: { xs: 16, sm: 20 } }} /> : markerChecked ? <Box component="span" sx={{ bgcolor: accentColor, borderRadius: innerRadius, height: { xs: 8, sm: 10 }, width: { xs: 8, sm: 10 } }} /> : null}
       </Box>
 
-      <Box component="span" sx={{ color: textColor, fontSize: "var(--quiz-readable-size-lg)", fontWeight: 600, lineHeight: 1.38, minWidth: 0 }}>{children}</Box>
+      <Box component="span" sx={{ color: textColor, fontSize: "var(--quiz-readable-size-lg)", fontWeight: 600, lineHeight: 1.38, minWidth: 0 }}>
+        {image ? <Box component="img" src={image.url} alt={image.alt ?? ""} sx={{ display: "block", maxHeight: 160, maxWidth: "100%", mb: 1, objectFit: "contain" }} /> : null}
+        {children}
+      </Box>
     </ButtonBase>
   );
-}
-
-export function EditableChoiceOption({
-  correct,
-  disabled = false,
-  label,
-  mode,
-  onCorrectToggle,
-  onLabelChange,
-  onRemove,
-}: EditableChoiceOptionProps) {
-  const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
-  const isMultiple = mode === "multiple";
-  const successColor = "#118D57";
-  const markerRadius = mode === "single" ? "999px" : "6px";
-  const innerRadius = mode === "single" ? "999px" : "3px";
-  const markerStyle: CSSProperties = isMultiple
-    ? { background: correct ? "linear-gradient(180deg, #22C55E 0%, #118D57 100%)" : "#ffffff", borderColor: correct ? successColor : "#cfd6df", borderRadius: markerRadius, borderStyle: "solid", borderWidth: correct ? "1px" : "1.5px", boxShadow: correct ? "0 8px 18px rgba(17,141,87,0.22)" : "0 1px 2px rgba(15,23,42,0.06)" }
-    : { borderColor: correct ? successColor : "rgba(0,0,136,0.24)", borderRadius: markerRadius, borderStyle: "solid", borderWidth: correct ? "3px" : "1.5px" };
-
-  useEffect(() => {
-    const element = textAreaRef.current;
-    if (element) resizeTextArea(element);
-  }, [label]);
-
-  return (
-    <Box className="quiz-runtime-edit-input-row" sx={{ alignItems: "start", background: correct ? "linear-gradient(180deg, #f0fdf4 0%, #dcfce7 100%)" : "transparent", border: "1px solid transparent", borderRadius: 1.5, boxShadow: correct ? "0 16px 34px rgba(17,141,87,0.10)" : "none", display: "grid", gap: 2, gridTemplateColumns: { xs: "44px minmax(0,1fr)", sm: "52px minmax(0,1fr)" }, minHeight: "calc(var(--quiz-control-height) + 18px)", px: { xs: 1.5, sm: 2 }, py: 1.5, position: "relative", width: "100%", "&:hover": { bgcolor: "#eef3ff", borderColor: "rgba(0,0,136,0.18)", boxShadow: "0 14px 30px rgba(0,0,136,0.075)" } }}>
-      <ButtonBase type="button" disabled={disabled} onClick={onCorrectToggle} aria-label="Mark correct answer" sx={{ ...markerStyle, alignItems: "center", bgcolor: "common.white", display: "inline-flex", height: { xs: 28, sm: 32 }, justifyContent: "center", justifySelf: "center", mt: 1, width: { xs: 28, sm: 32 } }}>
-        {isMultiple && correct ? <CheckIcon sx={{ color: "common.white", fontSize: { xs: 16, sm: 20 } }} /> : correct ? <Box component="span" sx={{ bgcolor: successColor, borderRadius: innerRadius, height: { xs: 8, sm: 10 }, width: { xs: 8, sm: 10 } }} /> : null}
-      </ButtonBase>
-
-      <Box
-        component="textarea"
-        ref={textAreaRef}
-        className={correct ? "quiz-runtime-edit-input is-correct" : "quiz-runtime-edit-input"}
-        value={label}
-        disabled={disabled}
-        rows={1}
-        onChange={(event) => onLabelChange(event.target.value)}
-        onInput={(event) => resizeTextArea(event.currentTarget)}
-        sx={{ bgcolor: "common.white", border: "1px solid #f1f5f9", borderRadius: 1, color: correct ? successColor : "#172033", fontSize: "var(--quiz-readable-size-lg)", fontWeight: 700, lineHeight: 1.38, minHeight: "calc(var(--quiz-control-height) - 6px)", minWidth: 0, overflow: "hidden", overflowWrap: "anywhere", p: "8px 12px", resize: "none", width: "100%", "&:focus": { borderColor: "rgba(0,0,136,0.24)", boxShadow: "0 0 0 2px rgba(95,143,230,0.16)", outline: "none" } }}
-      />
-
-      {onRemove ? <ButtonBase type="button" className="quiz-runtime-edit-remove matching-puzzle__remove-button" onClick={onRemove} aria-label="Remove option" sx={{ minWidth: 28, minHeight: 28 }}><CloseIcon sx={{ fontSize: 14 }} /></ButtonBase> : null}
-    </Box>
-  );
-}
-
-function resizeTextArea(element: HTMLTextAreaElement) {
-  element.style.height = "auto";
-  element.style.height = `${element.scrollHeight}px`;
 }

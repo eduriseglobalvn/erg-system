@@ -16,10 +16,10 @@ import {
   type UpdateLmsAssignmentInput,
   type UpdateLmsAssignmentRecipientsInput,
 } from "@/features/lms/api/lms-assignment-command-api";
-import { quizReportQueryKeys } from "@/features/lcms/quiz/quiz-reports";
+import { quizReportQueryKeys } from "@/features/quiz-reports";
 import { getDefaultTenantId } from "@/lib/graphql-client";
-import { readStoredAuthSession } from "@/platform/auth/api/auth-token-storage";
-import { QUERY_POLICIES } from "@/lib/query-policy";
+import { getAuthScope } from "@/platform/auth/api/auth-storage";
+import { persistedQueryMeta, QUERY_POLICIES } from "@/lib/query-policy";
 import {
   createOfflineTeachingCommandAdapter,
   type OfflineTeachingCommandResult,
@@ -78,12 +78,17 @@ export const lmsAssignmentReadQueryKeys = {
 
 
 function resolveLmsAssignmentReadAccountId() {
-  const session = readStoredAuthSession("lms") as { accountId?: string | null } | null;
+  const session = getAuthScope("lms").session as { accountId?: string | null } | null;
   return session?.accountId?.trim() || "anonymous";
 }
 
 export const LMS_STUDENT_GROUPS_STALE_TIME_MS = QUERY_POLICIES.transactional.staleTime;
-export const LMS_STUDENT_GROUPS_GC_TIME_MS = QUERY_POLICIES.transactional.gcTime;
+export const LMS_STUDENT_GROUPS_GC_TIME_MS = QUERY_POLICIES.offlineCore.gcTime;
+
+/** `meta` for LMS read queries keyed by lmsAssignmentReadQueryKeys; arguments mirror the key factories' defaults. */
+export function lmsReadPersistMeta(tenantId: string = getDefaultTenantId(), accountId: string = resolveLmsAssignmentReadAccountId()) {
+  return persistedQueryMeta(tenantId, normalizeLmsAssignmentReadAccountId(accountId));
+}
 
 export type LmsAssignmentOfflineOptions = {
   capability?: BackendOfflineTeachingPolicySnapshot | null;
@@ -100,6 +105,7 @@ export function lmsStudentGroupsQueryOptions(
   return {
     enabled: options.enabled ?? true,
     gcTime: LMS_STUDENT_GROUPS_GC_TIME_MS,
+    meta: lmsReadPersistMeta(tenantId, accountId),
     queryFn: ({ signal }: { signal: AbortSignal }) => loadLmsStudentGroups({ classId, tenantId }, signal),
     queryKey: lmsAssignmentReadQueryKeys.studentGroups(tenantId, accountId, classId),
     staleTime: LMS_STUDENT_GROUPS_STALE_TIME_MS,

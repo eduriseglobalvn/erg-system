@@ -3,7 +3,7 @@ import { shouldUseLocalQuizRuntimeFallback } from "@/features/lcms/quiz/quiz-run
 import { DEFAULT_QUIZ_RUNTIME_PORTAL } from "@/features/lcms/quiz/quiz-runtime/api/quiz-runtime-normalization-utils";
 import { gradeFinalAttemptLocally, isServerAttemptSnapshot, normalizeSubmitResponse } from "@/features/lcms/quiz/quiz-runtime/api/quiz-runtime-submit-model";
 import { API_ENDPOINTS } from "@/lib/api/api-endpoints";
-import type { Attempt } from "@/lib/types";
+import type { Attempt } from "@/domain/quiz/types";
 import type {
   RuntimeServerAttemptSnapshot,
   SaveAttemptAnswerInput,

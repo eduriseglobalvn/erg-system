@@ -1,8 +1,11 @@
 import Box from "@mui/material/Box";
 import Skeleton from "@mui/material/Skeleton";
-import { lazy, Suspense, type ComponentType, type LazyExoticComponent } from "react";
-import { SchoolManagementProvider } from "@/features/lcms/school-management/components/school-management-context";
-import { useLocation } from "@tanstack/react-router";
+import { lazy, Suspense, type ComponentType, type LazyExoticComponent, type ReactNode } from "react";
+import { ErgButton } from "@/components/erg-mui/erg-actions";
+import { ErgEmptyState, ErgErrorState } from "@/components/erg-mui/erg-feedback";
+import { SchoolManagementProvider, useSchoolManagementContext } from "@/features/lcms/school-management/components/school-management-context";
+import { adminPath } from "@/platform/workspaces/workspace-paths";
+import { useLocation, useNavigate } from "@tanstack/react-router";
 
 const screens: Record<string, LazyExoticComponent<ComponentType>> = {
   "/schools": lazy(() => import("@/features/lcms/school-management/screens/school-directory-screen")),
@@ -23,10 +26,38 @@ const screens: Record<string, LazyExoticComponent<ComponentType>> = {
   "/schools/audit-log": lazy(() => import("@/features/lcms/school-management/screens/school-audit-screen")),
 };
 
+function normalizeSchoolRoute(pathname: string) {
+  const path = pathname.split(/[?#]/)[0] ?? "";
+  if (path.startsWith("/admin/")) {
+    return path.slice("/admin".length);
+  }
+  return path;
+}
+
+// These screens render nothing without a selected school; the directory and detail screens handle that themselves.
+const SCHOOL_SCOPED_ROUTES = new Set(["/schools/overview", "/schools/classes", "/schools/students", "/schools/subjects", "/schools/subject-enrollments", "/schools/imports", "/schools/reviews", "/schools/reports"]);
+
 export function SchoolManagementApp() {
   const location = useLocation();
-  const Screen = screens[location.pathname] ?? screens["/schools/list"];
-  return <SchoolManagementProvider><Suspense fallback={<SchoolRouteSkeleton />}><Screen /></Suspense></SchoolManagementProvider>;
+  const normalizedPath = normalizeSchoolRoute(location.pathname);
+  const Screen = screens[normalizedPath] ?? screens[location.pathname] ?? screens["/schools/list"];
+  const screen = <Suspense fallback={<SchoolRouteSkeleton />}><Screen /></Suspense>;
+  return <SchoolManagementProvider>{SCHOOL_SCOPED_ROUTES.has(normalizedPath) ? <SelectedSchoolGate>{screen}</SelectedSchoolGate> : screen}</SchoolManagementProvider>;
+}
+
+function SelectedSchoolGate({ children }: { children: ReactNode }) {
+  const { error, isLoading, selectedSchool } = useSchoolManagementContext();
+  const navigate = useNavigate();
+  if (selectedSchool) return children;
+  if (isLoading) return <SchoolRouteSkeleton />;
+  const toList = <ErgButton onClick={() => void navigate({ href: adminPath("/schools/list") })} variant="outlined">Danh sách trường</ErgButton>;
+  return (
+    <Box sx={{ p: 3 }}>
+      {error
+        ? <ErgErrorState action={toList} description="Vui lòng kiểm tra kết nối, phiên đăng nhập hoặc quyền truy cập rồi thử lại." title="Không tải được dữ liệu trường học" />
+        : <ErgEmptyState action={toList} description="Tạo hoặc chọn một trường trong danh sách để xem mục này." title="Chưa chọn trường" />}
+    </Box>
+  );
 }
 
 function SchoolRouteSkeleton() {

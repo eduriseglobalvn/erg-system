@@ -3,6 +3,7 @@ import type { ChipProps } from "@mui/material/Chip";
 export type ExerciseStatus = "published" | "draft" | "archived";
 export type ExerciseDifficulty = "easy" | "medium" | "hard";
 export type ExerciseType = "quiz" | "practice" | "project" | "exam";
+export type ExerciseSource = "system" | "teacher";
 
 export type Exercise = {
   id: string;
@@ -18,6 +19,9 @@ export type Exercise = {
   updatedAt: string;
   assignedCount: number;
   tags: string[];
+  source?: ExerciseSource;
+  authorName?: string;
+  questionIds?: string[];
 };
 
 export type ExerciseFilters = {
@@ -27,6 +31,7 @@ export type ExerciseFilters = {
   difficulty: string;
   type: string;
   status: ExerciseStatus | typeof allExerciseFilter;
+  source?: "all" | ExerciseSource;
 };
 
 export const allExerciseFilter = "all";
@@ -46,6 +51,8 @@ export const exercises: Exercise[] = [
     updatedAt: "2026-06-02",
     assignedCount: 4,
     tags: ["IC3", "Computer basics", "Trắc nghiệm"],
+    source: "system",
+    authorName: "Hệ thống ERG",
   },
   {
     id: "ex-002",
@@ -61,6 +68,8 @@ export const exercises: Exercise[] = [
     updatedAt: "2026-06-01",
     assignedCount: 2,
     tags: ["Excel", "Hàm điều kiện"],
+    source: "teacher",
+    authorName: "Cô Hoàng Lan",
   },
   {
     id: "ex-003",
@@ -76,6 +85,8 @@ export const exercises: Exercise[] = [
     updatedAt: "2026-05-29",
     assignedCount: 0,
     tags: ["Scratch", "Game", "Dự án"],
+    source: "system",
+    authorName: "Hệ thống ERG",
   },
   {
     id: "ex-004",
@@ -91,6 +102,8 @@ export const exercises: Exercise[] = [
     updatedAt: "2026-05-28",
     assignedCount: 3,
     tags: ["Python", "Loop", "List"],
+    source: "teacher",
+    authorName: "Thầy Quốc Vương",
   },
   {
     id: "ex-005",
@@ -106,6 +119,8 @@ export const exercises: Exercise[] = [
     updatedAt: "2026-05-25",
     assignedCount: 1,
     tags: ["Contest", "Algorithm"],
+    source: "system",
+    authorName: "Hệ thống ERG",
   },
   {
     id: "ex-006",
@@ -121,6 +136,8 @@ export const exercises: Exercise[] = [
     updatedAt: "2026-05-22",
     assignedCount: 0,
     tags: ["AI", "Prompt"],
+    source: "system",
+    authorName: "Hệ thống ERG",
   },
   {
     id: "ex-007",
@@ -136,6 +153,8 @@ export const exercises: Exercise[] = [
     updatedAt: "2026-05-12",
     assignedCount: 5,
     tags: ["PowerPoint", "Presentation"],
+    source: "system",
+    authorName: "Hệ thống ERG",
   },
 ];
 
@@ -186,9 +205,9 @@ export function uniqueExerciseValues(key: "subject" | "level") {
   return Array.from(new Set(exercises.map((exercise) => exercise[key]))).sort();
 }
 
-export function filterExercises(filters: ExerciseFilters) {
+export function filterExercises(filters: ExerciseFilters, sourceList: Exercise[] = exercises) {
   const normalizedSearch = filters.searchTerm.trim().toLowerCase();
-  return exercises.filter((exercise) => {
+  return sourceList.filter((exercise) => {
     const matchesSearch = !normalizedSearch
       || exercise.title.toLowerCase().includes(normalizedSearch)
       || exercise.subject.toLowerCase().includes(normalizedSearch)
@@ -199,15 +218,17 @@ export function filterExercises(filters: ExerciseFilters) {
       && (filters.level === allExerciseFilter || exercise.level === filters.level)
       && (filters.difficulty === allExerciseFilter || exercise.difficulty === filters.difficulty)
       && (filters.type === allExerciseFilter || exercise.type === filters.type)
-      && (filters.status === allExerciseFilter || exercise.status === filters.status);
+      && (filters.status === allExerciseFilter || exercise.status === filters.status)
+      && (!filters.source || filters.source === "all" || (exercise.source ?? "system") === filters.source);
   });
 }
 
-export function summarizeExercises(filtered: Exercise[]) {
+export function summarizeExercises(filtered: Exercise[], allItems: Exercise[] = exercises) {
   return {
-    all: exercises.length,
-    published: exercises.filter((exercise) => exercise.status === "published").length,
-    draft: exercises.filter((exercise) => exercise.status === "draft").length,
+    all: allItems.length,
+    published: allItems.filter((exercise) => exercise.status === "published").length,
+    draft: allItems.filter((exercise) => exercise.status === "draft").length,
+    archived: allItems.filter((exercise) => exercise.status === "archived").length,
     visible: filtered.length,
   };
 }

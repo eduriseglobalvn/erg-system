@@ -5,10 +5,14 @@ import Skeleton from "@mui/material/Skeleton";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 
-import { PlayerShellRuntime } from "@/components/quiz/player-shell-runtime";
+import { portableIdentityAccountId, type PortableStudentIdentity } from "@/features/elearning/portable-exam/api/portable-exam-identity";
+import { PortableIdentityStep } from "@/features/elearning/portable-exam/components/portable-identity-step";
+import { PortableResultExportButton } from "@/features/elearning/portable-exam/components/portable-result-export-button";
+import { PlayerShellRuntime } from "@/features/lcms/quiz/player/player-shell-runtime";
 import { loadPortableQuizPackage } from "@/features/elearning/portable-exam/api/portable-exam-runtime";
-import { PortableExamVerificationError } from "@/features/elearning/portable-exam/types/portable-exam-types";
-import type { QuizPackage } from "@/lib/types";
+import { portableArtifactErrorMessage } from "@/features/elearning/portable-exam/components/portable-exam-error-message";
+import type { QuizPackage } from "@/domain/quiz/types";
+import { readOpenedExamFile } from "@/platform/desktop/opened-exam-file";
 
 export type PortableArtifactState =
   | { status: "loading" }
@@ -17,6 +21,7 @@ export type PortableArtifactState =
 
 export function PortableArtifactApp({ packageUrl = "/portable-exam.ergquiz" }: { packageUrl?: string }) {
   const [state, setState] = useState<PortableArtifactState>({ status: "loading" });
+  const [identity, setIdentity] = useState<PortableStudentIdentity | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -56,11 +61,17 @@ export function PortableArtifactApp({ packageUrl = "/portable-exam.ergquiz" }: {
     );
   }
 
+  if (!identity) {
+    return <PortableIdentityStep onConfirm={setIdentity} roster={state.quizPackage.roster} title={state.quizPackage.quiz.title} />;
+  }
+
   return (
     <Box component="main" data-portable-artifact="question-only" sx={{ bgcolor: "#f3f6ff", minHeight: "100dvh", p: { xs: 0.5, md: 1 } }}>
       <PlayerShellRuntime
+        identityAccountId={portableIdentityAccountId(identity)}
         portableOffline={state.quizPackage.gradingMode === "client-first"}
         portablePackage={state.quizPackage}
+        renderResultActions={(context) => <PortableResultExportButton identity={identity} {...context} />}
         runtimePortal="elearning"
         startImmediately
       />
@@ -69,9 +80,8 @@ export function PortableArtifactApp({ packageUrl = "/portable-exam.ergquiz" }: {
 }
 
 export async function loadEmbeddedPortablePackage(packageUrl: string) {
-  const response = await fetch(packageUrl, { cache: "no-store", credentials: "omit" });
-  if (!response.ok) throw new Error(`PACKAGE_HTTP_${response.status}`);
-  const bytes = await response.arrayBuffer();
+  // The shared Exam Player bundles no exam: it plays the .ergquiz Windows opened it with; per-exam builds embed theirs.
+  const bytes = (await readOpenedExamFile()) ?? (await fetchEmbeddedPackage(packageUrl));
   const { quizPackage } = await loadPortableQuizPackage(bytes, {
     persist: false,
     runtimeVersion: import.meta.env.VITE_PORTABLE_RUNTIME_VERSION ?? "1.0.0",
@@ -80,11 +90,8 @@ export async function loadEmbeddedPortablePackage(packageUrl: string) {
   return quizPackage;
 }
 
-function portableArtifactErrorMessage(error: unknown) {
-  const code = error instanceof PortableExamVerificationError ? error.code : undefined;
-  if (code === "KEY_NOT_TRUSTED") return "Khóa phát hành của gói bài thi không được tin cậy.";
-  if (code === "INVALID_SIGNATURE" || code === "INVALID_CONTENT_HASH") return "Nội dung bài thi đã bị thay đổi hoặc không còn toàn vẹn.";
-  if (code === "EXPIRED" || code === "REVOKED") return "Gói bài thi đã hết hạn hoặc bị thu hồi.";
-  if (code === "MIN_RUNTIME") return "Gói bài thi yêu cầu phiên bản ứng dụng mới hơn.";
-  return "Gói bài thi không hợp lệ, bị thiếu hoặc không tương thích với phiên bản này.";
+async function fetchEmbeddedPackage(packageUrl: string) {
+  const response = await fetch(packageUrl, { cache: "no-store", credentials: "omit" });
+  if (!response.ok) throw new Error(`PACKAGE_HTTP_${response.status}`);
+  return response.arrayBuffer();
 }

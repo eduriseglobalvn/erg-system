@@ -1,4 +1,4 @@
-import { createStore, del, get, set } from "idb-keyval";
+import { createStore, del, get, keys, set } from "idb-keyval";
 
 import {
   migrateEntries,
@@ -35,28 +35,69 @@ export function createOfflineOutboxStore(): OfflineOutboxStore {
 export class EncryptedIndexedDbOutboxStore implements OfflineOutboxStore {
   private readonly dataStore = createStore("erg-system", "offline-outbox");
   private readonly keyStore = createStore("erg-system", "offline-outbox-keys");
+  private readonly quarantineStore = createStore("erg-system", "offline-outbox-quarantine");
 
   async load(scopeKey: string) {
     const record = await get<PersistedEnvelope>(dataKey(scopeKey), this.dataStore);
     if (!record) return [];
     try {
-      if (record.schemaVersion === 1) {
-        const migrated = migrateEntries(record.entries);
-        await this.save(scopeKey, migrated);
-        return migrated;
-      }
-      const key = await this.getKey(scopeKey);
-      const plaintext = await crypto.subtle.decrypt(
-        { name: "AES-GCM", iv: fromBase64(record.iv) },
-        key,
-        fromBase64(record.ciphertext),
-      );
-      const parsed = JSON.parse(new TextDecoder().decode(plaintext)) as { entries?: OfflineMutation[] };
-      return migrateEntries(parsed.entries ?? []);
-    } catch {
-      await this.clear(scopeKey);
+      const entries = await this.decode(scopeKey, record);
+      if (record.schemaVersion === 1) await this.save(scopeKey, entries);
+      return entries;
+    } catch (error) {
+      // Never drop unsynced work silently: park the undecodable record for recovery/support.
+      console.error("Offline outbox record could not be read; moved to quarantine.", error);
+      await set(`erg-offline-quarantine:${scopeKey}:${Date.now()}`, record, this.quarantineStore);
+      await del(dataKey(scopeKey), this.dataStore);
       return [];
     }
+  }
+
+  async listQuarantined() {
+    return keys(this.quarantineStore);
+  }
+
+  /** Re-decode every quarantined record and merge it back into its outbox; records that still fail stay parked. */
+  async retryQuarantined() {
+    let restored = 0;
+    let failed = 0;
+    for (const quarantineKey of await this.listQuarantined()) {
+      const record = await get<PersistedEnvelope>(quarantineKey, this.quarantineStore);
+      const scopeKey = scopeOfQuarantineKey(String(quarantineKey));
+      if (!record || !scopeKey) continue;
+      try {
+        const recovered = await this.decode(scopeKey, record);
+        const current = await this.load(scopeKey);
+        const known = new Set(current.map((entry) => entry.id));
+        await this.save(scopeKey, [...current, ...recovered.filter((entry) => !known.has(entry.id))]);
+        await del(quarantineKey, this.quarantineStore);
+        restored += 1;
+      } catch {
+        failed += 1;
+      }
+    }
+    return { restored, failed };
+  }
+
+  /** Only call after the user confirmed: this is the one place quarantined work is destroyed. */
+  async deleteQuarantined() {
+    const all = await this.listQuarantined();
+    await Promise.all(all.map((quarantineKey) => del(quarantineKey, this.quarantineStore)));
+    return all.length;
+  }
+
+  private async decode(scopeKey: string, record: PersistedEnvelope) {
+    if (record.schemaVersion === 1) {
+      return migrateEntries(record.entries);
+    }
+    const key = await this.getKey(scopeKey);
+    const plaintext = await crypto.subtle.decrypt(
+      { name: "AES-GCM", iv: fromBase64(record.iv) },
+      key,
+      fromBase64(record.ciphertext),
+    );
+    const parsed = JSON.parse(new TextDecoder().decode(plaintext)) as { entries?: OfflineMutation[] };
+    return migrateEntries(parsed.entries ?? []);
   }
 
   async save(scopeKey: string, entries: OfflineMutation[]) {
@@ -85,6 +126,11 @@ export class EncryptedIndexedDbOutboxStore implements OfflineOutboxStore {
     await set(keyDataKey(scopeKey), key, this.keyStore);
     return key;
   }
+}
+
+function scopeOfQuarantineKey(key: string) {
+  const match = /^erg-offline-quarantine:(.+):\d+$/.exec(key);
+  return match ? match[1] : null;
 }
 
 function dataKey(scopeKey: string) {

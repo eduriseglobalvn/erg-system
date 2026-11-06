@@ -1,4 +1,4 @@
-﻿import type { AssignmentRun } from "@/features/lms/classroom/types/classroom-types";
+﻿import type { AssignmentRun } from "@/domain/school/classroom-types";
 
 export function resolveLmsTeacherRuns({
   apiBacked,

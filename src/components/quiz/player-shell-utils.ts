@@ -1,85 +1,31 @@
-import {
-  createRuntimeKey,
-  type LocalQuizAttemptScope,
-  localQuizAttemptStore,
-  saveApprovedOfflineQuizSnapshot,
-  startAttempt,
-} from "@/features/lcms/quiz/quiz-runtime";
-import { normalizeAnswerForSubmission } from "@/lib/quiz";
-import type { QuizRuntimePortal } from "@/features/lcms/quiz/quiz-runtime";
-import type { AnswerPayload, Question, QuizPackage } from "@/lib/types";
+import { isAnswerComplete, normalizeAnswerForSubmission } from "@/domain/quiz/quiz";
+import type { AnswerPayload, Question } from "@/domain/quiz/types";
 
-export async function createFreshLocalSession(
-  assignmentId: string,
-  quizPackage: QuizPackage,
-  scope?: LocalQuizAttemptScope,
-) {
-  const localAttemptId = createRuntimeKey("attempt");
-  const startKey = createRuntimeKey("start");
-  const submitKey = createRuntimeKey("submit");
-
-  return localQuizAttemptStore.createSession({
-    accountId: scope?.accountId,
-    assignmentId,
-    attemptId: localAttemptId,
-    packageHash: quizPackage.contentHash,
-    portal: scope?.portal,
-    quizId: quizPackage.quizId,
-    quizVersion: quizPackage.quizVersion,
-    shuffleSeed: `${quizPackage.contentHash}:${quizPackage.quizVersion}:${localAttemptId}`,
-    startIdempotencyKey: startKey,
-    submitIdempotencyKey: submitKey,
-    tenantId: scope?.tenantId,
-  });
-}
-
-export async function ensureServerAttempt(
-  session: Awaited<ReturnType<typeof createFreshLocalSession>>,
-  quizPackage: QuizPackage,
-  portal: QuizRuntimePortal,
-) {
-  if (session.serverStarted) {
-    return session;
-  }
-
-  const startedAttempt = await startAttempt({
-    assignmentId: session.assignmentId,
-    idempotencyKey: session.startIdempotencyKey ?? createRuntimeKey("start"),
-    localAttemptId: session.attemptId,
-    packageHash: quizPackage.contentHash,
-    packageId: quizPackage.id,
-    portal,
-    quizId: quizPackage.quizId,
-  });
-
-  const nextSession = await localQuizAttemptStore.markServerStarted(session, startedAttempt);
-  // Missing offlineAllowed is intentionally a no-op. The learner endpoint currently
-  // does not publish this capability, so the client must never infer it from a quiz id.
-  await saveApprovedOfflineQuizSnapshot({
-    session: nextSession,
-    quizPackage,
-    policy: startedAttempt.policySnapshot,
-  });
-  return nextSession;
-}
-
-export function serverNowMs(session: { serverClockOffsetMs?: number }, nowMs = Date.now()) {
+/** `localClock` (portable/offline only): there is no server, so the device clock is the reference. */
+export function serverNowMs(session: { serverClockOffsetMs?: number }, nowMs = Date.now(), localClock = false) {
   if (typeof session.serverClockOffsetMs !== "number" || !Number.isFinite(session.serverClockOffsetMs)) {
-    return null;
+    return localClock ? nowMs : null;
   }
 
   return nowMs + session.serverClockOffsetMs;
 }
 
 export function attemptDeadlineMs(
-  session: { deadlineAt?: string; serverStartedAt?: string; serverClockOffsetMs?: number },
+  session: { deadlineAt?: string; serverStartedAt?: string; serverClockOffsetMs?: number; startedAt?: string },
   durationSeconds: number,
+  /** Portable/offline: fall back to the locally stored start time when the server never started the attempt. */
+  localStart = false,
 ) {
   const explicitDeadline = session.deadlineAt ? Date.parse(session.deadlineAt) : Number.NaN;
   if (Number.isFinite(explicitDeadline)) return explicitDeadline;
 
   const startedAt = session.serverStartedAt ? Date.parse(session.serverStartedAt) : Number.NaN;
   if (Number.isFinite(startedAt) && durationSeconds > 0) return startedAt + durationSeconds * 1000;
+
+  if (localStart && durationSeconds > 0) {
+    const localStartedAt = session.startedAt ? Date.parse(session.startedAt) : Number.NaN;
+    if (Number.isFinite(localStartedAt)) return localStartedAt + durationSeconds * 1000;
+  }
 
   return null;
 }
@@ -193,4 +139,9 @@ export function questionLabel(question: Question) {
     default:
       return "Câu hỏi";
   }
+}
+
+/** Index of the first question without a complete answer, or -1 when everything is answered. */
+export function firstUnansweredIndex(questions: Question[], drafts: Record<string, AnswerPayload>) {
+  return questions.findIndex((question) => !isAnswerComplete(question, drafts[question.id]));
 }

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 
-import { mockExerciseLibrary } from "@/features/lcms/admin-operations/api/mock-exercise-library";
-import { USE_LEARNING_RESOURCE_AUTHORING_MOCK } from "@/features/lcms/admin-operations/api/mock-learning-resource-authoring-data";
+import { mockExerciseLibrary } from "@/features/lcms/admin-operations/api/learning-resource-authoring-defaults";
+import { USE_LEARNING_RESOURCE_AUTHORING_MOCK } from "@/features/lcms/admin-operations/api/learning-resource-authoring-defaults";
 import {
   filterExerciseLibraryItems,
   isGoogleSlidesUrl,
@@ -15,8 +15,10 @@ import {
 } from "@/features/lcms/admin-operations/components/learning-resource-authoring-utils";
 import { getTaxonomyIconColor, getTaxonomyIconId, type TaxonomyRole } from "@/features/lcms/admin-operations/components/learning-resource-authoring-icons";
 type DialogStep = "pick" | "details";
+import type { StudioNode } from "@/features/lcms/admin-operations/types/learning-resource-authoring";
 import { getAvailableDialogOptions, getCanSubmit, getDialogSubtitle, getDialogTitle, getSubmitHint, getSubmitLabel, isLevelNode, resolveTaxonomyMode } from "./learning-resource-authoring-create-dialog-model";
 import { executeCreateDialogSubmission } from "./learning-resource-authoring-create-dialog-submit";
+import type { AuthoringItemType } from "./learning-resource-authoring-create-dialog-presentation";
 import type { TaxonomyCreateDialogProps } from "./learning-resource-authoring-create-dialog-types";
 
 export function useTaxonomyCreateDialogController({
@@ -33,11 +35,13 @@ export function useTaxonomyCreateDialogController({
   onCreated,
 }: TaxonomyCreateDialogProps) {
   const [step, setStep] = useState<DialogStep>("details");
-  const [selectedOption, setSelectedOption] = useState<ContentDialogOptionId | null>(null);
+  const [itemType, setItemType] = useState<AuthoringItemType>("level");
+  const [selectedOption, setSelectedOption] = useState<ContentDialogOptionId | null>("lecture");
   const [label, setLabel] = useState("");
   const [description, setDescription] = useState("");
   const [draftSubjectId, setDraftSubjectId] = useState("");
   const [draftLevelId, setDraftLevelId] = useState("");
+  const [draftTopicId, setDraftTopicId] = useState("");
   const [iconId, setIconId] = useState("");
   const [iconColor, setIconColor] = useState("");
   const [slidesUrl, setSlidesUrl] = useState("");
@@ -52,19 +56,51 @@ export function useTaxonomyCreateDialogController({
 
   const open = Boolean(state);
   const availableOptions = useMemo(() => getAvailableDialogOptions(state, selectedNode), [selectedNode, state]);
-  const taxonomyMode = resolveTaxonomyMode(state, selectedOption);
-  const taxonomyRole: TaxonomyRole = taxonomyMode ?? "topic";
-  const isTaxonomyMode = Boolean(taxonomyMode);
+
+  // If creating subject, mode is strictly subject
+  const isSubjectMode = state?.mode === "subject";
+  const effectiveTaxonomyMode: TaxonomyRole | null = isSubjectMode
+    ? "subject"
+    : itemType === "level"
+      ? "level"
+      : itemType === "topic"
+        ? "topic"
+        : null;
+
+  const taxonomyRole: TaxonomyRole = effectiveTaxonomyMode ?? "topic";
+  const isTaxonomyMode = Boolean(effectiveTaxonomyMode);
+  const effectiveOption: ContentDialogOptionId | null = isTaxonomyMode ? null : (selectedOption || "lecture");
+
   const draftSubject = subjects.find((subject) => subject.id === draftSubjectId) ?? selectedSubject ?? subjects[0];
   const draftLevelOptions = useMemo(
     () => draftSubject?.tree.filter(isLevelNode) ?? [],
     [draftSubject?.tree],
   );
+
+  const draftTopicOptions = useMemo(() => {
+    if (!draftSubject) return [];
+    if (draftLevelId) {
+      const levelNode = draftSubject.tree.find((n) => n.optionId === draftLevelId || n.id === draftLevelId);
+      if (levelNode) {
+        return levelNode.children.filter((n) => n.kind === "lesson" || n.sourceKind === "section" || n.sourceKind === "topic");
+      }
+    }
+    const topics: StudioNode[] = [];
+    const visit = (node: StudioNode) => {
+      if (node.kind === "lesson" || node.sourceKind === "section" || node.sourceKind === "topic") {
+        topics.push(node);
+      }
+      node.children?.forEach(visit);
+    };
+    draftSubject.tree.forEach(visit);
+    return topics;
+  }, [draftLevelId, draftSubject]);
+
   const selectedLevelFromPath = selectedPath.find(isLevelNode);
   const selectedLevelLabel = selectedLevelFromPath?.label;
   const resourceLocation = useMemo(() => buildResourceLocation(selectedPath), [selectedPath]);
-  const title = getDialogTitle(taxonomyMode, selectedOption);
-  const subtitle = getDialogSubtitle(taxonomyMode, selectedOption);
+  const title = getDialogTitle(effectiveTaxonomyMode, effectiveOption);
+  const subtitle = getDialogSubtitle(effectiveTaxonomyMode, effectiveOption);
   const contextLabel = pathLabel(selectedSubject?.label ?? draftSubject?.label ?? "", selectedPath);
   const exerciseLibraryItems = useMemo(() => {
     return resolveExerciseLibraryItems(quizBankItems, mockExerciseLibrary, !USE_LEARNING_RESOURCE_AUTHORING_MOCK);
@@ -76,16 +112,16 @@ export function useTaxonomyCreateDialogController({
     topicLabel: selectedNode?.kind === "lesson" ? selectedNode.label : undefined,
     sectionLabel: selectedLevelLabel,
   });
-  const submitLabel = getSubmitLabel(taxonomyMode, selectedOption, saving);
+  const submitLabel = getSubmitLabel(effectiveTaxonomyMode, effectiveOption, saving);
   const canSubmit = getCanSubmit({
     draftLevelId,
     draftSubjectId,
     label,
     resourceUrl,
     selectedExerciseIds,
-    selectedOption,
+    selectedOption: effectiveOption,
     slidesUrl,
-    taxonomyMode,
+    taxonomyMode: effectiveTaxonomyMode,
     saving,
   });
   const submitHint = getSubmitHint({
@@ -95,29 +131,50 @@ export function useTaxonomyCreateDialogController({
     label,
     resourceUrl,
     selectedExerciseIds,
-    selectedOption,
+    selectedOption: effectiveOption,
     slidesUrl,
-    taxonomyMode,
+    taxonomyMode: effectiveTaxonomyMode,
   });
 
   useEffect(() => {
     if (!open) return;
     const autoOption = state?.initialOption ?? (availableOptions.length === 1 ? availableOptions[0] : null);
-    const nextTaxonomyMode = resolveTaxonomyMode(state, autoOption);
+    const resolvedMode = resolveTaxonomyMode(state, autoOption);
     const nextSubjectId = selectedSubject?.id || subjects[0]?.id || "";
     const contextLevelId =
       selectedNode?.sourceKind === "category" && selectedNode.optionId
         ? selectedNode.optionId
         : selectedNode?.location.categoryId || selectedLevelFromPath?.optionId || "";
+    const contextTopicId =
+      selectedNode?.kind === "lesson" || selectedNode?.sourceKind === "section"
+        ? (selectedNode.optionId || selectedNode.id)
+        : "";
 
-    setStep(nextTaxonomyMode || autoOption ? "details" : "pick");
-    setSelectedOption(autoOption);
+    let initialItemType: AuthoringItemType = "level";
+    if (state?.mode === "level" || state?.mode === "root" || resolvedMode === "level") {
+      initialItemType = "level";
+    } else if (state?.mode === "topic" || resolvedMode === "topic") {
+      initialItemType = "topic";
+    } else if (state?.mode === "child" || autoOption) {
+      initialItemType = "lesson";
+    } else if (selectedNode?.kind === "lesson" || selectedNode?.sourceKind === "section") {
+      initialItemType = "lesson";
+    } else if (selectedNode?.kind === "group") {
+      initialItemType = "topic";
+    } else {
+      initialItemType = "level";
+    }
+
+    setStep("details");
+    setItemType(initialItemType);
+    setSelectedOption(autoOption || "lecture");
     setLabel("");
     setDescription("");
     setDraftSubjectId(nextSubjectId);
-    setDraftLevelId(contextLevelId);
-    setIconId(getTaxonomyIconId(undefined, nextTaxonomyMode ?? "topic"));
-    setIconColor(getTaxonomyIconColor(undefined, nextTaxonomyMode ?? "topic"));
+    setDraftLevelId(initialItemType === "level" ? "" : contextLevelId);
+    setDraftTopicId(initialItemType === "level" || initialItemType === "topic" ? "" : contextTopicId);
+    setIconId(getTaxonomyIconId(undefined, resolvedMode ?? "topic"));
+    setIconColor(getTaxonomyIconColor(undefined, resolvedMode ?? "topic"));
     setSlidesUrl("");
     setExerciseQuery("");
     setSelectedExerciseIds([]);
@@ -136,12 +193,6 @@ export function useTaxonomyCreateDialogController({
     state,
     subjects,
   ]);
-
-  useEffect(() => {
-    if (!open || taxonomyMode !== "topic") return;
-    if (draftLevelOptions.some((node) => node.optionId === draftLevelId)) return;
-    setDraftLevelId(draftLevelOptions[0]?.optionId ?? "");
-  }, [draftLevelId, draftLevelOptions, open, taxonomyMode]);
 
   useEffect(() => {
     if (!open) return;
@@ -164,9 +215,12 @@ export function useTaxonomyCreateDialogController({
         description,
         draftLevelId,
         draftSubjectId,
+        draftTopicId,
+        draftTopicOptions,
         filteredExercises,
         iconColor,
         iconId,
+        itemType,
         label,
         onClose,
         onCreateLecture,
@@ -179,12 +233,13 @@ export function useTaxonomyCreateDialogController({
         resourceUrl,
         selectedExerciseIds,
         selectedNode,
-        selectedOption,
+        selectedOption: effectiveOption,
         selectedSubject,
+        subjects,
         slidesUrl,
         state,
         status,
-        taxonomyMode,
+        taxonomyMode: effectiveTaxonomyMode,
       });
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "Không thể tạo mục. Vui lòng thử lại.");
@@ -193,10 +248,20 @@ export function useTaxonomyCreateDialogController({
     }
   }
 
+  function handleItemTypeChange(nextType: AuthoringItemType) {
+    setItemType(nextType);
+    if (nextType === "level") {
+      setDraftLevelId("");
+      setDraftTopicId("");
+    }
+  }
+
   function handleSubjectChange(subjectId: string) {
     const nextSubject = subjects.find((subject) => subject.id === subjectId);
     setDraftSubjectId(subjectId);
-    setDraftLevelId(nextSubject?.tree.find(isLevelNode)?.optionId ?? "");
+    const firstLevel = nextSubject?.tree.find(isLevelNode)?.optionId ?? "";
+    setDraftLevelId(firstLevel);
+    setDraftTopicId("");
   }
 
   function handleLectureTitleChange(value: string) {
@@ -211,16 +276,18 @@ export function useTaxonomyCreateDialogController({
   return {
     availableOptions, canSubmit, contextLabel, description,
     draftLevelId, draftLevelOptions, draftSubject, draftSubjectId,
+    draftTopicId, draftTopicOptions,
+    effectiveOption, effectiveTaxonomyMode,
     error, exerciseQuery, filteredExercises,
-    handleLectureTitleChange, handleSubjectChange, handleSubmit,
-    isTaxonomyMode, label, onClose, open,
+    handleItemTypeChange, handleLectureTitleChange, handleSubjectChange, handleSubmit,
+    isSubjectMode, isTaxonomyMode, itemType, label, onClose, open,
     resourceFileType, resourceTotalSlides, resourceUrl, saving,
     selectedExerciseIds, selectedNode, selectedOption, selectedSubject,
-    setDescription, setDraftLevelId, setExerciseQuery, setLabel,
+    setDescription, setDraftLevelId, setDraftTopicId, setExerciseQuery, setItemType: handleItemTypeChange, setLabel,
     setResourceFileType, setResourceTotalSlides, setResourceUrl,
     setSelectedExerciseIds, setSelectedOption, setSlidesUrl, setStatus, setStep,
     slidesUrl, status, step, subjects,
     submitHint, submitLabel, subtitle,
-    taxonomyMode, taxonomyRole, title,
+    taxonomyMode: effectiveTaxonomyMode, taxonomyRole, title,
   };
 }

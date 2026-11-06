@@ -12,14 +12,13 @@ describe("Teacher shell route state policy", () => {
   });
 
   it("returns mobile assignment cancel to the homework list", () => {
-    const source = readFileSync(resolve("src/features/lms/components/lms-teacher-shell-workspaces.tsx"), "utf8");
-    const mobileSource = source.slice(source.indexOf("export function LmsTeacherMobileContent"));
-    const assignmentBranchStart = mobileSource.indexOf('if (localPathname === "/homework/assign")');
-    const assignmentBranchEnd = mobileSource.indexOf('if (localPathname === "/homework/exercise-bank")');
-    const assignmentBranch = mobileSource.slice(assignmentBranchStart, assignmentBranchEnd);
+    const source = readFileSync(resolve("src/features/lms/components/lms-teacher-route-pages.tsx"), "utf8");
+    const assignmentBranchStart = source.indexOf("export function TeacherAssignHomeworkRoute");
+    const assignmentBranchEnd = source.indexOf("export function TeacherExerciseBankRoute");
+    const assignmentBranch = source.slice(assignmentBranchStart, assignmentBranchEnd);
 
-    expect(assignmentBranch).toContain('onBack={() => void navigate({ href: teacherPath("/homework") })}');
-    expect(assignmentBranch).toContain('handleLocalAssignmentCreated(title, subject, teacherPath("/homework"))');
+    expect(assignmentBranch).toContain('onBack={() => void m.navigate({ href: teacherPath("/homework") })}');
+    expect(assignmentBranch).toContain('m.handleLocalAssignmentCreated(title, subject, teacherPath("/homework"))');
     expect(assignmentBranch).not.toContain('teacherPath("/homework/assign")');
   });
 });

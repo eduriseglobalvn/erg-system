@@ -28,7 +28,7 @@ export const trainingMetricMeta: Record<TrainingMetricKey, {
   shortLabel: string;
 }> = {
   studentMastery: {
-    color: "#2563EB",
+    color: "#0071E3",
     description: "Điểm đạt chuẩn và mức tiến bộ qua các lần làm",
     label: "Năng lực học sinh",
     shortLabel: "Năng lực",
@@ -83,7 +83,7 @@ export function buildTrainingWaveSeries(activeMetric: TrainingMetricKey) {
 
 export function buildScoreDistributionData(students: Array<Pick<StudentTrainingInsight, "averageScore">>): ScoreDistributionDatum[] {
   return [
-    { color: "#2563EB", id: "excellent", label: "Tốt · 8–10", value: students.filter((student) => student.averageScore >= 8).length },
+    { color: "#0071E3", id: "excellent", label: "Tốt · 8–10", value: students.filter((student) => student.averageScore >= 8).length },
     { color: "#059669", id: "achieved", label: "Đạt · 6.5–7.9", value: students.filter((student) => student.averageScore >= 6.5 && student.averageScore < 8).length },
     { color: "#D97706", id: "reinforce", label: "Cần củng cố · 5–6.4", value: students.filter((student) => student.averageScore >= 5 && student.averageScore < 6.5).length },
     { color: "#DC2626", id: "support", label: "Cần hỗ trợ · dưới 5", value: students.filter((student) => student.averageScore < 5).length },

@@ -16,7 +16,7 @@ afterEach(() => {
 });
 
 test("student login sends elearning portal to backend and stores returned token", async () => {
-  const fetchMock = vi.fn(async () =>
+  const fetchMock = vi.fn(async (_url?: string | URL | Request, _init?: RequestInit) =>
     new Response(
       JSON.stringify({
         data: {

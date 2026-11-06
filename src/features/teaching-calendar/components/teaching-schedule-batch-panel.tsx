@@ -21,6 +21,7 @@ import Typography from "@mui/material/Typography";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { formatDateVi } from "@/domain/formatters/format-date";
 import type { ErgCalendarPermissions } from "@/components/shared/erg-calendar-workspace";
 import {
   cancelTeachingScheduleBatch,
@@ -74,7 +75,7 @@ export function TeachingScheduleBatchPanel({ canCreate = false, onCreate, permis
     <Paper variant="outlined" sx={{ borderRadius: 2, boxShadow: "none", overflow: "hidden" }}>
       <Stack direction={{ xs: "column", sm: "row" }} spacing={1} sx={{ alignItems: { sm: "center" }, justifyContent: "space-between", p: 2 }}>
         <div>
-          <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>Đợt lịch giảng dạy</Typography>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>Đợt lịch giảng dạy</Typography>
           <Typography variant="body2" color="text.secondary">Xuất bản bản nháp để giáo viên nhận lịch trên LMS.</Typography>
         </div>
         <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap", justifyContent: "flex-end" }}>
@@ -102,10 +103,10 @@ export function TeachingScheduleBatchPanel({ canCreate = false, onCreate, permis
             <MenuItem value="PUBLISHED">Đã xuất bản</MenuItem>
             <MenuItem value="CANCELLED">Đã hủy</MenuItem>
           </TextField>
-          <Button size="small" onClick={() => void query.refetch()} disabled={query.isFetching}>Tải lại</Button>
+          <Button variant="outlined" size="small" onClick={() => void query.refetch()} disabled={query.isFetching}>Tải lại</Button>
         </Stack>
       </Stack>
-      {query.error instanceof Error ? <Alert severity="error" action={<Button onClick={() => void query.refetch()}>Thử lại</Button>}>{query.error.message}</Alert> : null}
+      {query.error instanceof Error ? <Alert severity="error" action={<Button variant="text" onClick={() => void query.refetch()}>Thử lại</Button>}>{query.error.message}</Alert> : null}
       {query.isPending ? <Stack spacing={1} sx={{ p: 2, pt: 0 }}><Skeleton height={38} /><Skeleton height={38} /></Stack> : null}
       {!query.isPending && !query.data?.items.length ? <Alert severity="info">Chưa có đợt lịch nào.</Alert> : null}
       {query.data?.items.length ? (
@@ -116,17 +117,17 @@ export function TeachingScheduleBatchPanel({ canCreate = false, onCreate, permis
               {query.data.items.map((batch) => (
                 <TableRow key={batch.id} hover>
                   <TableCell>
-                    <Button aria-label={`Xem đợt ${batch.id}`} onClick={() => setSelectedBatchId(batch.id)} size="small" sx={{ fontFamily: "JetBrains Mono, monospace", fontSize: 12, textTransform: "none" }}>
+                    <Button variant="text" aria-label={`Xem đợt ${batch.id}`} onClick={() => setSelectedBatchId(batch.id)} size="small" sx={{ fontFamily: "JetBrains Mono, monospace", fontSize: 12, textTransform: "none" }}>
                       {batch.id}
                     </Button>
                   </TableCell>
-                  <TableCell>{batch.applyFrom}</TableCell>
+                  <TableCell sx={{ whiteSpace: "nowrap" }}>{formatDateVi(batch.applyFrom)}</TableCell>
                   <TableCell>{batch.repeatWeeks}</TableCell>
                   <TableCell><BatchStatus status={batch.status} /></TableCell>
                   <TableCell align="right">
                     <Stack direction="row" spacing={1} sx={{ justifyContent: "flex-end" }}>
-                      {batch.status === "DRAFT" && permissions?.canPublish ? <Button size="small" variant="contained" disabled={Boolean(pendingBatchId)} onClick={() => window.confirm("Xuất bản đợt lịch này cho giáo viên?") && publishMutation.mutate(batch.id)}>Xuất bản</Button> : null}
-                      {batch.status !== "CANCELLED" && permissions?.canDelete ? <Button size="small" color="error" disabled={Boolean(pendingBatchId)} onClick={() => window.confirm("Hủy toàn bộ đợt lịch này?") && cancelMutation.mutate(batch.id)}>Hủy</Button> : null}
+                      {batch.status === "DRAFT" && permissions?.canPublish ? <Button size="small" variant="outlined" disabled={Boolean(pendingBatchId)} onClick={() => window.confirm("Xuất bản đợt lịch này cho giáo viên?") && publishMutation.mutate(batch.id)}>Xuất bản</Button> : null}
+                      {batch.status !== "CANCELLED" && permissions?.canDelete ? <Button variant="outlined" size="small" color="error" disabled={Boolean(pendingBatchId)} onClick={() => window.confirm("Hủy toàn bộ đợt lịch này?") && cancelMutation.mutate(batch.id)}>Hủy</Button> : null}
                     </Stack>
                   </TableCell>
                 </TableRow>
@@ -137,9 +138,9 @@ export function TeachingScheduleBatchPanel({ canCreate = false, onCreate, permis
       ) : null}
       {query.data && query.data.totalPages > 1 ? (
         <Stack direction="row" spacing={1} sx={{ alignItems: "center", justifyContent: "flex-end", p: 2 }}>
-          <Button disabled={!query.data.hasPrevious || query.isFetching} onClick={() => setPage((current) => Math.max(0, current - 1))} size="small">Trang trước</Button>
+          <Button variant="outlined" disabled={!query.data.hasPrevious || query.isFetching} onClick={() => setPage((current) => Math.max(0, current - 1))} size="small">Trang trước</Button>
           <Typography variant="body2">Trang {query.data.page + 1}/{query.data.totalPages}</Typography>
-          <Button disabled={!query.data.hasNext || query.isFetching} onClick={() => setPage((current) => current + 1)} size="small">Trang sau</Button>
+          <Button variant="outlined" disabled={!query.data.hasNext || query.isFetching} onClick={() => setPage((current) => current + 1)} size="small">Trang sau</Button>
         </Stack>
       ) : null}
       <Dialog fullWidth maxWidth="sm" onClose={() => setSelectedBatchId("")} open={Boolean(selectedBatchId)}>
@@ -152,12 +153,12 @@ export function TeachingScheduleBatchPanel({ canCreate = false, onCreate, permis
               <Typography sx={{ fontFamily: "JetBrains Mono, monospace", fontSize: 13 }}>{detailQuery.data.id}</Typography>
               <BatchStatus status={detailQuery.data.status} />
               <Typography>{detailQuery.data.eventCount} sự kiện</Typography>
-              <Typography variant="body2" color="text.secondary">Áp dụng từ {detailQuery.data.applyFrom ?? "—"} trong {detailQuery.data.repeatWeeks} tuần.</Typography>
+              <Typography variant="body2" color="text.secondary">Áp dụng từ {formatDateVi(detailQuery.data.applyFrom) || "—"} trong {detailQuery.data.repeatWeeks} tuần.</Typography>
               {detailQuery.data.note ? <Typography variant="body2">{detailQuery.data.note}</Typography> : null}
             </Stack>
           ) : null}
         </DialogContent>
-        <DialogActions><Button onClick={() => setSelectedBatchId("")}>Đóng</Button></DialogActions>
+        <DialogActions><Button variant="text" onClick={() => setSelectedBatchId("")}>Đóng</Button></DialogActions>
       </Dialog>
     </Paper>
   );

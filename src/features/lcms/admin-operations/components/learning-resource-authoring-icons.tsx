@@ -119,14 +119,14 @@ const defaultIconByRole: Record<TaxonomyRole, string> = {
 };
 
 const roleTone: Record<TaxonomyRole, { background: string; border: string; foreground: string }> = {
-  subject: { background: "#EEF6FF", border: "#B8D6FA", foreground: "#0F6CBD" },
-  level: { background: "#EAF4FF", border: "#B8D6FA", foreground: "#0F6CBD" },
+  subject: { background: "#EEF6FF", border: "#B8D6FA", foreground: "#0071E3" },
+  level: { background: "#EAF4FF", border: "#B8D6FA", foreground: "#0071E3" },
   topic: { background: "#FFF1F3", border: "#FFD0D6", foreground: "#F35C6B" },
 };
 
 export const taxonomyIconColorOptions = [
-  { value: "#0F6CBD", label: "Xanh ERG" },
-  { value: "#2563EB", label: "Xanh học thuật" },
+  { value: "#0071E3", label: "Xanh ERG" },
+  { value: "#0071E3", label: "Xanh học thuật" },
   { value: "#F35C6B", label: "Do quiz bank" },
   { value: "#D73D50", label: "Do nhan" },
   { value: "#0891B2", label: "Cyan" },

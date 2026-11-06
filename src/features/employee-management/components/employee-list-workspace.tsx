@@ -1,77 +1,202 @@
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
-import MoreVertRoundedIcon from "@mui/icons-material/MoreVertRounded";
-import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
-import DialogTitle from "@mui/material/DialogTitle";
-import IconButton from "@mui/material/IconButton";
-import InputAdornment from "@mui/material/InputAdornment";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import TextField from "@mui/material/TextField";
-import Typography from "@mui/material/Typography";
-import { useEffect, useState } from "react";
-
-import { ErgContentBand, ErgPageSurface, ErgSectionHeader } from "@/components/erg-mui/erg-layout";
-import { ErgDataTableShell, ErgTable, ErgTableToolbar } from "@/components/erg-mui/erg-table";
-import { ErgEmptyState, ErgErrorState, ErgLoadingSkeleton, ErgStatusChip } from "@/components/erg-mui/erg-feedback";
+import TablePagination from "@mui/material/TablePagination";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { useTheme } from "@mui/material/styles";
+import { useEffect, useMemo, useState } from "react";
+import { ErgButton } from "@/components/erg-mui/erg-actions";
+import { ErgConfirmDialog } from "@/components/erg-mui/erg-confirm-dialog";
+import { ErgEmptyState, ErgErrorState, ErgLoadingSkeleton } from "@/components/erg-mui/erg-feedback";
+import { ErgContentBand, ErgPageSurface } from "@/components/erg-mui/erg-layout";
+import { ErgPageHeader } from "@/components/erg-mui/erg-page-header";
+import { ErgDataTableShell } from "@/components/erg-mui/erg-table";
 import { CreateEmployeeWizard } from "@/features/employee-management/components/create-employee-wizard";
 import { EmployeeDetailDrawer } from "@/features/employee-management/components/employee-detail-drawer";
-import { useEmployeeCommands, useEmployeeRoleOptions, useEmployees } from "@/features/employee-management/hooks/use-employee-management";
-import type { EmployeeItem } from "@/features/employee-management/types/employee-management";
+import { EmployeeActionMenu } from "@/features/employee-management/components/employee-list/action-menu";
+import { EmployeeMobileList } from "@/features/employee-management/components/employee-list/employee-mobile-list";
+import { EmployeeTable } from "@/features/employee-management/components/employee-list/employee-table";
+import { EmployeeListToolbar } from "@/features/employee-management/components/employee-list/list-toolbar";
+import { RoleAssignDialog } from "@/features/employee-management/components/employee-list/role-assign-dialog";
+import {
+  useEmployeeCommands,
+  useEmployeeRoleOptions,
+  useEmployees,
+  useEmployeeSchoolOptions,
+} from "@/features/employee-management/hooks/use-employee-management";
+import type { EmployeeItem, EmployeeStatusInput } from "@/features/employee-management/types/employee-management";
 
 export function EmployeeListWorkspace({ tenantId }: { tenantId: string }) {
+  const isMobile = useMediaQuery(useTheme().breakpoints.down("md"));
   const [search, setSearch] = useState("");
   const [querySearch, setQuerySearch] = useState("");
+  const [role, setRole] = useState("");
+  const [status, setStatus] = useState("");
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(25);
   const [selectedUserId, setSelectedUserId] = useState<string>();
   const [createOpen, setCreateOpen] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
   const [actionEmployee, setActionEmployee] = useState<EmployeeItem>();
   const [roleDialogOpen, setRoleDialogOpen] = useState(false);
   const [roleName, setRoleName] = useState("");
+  const [statusTarget, setStatusTarget] = useState<EmployeeItem>();
+
   const commands = useEmployeeCommands(tenantId);
   const rolesQuery = useEmployeeRoleOptions(tenantId);
-  useEffect(() => { const timer = window.setTimeout(() => setQuerySearch(search.trim()), 250); return () => window.clearTimeout(timer); }, [search]);
-  const query = useEmployees(tenantId, { page: 1, limit: 25, search: querySearch || undefined });
+  const { schools } = useEmployeeSchoolOptions();
+  const schoolNames = useMemo(() => new Map(schools.map((school) => [school.id, school.name])), [schools]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setQuerySearch(search.trim());
+      setPage(1);
+    }, 250);
+    return () => window.clearTimeout(timer);
+  }, [search]);
+
+  // Máy chủ hỗ trợ page/limit/search/status/role nên phân trang và lọc đều ở server.
+  const query = useEmployees(tenantId, {
+    limit,
+    page,
+    role: role || undefined,
+    search: querySearch || undefined,
+    status: (status || undefined) as EmployeeStatusInput | undefined,
+  });
   const employees = query.data?.users ?? [];
+  const total = query.data?.meta.total;
 
   const openMenu = (event: React.MouseEvent<HTMLElement>, employee: EmployeeItem) => {
-    event.stopPropagation(); setMenuAnchor(event.currentTarget); setActionEmployee(employee);
+    event.stopPropagation();
+    setMenuAnchor(event.currentTarget);
+    setActionEmployee(employee);
   };
   const closeMenu = () => setMenuAnchor(null);
-  const openRoleDialog = () => { setRoleName(""); setRoleDialogOpen(true); closeMenu(); };
+
   const assignRole = async () => {
     if (!actionEmployee || !roleName) return;
-    await commands.roles.mutateAsync({ userId: actionEmployee.id, roles: [...new Set([...actionEmployee.roles, roleName])] });
+    try {
+      await commands.roles.mutateAsync({
+        roles: [...new Set([...actionEmployee.roles, roleName])],
+        userId: actionEmployee.id,
+      });
+    } catch {
+      return; // global handler already toasted; keep the dialog open
+    }
     setRoleDialogOpen(false);
   };
 
-  return <ErgContentBand>
-    <ErgSectionHeader eyebrow="Quản lý" title="Tài khoản nhân sự" description="Quản lý hồ sơ, nhóm quyền, scope, trạng thái, credential, rủi ro và session trong một workspace." action={<Button variant="contained" startIcon={<AddRoundedIcon />} onClick={() => setCreateOpen(true)}>Tạo tài khoản</Button>} />
-    <ErgPageSurface flush><ErgDataTableShell toolbar={<ErgTableToolbar title="Danh sách nhân sự" meta={query.data ? `${query.data.meta.total} tài khoản` : "Đang tải dữ liệu"} actions={<TextField size="small" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Tên, mã nhân viên, email, điện thoại..." slotProps={{ input: { startAdornment: <InputAdornment position="start"><SearchRoundedIcon fontSize="small" /></InputAdornment> } }} />} />}>
-      {query.isPending ? <Box sx={{ p: 2 }}><ErgLoadingSkeleton rows={7} /></Box> : null}
-      {query.isError ? <Box sx={{ p: 2 }}><ErgErrorState title="Không tải được nhân sự" description="Không dùng danh sách giả khi API quản trị gặp lỗi." /></Box> : null}
-      {!query.isPending && !query.isError && !employees.length ? <Box sx={{ p: 2 }}><ErgEmptyState title="Chưa có nhân sự phù hợp" /></Box> : null}
-      {!query.isPending && !query.isError && employees.length ? <ErgTable aria-label="Danh sách nhân sự"><TableHead><TableRow><TableCell>Nhân sự</TableCell><TableCell>Phòng ban & chức danh</TableCell><TableCell>Nhóm quyền & scope</TableCell><TableCell>Trạng thái & rủi ro</TableCell><TableCell>Thiết bị</TableCell><TableCell>Lần đăng nhập cuối</TableCell><TableCell align="right">Thao tác</TableCell></TableRow></TableHead><TableBody>{employees.map((employee) => <TableRow hover key={employee.id} onClick={() => setSelectedUserId(employee.id)} sx={{ cursor: "pointer" }}>
-        <TableCell><Typography variant="body2" sx={{ fontWeight: 800 }}>{employee.fullName}</Typography><Typography color="text.secondary" variant="caption">{employee.employeeCode || employee.id}</Typography><Typography color="text.secondary" variant="caption" sx={{ display: "block" }}>{employee.email}</Typography></TableCell>
-        <TableCell><Typography variant="body2">{employee.jobTitle || "Chưa có chức danh"}</Typography><Typography color="text.secondary" variant="caption">{employee.departmentId || "Chưa có phòng ban"}</Typography></TableCell>
-        <TableCell><Typography variant="body2" sx={{ fontWeight: 700 }}>{employee.roles.length ? employee.roles.join(", ") : "Chưa gán"}</Typography><Typography color="text.secondary" variant="caption">{employee.scopes?.join(", ") || "Chưa giới hạn scope"}</Typography></TableCell>
-        <TableCell><Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}><ErgStatusChip label={employee.status} tone={employee.status === "ACTIVE" ? "success" : "warning"} />{employee.riskCode ? <ErgStatusChip label={employee.riskCode} tone="warning" /> : null}</Box></TableCell>
-        <TableCell><Typography variant="body2">{employee.activeDeviceCount ?? 0} thiết bị</Typography><Typography color="text.secondary" variant="caption">{employee.activePlatforms?.join(" · ") || "Không có phiên active"}</Typography></TableCell>
-        <TableCell>{employee.last_login_at ? new Date(employee.last_login_at).toLocaleString("vi-VN") : "Chưa đăng nhập"}</TableCell>
-        <TableCell align="right"><IconButton aria-label={`Thao tác cho ${employee.fullName}`} onClick={(event) => openMenu(event, employee)}><MoreVertRoundedIcon /></IconButton></TableCell>
-      </TableRow>)}</TableBody></ErgTable> : null}
-    </ErgDataTableShell></ErgPageSurface>
-    <Menu anchorEl={menuAnchor} open={Boolean(menuAnchor)} onClose={closeMenu}><MenuItem onClick={() => { if (actionEmployee) setSelectedUserId(actionEmployee.id); closeMenu(); }}>Xem hồ sơ</MenuItem><MenuItem onClick={openRoleDialog}>Gán nhóm quyền</MenuItem><MenuItem onClick={() => { if (actionEmployee) void commands.status.mutateAsync({ userId: actionEmployee.id, status: actionEmployee.status === "ACTIVE" ? "INACTIVE" : "ACTIVE" }); closeMenu(); }}>{actionEmployee?.status === "ACTIVE" ? "Deactive tài khoản" : "Active tài khoản"}</MenuItem></Menu>
-    <Dialog open={roleDialogOpen} onClose={() => setRoleDialogOpen(false)} fullWidth maxWidth="xs"><DialogTitle>Gán nhóm quyền</DialogTitle><DialogContent><DialogContentText sx={{ mb: 2 }}>Nhóm mới được cộng vào các nhóm hiện có. Thay đổi có audit và tăng authz version.</DialogContentText><TextField select fullWidth label="Nhóm quyền" value={roleName} onChange={(event) => setRoleName(event.target.value)}>{(rolesQuery.data ?? []).map((role) => <MenuItem key={role.id} value={role.name}>{role.name}</MenuItem>)}</TextField></DialogContent><DialogActions><Button color="inherit" onClick={() => setRoleDialogOpen(false)}>Hủy</Button><Button variant="contained" onClick={() => void assignRole()} disabled={!roleName || commands.roles.isPending}>Xác nhận gán quyền</Button></DialogActions></Dialog>
-    <EmployeeDetailDrawer tenantId={tenantId} userId={selectedUserId} onClose={() => setSelectedUserId(undefined)} /><CreateEmployeeWizard tenantId={tenantId} open={createOpen} onClose={() => setCreateOpen(false)} />
-  </ErgContentBand>;
+  const locking = statusTarget?.status === "ACTIVE";
+  const showContent = !query.isPending && !query.isError;
+
+  return (
+    <ErgContentBand sx={{ bgcolor: "background.default", py: { md: 4, xs: 2.5 } }}>
+      <ErgPageHeader
+        description="Quản lý hồ sơ, vai trò, phạm vi, trạng thái và phiên đăng nhập của nhân sự."
+        primaryAction={
+          <ErgButton onClick={() => setCreateOpen(true)} startIcon={<AddRoundedIcon />} variant="contained">
+            Tạo tài khoản
+          </ErgButton>
+        }
+        title="Tài khoản nhân sự"
+      />
+
+      <ErgPageSurface flush>
+        <ErgDataTableShell
+          toolbar={
+            <EmployeeListToolbar
+              onRoleChange={(value) => { setRole(value); setPage(1); }}
+              onSearchChange={setSearch}
+              onStatusChange={(value) => { setStatus(value); setPage(1); }}
+              role={role}
+              roles={rolesQuery.data ?? []}
+              search={search}
+              status={status}
+              total={total}
+              loading={query.isPending}
+            />
+          }
+        >
+          {query.isPending ? <Box sx={{ p: 3 }}><ErgLoadingSkeleton rows={7} /></Box> : null}
+          {query.isError ? (
+            <Box sx={{ p: 3 }}>
+              <ErgErrorState
+                action={<ErgButton onClick={() => void query.refetch()} variant="outlined">Thử lại</ErgButton>}
+                description={query.error instanceof Error ? query.error.message : "Không tải được danh sách nhân sự từ hệ thống."}
+                title="Không tải được nhân sự"
+              />
+            </Box>
+          ) : null}
+          {showContent && !employees.length ? (
+            <Box sx={{ p: 4 }}><ErgEmptyState title="Chưa có nhân sự phù hợp" description="Thử đổi từ khoá hoặc bộ lọc." /></Box>
+          ) : null}
+          {showContent && employees.length ? (
+            <>
+              {isMobile ? (
+                <EmployeeMobileList employees={employees} onOpenMenu={openMenu} onSelect={setSelectedUserId} />
+              ) : (
+                <EmployeeTable employees={employees} onOpenMenu={openMenu} onSelect={setSelectedUserId} schoolNames={schoolNames} />
+              )}
+              <TablePagination
+                component="div"
+                count={total ?? 0}
+                labelRowsPerPage="Số dòng"
+                onPageChange={(_, next) => setPage(next + 1)}
+                onRowsPerPageChange={(event) => { setLimit(Number(event.target.value)); setPage(1); }}
+                page={Math.max(0, page - 1)}
+                rowsPerPage={limit}
+                rowsPerPageOptions={[25, 50, 100]}
+              />
+            </>
+          ) : null}
+        </ErgDataTableShell>
+      </ErgPageSurface>
+
+      <EmployeeActionMenu
+        anchorEl={menuAnchor}
+        onAssignRole={() => { setRoleName(""); setRoleDialogOpen(true); closeMenu(); }}
+        onClose={closeMenu}
+        onToggleStatus={() => { if (actionEmployee) setStatusTarget(actionEmployee); closeMenu(); }}
+        onView={() => { if (actionEmployee) setSelectedUserId(actionEmployee.id); closeMenu(); }}
+        status={actionEmployee?.status}
+      />
+
+      <ErgConfirmDialog
+        confirmLabel={locking ? "Khoá" : "Mở khoá"}
+        description={`${locking ? "Khoá" : "Mở khoá"} tài khoản ${statusTarget?.fullName ?? ""}. Thay đổi trạng thái có thể thu hồi toàn bộ phiên đăng nhập của nhân sự.`}
+        destructive={locking}
+        loading={commands.status.isPending}
+        onCancel={() => setStatusTarget(undefined)}
+        onConfirm={() => {
+          if (statusTarget) {
+            commands.status.mutate({
+              status: locking ? "INACTIVE" : "ACTIVE",
+              userId: statusTarget.id,
+            });
+          }
+          setStatusTarget(undefined);
+        }}
+        open={Boolean(statusTarget)}
+        title={locking ? "Khoá tài khoản" : "Mở khoá tài khoản"}
+      />
+
+      <RoleAssignDialog
+        onClose={() => setRoleDialogOpen(false)}
+        onConfirm={assignRole}
+        onRoleNameChange={setRoleName}
+        open={roleDialogOpen}
+        pending={commands.roles.isPending}
+        roleName={roleName}
+        roles={rolesQuery.data}
+      />
+
+      <EmployeeDetailDrawer
+        key={selectedUserId ?? "none"}
+        onClose={() => setSelectedUserId(undefined)}
+        tenantId={tenantId}
+        userId={selectedUserId}
+      />
+
+      <CreateEmployeeWizard onClose={() => setCreateOpen(false)} open={createOpen} tenantId={tenantId} />
+    </ErgContentBand>
+  );
 }

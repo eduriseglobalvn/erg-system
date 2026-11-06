@@ -1,8 +1,8 @@
 import { useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
-import type { ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
-import type { ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
+import type { ClassroomStudent } from "@/domain/school/classroom-types";
+import type { ClassroomSnapshot } from "@/domain/school/classroom-types";
 import { OfflineTeachingCommandError } from "@/features/lms/offline-teaching";
 import {
   isPendingAcademicRecordMutation,
@@ -13,7 +13,9 @@ import {
 import { lmsSubjectOptions } from "@/features/lms/components/lms-subject-options";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useVirtualList } from "@/hooks/use-virtual-list";
+import { formatDateVi } from "@/domain/formatters/format-date";
 import { runtimeFixturesEnabled } from "@/lib/runtime-fixtures";
+import { describePaste, isBlockPaste, parseClipboardGrid, planScorePaste } from "./score-paste";
 import {
   baseScoreColumns,
   classificationOptions,
@@ -117,6 +119,30 @@ export function useScoreSheetController(students: ClassroomStudent[], selectedCl
   function updateManualScore(columnId: string, studentId: string, score: string) {
     if (!/^\d*([.,]\d*)?$/.test(score)) return;
     setManualScores((current) => ({ ...current, [`${columnId}:${studentId}`]: score.replace(",", ".") }));
+  }
+
+  // Only offline columns are hand-entered; quiz/topic columns come from submissions.
+  const editableColumns = scoreColumns.filter((column) => column.kind === "offline");
+
+  /** Block paste from Excel at (startRow, startCol) of the editable grid. Returns false for a single value so the browser pastes normally. */
+  function pasteScores(startRow: number, startCol: number, text: string) {
+    const grid = parseClipboardGrid(text);
+    if (!isBlockPaste(grid)) return false;
+    const plan = planScorePaste(grid, { row: startRow, col: startCol }, {
+      rows: filteredStudents.length,
+      colMaxScores: editableColumns.map((column) => column.maxScore),
+    });
+    for (const { row, col, value } of plan.assignments) {
+      const student = filteredStudents[row];
+      const column = editableColumns[col];
+      updateManualScore(column.id, student.id, String(value));
+      commitScore(column.id, student.id, String(value));
+    }
+    const message = describePaste(plan);
+    setNotice(message);
+    if (plan.invalid || plan.ignored) toast.warning(message);
+    else toast.success(message);
+    return true;
   }
 
   function updateBonusScore(studentId: string, score: string) {
@@ -229,7 +255,9 @@ export function useScoreSheetController(students: ClassroomStudent[], selectedCl
     notice,
     offlinePending: isPendingAcademicRecordMutation(scoreMutation.data),
     offlineColumnName,
+    editableColumns,
     openStudentDetail,
+    pasteScores,
     pendingClassification,
     requestClassificationChange,
     saveClassificationChange,
@@ -268,7 +296,7 @@ function fromApiScoreKind(kind: string): ScoreColumn["kind"] {
 
 function formatUpdatedAt(value: string) {
   const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString("vi-VN");
+  return Number.isNaN(date.getTime()) ? value : formatDateVi(date);
 }
 
 export type ScoreSheetController = ReturnType<typeof useScoreSheetController>;

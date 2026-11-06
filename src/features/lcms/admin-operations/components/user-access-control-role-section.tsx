@@ -37,8 +37,8 @@ export function RolesSection({ currentRoles, rootAdmin, saving, onChange, onSave
         {roleOptions.map((role) => {
           const checked = isChecked(role.id);
           return (
-            <Button key={role.id} type="button" onClick={() => toggle(role.id)} disabled={rootAdmin && role.id === "erg_super_admin"} sx={{ minHeight: 110, display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 1.5, border: 1, borderColor: checked ? "primary.main" : "divider", borderRadius: 1.5, bgcolor: checked ? "primary.50" : "background.paper", p: 2, textAlign: "left", textTransform: "none", "&:hover": { bgcolor: checked ? "primary.50" : "action.hover" } }}>
-              <Box sx={{ minWidth: 0, flex: 1 }}><Typography sx={{ color: "text.primary", fontSize: 12, fontWeight: 700 }}>{role.label}</Typography><Typography sx={{ mt: 1, color: "text.secondary", fontSize: 10, lineHeight: 1.6 }}>{role.hint}</Typography></Box>
+            <Button variant="contained" key={role.id} type="button" onClick={() => toggle(role.id)} disabled={rootAdmin && role.id === "erg_super_admin"} sx={{ minHeight: 110, display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 1.5, border: 1, borderColor: checked ? "primary.main" : "divider", borderRadius: 1.5, bgcolor: checked ? "primary.50" : "background.paper", p: 2, textAlign: "left", textTransform: "none", "&:hover": { bgcolor: checked ? "primary.50" : "action.hover" } }}>
+              <Box sx={{ minWidth: 0, flex: 1 }}><Typography sx={{ color: "text.primary", fontSize: 12, fontWeight: 600 }}>{role.label}</Typography><Typography sx={{ mt: 1, color: "text.secondary", fontSize: 10, lineHeight: 1.6 }}>{role.hint}</Typography></Box>
               {checked ? <Box sx={{ display: "grid", width: 20, height: 20, flexShrink: 0, placeItems: "center", borderRadius: "50%", bgcolor: "primary.main", color: "primary.contrastText" }}><CheckIcon sx={{ fontSize: 14 }} /></Box> : null}
             </Button>
           );

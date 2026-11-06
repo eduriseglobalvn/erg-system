@@ -55,6 +55,7 @@ export const API_ENDPOINTS = {
     lifecycle: (resourceKind: string, resourceId: string) => path(`/api/v1/content/${encodeApiPathSegment(resourceKind)}/${encodeApiPathSegment(resourceId)}/lifecycle`),
   },
   curriculum: {
+    activeTree: `${curriculumRoot}/tree?status=active`,
     collection: (kind: string) => path(`${curriculumRoot}/${encodeApiPathSegment(kind)}`),
     subjectLevels: (subjectId: string) => path(`${curriculumRoot}/subjects/${encodeApiPathSegment(subjectId)}/levels`),
     levelTopics: (levelId: string) => path(`${curriculumRoot}/levels/${encodeApiPathSegment(levelId)}/topics`),
@@ -62,6 +63,7 @@ export const API_ENDPOINTS = {
     impact: (kind: string, id: string) => path(`${curriculumRoot}/${encodeApiPathSegment(kind)}/${encodeApiPathSegment(id)}/impact`),
     archive: (kind: string, id: string) => path(`${curriculumRoot}/${encodeApiPathSegment(kind)}/${encodeApiPathSegment(id)}/archive`),
     teachingPlan: path(`${curriculumRoot}/teaching-plan`),
+    classSubjects: path(`${curriculumRoot}/class-subjects`),
     program: path(`${curriculumRoot}/program`),
     topicContentItems: (topicId: string) => path(`${curriculumRoot}/topics/${encodeApiPathSegment(topicId)}/content-items`),
   },
@@ -103,6 +105,7 @@ export const API_ENDPOINTS = {
     assignmentRecipients: (assignmentId: string) => path(`/api/v1/lms/assignments/${encodeApiPathSegment(assignmentId)}/recipients`),
     attempts: "/api/v1/lms/attempts" satisfies ContractPath,
     attemptAnswer: (attemptId: string, questionId: string) => path(`/api/v1/lms/attempts/${encodeApiPathSegment(attemptId)}/answers/${encodeApiPathSegment(questionId)}`),
+    attemptImport: path("/api/v1/lms/attempts/import"),
     attemptSubmit: (attemptId: string) => path(`/api/v1/lms/attempts/${encodeApiPathSegment(attemptId)}/submit`),
     attemptDraft: (attemptId: string) => path(`/api/v1/lms/attempts/${encodeApiPathSegment(attemptId)}/draft`),
     attemptSync: (attemptId: string) => path(`/api/v1/lms/attempts/${encodeApiPathSegment(attemptId)}/sync`),

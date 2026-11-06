@@ -18,7 +18,7 @@ export function ErgChartInsight({ direction = "flat", primary, secondary }: {
   const TrendIcon = direction === "up" ? TrendingUpRoundedIcon : direction === "down" ? TrendingDownRoundedIcon : TrendingFlatRoundedIcon;
   return <Box sx={{ minWidth: 0 }}>
     <Box sx={{ alignItems: "center", display: "flex", gap: 0.65 }}>
-      <Typography sx={{ fontSize: 13, fontWeight: 800, lineHeight: 1.35 }}>{primary}</Typography>
+      <Typography sx={{ fontSize: 13, fontWeight: 600, lineHeight: 1.35 }}>{primary}</Typography>
       <TrendIcon aria-hidden sx={{ color: direction === "down" ? "error.main" : direction === "up" ? "success.main" : "text.secondary", fontSize: 17 }} />
     </Box>
     {secondary ? <Typography color="text.secondary" sx={{ display: "block", fontSize: 12.5, lineHeight: 1.45, mt: 0.25 }}>{secondary}</Typography> : null}
@@ -53,7 +53,7 @@ export function ErgChartCard({ action, bodySx, children, description, footer, hi
   >
     <Box sx={{ alignItems: { xs: "stretch", sm: "center" }, borderBottom: "1px solid", borderColor: "divider", display: "flex", flexDirection: { xs: "column", sm: "row" }, gap: 1.5, justifyContent: "space-between", px: { xs: 2, sm: 3 }, py: 2.5 }}>
       <Box sx={{ minWidth: 0 }}>
-        <Typography component="h2" sx={{ fontSize: 16, fontWeight: 750, letterSpacing: "-0.01em", lineHeight: 1.35 }}>{title}</Typography>
+        <Typography component="h2" sx={{ fontSize: 16, fontWeight: 600, letterSpacing: "-0.01em", lineHeight: 1.35 }}>{title}</Typography>
         {description ? <Typography color="text.secondary" sx={{ fontSize: 13, lineHeight: 1.45, mt: 0.35 }}>{description}</Typography> : null}
       </Box>
       {action ? <Box sx={{ flexShrink: 0 }}>{action}</Box> : null}

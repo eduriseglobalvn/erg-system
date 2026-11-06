@@ -20,7 +20,7 @@ export function EnterpriseContentGrid({
     return (
       <div className="flex h-full min-h-[320px] items-center justify-center bg-[#FBFCFE] p-8 text-center">
         <div className="max-w-sm">
-          <span className="mx-auto grid h-12 w-12 place-items-center rounded-lg border border-[#B8D6FA] bg-[#EAF4FF] text-[#0F6CBD]">
+          <span className="mx-auto grid h-12 w-12 place-items-center rounded-lg border border-[#B8D6FA] bg-[#EAF4FF] text-[#0071E3]">
             <FileText className="h-6 w-6" />
           </span>
           <h3 className="mt-3 text-sm font-bold text-[#1C252E]">Chưa có nội dung</h3>
@@ -81,7 +81,7 @@ export function ContentCard({
         }
       }}
     >
-      {selected ? <span className="absolute inset-y-0 left-0 w-1 rounded-l-lg bg-[#0F6CBD]" aria-hidden="true" /> : null}
+      {selected ? <span className="absolute inset-y-0 left-0 w-1 rounded-l-lg bg-[#0071E3]" aria-hidden="true" /> : null}
       <div className="flex items-start gap-3">
         <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border" style={{ background: tone.background, borderColor: tone.border, color: tone.foreground }}>
           {roleIcon(item.kind)}

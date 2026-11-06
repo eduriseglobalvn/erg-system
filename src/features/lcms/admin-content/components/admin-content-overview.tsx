@@ -3,7 +3,12 @@ import AccountTreeRoundedIcon from "@mui/icons-material/AccountTreeRounded";
 import FolderRoundedIcon from "@mui/icons-material/FolderRounded";
 import HelpOutlineRoundedIcon from "@mui/icons-material/HelpOutlineRounded";
 import QuizRoundedIcon from "@mui/icons-material/QuizRounded";
-import { Box, Button, Card, CardContent, Stack, Typography } from "@mui/material";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 import { useNavigate } from "@tanstack/react-router";
 
 import { ADMIN_CONTENT_SECTIONS, type AdminContentSectionKey } from "../admin-content-route";
@@ -30,7 +35,7 @@ export function AdminContentOverview() {
   return (
     <Box sx={{ display: "grid", gap: 2, maxWidth: 1200, mx: "auto", width: "100%" }}>
       <Box>
-        <Typography color="text.primary" sx={{ fontSize: { xs: 24, md: 30 }, fontWeight: 800 }}>
+        <Typography color="text.primary" sx={{ fontSize: { xs: 24, md: 30 }, fontWeight: 600 }}>
           Nội dung
         </Typography>
         <Typography color="text.secondary" sx={{ mt: 0.75, maxWidth: 720 }}>
@@ -48,7 +53,7 @@ export function AdminContentOverview() {
                   <Box sx={{ bgcolor: "primary.50", borderRadius: 1.5, color: "primary.main", display: "grid", p: 1, placeItems: "center" }}>
                     <Icon fontSize="small" />
                   </Box>
-                  <Typography sx={{ fontSize: 16, fontWeight: 750 }}>{section.label}</Typography>
+                  <Typography sx={{ fontSize: 16, fontWeight: 600 }}>{section.label}</Typography>
                 </Stack>
                 <Typography color="text.secondary" sx={{ flex: 1, fontSize: 13, lineHeight: 1.6 }}>
                   {DESCRIPTIONS[section.key]}

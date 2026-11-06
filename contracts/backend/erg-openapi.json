@@ -1495,6 +1495,32 @@
         },
         "type": "object"
       },
+      "ApiResponseCurriculumClassSubjectsResponse": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/CurriculumClassSubjectsResponse"
+          },
+          "errors": {},
+          "message": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "request_id": {
+            "type": "string"
+          },
+          "statusCode": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "ApiResponseCurriculumHardDeleteResponse": {
         "properties": {
           "data": {
@@ -1573,10 +1599,62 @@
         },
         "type": "object"
       },
+      "ApiResponseCurriculumProgramResponse": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/CurriculumProgramResponse"
+          },
+          "errors": {},
+          "message": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "request_id": {
+            "type": "string"
+          },
+          "statusCode": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "ApiResponseCurriculumSubjectResponse": {
         "properties": {
           "data": {
             "$ref": "#/components/schemas/CurriculumSubjectResponse"
+          },
+          "errors": {},
+          "message": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "request_id": {
+            "type": "string"
+          },
+          "statusCode": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ApiResponseCurriculumTeachingPlanResponse": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/CurriculumTeachingPlanResponse"
           },
           "errors": {},
           "message": {
@@ -2123,6 +2201,32 @@
         "properties": {
           "data": {
             "$ref": "#/components/schemas/HandoverResponse"
+          },
+          "errors": {},
+          "message": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "request_id": {
+            "type": "string"
+          },
+          "statusCode": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ApiResponseImportedAttemptResponse": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/ImportedAttemptResponse"
           },
           "errors": {},
           "message": {
@@ -3114,6 +3218,32 @@
         "properties": {
           "data": {
             "$ref": "#/components/schemas/PackageResponse"
+          },
+          "errors": {},
+          "message": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "request_id": {
+            "type": "string"
+          },
+          "statusCode": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ApiResponsePageResponseAttemptResponse": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/PageResponseAttemptResponse"
           },
           "errors": {},
           "message": {
@@ -7137,6 +7267,11 @@
             "minLength": 0,
             "type": "string"
           },
+          "authUserId": {
+            "maxLength": 36,
+            "minLength": 0,
+            "type": "string"
+          },
           "birthday": {
             "format": "date-time",
             "type": "string"
@@ -7334,6 +7469,56 @@
         },
         "type": "object"
       },
+      "CurriculumClassSubjectAllocationItem": {
+        "properties": {
+          "classId": {
+            "type": "string"
+          },
+          "subjectIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "CurriculumClassSubjectsRequest": {
+        "properties": {
+          "allocations": {
+            "items": {
+              "$ref": "#/components/schemas/CurriculumClassSubjectAllocationItem"
+            },
+            "type": "array"
+          },
+          "expectedVersion": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CurriculumClassSubjectsResponse": {
+        "properties": {
+          "academicYear": {
+            "type": "string"
+          },
+          "allocations": {
+            "items": {
+              "$ref": "#/components/schemas/CurriculumClassSubjectAllocationItem"
+            },
+            "type": "array"
+          },
+          "schoolId": {
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "CurriculumHardDeleteResponse": {
         "properties": {
           "deleted": {
@@ -7493,6 +7678,129 @@
         },
         "type": "object"
       },
+      "CurriculumProgramRequest": {
+        "properties": {
+          "expectedVersion": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/CurriculumProgramRowRequest"
+            },
+            "type": "array"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CurriculumProgramResponse": {
+        "properties": {
+          "academicYear": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "levelId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "recordVersion": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/CurriculumProgramRowResponse"
+            },
+            "type": "array"
+          },
+          "status": {
+            "type": "string"
+          },
+          "subjectId": {
+            "type": "string"
+          },
+          "tenantId": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CurriculumProgramRowRequest": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "period": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "sessions": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "topic": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CurriculumProgramRowResponse": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "period": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "recordVersion": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "sessions": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "sortOrder": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "topic": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "CurriculumSubjectResponse": {
         "properties": {
           "code": {
@@ -7544,6 +7852,89 @@
           },
           "subject": {
             "$ref": "#/components/schemas/CurriculumSubjectResponse"
+          }
+        },
+        "type": "object"
+      },
+      "CurriculumTeachingPlanRequest": {
+        "properties": {
+          "expectedVersion": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "sessionsPerDay": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "startDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "teachingDays": {
+            "items": {
+              "format": "int32",
+              "type": "integer"
+            },
+            "type": "array"
+          },
+          "timezone": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CurriculumTeachingPlanResponse": {
+        "properties": {
+          "academicYear": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "recordVersion": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "schoolId": {
+            "type": "string"
+          },
+          "sessionsPerDay": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "startDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "subjectId": {
+            "type": "string"
+          },
+          "teachingDays": {
+            "items": {
+              "format": "int32",
+              "type": "integer"
+            },
+            "type": "array"
+          },
+          "tenantId": {
+            "type": "string"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
           }
         },
         "type": "object"
@@ -8407,6 +8798,64 @@
         },
         "type": "object"
       },
+      "ImportPortableResultRequest": {
+        "properties": {
+          "body": {
+            "additionalProperties": {},
+            "type": "object"
+          },
+          "checksum": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "body",
+          "checksum"
+        ],
+        "type": "object"
+      },
+      "ImportedAttemptResponse": {
+        "properties": {
+          "assignmentId": {
+            "type": "string"
+          },
+          "attemptId": {
+            "type": "string"
+          },
+          "duplicate": {
+            "type": "boolean"
+          },
+          "late": {
+            "type": "boolean"
+          },
+          "maxScore": {
+            "format": "double",
+            "type": "number"
+          },
+          "passed": {
+            "type": "boolean"
+          },
+          "percent": {
+            "format": "double",
+            "type": "number"
+          },
+          "quizId": {
+            "type": "string"
+          },
+          "score": {
+            "format": "double",
+            "type": "number"
+          },
+          "status": {
+            "type": "string"
+          },
+          "studentId": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "IpSecurityStatusResponse": {
         "properties": {
           "allowlisted": {
@@ -8823,6 +9272,14 @@
         },
         "type": "object"
       },
+      "LegalHoldRequest": {
+        "properties": {
+          "legalHold": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
       "LifecycleResponse": {
         "properties": {
           "actorId": {
@@ -9044,6 +9501,22 @@
             "type": "string"
           }
         },
+        "type": "object"
+      },
+      "ManualGradeRequest": {
+        "properties": {
+          "expectedVersion": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "points": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "points"
+        ],
         "type": "object"
       },
       "MarkReadResponse": {
@@ -9424,6 +9897,39 @@
           "updatedAt": {
             "format": "date-time",
             "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PageResponseAttemptResponse": {
+        "properties": {
+          "hasNext": {
+            "type": "boolean"
+          },
+          "hasPrevious": {
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AttemptResponse"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalItems": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
           }
         },
         "type": "object"
@@ -12240,6 +12746,11 @@
             "minLength": 0,
             "type": "string"
           },
+          "authUserId": {
+            "maxLength": 36,
+            "minLength": 0,
+            "type": "string"
+          },
           "birthday": {
             "format": "date-time",
             "type": "string"
@@ -12581,6 +13092,26 @@
         ],
         "type": "object"
       },
+      "WorkspacePage": {
+        "properties": {
+          "hasMore": {
+            "type": "boolean"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalSchools": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "WorkspaceResponse": {
         "properties": {
           "followUps": {
@@ -12606,6 +13137,9 @@
               "$ref": "#/components/schemas/OpportunityResponse"
             },
             "type": "array"
+          },
+          "page": {
+            "$ref": "#/components/schemas/WorkspacePage"
           }
         },
         "type": "object"
@@ -12714,6 +13248,7 @@
   "paths": {
     "/api/content/assets": {
       "post": {
+        "deprecated": true,
         "operationId": "createContentAsset",
         "requestBody": {
           "content": {
@@ -12744,6 +13279,7 @@
     },
     "/api/content/assets/{contentAssetId}": {
       "patch": {
+        "deprecated": true,
         "operationId": "updateContentAsset",
         "parameters": [
           {
@@ -12792,6 +13328,7 @@
     },
     "/api/content/items": {
       "post": {
+        "deprecated": true,
         "operationId": "createContentItem_1",
         "requestBody": {
           "content": {
@@ -12822,6 +13359,7 @@
     },
     "/api/content/items/{contentItemId}": {
       "delete": {
+        "deprecated": true,
         "operationId": "deleteContentItem",
         "parameters": [
           {
@@ -12850,6 +13388,7 @@
         ]
       },
       "patch": {
+        "deprecated": true,
         "operationId": "updateContentItem",
         "parameters": [
           {
@@ -12898,6 +13437,7 @@
     },
     "/api/content/items/{contentItemId}/assets": {
       "post": {
+        "deprecated": true,
         "operationId": "attachContentAsset",
         "parameters": [
           {
@@ -12938,6 +13478,7 @@
     },
     "/api/content/lectures/google-slides": {
       "post": {
+        "deprecated": true,
         "operationId": "createGoogleSlidesLecture",
         "requestBody": {
           "content": {
@@ -12968,6 +13509,7 @@
     },
     "/api/curriculum/topics/{topicId}/content-items": {
       "post": {
+        "deprecated": true,
         "operationId": "placeContentItem",
         "parameters": [
           {
@@ -13008,6 +13550,7 @@
     },
     "/api/curriculum/topics/{topicId}/content-items/reorder": {
       "patch": {
+        "deprecated": true,
         "operationId": "reorderPlacements",
         "parameters": [
           {
@@ -13048,6 +13591,7 @@
     },
     "/api/curriculum/topics/{topicId}/content-items/{placementId}": {
       "delete": {
+        "deprecated": true,
         "operationId": "removePlacement_1",
         "parameters": [
           {
@@ -13874,6 +14418,46 @@
         ]
       }
     },
+    "/api/v1/audit/events/{eventId}/legal-hold": {
+      "put": {
+        "operationId": "legalHold",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "eventId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LegalHoldRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseVoid"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "audit-controller"
+        ]
+      }
+    },
     "/api/v1/audit/export": {
       "get": {
         "operationId": "export",
@@ -14000,6 +14584,7 @@
             "description": "OK"
           }
         },
+        "security": [],
         "tags": [
           "auth-controller"
         ]
@@ -14100,6 +14685,7 @@
             "description": "OK"
           }
         },
+        "security": [],
         "tags": [
           "auth-controller"
         ]
@@ -15489,7 +16075,7 @@
             "name": "signed",
             "required": false,
             "schema": {
-              "default": false,
+              "default": true,
               "type": "boolean"
             }
           }
@@ -15514,6 +16100,28 @@
     "/api/v1/crm/workspace": {
       "get": {
         "operationId": "workspace",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 500,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -15528,6 +16136,90 @@
         },
         "tags": [
           "crm-workspace-controller"
+        ]
+      }
+    },
+    "/api/v1/curriculum/class-subjects": {
+      "get": {
+        "operationId": "classSubjects",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "schoolId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "academicYear",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseCurriculumClassSubjectsResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "curriculum-controller"
+        ]
+      },
+      "put": {
+        "operationId": "replaceClassSubjects",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "schoolId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "academicYear",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CurriculumClassSubjectsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseCurriculumClassSubjectsResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "curriculum-controller"
         ]
       }
     },
@@ -15688,6 +16380,106 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponseCurriculumTopicResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "curriculum-controller"
+        ]
+      }
+    },
+    "/api/v1/curriculum/program": {
+      "get": {
+        "operationId": "program",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "subjectId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "levelId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "academicYear",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseCurriculumProgramResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "curriculum-controller"
+        ]
+      },
+      "put": {
+        "operationId": "upsertProgram",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "subjectId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "levelId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "academicYear",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CurriculumProgramRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseCurriculumProgramResponse"
                 }
               }
             },
@@ -15886,6 +16678,106 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponseCurriculumLevelResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "curriculum-controller"
+        ]
+      }
+    },
+    "/api/v1/curriculum/teaching-plan": {
+      "get": {
+        "operationId": "teachingPlan",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "schoolId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "subjectId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "academicYear",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseCurriculumTeachingPlanResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "curriculum-controller"
+        ]
+      },
+      "put": {
+        "operationId": "upsertTeachingPlan",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "schoolId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "subjectId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "academicYear",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CurriculumTeachingPlanRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseCurriculumTeachingPlanResponse"
                 }
               }
             },
@@ -16496,6 +17388,7 @@
             "description": "OK"
           }
         },
+        "security": [],
         "tags": [
           "platform-health-controller"
         ]
@@ -16652,7 +17545,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "format": "byte",
+                "format": "binary",
                 "type": "string"
               }
             }
@@ -16664,6 +17557,7 @@
             "description": "OK"
           }
         },
+        "security": [],
         "tags": [
           "lcms-media-controller"
         ]
@@ -19547,6 +20441,54 @@
         ]
       }
     },
+    "/api/v1/lms/attempts/import": {
+      "post": {
+        "operationId": "importPortableResult",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "assignmentId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Idempotency-Key",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportPortableResultRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseImportedAttemptResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "lms-controller"
+        ]
+      }
+    },
     "/api/v1/lms/attempts/{attemptId}/answers": {
       "post": {
         "operationId": "saveAnswers",
@@ -19640,6 +20582,54 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponseAnswerResultResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "lms-controller"
+        ]
+      }
+    },
+    "/api/v1/lms/attempts/{attemptId}/answers/{questionId}/grade": {
+      "post": {
+        "operationId": "gradeAnswer",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "attemptId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "questionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ManualGradeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseAttemptResponse"
                 }
               }
             },
@@ -19886,6 +20876,14 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "in": "query",
+            "name": "assignmentId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -19924,6 +20922,56 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponseListAttemptResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "lms-controller"
+        ]
+      }
+    },
+    "/api/v1/lms/quizzes/{quizId}/students/page": {
+      "get": {
+        "operationId": "quizStudentsPage",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "quizId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePageResponseAttemptResponse"
                 }
               }
             },
@@ -20860,6 +21908,7 @@
             "description": "OK"
           }
         },
+        "security": [],
         "tags": [
           "platform-health-controller"
         ]
@@ -21550,6 +22599,36 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponseUserResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "user-controller"
+        ]
+      }
+    },
+    "/api/v1/users/me/onboarding": {
+      "post": {
+        "operationId": "completeOnboarding_1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OnboardingRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOnboardingResponse"
                 }
               }
             },
@@ -22364,6 +23443,7 @@
             "description": "OK"
           }
         },
+        "security": [],
         "tags": [
           "platform-health-controller"
         ]
@@ -22384,6 +23464,7 @@
             "description": "OK"
           }
         },
+        "security": [],
         "tags": [
           "platform-health-controller"
         ]
@@ -22404,6 +23485,7 @@
             "description": "OK"
           }
         },
+        "security": [],
         "tags": [
           "platform-health-controller"
         ]
@@ -22453,6 +23535,7 @@
             "description": "OK"
           }
         },
+        "security": [],
         "tags": [
           "webhook-controller"
         ]
@@ -22494,6 +23577,7 @@
             "description": "OK"
           }
         },
+        "security": [],
         "tags": [
           "webhook-controller"
         ]

@@ -1,4 +1,4 @@
-import { listLearningResourceResources } from "@/features/lcms/admin-operations/api/learning-resource-authoring-api";
+import { listLearningResourceResources } from "@/features/lms/learning-resources/api/learning-resource-authoring-api";
 import type { LearningResourceResource, LearningResourceResourceSection } from "@/features/lms/learning-resources/api/learning-resource-domain-types";
 import {
   mapGraphQlLearningResourceToResource,
@@ -8,13 +8,11 @@ import {
 } from "@/features/lms/learning-resources/api/learning-resource-graphql-mapper";
 import { loadGraphQlLearningResourceLibrary } from "@/features/lms/learning-resources/api/learning-resource-graphql-transport";
 import { groupCardsBySection, mapCardToResource } from "@/features/lms/learning-resources/api/learning-resource-mapper";
-import {
-  getMockLearningResourceLibrarySections,
-  mockLibraryBootstrap,
-} from "@/features/lms/learning-resources/api/learning-resource-mock-library";
-import { LEARNING_RESOURCE_LIBRARY_SECTIONS } from "@/features/lms/learning-resources/api/learning-resource-mock-data";
 import type { LearningResourceLibraryProgressDTO } from "@/features/lms/learning-resources/api/learning-resource-types";
 import { runtimeFixturesEnabled } from "@/lib/runtime-fixtures";
+
+const loadMockLibrary = () => import("@/test/fixtures/learning-resource-mock-library");
+const loadMockSections = () => import("@/test/fixtures/learning-resource-library-sections");
 
 export async function loadLearningResourceLibraryBootstrap(
   input: { schoolId: string; academicYear: string; tenantId?: string },
@@ -30,8 +28,8 @@ export async function loadLearningResourceLibraryBootstrap(
     return mapGraphQlLibraryToBootstrap(graphQlLibrary, input);
   }
 
-  if (runtimeFixturesEnabled()) {
-    return mockLibraryBootstrap(input);
+  if (import.meta.env.DEV && runtimeFixturesEnabled()) {
+    return (await loadMockLibrary()).mockLibraryBootstrap(input);
   }
 
   return { schoolId: input.schoolId, academicYear: input.academicYear, subjects: [] };
@@ -55,7 +53,7 @@ export async function loadLearningResourceLibraryProgress(
 }
 
 export async function loadLearningResourceLibrarySections(): Promise<LearningResourceResourceSection[]> {
-  if (runtimeFixturesEnabled()) return getMockLearningResourceLibrarySections();
+  if (import.meta.env.DEV && runtimeFixturesEnabled()) return (await loadMockLibrary()).getMockLearningResourceLibrarySections();
 
   const graphQlLibrary = await loadGraphQlLearningResourceLibrary();
   if (graphQlLibrary?.resources.items.length) {
@@ -67,14 +65,14 @@ export async function loadLearningResourceLibrarySections(): Promise<LearningRes
     const cards = result.data;
     return groupCardsBySection(cards.map(mapCardToResource));
   } catch (error) {
-    if (runtimeFixturesEnabled()) return LEARNING_RESOURCE_LIBRARY_SECTIONS;
+    if (import.meta.env.DEV && runtimeFixturesEnabled()) return (await loadMockSections()).LEARNING_RESOURCE_LIBRARY_SECTIONS;
     throw error;
   }
 }
 
 export async function loadLearningResourceResourcesBySubject(subjectId: string): Promise<LearningResourceResource[]> {
-  if (runtimeFixturesEnabled()) {
-    return getMockLearningResourceLibrarySections()
+  if (import.meta.env.DEV && runtimeFixturesEnabled()) {
+    return (await loadMockLibrary()).getMockLearningResourceLibrarySections()
       .flatMap((section) => section.resources)
       .filter((resource) => resource.subjectId === subjectId);
   }
@@ -98,8 +96,8 @@ export async function loadLearningResourceResourcesBySubject(subjectId: string):
     const cards = result.data;
     return cards.map((card, index) => mapCardToResource(card, index));
   } catch (error) {
-    if (runtimeFixturesEnabled()) {
-      return LEARNING_RESOURCE_LIBRARY_SECTIONS.flatMap((section) => section.resources).filter((resource) => resource.subjectId === subjectId);
+    if (import.meta.env.DEV && runtimeFixturesEnabled()) {
+      return (await loadMockSections()).LEARNING_RESOURCE_LIBRARY_SECTIONS.flatMap((section) => section.resources).filter((resource) => resource.subjectId === subjectId);
     }
     throw error;
   }

@@ -47,7 +47,7 @@ export function DesktopUpdateBanner() {
       severity={result?.status === "error" ? "error" : result?.status === "available" ? "info" : "success"}
       sx={{ borderRadius: 2 }}
       action={
-        <Button
+        <Button variant="contained"
           color="inherit"
           size="small"
           disabled={checking || installing}
@@ -58,7 +58,7 @@ export function DesktopUpdateBanner() {
       }
     >
       <Stack spacing={0.25}>
-        <Typography variant="body2" sx={{ fontWeight: 800 }}>
+        <Typography variant="body2" sx={{ fontWeight: 600 }}>
           {result?.status === "available"
             ? `Có bản cập nhật ERG LMS Desktop ${result.version}`
             : result?.status === "error"

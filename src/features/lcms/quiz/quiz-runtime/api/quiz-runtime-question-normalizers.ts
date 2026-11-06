@@ -9,7 +9,7 @@ import {
   stringArray,
   stringValue,
 } from "@/features/lcms/quiz/quiz-runtime/api/quiz-runtime-normalization-utils";
-import type { Choice, Feedback, HotspotArea, InlineBlank, Question, QuizPackage } from "@/lib/types";
+import type { Choice, Feedback, HotspotArea, InlineBlank, Question, QuizPackage } from "@/domain/quiz/types";
 
 export function normalizeBackendQuestion(
   value: unknown,
@@ -42,6 +42,9 @@ export function normalizeBackendQuestion(
     contentImage: normalizeQuestionImage(value.contentImage ?? value.image),
     choices: normalizeChoices(value.choices ?? value.options, key),
     matching: normalizeList(value.matching),
+    matchingResponses: normalizeList(value.matchingResponses),
+    matchingKey: normalizeMatchingKey(key) ?? (isRecord(value.matchingKey) ? value.matchingKey as Record<string, string> : undefined),
+    sequenceCorrectOrder: normalizeSequenceCorrectOrder(kind, value, key, gradingMode),
     sequenceItems: normalizeList(value.sequenceItems),
     inlineBlanks: normalizeInlineBlanks(value.inlineBlanks, key),
     textBlanks: normalizeTextBlanks(value.textBlanks ?? value.blanks, key),
@@ -71,6 +74,7 @@ function normalizeChoices(value: unknown, key?: Record<string, unknown>): Choice
       id,
       label: stringValue(record.label ?? record.text, `Đáp án ${index + 1}`),
       correct: booleanValue(record.correct ?? record.isCorrect, correctIds.has(id)),
+      ...imageField(record),
     };
   });
 }
@@ -105,6 +109,7 @@ function normalizeInlineBlanks(value: unknown, key?: Record<string, unknown>): I
       options: stringArray(record.options),
       correctOptionId: stringArray(record.correctOptionId ?? keyBlanks.get(id))[0] ?? "",
       selectPosition: record.selectPosition === "before" ? "before" : "after",
+      suffix: stringValue(record.suffix, ""),
     };
   });
 }
@@ -130,6 +135,7 @@ function normalizeWordSlots(value: unknown, key?: Record<string, unknown>): Ques
       id,
       label: stringValue(record.label, ""),
       correctWordId: stringArray(record.correctWordId ?? keyBlanks.get(id))[0] ?? "",
+      suffix: stringValue(record.suffix, ""),
     };
   });
 }
@@ -144,6 +150,7 @@ function normalizeDragDropItems(value: unknown, key?: Record<string, unknown>): 
       id,
       label: stringValue(record.label, ""),
       correctTargetId: stringValue(record.correctTargetId ?? targetMap.get(id), ""),
+      ...imageField(record),
     };
   });
 }
@@ -166,6 +173,12 @@ function normalizeHotspotAreas(value: unknown, key?: Record<string, unknown>): H
   });
 }
 
+// Backend sends the option picture as media.src; the runtime model calls it image.
+function imageField(record: Record<string, unknown>) {
+  const image = normalizeQuestionImage(record.image ?? record.media);
+  return image ? { image } : {};
+}
+
 function normalizeQuestionImage(value: unknown): Question["contentImage"] {
   if (!isRecord(value)) return undefined;
   const url = stringValue(value.url ?? value.src, "");
@@ -179,4 +192,23 @@ function normalizeQuestionImage(value: unknown): Question["contentImage"] {
 
 function normalizeList<T = never>(value: unknown): T[] | undefined {
   return Array.isArray(value) ? value as T[] : undefined;
+}
+
+function normalizeMatchingKey(key?: Record<string, unknown>): Record<string, string> | undefined {
+  const map = pairMap(key?.pairs);
+  return map.size > 0 ? Object.fromEntries(map) : undefined;
+}
+
+// Sequence items arrive shuffled; only the key knows the order. Server-graded without a key => [] (unknown).
+function normalizeSequenceCorrectOrder(
+  kind: Question["kind"],
+  value: Record<string, unknown>,
+  key: Record<string, unknown> | undefined,
+  gradingMode: QuizPackage["gradingMode"],
+): string[] | undefined {
+  if (kind !== "sequence") return undefined;
+  const order = stringArray(key?.order);
+  if (order.length > 0) return order;
+  if (Array.isArray(value.sequenceCorrectOrder)) return stringArray(value.sequenceCorrectOrder);
+  return gradingMode === "server-authoritative" ? [] : undefined;
 }

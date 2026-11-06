@@ -8,7 +8,7 @@ import type {
   LearningResourceResourceCard,
   LearningResourceTaxonomyOption,
   LearningResourceTaxonomyResponse,
-} from "@/features/lcms/admin-operations/api/learning-resource-authoring-api";
+} from "@/features/lms/learning-resources/api/learning-resource-authoring-api";
 import type { ContentDialogOptionId } from "@/features/lcms/admin-operations/utils/learning-resource-content-dialog";
 import type {
   AttachedResourceItem,

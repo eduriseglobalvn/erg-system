@@ -1,7 +1,16 @@
-import { Calendar, RefreshCw, Search } from "lucide-react";
+import type { ReactNode } from "react";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import RefreshIcon from "@mui/icons-material/Refresh";
+import Box from "@mui/material/Box";
+import InputAdornment from "@mui/material/InputAdornment";
+import Typography from "@mui/material/Typography";
+const visuallyHidden = { border: 0, clip: "rect(0 0 0 0)", height: 1, margin: -1, overflow: "hidden", p: 0, position: "absolute", whiteSpace: "nowrap", width: 1 } as const;
+import { ErgButton, ErgIconButton } from "@/components/erg-mui/erg-actions";
+import { ErgSearchField, ErgSelect, ErgTextField } from "@/components/erg-mui/erg-form";
+import { formatShortDateTimeVi } from "@/features/lms/api/lms-date-label";
+import { parseAssignDateTime } from "@/features/lms/components/assign-homework-recipient";
 import { DateTimePickerPopover } from "@/features/lms/components/assign-date-time-picker";
 import { allGroupSourcesFilterValue } from "@/features/lms/components/assign-homework-groups";
-import { AppSelect } from "@/components/ui/app-select";
 import {
   MobileAssignProgress,
   MobileAssignmentGroupList,
@@ -35,7 +44,7 @@ export function AssignHomeworkMobileView({ model }: AssignHomeworkMobileViewProp
     setAttemptLimit,
     maxDurationMinutes,
     setMaxDurationMinutes,
-    setAssignmentClassId,
+    handleAssignmentClassChange,
     selectedGradeLabel,
     setSelectedGradeLabel,
     selectedGradeClassIds,
@@ -60,11 +69,11 @@ export function AssignHomeworkMobileView({ model }: AssignHomeworkMobileViewProp
     setResourceSearch,
     mobileValidationError,
     setMobileValidationError,
-    apiBacked,
+    isSubmitting,
+    isClassLoading,
     gradeOptions,
     assignmentClass,
     groupSourceOptions,
-    getFallbackStudentsForClass,
     students,
     gradeClasses,
     gradeStudentIdsByClass,
@@ -110,202 +119,219 @@ export function AssignHomeworkMobileView({ model }: AssignHomeworkMobileViewProp
         ? filteredSelectedAssignmentGroupCount
         : selectedGradeClassIds.size;
 
+    const numberAdornment = (unit: string) => ({
+      input: { endAdornment: <InputAdornment position="end">{unit}</InputAdornment> },
+    });
+    const dateField = (kind: "start" | "end", label: string, value: string, onChange: (value: string) => void) => (
+      <Box sx={{ position: "relative" }}>
+        <ErgTextField
+          label={label}
+          size="small"
+          value={formatShortDateTimeVi(parseAssignDateTime(value)) || value}
+          onClick={() => setOpenDatePicker(kind)}
+          slotProps={{
+            htmlInput: { readOnly: true },
+            input: {
+              endAdornment: (
+                <InputAdornment position="end">
+                  <ErgIconButton
+                    label={kind === "start" ? "Chọn ngày bắt đầu" : "Chọn ngày kết thúc"}
+                    edge="end"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setOpenDatePicker(openDatePicker === kind ? null : kind);
+                    }}
+                    sx={{ width: 44, height: 44 }}
+                  >
+                    <CalendarTodayIcon fontSize="small" />
+                  </ErgIconButton>
+                </InputAdornment>
+              ),
+            },
+          }}
+        />
+        <DateTimePickerPopover open={openDatePicker === kind} value={value} onChange={onChange} onClose={() => setOpenDatePicker(null)} />
+      </Box>
+    );
+    const previewOverlay = ({
+      meta,
+      onClose,
+      onReset,
+      search,
+      setSearch,
+      title: overlayTitle,
+      list,
+    }: {
+      meta: string;
+      onClose: () => void;
+      onReset: () => void;
+      search: string;
+      setSearch: (value: string) => void;
+      title: string;
+      list: ReactNode;
+    }) => (
+      <Box sx={{ position: "fixed", inset: 0, zIndex: 70, display: "flex", flexDirection: "column", bgcolor: "background.default", color: "text.primary" }}>
+        <Box sx={{ flexShrink: 0, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 2, py: 1.5, boxShadow: 1 }}>
+          <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 1.5 }}>
+            <Box sx={{ minWidth: 0 }}>
+              <Typography noWrap variant="subtitle1" sx={{ fontWeight: "fontWeightBold" }}>{overlayTitle}</Typography>
+              <Typography variant="caption" sx={{ display: "block", mt: 0.5, color: "text.secondary", fontWeight: "fontWeightMedium" }}>{meta}</Typography>
+            </Box>
+            <ErgButton variant="outlined" onClick={onClose} sx={{ height: 40, flexShrink: 0 }}>
+              Đóng
+            </ErgButton>
+          </Box>
+          <Box sx={{ mt: 1.5, display: "flex", gap: 1 }}>
+            <ErgSearchField
+              placeholder="Tìm học sinh"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              sx={{ minWidth: 0, flex: 1 }}
+            />
+            <ErgButton variant="outlined" startIcon={<RefreshIcon fontSize="small" />} onClick={onReset} sx={{ height: 44, flexShrink: 0 }}>
+              Đặt lại
+            </ErgButton>
+          </Box>
+        </Box>
+        {list}
+      </Box>
+    );
+    const summaryRows: Array<[string, ReactNode, boolean]> = [
+      ["Tên bài", title || "Chưa nhập", true],
+      ["Đối tượng", `${mobileSelectedCount} đã chọn`, false],
+      ["Bài tập", selectedResourceLabel, false],
+      ["Học liệu", selectedResource?.title ?? "Chưa chọn", true],
+      ["Thời gian", `${maxDurationMinutes} phút`, false],
+    ];
+    const cardSx = { borderRadius: 2, border: 1, borderColor: "divider", bgcolor: "background.paper", boxShadow: 1 } as const;
+
     return (
-      <div className="flex min-h-full min-w-0 flex-col overflow-x-hidden bg-[#f3f6fb] text-slate-900">
-        <div className="min-h-0 min-w-0 flex-1 pb-[calc(190px+env(safe-area-inset-bottom,0px))]">
+      <Box sx={{ display: "flex", minHeight: "100%", minWidth: 0, flexDirection: "column", overflowX: "hidden", bgcolor: "background.default", color: "text.primary" }}>
+        <Box sx={{ minHeight: 0, minWidth: 0, flex: 1, pb: "calc(96px + env(safe-area-inset-bottom, 0px))" }}>
+          <Typography component="h1" sx={visuallyHidden}>Giao bài</Typography>
           <MobileAssignProgress selectedCount={mobileSelectedCount} step={step} targetType={targetType} />
 
-          <div className="grid gap-2.5 p-3">
+          <Box sx={{ display: "grid", gap: 1.25, p: 1.5 }}>
             {step === 1 ? (
-            <section className="rounded-[16px] border border-[#d9e2ef] bg-white p-3 shadow-[0_8px_22px_rgba(15,23,42,0.045)]">
-              <div className="mb-3">
-                <div className="text-[13px] font-extrabold text-[#0f6cbd]">Thiết lập giao bài</div>
-                <h2 className="mt-0.5 text-[15px] font-extrabold text-slate-950">Đối tượng, tên bài và thời gian</h2>
-              </div>
+            <Box component="section" sx={{ ...cardSx, p: 1.5 }}>
+              <Box sx={{ mb: 1.5 }}>
+                <Typography variant="body2" sx={{ fontWeight: "fontWeightBold", color: "primary.main" }}>Thiết lập giao bài</Typography>
+                <Typography component="h2" variant="subtitle1" sx={{ mt: 0.25, fontWeight: "fontWeightBold" }}>Đối tượng, tên bài và thời gian</Typography>
+              </Box>
 
-              <div className="grid gap-2.5">
-                <label className="grid gap-1.5">
-                  <span className="text-[12px] font-bold text-slate-600">Đối tượng giao bài</span>
-                  <AppSelect
-                    value={targetType}
-                    onChange={(event) => setTargetType(event.target.value as "grade" | "class" | "group")}
-                    className="h-10 w-full rounded-[13px] border border-[#cbd7e6] bg-white px-3 text-[14px] font-semibold text-slate-900 outline-none focus:border-[#0f6cbd] focus:ring-2 focus:ring-[#0f6cbd]/15"
-                  >
-                    <option value="class">Giao theo lớp</option>
-                    <option value="grade">Giao theo khối</option>
-                    <option value="group">Giao theo nhóm học tập</option>
-                  </AppSelect>
-                </label>
+              <Box sx={{ display: "grid", gap: 1.25 }}>
+                <ErgSelect
+                  label="Đối tượng giao bài"
+                  size="small"
+                  value={targetType}
+                  onChange={(event) => setTargetType(event.target.value as "grade" | "class" | "group")}
+                  options={[
+                    { label: "Giao theo lớp", value: "class" },
+                    { label: "Giao theo khối", value: "grade" },
+                    { label: "Giao theo nhóm học tập", value: "group" },
+                  ]}
+                />
 
-                <label className="grid gap-1.5">
-                  <span className="text-[12px] font-bold text-slate-600">Tên bài tập <span className="text-rose-500">*</span></span>
-                  <input
-                    value={title}
-                    onChange={(event) => {
-                      setTitle(event.target.value);
-                      if (mobileValidationError) setMobileValidationError("");
-                    }}
-                    className="h-10 w-full rounded-[13px] border border-[#cbd7e6] bg-white px-3 text-[14px] font-semibold text-slate-900 outline-none placeholder:text-slate-400 focus:border-[#0f6cbd] focus:ring-2 focus:ring-[#0f6cbd]/15"
-                    placeholder="Nhập tên bài tập"
+                <ErgTextField
+                  label="Tên bài tập"
+                  required
+                  size="small"
+                  value={title}
+                  onChange={(event) => {
+                    setTitle(event.target.value);
+                    if (mobileValidationError) setMobileValidationError("");
+                  }}
+                  placeholder="Nhập tên bài tập"
+                  error={Boolean(mobileValidationError)}
+                  helperText={mobileValidationError || undefined}
+                />
+
+                <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 1.5 }}>
+                  <ErgTextField
+                    label="Số lần làm"
+                    size="small"
+                    type="number"
+                    value={attemptLimit}
+                    onChange={(event) => setAttemptLimit(Math.max(1, Number(event.target.value) || 1))}
+                    slotProps={{ ...numberAdornment("lần"), htmlInput: { min: 1, max: 20 } }}
                   />
-                  {mobileValidationError ? <span className="text-[12px] font-bold text-rose-600">{mobileValidationError}</span> : null}
-                </label>
+                  <ErgTextField
+                    label="Thời gian tối đa"
+                    size="small"
+                    type="number"
+                    value={maxDurationMinutes}
+                    onChange={(event) => setMaxDurationMinutes(Math.max(1, Number(event.target.value) || 1))}
+                    slotProps={{ ...numberAdornment("phút"), htmlInput: { min: 1, max: 240 } }}
+                  />
+                </Box>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <label className="grid gap-1.5">
-                    <span className="text-[12px] font-bold text-slate-600">Số lần làm</span>
-                    <div className="relative">
-                      <input
-                        type="number"
-                        min={1}
-                        max={20}
-                        value={attemptLimit}
-                        onChange={(event) => setAttemptLimit(Math.max(1, Number(event.target.value) || 1))}
-                        className="h-10 w-full rounded-[13px] border border-[#cbd7e6] bg-white px-3 pr-12 text-[14px] font-semibold text-slate-900 outline-none focus:border-[#0f6cbd] focus:ring-2 focus:ring-[#0f6cbd]/15"
-                      />
-                      <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[12px] font-semibold text-slate-500">lần</span>
-                    </div>
-                  </label>
-
-                  <label className="grid gap-1.5">
-                    <span className="text-[12px] font-bold text-slate-600">Thời gian tối đa</span>
-                    <div className="relative">
-                      <input
-                        type="number"
-                        min={1}
-                        max={240}
-                        value={maxDurationMinutes}
-                        onChange={(event) => setMaxDurationMinutes(Math.max(1, Number(event.target.value) || 1))}
-                        className="h-10 w-full rounded-[13px] border border-[#cbd7e6] bg-white px-3 pr-12 text-[14px] font-semibold text-slate-900 outline-none focus:border-[#0f6cbd] focus:ring-2 focus:ring-[#0f6cbd]/15"
-                      />
-                      <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[12px] font-semibold text-slate-500">phút</span>
-                    </div>
-                  </label>
-                </div>
-
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <label className="grid gap-1.5">
-                    <span className="text-[12px] font-bold text-slate-600">Ngày bắt đầu</span>
-                    <div className="relative">
-                      <input
-                        readOnly
-                        value={startDate}
-                        onClick={() => setOpenDatePicker("start")}
-                        className="h-10 w-full rounded-[13px] border border-[#cbd7e6] bg-white px-3 pr-10 text-[14px] font-semibold text-slate-900 outline-none focus:border-[#0f6cbd] focus:ring-2 focus:ring-[#0f6cbd]/15"
-                      />
-                      <button
-                        type="button"
-                        aria-label="Chọn ngày bắt đầu"
-                        onClick={() => setOpenDatePicker(openDatePicker === "start" ? null : "start")}
-                        className="absolute right-2 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-[12px] text-slate-400 transition hover:bg-[#eef7ff] hover:text-[#0f6cbd]"
-                      >
-                        <Calendar className="h-4 w-4" />
-                      </button>
-                    </div>
-                    <DateTimePickerPopover open={openDatePicker === "start"} value={startDate} onChange={setStartDate} onClose={() => setOpenDatePicker(null)} />
-                  </label>
-
-                  <label className="grid gap-1.5">
-                    <span className="text-[12px] font-bold text-slate-600">Ngày kết thúc</span>
-                    <div className="relative">
-                      <input
-                        readOnly
-                        value={endDate}
-                        onClick={() => setOpenDatePicker("end")}
-                        className="h-10 w-full rounded-[13px] border border-[#cbd7e6] bg-white px-3 pr-10 text-[14px] font-semibold text-slate-900 outline-none focus:border-[#0f6cbd] focus:ring-2 focus:ring-[#0f6cbd]/15"
-                      />
-                      <button
-                        type="button"
-                        aria-label="Chọn ngày kết thúc"
-                        onClick={() => setOpenDatePicker(openDatePicker === "end" ? null : "end")}
-                        className="absolute right-2 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-[12px] text-slate-400 transition hover:bg-[#eef7ff] hover:text-[#0f6cbd]"
-                      >
-                        <Calendar className="h-4 w-4" />
-                      </button>
-                    </div>
-                    <DateTimePickerPopover open={openDatePicker === "end"} value={endDate} onChange={setEndDate} onClose={() => setOpenDatePicker(null)} />
-                  </label>
-                </div>
-              </div>
-            </section>
+                <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))" }, gap: 1.5 }}>
+                  {dateField("start", "Ngày bắt đầu", startDate, setStartDate)}
+                  {dateField("end", "Ngày kết thúc", endDate, setEndDate)}
+                </Box>
+              </Box>
+            </Box>
             ) : null}
 
             {step === 1 ? (
-              <section className="rounded-[16px] border border-[#d9e2ef] bg-white shadow-[0_8px_22px_rgba(15,23,42,0.045)]">
-                <div className="border-b border-[#dbe4f0] px-3 py-2.5">
-                  <div className="text-[13px] font-bold text-slate-500">
+              <Box component="section" sx={cardSx}>
+                <Box sx={{ borderBottom: 1, borderColor: "divider", px: 1.5, py: 1.25 }}>
+                  <Typography variant="body2" sx={{ fontWeight: "fontWeightBold", color: "text.secondary" }}>
                     {isClassMode ? "Chọn lớp giao bài" : isGroupMode ? "Chọn nhóm giao bài" : "Chọn khối giao bài"}
-                  </div>
-                  <div className="mt-0.5 text-[14px] font-extrabold text-slate-950">
+                  </Typography>
+                  <Typography variant="body2" sx={{ mt: 0.25, fontWeight: "fontWeightBold" }}>
                     {isClassMode ? `${selectedStudentIds.size}/${students.length} học sinh` : isGroupMode ? `${filteredSelectedAssignmentGroupCount}/${filteredAssignmentGroups.length} nhóm` : `${selectedGradeClassIds.size}/${gradeClasses.length} lớp`}
-                  </div>
-                </div>
+                  </Typography>
+                </Box>
 
                 {isClassMode ? (
-                  <div className="grid gap-2.5 p-3">
-                    <AppSelect
+                  <Box sx={{ display: "grid", gap: 1.25, p: 1.5 }}>
+                    <ErgSelect
+                      size="small"
                       value={assignmentClass?.id ?? ""}
-                      onChange={(event) => {
-                        setAssignmentClassId(event.target.value);
-                        const nextClass = classes.find((classroom) => classroom.id === event.target.value);
-                        setSelectedStudentIds(
-                          new Set(
-                            apiBacked
-                              ? []
-                              : getFallbackStudentsForClass(event.target.value, nextClass?.className).map((student) => student.id),
-                          ),
-                        );
-                        setSearchQuery("");
-                      }}
-                      className="h-10 w-[122px] rounded-[13px] border border-[#cbd7e6] bg-white px-3 text-[14px] font-semibold text-slate-900 outline-none focus:border-[#0f6cbd] focus:ring-2 focus:ring-[#0f6cbd]/15"
-                    >
-                      {classes.map((classroom) => (
-                        <option key={classroom.id} value={classroom.id}>{classroom.className}</option>
-                      ))}
-                    </AppSelect>
-                    <div className="flex items-center gap-2">
-                      <div className="relative min-w-0 flex-1">
-                        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#0f6cbd]" />
-                        <input
-                          type="text"
-                          placeholder="Tìm học sinh"
-                          value={searchQuery}
-                          onChange={(event) => setSearchQuery(event.target.value)}
-                          className="h-10 w-full rounded-[13px] border border-[#cbd7e6] bg-white pl-10 pr-3 text-[14px] font-semibold text-slate-900 outline-none focus:border-[#0f6cbd] focus:ring-2 focus:ring-[#0f6cbd]/15"
-                        />
-                      </div>
-                      <button
-                        type="button"
+                      onChange={(event) => handleAssignmentClassChange(event.target.value)}
+                      options={classes.map((classroom) => ({ label: classroom.className, value: classroom.id }))}
+                      sx={{ width: 122 }}
+                    />
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <ErgSearchField
+                        placeholder="Tìm học sinh"
+                        value={searchQuery}
+                        onChange={(event) => setSearchQuery(event.target.value)}
+                        sx={{ minWidth: 0, flex: 1 }}
+                      />
+                      <ErgButton
+                        variant="outlined"
+                        startIcon={<RefreshIcon fontSize="small" />}
                         onClick={() => {
                           setSearchQuery("");
                           setSelectedStudentIds(new Set(students.map((student) => student.id)));
                         }}
-                        className="inline-flex h-10 shrink-0 items-center justify-center rounded-[13px] border border-[#cbd7e6] bg-white px-2.5 text-[12px] font-bold text-slate-700"
+                        sx={{ height: 40, flexShrink: 0 }}
                       >
-                        <RefreshCw className="mr-1 h-4 w-4" />
                         Đặt lại
-                      </button>
-                    </div>
+                      </ErgButton>
+                    </Box>
                     <MobileStudentSelectionList
                       allSelected={allSelected}
+                      isLoading={isClassLoading}
                       onToggleAll={toggleSelectAll}
                       onToggleStudent={toggleStudent}
                       selectedIds={selectedStudentIds}
                       students={filteredStudents}
                     />
-                  </div>
+                  </Box>
                 ) : isGroupMode ? (
-                  <div className="grid gap-3 p-3">
-                    <AppSelect
+                  <Box sx={{ display: "grid", gap: 1.5, p: 1.5 }}>
+                    <ErgSelect
+                      size="small"
                       value={selectedGroupSource}
                       onChange={(event) => setSelectedGroupSource(event.target.value)}
-                      className="h-11 rounded-[14px] border border-[#cbd7e6] bg-white px-3 text-[14px] font-semibold text-slate-900 outline-none focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
-                    >
-                      <option value={allGroupSourcesFilterValue}>Tất cả nhóm</option>
-                      {groupSourceOptions.map((source) => (
-                        <option key={source} value={source}>{source}</option>
-                      ))}
-                    </AppSelect>
+                      options={[
+                        { label: "Tất cả nhóm", value: allGroupSourcesFilterValue },
+                        ...groupSourceOptions.map((source) => ({ label: source, value: source })),
+                      ]}
+                    />
                     <MobileAssignmentGroupList
                       groups={filteredAssignmentGroups}
                       onOpenPreview={openAssignmentGroupPreview}
@@ -313,22 +339,19 @@ export function AssignHomeworkMobileView({ model }: AssignHomeworkMobileViewProp
                       selectedGroupIds={selectedAssignmentGroupIds}
                       selectedStudentIdsByGroup={selectedGroupStudentIdsByGroup}
                     />
-                  </div>
+                  </Box>
                 ) : (
-                  <div className="grid gap-3 p-3">
-                    <AppSelect
+                  <Box sx={{ display: "grid", gap: 1.5, p: 1.5 }}>
+                    <ErgSelect
+                      size="small"
                       value={selectedGradeLabel}
                       onChange={(event) => {
                         setSelectedGradeLabel(event.target.value);
                         setSelectedGradeClassIds(new Set());
                         setPreviewGradeClassId(null);
                       }}
-                      className="h-11 rounded-[14px] border border-[#cbd7e6] bg-white px-3 text-[14px] font-semibold text-slate-900 outline-none focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
-                    >
-                      {gradeOptions.map((grade) => (
-                        <option key={grade} value={grade}>{grade}</option>
-                      ))}
-                    </AppSelect>
+                      options={gradeOptions.map((grade) => ({ label: grade, value: grade }))}
+                    />
                     <MobileGradeClassList
                       classes={gradeClasses}
                       onOpenPreview={openGradeClassPreview}
@@ -337,183 +360,107 @@ export function AssignHomeworkMobileView({ model }: AssignHomeworkMobileViewProp
                       studentIdsByClass={gradeStudentIdsByClass}
                       selectedStudentIdsByClass={selectedGradeStudentIdsByClass}
                     />
-                  </div>
+                  </Box>
                 )}
-              </section>
+              </Box>
             ) : step === 2 ? (
-              <section className="rounded-[18px] border border-[#d9e2ef] bg-white shadow-[0_10px_28px_rgba(15,23,42,0.05)]">
-                <div className="border-b border-[#dbe4f0] px-4 py-3">
-                  <div className="text-[13px] font-bold text-slate-500">Tài nguyên</div>
-                  <div className="mt-0.5 text-[15px] font-extrabold text-slate-950">
+              <Box component="section" sx={cardSx}>
+                <Box sx={{ borderBottom: 1, borderColor: "divider", px: 2, py: 1.5 }}>
+                  <Typography variant="body2" sx={{ fontWeight: "fontWeightBold", color: "text.secondary" }}>Tài nguyên</Typography>
+                  <Typography variant="subtitle1" sx={{ mt: 0.25, fontWeight: "fontWeightBold" }}>
                     {selectedResource?.title ?? selectedResourceLabel}
-                  </div>
-                </div>
-                <div className="grid gap-3 p-3">
-                  <div className="relative">
-                    <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--erg-blue)]" />
-                    <input
-                      type="text"
-                      placeholder="Tìm tài nguyên"
-                      value={resourceSearch}
-                      onChange={(event) => setResourceSearch(event.target.value)}
-                      className="h-11 w-full rounded-[14px] border border-[#cbd7e6] bg-white pl-10 pr-3 text-[14px] font-semibold text-slate-900 outline-none focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
-                    />
-                  </div>
+                  </Typography>
+                </Box>
+                <Box sx={{ display: "grid", gap: 1.5, p: 1.5 }}>
+                  <ErgSearchField
+                    placeholder="Tìm tài nguyên"
+                    value={resourceSearch}
+                    onChange={(event) => setResourceSearch(event.target.value)}
+                  />
                   <MobileAssignmentResourceList
                     onToggleResource={toggleResourceSelection}
                     resources={filteredResourceTopics.flatMap((topic) => topic.items)}
                     selectedResourceIds={selectedResourceIds}
                   />
-                  <div className="rounded-[16px] border border-[#d9e2ef] bg-[#f8fbff] p-3">
-                    <div className="text-[13px] font-extrabold text-slate-950">Xac nhan giao bai</div>
-                    <div className="mt-2 grid gap-2 text-[12px] font-bold text-slate-600">
-                      <div className="flex justify-between gap-3">
-                        <span>Ten bai</span>
-                        <span className="min-w-0 truncate text-right text-slate-950">{title || "Chua nhap"}</span>
-                      </div>
-                      <div className="flex justify-between gap-3">
-                        <span>Đối tượng</span>
-                        <span className="text-slate-950">{mobileSelectedCount} da chon</span>
-                      </div>
-                      <div className="flex justify-between gap-3">
-                        <span>Bài tập</span>
-                        <span className="text-slate-950">{selectedResourceLabel}</span>
-                      </div>
-                      <div className="flex justify-between gap-3">
-                        <span>Học liệu</span>
-                        <span className="min-w-0 truncate text-right text-slate-950">{selectedResource?.title ?? "Chưa chọn"}</span>
-                      </div>
-                      <div className="flex justify-between gap-3">
-                        <span>Thoi gian</span>
-                        <span className="text-slate-950">{maxDurationMinutes} phut</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </section>
+                  <Box sx={{ borderRadius: 2, border: 1, borderColor: "divider", bgcolor: "background.default", p: 1.5 }}>
+                    <Typography variant="body2" sx={{ fontWeight: "fontWeightBold" }}>Xác nhận giao bài</Typography>
+                    <Box sx={{ mt: 1, display: "grid", gap: 1 }}>
+                      {summaryRows.map(([label, value, truncate]) => (
+                        <Box key={label} sx={{ display: "flex", justifyContent: "space-between", gap: 1.5, typography: "caption", fontWeight: "fontWeightBold", color: "text.secondary" }}>
+                          <span>{label}</span>
+                          <Box component="span" sx={{ color: "text.primary", ...(truncate ? { minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textAlign: "right" } : null) }}>
+                            {value}
+                          </Box>
+                        </Box>
+                      ))}
+                    </Box>
+                  </Box>
+                </Box>
+              </Box>
             ) : null}
-          </div>
-        </div>
+          </Box>
+        </Box>
 
-        {previewAssignmentGroup ? (
-          <div className="fixed inset-0 z-[70] flex flex-col bg-[#f3f6fb] text-slate-900">
-            <div className="shrink-0 border-b border-[#d9e2ef] bg-white px-4 py-3 shadow-[0_8px_20px_rgba(15,23,42,0.06)]">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="truncate text-base font-extrabold text-slate-950">{previewAssignmentGroup.name}</div>
-                  <div className="mt-1 text-[12px] font-semibold text-slate-500">
-                    {selectedGroupPopupStudentIds.size}/{previewAssignmentGroupStudents.length} học sinh đang chọn
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setPreviewAssignmentGroupId(null)}
-                  className="h-10 shrink-0 rounded-[14px] border border-[#cbd7e6] bg-white px-3 text-[13px] font-bold text-slate-700"
-                >
-                  Đóng
-                </button>
-              </div>
-              <div className="mt-3 flex gap-2">
-                <div className="relative min-w-0 flex-1">
-                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--erg-blue)]" />
-                  <input
-                    type="text"
-                    placeholder="Tìm học sinh"
-                    value={groupStudentSearch}
-                    onChange={(event) => setGroupStudentSearch(event.target.value)}
-                    className="h-11 w-full rounded-[14px] border border-[#cbd7e6] bg-white pl-10 pr-3 text-[14px] font-semibold text-slate-900 outline-none focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
-                  />
-                </div>
-                <button
-                  type="button"
-                  onClick={resetGroupPreviewStudents}
-                  className="inline-flex h-11 shrink-0 items-center justify-center rounded-[14px] border border-[#cbd7e6] bg-white px-3 text-[13px] font-bold text-slate-700"
-                >
-                  <RefreshCw className="mr-1 h-4 w-4" />
-                  Đặt lại
-                </button>
-              </div>
-            </div>
-            <MobileStudentSelectionList
-              allSelected={allGroupPopupStudentsSelected}
-              onToggleAll={toggleAllGroupPreviewStudents}
-              onToggleStudent={toggleGroupPreviewStudent}
-              selectedIds={selectedGroupPopupStudentIds}
-              students={filteredPreviewAssignmentGroupStudents}
-            />
-          </div>
-        ) : null}
+        {previewAssignmentGroup
+          ? previewOverlay({
+              title: previewAssignmentGroup.name,
+              meta: `${selectedGroupPopupStudentIds.size}/${previewAssignmentGroupStudents.length} học sinh đang chọn`,
+              onClose: () => setPreviewAssignmentGroupId(null),
+              onReset: resetGroupPreviewStudents,
+              search: groupStudentSearch,
+              setSearch: setGroupStudentSearch,
+              list: (
+                <MobileStudentSelectionList
+                  allSelected={allGroupPopupStudentsSelected}
+                  onToggleAll={toggleAllGroupPreviewStudents}
+                  onToggleStudent={toggleGroupPreviewStudent}
+                  selectedIds={selectedGroupPopupStudentIds}
+                  students={filteredPreviewAssignmentGroupStudents}
+                />
+              ),
+            })
+          : null}
 
-        {previewGradeClass ? (
-          <div className="fixed inset-0 z-[70] flex flex-col bg-[#f3f6fb] text-slate-900">
-            <div className="shrink-0 border-b border-[#d9e2ef] bg-white px-4 py-3 shadow-[0_8px_20px_rgba(15,23,42,0.06)]">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="truncate text-base font-extrabold text-slate-950">{previewGradeClass.className}</div>
-                  <div className="mt-1 text-[12px] font-semibold text-slate-500">
-                    {selectedPopupStudentIds.size}/{previewGradeClassStudents.length} học sinh đang chọn
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setPreviewGradeClassId(null)}
-                  className="h-10 shrink-0 rounded-[14px] border border-[#cbd7e6] bg-white px-3 text-[13px] font-bold text-slate-700"
-                >
-                  Đóng
-                </button>
-              </div>
-              <div className="mt-3 flex gap-2">
-                <div className="relative min-w-0 flex-1">
-                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--erg-blue)]" />
-                  <input
-                    type="text"
-                    placeholder="Tìm học sinh"
-                    value={gradeStudentSearch}
-                    onChange={(event) => setGradeStudentSearch(event.target.value)}
-                    className="h-11 w-full rounded-[14px] border border-[#cbd7e6] bg-white pl-10 pr-3 text-[14px] font-semibold text-slate-900 outline-none focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
-                  />
-                </div>
-                <button
-                  type="button"
-                  onClick={resetPreviewStudents}
-                  className="inline-flex h-11 shrink-0 items-center justify-center rounded-[14px] border border-[#cbd7e6] bg-white px-3 text-[13px] font-bold text-slate-700"
-                >
-                  <RefreshCw className="mr-1 h-4 w-4" />
-                  Đặt lại
-                </button>
-              </div>
-            </div>
-            <MobileStudentSelectionList
-              allSelected={allPreviewStudentsSelected}
-              onToggleAll={toggleAllPreviewStudents}
-              onToggleStudent={togglePreviewStudent}
-              selectedIds={selectedPopupStudentIds}
-              students={filteredPreviewGradeClassStudents}
-            />
-          </div>
-        ) : null}
+        {previewGradeClass
+          ? previewOverlay({
+              title: previewGradeClass.className,
+              meta: `${selectedPopupStudentIds.size}/${previewGradeClassStudents.length} học sinh đang chọn`,
+              onClose: () => setPreviewGradeClassId(null),
+              onReset: resetPreviewStudents,
+              search: gradeStudentSearch,
+              setSearch: setGradeStudentSearch,
+              list: (
+                <MobileStudentSelectionList
+                  allSelected={allPreviewStudentsSelected}
+                  onToggleAll={toggleAllPreviewStudents}
+                  onToggleStudent={togglePreviewStudent}
+                  selectedIds={selectedPopupStudentIds}
+                  students={filteredPreviewGradeClassStudents}
+                />
+              ),
+            })
+          : null}
 
-        <div className="fixed inset-x-0 bottom-[calc(104px+env(safe-area-inset-bottom,0px))] z-50 px-3">
-          <div className="rounded-[18px] border border-[#d9e2ef] bg-white p-2.5 shadow-[0_12px_30px_rgba(15,23,42,0.12)]">
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={step === 1 ? onBack : () => setStep((currentStep) => Math.max(1, currentStep - 1))}
-                className="flex h-11 flex-1 items-center justify-center rounded-[14px] border border-[#d7e0ec] bg-white text-[14px] font-bold text-slate-700"
-              >
-                {step === 1 ? "Hủy" : "Quay lại"}
-              </button>
-              <button
-                type="button"
-                onClick={step < 2 ? handleNext : handleFinish}
-                className="flex h-11 min-w-0 flex-[1.35] items-center justify-center rounded-[14px] px-4 text-center text-[14px] font-extrabold shadow-[0_10px_20px_rgba(15,108,189,0.28)] ring-1 ring-white/30 transition active:scale-[0.99]"
-                style={{ backgroundColor: "#0f6cbd", color: "#ffffff" }}
-              >
-                <span>{step < 2 ? "Tiếp theo" : "Giao bài"}</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+        <Box sx={{ position: "fixed", left: 0, right: 0, bottom: 0, zIndex: 50, borderTop: 1, borderColor: "divider", bgcolor: "background.paper", px: 1.5, pt: 1, pb: "calc(env(safe-area-inset-bottom, 0px) + 8px)" }}>
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <ErgButton
+              variant="outlined"
+              disabled={isSubmitting}
+              onClick={step === 1 ? onBack : () => setStep((currentStep) => Math.max(1, currentStep - 1))}
+              sx={{ height: 44, flex: 1 }}
+            >
+              {step === 1 ? "Hủy" : "Quay lại"}
+            </ErgButton>
+            <ErgButton
+              variant="contained"
+              disabled={isSubmitting}
+              onClick={step < 2 ? handleNext : handleFinish}
+              sx={{ height: 44, minWidth: 0, flex: 1.35, px: 2, "&:active": { transform: "scale(0.99)" } }}
+            >
+              <span>{step < 2 ? "Tiếp theo" : isSubmitting ? "Đang giao..." : "Giao bài"}</span>
+            </ErgButton>
+          </Box>
+        </Box>
+      </Box>
     );
 }

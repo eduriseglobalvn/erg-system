@@ -1,5 +1,5 @@
-import { assignmentRuns } from "@/features/lms/classroom/api/mock-classroom-data";
-import type { ClassroomStudent, StudentStatus } from "@/features/lms/classroom/types/classroom-types";
+import { assignmentRuns } from "@/features/lms/classroom/api/classroom-defaults";
+import type { ClassroomStudent, StudentStatus } from "@/domain/school/classroom-types";
 import { assignmentCatalog, IC3_PROGRAM_LABEL } from "./class-students-workspace.constants";
 import type { AssignmentCatalogItem, DeliveryBatch } from "./class-students-workspace.types";
 import type { StudentCopy } from "./class-students-workspace.copy";

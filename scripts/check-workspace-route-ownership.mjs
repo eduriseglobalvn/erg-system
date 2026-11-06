@@ -5,7 +5,9 @@ export function findLegacyPageImports(source) {
 }
 
 if (import.meta.url.endsWith("check-workspace-route-ownership.mjs")) {
-  const source = fs.readFileSync("src/routes/app-routes.tsx", "utf8");
+  const source = ["src/routes/app-routes.tsx", ...fs.readdirSync("src/routes/portals").map((name) => `src/routes/portals/${name}`)]
+    .map((file) => fs.readFileSync(file, "utf8"))
+    .join(";");
   const violations = findLegacyPageImports(source);
   if (violations.length) {
     console.error(`Route tree imports legacy page roots: ${violations.join(", ")}`);

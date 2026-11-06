@@ -1,4 +1,4 @@
-import type { ClassroomSnapshot, ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
+import type { ClassroomSnapshot, ClassroomStudent } from "@/domain/school/classroom-types";
 import { DesktopScoreSheetPanel } from "@/features/lms/components/score/desktop-score-sheet-panel";
 import { MobileScoreSheetPanel } from "@/features/lms/components/score/mobile-score-sheet-panel";
 import { ScoreSheetOverlays } from "@/features/lms/components/score/score-sheet-overlays";

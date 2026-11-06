@@ -20,11 +20,12 @@ export const seoCrmQueryKeys = {
   ] as const,
 };
 
+// Lead names/phones: never persisted (the IndexedDB cache is unencrypted).
 export function seoCrmWorkspaceQueryOptions(scope: SeoCrmQueryScope) {
   return queryOptions({
     queryKey: seoCrmQueryKeys.workspace(scope),
     queryFn: ({ signal }) => loadSeoCrmWorkspace(signal),
-    staleTime: QUERY_POLICIES.offlineCore.staleTime,
-    gcTime: QUERY_POLICIES.offlineCore.gcTime,
+    staleTime: QUERY_POLICIES.transactional.staleTime,
+    gcTime: QUERY_POLICIES.transactional.gcTime,
   });
 }

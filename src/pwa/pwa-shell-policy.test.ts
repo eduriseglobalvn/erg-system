@@ -33,7 +33,7 @@ it("keeps auth and API traffic out of Workbox caches", () => {
   expect(viteConfig).toContain('registerType: "prompt"');
   expect(viteConfig).toContain("skipWaiting: false");
   expect(viteConfig).not.toContain('registerType: "autoUpdate"');
-  expect(viteConfig).toContain('globIgnores: ["**/mock/**"]');
+  expect(viteConfig).toMatch(/globIgnores: \[[^\]]*"\*\*\/mock\/\*\*"/);
   expect(viteConfig).toContain("/^\\/api\\//");
   expect(viteConfig).toContain("/^\\/auth\\//");
   expect(viteConfig).toContain("/^\\/sso\\//");

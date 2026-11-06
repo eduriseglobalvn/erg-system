@@ -1,4 +1,4 @@
-import type { AnswerPayload, AnswerResult, Question } from "@/lib/types";
+import type { AnswerPayload, AnswerResult, Question } from "@/domain/quiz/types";
 
 export type QuestionComponentProps = {
   question: Question;
@@ -7,6 +7,4 @@ export type QuestionComponentProps = {
   submitted?: boolean;
   reviewMode?: boolean;
   result?: AnswerResult | null;
-  editable?: boolean;
-  onQuestionChange?: (next: Question) => void;
 };

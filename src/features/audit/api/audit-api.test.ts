@@ -24,7 +24,7 @@ test("serializes only contract-supported filters and clamps the page size", () =
 });
 
 test("normalizes malformed optional fields without trusting client scope data", () => {
-  const page = normalizeAuditPage({ items: [{ action: "UPDATE", details: null, id: "e1", outcome: "NOPE" }], hasNext: undefined });
+  const page = normalizeAuditPage({ items: [{ action: "UPDATE", details: null, id: "e1", outcome: "NOPE" }], hasNext: undefined } as never);
   expect(page).toMatchObject({ page: 0, size: 1, totalElements: 1, items: [{ id: "e1", action: "UPDATE", details: {}, outcome: undefined }] });
 });
 

@@ -2,52 +2,55 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 
 import { WeeklyClassLogPage } from "@/features/lms/weekly-class-log";
+import { useWeeklyClassLogController } from "./use-weekly-class-log-controller";
+import { WeeklyClassLogTable } from "./weekly-class-log-table";
 
 beforeEach(() => {
-  window.localStorage.clear();
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date(2026, 5, 3, 9, 0));
 });
 
 afterEach(() => {
-  window.localStorage.clear();
-  vi.restoreAllMocks();
+  vi.useRealTimers();
 });
 
-test("renders the first week, lets the teacher edit a class cell and navigate weeks with the compact controls", () => {
+test("opens on the current ISO week, navigates both ways and shows an honest empty state without the dev banner", () => {
   render(<WeeklyClassLogPage selectedSchoolName="Trường Tiểu học ERG" teacherName="Lê Thị Thùy" />);
 
-  // The first week (draft) is rendered by default.
-  expect(screen.getByText("Sổ Đầu Bài")).toBeInTheDocument();
+  expect(screen.getByRole("heading", { name: "Sổ đầu bài" })).toBeInTheDocument();
+  expect(screen.getByText("Tuần 23 · 01/06 - 07/06")).toBeInTheDocument();
+  expect(screen.queryByText(/Chưa có hợp đồng máy chủ/)).not.toBeInTheDocument();
+  expect(screen.getByText(/chưa thể lưu/)).toBeInTheDocument();
 
-  const classCells = screen.getAllByDisplayValue("6A1");
-  expect(classCells.length).toBeGreaterThan(0);
+  const next = screen.getByRole("button", { name: "Sau" });
+  const previous = screen.getByRole("button", { name: "Trước" });
+  expect(next).toBeEnabled();
+  fireEvent.click(next);
+  expect(screen.getByText("Tuần 24 · 08/06 - 14/06")).toBeInTheDocument();
+  fireEvent.click(previous);
+  fireEvent.click(previous);
+  expect(screen.getByText("Tuần 22 · 25/05 - 31/05")).toBeInTheDocument();
 
-  // Editing a class cell updates the input value.
-  fireEvent.change(classCells[0], { target: { value: "6A9" } });
-  expect(screen.getByDisplayValue("6A9")).toBeInTheDocument();
-
-  // The draft save and submit controls are not present on a read-only compact layout.
-  expect(screen.queryByTestId("save-weekly-class-log-draft")).not.toBeInTheDocument();
-  expect(screen.queryByTestId("submit-weekly-class-log")).not.toBeInTheDocument();
-
-  // Navigating back to the previous week switches the displayed week select value.
-  // The week select is the combobox whose options include the weekly date ranges.
-  const weekSelect = screen.getAllByRole("combobox").find((box) =>
-    Array.from(box.querySelectorAll("option")).some((option) => option.textContent?.includes("Tuần 22")),
-  );
-  expect(weekSelect).toBeTruthy();
-  fireEvent.change(weekSelect!, { target: { value: "week-2026-05-25" } });
-  expect(weekSelect).toHaveValue("week-2026-05-25");
+  fireEvent.click(screen.getByRole("button", { name: "Tuần này" }));
+  expect(screen.getByText("Tuần 23 · 01/06 - 07/06")).toBeInTheDocument();
 });
 
-test("auto-signs the teacher name on a fully completed period row", () => {
-  render(<WeeklyClassLogPage selectedSchoolName="Trường Tiểu học ERG" teacherName="Lê Thị Thùy" />);
+function TableHarness() {
+  const controller = useWeeklyClassLogController("Lê Thị Thùy");
+  return <WeeklyClassLogTable controller={controller} />;
+}
 
-  // The seeded draft weeks already contain complete periods with discipline score "Đạt",
-  // which trigger an auto-signature of the teacher name on that row.
-  expect(screen.getAllByText("Lê Thị Thùy").length).toBeGreaterThan(0);
+test("labels every input as Thứ / Tiết / Cột and keeps edits", () => {
+  const { container } = render(<TableHarness />);
 
-  // Editing the lesson content of one of those rows and clearing the discipline score
-  // removes the signature until the row is complete again.
-  const lessonCells = screen.getAllByDisplayValue(/Nội dung bài học/);
-  expect(lessonCells.length).toBeGreaterThan(0);
+  expect(screen.getByText("01/06/2026")).toBeInTheDocument();
+  const unlabeled = Array.from(container.querySelectorAll("input:not([aria-hidden]), textarea")).filter((node) => !node.getAttribute("aria-label"));
+  expect(unlabeled).toHaveLength(0);
+  expect(container.querySelectorAll("input[aria-label]:not([aria-hidden]), textarea[aria-label]")).toHaveLength(5 * 10 * 5);
+  expect(screen.getByLabelText("Thứ 2 · Tiết 1 · Lớp")).toBeInTheDocument();
+  expect(screen.getByLabelText("Thứ 6 · Tiết 5 chiều · Nhận xét")).toBeInTheDocument();
+  expect(screen.getByLabelText("Thứ 3 · Tiết 2 · Kỷ luật")).toBeInTheDocument();
+
+  fireEvent.change(screen.getByLabelText("Thứ 2 · Tiết 1 · Lớp"), { target: { value: "6A1" } });
+  expect(screen.getByLabelText("Thứ 2 · Tiết 1 · Lớp")).toHaveValue("6A1");
 });

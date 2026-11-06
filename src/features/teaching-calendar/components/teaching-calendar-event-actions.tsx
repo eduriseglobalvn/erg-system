@@ -89,7 +89,7 @@ export function TeachingCalendarEventActions({ event, onDelete, onUpdate, permis
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button disabled={isSaving} onClick={() => setEditOpen(false)}>Hủy</Button>
+          <Button variant="contained" disabled={isSaving} onClick={() => setEditOpen(false)}>Hủy</Button>
           <Button disabled={isSaving} onClick={() => void saveUpdate()} variant="contained">Lưu thay đổi</Button>
         </DialogActions>
       </Dialog>

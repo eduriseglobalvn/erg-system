@@ -20,7 +20,7 @@ export function PortalHeaderNotifications({ activeTab, notifications, onClose, o
   return (
     <Drawer anchor="right" open={open} onClose={onClose} sx={{ "& .MuiDrawer-paper": { width: 400, bgcolor: "#FFFFFF", border: "none", boxShadow: "-4px 0 20px rgba(0,0,0,0.08)" } }}>
       <Box sx={{ alignItems: "center", borderBottom: "1px solid rgba(145,158,171,0.12)", display: "flex", height: 72, justifyContent: "space-between", px: 3 }}>
-        <Typography sx={{ color: "#1C252E", fontSize: 20, fontWeight: 700 }}>Thông báo</Typography>
+        <Typography sx={{ color: "#1C252E", fontSize: 20, fontWeight: 600 }}>Thông báo</Typography>
         <IconButton onClick={onClose} sx={{ color: "#637381" }}><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M15 5L5 15M5 5L15 15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg></IconButton>
       </Box>
       <Box sx={{ borderBottom: "1px solid rgba(145,158,171,0.12)", display: "flex", px: 3 }}>
@@ -45,5 +45,5 @@ export function PortalHeaderNotifications({ activeTab, notifications, onClose, o
 }
 
 function NotificationTab({ active, label, onClick, spaced = false }: { active: boolean; label: string; onClick: () => void; spaced?: boolean }) {
-  return <Box onClick={onClick} sx={{ borderBottom: active ? "2px solid #696CFF" : "2px solid transparent", color: active ? "#1C252E" : "#637381", cursor: "pointer", fontSize: 14, fontWeight: active ? 600 : 400, ml: spaced ? 3 : 0, pb: 2, pt: 2 }}>{label}</Box>;
+  return <Box onClick={onClick} sx={{ borderBottom: active ? "2px solid #0071E3" : "2px solid transparent", color: active ? "#1C252E" : "#637381", cursor: "pointer", fontSize: 14, fontWeight: active ? 600 : 400, ml: spaced ? 3 : 0, pb: 2, pt: 2 }}>{label}</Box>;
 }

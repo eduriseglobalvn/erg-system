@@ -1,14 +1,172 @@
 import type { ReactNode } from "react";
 import ChevronLeft from "@mui/icons-material/ChevronLeft";
 import { ErgButton } from "@/components/erg-mui/erg-actions";
-import { AppSelect } from "@/components/ui/app-select";
-import { inputClassName } from "@/components/ui/input";
+import { AppSelect } from "@/components/erg-mui/app-select";
+import { ErgTextField } from "@/components/erg-mui";
 import type { StudioNode, StudioSubject } from "@/features/lcms/admin-operations/types/learning-resource-authoring";
 import type { TaxonomyRole } from "@/features/lcms/admin-operations/components/learning-resource-authoring-icons";
 import type { ContentDialogOptionId, ExerciseLibraryItem } from "@/features/lcms/admin-operations/utils/learning-resource-content-dialog";
 import { cn } from "@/lib/utils";
 import { RESOURCE_BLUE, RESOURCE_BLUE_BORDER, RESOURCE_BLUE_SOFT, RESOURCE_BORDER, RESOURCE_RED, RESOURCE_RED_BORDER, RESOURCE_RED_SOFT, type ResolvedTaxonomyMode } from "./learning-resource-authoring-create-dialog-config";
 import { getOptionMeta, getTaxonomyMeta } from "./learning-resource-authoring-create-dialog-model";
+
+export type AuthoringItemType = "level" | "topic" | "lesson";
+
+export function TypeSelectorStrip({
+  selectedType,
+  onSelectType,
+  disabled,
+}: {
+  selectedType: AuthoringItemType;
+  onSelectType: (type: AuthoringItemType) => void;
+  disabled?: boolean;
+}) {
+  const items: Array<{ id: AuthoringItemType; title: string }> = [
+    { id: "level", title: "Chặng học (Level)" },
+    { id: "topic", title: "Chủ đề" },
+    { id: "lesson", title: "Bài học" },
+  ];
+
+  return (
+    <div className="flex rounded-lg border border-[#D9E2EF] bg-[#F4F6F8] p-1">
+      {items.map((item) => {
+        const active = selectedType === item.id;
+        return (
+          <button
+            key={item.id}
+            type="button"
+            disabled={disabled}
+            onClick={() => onSelectType(item.id)}
+            className={cn(
+              "flex-1 rounded-md py-1.5 text-center text-xs font-bold transition",
+              active
+                ? "bg-white text-[#0071E3] shadow-sm"
+                : "text-[#637381] hover:text-[#1C252E]",
+              disabled && "cursor-not-allowed opacity-60",
+            )}
+          >
+            {item.title}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+export function LessonSubtypePicker({
+  selected,
+  onSelect,
+}: {
+  selected: ContentDialogOptionId;
+  onSelect: (option: ContentDialogOptionId) => void;
+}) {
+  const options: Array<{ id: ContentDialogOptionId; label: string }> = [
+    { id: "lecture", label: "Bài giảng" },
+    { id: "exercise", label: "Bài tập" },
+    { id: "resource", label: "Tài liệu" },
+  ];
+
+  return (
+    <div className="flex rounded-lg border border-[#D9E2EF] bg-[#F4F6F8] p-1">
+      {options.map((opt) => {
+        const active = selected === opt.id;
+        return (
+          <button
+            key={opt.id}
+            type="button"
+            onClick={() => onSelect(opt.id)}
+            className={cn(
+              "flex-1 rounded-md py-1.5 text-center text-xs font-bold transition",
+              active
+                ? "bg-white text-[#0071E3] shadow-sm"
+                : "text-[#637381] hover:text-[#1C252E]",
+            )}
+          >
+            {opt.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+export function getContextBreadcrumbText({
+  contextLabel,
+  draftLevelId,
+  draftLevelOptions,
+  draftSubject,
+  draftTopicId,
+  draftTopicOptions,
+  itemType,
+  mode,
+  selectedNode,
+}: {
+  contextLabel?: string;
+  draftLevelId?: string;
+  draftLevelOptions?: StudioNode[];
+  draftSubject?: StudioSubject;
+  draftTopicId?: string;
+  draftTopicOptions?: StudioNode[];
+  itemType?: AuthoringItemType;
+  mode?: ResolvedTaxonomyMode;
+  selectedNode?: StudioNode;
+}) {
+  if (mode === "subject") return "";
+
+  const level = draftLevelOptions?.find(
+    (item) => item.optionId === draftLevelId || item.id === draftLevelId || (selectedNode?.location.categoryId && (item.optionId === selectedNode.location.categoryId || item.id === selectedNode.location.categoryId)),
+  );
+  const topic = draftTopicOptions?.find(
+    (item) => item.optionId === draftTopicId || item.id === draftTopicId,
+  );
+  const subjectName = draftSubject?.label ?? "Môn học";
+
+  const parts: string[] = [subjectName];
+  if (itemType === "level" || mode === "level") {
+    // Level is direct child of subject
+  } else if (itemType === "topic" || mode === "topic") {
+    if (level) parts.push(level.label);
+  } else {
+    // lesson
+    if (level) parts.push(level.label);
+    if (topic) {
+      parts.push(topic.label);
+    } else if (selectedNode?.label && selectedNode?.sourceKind !== "category") {
+      parts.push(selectedNode.label);
+    } else if (contextLabel) {
+      parts.push(contextLabel);
+    }
+  }
+
+  return parts.join(" › ");
+}
+
+export function ContextBox(props: {
+  contextLabel?: string;
+  draftLevelId?: string;
+  draftLevelOptions?: StudioNode[];
+  draftSubject?: StudioSubject;
+  draftTopicId?: string;
+  draftTopicOptions?: StudioNode[];
+  itemType?: AuthoringItemType;
+  mode?: ResolvedTaxonomyMode;
+  option?: ContentDialogOptionId | null;
+  selectedNode?: StudioNode;
+}) {
+  const text = getContextBreadcrumbText(props);
+  if (!text) return null;
+
+  return (
+    <div className="flex items-center gap-1.5 text-xs text-[#637381]">
+      <span className="font-semibold text-[#52606D]">Vị trí:</span>
+      <span className="font-bold text-[#0071E3]">{text}</span>
+    </div>
+  );
+}
+
+export function HierarchyStrip({ active: _active }: { active: ContentDialogOptionId | TaxonomyRole }) {
+  return null;
+}
 
 export function ContentTypePicker({ options, onPick }: { options: ContentDialogOptionId[]; onPick: (option: ContentDialogOptionId) => void }) {
   return (
@@ -60,70 +218,6 @@ export function SelectedOptionHeader({ canGoBack, option, onBack }: { canGoBack:
   );
 }
 
-export function ContextBox({
-  contextLabel,
-  draftLevelId,
-  draftLevelOptions,
-  draftSubject,
-  mode,
-  option,
-  selectedNode,
-}: {
-  contextLabel: string;
-  draftLevelId: string;
-  draftLevelOptions: StudioNode[];
-  draftSubject?: StudioSubject;
-  mode: ResolvedTaxonomyMode;
-  option: ContentDialogOptionId | null;
-  selectedNode?: StudioNode;
-}) {
-  const level = draftLevelOptions.find((item) => item.optionId === draftLevelId);
-  const targetText =
-    mode === "subject"
-      ? "Tạo môn học ở cấp gốc"
-      : mode === "level"
-        ? `Level sẽ nằm dưới ${draftSubject?.label ?? "môn học đã chọn"}`
-        : mode === "topic"
-          ? `Chủ đề sẽ nằm dưới ${draftSubject?.label ?? "môn học"} / ${level?.label ?? "level đã chọn"}`
-          : `Nội dung sẽ nằm trong ${contextLabel || selectedNode?.label || "chủ đề đang chọn"}`;
-
-  return (
-    <div className="mt-4 rounded-lg border px-4 py-3" style={{ borderColor: option === "exercise" ? RESOURCE_RED_BORDER : RESOURCE_BLUE_BORDER, background: option === "exercise" ? RESOURCE_RED_SOFT : RESOURCE_BLUE_SOFT }}>
-      <div className="text-[11px] font-bold uppercase text-[#637381]">Vị trí tạo</div>
-      <div className="mt-1 text-sm font-bold text-[#1C252E]">{targetText}</div>
-    </div>
-  );
-}
-
-export function HierarchyStrip({ active }: { active: ContentDialogOptionId | TaxonomyRole }) {
-  const items: Array<{ id: ContentDialogOptionId | TaxonomyRole; label: string }> = [
-    { id: "subject", label: "Môn học" },
-    { id: "level", label: "Level" },
-    { id: "topic", label: "Chủ đề" },
-    { id: "lecture", label: "Nội dung" },
-  ];
-  const normalizedActive = active === "resource" || active === "exercise" ? "lecture" : active;
-
-  return (
-    <div className="flex flex-wrap items-center gap-2">
-      {items.map((item, index) => {
-        const selected = normalizedActive === item.id;
-        return (
-          <span key={item.id} className="inline-flex items-center gap-2">
-            <span
-              className={cn("inline-flex h-7 items-center rounded-lg border px-2.5 text-xs font-bold", selected ? "bg-[#0F6CBD] text-white" : "bg-white text-[#637381]")}
-              style={{ borderColor: selected ? RESOURCE_BLUE : RESOURCE_BORDER }}
-            >
-              {item.label}
-            </span>
-            {index < items.length - 1 ? <span className="text-[#C4CDD5]">/</span> : null}
-          </span>
-        );
-      })}
-    </div>
-  );
-}
-
 export function ExerciseOptionCard({ item, selected, onToggle }: { item: ExerciseLibraryItem; selected: boolean; onToggle: () => void }) {
   return (
     <button
@@ -152,7 +246,7 @@ export function ExerciseOptionCard({ item, selected, onToggle }: { item: Exercis
 export function StatusField({ taxonomy, value, onChange }: { taxonomy?: boolean; value: string; onChange: (value: string) => void }) {
   return (
     <Field label="Trạng thái">
-      <AppSelect variant="native" className={inputClassName} value={value} onChange={(event) => onChange(event.target.value)}>
+      <AppSelect style={{ width: "100%" }} value={value} onChange={(event) => onChange(event.target.value)}>
         <option value={taxonomy ? "active" : "published"}>Đã xuất bản</option>
         <option value="draft">Bản nháp</option>
         <option value="hidden">Đã ẩn</option>
@@ -164,7 +258,7 @@ export function StatusField({ taxonomy, value, onChange }: { taxonomy?: boolean;
 export function ReadOnlyField({ label, value }: { label: string; value: string }) {
   return (
     <Field label={label}>
-      <div className={cn(inputClassName, "flex items-center truncate bg-[#F8FAFC] text-[#637381]")}>{value}</div>
+      <ErgTextField compact value={value} slotProps={{ input: { readOnly: true } }} sx={{ "& .MuiOutlinedInput-root": { bgcolor: "grey.50", color: "text.secondary" } }} />
     </Field>
   );
 }

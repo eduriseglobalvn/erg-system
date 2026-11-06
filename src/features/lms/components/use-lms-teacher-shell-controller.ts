@@ -10,10 +10,10 @@ import {
   classroomSnapshots,
   defaultClassId,
   defaultSchoolId,
-} from "@/features/lms/classroom/api/mock-classroom-data";
-import type { AssignmentRun } from "@/features/lms/classroom/types/classroom-types";
+} from "@/features/lms/classroom/api/classroom-defaults";
+import type { AssignmentRun } from "@/domain/school/classroom-types";
 import { loadLmsTeacherHomeworkWorkspace, mapAssignmentsToRuns } from "@/features/lms/api/lms-teacher-homework-api";
-import { lmsAssignmentReadQueryKeys } from "@/features/lms/api/lms-assignment-command-query";
+import { lmsAssignmentReadQueryKeys, lmsReadPersistMeta } from "@/features/lms/api/lms-assignment-command-query";
 import { loadLmsDashboardBootstrap } from "@/features/lms/infrastructure/lms-dashboard-api";
 import { getCurrentAcademicYear } from "@/features/lms/learning-resources/api/teacher-resource-dashboard-api";
 import { useLmsMobileBreakpoint } from "@/features/lms/mobile";
@@ -22,8 +22,10 @@ import { isSchedulePublishedNotification, resolveLmsTeacherRuns } from "@/featur
 import {
   LMS_MENU_GROUPS,
   lmsMobileDockItems,
+  lmsMobileMoreItems,
   lmsNavItems,
   resolveMobileSection,
+  resolveMobileTitle,
   resolveSection,
 } from "@/features/lms/components/lms-teacher-shell-config";
 import { teachingCalendarQueryKeys } from "@/features/teaching-calendar/api/teaching-calendar-api";
@@ -31,6 +33,14 @@ import { canNavigateToLmsPath, filterLmsNavigation } from "@/features/lms/naviga
 import { hasApiBase } from "@/lib/api-client";
 import { queryKeys } from "@/lib/query-keys";
 import { QUERY_POLICIES } from "@/lib/query-policy";
+import { getPersistedJsonValue, setPersistedJsonValue } from "@/stores/persisted-store";
+
+const TEACHER_SCOPE_STORAGE_KEY = "erg:lms-teacher-scope:v1";
+
+type StoredTeacherScope = {
+  schoolId?: string;
+  classId?: string;
+};
 import { teacherPath } from "@/platform/workspaces/workspace-paths";
 
 export function useLmsTeacherShellController() {
@@ -46,8 +56,12 @@ export function useLmsTeacherShellController() {
   const activeSection = resolveSection(pathname);
   const activeMobileSection = resolveMobileSection(pathname);
   const shouldLoadHomeworkWorkspace = activeSection === "home" || activeSection === "homework";
-  const [requestedSchoolId, setSelectedSchoolId] = useState("");
-  const [requestedClassId, setSelectedClassId] = useState("");
+  const initialScope = useMemo(
+    () => getPersistedJsonValue<StoredTeacherScope>(TEACHER_SCOPE_STORAGE_KEY, {}),
+    [],
+  );
+  const [requestedSchoolId, setSelectedSchoolId] = useState(initialScope.schoolId ?? "");
+  const [requestedClassId, setSelectedClassId] = useState(initialScope.classId ?? "");
   const [createdRuns, setCreatedRuns] = useState<AssignmentRun[]>([]);
   const bootstrapQuery = useQuery({
     queryKey: queryKeys.lmsTeacherShell.bootstrap(tenantId, account?.id),
@@ -69,6 +83,7 @@ export function useLmsTeacherShellController() {
   });
   const homeworkWorkspaceQuery = useQuery({
     queryKey: lmsAssignmentReadQueryKeys.homeworkWorkspace(tenantId, account?.id),
+    meta: lmsReadPersistMeta(tenantId, account?.id),
     queryFn: ({ signal }) => loadLmsTeacherHomeworkWorkspace({ page: 0, size: 50, status: "active", tenantId }, signal),
     enabled: apiBacked && shouldLoadHomeworkWorkspace,
     staleTime: QUERY_POLICIES.offlineCore.staleTime,
@@ -95,9 +110,12 @@ export function useLmsTeacherShellController() {
     [apiBacked, createdRuns, workspaceRuns],
   );
   const bootstrapSelection = useMemo(() => {
+    const stored = getPersistedJsonValue<StoredTeacherScope>(TEACHER_SCOPE_STORAGE_KEY, {});
     const scope = bootstrapQuery.data?.managementScope;
     const scopedSchoolId =
-      scope?.centerId && schools.some((school) => school.id === scope.centerId)
+      stored.schoolId && schools.some((school) => school.id === stored.schoolId)
+        ? stored.schoolId
+        : scope?.centerId && schools.some((school) => school.id === scope.centerId)
         ? scope.centerId
         : schools[0]?.id ?? (apiBacked ? "" : defaultSchoolId);
     const classInScope =
@@ -105,10 +123,13 @@ export function useLmsTeacherShellController() {
         ? classes.find((classroom) => classroom.id === scope.classId && classroom.schoolId === scopedSchoolId)
         : undefined;
     const firstClassInSchool = classes.find((classroom) => classroom.schoolId === scopedSchoolId);
+    const storedClassInSchool = stored.classId && classes.some((c) => c.id === stored.classId && c.schoolId === scopedSchoolId)
+      ? stored.classId
+      : undefined;
 
     return {
       schoolId: scopedSchoolId,
-      classId: classInScope?.id ?? firstClassInSchool?.id ?? classes[0]?.id ?? (apiBacked ? "" : defaultClassId),
+      classId: storedClassInSchool ?? classInScope?.id ?? firstClassInSchool?.id ?? classes[0]?.id ?? (apiBacked ? "" : defaultClassId),
     };
   }, [apiBacked, bootstrapQuery.data?.managementScope, classes, schools]);
   const selectedSchoolId = schools.some((school) => school.id === requestedSchoolId)
@@ -127,9 +148,9 @@ export function useLmsTeacherShellController() {
   const selectedSchool = schools.find((school) => school.id === selectedSchoolId) ?? schools[0] ?? (apiBacked ? undefined : classroomSchools[0]);
   const selectedSchoolName = selectedSchool?.name ?? "ERG";
   const activeNav = lmsNavItems.find((item) => item.id === activeSection) ?? lmsNavItems[0];
-  const activeMobileNav = lmsMobileDockItems.find((item) => item.id === activeMobileSection) ?? {
-    ...lmsMobileDockItems[0],
-    label: activeNav.label,
+  const activeMobileNav = {
+    ...(lmsMobileDockItems.find((item) => item.id === activeMobileSection) ?? lmsMobileDockItems[0]),
+    label: resolveMobileTitle(pathname, activeMobileSection, activeNav.label),
   };
   const teacherName = account?.fullName || "Lê Thị Thùy";
   const teacherEmail = account?.email || "teacher@erg.edu.vn";
@@ -160,8 +181,12 @@ export function useLmsTeacherShellController() {
     () =>
       lmsMobileDockItems
         .filter((item) => canNavigateToLmsPath(item.path, grantedPermissions, deniedPermissions))
-        .map((item) => (item.id === "notifications" ? { ...item, badgeCount: unreadNotificationCount } : item)),
+        .map((item) => (item.id === "more" ? { ...item, badgeCount: unreadNotificationCount } : item)),
     [deniedPermissions, grantedPermissions, unreadNotificationCount],
+  );
+  const mobileMoreItems = useMemo(
+    () => lmsMobileMoreItems.filter((item) => canNavigateToLmsPath(item.path, grantedPermissions, deniedPermissions)),
+    [deniedPermissions, grantedPermissions],
   );
 
   useEffect(() => {
@@ -191,7 +216,12 @@ export function useLmsTeacherShellController() {
   function selectSchool(schoolId: string) {
     const firstClass = classes.find((classroom) => classroom.schoolId === schoolId);
     setSelectedSchoolId(schoolId);
-    setSelectedClassId(firstClass?.id ?? classes[0]?.id ?? defaultClassId);
+    const newClassId = firstClass?.id ?? classes[0]?.id ?? defaultClassId;
+    setSelectedClassId(newClassId);
+    setPersistedJsonValue<StoredTeacherScope>(TEACHER_SCOPE_STORAGE_KEY, {
+      schoolId,
+      classId: newClassId,
+    });
   }
 
   function signOut() {
@@ -205,7 +235,12 @@ export function useLmsTeacherShellController() {
   }
 
   function handleClassChange(e: { target: { value: string } }) {
-    setSelectedClassId(e.target.value);
+    const newClassId = e.target.value;
+    setSelectedClassId(newClassId);
+    setPersistedJsonValue<StoredTeacherScope>(TEACHER_SCOPE_STORAGE_KEY, {
+      schoolId: selectedSchoolId,
+      classId: newClassId,
+    });
   }
 
   function handleLocalAssignmentCreated(title: string, subject: string, destination: string) {
@@ -279,6 +314,7 @@ export function useLmsTeacherShellController() {
     deniedPermissions,
     filteredMenuGroups,
     mobileDockItems,
+    mobileMoreItems,
     selectSchool,
     signOut,
     handleSchoolChange,

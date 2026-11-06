@@ -4,10 +4,14 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const ROOT = resolve(process.cwd(), "src/components/quiz");
+const PLAYER = resolve(process.cwd(), "src/features/lcms/quiz/player");
+
+// The runtime is split into sibling files (shell <= 200 lines); ownership is checked across them.
+const RUNTIME_FILES = ["player-shell-runtime.tsx", "player-ready-view.tsx", "player-ready-parts.tsx", "use-player-runtime.ts", "use-player-ready-handlers.ts"];
 
 describe("Quiz Player Shell ownership", () => {
   it("keeps the public shell as a typed runtime boundary", () => {
-    const source = readFileSync(resolve(ROOT, "player-shell.tsx"), "utf8");
+    const source = readFileSync(resolve(PLAYER, "player-shell.tsx"), "utf8");
 
     expect(source.split(/\r?\n/).length).toBeLessThanOrEqual(80);
     expect(source).toContain("PlayerShellRuntime");
@@ -15,7 +19,7 @@ describe("Quiz Player Shell ownership", () => {
   });
 
   it("keeps runtime, navigation, mobile and result owners explicit", () => {
-    const runtime = readFileSync(resolve(ROOT, "player-shell-runtime.tsx"), "utf8");
+    const runtime = RUNTIME_FILES.map((file) => readFileSync(resolve(PLAYER, file), "utf8")).join("\n");
 
     expect(runtime).toContain("QuestionNavigator");
     expect(runtime).toContain("MobilePlayerShell");
@@ -28,10 +32,15 @@ describe("Quiz Player Shell ownership", () => {
   });
 
   it("does not make protected matching implementations shell dependencies", () => {
-    for (const fileName of ["player-shell.tsx", "player-shell-runtime.tsx", "player-shell-runtime-model.ts"]) {
-      const source = readFileSync(resolve(ROOT, fileName), "utf8");
+    for (const file of [resolve(PLAYER, "player-shell.tsx"), ...RUNTIME_FILES.map((name) => resolve(PLAYER, name)), resolve(ROOT, "player-shell-runtime-model.ts")]) {
+      const source = readFileSync(file, "utf8");
       expect(source).not.toContain("matching-question");
-      expect(source).not.toContain("classic-editor.css");
+    }
+  });
+
+  it("never pulls quiz editor code into the player", () => {
+    for (const file of [resolve(PLAYER, "player-shell.tsx"), ...RUNTIME_FILES.map((name) => resolve(PLAYER, name)), resolve(ROOT, "player-shell-runtime-model.ts")]) {
+      expect(readFileSync(file, "utf8")).not.toContain("quiz-editor");
     }
   });
 });

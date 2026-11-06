@@ -60,13 +60,13 @@ export function parseCsvRows(csv: string) {
   return rows;
 }
 
-export async function fetchGoogleSheetCsv(input: string, options: RequestOptions = {}) {
+export async function fetchGoogleSheetCsv(input: string, options: RequestOptions & { sheetName?: string } = {}) {
   const { spreadsheetId, gid } = parseGoogleSheetUrl(input);
   const request = createTimedSignal(options);
 
   try {
     const response = await fetch(
-      `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:csv&gid=${gid}`,
+      `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:csv&${options.sheetName ? `sheet=${encodeURIComponent(options.sheetName)}` : `gid=${gid}`}`,
       { signal: request.signal },
     );
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -91,7 +91,15 @@ export async function fetchGoogleSheetTabs(spreadsheetId: string, options: Reque
     const captions = Array.from(html.matchAll(/docs-sheet-tab-caption">([^<]+)</g))
       .map((match) => decodeHtml(match[1] ?? "").trim())
       .filter(Boolean);
-    return Array.from(new Set(captions)).map((name) => ({ name }));
+    if (!captions.length) {
+      for (const match of html.matchAll(/"name":"([^"]+)"[,\s]*"sheetId":/g)) {
+        if (match[1]) captions.push(decodeHtml(match[1]).trim());
+      }
+      for (const match of html.matchAll(/"sheetId":\d+[,\s]*"name":"([^"]+)"/g)) {
+        if (match[1]) captions.push(decodeHtml(match[1]).trim());
+      }
+    }
+    return Array.from(new Set(captions)).filter((name) => name && !name.startsWith("docs-")).map((name) => ({ name }));
   } catch (error) {
     if (options.signal?.aborted) throw options.signal.reason ?? error;
     if (request.timedOut()) throw new Error("Google Sheet phản hồi quá lâu. Vui lòng thử lại.");

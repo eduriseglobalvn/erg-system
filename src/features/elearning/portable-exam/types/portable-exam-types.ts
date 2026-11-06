@@ -1,4 +1,4 @@
-import type { QuizPackage } from "@/lib/types";
+import type { QuizPackage } from "@/domain/quiz/types";
 
 export const PORTABLE_EXAM_SCHEMA_VERSION = 1 as const;
 export const PORTABLE_EXAM_PACKAGE_FORMATS = ["single", "bundle"] as const;

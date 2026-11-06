@@ -1,7 +1,16 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Maximize2, ZoomIn, ZoomOut } from "lucide-react";
-
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import OpenInFullIcon from "@mui/icons-material/OpenInFull";
+import ZoomInIcon from "@mui/icons-material/ZoomIn";
+import ZoomOutIcon from "@mui/icons-material/ZoomOut";
+import Box from "@mui/material/Box";
+import ButtonBase from "@mui/material/ButtonBase";
+import IconButton from "@mui/material/IconButton";
 import Skeleton from "@mui/material/Skeleton";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import { alpha, type SxProps, type Theme } from "@mui/material/styles";
+
 import { getStoredAccessToken } from "@/platform/auth/api/auth-token-storage";
 import type {
   LearningResourceResource,
@@ -10,6 +19,8 @@ import type {
 
 type PdfJsModule = typeof import("pdfjs-dist");
 type PdfLoadingTask = ReturnType<PdfJsModule["getDocument"]>;
+
+type PaletteTone = "primary" | "success" | "warning" | "error" | "info";
 
 let pdfJsPromise: Promise<PdfJsModule> | null = null;
 
@@ -27,16 +38,26 @@ async function loadPdfJs() {
   return pdfJsPromise;
 }
 
-const thumbnailThemes = {
-  blue: "border-[#b8d6fa] bg-[var(--erg-blue-light)] text-[var(--erg-blue)]",
-  green: "border-emerald-200 bg-emerald-50 text-emerald-900",
-  orange: "border-orange-200 bg-orange-50 text-orange-900",
-  purple: "border-[#b8d6fa] bg-[var(--erg-blue-light)] text-[var(--erg-blue)]",
-  teal: "border-cyan-200 bg-cyan-50 text-cyan-900",
-  rose: "border-rose-200 bg-rose-50 text-rose-900",
-  yellow: "border-amber-200 bg-amber-50 text-amber-900",
-  slate: "border-slate-200 bg-slate-50 text-slate-900",
-} satisfies Record<LearningResourceResource["thumbnailTheme"], string>;
+const thumbnailTones = {
+  blue: "primary",
+  green: "success",
+  orange: "warning",
+  purple: "primary",
+  teal: "info",
+  rose: "error",
+  yellow: "warning",
+  slate: null,
+} satisfies Record<LearningResourceResource["thumbnailTheme"], PaletteTone | null>;
+
+function thumbnailThemeSx(themeKey: LearningResourceResource["thumbnailTheme"]): SxProps<Theme> {
+  const tone = thumbnailTones[themeKey];
+  if (!tone) return { bgcolor: "background.default", borderColor: "divider", color: "text.primary" };
+  return (theme) => ({
+    bgcolor: alpha(theme.palette[tone].main, 0.08),
+    borderColor: alpha(theme.palette[tone].main, 0.3),
+    color: theme.palette[tone].dark,
+  });
+}
 
 function displayText(value?: string) {
   if (!value) return "";
@@ -142,71 +163,91 @@ function getLectureDeckLabel(resource: LearningResourceResource) {
   return "ERG Lesson";
 }
 
-function getLectureDeckTheme(resource: LearningResourceResource) {
-  if (resource.subjectId === "tieng-anh") {
-    return {
-      background: "bg-[#f8fbff]",
-      panel: "border-[#cbd7e6] bg-white text-slate-900",
-      card: "border-orange-100 bg-orange-50/80",
-      icon: "bg-orange-500 text-white",
-    };
-  }
-
-  if (resource.subjectId === "tin-hoc") {
-    return {
-      background: "bg-[#f8fbff]",
-      panel: "border-[#cbd7e6] bg-white text-slate-900",
-      card: "border-[#b8d6fa] bg-[var(--erg-blue-light)]",
-      icon: "bg-[var(--erg-blue)] text-white",
-    };
-  }
-
-  return {
-    background: "bg-[#f8fbff]",
-    panel: "border-[#cbd7e6] bg-white text-slate-900",
-    card: "border-[#b8d6fa] bg-[var(--erg-blue-light)]",
-    icon: "bg-[var(--erg-blue)] text-white",
-  };
+function getLectureDeckTone(resource: LearningResourceResource): PaletteTone {
+  return resource.subjectId === "tieng-anh" ? "warning" : "primary";
 }
+
+const toolbarIconSx = { borderRadius: 0.75, color: "inherit", height: 32, width: 32, "&:hover": { bgcolor: "background.paper", color: "text.primary" } } as const;
 
 function LectureUnitCard({
   index,
   onOpenLesson,
-  theme,
+  tone,
   unit,
 }: {
   index: number;
   onOpenLesson: (title: string) => void;
-  theme: ReturnType<typeof getLectureDeckTheme>;
+  tone: PaletteTone;
   unit: LearningResourceViewerUnit;
 }) {
   const children = unit.children?.length ? unit.children : [{ id: `${unit.id}-default`, title: unit.title }];
 
   return (
-    <article className={`rounded-lg border ${theme.card} p-4 shadow-sm`}>
-      <div className="flex items-start gap-4">
-        <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-md text-sm font-semibold ${theme.icon}`}>{index + 1}</span>
-        <div className="min-w-0 flex-1">
-          <h2 className="text-sm font-semibold text-slate-950">{displayText(unit.title)}</h2>
-          <div className="mt-4 grid gap-3">
+    <Box
+      component="article"
+      sx={(theme) => ({
+        bgcolor: alpha(theme.palette[tone].main, 0.08),
+        border: 1,
+        borderColor: alpha(theme.palette[tone].main, 0.3),
+        borderRadius: 1,
+        boxShadow: 1,
+        p: 2,
+      })}
+    >
+      <Stack direction="row" spacing={2} sx={{ alignItems: "flex-start" }}>
+        <Box
+          component="span"
+          sx={{
+            bgcolor: `${tone}.main`,
+            borderRadius: 0.75,
+            color: `${tone}.contrastText`,
+            display: "grid",
+            flexShrink: 0,
+            height: 40,
+            placeItems: "center",
+            typography: "subtitle2",
+            width: 40,
+          }}
+        >
+          {index + 1}
+        </Box>
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Typography component="h2" variant="subtitle2">
+            {displayText(unit.title)}
+          </Typography>
+          <Box sx={{ display: "grid", gap: 1.5, mt: 2 }}>
             {children.map((child) => {
               const lesson = formatLessonTitle(child.title);
               return (
-                <button
+                <ButtonBase
                   key={child.id}
-                  type="button"
                   onClick={() => onOpenLesson(displayText(child.title))}
-                  className="rounded-lg border border-[#cbd7e6] bg-white px-3 py-2.5 text-left transition hover:border-[#b8d6fa] hover:bg-[#f7fbff]"
+                  sx={(theme) => ({
+                    bgcolor: "background.paper",
+                    border: 1,
+                    borderColor: "divider",
+                    borderRadius: 1,
+                    display: "block",
+                    px: 1.5,
+                    py: 1.25,
+                    textAlign: "left",
+                    transition: "background-color 0.15s ease, border-color 0.15s ease",
+                    "&:hover": { bgcolor: alpha(theme.palette.primary.main, 0.04), borderColor: alpha(theme.palette.primary.main, 0.3) },
+                  })}
                 >
-                  <p className="text-[13px] font-bold text-[var(--erg-blue)]">{lesson.eyebrow}</p>
-                  <p className="mt-1 text-[14px] font-semibold text-slate-800">{lesson.title}</p>
-                </button>
+                  <Typography variant="body2" sx={{ color: "primary.main", fontWeight: "fontWeightBold" }}>
+                    {lesson.eyebrow}
+                  </Typography>
+                  <Typography variant="subtitle2" sx={{ mt: 0.5 }}>
+                    {lesson.title}
+                  </Typography>
+                </ButtonBase>
               );
             })}
-          </div>
-        </div>
-      </div>
-    </article>
+          </Box>
+        </Box>
+      </Stack>
+    </Box>
   );
 }
 
@@ -220,36 +261,73 @@ function PdfLessonBankView({
   onOpenLesson: (title: string) => void;
 }) {
   const units = getDefaultViewerUnits(resource);
-  const theme = getLectureDeckTheme(resource);
+  const tone = getLectureDeckTone(resource);
   const deckLabel = getLectureDeckLabel(resource);
 
   return (
-    <div className={`fixed inset-0 z-[240] overflow-hidden ${theme.background}`}>
-      <button
-        type="button"
+    <Box sx={{ bgcolor: "background.default", inset: 0, overflow: "hidden", position: "fixed", zIndex: 240 }}>
+      <ButtonBase
         onClick={onClose}
-        className="fixed left-0 top-5 z-10 flex h-10 w-16 items-center justify-center rounded-r-lg border border-l-0 border-[#cbd7e6] bg-white text-[var(--erg-blue)] shadow-sm transition hover:w-20"
         aria-label="Quay lại kho học liệu"
+        sx={{
+          bgcolor: "background.paper",
+          border: 1,
+          borderBottomRightRadius: 8,
+          borderColor: "divider",
+          borderLeft: 0,
+          borderTopRightRadius: 8,
+          boxShadow: 1,
+          color: "primary.main",
+          height: 40,
+          left: 0,
+          position: "fixed",
+          top: 20,
+          transition: "width 0.15s ease",
+          width: 64,
+          zIndex: 10,
+          "&:hover": { width: 80 },
+        }}
       >
-        <span className="text-center text-[13px] font-bold leading-4">
+        <Typography component="span" variant="body2" sx={{ fontWeight: "fontWeightBold", lineHeight: 1.2, textAlign: "center" }}>
           ERG
-        </span>
-      </button>
-      <main className="relative mx-auto my-5 flex h-[calc(100vh-40px)] w-[min(1350px,calc(100vw-96px))] flex-col overflow-hidden rounded-lg border border-[#cbd7e6] bg-white shadow-sm">
-        <header className={`relative shrink-0 overflow-hidden border-b ${theme.panel} px-5 py-4`}>
-          <div className="relative max-w-3xl">
-            <p className="text-[13px] font-semibold text-[var(--erg-blue)]">{deckLabel}</p>
-            <h1 className="mt-1 text-xl font-semibold leading-tight text-slate-950">{displayText(resource.viewer.title)}</h1>
-          </div>
-        </header>
+        </Typography>
+      </ButtonBase>
+      <Box
+        component="main"
+        sx={{
+          bgcolor: "background.paper",
+          border: 1,
+          borderColor: "divider",
+          borderRadius: 1,
+          boxShadow: 1,
+          display: "flex",
+          flexDirection: "column",
+          height: "calc(100vh - 40px)",
+          mx: "auto",
+          my: 2.5,
+          overflow: "hidden",
+          position: "relative",
+          width: "min(1350px, calc(100vw - 96px))",
+        }}
+      >
+        <Box component="header" sx={{ bgcolor: "background.paper", borderBottom: 1, borderColor: "divider", color: "text.primary", flexShrink: 0, overflow: "hidden", position: "relative", px: 2.5, py: 2 }}>
+          <Box sx={{ maxWidth: 768, position: "relative" }}>
+            <Typography variant="subtitle2" sx={{ color: "primary.main" }}>
+              {deckLabel}
+            </Typography>
+            <Typography component="h1" variant="h3" sx={{ lineHeight: 1.25, mt: 0.5 }}>
+              {displayText(resource.viewer.title)}
+            </Typography>
+          </Box>
+        </Box>
 
-        <section className="grid flex-1 gap-4 overflow-y-auto p-5 lg:grid-cols-2">
+        <Box component="section" sx={{ display: "grid", flex: 1, gap: 2, gridTemplateColumns: { lg: "repeat(2, minmax(0, 1fr))" }, overflowY: "auto", p: 2.5 }}>
           {units.map((unit, index) => (
-            <LectureUnitCard key={unit.id} unit={unit} index={index} theme={theme} onOpenLesson={onOpenLesson} />
+            <LectureUnitCard key={unit.id} unit={unit} index={index} tone={tone} onOpenLesson={onOpenLesson} />
           ))}
-        </section>
-      </main>
-    </div>
+        </Box>
+      </Box>
+    </Box>
   );
 }
 
@@ -337,7 +415,6 @@ export function PdfFullScreenPreview({ resource, onClose }: { resource: Learning
           canvas.height = Math.floor(viewport.height * outputScale);
           canvas.style.width = `${Math.floor(viewport.width)}px`;
           canvas.style.height = `${Math.floor(viewport.height)}px`;
-          canvas.className = "mx-auto mb-6 block max-w-full rounded-sm bg-white shadow-sm shadow-slate-950/12";
           viewerContainer.appendChild(canvas);
 
           await page.render({
@@ -383,77 +460,123 @@ export function PdfFullScreenPreview({ resource, onClose }: { resource: Learning
   }
 
   return (
-    <div ref={viewerRootRef} className="fixed inset-0 z-[240] overflow-hidden bg-[#f8fbff]">
-      <div className="flex h-14 items-center justify-between border-b border-[#cbd7e6] bg-[#f8fbff] px-4 text-slate-900 shadow-sm">
-        <div className="flex min-w-0 items-center gap-3">
-          <button
-            type="button"
+    <Box ref={viewerRootRef} sx={{ bgcolor: "background.default", inset: 0, overflow: "hidden", position: "fixed", zIndex: 240 }}>
+      <Stack
+        direction="row"
+        sx={{ alignItems: "center", bgcolor: "background.default", borderBottom: 1, borderColor: "divider", boxShadow: 1, color: "text.primary", height: 56, justifyContent: "space-between", px: 2 }}
+      >
+        <Stack direction="row" spacing={1.5} sx={{ alignItems: "center", minWidth: 0 }}>
+          <IconButton
             onClick={() => setActiveLessonTitle(null)}
-            className="-ml-1 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-slate-600 transition hover:bg-white hover:text-slate-900"
+            sx={{ ...toolbarIconSx, color: "text.secondary", flexShrink: 0, ml: -0.5 }}
             aria-label="Quay lại danh sách bài"
           >
-            <ArrowLeft className="h-5 w-5" />
-          </button>
-          <h1 className="truncate text-[15px] font-bold">{activeLessonTitle}</h1>
-        </div>
-        <div className="flex items-center gap-1 text-slate-600">
-          <button
-            type="button"
+            <ArrowBackIcon />
+          </IconButton>
+          <Typography component="h1" variant="h6" noWrap sx={{ fontWeight: "fontWeightBold" }}>
+            {activeLessonTitle}
+          </Typography>
+        </Stack>
+        <Stack direction="row" spacing={0.5} sx={{ alignItems: "center", color: "text.secondary" }}>
+          <IconButton
             onClick={() => setZoom((value) => Math.max(0.75, Number((value - 0.1).toFixed(2))))}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-md transition hover:bg-white hover:text-slate-900"
+            sx={toolbarIconSx}
             aria-label="Thu nhỏ PDF"
           >
-            <ZoomOut className="h-4 w-4" />
-          </button>
-          <button
-            type="button"
+            <ZoomOutIcon fontSize="small" />
+          </IconButton>
+          <IconButton
             onClick={() => setZoom((value) => Math.min(1.8, Number((value + 0.1).toFixed(2))))}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-md transition hover:bg-white hover:text-slate-900"
+            sx={toolbarIconSx}
             aria-label="Phóng to PDF"
           >
-            <ZoomIn className="h-4 w-4" />
-          </button>
-          <button
-            type="button"
+            <ZoomInIcon fontSize="small" />
+          </IconButton>
+          <IconButton
             onClick={() => void toggleFullscreen()}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-md transition hover:bg-white hover:text-slate-900"
+            sx={toolbarIconSx}
             aria-label="Mở toàn màn hình"
           >
-            <Maximize2 className="h-4 w-4" />
-          </button>
-        </div>
-      </div>
+            <OpenInFullIcon fontSize="small" />
+          </IconButton>
+        </Stack>
+      </Stack>
       {canEmbed ? (
-        <div className="h-[calc(100vh-48px)] overflow-y-auto bg-[#f8fbff] px-4 py-6">
+        <Box sx={{ bgcolor: "background.default", height: "calc(100vh - 48px)", overflowY: "auto", px: 2, py: 3 }}>
           {renderState === "loading" ? (
-            <div className="mx-auto mb-6 grid max-w-[980px] gap-4 rounded-lg border border-[#cbd7e6] bg-white p-5 shadow-sm" aria-hidden="true">
+            <Box
+              sx={{ bgcolor: "background.paper", border: 1, borderColor: "divider", borderRadius: 1, boxShadow: 1, display: "grid", gap: 2, maxWidth: 980, mb: 3, mx: "auto", p: 2.5 }}
+              aria-hidden="true"
+            >
               <Skeleton variant="rectangular" sx={{ height: 20, width: 192, borderRadius: "6px" }} />
               <Skeleton variant="rectangular" sx={{ height: 520, width: "100%", borderRadius: "8px" }} />
-              <div className="grid gap-3 sm:grid-cols-3">
+              <Box sx={{ display: "grid", gap: 1.5, gridTemplateColumns: { sm: "repeat(3, minmax(0, 1fr))" } }}>
                 <Skeleton variant="rectangular" sx={{ height: 12, borderRadius: "6px" }} />
                 <Skeleton variant="rectangular" sx={{ height: 12, borderRadius: "6px" }} />
                 <Skeleton variant="rectangular" sx={{ height: 12, borderRadius: "6px" }} />
-              </div>
-            </div>
+              </Box>
+            </Box>
           ) : null}
           {renderState === "error" ? (
-            <div className="mx-auto max-w-[720px] rounded-lg border border-rose-200 bg-white p-6 text-sm font-medium text-rose-600 shadow-sm">
+            <Typography
+              component="div"
+              variant="body2"
+              sx={(theme) => ({
+                bgcolor: "background.paper",
+                border: 1,
+                borderColor: alpha(theme.palette.error.main, 0.3),
+                borderRadius: 1,
+                boxShadow: 1,
+                color: "error.main",
+                fontWeight: "fontWeightMedium",
+                maxWidth: 720,
+                mx: "auto",
+                p: 3,
+              })}
+            >
               Không thể mở PDF. BE cần trả file dạng `application/pdf` qua viewer endpoint cùng domain.
-            </div>
+            </Typography>
           ) : null}
-          <div ref={canvasContainerRef} className="mx-auto max-w-[1100px]" />
-        </div>
+          {/* pdf.js pages are appended imperatively, so they are styled from the container */}
+          <Box
+            ref={canvasContainerRef}
+            sx={(theme) => ({
+              maxWidth: 1100,
+              mx: "auto",
+              "& canvas": {
+                bgcolor: "background.paper",
+                borderRadius: "2px",
+                boxShadow: `0 1px 2px ${alpha(theme.palette.common.black, 0.12)}`,
+                display: "block",
+                maxWidth: "100%",
+                mb: 3,
+                mx: "auto",
+              },
+            })}
+          />
+        </Box>
       ) : (
-        <div className="flex h-[calc(100vh-48px)] items-center justify-center p-6">
-          <div className={`flex aspect-[3/4] w-[280px] flex-col justify-between rounded-lg border ${thumbnailThemes[resource.thumbnailTheme]} p-8 text-center shadow-sm`}>
+        <Box sx={{ alignItems: "center", display: "flex", height: "calc(100vh - 48px)", justifyContent: "center", p: 3 }}>
+          <Box
+            sx={[
+              { aspectRatio: "3 / 4", border: 1, borderRadius: 1, boxShadow: 1, display: "flex", flexDirection: "column", justifyContent: "space-between", p: 4, textAlign: "center", width: 280 },
+              thumbnailThemeSx(resource.thumbnailTheme),
+            ] as SxProps<Theme>}
+          >
             <div>
-              <p className="text-sm font-semibold text-current">{displayText(resource.formatBadge)}</p>
-              <h4 className="mt-8 text-xl font-semibold leading-tight">{displayText(resource.title)}</h4>
+              <Typography variant="subtitle2" sx={{ color: "inherit" }}>
+                {displayText(resource.formatBadge)}
+              </Typography>
+              <Typography component="h4" variant="h3" sx={{ lineHeight: 1.25, mt: 4 }}>
+                {displayText(resource.title)}
+              </Typography>
             </div>
-            <p className="text-sm font-medium text-white/80">{resource.viewer.pageCount ?? 1} pages</p>
-          </div>
-        </div>
+            <Typography variant="body2" sx={{ color: (theme) => alpha(theme.palette.common.white, 0.8), fontWeight: "fontWeightMedium" }}>
+              {resource.viewer.pageCount ?? 1} pages
+            </Typography>
+          </Box>
+        </Box>
       )}
-    </div>
+    </Box>
   );
 }

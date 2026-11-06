@@ -6,44 +6,8 @@ import { createStore, del, get, set } from "idb-keyval";
 export const QUERY_CACHE_BUSTER = "erg-query-cache-v6";
 export const QUERY_CACHE_STORAGE_KEY = `ERG_QUERY_CACHE:${QUERY_CACHE_BUSTER}`;
 
-type QueryLike = Pick<Query<unknown, unknown>, "queryKey">;
-
-export function isPersistableQuery(query: QueryLike) {
-  const [family, ...rest] = query.queryKey;
-  const normalized = rest.map((part) => String(part).toLowerCase()).join(":");
-  if (/(auth|security|notification|token|credential|session)/.test(normalized)) return false;
-  if (family === "student-dashboard") {
-    const [tenantId, accountId] = rest;
-    return typeof tenantId === "string" && tenantId.trim().length > 0 &&
-      typeof accountId === "string" && accountId.trim().length > 0 && accountId !== "anonymous";
-  }
-  if (family === "student-engagement") {
-    return rest[0] === "feed" && hasPersistedIdentity(rest[1], rest[2]);
-  }
-  if (family === "lms-teacher-shell") {
-    return rest[0] === "teacher-homework-workspace" && hasPersistedIdentity(rest[1], rest[2]);
-  }
-  if (family === "crm") {
-    return rest[0] === "workspace" && rest[1] === "crm" && hasPersistedIdentity(rest[2], rest[3]);
-  }
-  if (family !== "lms") return false;
-  const requiredKeyParts: Record<string, number> = {
-    "assignment-progress-workspace": 4,
-    "class-workspace": 6,
-    attendance: 4,
-    homework: 4,
-    scores: 4,
-    "student-groups": 4,
-  };
-  const minimumParts = requiredKeyParts[String(rest[0])];
-  return typeof minimumParts === "number" && rest.length >= minimumParts &&
-    hasPersistedIdentity(rest[1], rest[2]);
-}
-
-function hasPersistedIdentity(tenantId: unknown, accountId: unknown) {
-  return typeof tenantId === "string" && tenantId.trim().length > 0 &&
-    typeof accountId === "string" && accountId.trim().length > 0 &&
-    accountId.trim().toLowerCase() !== "anonymous";
+export function shouldDehydratePersistedQuery(query: Pick<Query, "meta" | "state">) {
+  return query.state.status === "success" && query.meta?.persist === true;
 }
 
 export function queryCacheScopeKey(scope: { portal: string; workspace?: string; tenantId: string; accountId: string }) {

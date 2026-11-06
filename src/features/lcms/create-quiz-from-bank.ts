@@ -1,8 +1,8 @@
-import type { QuestionBankQuestion } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
+import type { QuestionBankQuestion } from "@/features/question-bank/types/question-bank-types";
 import {
   createQuizDraftFromBankQuestions,
   type CreateQuizFromBankOptions,
-} from "@/features/lcms/quiz/question-bank/api/question-bank-to-quiz";
+} from "@/features/question-bank/api/question-bank-to-quiz";
 import type {
   QuizEditorCreateResult,
   QuizEditorSaveDraftResult,

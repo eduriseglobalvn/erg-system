@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { flattenMenuItems } from "@/features/lcms/lcms-menu";
+import { flattenMenuItems } from "@/features/lcms/admin-menu";
 import {
   COURSE_STRUCTURE_WORKSPACE_LABEL,
   LEARNING_RESOURCE_WORKSPACE_LABEL,
@@ -32,7 +32,7 @@ describe("Admin information architecture", () => {
       "/admin/content/quiz-editor",
     ]));
     expect(paths).not.toEqual(expect.arrayContaining(["/resources", "/quiz-bank", "/questions", "/quiz-editor"]));
-    expect(ADMIN_MENU_GROUPS.map((group) => group.label)).toContain("Nội dung");
+    expect(items.map((item) => item.label)).toContain("Nội dung");
     expect(items.map((item) => item.label).join(" ")).not.toMatch(/LCMS|author portal/i);
   });
 });

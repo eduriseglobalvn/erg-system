@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useMemo } from "react";
 import Box from "@mui/material/Box";
-import { Toaster } from "@/components/ui/sonner";
+import { ErgToaster } from "@/components/erg-mui/erg-toaster";
 import { AppSeo } from "@/components/seo/app-seo";
 import { logoutAccount } from "@/platform/auth/api/auth-storage";
 import { logoutStudentSession } from "@/platform/auth/api/student-auth-storage";
@@ -72,7 +72,7 @@ export function RootLayout() {
       <AppSeo />
       <Outlet />
       <DesktopUpdateSurface pathname={location.pathname} />
-      <Toaster richColors position="top-right" />
+      <ErgToaster richColors position="top-right" />
     </ErgMuiProvider>
   );
 }

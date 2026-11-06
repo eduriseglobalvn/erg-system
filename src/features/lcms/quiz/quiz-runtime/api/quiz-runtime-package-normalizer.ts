@@ -1,4 +1,4 @@
-import { createQuizPackage } from "@/lib/assessment-engine";
+import { createQuizPackage } from "@/domain/quiz/assessment-engine";
 import { normalizeBackendQuestion } from "@/features/lcms/quiz/quiz-runtime/api/quiz-runtime-question-normalizers";
 import {
   booleanValue,
@@ -11,11 +11,15 @@ import {
   stringValue,
 } from "@/features/lcms/quiz/quiz-runtime/api/quiz-runtime-normalization-utils";
 import type { BackendQuizPackage } from "@/features/lcms/quiz/quiz-runtime/api/quiz-runtime-package-api";
-import type { Question, Quiz, QuizPackage, Section } from "@/lib/types";
+import type { Question, Quiz, QuizPackage, Section } from "@/domain/quiz/types";
 
 export function normalizeQuizPackage(value: BackendQuizPackage): QuizPackage {
   const gradingMode = value.gradingMode ?? "server-authoritative";
-  const quiz = extractQuiz(value.quiz, value.answerKey ?? {}, gradingMode);
+  const extractedQuiz = extractQuiz(value.quiz, value.answerKey ?? {}, gradingMode);
+  // Training mode grades per question on the client, so only graded (testing) quizzes can lose the key.
+  const quiz = withoutEssayGuide(gradingMode === "server-authoritative" && extractedQuiz.settings.mode === "testing"
+    ? stripQuizAnswerKey(extractedQuiz)
+    : extractedQuiz);
   const quizVersion = String(value.quizVersion ?? value.version ?? quiz.version);
   const contentHash = value.contentHash ?? value.packageHash ?? createQuizPackage(quiz).contentHash;
 
@@ -44,6 +48,33 @@ export function normalizeQuizPackage(value: BackendQuizPackage): QuizPackage {
     source: value.source ?? "server",
     quiz,
   };
+}
+
+/**
+ * 4.4 #18: a server-authoritative package must not carry the answer key even if the backend sent it.
+ * Limitation: matching pairs / sequence order are the key by structure; the server has to send those unpaired.
+ */
+export function stripQuizAnswerKey(quiz: Quiz): Quiz {
+  const strip = (question: Question): Question => ({
+    ...question,
+    ...(question.choices ? { choices: question.choices.map((choice) => ({ ...choice, correct: false })) } : {}),
+    ...(question.inlineBlanks ? { inlineBlanks: question.inlineBlanks.map((blank) => ({ ...blank, correctOptionId: "" })) } : {}),
+    ...(question.textBlanks ? { textBlanks: question.textBlanks.map((blank) => ({ ...blank, correctAnswers: [] })) } : {}),
+    ...(question.numericAnswer ? { numericAnswer: { ...question.numericAnswer, correctValue: 0, tolerance: 0 } } : {}),
+    ...(question.wordSlots ? { wordSlots: question.wordSlots.map((slot) => ({ ...slot, correctWordId: "" })) } : {}),
+    ...(question.dragDropItems ? { dragDropItems: question.dragDropItems.map((item) => ({ ...item, correctTargetId: "" })) } : {}),
+    ...(question.hotspotAreas ? { hotspotAreas: [] } : {}),
+    ...(question.matchingKey ? { matchingKey: undefined } : {}),
+    ...(question.sequenceCorrectOrder ? { sequenceCorrectOrder: [] } : {}),
+    ...(question.essayRubric ? { essayRubric: undefined } : {}),
+  });
+  return { ...quiz, sections: quiz.sections.map((section) => ({ ...section, questions: section.questions.map(strip) })) };
+}
+
+/** The essay marking guide is for teachers only (spec §7); no learner package keeps it, whatever the mode. */
+function withoutEssayGuide(quiz: Quiz): Quiz {
+  const drop = (question: Question): Question => (question.essayRubric ? { ...question, essayRubric: undefined } : question);
+  return { ...quiz, sections: quiz.sections.map((section) => ({ ...section, questions: section.questions.map(drop) })) };
 }
 
 function extractQuiz(

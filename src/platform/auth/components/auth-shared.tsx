@@ -57,7 +57,7 @@ export function DividerText({ text }: { text: string }) {
 
 export function MetaBadge({ children }: { children: ReactNode }) {
   return (
-    <Box component="span" sx={{ alignItems: "center", bgcolor: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 1, color: "rgba(255,255,255,0.8)", display: "inline-flex", fontSize: 12, fontWeight: 700, px: 1.5, py: 0.5 }}>
+    <Box component="span" sx={{ alignItems: "center", bgcolor: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 1, color: "rgba(255,255,255,0.8)", display: "inline-flex", fontSize: 12, fontWeight: 600, px: 1.5, py: 0.5 }}>
       {children}
     </Box>
   );
@@ -75,7 +75,7 @@ export function MetaRow({ label, value }: { label: string; value: string }) {
 export function QuickLinkCard({ to, title, caption }: { to: string; title: string; caption: string }) {
   return (
     <Paper component={Link} elevation={0} sx={{ bgcolor: "background.default", border: "1px solid", borderColor: "divider", color: "inherit", display: "block", px: 2, py: 2, textDecoration: "none", transition: "background-color 160ms ease, border-color 160ms ease", "&:hover": { bgcolor: "background.paper", borderColor: "text.disabled" } }} to={to}>
-      <Box sx={{ color: "text.primary", fontSize: 14, fontWeight: 700 }}>{title}</Box>
+      <Box sx={{ color: "text.primary", fontSize: 14, fontWeight: 600 }}>{title}</Box>
       <Box sx={{ color: "text.secondary", fontSize: 14, lineHeight: 1.5, mt: 0.5 }}>{caption}</Box>
     </Paper>
   );

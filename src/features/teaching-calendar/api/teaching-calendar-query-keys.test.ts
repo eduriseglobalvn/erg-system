@@ -12,7 +12,7 @@ test("scopes teaching-calendar workspace and reference catalog keys by portal an
     viewMode: "BY_SCHOOL" as const,
   };
 
-  expect(teachingCalendarQueryKeys.workspace("lcms", "workspace", input)).toEqual([
+  expect(teachingCalendarQueryKeys.workspace("lcms", "workspace", input as never)).toEqual([
     "teaching-calendar",
     "lcms",
     "tenant-a",

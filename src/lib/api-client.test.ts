@@ -34,7 +34,7 @@ test("uses LMS portal auth for versioned LMS API requests without client portal 
       rememberMe: true,
     }),
   );
-  const fetchMock = vi.fn(async () => new Response(JSON.stringify({ data: { subjects: [] } }), { status: 200, headers: { "Content-Type": "application/json" } }));
+  const fetchMock = vi.fn(async (_url?: string | URL | Request, _init?: RequestInit) => new Response(JSON.stringify({ data: { subjects: [] } }), { status: 200, headers: { "Content-Type": "application/json" } }));
   vi.stubGlobal("fetch", fetchMock);
 
   await apiRequest("/api/v1/lms/resources/library?schoolId=school-erg-alpha");
@@ -58,7 +58,7 @@ test("uses LCMS portal auth for canonical curriculum commands while omitting cli
       rememberMe: true,
     }),
   );
-  const fetchMock = vi.fn(async () => new Response(JSON.stringify({ data: { id: "subject-1" } }), { status: 200, headers: { "Content-Type": "application/json" } }));
+  const fetchMock = vi.fn(async (_url?: string | URL | Request, _init?: RequestInit) => new Response(JSON.stringify({ data: { id: "subject-1" } }), { status: 200, headers: { "Content-Type": "application/json" } }));
   vi.stubGlobal("fetch", fetchMock);
 
   await apiRequest("/api/v1/curriculum/subjects", {
@@ -85,7 +85,7 @@ test("uses LCMS portal auth for canonical curriculum and content APIs", async ()
       rememberMe: true,
     }),
   );
-  const fetchMock = vi.fn(async () => new Response(JSON.stringify({ data: { id: "content-1" } }), { status: 200, headers: { "Content-Type": "application/json" } }));
+  const fetchMock = vi.fn(async (_url?: string | URL | Request, _init?: RequestInit) => new Response(JSON.stringify({ data: { id: "content-1" } }), { status: 200, headers: { "Content-Type": "application/json" } }));
   vi.stubGlobal("fetch", fetchMock);
 
   await apiRequest("/api/content/items", {
@@ -113,7 +113,7 @@ test("uses current back-office auth for shared admin endpoints on LCMS host with
       rememberMe: true,
     }),
   );
-  const fetchMock = vi.fn(async () => new Response(JSON.stringify({ data: [] }), { status: 200, headers: { "Content-Type": "application/json" } }));
+  const fetchMock = vi.fn(async (_url?: string | URL | Request, _init?: RequestInit) => new Response(JSON.stringify({ data: [] }), { status: 200, headers: { "Content-Type": "application/json" } }));
   vi.stubGlobal("fetch", fetchMock);
 
   await apiRequest("/api/v1/centers");
@@ -130,7 +130,7 @@ test("returns authenticated binary downloads without passing responseType to fet
     portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lms"),
     JSON.stringify({ accountId: "teacher-1", accessToken: "lms-token", loggedInAt: new Date().toISOString(), portal: "lms", portals: ["lms"], rememberMe: true }),
   );
-  const fetchMock = vi.fn(async () => new Response("action,actor\nUPDATE,ac…56\n", { status: 200, headers: { "Content-Type": "text/csv" } }));
+  const fetchMock = vi.fn(async (_url?: string | URL | Request, _init?: RequestInit) => new Response("action,actor\nUPDATE,ac…56\n", { status: 200, headers: { "Content-Type": "text/csv" } }));
   vi.stubGlobal("fetch", fetchMock);
 
   const result = await apiRequest<Blob>("/api/v1/reports/jobs/job-1/download", { portal: "lms", responseType: "blob" });
@@ -154,7 +154,7 @@ test("uses CRM auth for shared admin endpoints on CRM host without client portal
       rememberMe: true,
     }),
   );
-  const fetchMock = vi.fn(async () => new Response(JSON.stringify({ data: [] }), { status: 200, headers: { "Content-Type": "application/json" } }));
+  const fetchMock = vi.fn(async (_url?: string | URL | Request, _init?: RequestInit) => new Response(JSON.stringify({ data: [] }), { status: 200, headers: { "Content-Type": "application/json" } }));
   vi.stubGlobal("fetch", fetchMock);
 
   await apiRequest("/api/users/crm-1");
@@ -180,7 +180,7 @@ test("refreshes an expired access token before calling a protected Spring API", 
       rememberMe: true,
     }),
   );
-  const fetchMock = vi.fn(async (url: string | URL | Request) => {
+  const fetchMock = vi.fn(async (url: string | URL | Request, _init?: RequestInit) => {
     if (String(url).endsWith("/api/v1/auth/refresh")) {
       return new Response(
         JSON.stringify({
@@ -295,7 +295,7 @@ test("does not clear the session or dispatch invalid event when a data query 401
   );
   const invalidListener = vi.fn();
   window.addEventListener(AUTH_SESSION_INVALID_EVENT, invalidListener);
-  const fetchMock = vi.fn(async () =>
+  const fetchMock = vi.fn(async (_url?: string | URL | Request, _init?: RequestInit) =>
     new Response(JSON.stringify({ error: { code: "FORBIDDEN", message: "no access" } }), { status: 401 }),
   );
   vi.stubGlobal("fetch", fetchMock);
@@ -335,7 +335,7 @@ test("treats HTTP 304 as a successful empty revalidation response", async () => 
       rememberMe: true,
     }),
   );
-  const fetchMock = vi.fn(async () => new Response(null, { status: 304 }));
+  const fetchMock = vi.fn(async (_url?: string | URL | Request, _init?: RequestInit) => new Response(null, { status: 304 }));
   vi.stubGlobal("fetch", fetchMock);
 
   await expect(
@@ -449,7 +449,7 @@ test("BFF commands obtain and send a CSRF token without a browser bearer token",
 
 test("preserves structured backend error envelope metadata", async () => {
   vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
-  vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({
+  vi.stubGlobal("fetch", vi.fn(async (_url?: string | URL | Request, _init?: RequestInit) => new Response(JSON.stringify({
     statusCode: 422,
     message: "Validation failed",
     data: null,
@@ -470,7 +470,7 @@ test("preserves structured backend error envelope metadata", async () => {
 
 test("retains request ID metadata on a successful unwrapped response", async () => {
   vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
-  vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({
+  vi.stubGlobal("fetch", vi.fn(async (_url?: string | URL | Request, _init?: RequestInit) => new Response(JSON.stringify({
     data: { users: [] },
     request_id: "req-success-1",
   }), { status: 200, headers: { "Content-Type": "application/json" } })));
@@ -483,9 +483,62 @@ test("retains request ID metadata on a successful unwrapped response", async () 
 test("rethrows an external abort reason without converting it to a network error", async () => {
   vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
   const reason = new Error("user cancelled");
-  vi.stubGlobal("fetch", vi.fn(async () => { throw reason; }));
+  vi.stubGlobal("fetch", vi.fn(async (_url?: string | URL | Request, _init?: RequestInit) => { throw reason; }));
   const controller = new AbortController();
   controller.abort(reason);
 
   await expect(apiRequest("/api/v1/auth/login", { signal: controller.signal, auth: "public" })).rejects.toBe(reason);
+});
+
+test("hides HTML error pages from proxies behind a friendly message", async () => {
+  vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
+  vi.stubGlobal("fetch", vi.fn(async (_url?: string | URL | Request, _init?: RequestInit) => new Response("<!doctype html><html><title>HTTP Status 500</title></html>", { status: 500, headers: { "Content-Type": "text/html" } })));
+
+  await expect(apiRequest("/api/v1/auth/login", { auth: "public" })).rejects.toMatchObject({
+    message: "Máy chủ trả về phản hồi không hợp lệ (HTTP 500).",
+  });
+});
+
+test("copies the Retry-After header into error details for lockout messages", async () => {
+  vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
+  vi.stubGlobal("fetch", vi.fn(async (_url?: string | URL | Request, _init?: RequestInit) => new Response(JSON.stringify({ error: { code: "AUTH_TOO_MANY_ATTEMPTS", message: "Too many" } }), { status: 429, headers: { "Content-Type": "application/json", "Retry-After": "60" } })));
+
+  await expect(apiRequest("/api/v1/auth/login", { auth: "public" })).rejects.toMatchObject({
+    code: "AUTH_TOO_MANY_ATTEMPTS",
+    details: expect.objectContaining({ retryAfterSeconds: 60 }),
+  });
+});
+
+test("keeps the entries of a 422 envelope whose errors is an array as ApiClientError details", async () => {
+  vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
+  const errors = [{ field: "questions[2].answerKey", tag: "required", actual_tag: "required", message: "Câu 3 thiếu đáp án" }];
+  vi.stubGlobal("fetch", vi.fn(async () => new Response(
+    JSON.stringify({ statusCode: 422, message: "quiz failed publish validation", errors, request_id: "req-1" }),
+    { status: 422, headers: { "Content-Type": "application/json" } },
+  )));
+
+  const error = await apiRequest("/api/v1/lcms/quizzes/q1/publish", { auth: "public", method: "POST" }).catch((e: unknown) => e);
+
+  expect(error).toBeInstanceOf(ApiClientError);
+  expect(error).toMatchObject({ message: "quiz failed publish validation", code: "HTTP_422", status: 422, details: errors, requestId: "req-1" });
+});
+
+test("does not treat a 200 body with data and a non-empty errors array (GraphQL style) as a failure", async () => {
+  vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
+  vi.stubGlobal("fetch", vi.fn(async () => new Response(
+    JSON.stringify({ data: { ok: true }, errors: [{ message: "partial" }] }),
+    { status: 200, headers: { "Content-Type": "application/json" } },
+  )));
+
+  await expect(apiRequest("/api/v1/lcms/anything", { auth: "public" })).resolves.toEqual({ ok: true });
+});
+
+test("does not treat an empty errors array on a successful response as a failure", async () => {
+  vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
+  vi.stubGlobal("fetch", vi.fn(async () => new Response(
+    JSON.stringify({ statusCode: 200, data: { ok: true }, errors: [] }),
+    { status: 200, headers: { "Content-Type": "application/json" } },
+  )));
+
+  await expect(apiRequest("/api/v1/lcms/anything", { auth: "public" })).resolves.toEqual({ ok: true });
 });

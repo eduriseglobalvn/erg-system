@@ -60,7 +60,7 @@ export function PortablePackageCatalogDialog({ onClose, portal }: { onClose: () 
           <Typography color="text.secondary" sx={{ p: 4, textAlign: "center" }}>Chưa có đề đã xuất bản để đóng gói.</Typography>
         )}
       </DialogContent>
-      <DialogActions sx={{ px: 2.5, py: 1.5 }}><Button onClick={onClose}>Đóng</Button></DialogActions>
+      <DialogActions sx={{ px: 2.5, py: 1.5 }}><Button variant="contained" onClick={onClose}>Đóng</Button></DialogActions>
     </Dialog>
   );
 }

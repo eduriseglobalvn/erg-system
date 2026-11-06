@@ -13,10 +13,11 @@ import Typography from "@mui/material/Typography";
 
 import type { DashboardCopy } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
 import type { StudentDashboardAssignment } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
-const MUI_PRIMARY = "#0F6CBD";
-const MUI_TEXT = "#172033";
-const MUI_MUTED = "#667085";
+const MUI_PRIMARY = "#0071E3";
+const MUI_TEXT = "#1D1D1F";
+const MUI_MUTED = "#6E6E73";
 const MUI_BORDER = "rgba(16, 24, 40, 0.1)";
 const MUI_DIVIDER = "rgba(16, 24, 40, 0.075)";
 const MUI_SURFACE = "#FFFFFF";
@@ -76,7 +77,7 @@ export function ScoresView({ assignments, copy }: { assignments: StudentDashboar
   return (
     <Stack spacing={2.5}>
       <Box sx={{ mb: 0.5 }}>
-        <Typography variant="h5" sx={{ fontWeight: 800, color: "#0F172A", letterSpacing: "-0.02em" }}>
+        <Typography variant="h5" sx={{ fontWeight: 600, color: "#0F172A", letterSpacing: "-0.02em" }}>
           {copy.scoresTitle}
         </Typography>
         <Typography variant="body2" sx={{ color: "#64748B", mt: 0.4, fontWeight: 550 }}>
@@ -99,10 +100,10 @@ export function ScoresView({ assignments, copy }: { assignments: StudentDashboar
               onClick={() => setCourseFilter(tab.key as any)}
               sx={{
                 alignItems: "center",
-                bgcolor: active ? "#2563EB" : "#FFFFFF",
-                border: `1px solid ${active ? "#2563EB" : "#E2E8F0"}`,
+                bgcolor: active ? "#0071E3" : "#FFFFFF",
+                border: `1px solid ${active ? "#0071E3" : "#E2E8F0"}`,
                 borderRadius: "99px",
-                boxShadow: active ? "0 2px 8px rgba(37, 99, 235, 0.25)" : "none",
+                boxShadow: active ? "0 2px 8px rgba(0, 113, 227, 0.25)" : "none",
                 color: active ? "#FFFFFF" : "#475569",
                 cursor: "pointer",
                 display: "inline-flex",
@@ -116,8 +117,8 @@ export function ScoresView({ assignments, copy }: { assignments: StudentDashboar
                 transition: "all 140ms ease",
                 whiteSpace: "nowrap",
                 "&:hover": {
-                  bgcolor: active ? "#1D4ED8" : "#F8FAFC",
-                  borderColor: active ? "#1D4ED8" : "#CBD5E1",
+                  bgcolor: active ? "#0058B0" : "#FAFAFC",
+                  borderColor: active ? "#0058B0" : "#CBD5E1",
                   color: active ? "#FFFFFF" : "#0F172A",
                 },
               }}
@@ -130,7 +131,7 @@ export function ScoresView({ assignments, copy }: { assignments: StudentDashboar
                   borderRadius: "99px",
                   color: active ? "#FFFFFF" : "#64748B",
                   fontSize: 11,
-                  fontWeight: 700,
+                  fontWeight: 600,
                   px: 0.85,
                   py: 0.1,
                 }}
@@ -157,7 +158,7 @@ export function ScoresView({ assignments, copy }: { assignments: StudentDashboar
           <Box
             sx={{
               alignItems: "center",
-              background: "linear-gradient(135deg, #0284C7 0%, #2563EB 50%, #4F46E5 100%)",
+              background: "linear-gradient(135deg, #0284C7 0%, #0071E3 50%, #4F46E5 100%)",
               borderRadius: "14px",
               color: "#FFFFFF",
               display: "flex",
@@ -171,7 +172,7 @@ export function ScoresView({ assignments, copy }: { assignments: StudentDashboar
           </Box>
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Stack direction="row" spacing={1} alignItems="center" justifyContent="space-between" sx={{ mb: 0.4 }}>
-              <Typography variant="subtitle1" noWrap sx={{ color: "#0F172A", fontSize: 15, fontWeight: 800 }}>
+              <Typography variant="subtitle1" noWrap sx={{ color: "#0F172A", fontSize: 15, fontWeight: 600 }}>
                 [Tập huấn 2026] IC3 GS6
               </Typography>
               <Box
@@ -181,7 +182,7 @@ export function ScoresView({ assignments, copy }: { assignments: StudentDashboar
                   borderRadius: "99px",
                   color: "#059669",
                   fontSize: 11,
-                  fontWeight: 700,
+                  fontWeight: 600,
                   px: 1.15,
                   py: 0.25,
                 }}
@@ -196,7 +197,7 @@ export function ScoresView({ assignments, copy }: { assignments: StudentDashboar
               <Box sx={{ flex: 1, bgcolor: "#E2E8F0", borderRadius: 99, height: 5, overflow: "hidden" }}>
                 <Box sx={{ bgcolor: "#10B981", borderRadius: 99, height: "100%", width: "100%" }} />
               </Box>
-              <Typography variant="caption" sx={{ color: "#10B981", fontSize: 12, fontWeight: 800 }}>
+              <Typography variant="caption" sx={{ color: "#10B981", fontSize: 12, fontWeight: 600 }}>
                 100%
               </Typography>
             </Stack>
@@ -268,7 +269,7 @@ function ScoreRow({ assignment, copy }: { assignment: StudentDashboardAssignment
                 sx={{ bgcolor: "#F0F2F5", borderRadius: "7px", color: MUI_MUTED, fontWeight: 850, height: 28 }}
               />
             </Stack>
-            <Typography variant="caption" sx={{ color: MUI_MUTED, fontWeight: 750 }}>
+            <Typography variant="caption" sx={{ color: MUI_MUTED, fontWeight: 600 }}>
               {assignment.teacherName ?? "Chưa có giáo viên"}
             </Typography>
           </Stack>
@@ -282,13 +283,13 @@ function ScoreRow({ assignment, copy }: { assignment: StudentDashboardAssignment
               3 kết quả gần nhất
             </Typography>
             {latestAttempts.length ? (
-              <Box sx={{ border: `1px solid ${MUI_DIVIDER}`, borderRadius: "10px", overflow: "hidden" }}>
+              <Box sx={{ border: `1px solid ${MUI_DIVIDER}`, borderRadius: `${ergEnterpriseTokens.radius.md}px`, overflow: "hidden" }}>
                 {latestAttempts.map((attempt, index) => (
                   <Box
                     key={attempt.id}
                     sx={{
                       alignItems: "center",
-                      bgcolor: index % 2 ? "#fff" : "#F8FAFC",
+                      bgcolor: index % 2 ? "#fff" : "#FAFAFC",
                       borderTop: index ? `1px solid ${MUI_DIVIDER}` : "none",
                       display: "grid",
                       gap: 1,
@@ -310,7 +311,7 @@ function ScoreRow({ assignment, copy }: { assignment: StudentDashboardAssignment
                 ))}
               </Box>
             ) : (
-              <Box sx={{ bgcolor: "#F8FAFC", border: `1px dashed ${MUI_BORDER}`, borderRadius: "10px", px: 1.25, py: 1 }}>
+              <Box sx={{ bgcolor: "#FAFAFC", border: `1px dashed ${MUI_BORDER}`, borderRadius: `${ergEnterpriseTokens.radius.md}px`, px: 1.25, py: 1 }}>
                 <Typography variant="body2" sx={{ color: MUI_MUTED }}>
                   {copy.noRecentResults}
                 </Typography>
@@ -321,7 +322,7 @@ function ScoreRow({ assignment, copy }: { assignment: StudentDashboardAssignment
         <Box
           sx={{
             alignSelf: "stretch",
-            bgcolor: "#F8FAFC",
+            bgcolor: "#FAFAFC",
             borderLeft: { md: `1px solid ${MUI_DIVIDER}` },
             borderTop: { xs: `1px solid ${MUI_DIVIDER}`, md: "none" },
             display: "flex",
@@ -345,7 +346,7 @@ function ScoreRow({ assignment, copy }: { assignment: StudentDashboardAssignment
               value={scorePercent}
               variant="determinate"
               sx={{
-                bgcolor: "rgba(15,108,189,0.1)",
+                bgcolor: "rgba(0, 113, 227,0.1)",
                 borderRadius: 99,
                 height: 8,
                 mt: 1.2,
@@ -387,10 +388,10 @@ function ScoreMetricCard({
       <CardContent sx={{ p: 2.25 }}>
         <Stack direction="row" justifyContent="space-between" spacing={1.5}>
           <Box sx={{ minWidth: 0 }}>
-            <Typography noWrap variant="caption" sx={{ color: MUI_MUTED, fontWeight: 800, textTransform: "uppercase" }}>
+            <Typography noWrap variant="caption" sx={{ color: MUI_MUTED, fontWeight: 600, textTransform: "uppercase" }}>
               {label}
             </Typography>
-            <Typography variant="h5" sx={{ mt: 0.75, color: MUI_TEXT, fontWeight: 800 }}>
+            <Typography variant="h5" sx={{ mt: 0.75, color: MUI_TEXT, fontWeight: 600 }}>
               {value}
             </Typography>
           </Box>

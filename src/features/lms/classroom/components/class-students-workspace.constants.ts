@@ -1,4 +1,4 @@
-import { assignmentRuns } from "@/features/lms/classroom/api/mock-classroom-data";
+import { assignmentRuns } from "@/features/lms/classroom/api/classroom-defaults";
 import type { AssignmentKind, AssignmentLevel, AssignmentSubject } from "./class-students-workspace.types";
 
 export const TABLE_VISIBLE_ROWS = 20;

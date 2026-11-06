@@ -1,10 +1,11 @@
 import type { FormEvent } from "react";
 
-import { getCurrentAccount } from "@/platform/auth/api/auth-storage";
-import { readStoredAuthSession, type StoredAuthSession } from "@/platform/auth/api/auth-token-storage";
+import { getAuthScope, getCurrentAccount } from "@/platform/auth/api/auth-storage";
+import type { StoredAuthSession } from "@/platform/auth/api/auth-token-storage";
 import { loginStudent } from "@/platform/auth/api/student-auth-storage";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
 import { isAuthOnlyRedirect, sanitizeLocalRedirect } from "@/platform/auth/utils/auth-redirects";
+import { hasAdminLikeClaims } from "@/platform/auth/permissions/admin-like";
 import { PLATFORM_ROOT_ADMIN_EMAIL, projectVerifiedWorkspaces } from "@/platform/auth/permissions/workspace-capability-projection";
 import { resolveWorkspaceLandingTarget } from "@/platform/auth/utils/access-denied";
 import { canAccessPortal } from "@/platform/auth/utils/portal-access";
@@ -84,29 +85,46 @@ export function redirectAfterAuth(
   navigateTo: (path: string) => void,
   options: LoginRedirectOptions = {},
 ) {
-  const session = options.session ?? readStoredAuthSession(portal);
+  const session = options.session ?? getAuthScope(portal).session;
   const destination = options.hasExplicitRedirect === false
     ? resolveDefaultPostLoginRedirect(account, portal, session)
     : redirect;
   const targetPortal = portalForRedirect(destination, portal);
-  const teacherSession = readStoredAuthSession(targetPortal) ?? session;
+  const teacherSession = getAuthScope(targetPortal).session ?? session;
   const canAccessTarget = canAccessPortal({ portal: targetPortal, teacherAccount: account, teacherSession });
   navigateTo(canAccessTarget || isAuthOnlyRedirect(targetPortal, destination)
     ? destination
     : accessDeniedPath(targetPortal, account?.email ?? "", destination));
 }
 
+const LOCKED_CODES = new Set(["ACCOUNT_LOCKED", "AUTH_ACCOUNT_LOCKED"]);
+const TOO_MANY_CODES = new Set(["AUTH_TOO_MANY_ATTEMPTS", "RATE_LIMITED"]);
+
+/** "Thử lại sau X phút" when the backend put retry seconds in the error details; empty otherwise. */
+function retryHint(details: unknown) {
+  const seconds = details && typeof details === "object"
+    ? Number((details as Record<string, unknown>).retryAfterSeconds ?? (details as Record<string, unknown>).retry_after_seconds)
+    : NaN;
+  return Number.isFinite(seconds) && seconds > 0 ? ` Thử lại sau ${Math.ceil(seconds / 60)} phút.` : "";
+}
+
 export function getFriendlyAuthErrorMessage(error: unknown, fallback: string) {
   if (error instanceof ApiClientError) {
     if (error.status === 0 || error.code === "NETWORK_ERROR" || error.code === "API_BASE_MISSING") {
-      return "Chưa kết nối được máy chủ ERG. Vui lòng kiểm tra API/backend hoặc cấu hình môi trường rồi thử lại.";
+      return "Chưa kết nối được máy chủ ERG. Vui lòng kiểm tra kết nối mạng rồi thử lại.";
+    }
+    if (LOCKED_CODES.has(error.code) || error.status === 423) {
+      return `Tài khoản đang tạm khóa do đăng nhập sai nhiều lần.${retryHint(error.details) || " Vui lòng thử lại sau ít phút hoặc liên hệ quản trị viên để được mở khóa."}`;
+    }
+    if (TOO_MANY_CODES.has(error.code) || error.status === 429) {
+      return `Bạn đã thử đăng nhập quá nhiều lần.${retryHint(error.details) || " Vui lòng thử lại sau ít phút."}`;
     }
     if (error.status === 401) return "Email hoặc mật khẩu chưa đúng. Vui lòng kiểm tra lại thông tin đăng nhập.";
     if (error.code === "AUTH_LOGIN_IN_PROGRESS") return "Một tab khác đang xử lý đăng nhập cho tài khoản này. Vui lòng chờ một chút rồi thử lại.";
     return error.message || fallback;
   }
   if (error instanceof TypeError && error.message.toLowerCase().includes("fetch")) {
-    return "Chưa kết nối được máy chủ ERG. Vui lòng kiểm tra API/backend hoặc cấu hình môi trường rồi thử lại.";
+    return "Chưa kết nối được máy chủ ERG. Vui lòng kiểm tra kết nối mạng rồi thử lại.";
   }
   if (error instanceof Error) return error.message || fallback;
   return fallback;
@@ -127,19 +145,19 @@ export function googleEmailFromIdToken(idToken?: string) {
 }
 
 export function sanitizeRedirect(value: string | null, fallback = "/") {
-  return !value || !value.startsWith("/") || value.startsWith("//") ? fallback : value;
+  return !value || !value.startsWith("/") || value.startsWith("//") || value.includes("\\") ? fallback : value;
 }
 
 export function defaultPortalRedirect(portal: PortalKey) {
   if (portal === "lcms") return adminPath("/content/resources");
-  if (portal === "lms") return teacherPath("/");
+  if (portal === "lms") return teacherPath("/home");
   return "/";
 }
 
 export function resolveDefaultPostLoginRedirect(
   account: TeacherAccount | null | undefined,
   portal: PortalKey,
-  session: StoredAuthSession | null = readStoredAuthSession(portal),
+  session: StoredAuthSession | null = getAuthScope(portal).session,
 ) {
   // Keep the dedicated portal defaults for an explicit Admin/Student login;
   // workspace inference is needed for the shared LMS login only.
@@ -181,8 +199,7 @@ function preferredWorkspaceForLogin(
   const roles = [...(account?.roles ?? []), ...(session?.roles ?? [])].map((role) => role.trim().toLowerCase());
   const adminLike = account?.role === "admin"
     || account?.email.trim().toLowerCase() === PLATFORM_ROOT_ADMIN_EMAIL
-    || roles.some((role) => ["admin", "super_admin", "super-admin", "system.super_admin", "erg_super_admin", "global_admin", "lms_admin"].includes(role))
-    || session?.permissions?.some((permission) => permission.trim().toLowerCase() === "lms.admin" || permission.trim() === "*") === true;
+    || hasAdminLikeClaims(roles, session?.permissions);
 
   if (adminLike) return "ADMIN";
 
@@ -210,6 +227,7 @@ function portalForRedirect(redirect: string, fallback: PortalKey): PortalKey {
 
 function isAccessDeniedError(error: unknown) {
   if (!(error instanceof ApiClientError)) return false;
+  if (LOCKED_CODES.has(error.code)) return false;
   const code = error.code.toLowerCase();
   return error.status === 403 || code.includes("forbidden") || code.includes("denied") || code.includes("permission");
 }

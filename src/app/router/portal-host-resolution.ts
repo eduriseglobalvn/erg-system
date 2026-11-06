@@ -7,6 +7,7 @@ import {
 } from "@/config/portal-urls";
 import { workspaceFromLegacyPortal, type LegacyPortal } from "@/platform/workspaces/legacy-portal-compat";
 import { resolveWorkspaceLocation, type Workspace } from "@/platform/workspaces/workspace-domain";
+import { isCanonicalLmsWorkspaceHost } from "@/platform/workspaces/workspace-route";
 import { desktopWorkspaceFromLocation, getDesktopRuntime } from "@/platform/desktop";
 
 export type ActivePortal = LegacyPortal | null;
@@ -22,6 +23,7 @@ export function resolveActivePortal(): ActivePortal {
   if (isPortalHost(LCMS_PORTAL_HOSTS)) return "lcms";
   if (isPortalHost(CRM_PORTAL_HOSTS)) return "crm";
   if (isPortalHost(ELEARNING_PORTAL_HOSTS)) return "elearning";
+  if (typeof window !== "undefined" && isCanonicalLmsWorkspaceHost(window.location)) return "lms";
   return null;
 }
 
@@ -38,8 +40,4 @@ export function resolveActiveWorkspace(): Workspace | undefined {
 
   const portal = resolveActivePortal();
   return portal ? workspaceFromLegacyPortal(portal) : undefined;
-}
-
-export function isCanonicalLmsWorkspaceHost() {
-  return isPortalHost(["lms.erg.edu.vn"]);
 }

@@ -4,14 +4,17 @@ import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import Toolbar from "@mui/material/Toolbar";
+import type { SxProps, Theme } from "@mui/material/styles";
 import { useState, type ReactNode } from "react";
 import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
 
 import { PortalHeaderActions } from "./portal-header-actions";
 import { PortalHeaderIdentity } from "./portal-header-identity";
-import { PORTAL_NOTIFICATIONS, type PortalNotificationTab } from "./portal-header-notification-data";
+import type { PortalNotificationTab } from "./portal-header-notification-data";
 import { PortalHeaderNotifications } from "./portal-header-notifications";
 import { portalHeaderAppBarSx } from "./portal-header-styles";
+import { notificationPortalFromPath, usePortalNotifications } from "./use-portal-notifications";
+
 import type { Workspace } from "@/platform/workspaces/workspace-domain";
 
 interface HeaderProps {
@@ -28,8 +31,11 @@ interface HeaderProps {
   workspaceCapabilities?: readonly Workspace[];
   workspacePortals?: string[];
   onMenuOpen?: () => void;
+  onNavigate?: (path: string) => void;
   onSignOut?: () => void;
 }
+
+const toSxArray = (sx: SxProps<Theme>) => (Array.isArray(sx) ? sx : [sx]);
 
 export default function ErgPortalHeader({
   centerName,
@@ -42,25 +48,33 @@ export default function ErgPortalHeader({
   scrolled = false,
   userName,
   userEmail,
+  workspaceCapabilities,
+  workspacePortals,
   onMenuOpen,
+  onNavigate,
   onSignOut,
 }: HeaderProps) {
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<PortalNotificationTab>("all");
-  const notifications = activeTab === "unread"
-    ? PORTAL_NOTIFICATIONS.filter((notification) => !notification.isRead)
-    : PORTAL_NOTIFICATIONS;
+  const { notifications, unreadCount } = usePortalNotifications(
+    notificationPortalFromPath(typeof window === "undefined" ? "" : window.location.pathname),
+    activeTab,
+    notificationOpen,
+  );
+
+  // Menu-level pages carry their own title (design canvas): no empty bar on desktop, the phone keeps it for the menu button.
+  const desktopEmpty = hideIdentity && !headerControls && !headerTrailingControls;
 
   return (
     <>
-      <AppBar position="sticky" sx={portalHeaderAppBarSx(scrolled)}>
+      <AppBar position="sticky" sx={[...toSxArray(portalHeaderAppBarSx(scrolled)), desktopEmpty && { display: { lg: "none" } }]}>
         <Toolbar sx={{ gap: { xs: 0.5, sm: 1 }, minHeight: { xs: "46px !important", md: "50px !important" }, px: { xs: "12px !important", sm: "16px !important", md: "24px !important" }, position: "relative", zIndex: 1 }}>
           {onMenuOpen ? (
             <IconButton
               aria-label="Mở menu"
               onClick={onMenuOpen}
               size="small"
-              sx={{ display: { xs: "inline-flex", lg: "none" }, flexShrink: 0, mr: 0.25 }}
+              sx={{ display: { xs: "inline-flex", lg: "none" }, flexShrink: 0, height: { xs: 44, md: "auto" }, mr: 0.25, width: { xs: 44, md: "auto" } }}
             >
               <MenuRoundedIcon sx={{ fontSize: 20 }} />
             </IconButton>
@@ -74,14 +88,19 @@ export default function ErgPortalHeader({
             portalPlan={portalPlan}
           />
           <Box sx={{ flex: 1, minWidth: 8 }} />
-          <Box sx={{ display: { xs: "inline-flex", lg: "none" } }}>
-            <PortalHeaderActions
-              notificationCount={notificationCount}
-              onOpenNotifications={() => setNotificationOpen(true)}
-              userName={userName}
-              userEmail={userEmail}
-              onSignOut={onSignOut}
-            />
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+            <Box sx={{ display: { xs: "inline-flex", lg: "none" } }}>
+              <PortalHeaderActions
+                notificationCount={unreadCount ?? notificationCount}
+                onOpenNotifications={() => setNotificationOpen(true)}
+                userName={userName}
+                userEmail={userEmail}
+                onNavigate={onNavigate}
+                onSignOut={onSignOut}
+                workspaceCapabilities={workspaceCapabilities}
+                workspacePortals={workspacePortals}
+              />
+            </Box>
           </Box>
         </Toolbar>
       </AppBar>

@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
 import { Navigate, useLocation } from "@tanstack/react-router";
 
-import { getCurrentAccount } from "@/platform/auth/api/auth-storage";
-import { readStoredAuthSession, type StoredAuthSession } from "@/platform/auth/api/auth-token-storage";
+import { getAuthScope, getCurrentAccount } from "@/platform/auth/api/auth-storage";
+import type { StoredAuthSession } from "@/platform/auth/api/auth-token-storage";
 import { getCurrentStudentSession } from "@/platform/auth/api/student-auth-storage";
 import { ReauthDialog } from "@/platform/auth/components/reauth-dialog";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
@@ -20,9 +20,12 @@ type PortalAuthGateProps = {
   requiredPermission?: string;
 };
 
-export function PortalAuthGate({ children, portal, requiredPermission }: PortalAuthGateProps) {
-  if (AUTH_BYPASS_ENABLED) return <>{children}</>;
+// The bypass check lives in a thin wrapper so the enforcing gates can call hooks unconditionally.
+export function PortalAuthGate(props: PortalAuthGateProps) {
+  return AUTH_BYPASS_ENABLED ? <>{props.children}</> : <EnforcedPortalAuthGate {...props} />;
+}
 
+function EnforcedPortalAuthGate({ children, portal, requiredPermission }: PortalAuthGateProps) {
   const auth = useAuthSession(portal);
   const location = useLocation();
   const redirect = buildRedirectPath(location.pathname, location.searchStr, location.hash);
@@ -42,7 +45,7 @@ export function PortalAuthGate({ children, portal, requiredPermission }: PortalA
     .map((candidate) => getCurrentAccount(candidate))
     .find((candidate): candidate is NonNullable<typeof candidate> => Boolean(candidate));
   const storedTeacherSession = compatibilityPortals
-    .map((candidate) => readStoredAuthSession(candidate))
+    .map((candidate) => getAuthScope(candidate).session)
     .find((candidate): candidate is NonNullable<typeof candidate> => Boolean(candidate));
   const teacherAccount = isBffAuthEnabled()
     ? auth.account ?? null
@@ -80,8 +83,10 @@ export function PortalAuthGate({ children, portal, requiredPermission }: PortalA
 }
 
 export function AuthenticatedAccountGate({ children }: { children: ReactNode }) {
-  if (AUTH_BYPASS_ENABLED) return <>{children}</>;
+  return AUTH_BYPASS_ENABLED ? <>{children}</> : <EnforcedAuthenticatedAccountGate>{children}</EnforcedAuthenticatedAccountGate>;
+}
 
+function EnforcedAuthenticatedAccountGate({ children }: { children: ReactNode }) {
   const auth = useAuthSession();
   const location = useLocation();
 

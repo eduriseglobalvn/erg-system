@@ -1,21 +1,42 @@
+import { memo } from "react";
+import Box from "@mui/material/Box";
+import ButtonBase from "@mui/material/ButtonBase";
+import LinearProgress from "@mui/material/LinearProgress";
 import LmsCheckbox from "@mui/material/Checkbox";
+import Skeleton from "@mui/material/Skeleton";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Typography from "@mui/material/Typography";
+import type { SxProps, Theme } from "@mui/material/styles";
 
+import { ErgButton } from "@/components/erg-mui/erg-actions";
+import { ErgTable } from "@/components/erg-mui/erg-table";
 import {
-  getMockBirthDate,
-  getMockStudentLevel,
-  StudentLevelBadge,
   type AssignHomeworkGroupOption,
 } from "@/features/lms/components/assign-homework-student-utils";
 import type { AssignmentCatalogItem } from "@/features/lms/classroom/components/class-students-workspace.types";
-import type { ClassroomSnapshot, ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
-import { cn } from "@/lib/utils";
+import type { ClassroomSnapshot, ClassroomStudent } from "@/domain/school/classroom-types";
 
 export type AssignmentGroupItem = AssignHomeworkGroupOption;
 
+// Sticky cells must stay opaque, so the selection/hover tint is layered over the paper colour.
+const tint = (color: string) => `linear-gradient(${color}, ${color})`;
+
+const selectableCardSx = (checked: boolean) => ({
+  border: 1,
+  borderColor: checked ? "primary.main" : "divider",
+  borderRadius: 2,
+  bgcolor: checked ? "info.light" : "background.paper",
+  boxShadow: 1,
+});
+
 export function AssignmentCheckbox({ checked, onChange, label }: { checked: boolean; onChange: () => void; label: string }) {
   return (
-    <span
-      className="mx-auto inline-flex items-center justify-center"
+    <Box
+      component="span"
+      sx={{ mx: "auto", display: "inline-flex", alignItems: "center", justifyContent: "center" }}
       onClick={(event) => event.stopPropagation()}
     >
       <LmsCheckbox
@@ -23,89 +44,156 @@ export function AssignmentCheckbox({ checked, onChange, label }: { checked: bool
         onChange={() => onChange()}
         size="small"
         slotProps={{ input: { "aria-label": label } }}
-        sx={{ p: 0, color: "#696CFF", "&.Mui-checked": { color: "#696CFF" }, "&.MuiCheckbox-indeterminate": { color: "#696CFF" } }}
+        sx={{ p: 0, color: "primary.main", "&.Mui-checked, &.MuiCheckbox-indeterminate": { color: "primary.main" } }}
       />
-    </span>
+    </Box>
   );
 }
 
-function StudentProgressCell({ value }: { value: number }) {
+function StudentProgressCell({ value, available = true }: { value: number; available?: boolean }) {
+  if (!available) return <Typography component="span" variant="body2" sx={{ color: "text.secondary", fontWeight: "fontWeightMedium" }}>—</Typography>;
   return (
-    <div className="min-w-[120px]">
-      <div className="flex items-center justify-between gap-2 text-[13px] font-semibold text-slate-700">
-        <span>{value}%</span>
-      </div>
-      <div className="mt-1 h-1.5 overflow-hidden rounded-md bg-[#EEF2F7]">
-        <div className="h-full rounded-full bg-[#696CFF]" style={{ width: `${Math.min(100, Math.max(0, value))}%` }} />
-      </div>
-    </div>
+    <Box sx={{ minWidth: 120 }}>
+      <Typography component="div" variant="body2" sx={{ fontWeight: "fontWeightMedium" }}>{value}%</Typography>
+      <Box sx={{ mt: 0.5, height: 6, overflow: "hidden", borderRadius: 1, bgcolor: "action.hover" }}>
+        <Box sx={{ height: "100%", borderRadius: 1, bgcolor: "primary.main", width: `${Math.min(100, Math.max(0, value))}%` }} />
+      </Box>
+    </Box>
   );
 }
+
+const SKELETON_ROWS = Array.from({ length: 8 }, (_, i) => i);
+
+const cellSx = { borderRight: 1, borderColor: "divider" } as const;
+const stickyCol = (left: number) => ({ ...cellSx, position: "sticky", left, zIndex: 2 }) as const;
+const headStickyCol = (left: number) => ({ ...cellSx, position: "sticky", left, top: 0, zIndex: 4 }) as const;
+
+function StudentSelectionSkeletonRow({ index }: { index: number }) {
+  return (
+    <TableRow sx={{ "& td": { bgcolor: "background.paper" } }}>
+      <TableCell align="center" sx={stickyCol(0)}>
+        <Skeleton variant="rounded" width={18} height={18} sx={{ mx: "auto", borderRadius: 0.5 }} />
+      </TableCell>
+      <TableCell align="center" sx={stickyCol(48)}>
+        <Skeleton variant="text" width={20} height={18} sx={{ mx: "auto" }} />
+      </TableCell>
+      <TableCell sx={stickyCol(104)}>
+        <Skeleton variant="text" width={110 + (index % 4) * 20} height={18} />
+      </TableCell>
+      <TableCell sx={cellSx}><Skeleton variant="text" width={40} height={18} /></TableCell>
+      <TableCell sx={cellSx}><Skeleton variant="text" width={140} height={18} /></TableCell>
+      <TableCell sx={cellSx}><Skeleton variant="rounded" width={120} height={10} sx={{ borderRadius: 0.5 }} /></TableCell>
+      <TableCell sx={cellSx}><Skeleton variant="text" width={85} height={18} /></TableCell>
+    </TableRow>
+  );
+}
+
+export const StudentSelectionTableRow = memo(function StudentSelectionTableRow({
+  student,
+  index,
+  isChecked,
+  onToggleStudent,
+}: {
+  student: ClassroomStudent;
+  index: number;
+  isChecked: boolean;
+  onToggleStudent: (studentId: string) => void;
+}) {
+  return (
+    <TableRow
+      onClick={() => onToggleStudent(student.id)}
+      sx={(theme) => ({
+        cursor: "pointer",
+        userSelect: "none",
+        "& td": {
+          bgcolor: "background.paper",
+          backgroundImage: isChecked ? tint(theme.palette.info.light) : "none",
+          transition: "background-color 100ms",
+        },
+        "&:hover td": {
+          bgcolor: "background.paper",
+          backgroundImage: tint(isChecked ? theme.palette.info.light : theme.palette.action.hover),
+        },
+      })}
+    >
+      <TableCell align="center" sx={stickyCol(0)}>
+        <AssignmentCheckbox checked={isChecked} onChange={() => onToggleStudent(student.id)} label={`Chọn ${student.name}`} />
+      </TableCell>
+      <TableCell align="center" sx={{ ...stickyCol(48), color: "text.secondary", fontWeight: "fontWeightMedium" }}>
+        {index + 1}
+      </TableCell>
+      <TableCell sx={{ ...stickyCol(104), color: "primary.main", fontWeight: "fontWeightBold", "&:hover": { textDecoration: "underline" } }}>
+        {student.name}
+      </TableCell>
+      <TableCell sx={{ ...cellSx, fontWeight: "fontWeightMedium" }}>{student.className}</TableCell>
+      <TableCell sx={{ ...cellSx, fontWeight: "fontWeightMedium" }}>{student.currentAssignment}</TableCell>
+      <TableCell sx={cellSx}>
+        <StudentProgressCell available={student.hasProgressData === true} value={student.progressRate} />
+      </TableCell>
+      <TableCell sx={{ ...cellSx, color: "text.secondary", fontWeight: "fontWeightMedium" }}>{student.lastActivity}</TableCell>
+    </TableRow>
+  );
+});
 
 export function StudentSelectionTable({
   allSelected,
-  className,
+  sx,
+  isLoading = false,
   onToggleAll,
   onToggleStudent,
   selectedIds,
   students,
 }: {
   allSelected: boolean;
-  className?: string;
+  sx?: SxProps<Theme>;
+  isLoading?: boolean;
   onToggleAll: () => void;
   onToggleStudent: (studentId: string) => void;
   selectedIds: Set<string>;
   students: ClassroomStudent[];
 }) {
   return (
-    <div className={cn("min-h-0 flex-1 overflow-auto", className)}>
-      <table className="erg-data-table min-w-[1160px] w-full border-separate border-spacing-0 text-[14px]">
-        <thead>
-          <tr className="bg-[#F4F6F8] text-[13px] font-bold tracking-normal text-[#344054]">
-            <th className="sticky left-0 top-0 z-40 w-12 border-b border-r border-[#D9E2EF] bg-[#F4F6F8] px-3 py-3 text-center">
+    <Box sx={[{ minHeight: 0, flex: 1, overflow: "auto", position: "relative" }, ...(Array.isArray(sx) ? sx : [sx])]}>
+      {isLoading && students.length > 0 ? (
+        <LinearProgress sx={{ position: "sticky", top: 0, left: 0, zIndex: 50, height: 2 }} />
+      ) : null}
+      <ErgTable sx={{ minWidth: 1160, width: "100%", borderCollapse: "separate", borderSpacing: 0 }}>
+        <TableHead>
+          <TableRow>
+            <TableCell align="center" sx={{ ...headStickyCol(0), width: 48 }}>
               <AssignmentCheckbox checked={allSelected} onChange={onToggleAll} label="Chọn tất cả học sinh" />
-            </th>
-            <th className="sticky left-12 top-0 z-40 w-14 border-b border-r border-[#D9E2EF] bg-[#F4F6F8] px-3 py-3 text-center">STT</th>
-            <th className="sticky left-[104px] top-0 z-40 w-52 border-b border-r border-[#D9E2EF] bg-[#F4F6F8] px-3 py-3 text-left">Học sinh</th>
-            <th className="sticky top-0 z-30 border-b border-r border-[#D9E2EF] bg-[#F4F6F8] px-3 py-3 text-left">Ngày sinh</th>
-            <th className="sticky top-0 z-30 border-b border-r border-[#D9E2EF] bg-[#F4F6F8] px-3 py-3 text-left">Lớp</th>
-            <th className="sticky top-0 z-30 border-b border-r border-[#D9E2EF] bg-[#F4F6F8] px-3 py-3 text-left">Xếp loại</th>
-            <th className="sticky top-0 z-30 border-b border-r border-[#D9E2EF] bg-[#F4F6F8] px-3 py-3 text-left">Bài hiện tại</th>
-            <th className="sticky top-0 z-30 border-b border-r border-[#D9E2EF] bg-[#F4F6F8] px-3 py-3 text-left">Tiến độ</th>
-            <th className="sticky top-0 z-30 border-b border-r border-[#D9E2EF] bg-[#F4F6F8] px-3 py-3 text-left">Hoạt động gần nhất</th>
-          </tr>
-        </thead>
-        <tbody>
-          {students.map((student, index) => {
-            const isChecked = selectedIds.has(student.id);
-            const level = getMockStudentLevel(student.status);
-            return (
-              <tr key={student.id} className={cn("group transition-colors", isChecked ? "bg-[var(--erg-blue-light)]" : "bg-white hover:bg-[#f8fbff]")}>
-                <td className="sticky left-0 z-20 border-b border-r border-[#dbe4f0] bg-inherit px-3 py-2 text-center">
-                  <AssignmentCheckbox checked={isChecked} onChange={() => onToggleStudent(student.id)} label={`Chọn ${student.name}`} />
-                </td>
-                <td className="sticky left-12 z-20 border-b border-r border-[#dbe4f0] bg-inherit px-3 py-2 text-center text-[13px] font-semibold text-slate-600">
-                  {index + 1}
-                </td>
-                <td className="sticky left-[104px] z-20 border-b border-r border-[#dbe4f0] bg-inherit px-3 py-2 font-bold text-[var(--erg-blue)]">
-                  {student.name}
-                </td>
-                <td className="border-b border-r border-[#dbe4f0] px-3 py-2 text-[13px] font-semibold text-slate-700">{getMockBirthDate(index)}</td>
-                <td className="border-b border-r border-[#dbe4f0] px-3 py-2 text-[13px] font-semibold text-slate-700">{student.className}</td>
-                <td className="border-b border-r border-[#dbe4f0] px-3 py-2">
-                  <StudentLevelBadge level={level} />
-                </td>
-                <td className="border-b border-r border-[#dbe4f0] px-3 py-2 text-[13px] font-semibold text-slate-800">{student.currentAssignment}</td>
-                <td className="border-b border-r border-[#dbe4f0] px-3 py-2">
-                  <StudentProgressCell value={student.progressRate} />
-                </td>
-                <td className="border-b border-r border-[#dbe4f0] px-3 py-2 text-[13px] font-semibold text-slate-600">{student.lastActivity}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
+            </TableCell>
+            <TableCell align="center" sx={{ ...headStickyCol(48), width: 56 }}>STT</TableCell>
+            <TableCell sx={{ ...headStickyCol(104), width: 208 }}>Học sinh</TableCell>
+            <TableCell sx={cellSx}>Lớp</TableCell>
+            <TableCell sx={cellSx}>Bài hiện tại</TableCell>
+            <TableCell sx={cellSx}>Tiến độ</TableCell>
+            <TableCell sx={cellSx}>Hoạt động gần nhất</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody sx={{ transition: "opacity 200ms", opacity: isLoading && students.length > 0 ? 0.6 : 1 }}>
+          {isLoading && students.length === 0 ? (
+            SKELETON_ROWS.map((idx) => <StudentSelectionSkeletonRow key={idx} index={idx} />)
+          ) : students.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={7} align="center" sx={{ py: 6, color: "text.secondary" }}>
+                Chưa có dữ liệu học sinh của lớp này
+              </TableCell>
+            </TableRow>
+          ) : (
+            students.map((student, index) => (
+              <StudentSelectionTableRow
+                key={student.id}
+                student={student}
+                index={index}
+                isChecked={selectedIds.has(student.id)}
+                onToggleStudent={onToggleStudent}
+              />
+            ))
+          )}
+        </TableBody>
+      </ErgTable>
+    </Box>
   );
 }
 
@@ -125,81 +213,157 @@ export function MobileAssignProgress({
   ];
 
   return (
-    <section className="shrink-0 border-b border-[#d9e2ef] bg-white px-3 py-2 md:hidden">
-      <div className="flex items-center justify-between gap-3">
-        <div className="min-w-0 truncate text-[13px] font-extrabold text-slate-900">
+    <Box component="section" sx={{ flexShrink: 0, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 1.5, py: 1, display: { md: "none" } }}>
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1.5 }}>
+        <Typography noWrap variant="body2" sx={{ minWidth: 0, fontWeight: "fontWeightBold" }}>
           Giao bài · {targetLabel} · {selectedCount} đã chọn
-        </div>
-        <span className="shrink-0 rounded-full border border-[#b8d6fa] bg-[#eef7ff] px-2.5 py-1 text-[11px] font-extrabold text-[#0f6cbd]">
+        </Typography>
+        <Typography
+          component="span"
+          variant="caption"
+          sx={{ flexShrink: 0, borderRadius: 999, border: 1, borderColor: "primary.main", bgcolor: "info.light", px: 1.25, py: 0.5, fontWeight: "fontWeightBold", color: "primary.main" }}
+        >
           Bước {step}/2
-        </span>
-      </div>
-      <div className="mt-2 grid grid-cols-2 gap-2">
+        </Typography>
+      </Box>
+      <Box sx={{ mt: 1, display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 1 }}>
         {steps.map((item) => (
-          <div key={item.id} className="min-w-0">
-            <div className={cn("h-1 rounded-full", step >= item.id ? "bg-[#0f6cbd]" : "bg-[#d9e2ef]")} />
-            <div className={cn("mt-1 truncate text-[10.5px] font-bold", step === item.id ? "text-[#0f6cbd]" : "text-slate-500")}>
+          <Box key={item.id} sx={{ minWidth: 0 }}>
+            <Box sx={{ height: 4, borderRadius: 999, bgcolor: step >= item.id ? "primary.main" : "divider" }} />
+            <Typography
+              noWrap
+              variant="caption"
+              sx={{ display: "block", mt: 0.5, fontWeight: "fontWeightBold", color: step === item.id ? "primary.main" : "text.secondary" }}
+            >
               {item.label}
-            </div>
-          </div>
+            </Typography>
+          </Box>
         ))}
-      </div>
-    </section>
+      </Box>
+    </Box>
   );
 }
 
 export function MobileStudentSelectionList({
   allSelected,
+  isLoading = false,
   onToggleAll,
   onToggleStudent,
   selectedIds,
   students,
 }: {
   allSelected: boolean;
+  isLoading?: boolean;
   onToggleAll: () => void;
   onToggleStudent: (studentId: string) => void;
   selectedIds: Set<string>;
   students: ClassroomStudent[];
 }) {
   return (
-    <div className="min-h-0 flex-1 overflow-y-auto rounded-[16px] bg-[#f5f7fb] md:hidden">
-      <button
-        type="button"
-        className="sticky top-0 z-10 grid min-h-11 w-full grid-cols-[minmax(0,1fr)_28px] items-center gap-2 border-b border-[#d9e2ef] bg-white px-3 text-left text-[12px] font-extrabold text-slate-700 shadow-[0_8px_18px_rgba(15,23,42,0.04)]"
+    <Box sx={{ minHeight: 0, flex: 1, overflowY: "auto", borderRadius: 2, bgcolor: "background.default", display: { md: "none" } }}>
+      <ButtonBase
         onClick={onToggleAll}
+        sx={{
+          position: "sticky",
+          top: 0,
+          zIndex: 10,
+          display: "grid",
+          minHeight: 44,
+          width: "100%",
+          gridTemplateColumns: "minmax(0, 1fr) 28px",
+          alignItems: "center",
+          gap: 1,
+          borderBottom: 1,
+          borderColor: "divider",
+          bgcolor: "background.paper",
+          px: 1.5,
+          textAlign: "left",
+          boxShadow: 1,
+        }}
       >
-        <span className="min-w-0 truncate">{allSelected ? "Bỏ chọn tất cả" : "Chọn tất cả"}</span>
+        <Typography noWrap component="span" variant="caption" sx={{ minWidth: 0, fontWeight: "fontWeightBold" }}>
+          {allSelected ? "Bỏ chọn tất cả" : "Chọn tất cả"}
+        </Typography>
         <AssignmentCheckbox checked={allSelected} onChange={onToggleAll} label="Chọn tất cả học sinh trong danh sách lọc" />
-      </button>
-      <div className="grid max-h-[330px] gap-1.5 overflow-y-auto p-2">
-        {students.length === 0 ? (
-          <div className="rounded-[14px] border border-dashed border-[#cbd7e6] bg-white px-4 py-5 text-center">
-            <div className="text-[14px] font-extrabold text-slate-900">Không có học sinh</div>
-            <div className="mt-1 text-[12px] font-semibold leading-5 text-slate-500">Thử chọn lại lớp hoặc xóa bộ lọc tìm kiếm.</div>
-          </div>
+      </ButtonBase>
+      <Box sx={{ display: "grid", maxHeight: 330, gap: 0.75, overflowY: "auto", p: 1 }}>
+        {isLoading && students.length === 0 ? (
+          Array.from({ length: 5 }).map((_, i) => (
+            <Box key={i} sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1.5, borderRadius: 2, bgcolor: "background.paper", p: 1.5, boxShadow: 1 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                <Skeleton variant="rounded" width={18} height={18} sx={{ borderRadius: 0.5 }} />
+                <Box sx={{ display: "grid", gap: 0.5 }}>
+                  <Skeleton variant="text" width={120} height={16} />
+                  <Skeleton variant="text" width={60} height={12} />
+                </Box>
+              </Box>
+              <Skeleton variant="rounded" width={40} height={18} sx={{ borderRadius: 1 }} />
+            </Box>
+          ))
+        ) : students.length === 0 ? (
+          <Box sx={{ borderRadius: 2, border: 1, borderStyle: "dashed", borderColor: "divider", bgcolor: "background.paper", px: 2, py: 2.5, textAlign: "center" }}>
+            <Typography variant="body2" sx={{ fontWeight: "fontWeightBold" }}>Không có học sinh</Typography>
+            <Typography variant="caption" sx={{ display: "block", mt: 0.5, color: "text.secondary", fontWeight: "fontWeightMedium" }}>
+              Thử chọn lại lớp hoặc xóa bộ lọc tìm kiếm.
+            </Typography>
+          </Box>
         ) : null}
         {students.map((student) => {
           const checked = selectedIds.has(student.id);
           return (
-            <button
+            <ButtonBase
               key={student.id}
-              type="button"
-              className={cn(
-                "flex min-h-[54px] items-center gap-2.5 rounded-[14px] border px-3 py-2 text-left shadow-[0_8px_18px_rgba(15,23,42,0.04)] transition active:scale-[0.99]",
-                checked ? "border-[#9cc7f5] bg-[#eef7ff]" : "border-white bg-white",
-              )}
               onClick={() => onToggleStudent(student.id)}
+              sx={[
+                selectableCardSx(checked),
+                { display: "flex", minHeight: 54, alignItems: "center", justifyContent: "flex-start", gap: 1.25, px: 1.5, py: 1, textAlign: "left", "&:active": { transform: "scale(0.99)" } },
+              ]}
             >
               <AssignmentCheckbox checked={checked} onChange={() => onToggleStudent(student.id)} label={`Chọn ${student.name}`} />
-              <div className="min-w-0 flex-1">
-                <div className="truncate text-[14px] font-bold text-slate-950">{student.name}</div>
-                <div className="mt-0.5 truncate text-[12px] font-semibold text-slate-500">{student.className}</div>
-              </div>
-            </button>
+              <Box sx={{ minWidth: 0, flex: 1 }}>
+                <Typography noWrap variant="body2" sx={{ fontWeight: "fontWeightBold" }}>{student.name}</Typography>
+                <Typography noWrap variant="caption" sx={{ display: "block", mt: 0.25, color: "text.secondary", fontWeight: "fontWeightMedium" }}>
+                  {student.className}
+                </Typography>
+              </Box>
+            </ButtonBase>
           );
         })}
-      </div>
-    </div>
+      </Box>
+    </Box>
+  );
+}
+
+function MobilePreviewCard({
+  checked,
+  checkboxLabel,
+  meta,
+  name,
+  onOpenPreview,
+  onToggle,
+}: {
+  checked: boolean;
+  checkboxLabel: string;
+  meta: string;
+  name: string;
+  onOpenPreview: () => void;
+  onToggle: () => void;
+}) {
+  return (
+    <Box component="article" sx={[selectableCardSx(checked), { p: 1.5 }]}>
+      <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1.5 }}>
+        <AssignmentCheckbox checked={checked} onChange={onToggle} label={checkboxLabel} />
+        <ButtonBase onClick={onOpenPreview} sx={{ minWidth: 0, flex: 1, display: "block", textAlign: "left" }}>
+          <Typography noWrap component="span" variant="body2" sx={{ display: "block", fontWeight: "fontWeightBold" }}>{name}</Typography>
+          <Typography component="span" variant="caption" sx={{ display: "block", mt: 0.25, color: "text.secondary", fontWeight: "fontWeightMedium" }}>
+            {meta}
+          </Typography>
+        </ButtonBase>
+        <ErgButton variant="outlined" size="small" onClick={onOpenPreview} sx={{ height: 40, flexShrink: 0 }}>
+          Xem
+        </ErgButton>
+      </Box>
+    </Box>
   );
 }
 
@@ -217,28 +381,22 @@ export function MobileAssignmentGroupList({
   selectedStudentIdsByGroup: Record<string, string[]>;
 }) {
   return (
-    <div className="grid gap-3 bg-[#f3f6fb] p-3 md:hidden">
+    <Box sx={{ display: { xs: "grid", md: "none" }, gap: 1.5, bgcolor: "background.default", p: 1.5 }}>
       {groups.map((group) => {
-        const checked = selectedGroupIds.has(group.id);
         const selectedCount = selectedStudentIdsByGroup[group.id]?.length ?? group.studentIds.length;
         return (
-          <article key={group.id} className={cn("rounded-[16px] border p-3 shadow-[0_10px_26px_rgba(96,165,250,0.08)]", checked ? "border-[#b8d6fa] bg-[#eff7ff]" : "border-white bg-white")}>
-            <div className="flex items-start gap-3">
-              <AssignmentCheckbox checked={checked} onChange={() => onToggleGroup(group.id)} label={`Chọn nhóm ${group.name}`} />
-              <button type="button" className="min-w-0 flex-1 text-left" onClick={() => onOpenPreview(group.id)}>
-                <span className="block truncate text-[14px] font-bold text-slate-950">{group.name}</span>
-                <span className="mt-0.5 block text-[12px] font-semibold text-slate-500">
-                  {group.source} · {selectedCount}/{group.studentIds.length} học sinh
-                </span>
-              </button>
-              <button type="button" className="h-10 rounded-[14px] border border-[#cbd7e6] bg-white px-3 text-[12px] font-bold text-[var(--erg-blue)] shadow-[var(--shadow-xs)]" onClick={() => onOpenPreview(group.id)}>
-                Xem
-              </button>
-            </div>
-          </article>
+          <MobilePreviewCard
+            key={group.id}
+            checked={selectedGroupIds.has(group.id)}
+            checkboxLabel={`Chọn nhóm ${group.name}`}
+            meta={`${group.source} · ${selectedCount}/${group.studentIds.length} học sinh`}
+            name={group.name}
+            onOpenPreview={() => onOpenPreview(group.id)}
+            onToggle={() => onToggleGroup(group.id)}
+          />
         );
       })}
-    </div>
+    </Box>
   );
 }
 
@@ -258,32 +416,27 @@ export function MobileGradeClassList({
   selectedStudentIdsByClass: Record<string, string[]>;
 }) {
   return (
-    <div className="grid gap-3 bg-[#f3f6fb] p-3 md:hidden">
+    <Box sx={{ display: { xs: "grid", md: "none" }, gap: 1.5, bgcolor: "background.default", p: 1.5 }}>
       {classes.map((classroom) => {
-        const checked = selectedClassIds.has(classroom.id);
         const studentIds = studentIdsByClass[classroom.id] ?? [];
-        const students = studentIds;
         const selectedCount = selectedStudentIdsByClass[classroom.id]?.length ?? studentIds.length;
         return (
-          <article key={classroom.id} className={cn("rounded-[16px] border p-3 shadow-[0_10px_26px_rgba(96,165,250,0.08)]", checked ? "border-[#b8d6fa] bg-[#eff7ff]" : "border-white bg-white")}>
-            <div className="flex items-start gap-3">
-              <AssignmentCheckbox checked={checked} onChange={() => onToggleClass(classroom.id)} label={`Chọn lớp ${classroom.className}`} />
-              <button type="button" className="min-w-0 flex-1 text-left" onClick={() => onOpenPreview(classroom.id)}>
-                <span className="block truncate text-[14px] font-bold text-slate-950">{classroom.className}</span>
-                <span className="mt-0.5 block text-[12px] font-semibold text-slate-500">
-                  {classroom.schoolName} · {selectedCount}/{students.length} học sinh
-                </span>
-              </button>
-              <button type="button" className="h-10 rounded-[14px] border border-[#cbd7e6] bg-white px-3 text-[12px] font-bold text-[var(--erg-blue)] shadow-[var(--shadow-xs)]" onClick={() => onOpenPreview(classroom.id)}>
-                Xem
-              </button>
-            </div>
-          </article>
+          <MobilePreviewCard
+            key={classroom.id}
+            checked={selectedClassIds.has(classroom.id)}
+            checkboxLabel={`Chọn lớp ${classroom.className}`}
+            meta={`${classroom.schoolName} · ${selectedCount}/${studentIds.length} học sinh`}
+            name={classroom.className}
+            onOpenPreview={() => onOpenPreview(classroom.id)}
+            onToggle={() => onToggleClass(classroom.id)}
+          />
         );
       })}
-    </div>
+    </Box>
   );
 }
+
+const resourceTagSx = { borderRadius: 1, border: 1, borderColor: "divider", bgcolor: "background.paper", px: 1, py: 0.25 } as const;
 
 export function MobileAssignmentResourceList({
   onToggleResource,
@@ -295,33 +448,32 @@ export function MobileAssignmentResourceList({
   selectedResourceIds: Set<string>;
 }) {
   return (
-    <div className="grid gap-3 bg-[#f3f6fb] p-3 md:hidden">
+    <Box sx={{ display: { xs: "grid", md: "none" }, gap: 1.5, bgcolor: "background.default", p: 1.5 }}>
       {resources.map((resource) => {
         const selected = selectedResourceIds.has(resource.id);
         return (
-          <button
+          <ButtonBase
             key={resource.id}
-            type="button"
-            className={cn(
-              "min-h-[76px] rounded-[16px] border px-3 py-3 text-left shadow-[0_10px_26px_rgba(96,165,250,0.08)] transition active:scale-[0.99]",
-              selected ? "border-[#b8d6fa] bg-[#eff7ff]" : "border-white bg-white",
-            )}
             onClick={() => onToggleResource(resource.id)}
+            sx={[
+              selectableCardSx(selected),
+              { display: "block", minHeight: 76, px: 1.5, py: 1.5, textAlign: "left", "&:active": { transform: "scale(0.99)" } },
+            ]}
           >
-            <span className="flex items-start gap-2">
+            <Box component="span" sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
               <AssignmentCheckbox checked={selected} onChange={() => onToggleResource(resource.id)} label={`Chọn ${resource.title}`} />
-              <span className="min-w-0">
-                <span className="block truncate text-[14px] font-bold text-slate-950">{resource.title}</span>
-              </span>
-            </span>
-            <span className="mt-1 flex flex-wrap gap-1.5 text-[12px] font-semibold text-slate-600">
-              <span className="rounded-md border border-[#d9e2ef] bg-white px-2 py-0.5">{resource.levelLabel}</span>
-              <span className="rounded-md border border-[#d9e2ef] bg-white px-2 py-0.5">{resource.topicLabel}</span>
-              <span className="rounded-md border border-[#d9e2ef] bg-white px-2 py-0.5">{resource.durationLabel}</span>
-            </span>
-          </button>
+              <Typography noWrap component="span" variant="body2" sx={{ display: "block", minWidth: 0, fontWeight: "fontWeightBold" }}>
+                {resource.title}
+              </Typography>
+            </Box>
+            <Typography component="span" variant="caption" sx={{ mt: 0.5, display: "flex", flexWrap: "wrap", gap: 0.75, color: "text.secondary", fontWeight: "fontWeightMedium" }}>
+              <Box component="span" sx={resourceTagSx}>{resource.levelLabel}</Box>
+              <Box component="span" sx={resourceTagSx}>{resource.topicLabel}</Box>
+              <Box component="span" sx={resourceTagSx}>{resource.durationLabel}</Box>
+            </Typography>
+          </ButtonBase>
         );
       })}
-    </div>
+    </Box>
   );
 }

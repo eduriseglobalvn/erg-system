@@ -1,4 +1,4 @@
-import { lmsPaths } from "@/app/portal-route-registry";
+import { lmsPaths } from "@/platform/auth/permissions/portal-route-registry";
 
 export const LMS_PERMISSION_CATALOG = [
   "lms.portal.access",

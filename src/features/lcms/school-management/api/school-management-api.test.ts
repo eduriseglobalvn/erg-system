@@ -86,6 +86,9 @@ describe("school management API", () => {
     await updateSchool("s1", 4, draft);
     expect(apiRequest).toHaveBeenLastCalledWith("/api/v1/lcms/schools/s1", expect.objectContaining({ method: "PATCH", portal: "lcms" }));
     expect(JSON.parse(apiRequest.mock.calls[1][1].body).version).toBe(4);
+
+    await updateSchool("s1", undefined, draft);
+    expect(JSON.parse(apiRequest.mock.calls[2][1].body)).not.toHaveProperty("version");
   });
 
   it("archives and synchronizes default grades through REST", async () => {
@@ -129,11 +132,31 @@ describe("school management API", () => {
       .mockResolvedValueOnce({ enrollSchoolStudent: { id: "e1", tenantId: "erg", schoolId: "s1", studentId: "st1", classId: "c1", status: "ACTIVE", version: "1", replayed: false } })
       .mockResolvedValueOnce({ bulkEnrollSchoolStudents: { idempotencyKey: "enroll-1", requested: 2, enrolled: 2, replayed: 0, items: [{ id: "e1", tenantId: "erg", schoolId: "s1", studentId: "st1", classId: "c1", status: "ACTIVE", version: "1", replayed: false }] } });
 
-    await expect(importSchoolStudents("s1", [{ studentCode: "HS01", fullName: "Nguyen An" }], "students-1")).resolves.toMatchObject({ created: 1, items: [{ id: "st1" }] });
-    await expect(enrollSchoolStudent({ studentId: "st1", classId: "c1" }, "enroll-1")).resolves.toMatchObject({ classId: "c1" });
-    await expect(bulkEnrollSchoolStudents([{ studentId: "st1", classId: "c1" }], "enroll-2")).resolves.toMatchObject({ enrolled: 2 });
+    await expect(importSchoolStudents("s1", [{ studentCode: "HS01", fullName: "Nguyen An" }], "students-1" as never)).resolves.toMatchObject({ created: 1, items: [{ id: "st1" }] });
+    await expect(enrollSchoolStudent({ studentId: "st1", classId: "c1" }, "enroll-1" as never)).resolves.toMatchObject({ classId: "c1" });
+    await expect(bulkEnrollSchoolStudents([{ studentId: "st1", classId: "c1" }], "enroll-2" as never)).resolves.toMatchObject({ enrolled: 2 });
     expect(graphQlRequest.mock.calls[0][0].variables.input).toMatchObject({ schoolId: "s1", idempotencyKey: "students-1" });
     expect(graphQlRequest.mock.calls[1][0].variables.input).toMatchObject({ studentId: "st1", classId: "c1", idempotencyKey: "enroll-1" });
     expect(graphQlRequest.mock.calls[2][0].variables.input.items).toEqual([{ studentId: "st1", classId: "c1" }]);
+  });
+
+  it("chunks bulk student imports into batches of 50 to respect GraphQL cardinality limits", async () => {
+    const manyStudents = Array.from({ length: 120 }, (_, i) => ({
+      studentCode: `HS${i + 1}`,
+      fullName: `Học sinh ${i + 1}`,
+    }));
+
+    graphQlRequest
+      .mockResolvedValueOnce({ importSchoolStudents: { idempotencyKey: "key-b0", requested: 50, created: 50, replayed: 0, items: [] } })
+      .mockResolvedValueOnce({ importSchoolStudents: { idempotencyKey: "key-b1", requested: 50, created: 50, replayed: 0, items: [] } })
+      .mockResolvedValueOnce({ importSchoolStudents: { idempotencyKey: "key-b2", requested: 20, created: 20, replayed: 0, items: [] } });
+
+    const result = await importSchoolStudents("s1", manyStudents, "key" as never);
+    expect(result.created).toBe(120);
+    expect(result.requested).toBe(120);
+    expect(graphQlRequest).toHaveBeenCalledTimes(3);
+    expect(graphQlRequest.mock.calls[0][0].variables.input.items).toHaveLength(50);
+    expect(graphQlRequest.mock.calls[1][0].variables.input.items).toHaveLength(50);
+    expect(graphQlRequest.mock.calls[2][0].variables.input.items).toHaveLength(20);
   });
 });

@@ -78,7 +78,7 @@ export function LearningStandardsPackageCreateDialog({ open, scope, onClose, onC
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Hủy</Button>
+        <Button variant="contained" onClick={onClose}>Hủy</Button>
         <Button disabled={!canSubmit || mutation.isPending} onClick={() => void submit()} variant="contained">{mutation.isPending ? "Đang đăng ký…" : "Đăng ký gói"}</Button>
       </DialogActions>
     </Dialog>
@@ -124,7 +124,7 @@ export function LearningStandardsPackageValidationDialog({ open, scope, packageV
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Hủy</Button>
+        <Button variant="contained" onClick={onClose}>Hủy</Button>
         <Button disabled={!packageValue || !manifestXml.trim() || mutation.isPending} onClick={() => void submit()} variant="contained">{mutation.isPending ? "Đang kiểm tra…" : "Gửi kiểm tra"}</Button>
       </DialogActions>
     </Dialog>

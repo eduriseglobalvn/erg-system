@@ -6,12 +6,13 @@ import Container from "@mui/material/Container";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 
-import { PlayerShellRuntime } from "@/components/quiz/player-shell-runtime";
+import { PlayerShellRuntime } from "@/features/lcms/quiz/player/player-shell-runtime";
 import {
   PortableExamLauncher,
   type PortableExamScope,
 } from "@/features/elearning/portable-exam";
-import type { QuizPackage } from "@/lib/types";
+import { PortableResultImportCard } from "@/features/elearning/portable-exam/components/portable-result-import-card";
+import type { QuizPackage } from "@/domain/quiz/types";
 import { getDefaultTenantId } from "@/lib/graphql-client";
 import { getCurrentElearningViewerSession } from "@/platform/auth/api/elearning-viewer-session";
 
@@ -32,31 +33,34 @@ export function PortableExamPage({ workspace }: PortableExamPageProps) {
     };
   }, [viewer?.id, workspace]);
 
+  const studentPortalKind = "elearning" as const;
+  const teacherPortalKind = "lms" as const;
+  const activeRuntimePortal = workspace === "STUDENT" ? studentPortalKind : teacherPortalKind;
+
   if (quizPackage) {
     return (
-      <Box sx={{ minHeight: "100vh", bgcolor: "#f3f6ff", p: { xs: 0.5, md: 1 } }}>
+      <Box sx={{ minHeight: "100vh", bgcolor: "background.default", p: { xs: 0.5, md: 1 } }}>
         <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center", px: { xs: 1, md: 2 }, py: 1 }}>
           <Button
             size="small"
             startIcon={<ArrowBack />}
             variant="outlined"
             onClick={() => setQuizPackage(null)}
-            sx={{ borderRadius: 1.5, fontWeight: 800 }}
           >
             Chọn bài khác
           </Button>
           <Typography variant="caption" color="text.secondary">
-            {workspace === "STUDENT" ? "Student workspace" : "Teacher workspace"} · Gói đã xác thực
+            Gói bài thi đã xác thực
           </Typography>
         </Stack>
         <PlayerShellRuntime
           portableOffline={quizPackage.gradingMode === "client-first"}
           portablePackage={quizPackage}
-          runtimePortal={workspace === "STUDENT" ? "elearning" : "lms"}
+          runtimePortal={activeRuntimePortal}
           welcomeMeta={{
             courseLabel: quizPackage.quiz.title,
             reviewContent: quizPackage.quiz.description,
-            subjectLabel: "Portable exam",
+            subjectLabel: "Bài thi từ tệp",
           }}
         />
       </Box>
@@ -64,21 +68,26 @@ export function PortableExamPage({ workspace }: PortableExamPageProps) {
   }
 
   return (
-    <Box sx={{ minHeight: "100vh", bgcolor: "#f3f6ff", py: { xs: 4, md: 8 } }}>
+    <Box sx={{ minHeight: "100vh", bgcolor: "background.default", py: { xs: 4, md: 8 } }}>
       <Container maxWidth="sm">
         <Stack spacing={2}>
           <Stack spacing={0.5}>
-            <Typography variant="overline" color="primary" sx={{ fontWeight: 900, letterSpacing: 1 }}>
-              ERG · {workspace === "STUDENT" ? "Student" : "Teacher"}
-            </Typography>
-            <Typography variant="h4" sx={{ fontWeight: 900, letterSpacing: -1 }}>
-              Portable exam runtime
-            </Typography>
+            <Button
+              href={workspace === "STUDENT" ? "/student" : "/teacher"}
+              size="small"
+              startIcon={<ArrowBack />}
+              sx={{ alignSelf: "flex-start", minHeight: 44 }}
+              variant="text"
+            >
+              Về trang chủ
+            </Button>
+            <Typography variant="h1">Làm bài thi từ tệp</Typography>
             <Typography color="text.secondary">
-              Mở tệp bài kiểm tra đã phát hành và sử dụng đúng Player chung với web/PWA.
+              Mở tệp bài thi giáo viên đã gửi. Bài làm dùng cùng trình làm bài như trên web.
             </Typography>
           </Stack>
           <PortableExamLauncher onPackageReady={setQuizPackage} scope={scope} />
+          <PortableResultImportCard portal={activeRuntimePortal} />
         </Stack>
       </Container>
     </Box>

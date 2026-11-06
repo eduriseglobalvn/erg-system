@@ -23,7 +23,7 @@ export function LmsPanel(props: PaperProps) {
 }
 
 export function LmsSectionTitle(props: TypographyProps) {
-  return <Typography component="h2" sx={{ fontSize: 14, fontWeight: 750, lineHeight: 1.45 }} {...props} />;
+  return <Typography component="h2" variant="subtitle2" {...props} />;
 }
 
 export function LmsSelect(props: NativeSelectProps) {
@@ -31,16 +31,16 @@ export function LmsSelect(props: NativeSelectProps) {
   return (
     <NativeSelect
       fullWidth
-      sx={{ bgcolor: "background.paper", borderRadius: 2, fontSize: 14, fontWeight: 700, minHeight: 40, px: 1.25 }}
+      sx={{ bgcolor: "background.paper", borderRadius: 2, typography: "subtitle2", minHeight: 40, px: 1.25 }}
       inputProps={{ ...inputProps, "aria-label": nativeProps["aria-label"] ?? inputProps?.["aria-label"] }}
       {...nativeProps}
     />
   );
 }
 
-type LmsSearchInputProps = Omit<TextFieldProps, "variant"> & { inputClassName?: string };
+type LmsSearchInputProps = Omit<TextFieldProps, "variant">;
 
-export function LmsSearchInput({ inputClassName, slotProps, ...props }: LmsSearchInputProps) {
+export function LmsSearchInput({ slotProps, ...props }: LmsSearchInputProps) {
   return (
     <TextField
       fullWidth
@@ -49,11 +49,7 @@ export function LmsSearchInput({ inputClassName, slotProps, ...props }: LmsSearc
         ...slotProps,
         input: {
           ...(slotProps?.input as object | undefined),
-          startAdornment: <InputAdornment position="start"><SearchRoundedIcon color="primary" sx={{ fontSize: 18 }} /></InputAdornment>,
-        },
-        htmlInput: {
-          ...(slotProps?.htmlInput as object | undefined),
-          className: inputClassName,
+          startAdornment: <InputAdornment position="start"><SearchRoundedIcon color="primary" fontSize="small" /></InputAdornment>,
         },
       }}
       sx={{ maxWidth: { xl: 340 }, minWidth: 220 }}
@@ -65,19 +61,19 @@ export function LmsSearchInput({ inputClassName, slotProps, ...props }: LmsSearc
 type LmsBadgeTone = "default" | "blue" | "green" | "amber" | "red" | "slate";
 const toneColor = { blue: "info", green: "success", amber: "warning", red: "error" } as const;
 
-export function LmsBadge({ children, tone = "default" }: { children: ReactNode; className?: string; tone?: LmsBadgeTone }) {
+export function LmsBadge({ children, tone = "default" }: { children: ReactNode; tone?: LmsBadgeTone }) {
   const color = tone in toneColor ? toneColor[tone as keyof typeof toneColor] : "default";
   return <Chip color={color} label={children} size="small" variant={tone === "default" || tone === "slate" ? "outlined" : "filled"} />;
 }
 
-export function LmsStatusPill(props: { children: ReactNode; className?: string; tone?: LmsBadgeTone }) {
+export function LmsStatusPill(props: { children: ReactNode; tone?: LmsBadgeTone }) {
   return <LmsBadge {...props} />;
 }
 
 export function LmsTable(props: TableProps) {
-  return <Table className="erg-data-table" size="small" stickyHeader {...props} />;
+  return <Table size="small" stickyHeader {...props} />;
 }
 
 export function LmsTableHeadCell(props: TableCellProps) {
-  return <TableCell align="center" sx={{ bgcolor: "background.default", fontSize: 13, fontWeight: 750, height: 40 }} {...props} />;
+  return <TableCell align="center" sx={{ bgcolor: "background.default", typography: "subtitle2", height: 40 }} {...props} />;
 }

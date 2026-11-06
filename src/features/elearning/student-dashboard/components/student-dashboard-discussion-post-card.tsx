@@ -37,6 +37,7 @@ import {
 import { ReactionActionButton, PostEngagementBar } from "@/features/elearning/student-dashboard/components/student-dashboard-discussion-reactions";
 import { ComposerToolbar, ShareDialog, ReactionCluster, AttachmentPreview, AttachmentGrid } from "@/features/elearning/student-dashboard/components/student-dashboard-discussion-composer-tools";
 import { getReactionTotal, createImageAttachments } from "@/features/elearning/student-dashboard/components/student-dashboard-discussion-primitives";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 export function DiscussionPostCard({
   copy,
   post,
@@ -88,7 +89,7 @@ export function DiscussionPostCard({
       <CardContent sx={{ p: 0 }}>
         <Box sx={{ bgcolor: "#fff", borderRadius: "14px 14px 0 0", px: { xs: 1.5, md: 2 }, pt: { xs: 1.45, md: 1.65 }, pb: post.attachments.length ? 1.15 : 1.45 }}>
           <Stack direction="row" spacing={1.25} alignItems="flex-start">
-            <Avatar sx={{ bgcolor: "rgba(24,119,242,0.1)", border: "1px solid rgba(24,119,242,0.14)", color: "#1877F2", fontSize: 14, fontWeight: 900, height: 40, width: 40 }}>
+            <Avatar sx={{ bgcolor: "rgba(24,119,242,0.1)", border: "1px solid rgba(24,119,242,0.14)", color: "#1877F2", fontSize: 14, fontWeight: 600, height: 40, width: 40 }}>
               {post.authorInitials}
             </Avatar>
             <Box sx={{ minWidth: 0, flex: 1 }}>
@@ -96,9 +97,9 @@ export function DiscussionPostCard({
                 <Typography variant="subtitle2" sx={{ color: "#050505", fontWeight: 850, lineHeight: 1.2 }}>
                   {post.authorName}
                 </Typography>
-                <Chip label={post.className} size="small" sx={{ bgcolor: "#F0F2F5", borderRadius: "7px", fontWeight: 750, height: 24 }} />
+                <Chip label={post.className} size="small" sx={{ bgcolor: "#F0F2F5", borderRadius: "7px", fontWeight: 600, height: 24 }} />
                 {post.relatedAssignmentTitle ? (
-                  <Chip label={post.relatedAssignmentTitle} size="small" sx={{ bgcolor: "rgba(15,108,189,0.08)", borderRadius: "7px", color: MUI_TEXT, fontWeight: 750, height: 24 }} />
+                  <Chip label={post.relatedAssignmentTitle} size="small" sx={{ bgcolor: "rgba(0, 113, 227,0.08)", borderRadius: "7px", color: MUI_TEXT, fontWeight: 600, height: 24 }} />
                 ) : null}
               </Stack>
               <Typography variant="caption" sx={{ color: "#65676B", display: "block", mt: 0.15 }}>
@@ -114,8 +115,8 @@ export function DiscussionPostCard({
             {post.content}
           </Typography>
           {post.moderationWarning ? (
-            <Box sx={{ bgcolor: "#FFF7E6", border: "1px solid rgba(255,171,0,0.22)", borderRadius: "10px", mt: 1.1, px: 1.1, py: 0.75 }}>
-              <Typography variant="caption" sx={{ color: "#B76E00", display: "block", fontWeight: 750 }}>
+            <Box sx={{ bgcolor: "#FFF7E6", border: "1px solid rgba(255,171,0,0.22)", borderRadius: `${ergEnterpriseTokens.radius.md}px`, mt: 1.1, px: 1.1, py: 0.75 }}>
+              <Typography variant="caption" sx={{ color: "#B76E00", display: "block", fontWeight: 600 }}>
                 {copy.discussionModerationWarning}
               </Typography>
             </Box>
@@ -171,7 +172,7 @@ export function DiscussionPostCard({
           ) : null}
 
           <Stack direction="row" spacing={1} alignItems="flex-start" sx={{ mt: post.comments.length ? 1.2 : 0 }}>
-            <Avatar sx={{ bgcolor: MUI_PRIMARY, color: "#fff", fontSize: 13, fontWeight: 900, height: 32, width: 32 }}>L</Avatar>
+            <Avatar sx={{ bgcolor: MUI_PRIMARY, color: "#fff", fontSize: 13, fontWeight: 600, height: 32, width: 32 }}>L</Avatar>
             <Box sx={{ flex: 1, minWidth: 0 }}>
               <TextField
                 id={`comment-input-${post.id}`}

@@ -23,6 +23,8 @@ test("portable build is a question-only entry without portal chrome or remote AP
   assert.equal(config.app.windows[0].fullscreen, true);
   assert.deepEqual(config.app.security.capabilities, []);
   assert.doesNotMatch(config.app.security.csp, /https:/);
+  assert.equal(config.bundle.resources, undefined);
+  assert.match(builder, /must not bundle the exam package as a resource/);
   assert.equal(config.bundle.createUpdaterArtifacts, false);
   assert.match(builder, /--package/);
   assert.match(builder, /portable-exam\.ergquiz/);
@@ -30,4 +32,14 @@ test("portable build is a question-only entry without portal chrome or remote AP
   assert.match(builder, /--prepare-only/);
   assert.match(builder, /VITE_PORTABLE_PACKAGE_PUBLIC_KEYS/);
   assert.match(builder, /signatureBlock\?\.publicKeyId/);
+});
+
+test("exam player profile: .ergquiz association, offline WebView2 installer, no bundled exam", () => {
+  const player = JSON.parse(readFileSync("src-tauri/tauri.player.conf.json", "utf8"));
+  assert.equal(player.identifier, "vn.erg.examplayer");
+  assert.deepEqual(player.bundle.fileAssociations[0].ext, ["ergquiz"]);
+  assert.equal(player.bundle.windows.webviewInstallMode.type, "offlineInstaller");
+  assert.equal(player.bundle.resources, undefined);
+  assert.deepEqual(player.app.security.capabilities, []);
+  assert.doesNotMatch(player.app.security.csp, /https?:/);
 });

@@ -4,27 +4,46 @@ import Skeleton, { type SkeletonProps } from "@mui/material/Skeleton";
 import Typography from "@mui/material/Typography";
 import type { ReactNode } from "react";
 
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
+
 type ErgStatusTone = "success" | "warning" | "error" | "info" | "neutral";
 
-const CHIP_COLOR_BY_TONE: Record<Exclude<ErgStatusTone, "neutral">, ChipProps["color"]> = {
-  error: "error",
-  info: "info",
-  success: "success",
-  warning: "warning",
-};
-
 type ErgStatusChipProps = Omit<ChipProps, "color"> & {
+  dot?: boolean;
   status?: ErgStatusTone;
   tone?: ErgStatusTone;
 };
 
-export function ErgStatusChip({ status, tone = "neutral", variant = "filled", ...props }: ErgStatusChipProps) {
+export function ErgStatusChip({ dot = true, label, status, sx, tone = "neutral", variant: _variant, ...props }: ErgStatusChipProps) {
   const resolvedTone = status ?? tone;
+  const style = ergEnterpriseTokens.statusTint[resolvedTone] ?? ergEnterpriseTokens.statusTint.neutral;
+
   return (
     <Chip
-      color={resolvedTone === "neutral" ? undefined : CHIP_COLOR_BY_TONE[resolvedTone]}
+      icon={
+        dot ? (
+          <Box
+            component="span"
+            sx={{ bgcolor: style.dot, borderRadius: "50%", display: "inline-block", height: 6, ml: "6px !important", mr: "-4px !important", width: 6 }}
+          />
+        ) : undefined
+      }
+      label={label}
       size="small"
-      variant={variant}
+      sx={[
+        {
+          bgcolor: style.bg,
+          borderRadius: "9999px",
+          color: style.color,
+          fontSize: 12,
+          fontWeight: 500,
+          height: 22,
+          lineHeight: 1,
+          "& .MuiChip-label": { px: 1 },
+        },
+        ...(Array.isArray(sx) ? sx : [sx]),
+      ]}
+      variant="filled"
       {...props}
     />
   );
@@ -41,20 +60,19 @@ export function ErgErrorState({ action, description, title }: ErgErrorStateProps
     <Box
       role="alert"
       sx={{
-        bgcolor: "error.light",
-        border: "1px solid",
-        borderColor: "error.main",
-        borderRadius: 2,
-        color: "error.dark",
+        bgcolor: "rgba(255, 59, 48, 0.08)",
+        border: "1px solid rgba(255, 59, 48, 0.2)",
+        borderRadius: "14px",
+        color: "error.main",
         display: "grid",
         gap: 0.75,
-        p: 2,
+        p: 2.25,
       }}
     >
-      <Typography sx={{ fontWeight: 800 }} variant="subtitle2">
+      <Typography sx={{ color: "#DC2626", fontSize: "0.95rem", fontWeight: 600 }} variant="subtitle2">
         {title}
       </Typography>
-      <Typography color="inherit" variant="body2">
+      <Typography color="inherit" sx={{ fontSize: "0.85rem", opacity: 0.9 }} variant="body2">
         {description}
       </Typography>
       {action ? <Box sx={{ mt: 0.5 }}>{action}</Box> : null}
@@ -63,7 +81,7 @@ export function ErgErrorState({ action, description, title }: ErgErrorStateProps
 }
 
 export function ErgSkeleton(props: SkeletonProps) {
-  return <Skeleton variant="rounded" {...props} />;
+  return <Skeleton sx={{ borderRadius: 1.25 }} variant="rounded" {...props} />;
 }
 
 type ErgEmptyStateProps = {
@@ -78,10 +96,9 @@ export function ErgEmptyState({ action, description, icon, title }: ErgEmptyStat
     <Box
       sx={{
         alignItems: "center",
-        bgcolor: "background.paper",
-        border: "1px dashed",
-        borderColor: "divider",
-        borderRadius: 3,
+        bgcolor: "#FFFFFF",
+        border: "1px dashed rgba(0, 0, 0, 0.12)",
+        borderRadius: "16px",
         display: "flex",
         flexDirection: "column",
         gap: 1.25,
@@ -92,11 +109,11 @@ export function ErgEmptyState({ action, description, icon, title }: ErgEmptyStat
       }}
     >
       {icon ? <Box sx={{ color: "primary.main", display: "flex" }}>{icon}</Box> : null}
-      <Typography color="text.primary" sx={{ fontWeight: 800 }} variant="h6">
+      <Typography sx={{ color: "text.primary", fontSize: "1.05rem", fontWeight: 600 }}>
         {title}
       </Typography>
       {description ? (
-        <Typography color="text.secondary" sx={{ maxWidth: 460 }} variant="body2">
+        <Typography sx={{ color: "text.secondary", fontSize: "0.85rem", maxWidth: 460 }} variant="body2">
           {description}
         </Typography>
       ) : null}
@@ -107,9 +124,9 @@ export function ErgEmptyState({ action, description, icon, title }: ErgEmptyStat
 
 export function ErgLoadingSkeleton({ rows = 5 }: { rows?: number }) {
   return (
-    <Box sx={{ display: "grid", gap: 1.25 }}>
-      {Array.from({ length: rows }, (_, index) => (
-        <ErgSkeleton height={42} key={index} />
+    <Box sx={{ display: "grid", gap: 1.5 }}>
+      {Array.from({ length: rows }).map((_, index) => (
+        <Skeleton height={36} key={index} sx={{ borderRadius: "8px" }} variant="rounded" />
       ))}
     </Box>
   );

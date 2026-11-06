@@ -17,7 +17,8 @@ describe("LMS Teacher Shell ownership", () => {
   it.each([
     "use-lms-teacher-shell-controller.ts",
     "lms-teacher-shell-config.tsx",
-    "lms-teacher-shell-workspaces.tsx",
+    "lms-teacher-route-pages.tsx",
+    "lms-teacher-shell-context.ts",
     "lms-teacher-shell-presentation.tsx",
   ])("has a dedicated %s owner", (fileName) => {
     expect(() => readFileSync(resolve(ROOT, fileName), "utf8")).not.toThrow();

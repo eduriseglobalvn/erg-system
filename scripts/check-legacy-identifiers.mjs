@@ -7,7 +7,7 @@ const ALLOWED_SEGMENTS = ["generated", "contracts", "migration", "target", "node
 
 export function isAllowlisted(filePath) {
   const normalized = filePath.replaceAll("\\", "/").toLowerCase();
-  if (normalized.includes("/features/lcms/") || normalized.includes("/features/elearning/") || normalized.includes("/features/lms/") || normalized.includes("/platform/auth/") || normalized.includes("/platform/workspaces/") || normalized.endsWith("/routes/app-routes.tsx") || normalized.includes("/portal-workspace-switcher.tsx") || normalized.includes("/dashboard-placeholder-workspace.tsx")) return true;
+  if (normalized.includes("/features/lcms/") || normalized.includes("/features/elearning/") || normalized.includes("/features/lms/") || normalized.includes("/platform/auth/") || normalized.includes("/platform/workspaces/") || normalized.endsWith("/routes/app-routes.tsx") || normalized.includes("/routes/portals/") || normalized.includes("/portal-workspace-switcher.tsx") || normalized.includes("/dashboard-placeholder-workspace.tsx")) return true;
   return ALLOWED_SEGMENTS.some((segment) => normalized.split("/").includes(segment));
 }
 

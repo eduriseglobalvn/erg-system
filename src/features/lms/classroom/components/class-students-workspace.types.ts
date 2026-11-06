@@ -1,4 +1,4 @@
-import type { AssignmentRun, StudentStatus } from "@/features/lms/classroom/types/classroom-types";
+import type { AssignmentRun, StudentStatus } from "@/domain/school/classroom-types";
 
 export type ProgressFilter = "all" | "not-started" | "in-progress" | "completed";
 export type StatusFilter = "all" | StudentStatus;

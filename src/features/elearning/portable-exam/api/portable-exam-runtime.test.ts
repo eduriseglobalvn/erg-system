@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 
-import { sampleQuiz } from "@/lib/sample-quiz";
+import { sampleQuiz } from "@/domain/quiz/sample-quiz";
 import { normalizePortableQuizPackage } from "@/features/elearning/portable-exam/api/portable-exam-runtime";
 import type { VerifiedPortableExamPackage } from "@/features/elearning/portable-exam/types/portable-exam-types";
 
@@ -45,6 +45,14 @@ test("normalizes a verified portable payload into the shared QuizPackage consume
     source: "tauri-cache",
     gradingMode: "server-authoritative",
   });
-  expect(normalized.quiz).toEqual(sampleQuiz);
+  // The essay marking guide is teacher-only: no learner package keeps it (spec §7).
+  const withoutGuide = {
+    ...sampleQuiz,
+    sections: sampleQuiz.sections.map((section) => ({
+      ...section,
+      questions: section.questions.map((question) => (question.essayRubric ? { ...question, essayRubric: undefined } : question)),
+    })),
+  };
+  expect(normalized.quiz).toEqual(withoutGuide);
 });
 

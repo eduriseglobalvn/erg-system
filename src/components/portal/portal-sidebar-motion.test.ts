@@ -6,8 +6,8 @@ import {
 } from "@/components/portal/portal-sidebar-motion";
 
 it("uses a measured shell motion that does not snap at the start", () => {
-  expect(PORTAL_SIDEBAR_MOTION_MS).toBe(280);
+  expect(PORTAL_SIDEBAR_MOTION_MS).toBe(220);
   expect(PORTAL_SIDEBAR_MOTION_EASING).toBe(
-    "cubic-bezier(0.2, 0, 0, 1)",
+    "cubic-bezier(0.16, 1, 0.3, 1)",
   );
 });

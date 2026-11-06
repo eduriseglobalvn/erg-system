@@ -4,10 +4,8 @@ import { createRoot } from "react-dom/client";
 import "./styles/globals.css";
 import "./index.css";
 
-import { clearStoredAuthSessions, TEACHER_LOCAL_SESSION_KEY, TEACHER_TEMP_SESSION_KEY } from "./platform/auth/api/auth-token-storage";
-import { clearCrossDomainSession, hydrateSessionFromCookie } from "./platform/auth/api/cross-domain-session";
-import { hydrateSessionFromPeerTab } from "./platform/auth/api/cross-tab-session";
-import { resolveCurrentPortal } from "./platform/auth/api/auth-token-storage";
+import { clearStoredAuthSessions, purgeLegacyAuthStorage } from "./platform/auth/api/auth-token-storage";
+import { initializeCrossTabAuthSync } from "./platform/auth/api/cross-tab-session";
 import { isBffAuthEnabled } from "./lib/api-client";
 import App from "./App";
 import { injectFontDisplaySwap } from "./config/fonts";
@@ -32,17 +30,30 @@ if (import.meta.env.DEV && "serviceWorker" in navigator) {
   });
 }
 
-// -- Phase 1: compatibility-session hydration (must happen before React mount) --
-// Legacy cookie hydration remains only until the BFF cutover; URL credentials are rejected.
-async function bootstrapApplication() {
-  if (!isBffAuthEnabled()) {
-    hydrateSessionFromCookie(TEACHER_LOCAL_SESSION_KEY, TEACHER_TEMP_SESSION_KEY);
-    await hydrateSessionFromPeerTab(resolveCurrentPortal());
-  } else {
-    // Clean-break BFF mode must not retain legacy bearer material in browser storage.
-    clearStoredAuthSessions();
-    clearCrossDomainSession();
+// A deploy replaces hashed chunks; reload once to pick up the new index instead of a blank route.
+const PRELOAD_RELOAD_KEY = "erg-preload-reloaded";
+const ROUTE_CHUNK_RELOAD_KEY = "erg-chunk-reload"; // owned/cleared by route-feedback.tsx + App.tsx
+window.addEventListener("vite:preloadError", (event) => {
+  try {
+    // Shares a budget with RouteErrorBoundary (ROUTE_CHUNK_RELOAD_KEY): at most one chunk-error reload per window between both.
+    if (window.sessionStorage.getItem(PRELOAD_RELOAD_KEY) || window.sessionStorage.getItem(ROUTE_CHUNK_RELOAD_KEY)) return;
+    window.sessionStorage.setItem(PRELOAD_RELOAD_KEY, "1");
+    window.sessionStorage.setItem(ROUTE_CHUNK_RELOAD_KEY, "1");
+  } catch {
+    return;
   }
+  event.preventDefault();
+  window.location.reload();
+});
+
+// -- Phase 1: session hygiene (must happen before React mount) --
+// Legacy bearer material (localStorage session, erg_sso cookie) is purged on every start; URL credentials are rejected.
+function bootstrapApplication() {
+  purgeLegacyAuthStorage();
+  // Clean-break BFF mode must not retain bearer material in browser storage.
+  if (isBffAuthEnabled()) clearStoredAuthSessions();
+  // After the clear above, so it is not broadcast as a sign-out to other tabs.
+  initializeCrossTabAuthSync();
 
   // -- Phase 2: Font display swap (prevents FOIT on slow connections) --
   injectFontDisplaySwap();
@@ -53,7 +64,16 @@ async function bootstrapApplication() {
       <App />
     </StrictMode>,
   );
+
+  // Page survived 10s: allow a later deploy to trigger one more chunk-error reload (loop guard stays within a session burst).
+  window.setTimeout(() => {
+    try {
+      window.sessionStorage.removeItem(PRELOAD_RELOAD_KEY);
+    } catch {
+      // storage unavailable: nothing to clear
+    }
+  }, 10_000);
 }
 
-void bootstrapApplication();
+bootstrapApplication();
 

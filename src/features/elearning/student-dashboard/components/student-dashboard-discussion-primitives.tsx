@@ -37,7 +37,7 @@ export function DiscussionPageHeader({
     <Card sx={elevatedCardSx}>
       <CardContent sx={{ px: { xs: 1.5, md: 2 }, py: { xs: 1.35, md: 1.45 } }}>
         <Stack direction="row" spacing={1.1} alignItems="center">
-          <Box sx={{ bgcolor: "rgba(15,108,189,0.08)", border: "1px solid rgba(15,108,189,0.14)", borderRadius: "12px", color: MUI_PRIMARY, display: "grid", height: 42, placeItems: "center", width: 42 }}>
+          <Box sx={{ bgcolor: "rgba(0, 113, 227,0.08)", border: "1px solid rgba(0, 113, 227,0.14)", borderRadius: "12px", color: MUI_PRIMARY, display: "grid", height: 42, placeItems: "center", width: 42 }}>
             {icon}
           </Box>
           <Box sx={{ minWidth: 0 }}>
@@ -46,8 +46,8 @@ export function DiscussionPageHeader({
                 label={studentClass}
                 size="small"
                 sx={{
-                  bgcolor: "rgba(15,108,189,0.08)",
-                  border: "1px solid rgba(15,108,189,0.14)",
+                  bgcolor: "rgba(0, 113, 227,0.08)",
+                  border: "1px solid rgba(0, 113, 227,0.14)",
                   borderRadius: "8px",
                   color: MUI_PRIMARY,
                   fontSize: 12,
@@ -55,12 +55,12 @@ export function DiscussionPageHeader({
                   height: 24,
                 }}
               />
-              <Typography variant="caption" sx={{ color: MUI_MUTED, fontWeight: 750 }}>
+              <Typography variant="caption" sx={{ color: MUI_MUTED, fontWeight: 600 }}>
                 Bảng tin lớp học
               </Typography>
             </Stack>
             <Stack direction={{ xs: "column", sm: "row" }} spacing={{ xs: 0.2, sm: 1 }} alignItems={{ xs: "flex-start", sm: "baseline" }}>
-              <Typography variant="h6" sx={{ color: MUI_TEXT, fontSize: { xs: 17, md: 18 }, fontWeight: 900, lineHeight: 1.15 }}>
+              <Typography variant="h6" sx={{ color: MUI_TEXT, fontSize: { xs: 17, md: 18 }, fontWeight: 600, lineHeight: 1.15 }}>
                 {title}
               </Typography>
               <Typography variant="body2" sx={{ color: MUI_MUTED, fontSize: 13.5 }}>
@@ -77,7 +77,7 @@ export function DiscussionPageHeader({
 export function EmptyPanel({ description, title }: { description: string; title: string }) {
   return (
     <Paper sx={{ bgcolor: "#F9FAFD", border: `1px solid ${MUI_BORDER}`, borderRadius: "12px", boxShadow: "0 5px 18px rgba(16,32,51,0.045)", p: 2.2 }}>
-      <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>{title}</Typography>
+      <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>{title}</Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>{description}</Typography>
     </Paper>
   );

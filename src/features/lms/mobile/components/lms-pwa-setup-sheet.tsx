@@ -191,7 +191,7 @@ function SetupCard({ children, description, icon: Icon, title }: { children: Rea
           <Icon sx={{ fontSize: 21 }} />
         </Box>
         <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Typography sx={{ fontSize: 14, fontWeight: 800 }}>{title}</Typography>
+          <Typography sx={{ fontSize: 14, fontWeight: 600 }}>{title}</Typography>
           <Typography color="text.secondary" sx={{ fontSize: 12, fontWeight: 600, lineHeight: 1.7, mt: 0.5 }}>
             {description}
           </Typography>
@@ -221,14 +221,14 @@ function InstructionStep({ icon: Icon, text }: { icon: MuiIcon; text: string }) 
   return (
     <Stack direction="row" spacing={1.5} sx={{ alignItems: "center", bgcolor: "background.default", border: "1px solid", borderColor: "divider", borderRadius: 1.5, minHeight: 44, px: 1.5 }}>
       <Icon color="primary" sx={{ flexShrink: 0, fontSize: 18 }} />
-      <Typography sx={{ fontSize: 13, fontWeight: 700 }}>{text}</Typography>
+      <Typography sx={{ fontSize: 13, fontWeight: 600 }}>{text}</Typography>
     </Stack>
   );
 }
 
 function StatusLine({ label, tone }: { label: string; tone: "success" | "warning" | "error" }) {
   return (
-    <Alert icon={tone === "success" ? <CheckCircleRoundedIcon /> : <ErrorOutlineRoundedIcon />} severity={tone} sx={{ fontSize: 12, fontWeight: 750, mt: 2 }}>
+    <Alert icon={tone === "success" ? <CheckCircleRoundedIcon /> : <ErrorOutlineRoundedIcon />} severity={tone} sx={{ fontSize: 12, fontWeight: 600, mt: 2 }}>
       {label}
     </Alert>
   );

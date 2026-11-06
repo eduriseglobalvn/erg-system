@@ -5,16 +5,16 @@ import Button from "@mui/material/Button";
 import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
 import { listEducationUnits, updateEducationUnit, type LmsEducationUnitDTO } from "@/features/lms/infrastructure/lms-dashboard-api";
-import type { ClassroomSchool, ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
+import type { ClassroomSchool, ClassroomSnapshot } from "@/domain/school/classroom-types";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { cn } from "@/lib/utils";
 import type { ManagementScope } from "@/types/scope-types";
 import { queryKeys } from "@/lib/query-keys";
 import { QUERY_POLICIES } from "@/lib/query-policy";
 import { getDefaultTenantId } from "@/lib/graphql-client";
-import { getCurrentAccount } from "@/platform/auth/api/auth-storage";
-import { AppSelect } from "@/components/ui/app-select";
-import { LcmsListSkeleton, LcmsMiniStat, LcmsPanel, LcmsPanelHeader, LcmsStatusChip } from "@/features/lcms/components/lcms-ui";
+import { getCurrentAccountId } from "@/platform/auth/api/auth-storage";
+import { AppSelect } from "@/components/erg-mui/app-select";
+import { LcmsListSkeleton, LcmsMiniStat, LcmsPanel, LcmsPanelHeader, LcmsStatusChip } from "@/features/lcms/components/admin-ui";
 import { EducationUnitEditor } from "./admin-operations-education-editor";
 import { OperationalErrorState } from "./admin-operations-support";
 import { UnitAvatar, UnitTypeBadge, sortEducationUnits } from "./admin-operations-insight";
@@ -34,7 +34,7 @@ export function CenterManagement({
 }) {
   const queryClient = useQueryClient();
   const tenantId = getDefaultTenantId();
-  const accountId = getCurrentAccount("lcms")?.id?.trim() || "anonymous";
+  const accountId = getCurrentAccountId("lcms");
   const [units, setUnits] = useState<LmsEducationUnitDTO[]>([]);
   const [selectedUnitId, setSelectedUnitId] = useState("");
   const [keyword, setKeyword] = useState("");
@@ -154,7 +154,7 @@ export function CenterManagement({
       ) : null}
 
       <div className="grid min-h-0 flex-1 bg-[#f7f9fc] xl:grid-cols-[320px_minmax(0,1fr)]">
-        <aside className="flex min-h-0 flex-col border-b border-[#d9e2ef] bg-[#f4f7fb] xl:border-b-0 xl:border-r">
+        <aside className="flex min-h-0 flex-col border-b border-[#d9e2ef] bg-[#F5F5F7] xl:border-b-0 xl:border-r">
           <div className="shrink-0 border-b border-[#d9e2ef] p-3">
             <div className="grid gap-2">
               <TextField

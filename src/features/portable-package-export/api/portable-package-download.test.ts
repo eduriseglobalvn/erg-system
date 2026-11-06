@@ -28,6 +28,7 @@ function bundle(patch: Partial<PortableExamPackageEnvelope> = {}): PortableExamP
 
 describe("portable package download", () => {
   it("downloads a signed self-contained bundle with a safe filename", () => {
+    vi.useFakeTimers();
     const click = vi.fn();
     const revokeObjectURL = vi.fn();
     const environment = {
@@ -37,6 +38,7 @@ describe("portable package download", () => {
 
     expect(downloadPortablePackage(bundle(), "Đề IC3 / GS6", environment)).toBe("De-IC3-GS6-v1.ergquiz");
     expect(click).toHaveBeenCalledOnce();
+    vi.advanceTimersByTime(1_000);
     expect(revokeObjectURL).toHaveBeenCalledWith("blob:portable");
   });
 
@@ -46,9 +48,10 @@ describe("portable package download", () => {
   });
 
   it("accepts only credential-free HTTPS release URLs", () => {
-    expect(publishedDesktopArtifactUrl(bundle({ downloadUrl: "https://download.erg.edu.vn/exam.exe" })))
-      .toBe("https://download.erg.edu.vn/exam.exe");
-    expect(publishedDesktopArtifactUrl(bundle({ downloadUrl: "http://download.erg.edu.vn/exam.exe" }))).toBeUndefined();
+    expect(publishedDesktopArtifactUrl(bundle({ downloadUrl: "https://downloads.erg.edu.vn/exam.exe" })))
+      .toBe("https://downloads.erg.edu.vn/exam.exe");
+    expect(publishedDesktopArtifactUrl(bundle({ downloadUrl: "http://downloads.erg.edu.vn/exam.exe" }))).toBeUndefined();
+    expect(publishedDesktopArtifactUrl(bundle({ downloadUrl: "https://evil.example.com/exam.exe" }))).toBeUndefined();
     expect(portablePackageFileName("***")).toBe("erg-exam.ergquiz");
   });
 });

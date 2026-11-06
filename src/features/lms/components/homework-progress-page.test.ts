@@ -5,7 +5,7 @@ import {
   resolveSelectedQuizVersionId,
   summarizeQuestionAnalytics,
 } from "@/features/lms/components/homework-progress-page";
-import type { AssignmentReport } from "@/features/lcms/quiz/quiz-reports";
+import type { AssignmentReport } from "@/features/quiz-reports";
 
 describe("mapAssignmentReportRows", () => {
   test("maps BE assignment report rows into the existing homework progress table shape", () => {

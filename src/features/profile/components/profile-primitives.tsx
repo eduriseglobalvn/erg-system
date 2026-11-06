@@ -3,39 +3,125 @@ import EyeOff from "@mui/icons-material/VisibilityOffRounded";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
 import type { ReactNode } from "react";
 import type { ProfileNotice as Notice } from "@/features/profile/types/profile-types";
+import { alpha } from "@mui/material/styles";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
-export function SectionHeader({ action, description, eyebrow, icon, title }: { action?: ReactNode; description: string; eyebrow: string; icon: ReactNode; title: string }) {
+export function SectionHeader({
+  action,
+  description,
+  eyebrow,
+  icon,
+  title,
+}: {
+  action?: ReactNode;
+  description: string;
+  eyebrow: string;
+  icon: ReactNode;
+  title: string;
+}) {
   return (
-    <Box component="div" sx={{"display":"flex","flexDirection":"column","gap":"calc(0.25rem * 4)","borderBottomStyle":"solid","borderBottomWidth":"1px","borderColor":"oklch(92.9% 0.013 255.508)","paddingBottom":"calc(0.25rem * 5)","@media (min-width: 48rem)":{"flexDirection":"row","alignItems":"flex-start","justifyContent":"space-between"}}}>
-      <Box component="div" sx={{"display":"flex","gap":"calc(0.25rem * 3)"}}>
-        <Box component="div" sx={{"display":"grid","width":"calc(0.25rem * 11)","height":"calc(0.25rem * 11)","flexShrink":"0","placeItems":"center","borderRadius":"0.5rem","backgroundColor":"var(--erg-blue-light)","color":"var(--erg-blue)"}}>{icon}</Box>
-        <div>
-          <Box component="p" sx={{"fontSize":"0.75rem","lineHeight":"calc(1 / 0.75)","fontWeight":"600","color":"var(--erg-red)"}}>{eyebrow}</Box>
-          <Box component="h2" sx={{"marginTop":"calc(0.25rem * 1)","fontSize":"1rem","lineHeight":"calc(1.5 / 1)","fontWeight":"600","color":"oklch(12.9% 0.042 264.695)"}}>{title}</Box>
-          <Box component="p" sx={{"marginTop":"calc(0.25rem * 1)","maxWidth":"42rem","fontSize":"0.875rem","lineHeight":"calc(0.25rem * 6)","color":"oklch(55.4% 0.046 257.417)"}}>{description}</Box>
-        </div>
+    <Box
+      sx={{
+        alignItems: { xs: "flex-start", md: "center" },
+        borderBottom: `1px solid ${ergEnterpriseTokens.color.border}`,
+        display: "flex",
+        flexDirection: { xs: "column", md: "row" },
+        gap: 2,
+        justifyContent: "space-between",
+        pb: 2.5,
+      }}
+    >
+      <Box sx={{ alignItems: "center", display: "flex", gap: 1.75 }}>
+        <Box
+          sx={{
+            alignItems: "center",
+            bgcolor: alpha(ergEnterpriseTokens.color.primary, 0.08),
+            borderRadius: "12px",
+            color: "primary.main",
+            display: "flex",
+            flexShrink: 0,
+            height: 44,
+            justifyContent: "center",
+            width: 44,
+          }}
+        >
+          {icon}
+        </Box>
+        <Box>
+          <Typography
+            sx={{
+              color: "text.disabled",
+              fontSize: "0.72rem",
+              fontWeight: 600,
+              letterSpacing: "0.05em",
+              textTransform: "uppercase",
+            }}
+          >
+            {eyebrow}
+          </Typography>
+          <Typography
+            sx={{
+              color: "text.primary",
+              fontSize: "1.15rem",
+              fontWeight: 600,
+              letterSpacing: "-0.015em",
+              mt: 0.25,
+            }}
+          >
+            {title}
+          </Typography>
+          <Typography sx={{ color: "text.secondary", fontSize: "0.825rem", mt: 0.35 }}>
+            {description}
+          </Typography>
+        </Box>
       </Box>
-      {action ? <Box component="div" sx={{"flexShrink":"0"}}>{action}</Box> : null}
+      {action ? <Box sx={{ flexShrink: 0 }}>{action}</Box> : null}
     </Box>
   );
 }
 
-export function Field({ children, fullWidth = false, icon, label }: { children: ReactNode; fullWidth?: boolean; icon: ReactNode; label: string }) {
+export function Field({
+  children,
+  fullWidth = false,
+  htmlFor,
+  icon,
+  label,
+}: {
+  children: ReactNode;
+  fullWidth?: boolean;
+  /** id of the control this label names. */
+  htmlFor: string;
+  icon: ReactNode;
+  label: string;
+}) {
   return (
-    <Box component="label" sx={{ gridColumn: fullWidth ? { md: "1 / -1" } : undefined }}>
-      <Box component="span" sx={{"marginBottom":"calc(0.25rem * 2)","display":"flex","alignItems":"center","gap":"calc(0.25rem * 2)","fontSize":"0.75rem","lineHeight":"calc(1 / 0.75)","fontWeight":"600","color":"oklch(70.4% 0.04 256.788)"}}>
-        {icon}
-        {label}
+    <Box sx={{ gridColumn: fullWidth ? { md: "1 / -1" } : undefined }}>
+      <Box sx={{ alignItems: "center", color: "text.secondary", display: "flex", gap: 0.75, mb: 1 }}>
+        <Box sx={{ color: "text.disabled", display: "flex" }}>{icon}</Box>
+        <Typography component="label" htmlFor={htmlFor} sx={{ color: "text.secondary", fontSize: "0.825rem", fontWeight: 600 }}>
+          {label}
+        </Typography>
       </Box>
       {children}
     </Box>
   );
 }
 
-export function PasswordInput({ disabled, onChange, onToggle, placeholder, show, type, value }: {
+export function PasswordInput({
+  disabled,
+  id,
+  onChange,
+  onToggle,
+  placeholder,
+  show,
+  type,
+  value,
+}: {
   disabled: boolean;
+  id: string;
   onChange: (value: string) => void;
   onToggle: () => void;
   placeholder: string;
@@ -45,12 +131,44 @@ export function PasswordInput({ disabled, onChange, onToggle, placeholder, show,
 }) {
   return (
     <Box sx={{ position: "relative" }}>
-      <TextField fullWidth size="small" disabled={disabled} type={type} value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} sx={{ "& .MuiInputBase-input": { pr: 6 } }} />
+      <TextField
+        disabled={disabled}
+        fullWidth
+        id={id}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder={placeholder}
+        size="small"
+        type={type}
+        value={value}
+        sx={{
+          "& .MuiOutlinedInput-root": {
+            bgcolor: "#FFFFFF",
+            borderRadius: `${ergEnterpriseTokens.radius.md}px`,
+            fontSize: "0.85rem",
+            fontWeight: 550,
+            pr: 5,
+            "& fieldset": { borderColor: "divider" },
+            "&:hover fieldset": { borderColor: "rgba(0, 0, 0, 0.22)" },
+            "&.Mui-focused fieldset": {
+              borderColor: "primary.main",
+              boxShadow: `0 0 0 3px ${alpha(ergEnterpriseTokens.color.primary, 0.15)}`,
+            },
+          },
+        }}
+      />
       <IconButton
         aria-label={show ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
-        sx={{"position":"absolute","right":"calc(0.25rem * 2)","top":"calc(1 / 2 * 100%)","display":"grid","width":"calc(0.25rem * 8)","height":"calc(0.25rem * 8)","translate":"0 calc(calc(1 / 2 * 100%) * -1)","placeItems":"center","borderRadius":"0.5rem","color":"oklch(55.4% 0.046 257.417)","transitionProperty":"color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events","transitionTimingFunction":"cubic-bezier(0.4, 0, 0.2, 1)","transitionDuration":"150ms","&:hover":{"@media (hover: hover)":{"backgroundColor":"oklch(96.8% 0.007 247.896)","color":"oklch(20.8% 0.042 265.755)"}}}}
-        size="small"
         onClick={onToggle}
+        size="small"
+        sx={{
+          color: "text.disabled",
+          position: "absolute",
+          right: 8,
+          top: "50%",
+          transform: "translateY(-50%)",
+          transition: "all 0.15s ease",
+          "&:hover": { bgcolor: "rgba(0, 0, 0, 0.05)", color: "text.primary" },
+        }}
       >
         {show ? <EyeOff sx={{ fontSize: 16 }} /> : <Eye sx={{ fontSize: 16 }} />}
       </IconButton>
@@ -58,17 +176,110 @@ export function PasswordInput({ disabled, onChange, onToggle, placeholder, show,
   );
 }
 
-export function ProfileTabButton({ active, description, icon, onClick, title }: { active: boolean; description: string; icon: ReactNode; onClick: () => void; title: string }) {
+/** The page's single save action: sticks to the bottom of the screen on mobile, sits at the card's end on desktop. */
+export function StickyActionBar({ children }: { children: ReactNode }) {
   return (
-    <Box component="button"
-      sx={{ alignItems: "center", bgcolor: active ? "var(--erg-blue-light)" : "background.paper", border: "1px solid", borderColor: active ? "primary.main" : "transparent", borderRadius: 1, boxShadow: active ? 1 : 0, color: active ? "primary.main" : "text.secondary", display: "flex", gap: 1.5, px: 2, py: 1.5, textAlign: "left", transition: "background-color 160ms ease, border-color 160ms ease", "&:hover": active ? {} : { bgcolor: "background.default", borderColor: "divider" } }}
-      type="button"
-      onClick={onClick}
+    <Box
+      sx={{
+        bgcolor: "background.paper",
+        borderRadius: { xs: "0 0 16px 16px", md: 0 },
+        borderTop: { xs: `1px solid ${ergEnterpriseTokens.color.border}`, md: "none" },
+        bottom: 0,
+        display: "flex",
+        justifyContent: { md: "flex-end" },
+        mb: { xs: -3, md: 0 },
+        mt: 3,
+        mx: { xs: -3, md: 0 },
+        pb: "calc(12px + env(safe-area-inset-bottom, 0px))",
+        position: { xs: "sticky", md: "static" },
+        pt: 1.5,
+        px: { xs: 3, md: 0 },
+        zIndex: 1,
+        "& > button": { minHeight: 44, width: { xs: "100%", md: "auto" } },
+      }}
     >
-      <Box component="span" sx={{ bgcolor: active ? "background.paper" : "background.default", borderRadius: 1, display: "grid", height: 36, placeItems: "center", width: 36 }}>{icon}</Box>
-      <Box component="span" sx={{"minWidth":"calc(0.25rem * 0)"}}>
-        <Box component="span" sx={{"display":"block","fontSize":"0.875rem","lineHeight":"calc(1.25 / 0.875)","fontWeight":"600"}}>{title}</Box>
-        <Box component="span" sx={{"marginTop":"calc(0.25rem * 0.5)","display":"block","overflow":"hidden","textOverflow":"ellipsis","whiteSpace":"nowrap","fontSize":"0.75rem","lineHeight":"calc(1 / 0.75)","fontWeight":"500","color":"oklch(55.4% 0.046 257.417)"}}>{description}</Box>
+      {children}
+    </Box>
+  );
+}
+
+export function ProfileTabButton({
+  active,
+  description,
+  icon,
+  onClick,
+  title,
+}: {
+  active: boolean;
+  description: string;
+  icon: ReactNode;
+  onClick: () => void;
+  title: string;
+}) {
+  return (
+    <Box
+      component="button"
+      onClick={onClick}
+      type="button"
+      sx={{
+        alignItems: "center",
+        bgcolor: active ? alpha(ergEnterpriseTokens.color.primary, 0.08) : "#FFFFFF",
+        border: `1px solid ${active ? alpha(ergEnterpriseTokens.color.primary, 0.18) : "rgba(0, 0, 0, 0.06)"}`,
+        borderRadius: "14px",
+        boxShadow: active ? `0 2px 8px ${alpha(ergEnterpriseTokens.color.primary, 0.08)}` : "0 1px 3px rgba(0, 0, 0, 0.02)",
+        color: active ? "primary.main" : ergEnterpriseTokens.color.textMuted,
+        cursor: "pointer",
+        display: "flex",
+        gap: 1.5,
+        p: 1.75,
+        textAlign: "left",
+        transition: "all 0.15s cubic-bezier(0.16, 1, 0.3, 1)",
+        width: "100%",
+        "&:hover": {
+          bgcolor: active ? alpha(ergEnterpriseTokens.color.primary, 0.12) : "rgba(0, 0, 0, 0.03)",
+        },
+        "&:active": {
+          transform: "scale(0.985)",
+        },
+      }}
+    >
+      <Box
+        sx={{
+          alignItems: "center",
+          bgcolor: active ? "primary.main" : "rgba(0, 0, 0, 0.05)",
+          borderRadius: `${ergEnterpriseTokens.radius.md}px`,
+          color: active ? "#FFFFFF" : ergEnterpriseTokens.color.textMuted,
+          display: "flex",
+          flexShrink: 0,
+          height: 38,
+          justifyContent: "center",
+          transition: "all 0.15s ease",
+          width: 38,
+        }}
+      >
+        {icon}
+      </Box>
+      <Box sx={{ minWidth: 0 }}>
+        <Typography
+          sx={{
+            color: active ? "primary.main" : ergEnterpriseTokens.color.text,
+            fontSize: "0.85rem",
+            fontWeight: active ? 750 : 650,
+          }}
+        >
+          {title}
+        </Typography>
+        <Typography
+          noWrap
+          sx={{
+            color: active ? alpha(ergEnterpriseTokens.color.primary, 0.75) : ergEnterpriseTokens.color.textSoft,
+            fontSize: "0.72rem",
+            fontWeight: 500,
+            mt: 0.25,
+          }}
+        >
+          {description}
+        </Typography>
       </Box>
     </Box>
   );
@@ -76,8 +287,33 @@ export function ProfileTabButton({ active, description, icon, onClick, title }: 
 
 export function NoticeBox({ notice }: { notice: Notice | null }) {
   if (!notice) return null;
+  const isSuccess = notice.tone === "success";
+
   return (
-    <Box sx={{ bgcolor: notice.tone === "success" ? "success.50" : "error.50", border: "1px solid", borderColor: notice.tone === "success" ? "success.light" : "error.light", borderRadius: 1, color: notice.tone === "success" ? "success.dark" : "error.dark", fontSize: 14, fontWeight: 700, mt: 2.5, px: 2, py: 1.5 }}>
+    <Box
+      sx={{
+        alignItems: "center",
+        bgcolor: isSuccess ? alpha(ergEnterpriseTokens.color.success, 0.1) : alpha(ergEnterpriseTokens.color.danger, 0.1),
+        border: `1px solid ${isSuccess ? alpha(ergEnterpriseTokens.color.success, 0.22) : alpha(ergEnterpriseTokens.color.danger, 0.22)}`,
+        borderRadius: "12px",
+        color: isSuccess ? "#15803D" : "#DC2626",
+        display: "flex",
+        fontSize: "0.85rem",
+        fontWeight: 600,
+        gap: 1,
+        mt: 2.5,
+        p: 1.75,
+      }}
+    >
+      <Box
+        sx={{
+          bgcolor: isSuccess ? "success.main" : ergEnterpriseTokens.color.danger,
+          borderRadius: "50%",
+          flexShrink: 0,
+          height: 6,
+          width: 6,
+        }}
+      />
       {notice.message}
     </Box>
   );
@@ -85,11 +321,25 @@ export function NoticeBox({ notice }: { notice: Notice | null }) {
 
 export function ProfileLine({ icon, label, value }: { icon: ReactNode; label: string; value: string }) {
   return (
-    <Box component="div" sx={{"display":"flex","alignItems":"center","gap":"calc(0.25rem * 3)","borderRadius":"0.5rem","backgroundColor":"oklch(98.4% 0.003 247.858)","paddingInline":"calc(0.25rem * 3)","paddingBlock":"calc(0.25rem * 2)"}}>
-      <Box component="span" sx={{"color":"var(--erg-blue)"}}>{icon}</Box>
-      <Box component="div" sx={{"minWidth":"calc(0.25rem * 0)","flex":"1"}}>
-        <Box component="p" sx={{"fontSize":"11px","fontWeight":"500","color":"oklch(70.4% 0.04 256.788)"}}>{label}</Box>
-        <Box component="p" sx={{"overflow":"hidden","textOverflow":"ellipsis","whiteSpace":"nowrap","fontSize":"0.875rem","lineHeight":"calc(1.25 / 0.875)","fontWeight":"500","color":"oklch(20.8% 0.042 265.755)"}}>{value}</Box>
+    <Box
+      sx={{
+        alignItems: "center",
+        bgcolor: "rgba(0, 0, 0, 0.025)",
+        borderRadius: `${ergEnterpriseTokens.radius.md}px`,
+        border: `1px solid ${ergEnterpriseTokens.color.border}`,
+        display: "flex",
+        gap: 1.25,
+        p: 1.25,
+      }}
+    >
+      <Box sx={{ color: "primary.main", display: "flex" }}>{icon}</Box>
+      <Box sx={{ minWidth: 0, flex: 1 }}>
+        <Typography sx={{ color: "text.disabled", fontSize: "0.7rem", fontWeight: 600 }}>
+          {label}
+        </Typography>
+        <Typography noWrap sx={{ color: "text.primary", fontSize: "0.825rem", fontWeight: 600 }}>
+          {value}
+        </Typography>
       </Box>
     </Box>
   );
@@ -97,9 +347,20 @@ export function ProfileLine({ icon, label, value }: { icon: ReactNode; label: st
 
 export function InfoTile({ label, value }: { label: string; value: string }) {
   return (
-    <Box component="div" sx={{"borderRadius":"0.5rem","borderStyle":"solid","borderWidth":"1px","borderColor":"oklch(92.9% 0.013 255.508)","backgroundColor":"oklch(98.4% 0.003 247.858)","paddingInline":"calc(0.25rem * 4)","paddingBlock":"calc(0.25rem * 3)"}}>
-      <Box component="p" sx={{"fontSize":"0.75rem","lineHeight":"calc(1 / 0.75)","fontWeight":"500","color":"oklch(70.4% 0.04 256.788)"}}>{label}</Box>
-      <Box component="p" sx={{"marginTop":"calc(0.25rem * 1)","fontSize":"0.875rem","lineHeight":"calc(1.25 / 0.875)","fontWeight":"600","color":"oklch(12.9% 0.042 264.695)"}}>{value}</Box>
+    <Box
+      sx={{
+        bgcolor: "rgba(0, 0, 0, 0.02)",
+        borderRadius: "12px",
+        border: "1px solid rgba(0, 0, 0, 0.05)",
+        p: 1.75,
+      }}
+    >
+      <Typography sx={{ color: "text.disabled", fontSize: "0.72rem", fontWeight: 600 }}>
+        {label}
+      </Typography>
+      <Typography sx={{ color: "text.primary", fontSize: "0.875rem", fontWeight: 600, mt: 0.5 }}>
+        {value}
+      </Typography>
     </Box>
   );
 }

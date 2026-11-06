@@ -1,6 +1,8 @@
 import { useState, type ReactNode } from "react";
+import AdminPanelSettingsRoundedIcon from "@mui/icons-material/AdminPanelSettingsRounded";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
+import MenuBookRoundedIcon from "@mui/icons-material/MenuBookRounded";
 import NotificationsNoneRoundedIcon from "@mui/icons-material/NotificationsNoneRounded";
 import PersonOutlineRoundedIcon from "@mui/icons-material/PersonOutlineRounded";
 import PhoneAndroidRoundedIcon from "@mui/icons-material/PhoneAndroidRounded";
@@ -16,18 +18,20 @@ import { LmsScopeSheet, type LmsMobileClassOption, type LmsMobileSchoolOption } 
 import { MobileBottomSheet } from "./mobile-bottom-sheet";
 import { OfflineShellStatus } from "@/components/erg-mui/offline";
 import { useOfflineShellStatus } from "@/hooks/use-offline-shell-status";
-import { useInstallPrompt } from "../hooks/use-install-prompt";
+import { useInstallPrompt } from "@/hooks/use-install-prompt";
 import { usePwaNotifications } from "../hooks/use-pwa-notifications";
-import { useServiceWorkerUpdate } from "../hooks/use-service-worker-update";
+import { useServiceWorkerUpdate } from "@/hooks/use-service-worker-update";
 import { teacherPath } from "@/platform/workspaces/workspace-paths";
+import { getAuthScope } from "@/platform/auth/api/auth-storage";
 
 export function LmsMobileShell<TSection extends string>({
-  activeLabel, activeSection, children, classes, dockItems, notificationCenter, schoolName, schools,
+  activeLabel, activeSection, children, classes, dockItems, hideDock = false, moreItems = [], notificationCenter, schoolName, schools,
   selectedClassId, selectedClassName, selectedSchoolId, teacherEmail, teacherName, unreadNotificationCount,
   onClassChange, onOpenNotifications, onNavigate, onSchoolChange, onSignOut,
 }: {
   activeLabel: string; activeSection: TSection; children: ReactNode; classes: LmsMobileClassOption[];
-  dockItems: Array<LmsMobileDockItem<TSection>>; notificationCenter?: ReactNode; schoolName: string;
+  dockItems: Array<LmsMobileDockItem<TSection>>; hideDock?: boolean;
+  moreItems?: Array<{ icon: LmsMobileDockItem<string>["icon"]; label: string; path: string }>; notificationCenter?: ReactNode; schoolName: string;
   schools: LmsMobileSchoolOption[]; selectedClassId: string; selectedClassName: string; selectedSchoolId: string;
   teacherEmail: string; teacherName: string; unreadNotificationCount?: number;
   onClassChange: (classId: string) => void; onOpenNotifications?: () => void; onNavigate: (path: string) => void;
@@ -41,6 +45,11 @@ export function LmsMobileShell<TSection extends string>({
   const [scopeOpen, setScopeOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const shouldOfferInstall = !installPrompt.installed && (installPrompt.canInstall || installPrompt.isIos);
+
+  const session = getAuthScope("lms").session ?? getAuthScope().session;
+  const grantedWorkspaces = session?.workspaces ?? [];
+  const canSwitchAdmin = grantedWorkspaces.includes("ADMIN");
+  const canSwitchStudent = grantedWorkspaces.includes("STUDENT");
 
   function navigate(path: string) {
     setAccountOpen(false);
@@ -62,7 +71,7 @@ export function LmsMobileShell<TSection extends string>({
         <Box sx={{ bgcolor: "info.light", px: 1.5, py: 1 }}>
           <ButtonBase onClick={() => setPwaOpen(true)} sx={{ bgcolor: "background.paper", border: "1px solid", borderColor: "divider", borderRadius: 2, display: "flex", gap: 1.5, minHeight: 56, px: 1.5, py: 1, textAlign: "left", width: "100%" }}>
             <Box sx={{ alignItems: "center", bgcolor: "primary.main", borderRadius: 1.5, color: "primary.contrastText", display: "flex", flexShrink: 0, height: 40, justifyContent: "center", width: 40 }}><PhoneAndroidRoundedIcon /></Box>
-            <Box sx={{ flex: 1, minWidth: 0 }}><Typography noWrap sx={{ fontSize: 14, fontWeight: 800 }}>Thêm LMS vào màn hình chính</Typography><Typography color="text.secondary" noWrap sx={{ fontSize: 12, fontWeight: 600 }}>Mở nhanh như ứng dụng với biểu tượng riêng.</Typography></Box>
+            <Box sx={{ flex: 1, minWidth: 0 }}><Typography noWrap sx={{ fontSize: 14, fontWeight: 600 }}>Thêm LMS vào màn hình chính</Typography><Typography color="text.secondary" noWrap sx={{ fontSize: 12, fontWeight: 600 }}>Mở nhanh như ứng dụng với biểu tượng riêng.</Typography></Box>
             <DownloadRoundedIcon color="primary" />
           </ButtonBase>
         </Box>
@@ -70,12 +79,35 @@ export function LmsMobileShell<TSection extends string>({
 
       <OfflineShellStatus network={network} />
 
-      <Box component="main" data-testid="lms-mobile-scroll-region" sx={{ flex: 1, minHeight: 0, overflowY: "auto", overscrollBehavior: "contain", pb: "calc(104px + env(safe-area-inset-bottom, 0px))" }}>{children}</Box>
-      <LmsBottomDock activeSection={activeSection} items={dockItems} onNavigate={navigate} />
+      <Box component="main" data-testid="lms-mobile-scroll-region" sx={{ flex: 1, minHeight: 0, overflowY: "auto", overscrollBehavior: "contain", pb: hideDock ? 0 : "calc(104px + env(safe-area-inset-bottom, 0px))" }}>{children}</Box>
+      {hideDock ? null : (
+        <LmsBottomDock
+          activeSection={activeSection}
+          items={dockItems}
+          onNavigate={(path) => (dockItems.find((item) => item.path === path)?.opensMenu ? setAccountOpen(true) : navigate(path))}
+        />
+      )}
       <LmsScopeSheet classes={classes} onClassChange={onClassChange} onOpenChange={setScopeOpen} onSchoolChange={onSchoolChange} open={scopeOpen} schools={schools} selectedClassId={selectedClassId} selectedSchoolId={selectedSchoolId} />
 
       <MobileBottomSheet description={teacherEmail} onOpenChange={setAccountOpen} open={accountOpen} title={teacherName}>
         <Stack spacing={1}>
+          {moreItems.map((item) => (
+            <AccountActionButton icon={<item.icon />} key={item.path} label={item.label} onClick={() => navigate(item.path)} />
+          ))}
+          {canSwitchAdmin ? (
+            <AccountActionButton
+              icon={<AdminPanelSettingsRoundedIcon sx={{ color: "primary.main" }} />}
+              label="Chuyển sang Admin LMS"
+              onClick={() => navigate("/admin")}
+            />
+          ) : null}
+          {canSwitchStudent ? (
+            <AccountActionButton
+              icon={<MenuBookRoundedIcon sx={{ color: "info.main" }} />}
+              label="Chuyển sang Học sinh"
+              onClick={() => navigate("/student")}
+            />
+          ) : null}
           <AccountActionButton icon={<PersonOutlineRoundedIcon />} label="Quản lý tài khoản" onClick={() => navigate(teacherPath("/account"))} />
           <AccountActionButton icon={<SecurityRoundedIcon />} label="Lịch sử đăng nhập" onClick={() => navigate(teacherPath("/account/login-logs"))} />
           {onOpenNotifications ? <AccountActionButton icon={<NotificationsNoneRoundedIcon />} label="Mở thông báo" onClick={() => { setAccountOpen(false); onOpenNotifications(); }} /> : null}
@@ -91,7 +123,7 @@ export function LmsMobileShell<TSection extends string>({
 function AccountActionButton({ danger = false, icon, label, onClick }: { danger?: boolean; icon: ReactNode; label: string; onClick: () => void }) {
   return (
     <ButtonBase onClick={onClick} sx={{ border: "1px solid", borderColor: danger ? "error.light" : "divider", borderRadius: 1.5, color: danger ? "error.main" : "text.primary", display: "flex", gap: 1.5, justifyContent: "flex-start", minHeight: 48, px: 1.5, textAlign: "left", width: "100%", "&:hover": { bgcolor: danger ? "error.light" : "action.hover" }, "& .MuiSvgIcon-root": { flexShrink: 0, fontSize: 20 } }}>
-      {icon}<Typography sx={{ fontSize: 14, fontWeight: 800 }}>{label}</Typography>
+      {icon}<Typography sx={{ fontSize: 14, fontWeight: 600 }}>{label}</Typography>
     </ButtonBase>
   );
 }

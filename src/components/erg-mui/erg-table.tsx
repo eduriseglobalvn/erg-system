@@ -4,19 +4,24 @@ import Table, { type TableProps } from "@mui/material/Table";
 import TableContainer from "@mui/material/TableContainer";
 import Typography from "@mui/material/Typography";
 import type { ReactNode } from "react";
+import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
 
 type ErgDataTableShellProps = PaperProps & {
   footer?: ReactNode;
   toolbar?: ReactNode;
 };
 
+/** Card around a table: 1px border, no shadow at rest (design system: shadow only on floating surfaces). */
 export function ErgDataTableShell({ children, footer, toolbar, sx, ...props }: ErgDataTableShellProps) {
   return (
     <Paper
+      elevation={0}
       sx={[
         {
-          borderColor: "divider",
-          borderRadius: 3,
+          bgcolor: "background.paper",
+          border: `1px solid ${t.color.border}`,
+          borderRadius: `${t.radius.sm}px`,
+          boxShadow: "none",
           display: "flex",
           flexDirection: "column",
           minHeight: 0,
@@ -44,9 +49,7 @@ export function ErgTableToolbar({ actions, meta, title }: ErgTableToolbarProps) 
     <Box
       sx={{
         alignItems: { xs: "flex-start", sm: "center" },
-        borderBottom: "1px solid",
-        borderColor: "divider",
-        bgcolor: "background.paper",
+        borderBottom: `1px solid ${t.color.border}`,
         display: "flex",
         flexDirection: { xs: "column", sm: "row" },
         gap: 1.5,
@@ -56,21 +59,32 @@ export function ErgTableToolbar({ actions, meta, title }: ErgTableToolbarProps) 
     >
       <Box sx={{ minWidth: 0 }}>
         {title ? (
-          <Typography sx={{ fontWeight: 850 }} variant="subtitle1">
+          <Typography sx={{ color: "text.primary" }} variant="subtitle1">
             {title}
           </Typography>
         ) : null}
         {meta ? (
-          <Typography color="text.secondary" variant="body2">
+          <Typography sx={{ color: "text.secondary", mt: 0.25 }} variant="body2">
             {meta}
           </Typography>
         ) : null}
       </Box>
-      {actions ? <Box sx={{ display: "flex", flexDirection: "row", flexWrap: "wrap", gap: 1 }}>{actions}</Box> : null}
+      {actions ? (
+        <Box sx={{ alignItems: "center", display: "flex", flexDirection: "row", flexWrap: "wrap", gap: 1 }}>
+          {actions}
+        </Box>
+      ) : null}
     </Box>
   );
 }
 
-export function ErgTable(props: TableProps) {
-  return <Table stickyHeader size="small" {...props} />;
+/** Header, padding and row rules come from the theme's MuiTableCell; numbers line up digit for digit. */
+export function ErgTable({ sx, ...props }: TableProps) {
+  return (
+    <Table
+      stickyHeader
+      sx={[{ fontVariantNumeric: "tabular-nums", "& .MuiTableCell-root": { fontVariantNumeric: "tabular-nums" } }, ...(Array.isArray(sx) ? sx : [sx])]}
+      {...props}
+    />
+  );
 }

@@ -44,3 +44,4 @@ export {
   type OfflineResourceCachePolicy,
   type OfflineResourceScope,
 } from "./offline-resource-cache";
+export { useOutboxQuarantine } from "./use-outbox-quarantine";

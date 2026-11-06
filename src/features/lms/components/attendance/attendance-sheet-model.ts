@@ -1,5 +1,6 @@
-import type { ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
+import type { ClassroomStudent } from "@/domain/school/classroom-types";
 import type { CurriculumTreeSubject } from "@/features/lms/api/curriculum-tree-api";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 export type AttendanceStatus = "present" | "absent" | "late" | "excused" | "";
 
@@ -191,16 +192,37 @@ export function attendanceText(status: AttendanceStatus) {
   return "Có mặt";
 }
 
+const attendanceTint = {
+  present: ergEnterpriseTokens.statusTint.success,
+  late: ergEnterpriseTokens.statusTint.warning,
+  absent: ergEnterpriseTokens.statusTint.error,
+  excused: ergEnterpriseTokens.statusTint.info,
+};
+
 export function getAttendanceBgColor(status: AttendanceStatus, isFocusDate: boolean) {
-  if (!status) return isFocusDate ? "#f9fafb" : "white";
-  const colors = { present: "#dcfce7", late: "#fef3c7", absent: "#fee2e2", excused: "#EEF2FF" };
-  return colors[status];
+  if (!status) return isFocusDate ? ergEnterpriseTokens.color.surfaceSubtle : ergEnterpriseTokens.color.surface;
+  return attendanceTint[status].bg;
 }
 
 export function getAttendanceTextColor(status: AttendanceStatus) {
-  if (!status) return "#9ca3af";
-  const colors = { present: "#16a34a", late: "#d97706", absent: "#dc2626", excused: "#4f46e5" };
-  return colors[status];
+  return status ? attendanceTint[status].color : ergEnterpriseTokens.color.textSoft;
+}
+
+/** Cells that still have no status; "Tất cả có mặt" fills only these so already-marked exceptions survive. */
+export function bulkPresentTargets(
+  students: ReadonlyArray<{ id: string }>,
+  columns: readonly AttendanceColumn[],
+  getStatus: (studentId: string, studentIndex: number, column: AttendanceColumn, columnIndex: number) => AttendanceStatus,
+) {
+  const targets: Array<{ studentId: string; columnId: string }> = [];
+  students.forEach((student, studentIndex) => {
+    columns.forEach((column, columnIndex) => {
+      if (!column.isFutureDate && !getStatus(student.id, studentIndex, column, columnIndex)) {
+        targets.push({ studentId: student.id, columnId: column.id });
+      }
+    });
+  });
+  return targets;
 }
 
 export function attendanceSummary(statuses: AttendanceStatus[]) {

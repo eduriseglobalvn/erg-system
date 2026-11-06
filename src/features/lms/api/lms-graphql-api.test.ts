@@ -8,7 +8,7 @@ import {
   mapClassWorkspaceToStudents,
   type LmsClassWorkspace,
 } from "@/features/lms/api/lms-classroom-api";
-import type { ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
+import type { ClassroomSnapshot } from "@/domain/school/classroom-types";
 
 test("maps LMS assignments into assignment runs", () => {
   const runs = mapAssignmentsToRuns(

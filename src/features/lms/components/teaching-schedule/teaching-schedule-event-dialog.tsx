@@ -48,7 +48,7 @@ export function TeachingScheduleEventDialog({ draft, mode, onChange, onClose, on
   return (
     <Dialog fullWidth maxWidth="md" onClose={onClose} open>
       <DialogTitle sx={{ alignItems: "center", display: "flex", justifyContent: "space-between", py: 1.25 }}>
-        <Typography component="span" sx={{ fontWeight: 800 }} variant="h6">{dialogTitle}</Typography>
+        <Typography component="span" sx={{ fontWeight: 600 }} variant="h6">{dialogTitle}</Typography>
         <Stack direction="row" spacing={0.5}>
           {mode === "edit" && onDelete ? <IconButton aria-label="Xóa" color="error" onClick={onDelete}><DeleteOutlineRoundedIcon /></IconButton> : null}
           <IconButton aria-label="Đóng" onClick={onClose}><CloseRoundedIcon /></IconButton>
@@ -84,7 +84,7 @@ export function TeachingScheduleEventDialog({ draft, mode, onChange, onClose, on
         <ScheduleRow icon={<NotificationsNoneRoundedIcon />}><Stack direction="row" sx={{ alignItems: "center", flexWrap: "wrap", gap: 1 }}><Chip label="30 phút trước" variant="outlined" /><Chip label="Email" variant="outlined" /><Button variant="text">Thêm thông báo</Button></Stack></ScheduleRow>
         <ScheduleRow icon={<CalendarMonthRoundedIcon />}>
           <Box sx={{ display: "grid", gap: 1.5, gridTemplateColumns: { xs: "1fr", sm: "1fr 190px" } }}>
-            <Box sx={{ alignItems: "center", bgcolor: "background.default", border: "1px solid", borderColor: "divider", borderRadius: 2, display: "flex", minHeight: 40, px: 1.5 }}><Typography sx={{ fontSize: 14, fontWeight: 700 }}>Lịch dạy của tôi</Typography></Box>
+            <Box sx={{ alignItems: "center", bgcolor: "background.default", border: "1px solid", borderColor: "divider", borderRadius: 2, display: "flex", minHeight: 40, px: 1.5 }}><Typography sx={{ fontSize: 14, fontWeight: 600 }}>Lịch dạy của tôi</Typography></Box>
             <TextField label="Trạng thái" onChange={(event) => updateDraft("status", event.target.value)} select value={draft.status}>{statusOptions.map((status) => <MenuItem key={status.value} value={status.value}>{status.label}</MenuItem>)}</TextField>
           </Box>
         </ScheduleRow>
@@ -93,7 +93,7 @@ export function TeachingScheduleEventDialog({ draft, mode, onChange, onClose, on
 
       <DialogActions sx={{ bgcolor: "background.default", justifyContent: "space-between", px: 3, py: 1.5 }}>
         <Button variant="text">Tùy chọn khác</Button>
-        <Button onClick={onSave} startIcon={<CheckRoundedIcon />}>Lưu</Button>
+        <Button variant="contained" onClick={onSave} startIcon={<CheckRoundedIcon />}>Lưu</Button>
       </DialogActions>
     </Dialog>
   );

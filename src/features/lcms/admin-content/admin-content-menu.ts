@@ -1,7 +1,9 @@
+import { createElement } from "react";
 import type { MenuGroup, MenuItem } from "@/components/portal/ErgPortalLayout";
+import FolderRoundedIcon from "@mui/icons-material/FolderRounded";
 
 import { ADMIN_CONTENT_SECTIONS } from "./admin-content-route";
-import { LCMS_MENU_GROUPS } from "@/features/lcms/lcms-menu";
+import { LCMS_MENU_GROUPS } from "@/features/lcms/admin-menu";
 import { adminPath } from "@/platform/workspaces/workspace-paths";
 
 const LEGACY_CONTENT_PATHS = new Set([
@@ -15,6 +17,7 @@ const LEGACY_CONTENT_PATHS = new Set([
 const contentMenuItem: MenuItem = {
   id: "admin-content",
   label: "Nội dung",
+  icon: createElement(FolderRoundedIcon, { sx: { fontSize: 24 } }),
   path: "/admin/content",
   description: "Quản lý cấu trúc môn học, tài nguyên, ngân hàng câu hỏi và quiz cho Teacher Workspace.",
   children: ADMIN_CONTENT_SECTIONS.map((section) => ({
@@ -61,7 +64,7 @@ function canonicalizeAdminMenuItem(item: MenuItem): MenuItem {
 
 export const ADMIN_MENU_GROUPS: MenuGroup[] = [
   ...withoutLegacyContent(LCMS_MENU_GROUPS).slice(0, 2),
-  { label: "Nội dung", items: [contentMenuItem] },
+  { label: "", items: [contentMenuItem] },
   ...withoutLegacyContent(LCMS_MENU_GROUPS).slice(2),
 ].map((group) => ({
   ...group,

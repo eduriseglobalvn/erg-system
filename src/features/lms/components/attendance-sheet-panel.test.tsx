@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 
-import { classroomSnapshots, classroomStudents } from "@/features/lms/classroom/api/mock-classroom-data";
+import { classroomSnapshots, classroomStudents } from "@/test/fixtures/mock-classroom-data";
 import { AttendanceSheetPanel } from "@/features/lms/components/attendance-sheet-panel";
 
 const selectedClass = classroomSnapshots[0];
@@ -55,14 +55,29 @@ test("shows up to five future attendance columns and stops at the fifth", () => 
 test("clamps a future selected date back to today", () => {
   const { container } = renderPanel();
 
-  const dateInput = container.querySelector<HTMLInputElement>('input[type="date"]');
-  expect(dateInput).not.toBeNull();
-  expect(dateInput!.value).toBe("2026-06-02");
+  // vi-locale date field (dd/MM/yyyy), not the browser-locale native date input.
+  const dateInput = container.querySelector<HTMLInputElement>("input[aria-hidden=true]")!;
+  expect(dateInput.value).toBe("02/06/2026");
 
   // Picking a future date clamps back to today, so the visible window does not move past 06/06.
-  fireEvent.change(dateInput!, { target: { value: "2026-06-09" } });
+  fireEvent.change(dateInput, { target: { value: "09/06/2026" } });
 
-  expect(dateInput!.value).toBe("2026-06-02");
+  expect(dateInput.value).toBe("02/06/2026");
   expect(screen.getAllByText("06/06").length).toBeGreaterThan(0);
   expect(screen.queryByText("07/06")).not.toBeInTheDocument();
+});
+
+test("Tất cả có mặt marks every unmarked student for the focus date in one click", () => {
+  renderPanel();
+
+  fireEvent.click(screen.getByRole("button", { name: "Tất cả có mặt" }));
+
+  // Today (Tue) has two lessons x 4 students = 8 cells (rows are virtualised away in jsdom, so assert the notice).
+  expect(screen.getByText(/Đã đánh dấu có mặt 8 lượt/)).toBeInTheDocument();
+});
+
+test("hides the admin-only teaching plan warning from teachers", () => {
+  renderPanel();
+  fireEvent.click(screen.getByRole("button", { name: "Khung chương trình" }));
+  expect(screen.queryByText(/Chưa cấu hình lịch dạy/)).not.toBeInTheDocument();
 });

@@ -3,9 +3,9 @@ import { describe, expect, it } from "vitest";
 import { QuestionRenderer } from "@/components/quiz/question-renderer";
 import { normalizePortableQuizPackage } from "@/features/elearning/portable-exam/api/portable-exam-runtime";
 import type { VerifiedPortableExamPackage } from "@/features/elearning/portable-exam/types/portable-exam-types";
-import { createInitialAnswer } from "@/lib/quiz";
-import { sampleQuiz } from "@/lib/sample-quiz";
-import type { Question, QuestionKind } from "@/lib/types";
+import { createInitialAnswer } from "@/domain/quiz/quiz";
+import { sampleQuiz } from "@/domain/quiz/sample-quiz";
+import type { Question, QuestionKind } from "@/domain/quiz/types";
 
 const ALL_QUESTION_KINDS = [
   "single_choice", "multiple_response", "true_false", "short_answer", "numeric",

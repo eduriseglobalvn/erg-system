@@ -14,12 +14,11 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Chip from "@mui/material/Chip";
 
-import { AppSelect } from "@/components/ui/app-select";
-import { EmptyState } from "@/components/ui/empty-state";
-import { inputClassName } from "@/components/ui/input";
-import type { LearningResourceResourceCard } from "@/features/lcms/admin-operations/api/learning-resource-authoring-api";
+import { AppSelect } from "@/components/erg-mui/app-select";
+import { ErgEmptyState } from "@/components/erg-mui";
+import type { LearningResourceResourceCard } from "@/features/lms/learning-resources/api/learning-resource-authoring-api";
 import { ContentLifecycleControls, lifecycleResourceKindForTaxonomyKind, lifecycleStateFromStatus } from "@/features/lcms/content-lifecycle";
-import type { QuestionBankQuestion, QuizBankItem } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
+import type { QuestionBankQuestion, QuizBankItem } from "@/features/question-bank/types/question-bank-types";
 import {
   AuthoringCardDescription,
   AuthoringCardHeader,
@@ -145,7 +144,7 @@ export function SubjectsScreen({
                 <Button variant="contained" color="error" onClick={() => onDeleteSubject(selectedSubject)} startIcon={<Trash2 className="h-4 w-4" />}>Xóa</Button>
               </div>
             </>
-          ) : <EmptyState title="Chưa chọn môn" description="Chọn một môn ở danh sách để xem chi tiết." />}
+          ) : <ErgEmptyState title="Chưa chọn môn" description="Chọn một môn ở danh sách để xem chi tiết." />}
         </CardContent>
       </Card>
     </div>
@@ -177,8 +176,8 @@ export function ResourcesScreen({ subjects, resources, onLifecycleTransitioned }
         </div>
         <div className="grid gap-3 md:grid-cols-3">
           <SearchInput value={query} onChange={setQuery} placeholder="Tìm tài liệu hoặc vị trí trong cấu trúc" />
-          <AppSelect value={subjectId} onChange={(event) => setSubjectId(event.target.value)} className={inputClassName}><option value="">Tất cả môn học</option>{subjects.map((subject) => <option key={subject.id} value={subject.id}>{subject.label}</option>)}</AppSelect>
-          <AppSelect value={fileType} onChange={(event) => setFileType(event.target.value)} className={inputClassName}><option value="">Tất cả định dạng</option><option value="PDF">PDF</option><option value="PPTX">PPTX</option><option value="VIDEO">Video</option><option value="AUDIO">Audio</option><option value="QUIZ">Bài tập</option></AppSelect>
+          <AppSelect value={subjectId} onChange={(event) => setSubjectId(event.target.value)} style={{ width: "100%" }}><option value="">Tất cả môn học</option>{subjects.map((subject) => <option key={subject.id} value={subject.id}>{subject.label}</option>)}</AppSelect>
+          <AppSelect value={fileType} onChange={(event) => setFileType(event.target.value)} style={{ width: "100%" }}><option value="">Tất cả định dạng</option><option value="PDF">PDF</option><option value="PPTX">PPTX</option><option value="VIDEO">Video</option><option value="AUDIO">Audio</option><option value="QUIZ">Bài tập</option></AppSelect>
         </div>
       </AuthoringCardHeader>
       <CardContent>
@@ -205,7 +204,7 @@ export function ResourcesScreen({ subjects, resources, onLifecycleTransitioned }
               </div>
             ))}
           </div>
-        ) : <EmptyState title={resources.length ? "Không tìm thấy tài liệu" : "Chưa có tài liệu"} description={resources.length ? "Thử đổi từ khóa hoặc bộ lọc môn học, định dạng." : "Tài liệu gắn trong Cấu trúc môn học sẽ tự động xuất hiện tại đây cùng đúng Level và Chủ đề."} />}
+        ) : <ErgEmptyState title={resources.length ? "Không tìm thấy tài liệu" : "Chưa có tài liệu"} description={resources.length ? "Thử đổi từ khóa hoặc bộ lọc môn học, định dạng." : "Tài liệu gắn trong Cấu trúc môn học sẽ tự động xuất hiện tại đây cùng đúng Level và Chủ đề."} />}
       </CardContent>
     </Card>
   );
@@ -243,7 +242,7 @@ export function PublishScreen({ subjects, resources, questions = [], quizBankIte
               <ContentLifecycleControls compact target={{ resourceKind: item.kind, resourceId: item.id, currentState: lifecycleStateFromStatus(item.status), label: item.label }} onTransitioned={() => onLifecycleTransitioned?.()} />
             </div>
           ))}
-          {!subjects.length && !resources.length && !questions.length && !quizBankItems.length ? <EmptyState title="Chưa có nội dung" description="Nội dung sẽ xuất hiện sau khi các workspace trả dữ liệu server." /> : null}
+          {!subjects.length && !resources.length && !questions.length && !quizBankItems.length ? <ErgEmptyState title="Chưa có nội dung" description="Nội dung sẽ xuất hiện sau khi các workspace trả dữ liệu server." /> : null}
         </CardContent>
       </Card>
     </div>

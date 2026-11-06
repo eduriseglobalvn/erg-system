@@ -1,4 +1,4 @@
-import type { AssignmentRun } from "@/features/lms/classroom/types/classroom-types";
+import type { AssignmentRun } from "@/domain/school/classroom-types";
 import { getDefaultTenantId, graphQlRequest, type GraphQlPage } from "@/lib/graphql-client";
 import {
   isLmsEntity,
@@ -9,6 +9,7 @@ import {
 } from "@/features/lms/api/lms-graphql-shared";
 import type { LmsAssignmentProgressWorkspace } from "@/features/lms/api/lms-assignment-progress-api";
 import { isObject, validateResponse } from "@/lib/validate-response";
+import { formatShortDateTimeVi } from "@/features/lms/api/lms-date-label";
 
 export type LmsTeacherHomeworkWorkspaceInput = {
   tenantId?: string;
@@ -219,9 +220,9 @@ export function mapAssignmentsToRuns(
       quizId: primaryResource?.quizId ?? assignment.quizId ?? null,
       quizVersionId: primaryResource?.quizVersionId ?? null,
       quizVersionLabel: primaryResource?.quizVersionLabel ?? null,
-      title: assignment.quizId ? `Bai tap ${assignment.quizId}` : assignment.id,
+      title: assignment.quizId ? `Bài tập ${assignment.quizId}` : assignment.id,
       subjectLabel: subjectLabel(assignment.subjectId),
-      targetLevel: classOption?.name || assignment.academicClassId || "Lop da giao",
+      targetLevel: classOption?.name || assignment.academicClassId || "Lớp đã giao",
       activeClasses: assignment.academicClassId ? 1 : 0,
       completionRate: total ? Math.round((submittedCount / total) * 100) : 0,
       submittedCount,
@@ -247,9 +248,7 @@ function subjectLabel(subjectId?: string | null) {
     .join(" ");
 }
 
-function formatDueLabel(value?: string | null) {
-  if (!value) return "Chua co han nop";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "Chua co han nop";
-  return `Hạn nộp ${date.toLocaleString("vi-VN", { day: "2-digit", hour: "2-digit", minute: "2-digit", month: "2-digit" })}`;
+export function formatDueLabel(value?: string | null) {
+  const formatted = formatShortDateTimeVi(value);
+  return formatted ? `Hạn nộp ${formatted}` : "Chưa có hạn nộp";
 }

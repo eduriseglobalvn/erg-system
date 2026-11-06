@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   assignEmployeeRoles,
   createEmployee,
@@ -13,10 +13,17 @@ import {
 } from "@/features/employee-management/api/employee-management-api";
 import type { CreateEmployeeRequest, EmployeeListFilters, EmployeeStatusInput, SecurityFeedFilters, UpdateEmployeeRequest } from "@/features/employee-management/types/employee-management";
 import { listRoles } from "@/features/access-management/api/access-management-api";
+import {
+  getSchoolDirectory,
+  getSchoolOperations,
+  schoolManagementQueryKeys,
+} from "@/features/lcms/school-management/api/school-management-api";
+import { getDefaultTenantId } from "@/lib/graphql-client";
 import { QUERY_POLICIES } from "@/lib/query-policy";
+import { getCurrentAccountId } from "@/platform/auth/api/auth-storage";
 
 export function useEmployees(tenantId: string, filters: EmployeeListFilters) {
-  return useQuery({ queryKey: employeeManagementQueryKeys.list(tenantId, filters), queryFn: ({ signal }) => listEmployees(filters, signal), staleTime: QUERY_POLICIES.transactional.staleTime });
+  return useQuery({ queryKey: employeeManagementQueryKeys.list(tenantId, filters), queryFn: ({ signal }) => listEmployees(filters, signal), staleTime: QUERY_POLICIES.transactional.staleTime, placeholderData: keepPreviousData });
 }
 
 export function useEmployeeDetail(tenantId: string, userId?: string) {
@@ -48,6 +55,32 @@ export function useEmployeeRoleOptions(tenantId: string) {
     queryFn: ({ signal }) => listRoles(signal),
     staleTime: QUERY_POLICIES.reference.staleTime,
   });
+}
+
+export function useEmployeeSchoolOptions(selectedSchoolId?: string) {
+  const tenantId = getDefaultTenantId();
+  const accountId = getCurrentAccountId("lcms");
+
+  const directoryQuery = useQuery({
+    queryKey: schoolManagementQueryKeys.directory(tenantId, accountId),
+    queryFn: ({ signal }) => getSchoolDirectory("", signal),
+    staleTime: QUERY_POLICIES.transactional.staleTime,
+    gcTime: QUERY_POLICIES.transactional.gcTime,
+  });
+
+  const operationsQuery = useQuery({
+    queryKey: schoolManagementQueryKeys.operations(tenantId, accountId, selectedSchoolId ?? ""),
+    queryFn: ({ signal }) => getSchoolOperations(selectedSchoolId!, signal),
+    enabled: Boolean(selectedSchoolId),
+    staleTime: QUERY_POLICIES.transactional.staleTime,
+    gcTime: QUERY_POLICIES.transactional.gcTime,
+  });
+
+  return {
+    schools: directoryQuery.data?.items ?? [],
+    classes: operationsQuery.data?.classes ?? [],
+    isPending: directoryQuery.isPending,
+  };
 }
 
 export function useEmployeeCommands(tenantId: string) {

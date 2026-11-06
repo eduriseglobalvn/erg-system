@@ -11,6 +11,8 @@ import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
 import type { CalendarMode, ErgCalendarEvent, ErgCalendarResolvedTone } from "./erg-calendar-types";
 import {
   buildHourRows,
+  CALENDAR_SCROLL_TIME,
+  scrollTopForTime,
   formatCompactEventLabel,
   formatScheduleClassLine,
   formatScheduleDateHeader,
@@ -132,7 +134,7 @@ function MonthView({
             <Box key={iso} onClick={() => setSelectedDate(day)} sx={calendarDayCellSx(isCurrentMonth, isSelected)}>
               <Box sx={{ alignItems: "center", display: "flex", justifyContent: "space-between", mb: 0.65 }}>
                 <Box sx={calendarDayNumberSx(isToday, isSelected, isCurrentMonth)}>{day.date()}</Box>
-                {dayEvents.length > 2 ? <Typography sx={{ color: "#5F6B7A", fontSize: 11, fontWeight: 700 }}>+{dayEvents.length - 2}</Typography> : null}
+                {dayEvents.length > 2 ? <Typography sx={{ color: "#5F6B7A", fontSize: 11, fontWeight: 600 }}>+{dayEvents.length - 2}</Typography> : null}
               </Box>
               <Stack spacing={0.4}>{dayEvents.slice(0, 2).map((event) => <EventChip key={event.id} compact event={event} onEventClick={onEventClick} tone={getEventTone(event)} />)}</Stack>
             </Box>
@@ -148,7 +150,7 @@ function MultiDayView({
   dayCount,
   eventsByDate,
   getEventTone,
-  mobileLayout,
+  mobileLayout: _mobileLayout,
   onEventClick,
   setSelectedDate,
   todayDate,
@@ -174,7 +176,7 @@ function MultiDayView({
     };
   });
   const hasAllDayEvents = allDayEventsByDate.some((day) => day.events.length > 0);
-  const timeGridRef = useWorkdayScroll(mobileLayout, `${anchorDate.format("YYYY-MM-DD")}-${dayCount}`);
+  const timeGridRef = useWorkdayScroll(true, `${anchorDate.format("YYYY-MM-DD")}-${dayCount}`);
 
   return (
     <Box sx={weekTimeGridShellSx}>
@@ -185,10 +187,10 @@ function MultiDayView({
           const isToday = iso === todayDate;
           return (
             <Box key={iso} sx={weekTimeDayHeaderSx}>
-              <Typography sx={{ color: "#3C4043", fontSize: 11, fontWeight: 650, textTransform: "uppercase" }}>
+              <Typography sx={{ color: "#3C4043", fontSize: 11, fontWeight: 600, textTransform: "uppercase" }}>
                 {weekLabels[day.day() === 0 ? 6 : day.day() - 1]}
               </Typography>
-              <Button onClick={() => setSelectedDate(day)} sx={weekDateButtonSx(isToday)}>
+              <Button variant="contained" onClick={() => setSelectedDate(day)} sx={weekDateButtonSx(isToday)}>
                 {day.date()}
               </Button>
             </Box>
@@ -234,7 +236,7 @@ function DayView({
   emptyDayLabel,
   eventsByDate,
   getEventTone,
-  mobileLayout,
+  mobileLayout: _mobileLayout,
   onEventClick,
 }: {
   anchorDate: Dayjs;
@@ -246,13 +248,13 @@ function DayView({
 }) {
   const events = eventsByDate.get(anchorDate.format("YYYY-MM-DD")) ?? [];
   const hourRows = buildHourRows();
-  const timeGridRef = useWorkdayScroll(mobileLayout, anchorDate.format("YYYY-MM-DD"));
+  const timeGridRef = useWorkdayScroll(true, anchorDate.format("YYYY-MM-DD"));
   return (
     <Box sx={dayTimeGridShellSx}>
       <Box sx={dayHeaderSx}>
         <Box sx={timeZoneCellSx}>GMT+07</Box>
         <Box sx={{ minWidth: 0 }}>
-          <Typography sx={{ color: "#3C4043", fontSize: 11, fontWeight: 650, textTransform: "uppercase" }}>
+          <Typography sx={{ color: "#3C4043", fontSize: 11, fontWeight: 600, textTransform: "uppercase" }}>
             {anchorDate.format("dddd")}
           </Typography>
           <Typography sx={{ color: "#202124", fontSize: 22, fontWeight: 450, lineHeight: 1.05 }}>
@@ -300,7 +302,7 @@ function useWorkdayScroll(enabled: boolean, resetKey: string) {
       window.cancelAnimationFrame(frame);
       frame = window.requestAnimationFrame(() => {
         const maxScrollTop = Math.max(0, element.scrollHeight - element.clientHeight);
-        element.scrollTop = Math.min(6 * 52, maxScrollTop);
+        element.scrollTop = Math.min(scrollTopForTime(CALENDAR_SCROLL_TIME), maxScrollTop);
       });
     };
     const resizeObserver = typeof window.ResizeObserver === "function"
@@ -339,7 +341,7 @@ function ScheduleView({
     return (
       <Box sx={scheduleEmptySx}>
         <FormatListBulletedRoundedIcon sx={{ color: "#8A94A6", fontSize: 24 }} />
-        <Typography sx={{ color: "#425466", fontSize: 13.5, fontWeight: 800 }}>Chưa có lịch trình trong khoảng thời gian này.</Typography>
+        <Typography sx={{ color: "#425466", fontSize: 13.5, fontWeight: 600 }}>Chưa có lịch trình trong khoảng thời gian này.</Typography>
       </Box>
     );
   }
@@ -353,7 +355,7 @@ function ScheduleView({
           return (
             <Box key={group.date} sx={mobileScheduleGroupSx}>
               <Box sx={mobileScheduleDateRailSx}>
-                <Typography sx={{ color: isToday ? "#0F6CBD" : "#667085", fontSize: 12, fontWeight: 850, textTransform: "uppercase" }}>
+                <Typography sx={{ color: isToday ? "#0071E3" : "#6E6E73", fontSize: 12, fontWeight: 850, textTransform: "uppercase" }}>
                   {date.format("ddd")}
                 </Typography>
                 <Box sx={mobileScheduleDateCircleSx(isToday)}>{date.date()}</Box>
@@ -381,10 +383,10 @@ function ScheduleView({
                       tabIndex={0}
                     >
                       <Typography sx={{ color: tone.text, fontSize: 14, fontWeight: 900, lineHeight: 1.3 }}>{event.title}</Typography>
-                      <Typography sx={{ color: "#425466", fontSize: 12.25, fontWeight: 700, lineHeight: 1.45, mt: 0.2 }}>
+                      <Typography sx={{ color: "#425466", fontSize: 12.25, fontWeight: 600, lineHeight: 1.45, mt: 0.2 }}>
                         {formatScheduleTimeRange(event)} · {event.className || event.attendees}
                       </Typography>
-                      {event.location ? <Typography sx={{ color: "#667085", fontSize: 12, fontWeight: 600, mt: 0.1 }}>{event.location}</Typography> : null}
+                      {event.location ? <Typography sx={{ color: "#6E6E73", fontSize: 12, fontWeight: 600, mt: 0.1 }}>{event.location}</Typography> : null}
                     </Box>
                   );
                 })}
@@ -401,7 +403,7 @@ function ScheduleView({
       {groupedEvents.map((group) => (
         <Box key={group.date} sx={scheduleDayGroupSx}>
           <Box sx={scheduleDateHeaderSx}>
-            <Typography sx={{ color: "#172033", fontSize: 15, fontWeight: 900, textTransform: "lowercase" }}>
+            <Typography sx={{ color: "#1D1D1F", fontSize: 15, fontWeight: 900, textTransform: "lowercase" }}>
               {formatScheduleDateHeader(group.date)}
             </Typography>
             <Box sx={scheduleDateDotSx} />
@@ -433,18 +435,18 @@ function ScheduleView({
                     tabIndex={0}
                   >
                     <Box sx={{ minWidth: 0 }}>
-                      <Typography noWrap sx={{ color: "#172033", fontSize: 13.5, fontWeight: 900, lineHeight: 1.35 }}>
+                      <Typography noWrap sx={{ color: "#1D1D1F", fontSize: 13.5, fontWeight: 900, lineHeight: 1.35 }}>
                         {event.title}
                       </Typography>
-                      <Typography noWrap sx={{ color: "#667085", fontSize: 12.25, fontWeight: 650, lineHeight: 1.55, mt: 0.15 }}>
+                      <Typography noWrap sx={{ color: "#6E6E73", fontSize: 12.25, fontWeight: 600, lineHeight: 1.55, mt: 0.15 }}>
                         {formatScheduleClassLine(event)}
                       </Typography>
                       {event.location ? (
-                        <Typography noWrap sx={{ color: "#667085", fontSize: 12.1, fontWeight: 600, lineHeight: 1.5 }}>
+                        <Typography noWrap sx={{ color: "#6E6E73", fontSize: 12.1, fontWeight: 600, lineHeight: 1.5 }}>
                           phòng: {event.location}
                         </Typography>
                       ) : null}
-                      <Typography noWrap sx={{ color: tone.text, fontSize: 12.25, fontWeight: 800, lineHeight: 1.5 }}>
+                      <Typography noWrap sx={{ color: tone.text, fontSize: 12.25, fontWeight: 600, lineHeight: 1.5 }}>
                         {formatScheduleTimeRange(event)}
                       </Typography>
                     </Box>

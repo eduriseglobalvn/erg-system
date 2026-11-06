@@ -64,7 +64,7 @@ export function DesktopWorkspaceEntryPage() {
           width: "100%",
         }}
       >
-        <Typography sx={{ color: "primary.main", fontSize: 12, fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+        <Typography sx={{ color: "primary.main", fontSize: 12, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase" }}>
           ERG Learning Desktop
         </Typography>
         <Typography component="h1" sx={{ fontSize: { xs: 26, sm: 34 }, fontWeight: 850, letterSpacing: "-0.03em", mt: 1 }}>
@@ -96,16 +96,16 @@ export function DesktopWorkspaceEntryPage() {
                     p: 2.5,
                     transition: "border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease",
                     width: "100%",
-                    "&:hover": { borderColor: "primary.main", boxShadow: "0 14px 30px rgba(15,108,189,0.12)", transform: "translateY(-2px)" },
+                    "&:hover": { borderColor: "primary.main", boxShadow: "0 14px 30px rgba(0, 113, 227,0.12)", transform: "translateY(-2px)" },
                   }}
                 >
                   <Box sx={{ alignItems: "center", bgcolor: "primary.main", borderRadius: 2, color: "primary.contrastText", display: "flex", height: 46, justifyContent: "center", width: 46 }}>
                     <Icon />
                   </Box>
-                  <Typography sx={{ color: "primary.main", fontSize: 12, fontWeight: 800, mt: 2.5 }}>{choice.eyebrow}</Typography>
-                  <Typography sx={{ fontSize: 19, fontWeight: 800, mt: 0.5 }}>{choice.title}</Typography>
+                  <Typography sx={{ color: "primary.main", fontSize: 12, fontWeight: 600, mt: 2.5 }}>{choice.eyebrow}</Typography>
+                  <Typography sx={{ fontSize: 19, fontWeight: 600, mt: 0.5 }}>{choice.title}</Typography>
                   <Typography sx={{ color: "text.secondary", fontSize: 14, lineHeight: 1.55, mt: 0.75 }}>{choice.description}</Typography>
-                  <Box sx={{ alignItems: "center", color: "primary.main", display: "flex", fontSize: 13, fontWeight: 800, gap: 0.5, mt: 2.5 }}>
+                  <Box sx={{ alignItems: "center", color: "primary.main", display: "flex", fontSize: 13, fontWeight: 600, gap: 0.5, mt: 2.5 }}>
                     Tiếp tục <ArrowForwardRoundedIcon fontSize="small" />
                   </Box>
                 </Box>

@@ -1,10 +1,17 @@
-import { LockKeyhole, UserRound, X } from "lucide-react";
+import CloseIcon from "@mui/icons-material/Close";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import type { ReactNode } from "react";
 
-import Button from "@mui/material/Button";
-import type { ClassroomStudent, StudentStatus } from "@/features/lms/classroom/types/classroom-types";
-import { cn } from "@/lib/utils";
-import { AppSelect } from "@/components/ui/app-select";
+import Box from "@mui/material/Box";
+import Drawer from "@mui/material/Drawer";
+import InputAdornment from "@mui/material/InputAdornment";
+import Paper from "@mui/material/Paper";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import { ErgButton, ErgIconButton } from "@/components/erg-mui/erg-actions";
+import { ErgSelect, ErgTextField } from "@/components/erg-mui/erg-form";
+import type { ClassroomStudent, StudentStatus } from "@/domain/school/classroom-types";
 
 export type StudentProfileDetailDraft = {
   name: string;
@@ -29,6 +36,8 @@ type StudentProfileDetailDrawerProps<TValue extends string = StudentStatus> = {
   student: ClassroomStudent;
 };
 
+const twoColumnGrid = { display: "grid", gap: 1.5, gridTemplateColumns: { sm: "repeat(2, minmax(0, 1fr))" }, mt: 1.5 } as const;
+
 export function StudentProfileDetailDrawer<TValue extends string = StudentStatus>({
   draft,
   onClose,
@@ -42,123 +51,131 @@ export function StudentProfileDetailDrawer<TValue extends string = StudentStatus
   const profile = buildStudentProfile(student);
 
   return (
-    <>
-      <button type="button" aria-label="Đóng chi tiết học sinh" className="fixed inset-0 z-[90] bg-slate-950/25" onClick={onClose} />
-      <aside className="fixed right-0 top-0 z-[100] flex h-screen w-[560px] max-w-[calc(100vw-20px)] flex-col border-l border-[#cbd7e6] bg-white shadow-sm">
-        <div className="border-b border-[#cbd7e6] bg-[#f8fbff] p-4">
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex min-w-0 items-start gap-3">
-              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-[var(--erg-blue-light)] text-[var(--erg-blue)]">
-                <UserRound className="h-5 w-5" />
-              </div>
-              <div className="min-w-0">
-                <h2 className="truncate text-lg font-semibold text-slate-950">Chi tiết hồ sơ học sinh</h2>
-                <p className="mt-0.5 text-[13px] font-semibold text-slate-600">
-                  {student.className} - {student.schoolName}
-                </p>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  <BadgeText>{profile.code}</BadgeText>
-                  <BadgeText>{profile.birthDate}</BadgeText>
-                  <BadgeText>{profile.gender}</BadgeText>
-                </div>
-              </div>
-            </div>
-            <button type="button" className="grid h-8 w-8 place-items-center rounded-md text-slate-500 hover:bg-white hover:text-[var(--erg-blue)]" onClick={onClose}>
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
+    <Drawer
+      anchor="right"
+      open
+      onClose={onClose}
+      slotProps={{
+        paper: { sx: { borderColor: "divider", borderLeft: 1, display: "flex", flexDirection: "column", height: "100vh", maxWidth: "calc(100vw - 20px)", width: 560 } },
+      }}
+    >
+      <Box sx={{ bgcolor: "background.default", borderBottom: 1, borderColor: "divider", p: 2 }}>
+        <Stack direction="row" spacing={1.5} sx={{ alignItems: "flex-start", justifyContent: "space-between" }}>
+          <Stack direction="row" spacing={1.5} sx={{ alignItems: "flex-start", minWidth: 0 }}>
+            <Box sx={{ bgcolor: "action.selected", borderRadius: 1, color: "primary.main", display: "grid", flexShrink: 0, height: 48, placeItems: "center", width: 48 }}>
+              <PersonOutlinedIcon fontSize="small" />
+            </Box>
+            <Box sx={{ minWidth: 0 }}>
+              <Typography component="h2" variant="h4" noWrap>Chi tiết hồ sơ học sinh</Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ fontWeight: "fontWeightMedium", mt: 0.25 }}>
+                {student.className} - {student.schoolName}
+              </Typography>
+              <Stack direction="row" useFlexGap sx={{ flexWrap: "wrap", gap: 1, mt: 1 }}>
+                <BadgeText>{profile.code}</BadgeText>
+                <BadgeText>{profile.birthDate}</BadgeText>
+                <BadgeText>{profile.gender}</BadgeText>
+              </Stack>
+            </Box>
+          </Stack>
+          <ErgIconButton label="Đóng" size="small" onClick={onClose}>
+            <CloseIcon fontSize="small" />
+          </ErgIconButton>
+        </Stack>
+      </Box>
 
-        <div className="min-h-0 flex-1 overflow-auto p-4">
-          <div className="grid gap-4">
-            <section className="rounded-lg border border-[#cbd7e6] bg-white p-4 shadow-[var(--shadow-xs)]">
-              <SectionTitle title="Thông tin định danh" />
-              <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                <Field label="Họ tên">
-                  <input value={draft.name} onChange={(event) => onUpdate({ name: event.target.value })} className={detailInputClass} />
+      <Box sx={{ flex: 1, minHeight: 0, overflow: "auto", p: 2 }}>
+        <Stack spacing={2}>
+          <DetailSection title="Thông tin định danh">
+            <Box sx={twoColumnGrid}>
+              <Field label="Họ tên">
+                <ErgTextField compact value={draft.name} onChange={(event) => onUpdate({ name: event.target.value })} />
+              </Field>
+              <ReadOnlyField label="Mã học sinh" value={profile.code} />
+              <ReadOnlyField label="Ngày sinh" value={profile.birthDate} />
+              <ReadOnlyField label="Giới tính" value={profile.gender} />
+              <ReadOnlyField label="Lớp hiện tại" value={student.className} />
+              <ReadOnlyField label="Khối" value={student.gradeLabel} />
+            </Box>
+          </DetailSection>
+
+          <DetailSection title="Liên hệ gia đình">
+            <Box sx={twoColumnGrid}>
+              <ReadOnlyField label="Phụ huynh chính" value={profile.guardianName} />
+              <ReadOnlyField label="Số điện thoại" value={profile.guardianPhone} />
+              <ReadOnlyField label="Email phụ huynh" value={profile.guardianEmail} />
+              <ReadOnlyField label="Địa chỉ" value={profile.address} />
+            </Box>
+          </DetailSection>
+
+          <DetailSection title="Tài khoản Student Workspace">
+            <Box sx={twoColumnGrid}>
+              <Field label="Username">
+                <ErgTextField compact value={draft.username} onChange={(event) => onUpdate({ username: event.target.value })} />
+              </Field>
+              <Field label="Mật khẩu">
+                <ErgTextField
+                  compact
+                  value={draft.password}
+                  onChange={(event) => onUpdate({ password: event.target.value })}
+                  slotProps={{
+                    input: {
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <LockOutlinedIcon fontSize="inherit" sx={{ color: "text.secondary" }} />
+                        </InputAdornment>
+                      ),
+                    },
+                  }}
+                />
+              </Field>
+              <ReadOnlyField label="Lần đăng nhập gần nhất" value={student.lastActivity} />
+              <ReadOnlyField label="Thiết bị thường dùng" value={profile.device} />
+            </Box>
+          </DetailSection>
+
+          <DetailSection title="Theo dõi học tập">
+            <Box sx={{ display: "grid", gap: 1, gridTemplateColumns: { xs: "repeat(2, minmax(0, 1fr))", sm: "repeat(4, minmax(0, 1fr))" }, mt: 1.5 }}>
+              <MiniMetric label="Tiến độ" value={`${student.progressRate}%`} />
+              <MiniMetric label="Điểm TB" value={`${student.averageScore}`} />
+              <MiniMetric label="Hoàn thành" value={`${student.completedAssignments} bài`} />
+              <MiniMetric label="Streak" value={`${student.streakDays} ngày`} />
+            </Box>
+            <Box sx={twoColumnGrid}>
+              <ReadOnlyField label="Bài đang học" value={student.currentAssignment} />
+              <ReadOnlyField label="Chặng hiện tại" value={student.currentStage} />
+              <ReadOnlyField label="Năng lực nổi bật" value={profile.strengths} />
+              <ReadOnlyField label="Cần hỗ trợ" value={profile.supportPlan} />
+            </Box>
+          </DetailSection>
+
+          <DetailSection title="Chăm sóc và ghi chú">
+            <Stack spacing={1.5} sx={{ mt: 1.5 }}>
+              {statusOptions?.length && statusValue && onStatusChange ? (
+                <Field label={statusLabel}>
+                  <ErgSelect
+                    size="small"
+                    options={statusOptions}
+                    value={statusValue}
+                    onChange={(event) => onStatusChange(event.target.value as TValue)}
+                  />
                 </Field>
-                <ReadOnlyField label="Mã học sinh" value={profile.code} />
-                <ReadOnlyField label="Ngày sinh" value={profile.birthDate} />
-                <ReadOnlyField label="Giới tính" value={profile.gender} />
-                <ReadOnlyField label="Lớp hiện tại" value={student.className} />
-                <ReadOnlyField label="Khối" value={student.gradeLabel} />
-              </div>
-            </section>
+              ) : null}
+              <ReadOnlyField label="Lịch sử chăm sóc" value={profile.careHistory} />
+              <Field label="Ghi chú giáo viên">
+                <ErgTextField compact multiline minRows={4} value={draft.note} onChange={(event) => onUpdate({ note: event.target.value })} />
+              </Field>
+            </Stack>
+          </DetailSection>
+        </Stack>
+      </Box>
 
-            <section className="rounded-lg border border-[#cbd7e6] bg-white p-4 shadow-[var(--shadow-xs)]">
-              <SectionTitle title="Liên hệ gia đình" />
-              <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                <ReadOnlyField label="Phụ huynh chính" value={profile.guardianName} />
-                <ReadOnlyField label="Số điện thoại" value={profile.guardianPhone} />
-                <ReadOnlyField label="Email phụ huynh" value={profile.guardianEmail} />
-                <ReadOnlyField label="Địa chỉ" value={profile.address} />
-              </div>
-            </section>
-
-            <section className="rounded-lg border border-[#cbd7e6] bg-white p-4 shadow-[var(--shadow-xs)]">
-              <SectionTitle title="Tài khoản Student Workspace" />
-              <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                <Field label="Username">
-                  <input value={draft.username} onChange={(event) => onUpdate({ username: event.target.value })} className={detailInputClass} />
-                </Field>
-                <Field label="Mật khẩu">
-                  <div className="relative">
-                    <LockKeyhole className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-500" />
-                    <input value={draft.password} onChange={(event) => onUpdate({ password: event.target.value })} className={cn(detailInputClass, "pl-8")} />
-                  </div>
-                </Field>
-                <ReadOnlyField label="Lần đăng nhập gần nhất" value={student.lastActivity} />
-                <ReadOnlyField label="Thiết bị thường dùng" value={profile.device} />
-              </div>
-            </section>
-
-            <section className="rounded-lg border border-[#cbd7e6] bg-white p-4 shadow-[var(--shadow-xs)]">
-              <SectionTitle title="Theo dõi học tập" />
-              <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                <MiniMetric label="Tiến độ" value={`${student.progressRate}%`} />
-                <MiniMetric label="Điểm TB" value={`${student.averageScore}`} />
-                <MiniMetric label="Hoàn thành" value={`${student.completedAssignments} bài`} />
-                <MiniMetric label="Streak" value={`${student.streakDays} ngày`} />
-              </div>
-              <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                <ReadOnlyField label="Bài đang học" value={student.currentAssignment} />
-                <ReadOnlyField label="Chặng hiện tại" value={student.currentStage} />
-                <ReadOnlyField label="Năng lực nổi bật" value={profile.strengths} />
-                <ReadOnlyField label="Cần hỗ trợ" value={profile.supportPlan} />
-              </div>
-            </section>
-
-            <section className="rounded-lg border border-[#cbd7e6] bg-white p-4 shadow-[var(--shadow-xs)]">
-              <SectionTitle title="Chăm sóc và ghi chú" />
-              <div className="mt-3 grid gap-3">
-                {statusOptions?.length && statusValue && onStatusChange ? (
-                  <Field label={statusLabel}>
-                    <AppSelect value={statusValue} onChange={(event) => onStatusChange(event.target.value as TValue)} className={detailInputClass}>
-                      {statusOptions.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </AppSelect>
-                  </Field>
-                ) : null}
-                <ReadOnlyField label="Lịch sử chăm sóc" value={profile.careHistory} />
-                <Field label="Ghi chú giáo viên">
-                  <textarea value={draft.note} onChange={(event) => onUpdate({ note: event.target.value })} className={cn(detailInputClass, "min-h-28 py-2 leading-5")} />
-                </Field>
-              </div>
-            </section>
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between gap-2 border-t border-[#cbd7e6] bg-[#f8fbff] p-3">
-          <span className="text-[13px] font-semibold text-slate-600">{student.name} - {student.className}</span>
-          <Button type="button" variant="contained" onClick={onClose} sx={{ height: 36, px: 1.5, fontSize: 14 }}>
-            Lưu thông tin
-          </Button>
-        </div>
-      </aside>
-    </>
+      <Stack direction="row" spacing={1} sx={{ alignItems: "center", bgcolor: "background.default", borderColor: "divider", borderTop: 1, justifyContent: "space-between", p: 1.5 }}>
+        <Typography variant="body2" color="text.secondary" sx={{ fontWeight: "fontWeightMedium" }}>{student.name} - {student.className}</Typography>
+        <ErgButton type="button" variant="contained" onClick={onClose} sx={{ height: 36, px: 1.5 }}>
+          Lưu thông tin
+        </ErgButton>
+      </Stack>
+    </Drawer>
   );
 }
 
@@ -178,40 +195,55 @@ function buildStudentProfile(student: ClassroomStudent) {
   };
 }
 
-function SectionTitle({ title }: { title: string }) {
-  return <h3 className="text-[14px] font-bold text-slate-700">{title}</h3>;
+function DetailSection({ children, title }: { children: ReactNode; title: string }) {
+  return (
+    <Paper component="section" variant="outlined" sx={{ borderRadius: 1, p: 2 }}>
+      <Typography component="h3" variant="subtitle2" color="text.secondary" sx={{ fontWeight: "fontWeightBold" }}>{title}</Typography>
+      {children}
+    </Paper>
+  );
 }
 
 function BadgeText({ children }: { children: string }) {
-  return <span className="rounded-md border border-[#dbe4f0] bg-white px-2.5 py-1 text-[13px] font-bold text-slate-700 shadow-[var(--shadow-xs)]">{children}</span>;
+  return (
+    <Typography
+      component="span"
+      variant="caption"
+      sx={{ bgcolor: "background.paper", border: 1, borderColor: "divider", borderRadius: 1, color: "text.secondary", fontWeight: "fontWeightBold", px: 1.25, py: 0.5 }}
+    >
+      {children}
+    </Typography>
+  );
 }
 
 function Field({ children, label }: { children: ReactNode; label: string }) {
   return (
-    <label className="block">
-      <span className="mb-1 block text-[13px] font-semibold text-slate-600">{label}</span>
+    <Box component="label" sx={{ display: "block" }}>
+      <Typography component="span" variant="caption" color="text.secondary" sx={{ display: "block", fontWeight: "fontWeightMedium", mb: 0.5 }}>{label}</Typography>
       {children}
-    </label>
+    </Box>
   );
 }
 
 function ReadOnlyField({ label, value }: { label: string; value: string }) {
   return (
-    <div>
-      <div className="mb-1 text-[13px] font-semibold text-slate-600">{label}</div>
-      <div className="min-h-10 rounded-md border border-[#cbd7e6] bg-[#f8fbff] px-2.5 py-2 text-sm font-semibold leading-5 text-slate-800">{value}</div>
-    </div>
+    <Box>
+      <Typography variant="caption" color="text.secondary" sx={{ display: "block", fontWeight: "fontWeightMedium", mb: 0.5 }}>{label}</Typography>
+      <Typography
+        variant="body2"
+        sx={{ bgcolor: "background.default", border: 1, borderColor: "divider", borderRadius: 1, fontWeight: "fontWeightMedium", minHeight: 40, px: 1.25, py: 1 }}
+      >
+        {value}
+      </Typography>
+    </Box>
   );
 }
 
 function MiniMetric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-md border border-[#cbd7e6] bg-[#f8fbff] px-2.5 py-2">
-      <div className="text-[13px] font-semibold text-slate-600">{label}</div>
-      <div className="mt-0.5 truncate text-[13px] font-bold text-slate-900">{value}</div>
-    </div>
+    <Box sx={{ bgcolor: "background.default", border: 1, borderColor: "divider", borderRadius: 1, px: 1.25, py: 1 }}>
+      <Typography variant="caption" color="text.secondary" sx={{ display: "block", fontWeight: "fontWeightMedium" }}>{label}</Typography>
+      <Typography variant="caption" noWrap sx={{ display: "block", fontWeight: "fontWeightBold", mt: 0.25 }}>{value}</Typography>
+    </Box>
   );
 }
-
-const detailInputClass = "h-10 w-full rounded-md border border-[#d7e0ec] bg-white px-2.5 text-[14px] font-semibold text-slate-900 outline-none focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]";
-

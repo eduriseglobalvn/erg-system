@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 
-import { buildLoginRedirectTarget, buildRedirectPath, isAuthOnlyRedirect } from "./auth-redirects";
+import { buildLoginRedirectTarget, buildRedirectPath, isAuthOnlyRedirect, sanitizeLocalRedirect } from "./auth-redirects";
 
 test("allows profile as an authenticated-only redirect on teacher portals", () => {
   expect(isAuthOnlyRedirect("lms", "/profile?tab=security")).toBe(true);
@@ -36,4 +36,11 @@ test("does not redirect an auth gate that is unmounting on the login route", () 
   expect(buildLoginRedirectTarget("/schools/list", "", "")).toBe(
     "/login?redirect=%2Fschools%2Flist",
   );
+});
+
+test("rejects backslash, protocol-relative and absolute redirect targets", () => {
+  expect(sanitizeLocalRedirect("/\\evil.com")).toBeNull();
+  expect(sanitizeLocalRedirect("//evil.com")).toBeNull();
+  expect(sanitizeLocalRedirect("https://evil.com")).toBeNull();
+  expect(sanitizeLocalRedirect("/teacher/home")).toBe("/teacher/home");
 });

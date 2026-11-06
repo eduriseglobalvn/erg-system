@@ -6,9 +6,9 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
-import { inputClassName } from "@/components/ui/input";
+import { ErgTextField } from "@/components/erg-mui";
 import { cn } from "@/lib/utils";
-import { AppSelect } from "@/components/ui/app-select";
+import { AppSelect } from "@/components/erg-mui/app-select";
 
 export function AuthoringCardHeader({ className, children }: { className?: string; children: ReactNode }) {
   return <div className={cn("flex flex-col gap-1.5 px-6 pt-5", className)}>{children}</div>;
@@ -33,7 +33,7 @@ export function StatusSelectField({
 }) {
   return (
     <Field label="Trạng thái">
-      <AppSelect value={value} onChange={(event) => onChange(event.target.value)} className={inputClassName}>
+      <AppSelect value={value} onChange={(event) => onChange(event.target.value)} style={{ width: "100%" }}>
         <option value={taxonomy ? "active" : "published"}>Đã xuất bản</option>
         <option value="draft">Bản nháp</option>
         <option value="hidden">Đã ẩn</option>
@@ -69,11 +69,13 @@ export function ContentTextFields({
         <TextField size="small" fullWidth value={titleValue} onChange={(event) => onTitleChange(event.target.value)} placeholder={titlePlaceholder} autoFocus={autoFocus} />
       </Field>
       <Field label={descriptionLabel}>
-        <textarea
+        <ErgTextField
+          compact
+          multiline
+          minRows={3}
           value={descriptionValue}
           onChange={(event) => onDescriptionChange(event.target.value)}
           placeholder={descriptionPlaceholder}
-          className={cn(inputClassName, "min-h-24 py-3")}
         />
       </Field>
     </>

@@ -1,17 +1,21 @@
-import { memo, type CSSProperties } from "react";
+import { memo } from "react";
+import { ErgSelect } from "@/components/erg-mui";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 import type { WeeklyClassLogDay, WeeklyClassLogPeriod } from "@/features/lms/weekly-class-log/types/weekly-class-log-types";
 import { getPeriodCompletionState } from "./weekly-class-log-model";
 import type { WeeklyClassLogController } from "./use-weekly-class-log-controller";
 
 const morningPeriodCount = 5;
+const { color, statusTint } = ergEnterpriseTokens;
+const border = `1px solid ${color.border}`;
 
 export function WeeklyClassLogTable({ controller }: { controller: WeeklyClassLogController }) {
   return (
     <div style={{ flex: 1, minWidth: 0, overflow: "auto" }}>
-      <table style={{ width: "100%", minWidth: 1200, borderCollapse: "collapse", fontSize: 13, fontFamily: "inherit" }}>
+      <table style={{ width: "100%", minWidth: 1200, borderCollapse: "collapse", fontFamily: "inherit" }}>
         <thead>
-          <tr style={{ backgroundColor: "#f8fafc" }}>
+          <tr style={{ backgroundColor: color.surfaceSubtle }}>
             <th style={thStyle(100)}>Thứ, ngày</th>
             <th style={thStyle(60)}>Buổi</th>
             <th style={thStyle(40)}>Tiết</th>
@@ -31,7 +35,6 @@ export function WeeklyClassLogTable({ controller }: { controller: WeeklyClassLog
               day={day}
               disabled={controller.isLocked}
               teacherName={controller.teacherName}
-              onUpdateDay={controller.updateDay}
               onUpdatePeriod={controller.updatePeriod}
             />
           ))}
@@ -41,16 +44,20 @@ export function WeeklyClassLogTable({ controller }: { controller: WeeklyClassLog
   );
 }
 
+/** "Thứ 2 · Tiết 1 · Lớp"; afternoon periods restart at 1, so they carry "chiều" to stay unique. */
+export function periodAriaLabel(dayLabel: string, periodIndex: number, column: string) {
+  const afternoon = periodIndex >= morningPeriodCount;
+  return `${dayLabel} · Tiết ${(periodIndex % morningPeriodCount) + 1}${afternoon ? " chiều" : ""} · ${column}`;
+}
+
 const DayRows = memo(function DayRows({
   day,
   disabled,
-  onUpdateDay,
   onUpdatePeriod,
   teacherName,
 }: {
   day: WeeklyClassLogDay;
   disabled: boolean;
-  onUpdateDay: (dayId: string, value: string) => void;
   onUpdatePeriod: (dayId: string, periodId: string, field: keyof WeeklyClassLogPeriod, value: string) => void;
   teacherName: string;
 }) {
@@ -58,46 +65,42 @@ const DayRows = memo(function DayRows({
     <>
       {day.periods.map((period, index) => {
         const rowState = getPeriodCompletionState(period);
-        const bgColor = rowState === "complete" ? "#dcfce7" : rowState === "incomplete" ? "#fee2e2" : "white";
+        const bgColor = rowState === "complete" ? statusTint.success.bg : rowState === "incomplete" ? statusTint.error.bg : color.surface;
+        const label = (column: string) => periodAriaLabel(day.label, index, column);
+        const edit = (field: keyof WeeklyClassLogPeriod) => (value: string) => onUpdatePeriod(day.id, period.id, field, value);
         return (
           <tr key={period.id} style={{ backgroundColor: bgColor }}>
             {index === 0 && (
               <td rowSpan={day.periods.length} style={{ ...tdStyle(100), verticalAlign: "middle", textAlign: "center" }}>
-                <div style={{ fontSize: 11, fontWeight: 600 }}>{day.label}</div>
-                <input
-                  type="date"
-                  value={day.date}
-                  disabled={disabled}
-                  onChange={(event) => onUpdateDay(day.id, event.target.value)}
-                  style={{ marginTop: 4, width: "100%", padding: "2px 4px", fontSize: 11, borderRadius: 4, border: "1px solid #e5e7eb", textAlign: "center" }}
-                />
+                <strong>{day.label}</strong>
+                <div>{day.date}</div>
               </td>
             )}
             {index === 0 && (
-              <td rowSpan={morningPeriodCount} style={{ ...tdStyle(60), verticalAlign: "middle", textAlign: "center", backgroundColor: "#f3f4f6", fontWeight: 600 }}>Sáng</td>
+              <td rowSpan={morningPeriodCount} style={{ ...tdStyle(60), ...sessionStyle }}>Sáng</td>
             )}
             {index === morningPeriodCount && (
-              <td rowSpan={day.periods.length - morningPeriodCount} style={{ ...tdStyle(60), verticalAlign: "middle", textAlign: "center", backgroundColor: "#f3f4f6", fontWeight: 600 }}>Chiều</td>
+              <td rowSpan={day.periods.length - morningPeriodCount} style={{ ...tdStyle(60), ...sessionStyle }}>Chiều</td>
             )}
-            <td style={{ ...tdStyle(40), textAlign: "center", fontWeight: 600 }}>{(index % morningPeriodCount) + 1}</td>
-            <EditableCell value={period.className} onChange={(value) => onUpdatePeriod(day.id, period.id, "className", value)} disabled={disabled} center />
-            <EditableCell value={period.ppct} onChange={(value) => onUpdatePeriod(day.id, period.id, "ppct", value)} disabled={disabled} center />
-            <EditableCell value={period.absent} onChange={(value) => onUpdatePeriod(day.id, period.id, "absent", value)} disabled={disabled} multiline />
-            <EditableCell value={period.lesson} onChange={(value) => onUpdatePeriod(day.id, period.id, "lesson", value)} disabled={disabled} multiline />
-            <EditableCell value={period.comment} onChange={(value) => onUpdatePeriod(day.id, period.id, "comment", value)} disabled={disabled} multiline />
+            <td style={{ ...tdStyle(40), textAlign: "center", fontWeight: "bold" }}>{(index % morningPeriodCount) + 1}</td>
+            <EditableCell label={label("Lớp")} value={period.className} onChange={edit("className")} disabled={disabled} center />
+            <EditableCell label={label("PPCT")} value={period.ppct} onChange={edit("ppct")} disabled={disabled} center />
+            <EditableCell label={label("HS vắng")} value={period.absent} onChange={edit("absent")} disabled={disabled} multiline />
+            <EditableCell label={label("Tên bài học, nội dung")} value={period.lesson} onChange={edit("lesson")} disabled={disabled} multiline />
+            <EditableCell label={label("Nhận xét")} value={period.comment} onChange={edit("comment")} disabled={disabled} multiline />
             <td style={{ ...tdStyle(70), textAlign: "center" }}>
-              <select
+              <ErgSelect
+                size="small"
+                fullWidth={false}
                 value={period.disciplineScore || ""}
-                onChange={(event) => onUpdatePeriod(day.id, period.id, "disciplineScore", event.target.value)}
+                onChange={(event) => onUpdatePeriod(day.id, period.id, "disciplineScore", String(event.target.value))}
                 disabled={disabled}
-                style={{ fontSize: 11, padding: "2px 4px", borderRadius: 4, border: "1px solid #e5e7eb", backgroundColor: "transparent", cursor: disabled ? "not-allowed" : "pointer" }}
-              >
-                <option value="">-</option>
-                <option value="Đạt">Đạt</option>
-                <option value="Chưa đạt">Chưa đạt</option>
-              </select>
+                options={[{ value: "", label: "-" }, { value: "Đạt", label: "Đạt" }, { value: "Chưa đạt", label: "Chưa đạt" }]}
+                slotProps={{ select: { displayEmpty: true, SelectDisplayProps: { "aria-label": label("Kỷ luật") } } }}
+                sx={{ minWidth: 72, "& .MuiSelect-select": { py: 0.25, typography: "caption" } }}
+              />
             </td>
-            <td style={{ ...tdStyle(80), textAlign: "center", fontWeight: 600, fontSize: 11 }}>
+            <td style={{ ...tdStyle(80), textAlign: "center", fontWeight: "bold" }}>
               {period.className && period.ppct && period.lesson && period.comment && period.disciplineScore ? teacherName : ""}
             </td>
           </tr>
@@ -108,46 +111,49 @@ const DayRows = memo(function DayRows({
 });
 
 const EditableCell = memo(function EditableCell({
-  value,
-  onChange,
-  disabled,
   center,
+  disabled,
+  label,
   multiline,
+  onChange,
+  value,
 }: {
-  value: string;
-  onChange: (value: string) => void;
-  disabled?: boolean;
   center?: boolean;
+  disabled?: boolean;
+  label: string;
   multiline?: boolean;
+  onChange: (value: string) => void;
+  value: string;
 }) {
-  const style: CSSProperties = {
-    padding: "2px 4px",
-    border: "1px solid transparent",
-    fontSize: 11,
-    width: "100%",
+  const style = {
     backgroundColor: "transparent",
-    textAlign: center ? "center" : "left",
+    border: "1px solid transparent",
     cursor: disabled ? "not-allowed" : "text",
+    font: "inherit",
+    padding: "2px 4px",
+    textAlign: center ? ("center" as const) : ("left" as const),
+    width: "100%",
   };
-  if (multiline) {
-    return (
-      <td style={{ ...tdStyle(), padding: "2px 4px" }}>
-        <textarea value={value} onChange={(event) => onChange(event.target.value)} disabled={disabled} rows={1} style={{ ...style, resize: "vertical", minHeight: 24, overflow: "hidden" }} />
-      </td>
-    );
-  }
-  return <td style={{ ...tdStyle(), padding: "2px 4px" }}><input type="text" value={value} onChange={(event) => onChange(event.target.value)} disabled={disabled} style={style} /></td>;
+  return (
+    <td style={{ ...tdStyle(), padding: "2px 4px" }}>
+      {multiline ? (
+        <textarea aria-label={label} value={value} onChange={(event) => onChange(event.target.value)} disabled={disabled} rows={1} style={{ ...style, resize: "vertical", minHeight: 24, overflow: "hidden" }} />
+      ) : (
+        <input aria-label={label} type="text" value={value} onChange={(event) => onChange(event.target.value)} disabled={disabled} style={style} />
+      )}
+    </td>
+  );
 });
 
+const sessionStyle = { backgroundColor: color.surfaceMuted, fontWeight: "bold", textAlign: "center" as const, verticalAlign: "middle" as const };
+
 const thStyle = (width?: string | number) => ({
+  backgroundColor: color.surfaceSubtle,
+  border,
   padding: "10px 8px",
-  border: "1px solid #e5e7eb",
-  fontSize: 11,
-  fontWeight: 700,
   textAlign: "center" as const,
-  backgroundColor: "#f8fafc",
   whiteSpace: "nowrap" as const,
   width,
 });
 
-const tdStyle = (width?: string | number) => ({ padding: "4px", border: "1px solid #e5e7eb", fontSize: 12, width });
+const tdStyle = (width?: string | number) => ({ border, padding: "4px", width });

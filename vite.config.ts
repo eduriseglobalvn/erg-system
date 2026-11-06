@@ -38,8 +38,8 @@ export default defineConfig(({ command, mode }) => {
         clientsClaim: true,
         importScripts: ["pwa-push.js"],
         skipWaiting: false,
-        globPatterns: ["**/*.{js,css,html,svg,png,woff2}"],
-        globIgnores: ["**/mock/**"],
+        globPatterns: ["**/*.{js,css,html,svg,woff2}"],
+        globIgnores: ["**/mock/**", "**/*-latin-ext-*.woff2", "**/*-cyrillic-*.woff2", "**/*-greek-*.woff2"],
         manifestTransforms: [
           (entries) => filterPwaPrecacheManifest(entries, path.resolve(__dirname, "dist/index.html")),
         ],
@@ -103,20 +103,6 @@ export default defineConfig(({ command, mode }) => {
   ],
   resolve: {
     alias: [
-      ...(mode === "production" ? [
-        {
-          find: "@/features/lms/classroom/api/mock-classroom-data",
-          replacement: path.resolve(__dirname, "./src/features/runtime-stubs/classroom-data.ts"),
-        },
-        {
-          find: "@/features/lcms/admin-operations/api/mock-learning-resource-authoring-data",
-          replacement: path.resolve(__dirname, "./src/features/runtime-stubs/learning-resource-authoring-data.ts"),
-        },
-        {
-          find: "@/features/lcms/school-management/api/mock-training-monitoring",
-          replacement: path.resolve(__dirname, "./src/features/runtime-stubs/training-monitoring-data.ts"),
-        },
-      ] : []),
       { find: "@", replacement: path.resolve(__dirname, "./src") },
     ],
     dedupe: ["react", "react-dom"],
@@ -131,7 +117,7 @@ export default defineConfig(({ command, mode }) => {
           if (context.hostType !== "html") return [];
           return deps.filter(
             (dep) =>
-              !/^(assets\/)?(pdfjs|pdf\.worker|fullcalendar|dnd|radix|portal-brand-mark|learning-resource-library-page|teaching-schedule-panel|assign-homework-page)/.test(dep),
+              !/^(assets\/)?(pdfjs|pdf\.worker|dnd|radix|portal-brand-mark|learning-resource-library-page|teaching-schedule-panel|assign-homework-page)/.test(dep),
           );
         },
       },
@@ -140,8 +126,8 @@ export default defineConfig(({ command, mode }) => {
       output: {
         manualChunks(id) {
           if (id.includes("node_modules")) {
-            if (id.includes("@fullcalendar")) return "fullcalendar";
-            if (id.includes("pdfjs-dist")) return "pdfjs";
+            // pdfjs is not grouped: a manual pdfjs chunk captured Vite's preload helper, so the entry
+            // downloaded ~120 KB of pdfjs on every cold start. It now stays inside the lazy PDF viewer chunk.
             if (id.includes("@tanstack/react-virtual")) return "virtual";
             if (id.includes("@tanstack")) return "tanstack";
             if (id.includes("radix-ui")) return "radix";
@@ -159,6 +145,8 @@ export default defineConfig(({ command, mode }) => {
       "**/dist/**",
       "**/.agent-artifacts/**",
       "**/.codex-chrome-*/**",
+      // Agent worktrees are full repo copies with their own node_modules (two Reacts).
+      "**/.claude/**",
       "**/scripts/**",
       "src/test/e2e/**/*.spec.ts",
     ],

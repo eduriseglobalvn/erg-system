@@ -134,7 +134,7 @@ export function PortablePackageExportDialog({
           />
         </Stack>
       </DialogContent>
-      <DialogActions sx={{ px: 3, py: 2 }}><Button onClick={onClose}>Đóng</Button></DialogActions>
+      <DialogActions sx={{ px: 3, py: 2 }}><Button variant="contained" onClick={onClose}>Đóng</Button></DialogActions>
     </Dialog>
   );
 }
@@ -149,7 +149,7 @@ function PackageStep({ action, description, icon, status, title }: {
   return (
     <Paper variant="outlined" sx={{ borderRadius: 2, p: 2 }}>
       <Stack direction="row" spacing={1.5} sx={{ alignItems: "flex-start" }}>
-        <Box sx={{ alignItems: "center", bgcolor: "rgba(15,108,189,0.08)", borderRadius: 1.5, display: "flex", height: 40, justifyContent: "center", width: 40 }}>{icon}</Box>
+        <Box sx={{ alignItems: "center", bgcolor: "rgba(0, 113, 227,0.08)", borderRadius: 1.5, display: "flex", height: 40, justifyContent: "center", width: 40 }}>{icon}</Box>
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Stack direction="row" spacing={1} sx={{ alignItems: "center", justifyContent: "space-between" }}>
             <Typography sx={{ fontWeight: 820 }}>{title}</Typography>{status}

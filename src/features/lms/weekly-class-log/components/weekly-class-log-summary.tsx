@@ -1,5 +1,8 @@
 import type { WeeklyClassLogSummary as WeeklyClassLogSummaryData } from "@/features/lms/weekly-class-log/types/weekly-class-log-types";
-import { Box } from "@mui/material";
+import Box from "@mui/material/Box";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
+
+const border = `1px solid ${ergEnterpriseTokens.color.border}`;
 
 export function WeeklyClassLogSummary({ summary }: { summary: WeeklyClassLogSummaryData }) {
   const summaryRows = [
@@ -16,23 +19,23 @@ export function WeeklyClassLogSummary({ summary }: { summary: WeeklyClassLogSumm
   ];
 
   return (
-    <Box sx={{ borderLeft: { xs: 0, md: "1px solid #e5e7eb" }, borderTop: { xs: "1px solid #e5e7eb", md: 0 }, display: "flex", flexDirection: "column", flexShrink: 0, overflow: "auto", width: { xs: "100%", md: 280 } }}>
-      <div style={{ padding: "12px 16px", textAlign: "center", borderBottom: "1px solid #e5e7eb", backgroundColor: "#f3f4f6", fontWeight: 600, fontSize: 14 }}>Tổng kết tuần</div>
-      <div style={{ padding: "12px 16px", borderBottom: "1px solid #e5e7eb" }}>
+    <Box sx={{ borderLeft: { xs: 0, md: border }, borderTop: { xs: border, md: 0 }, display: "flex", flexDirection: "column", flexShrink: 0, overflow: "auto", width: { xs: "100%", md: 280 } }}>
+      <div style={{ padding: "12px 16px", textAlign: "center", borderBottom: border, backgroundColor: ergEnterpriseTokens.color.surfaceMuted, fontWeight: 600, fontSize: 14 }}>Tổng kết tuần</div>
+      <div style={{ padding: "12px 16px", borderBottom: border }}>
         {summaryRows.map(({ label, field }) => (
-          <div key={field} style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px dotted #e5e7eb" }}>
-            <span style={{ fontSize: 12, color: "#6b7280" }}>{label}:</span>
+          <div key={field} style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: `1px dotted ${ergEnterpriseTokens.color.border}` }}>
+            <span style={{ fontSize: 12, color: ergEnterpriseTokens.color.textMuted }}>{label}:</span>
             <span style={{ fontSize: 12, fontWeight: 600 }}>{summary[field]}</span>
           </div>
         ))}
       </div>
-      <div style={{ borderBottom: "1px solid #e5e7eb" }}>
-        <div style={{ padding: "8px 16px", textAlign: "center", fontWeight: 600, fontSize: 13, borderBottom: "1px solid #e5e7eb" }}>Kiến nghị GVBM</div>
-        <div style={{ padding: "12px 16px", fontSize: 12, color: "#6b7280", fontStyle: "italic" }}>{summary.subjectTeacherProposal || "Không có"}</div>
+      <div style={{ borderBottom: border }}>
+        <div style={{ padding: "8px 16px", textAlign: "center", fontWeight: 600, fontSize: 13, borderBottom: border }}>Kiến nghị GVBM</div>
+        <div style={{ padding: "12px 16px", fontSize: 12, color: ergEnterpriseTokens.color.textMuted, fontStyle: "italic" }}>{summary.subjectTeacherProposal || "Không có"}</div>
       </div>
       <div>
-        <div style={{ padding: "8px 16px", textAlign: "center", fontWeight: 600, fontSize: 13, borderBottom: "1px solid #e5e7eb" }}>Ý kiến GVCN</div>
-        <div style={{ padding: "12px 16px", fontSize: 12, color: "#6b7280", fontStyle: "italic" }}>{summary.homeroomTeacherOpinion || "Không có"}</div>
+        <div style={{ padding: "8px 16px", textAlign: "center", fontWeight: 600, fontSize: 13, borderBottom: border }}>Ý kiến GVCN</div>
+        <div style={{ padding: "12px 16px", fontSize: 12, color: ergEnterpriseTokens.color.textMuted, fontStyle: "italic" }}>{summary.homeroomTeacherOpinion || "Không có"}</div>
       </div>
     </Box>
   );

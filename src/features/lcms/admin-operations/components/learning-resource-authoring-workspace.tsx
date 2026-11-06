@@ -6,7 +6,7 @@ import LinkIcon from "@mui/icons-material/Link";
 import ListTree from "@mui/icons-material/AccountTree";
 import Skeleton from "@mui/material/Skeleton";
 import { getDefaultTenantId } from "@/lib/graphql-client";
-import { getCurrentAccount } from "@/platform/auth/api/auth-storage";
+import { getCurrentAccountId } from "@/platform/auth/api/auth-storage";
 import {
   COURSE_STRUCTURE_WORKSPACE_DESCRIPTION,
   COURSE_STRUCTURE_WORKSPACE_LABEL,
@@ -18,13 +18,13 @@ import {
   loadLearningResourceStudioWorkspaceData,
   type LearningResourceResourceCard,
   type LearningResourceTaxonomyResponse,
-} from "@/features/lcms/admin-operations/api/learning-resource-authoring-api";
+} from "@/features/lms/learning-resources/api/learning-resource-authoring-api";
 import {
   USE_LEARNING_RESOURCE_AUTHORING_MOCK,
   mockLearningResourceAuthoringLocalContent as mockExplorerLocalContent,
   mockLearningResourceAuthoringResources as mockExplorerResources,
   mockLearningResourceAuthoringTaxonomy as mockExplorerModel,
-} from "@/features/lcms/admin-operations/api/mock-learning-resource-authoring-data";
+} from "@/features/lcms/admin-operations/api/learning-resource-authoring-defaults";
 import {
   PublishScreen,
   ResourcesScreen,
@@ -54,8 +54,8 @@ import type {
   TaxonomyDialogState,
   TaxonomyEditTarget,
 } from "@/features/lcms/admin-operations/types/learning-resource-authoring";
-import { questionBankWorkspaceQueryOptions } from "@/features/lcms/quiz/question-bank/api/question-bank-query";
-import { quizBankItems as fallbackQuizBankItems } from "@/features/lcms/quiz/question-bank/api/mock-question-bank";
+import { questionBankWorkspaceQueryOptions } from "@/features/question-bank/api/question-bank-query";
+import { fallbackQuizBankItems } from "@/features/lcms/admin-operations/api/learning-resource-authoring-defaults";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { usePacedStateBatch } from "@/hooks/use-paced-state-batch";
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
@@ -125,7 +125,7 @@ function LearningResourceAuthoringSkeleton() {
 export function LearningResourceAuthoringWorkspace({ activeLeaf }: { activeLeaf: DashboardLeaf; onOpenLeaf?: (leafId: string) => void }) {
   const queryClient = useQueryClient();
   const tenantId = getDefaultTenantId();
-  const accountId = getCurrentAccount("lcms")?.id?.trim() || "anonymous";
+  const accountId = getCurrentAccountId("lcms");
   const [model, setModel] = useState<LearningResourceTaxonomyResponse>(emptyModel);
   const [resources, setResources] = useState<LearningResourceResourceCard[]>([]);
   const [loading, setLoading] = useState(true);

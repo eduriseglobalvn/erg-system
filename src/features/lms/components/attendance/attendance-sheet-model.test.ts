@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 
-import { countLessonsThroughDate, curriculumProgramFromTree } from "./attendance-sheet-model";
+import { bulkPresentTargets, countLessonsThroughDate, curriculumProgramFromTree, type AttendanceColumn, type AttendanceStatus } from "./attendance-sheet-model";
 
 test("builds attendance curriculum rows from canonical level/topic order", () => {
   const rows = curriculumProgramFromTree({
@@ -19,4 +19,15 @@ test("builds attendance curriculum rows from canonical level/topic order", () =>
 
 test("counts lessons only on configured teaching weekdays", () => {
   expect(countLessonsThroughDate("2026-08-20", { startDate: "2026-08-18", teachingDays: [2, 4], sessionsPerDay: 2 })).toBe(4);
+});
+
+test("bulk present targets only unmarked, non-future cells", () => {
+  const column = (id: string, isFutureDate = false) => ({ id, isFutureDate }) as AttendanceColumn;
+  const marked: Record<string, AttendanceStatus> = { "a:c1": "absent" };
+  const targets = bulkPresentTargets(
+    [{ id: "a" }, { id: "b" }],
+    [column("c1"), column("c2", true)],
+    (studentId, _i, col) => marked[`${studentId}:${col.id}`] ?? "",
+  );
+  expect(targets).toEqual([{ studentId: "b", columnId: "c1" }]);
 });

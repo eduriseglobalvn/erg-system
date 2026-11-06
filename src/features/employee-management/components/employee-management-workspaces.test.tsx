@@ -8,6 +8,7 @@ const hooks = vi.hoisted(() => ({
   useEmployeeSecurityFeed: vi.fn(),
   useEmployeeRoleOptions: vi.fn(),
   useEmployeeCommands: vi.fn(),
+  useEmployeeSchoolOptions: vi.fn(),
 }));
 
 vi.mock("@/features/employee-management/hooks/use-employee-management", () => hooks);
@@ -17,12 +18,15 @@ import { EmployeeSecurityTimeline } from "@/features/employee-management/compone
 import { EmployeeAccessLogWorkspace } from "@/features/employee-management/components/employee-access-log-workspace";
 import { EmployeeDetailDrawer } from "@/features/employee-management/components/employee-detail-drawer";
 
+const emptyPeople = { data: { users: [], meta: { page: 1, limit: 20, total: 0, totalPages: 0 } }, isPending: false, isError: false };
+
 describe("employee management workspace", () => {
   beforeEach(() => {
     hooks.useEmployeeDetail.mockReturnValue({ data: undefined, isPending: false, isError: false, refetch: vi.fn() });
     hooks.useEmployeeSecurityEvents.mockReturnValue({ data: { items: [] }, isPending: false, isError: false, refetch: vi.fn() });
     hooks.useEmployeeSecurityFeed.mockReturnValue({ data: { items: [], page: 1, limit: 50, total: 0, totalPages: 0 }, isPending: false, isError: false, refetch: vi.fn() });
     hooks.useEmployeeRoleOptions.mockReturnValue({ data: [{ id: "role-it", name: "it_operator" }], isPending: false, isError: false });
+    hooks.useEmployeeSchoolOptions.mockReturnValue({ schools: [], classes: [], isPending: false });
     const command = { mutateAsync: vi.fn(), isPending: false };
     hooks.useEmployeeCommands.mockReturnValue({ create: command, update: command, status: command, roles: command, resetCredential: command, revokeSession: command });
   });
@@ -47,12 +51,12 @@ describe("employee management workspace", () => {
 
     expect(screen.getByText("Teacher One")).toBeInTheDocument();
     expect(screen.getByText("teacher@erg.edu.vn")).toBeInTheDocument();
-    expect(screen.getByText("lms_teacher")).toBeInTheDocument();
-    expect(screen.getByText("ACTIVE")).toBeInTheDocument();
-    expect(screen.getByText("GV-001")).toBeInTheDocument();
-    expect(screen.getByText("Senior Teacher")).toBeInTheDocument();
-    expect(screen.getByText("2 thiết bị")).toBeInTheDocument();
-    expect(screen.getByText("RAPID_SESSION_REPLACEMENT")).toBeInTheDocument();
+    expect(screen.getByText("Đang hoạt động")).toBeInTheDocument();
+    expect(screen.queryByText("ACTIVE")).not.toBeInTheDocument();
+    expect(screen.queryByText("lms_teacher")).not.toBeInTheDocument();
+    expect(screen.queryByText(/school-1/)).not.toBeInTheDocument();
+    expect(screen.getByText("Trường học")).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "Đăng nhập cuối" })).toBeInTheDocument();
   });
 
   test("quick assigns a real role group from the employee row", async () => {
@@ -90,6 +94,23 @@ describe("employee management workspace", () => {
     expect(screen.getByText("WARNING")).toBeInTheDocument();
   });
 
+  test("access log shows localhost, hides success badges and parses user agent", () => {
+    hooks.useEmployees.mockReturnValue(emptyPeople);
+    hooks.useEmployeeSecurityFeed.mockReturnValue({
+      isPending: false, isError: false,
+      data: { page: 1, limit: 50, total: 2, totalPages: 1, items: [
+        { id: "e1", sourceType: "LOGIN_ATTEMPT", eventType: "LOGIN_SUCCESS", tenantId: "t", userId: "u1", userName: "An", severity: "INFO", platform: "WEB_DESKTOP", result: "SUCCESS", ipAddress: "0:0:0:0:0:0:0:1", metadata: { userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/126.0 Safari/537.36" }, occurredAt: "2026-07-15T08:05:00Z" },
+        { id: "e2", sourceType: "LOGIN_ATTEMPT", eventType: "LOGIN_FAILED", tenantId: "t", userId: "u1", userName: "An", severity: "INFO", platform: "WEB_DESKTOP", result: "FAILED", ipAddress: null, metadata: {}, occurredAt: "2026-07-15T08:06:00Z" },
+      ] },
+    });
+    render(<EmployeeAccessLogWorkspace tenantId="tenant-1" />);
+    expect(screen.getByText("localhost")).toBeInTheDocument();
+    expect(screen.getByText("Chrome · Windows")).toBeInTheDocument();
+    expect(screen.queryByText("0:0:0:0:0:0:0:1")).not.toBeInTheDocument();
+    expect(screen.queryByText("Thành công")).not.toBeInTheDocument();
+    expect(screen.getByText("Thất bại")).toBeInTheDocument();
+  });
+
   test("renders a dedicated unified employee access log with identity and warning context", () => {
     hooks.useEmployeeSecurityFeed.mockReturnValue({
       isPending: false,
@@ -118,12 +139,15 @@ describe("employee management workspace", () => {
       },
     });
 
+    hooks.useEmployees.mockReturnValue(emptyPeople);
     render(<EmployeeAccessLogWorkspace tenantId="tenant-1" />);
 
     expect(screen.getByText("Nguyễn Văn Giáo Viên")).toBeInTheDocument();
-    expect(screen.getByText("RAPID_SESSION_REPLACEMENT")).toBeInTheDocument();
-    expect(screen.getByText(/WEB_DESKTOP/)).toBeInTheDocument();
-    expect(screen.getByText(/10\.0\.0\.12/)).toBeInTheDocument();
+    expect(screen.getByText("Đổi phiên đăng nhập liên tục trong thời gian ngắn")).toBeInTheDocument();
+    expect(screen.queryByText("RAPID_SESSION_REPLACEMENT")).not.toBeInTheDocument();
+    expect(screen.getByText("Máy tính")).toBeInTheDocument();
+    expect(screen.getByText("10.0.0.12")).toBeInTheDocument();
+    expect(screen.getByText("Cảnh báo")).toBeInTheDocument();
   });
 
   test("edits basic and professional employee information from the detail drawer", async () => {
@@ -155,5 +179,46 @@ describe("employee management workspace", () => {
         profile: expect.objectContaining({ employeeCode: "GV-001", jobTitle: "Senior Teacher" }),
       }),
     }));
+  });
+
+  const commandsWith = (over: Record<string, unknown>) => {
+    const c = () => ({ mutateAsync: vi.fn(), isPending: false });
+    hooks.useEmployeeCommands.mockReturnValue({ create: c(), update: c(), status: c(), roles: c(), resetCredential: c(), revokeSession: c(), ...over });
+  };
+
+  test("row status toggle only fires after confirming", async () => {
+    const status = vi.fn().mockResolvedValue({});
+    commandsWith({ status: { mutate: status, mutateAsync: vi.fn(), isPending: false } });
+    hooks.useEmployees.mockReturnValue({
+      isPending: false, isError: false,
+      data: { users: [{ id: "user-1", email: "teacher@erg.edu.vn", fullName: "Teacher One", status: "ACTIVE", roles: ["lms_teacher"], isProfileCompleted: true, createdAt: "2026-01-01T00:00:00Z" }], meta: { page: 1, limit: 25, total: 1, totalPages: 1 } },
+    });
+    render(<EmployeeListWorkspace tenantId="tenant-1" />);
+    fireEvent.click(screen.getByRole("button", { name: "Thao tác cho Teacher One" }));
+    fireEvent.click(screen.getByText("Khoá tài khoản"));
+    expect(status).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Khoá" }));
+    await waitFor(() => expect(status).toHaveBeenCalledWith({ userId: "user-1", status: "INACTIVE" }));
+  });
+
+  test("detail drawer reset credential and session revoke need confirmation", async () => {
+    const reset = vi.fn().mockResolvedValue({});
+    const revoke = vi.fn().mockResolvedValue({});
+    commandsWith({ resetCredential: { mutateAsync: reset, isPending: false }, revokeSession: { mutateAsync: revoke, isPending: false } });
+    hooks.useEmployeeDetail.mockReturnValue({
+      isPending: false,
+      isError: false,
+      data: {
+        account: { user: { id: "user-1", fullName: "Teacher One", email: "teacher@erg.edu.vn", phone: "0909", status: "ACTIVE", roles: ["lms_teacher"] }, sessions: [] },
+        profile: { id: "profile-1", userId: "user-1", tenantId: "tenant-1", employeeCode: "GV-001", jobTitle: "Teacher", emergencyContact: {} },
+      },
+    });
+    render(<EmployeeDetailDrawer tenantId="tenant-1" userId="user-1" onClose={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: /reset/i }));
+    expect(screen.getByText("Reset credential an toàn")).toBeInTheDocument();
+    expect(reset).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Xác nhận" }));
+    await waitFor(() => expect(reset).toHaveBeenCalledWith({ delivery: "ONE_TIME_PASSWORD", userId: "user-1" }));
+    expect(revoke).not.toHaveBeenCalled();
   });
 });

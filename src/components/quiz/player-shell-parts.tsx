@@ -4,51 +4,15 @@ import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import Typography from "@mui/material/Typography";
 
-import type { AnswerResult, Attempt, Question, QuizResultDisplay } from "@/lib/types";
+import { getMatchingKey, getSequenceCorrectOrder } from "@/domain/quiz/quiz";
+import type { AnswerResult, Question, QuizResultDisplay } from "@/domain/quiz/types";
 
 type SubmitDialogMode = "all-answered" | "confirm";
 
-export function FinalResultScreen({
-  attempt,
-  resultDisplay,
-  onReview,
-}: {
-  attempt: Attempt;
-  resultDisplay: QuizResultDisplay;
-  onReview: () => void;
-}) {
-  const resultMessage = attempt.passed ? resultDisplay.passMessage : resultDisplay.failMessage;
-
-  return (
-    <Box sx={{ alignItems: "center", bgcolor: "common.white", display: "grid", justifyItems: "center", minHeight: 420, overflow: "hidden", px: 3, py: 4 }}>
-      <Box sx={{ display: "grid", gap: 2, justifyItems: "center", textAlign: "center" }}>
-        <Box sx={{ alignItems: "center", bgcolor: attempt.passed ? "success.main" : "error.main", borderRadius: 1, color: "common.white", display: "grid", fontSize: 20, fontWeight: 600, height: 64, placeItems: "center", width: 64 }}>
-          {attempt.passed ? "✓" : "×"}
-        </Box>
-        <Typography component="h2" sx={{ color: "var(--erg-blue)", fontSize: 20, fontWeight: 600 }}>
-          {resultMessage}
-        </Typography>
-        <Box sx={{ display: "grid", gap: 1 }}>
-          <Typography component="span" sx={{ color: "text.secondary", fontSize: 14, fontWeight: 600 }}>Điểm</Typography>
-          <Typography component="strong" sx={{ color: "var(--erg-blue)", fontSize: 20, fontWeight: 600 }}>
-            {attempt.totalScore}/{attempt.maxScore}
-          </Typography>
-          <Typography component="span" sx={{ color: "text.disabled", fontSize: 14, fontWeight: 600 }}>{attempt.percent}%</Typography>
-        </Box>
-        {resultDisplay.showReviewButton ? (
-          <Button variant="contained" onClick={onReview} sx={{ minHeight: 40, px: 2 }}>
-            {resultDisplay.reviewButtonLabel}
-          </Button>
-        ) : null}
-        <Typography sx={{ color: "text.secondary", fontSize: 16, fontWeight: 500 }}>{resultDisplay.thankYouMessage}</Typography>
-      </Box>
-    </Box>
-  );
-}
-
 export function QuestionFeedbackPanel({ floating = false, result }: { floating?: boolean; result: AnswerResult }) {
-  const title = result.correct ? "Đáp án chính xác!" : "Đáp án chưa đúng!";
-  const message = result.correct ? result.message : "Câu trả lời chưa đúng. Em hãy xem lại đáp án và thử ở lần sau.";
+  const title = result.pendingReview ? "Đã ghi nhận bài làm" : result.correct ? "Đáp án chính xác!" : "Đáp án chưa đúng!";
+  const message = result.correct || result.pendingReview ? result.message : "Câu trả lời chưa đúng. Em hãy xem lại đáp án và thử ở lần sau.";
+  const headerColor = result.pendingReview ? "info.main" : result.correct ? "#22C55E" : "#e82828";
 
   return (
     <Box
@@ -65,10 +29,12 @@ export function QuestionFeedbackPanel({ floating = false, result }: { floating?:
         width: "100%",
       }}
     >
-      <Box sx={{ alignItems: "center", bgcolor: result.correct ? "#22C55E" : "#e82828", color: "common.white", display: "flex", fontSize: 16, fontWeight: 600, justifyContent: "space-between", minHeight: 48, px: 2.5 }}>
+      <Box sx={{ alignItems: "center", bgcolor: headerColor, color: "common.white", display: "flex", fontSize: 16, fontWeight: 600, justifyContent: "space-between", minHeight: 48, px: 2.5 }}>
         <span>{title}</span>
       </Box>
-      <Box sx={{ color: "text.primary", fontSize: 16, lineHeight: "28px", px: 2.5, py: 2.5 }}>{message}</Box>
+      {message ? (
+        <Box data-testid="question-feedback-body" sx={{ color: "text.primary", fontSize: 16, lineHeight: "28px", px: 2.5, py: 2.5 }}>{message}</Box>
+      ) : null}
     </Box>
   );
 }
@@ -77,14 +43,20 @@ export function SubmitConfirmDialog({
   mode,
   resultDisplay,
   submitting,
+  unansweredCount = 0,
+  flaggedCount = 0,
   onCancel,
   onConfirm,
+  onGoToUnanswered,
 }: {
   mode: SubmitDialogMode;
   resultDisplay: QuizResultDisplay;
   submitting: boolean;
+  unansweredCount?: number;
+  flaggedCount?: number;
   onCancel: () => void;
   onConfirm: () => void;
+  onGoToUnanswered?: () => void;
 }) {
   const isAllAnswered = mode === "all-answered";
 
@@ -111,7 +83,15 @@ export function SubmitConfirmDialog({
           <Typography id="quiz-submit-confirm-title" sx={{ color: "text.primary", fontSize: 14, fontWeight: 500 }}>
             {isAllAnswered ? resultDisplay.submitAllPrompt : resultDisplay.confirmSubmitPrompt}
           </Typography>
+          <Typography color="text.secondary" data-testid="submit-summary" variant="body2">
+            {`Còn ${unansweredCount} câu chưa làm, ${flaggedCount} câu đánh dấu`}
+          </Typography>
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1.5, justifyContent: "center" }}>
+            {unansweredCount > 0 && onGoToUnanswered ? (
+              <Button disabled={submitting} variant="outlined" onClick={onGoToUnanswered} sx={{ minHeight: 36, px: 2.5 }}>
+                Đến câu chưa làm
+              </Button>
+            ) : null}
             <Button disabled={submitting} variant="contained" onClick={onConfirm} sx={{ minHeight: 36, minWidth: 136, px: 2.5 }}>
               {submitting ? "ĐANG NỘP..." : isAllAnswered ? resultDisplay.submitAllLabel : resultDisplay.confirmYesLabel}
             </Button>
@@ -156,9 +136,16 @@ function getAnswerKeyLines(question: Question): string[] {
         ? [`Đáp án đúng: ${question.numericAnswer.correctValue}${question.numericAnswer.unit ? ` ${question.numericAnswer.unit}` : ""}`]
         : [];
     case "matching":
-      return (question.matching ?? []).map((pair, index) => `${index + 1}. ${pair.prompt} -> ${pair.response}`);
+      return (question.matching ?? []).flatMap((pair, index) => {
+        const responseId = getMatchingKey(question)?.[pair.id];
+        const response = question.matchingResponses ? question.matchingResponses.find((item) => item.id === responseId)?.response : pair.response;
+        return response === undefined ? [] : [`${index + 1}. ${pair.prompt} -> ${response}`];
+      });
     case "sequence":
-      return (question.sequenceItems ?? []).map((item, index) => `${index + 1}. ${item.label}`);
+      return getSequenceCorrectOrder(question).flatMap((id, index) => {
+        const item = question.sequenceItems?.find((candidate) => candidate.id === id);
+        return item ? [`${index + 1}. ${item.label}`] : [];
+      });
     case "inline_choice":
     case "select_from_lists":
       return (question.inlineBlanks ?? []).map((blank, index) => `${index + 1}. ${blank.statement}: ${formatInlineOption(blank.correctOptionId)}`);
@@ -177,7 +164,7 @@ function getAnswerKeyLines(question: Question): string[] {
     case "likert_scale":
       return ["Câu khảo sát ghi nhận mức độ lựa chọn, không có đáp án đúng sai tuyệt đối."];
     case "essay":
-      return (question.essayRubric ?? []).map((item) => `${item.label}: ${item.points}đ`);
+      return (question.essayRubric ?? []).map((item) => item.label).filter(Boolean);
     default:
       return [];
   }

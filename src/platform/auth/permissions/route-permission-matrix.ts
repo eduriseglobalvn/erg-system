@@ -1,4 +1,4 @@
-import { ADMIN_CONTENT_ROUTE_PATHS, ADMIN_ENTERPRISE_CONNECTORS_PATH, ADMIN_LEARNING_STANDARDS_PATH, crmPaths, lcmsWorkspacePaths, lmsPaths } from "@/app/portal-route-registry";
+import { ADMIN_CONTENT_ROUTE_PATHS, ADMIN_ENTERPRISE_CONNECTORS_PATH, ADMIN_LEARNING_STANDARDS_PATH, crmPaths, lcmsWorkspacePaths, lmsPaths } from "@/platform/auth/permissions/portal-route-registry";
 import { LMS_ROUTE_PERMISSIONS, type LmsPermission } from "@/platform/auth/permissions/lms-permission-catalog";
 import type { Workspace } from "@/platform/workspaces/workspace-domain";
 import { adminPath, studentPath, teacherPath } from "@/platform/workspaces/workspace-paths";
@@ -42,6 +42,7 @@ export type RoutePermission =
   | "crm.deal.manage"
   | "seo.manage"
   | "elearning.assignment.read_self"
+  | "elearning.student.preview"
   | "learning.outcomes.read"
   | "learning.outcomes.manage"
   | "learning.outcomes.issue_certificate"
@@ -58,7 +59,16 @@ export type RoutePermissionEntry = {
   readonly resource: string;
   readonly action: PermissionAction;
   readonly permission: RoutePermission;
+  /** Extra permissions that also open the route (any-of with `permission`). */
+  readonly alternatePermissions?: readonly RoutePermission[];
+  /** Deeper paths (e.g. `/teacher/notifications/:id`) inherit this row even without rows of their own. */
+  readonly matchChildren?: boolean;
 };
+
+/** Every permission that opens the route: `permission` or any alternate. */
+export function routeAcceptedPermissions(entry: RoutePermissionEntry): readonly RoutePermission[] {
+  return [entry.permission, ...(entry.alternatePermissions ?? [])];
+}
 
 const ADMIN_CONTENT_PERMISSIONS: Record<string, Pick<RoutePermissionEntry, "resource" | "action" | "permission">> = {
   "/admin/content": { resource: "content", action: "manage", permission: "content.manage" },
@@ -141,8 +151,11 @@ function crmEntry(path: string): RoutePermissionEntry {
   };
 }
 
+const STUDENT_PREVIEW_ALTERNATES: readonly RoutePermission[] = ["elearning.student.preview"];
+
 export const ROUTE_PERMISSION_MATRIX: readonly RoutePermissionEntry[] = [
   { path: "/admin", workspace: "ADMIN", resource: "admin", action: "manage", permission: "lms.admin" },
+  { path: "/admin/profile", workspace: "ADMIN", resource: "account.self", action: "read", permission: "lms.admin" },
   ...ADMIN_CONTENT_ROUTE_PATHS.map((path) => ({
     ...(ADMIN_CONTENT_PERMISSIONS[path] ?? ADMIN_CONTENT_PERMISSIONS["/admin/content"]),
     path,
@@ -153,10 +166,10 @@ export const ROUTE_PERMISSION_MATRIX: readonly RoutePermissionEntry[] = [
   { path: "/teacher", workspace: "TEACHER", resource: "dashboard", action: "read", permission: "lms.dashboard.read" },
   { path: "/teacher/exams/portable", workspace: "TEACHER", resource: "exam.portable", action: "launch", permission: "lms.quiz.read" },
   { path: "/teacher/downloads/desktop", workspace: "TEACHER", resource: "desktop.release", action: "read", permission: "lms.dashboard.read" },
-  ...lmsPaths.map(teacherEntry),
-  { path: "/student", workspace: "STUDENT", resource: "assignment", action: "read", permission: "elearning.assignment.read_self" },
-  { path: "/student/exams/portable", workspace: "STUDENT", resource: "exam.portable", action: "launch", permission: "elearning.assignment.read_self" },
-  { path: "/student/downloads/desktop", workspace: "STUDENT", resource: "desktop.release", action: "read", permission: "elearning.assignment.read_self" },
+  ...lmsPaths.map((path) => (path === "notifications" ? { ...teacherEntry(path), matchChildren: true } : teacherEntry(path))),
+  { path: "/student", workspace: "STUDENT", resource: "assignment", action: "read", permission: "elearning.assignment.read_self", alternatePermissions: STUDENT_PREVIEW_ALTERNATES },
+  { path: "/student/exams/portable", workspace: "STUDENT", resource: "exam.portable", action: "launch", permission: "elearning.assignment.read_self", alternatePermissions: STUDENT_PREVIEW_ALTERNATES },
+  { path: "/student/downloads/desktop", workspace: "STUDENT", resource: "desktop.release", action: "read", permission: "elearning.assignment.read_self", alternatePermissions: STUDENT_PREVIEW_ALTERNATES },
   { path: "/admin/learning-outcomes", workspace: "ADMIN", resource: "learning-outcomes", action: "manage", permission: "learning.outcomes.manage" },
   { path: ADMIN_LEARNING_STANDARDS_PATH, workspace: "ADMIN", resource: "learning-standards", action: "read", permission: "learning.standards.read" },
   { path: ADMIN_ENTERPRISE_CONNECTORS_PATH, workspace: "ADMIN", resource: "enterprise-connectors", action: "read", permission: "enterprise.connectors.read" },
@@ -168,7 +181,7 @@ export const ROUTE_PERMISSION_MATRIX: readonly RoutePermissionEntry[] = [
 const sortedMatrix = [...ROUTE_PERMISSION_MATRIX].sort((left, right) => right.path.length - left.path.length);
 const nestedRoutePrefixes = new Set(
   sortedMatrix
-    .filter((entry) => entry.path !== "/admin" && sortedMatrix.some((candidate) => candidate.path.startsWith(`${entry.path}/`)))
+    .filter((entry) => entry.path !== "/admin" && (entry.matchChildren || sortedMatrix.some((candidate) => candidate.path.startsWith(`${entry.path}/`))))
     .map((entry) => entry.path),
 );
 

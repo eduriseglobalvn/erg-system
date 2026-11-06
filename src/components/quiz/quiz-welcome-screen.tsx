@@ -12,7 +12,7 @@ import {
   UserRound,
 } from "lucide-react";
 
-import type { Question, Quiz } from "@/lib/types";
+import type { Question, Quiz } from "@/domain/quiz/types";
 
 export type QuizWelcomeMeta = {
   authorName?: string;

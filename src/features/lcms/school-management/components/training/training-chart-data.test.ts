@@ -36,7 +36,7 @@ describe("training chart period", () => {
     expect(Object.fromEntries(Object.entries(trainingMetricMeta).map(([key, value]) => [key, value.color]))).toEqual({
       interventionEffectiveness: "#7C3AED",
       learningEngagement: "#059669",
-      studentMastery: "#2563EB",
+      studentMastery: "#0071E3",
       teachingDelivery: "#D97706",
     });
   });

@@ -11,10 +11,8 @@ describe("portal sidebar ownership", () => {
     const sidebar = source("ErgPortalSidebar.tsx");
 
     expect(sidebar.split(/\r?\n/).length).toBeLessThanOrEqual(200);
-    expect(sidebar).toContain('from "./portal-sidebar-logo"');
     expect(sidebar).toContain('from "./portal-sidebar-nav-layer"');
     expect(sidebar).toContain('from "./portal-sidebar-styles"');
-    expect(sidebar).toContain('from "./portal-sidebar-utils"');
     expect(sidebar).not.toContain("useState(");
     expect(sidebar).not.toContain("useEffect(");
   });

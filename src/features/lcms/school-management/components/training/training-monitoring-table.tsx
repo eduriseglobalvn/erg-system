@@ -40,7 +40,7 @@ export function TrainingMonitoringTable({ schoolName, summaries }: { schoolName:
       onChange={(_, value: TrainingMonitorScope | null) => { if (value) setScope(value); }}
       size="small"
       value={scope}
-      sx={{ display: "flex", gap: 0.75, overflowX: "auto", p: 1.5, "& .MuiToggleButton-root": { border: "1px solid", borderColor: "divider", borderRadius: "8px !important", flexShrink: 0, fontWeight: 750, px: 1.75, textTransform: "none" } }}
+      sx={{ display: "flex", gap: 0.75, overflowX: "auto", p: 1.5, "& .MuiToggleButton-root": { border: "1px solid", borderColor: "divider", borderRadius: "8px !important", flexShrink: 0, fontWeight: 600, px: 1.75, textTransform: "none" } }}
     >
       {scopeOptions.map((option) => <ToggleButton key={option.value} value={option.value}>{option.label}</ToggleButton>)}
     </ToggleButtonGroup>
@@ -61,7 +61,7 @@ export function TrainingMonitoringTable({ schoolName, summaries }: { schoolName:
         <TableBody>{rows.map((row) => {
           const meta = statusMeta[row.status];
           return <TableRow hover key={row.id}>
-            <TableCell sx={{ fontWeight: 850 }}>{row.name}</TableCell>
+            <TableCell sx={{ fontWeight: 600 }}>{row.name}</TableCell>
             <TableCell align="right">{row.classCount}</TableCell>
             <TableCell align="right">{row.studentCount}</TableCell>
             <ScoreCell value={row.classHealth} />
@@ -69,7 +69,7 @@ export function TrainingMonitoringTable({ schoolName, summaries }: { schoolName:
             <ScoreCell value={row.learningEngagement} />
             <ScoreCell value={row.teachingDelivery} />
             <ScoreCell value={row.interventionEffectiveness} />
-            <TableCell align="right" sx={{ color: row.riskStudentCount ? "error.main" : "text.primary", fontWeight: 800 }}>{row.riskStudentCount}</TableCell>
+            <TableCell align="right" sx={{ color: row.riskStudentCount ? "error.main" : "text.primary", fontWeight: 600 }}>{row.riskStudentCount}</TableCell>
             <TableCell><Chip color={meta.color} label={meta.label} size="small" variant="outlined" /></TableCell>
           </TableRow>;
         })}</TableBody>
@@ -79,5 +79,5 @@ export function TrainingMonitoringTable({ schoolName, summaries }: { schoolName:
 }
 
 function ScoreCell({ value }: { value: number }) {
-  return <TableCell align="right" sx={{ color: value < 65 ? "error.main" : value < 80 ? "warning.main" : "text.primary", fontVariantNumeric: "tabular-nums", fontWeight: 800 }}>{value}</TableCell>;
+  return <TableCell align="right" sx={{ color: value < 65 ? "error.main" : value < 80 ? "warning.main" : "text.primary", fontVariantNumeric: "tabular-nums", fontWeight: 600 }}>{value}</TableCell>;
 }

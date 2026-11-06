@@ -3,7 +3,7 @@ import { useMemo } from "react";
 
 import { getDefaultTenantId } from "@/lib/graphql-client";
 import { QUERY_POLICIES } from "@/lib/query-policy";
-import { getCurrentAccount } from "@/platform/auth/api/auth-storage";
+import { getCurrentAccountId } from "@/platform/auth/api/auth-storage";
 import {
   deprovisionEnterpriseConnector,
   dryRunEnterpriseConnector,
@@ -30,7 +30,7 @@ export type EnterpriseConnectorsScope = {
 };
 
 export function useEnterpriseConnectorsScope(): EnterpriseConnectorsScope {
-  const accountId = getCurrentAccount("lcms")?.id?.trim() || "anonymous";
+  const accountId = getCurrentAccountId("lcms");
   return useMemo(() => ({
     tenantId: getDefaultTenantId(),
     accountId,

@@ -22,10 +22,11 @@ import {
   type QuizEditorReorderInput,
   type QuizEditorSaveDraftInput,
   type QuizEditorUpsertSlideInput,
+  type QuizEditorSummary,
   type QuizEditorWorkspaceInput,
   type QuizEditorApiPortal,
 } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-api";
-import { questionBankQueryKeys } from "@/features/lcms/quiz/question-bank/api/question-bank-query";
+import { questionBankQueryKeys } from "@/features/question-bank/api/question-bank-query";
 import {
   clearNormalizedQuizPackageCache,
   quizRuntimeQueryKeys,
@@ -70,6 +71,24 @@ export function quizEditorWorkspaceQueryOptions(input: QuizEditorWorkspaceInput 
     gcTime: QUIZ_EDITOR_REFERENCE_GC_TIME_MS,
     queryFn: ({ signal }: { signal: AbortSignal }) => loadQuizEditorWorkspace(input, signal),
     queryKey: quizEditorQueryKeys.workspace(input),
+    staleTime: QUIZ_EDITOR_WORKSPACE_STALE_TIME_MS,
+  };
+}
+
+/** Every quiz of a Level, page by page: a topic whose quiz sits past the first page must not read "Chưa có bài". */
+export function quizEditorLevelQuizzesQueryOptions(input: { subjectId: string; levelId: string }) {
+  const firstPage = { ...input, size: 50 };
+  return {
+    gcTime: QUIZ_EDITOR_REFERENCE_GC_TIME_MS,
+    queryFn: async ({ signal }: { signal: AbortSignal }) => {
+      const items: QuizEditorSummary[] = [];
+      for (let page = 0; ; page += 1) {
+        const { quizzes } = await loadQuizEditorWorkspace({ ...firstPage, page }, signal);
+        items.push(...quizzes.items);
+        if (!quizzes.hasNext || !quizzes.items.length) return items;
+      }
+    },
+    queryKey: [...quizEditorQueryKeys.workspace(firstPage), "all-pages"] as const,
     staleTime: QUIZ_EDITOR_WORKSPACE_STALE_TIME_MS,
   };
 }
@@ -191,6 +210,8 @@ export function usePublishQuizEditorDraftMutation() {
   return useMutation({
     mutationFn: (input: QuizEditorPublishInput) => publishQuizEditorDraft(input),
     mutationKey: quizEditorMutationKeys.publish,
+    // The publish hook shows the server's reason in place.
+    meta: { silent: true },
     onSuccess: (_result, input) => {
       void queryClient.invalidateQueries({ queryKey: quizEditorQueryKeys.draft(input.quizId) });
       void queryClient.invalidateQueries({ queryKey: quizEditorQueryKeys.versions(input.quizId) });

@@ -174,7 +174,7 @@ const LEGACY_FILE_OWNERS = new Map([
     "src/features/lms/components/lms-teacher-shell.tsx",
   ],
   [
-    "src/features/lms/components/lms-teacher-shell-workspaces.tsx",
+    "src/features/lms/components/lms-teacher-route-pages.tsx",
     "src/features/lms/components/lms-teacher-shell.tsx",
   ],
   [
@@ -239,17 +239,6 @@ const LEGACY_FILE_OWNERS = new Map([
     "src/features/lcms/admin-operations/components/learning-resource-curriculum-explorer.tsx",
   ]),
   ...[
-    "quiz-editor-slide-intro-preview.tsx",
-    "quiz-editor-slide-choice-preview.tsx",
-    "quiz-editor-slide-drag-drop-preview.tsx",
-    "quiz-editor-slide-feedback-preview.tsx",
-    "quiz-editor-slide-media.tsx",
-    "quiz-editor-slide-layout.tsx",
-  ].map((file) => [
-    `src/features/lcms/quiz/quiz-editor/components/${file}`,
-    "src/features/lcms/quiz/quiz-editor/components/quiz-editor-slide-render.tsx",
-  ]),
-  ...[
     "question-bank-workspace-shell.tsx",
     "question-bank-compact-header.tsx",
     "question-bank-structure-panel.tsx",
@@ -259,8 +248,8 @@ const LEGACY_FILE_OWNERS = new Map([
     "quiz-builder-panel.tsx",
     "quiz-bank-panel.tsx",
   ].map((file) => [
-    `src/features/lcms/quiz/question-bank/components/${file}`,
-    "src/features/lcms/quiz/question-bank/components/question-bank-workspace.tsx",
+    `src/features/question-bank/components/${file}`,
+    "src/features/question-bank/components/question-bank-workspace.tsx",
   ]),
   ...[
     "user-access-control-section-config.tsx",

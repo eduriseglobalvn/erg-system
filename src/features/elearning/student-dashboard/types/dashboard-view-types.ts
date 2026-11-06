@@ -31,7 +31,14 @@ export type DashboardCopy = {
   heroEyebrow: string;
   learnerFallbackName: string;
   heroTitle: (name: string) => string;
-  heroDescription: (taskTitle: string) => string;
+  heroDescription: (taskTitle: string, dueDate: string) => string;
+  heroAllDone: string;
+  heroEmpty: string;
+  greetingLead: (name: string) => string;
+  greetingOpen: (count: number) => string;
+  upcomingTitle: string;
+  todayEmptyDescription: string;
+  todayDoneDescription: string;
   primaryAction: string;
   secondaryAction: string;
   stats: {

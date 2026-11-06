@@ -12,7 +12,7 @@ import Trash2 from "@mui/icons-material/DeleteOutlined";
 import type { CurriculumContentItem, CurriculumContentKind, CurriculumFolder, CurriculumFolderRole, CurriculumTarget, ResourceCommandId, ResourceCommandSpec } from "@/features/lcms/admin-operations/utils/learning-resource-curriculum-view-model";
 
 export const resourcePalette = {
-  blue: "#0F6CBD",
+  blue: "#0071E3",
   blueSoft: "#EAF4FF",
   blueBorder: "#B8D6FA",
   red: "#F35C6B",

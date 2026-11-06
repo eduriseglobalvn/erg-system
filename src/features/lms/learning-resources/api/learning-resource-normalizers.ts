@@ -7,7 +7,7 @@ import type {
   LearningResourceResource,
   LearningResourceViewerSlide,
 } from "@/features/lms/learning-resources/api/learning-resource-domain-types";
-import { LEARNING_RESOURCE_CATEGORIES } from "@/features/lms/learning-resources/api/learning-resource-mock-data";
+import { LEARNING_RESOURCE_CATEGORIES } from "@/features/lms/learning-resources/api/learning-resource-taxonomy";
 import type { LearningResourceLaunchSlideDTO } from "@/features/lms/learning-resources/api/learning-resource-types";
 import { getApiBase } from "@/lib/platform";
 

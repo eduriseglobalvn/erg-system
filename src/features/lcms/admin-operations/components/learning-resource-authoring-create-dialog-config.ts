@@ -2,7 +2,7 @@ import type { TaxonomyRole } from "@/features/lcms/admin-operations/components/l
 
 export type ResolvedTaxonomyMode = TaxonomyRole | null;
 
-export const RESOURCE_BLUE = "#0F6CBD";
+export const RESOURCE_BLUE = "#0071E3";
 export const RESOURCE_BLUE_SOFT = "#EAF4FF";
 export const RESOURCE_BLUE_BORDER = "#B8D6FA";
 export const RESOURCE_RED = "#F35C6B";

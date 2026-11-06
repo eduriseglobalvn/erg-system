@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, test, vi } from "vitest";
 
 import { MatchingQuestion } from "@/components/quiz/questions/matching-question";
-import type { Question } from "@/lib/types";
+import type { Question } from "@/domain/quiz/types";
 
 vi.mock("@/hooks/use-mobile", () => ({
   useIsMobile: () => true,

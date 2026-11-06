@@ -1,20 +1,23 @@
 import Button from "@mui/material/Button";
-import Chip from "@mui/material/Chip";
 import Skeleton from "@mui/material/Skeleton";
 import { CheckCircle2 } from "lucide-react";
+import type { ComponentProps, ReactNode } from "react";
 
+import { ErgStatusChip } from "@/components/erg-mui/erg-feedback";
 import type { SeoLeadStatus, SeoSchoolLead } from "@/features/crm/seo/types/seo-crm-types";
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
 import { cn } from "@/lib/utils";
 
 type BadgeTone = "primary" | "secondary" | "success" | "warning" | "danger" | "outline";
 
-export function toChipProps(tone: BadgeTone) {
-  if (tone === "outline") return { variant: "outlined" as const, color: "default" as const };
-  const colorMap: Record<Exclude<BadgeTone, "outline">, "primary" | "secondary" | "success" | "warning" | "error"> = {
-    primary: "primary", secondary: "secondary", success: "success", warning: "warning", danger: "error",
-  };
-  return { variant: "filled" as const, color: colorMap[tone] };
+const ERG_TONE = { primary: "info", secondary: "neutral", success: "success", warning: "warning", danger: "error", outline: "neutral" } as const;
+
+export function toErgTone(tone: BadgeTone): ComponentProps<typeof ErgStatusChip>["tone"] {
+  return ERG_TONE[tone];
+}
+
+export function SeoBadge({ tone, label }: { tone: BadgeTone; label: ReactNode }) {
+  return <ErgStatusChip tone={toErgTone(tone)} label={label} />;
 }
 
 export const pipelineStatuses: SeoLeadStatus[] = [
@@ -68,8 +71,8 @@ export function SeoScopeSummary({ leads }: { leads: SeoSchoolLead[] }) {
         </p>
       </div>
       <div className="flex flex-wrap gap-2">
-        <Chip label={`${pendingSetupCount} chờ triển khai`} size="small" {...toChipProps("warning")} />
-        <Chip label={`${activeCount} active`} size="small" {...toChipProps("success")} />
+        <SeoBadge tone="warning" label={`${pendingSetupCount} chờ triển khai`} />
+        <SeoBadge tone="success" label={`${activeCount} active`} />
       </div>
     </div>
   );

@@ -1,6 +1,9 @@
 import Add from "@mui/icons-material/Add";
 import Lock from "@mui/icons-material/Lock";
-import { Button, Chip, Stack, Typography } from "@mui/material";
+import Button from "@mui/material/Button";
+import Chip from "@mui/material/Chip";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 import type { CSSProperties } from "react";
 
 import { StudentProfileDetailDrawer } from "@/features/lms/classroom/components/student-profile-detail-drawer";
@@ -164,7 +167,7 @@ function ClassificationChangeDialog({
             onClick={onSave}
             disabled={!canSave}
             variant="contained"
-            sx={{ borderRadius: 1.5, textTransform: "none", fontWeight: 600, backgroundColor: "#696CFF", "&:hover": { backgroundColor: "#5a5ce6" } }}
+            sx={{ textTransform: "none" }}
           >
             Lưu thay đổi
           </Button>

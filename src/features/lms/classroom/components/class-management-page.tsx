@@ -1,18 +1,32 @@
 import { useMemo, useState, type ReactNode } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQueries } from "@tanstack/react-query";
 import { QUERY_POLICIES } from "@/lib/query-policy";
-import { Search } from "lucide-react";
 
-import TextField from "@mui/material/TextField";
-import { lmsAssignmentReadQueryKeys } from "@/features/lms/api/lms-assignment-command-query";
+import Box from "@mui/material/Box";
+import ButtonBase from "@mui/material/ButtonBase";
+import LinearProgress from "@mui/material/LinearProgress";
+import Link from "@mui/material/Link";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import NativeSelect from "@mui/material/NativeSelect";
+import Paper from "@mui/material/Paper";
+import Stack from "@mui/material/Stack";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Typography from "@mui/material/Typography";
+import type { SxProps, Theme } from "@mui/material/styles";
+import { ErgEmptyState, ErgErrorState } from "@/components/erg-mui/erg-feedback";
+import { ErgSearchField, ErgSelect } from "@/components/erg-mui/erg-form";
+import { ErgTable } from "@/components/erg-mui/erg-table";
+import { lmsAssignmentReadQueryKeys, lmsReadPersistMeta } from "@/features/lms/api/lms-assignment-command-query";
 import { loadLmsClassWorkspace, mapClassWorkspaceToStudents } from "@/features/lms/api/lms-classroom-api";
-import type { ClassroomSnapshot, ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
+import type { ClassroomSnapshot, ClassroomStudent } from "@/domain/school/classroom-types";
 import { assignmentGroups } from "@/features/lms/components/assign-homework-groups";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { hasApiBase } from "@/lib/api-client";
-import { cn } from "@/lib/utils";
 import { StudentProfileDetailDrawer, type StudentProfileDetailDraft } from "./student-profile-detail-drawer";
-import { AppSelect } from "@/components/ui/app-select";
 
 type Classification = "A" | "B" | "C" | "D" | "E";
 type ProgressFilter = "all" | "not-started" | "in-progress" | "completed";
@@ -59,38 +73,6 @@ export function ClassManagementPage({ classes, selectedClass, selectedSchoolName
   const [manualClassifications, setManualClassifications] = useState<Record<string, Classification>>({});
   const debouncedSearchValue = useDebouncedValue(searchValue);
   const apiBacked = hasApiBase();
-  const selectedClassId = selectedClass?.id ?? classes[0]?.id ?? "";
-
-  const classWorkspaceQuery = useQuery({
-    queryKey: lmsAssignmentReadQueryKeys.classWorkspace({
-      classId: selectedClassId,
-      schoolId: selectedClass?.schoolId,
-      usage: "class-management",
-    }),
-    queryFn: ({ signal }) =>
-      loadLmsClassWorkspace({
-        assignmentPage: 0,
-        assignmentSize: 50,
-        assignmentStatus: "active",
-        classId: selectedClassId,
-        page: 0,
-        schoolId: selectedClass?.schoolId,
-        size: 50,
-        studentStatus: "active",
-      }, signal),
-    enabled: apiBacked && Boolean(selectedClassId),
-    staleTime: QUERY_POLICIES.transactional.staleTime,
-    gcTime: QUERY_POLICIES.transactional.gcTime,
-    refetchOnWindowFocus: false,
-  });
-  const workspaceStudents = useMemo(
-    () => (classWorkspaceQuery.data ? mapClassWorkspaceToStudents(classWorkspaceQuery.data, selectedClass) : undefined),
-    [classWorkspaceQuery.data, selectedClass],
-  );
-  const students = useMemo(
-    () => resolveClassManagementStudents(workspaceStudents, fallbackStudents, apiBacked),
-    [apiBacked, fallbackStudents, workspaceStudents],
-  );
 
   const schoolClasses = useMemo(() => classes.filter((classroom) => !selectedClass || classroom.schoolId === selectedClass.schoolId), [classes, selectedClass]);
   const gradeLabels = useMemo(() => Array.from(new Set(schoolClasses.map((classroom) => classroom.gradeLabel))), [schoolClasses]);
@@ -104,6 +86,43 @@ export function ClassManagementPage({ classes, selectedClass, selectedSchoolName
     return schoolClasses.map((classroom) => ({ label: classroom.className, value: classroom.id }));
   }, [gradeLabels, schoolClasses, scopeMode]);
   const resolvedScopeId = scopeOptions.some((option) => option.value === scopeId) ? scopeId : scopeOptions[0]?.value ?? "";
+  // One roster source (same loadLmsClassWorkspace as the assign page): load every class in the current scope.
+  const rosterClasses = useMemo(() => {
+    if (scopeMode === "grade") return schoolClasses.filter((classroom) => classroom.gradeLabel === resolvedScopeId);
+    if (scopeMode === "class") return schoolClasses.filter((classroom) => classroom.id === resolvedScopeId);
+    return selectedClass ? [selectedClass] : [];
+  }, [resolvedScopeId, schoolClasses, scopeMode, selectedClass]);
+  const rosterQueries = useQueries({
+    queries: rosterClasses.map((classroom) => ({
+      enabled: apiBacked && Boolean(classroom.id),
+      gcTime: QUERY_POLICIES.offlineCore.gcTime,
+      meta: lmsReadPersistMeta(),
+      queryFn: ({ signal }) =>
+        loadLmsClassWorkspace({
+          assignmentPage: 0,
+          assignmentSize: 20,
+          assignmentStatus: "active",
+          classId: classroom.id,
+          page: 0,
+          schoolId: classroom.schoolId,
+          size: 200,
+          studentStatus: "active",
+        }, signal),
+      queryKey: lmsAssignmentReadQueryKeys.classWorkspace({ classId: classroom.id, schoolId: classroom.schoolId, usage: "class-management" }),
+      refetchOnWindowFocus: false,
+      staleTime: QUERY_POLICIES.transactional.staleTime,
+    })),
+  });
+  const rosterLoading = apiBacked && rosterQueries.some((query) => query.isLoading);
+  const rosterError = apiBacked && rosterQueries.some((query) => query.isError);
+  const students = useMemo(() => {
+    const workspaceStudents = rosterClasses.flatMap((classroom, index) => {
+      const workspace = rosterQueries[index]?.data;
+      // Stamp the requested class id so scope filters match what the assign page shows.
+      return workspace ? mapClassWorkspaceToStudents(workspace, classroom).map((student) => ({ ...student, classId: classroom.id })) : [];
+    });
+    return resolveClassManagementStudents(workspaceStudents, fallbackStudents, apiBacked);
+  }, [apiBacked, fallbackStudents, rosterClasses, rosterQueries]);
   const scopeStudents = useMemo(() => {
     if (scopeMode === "grade") {
       const classIds = new Set(schoolClasses.filter((classroom) => classroom.gradeLabel === resolvedScopeId).map((classroom) => classroom.id));
@@ -157,170 +176,202 @@ export function ClassManagementPage({ classes, selectedClass, selectedSchoolName
   }
 
   return (
-    <section className="flex h-full min-h-0 flex-col gap-2 bg-[#f8fafc] p-2 xl:p-3">
-      <div className="shrink-0 rounded-lg border border-[#cbd7e6] bg-white px-2.5 py-2 shadow-[var(--shadow-xs)]">
-        <div className="flex flex-wrap items-center gap-1.5">
-          <div className="mr-auto min-w-[220px]">
-            <div className="text-sm font-semibold leading-5 text-slate-950">{scopeLabel}</div>
-            <div className="text-[13px] font-bold text-slate-600">
+    <Box
+      component="section"
+      sx={{ bgcolor: "background.default", display: "flex", flexDirection: "column", gap: 1, height: { lg: "100%" }, minHeight: { xs: "100%", lg: 0 }, p: { xs: 1, lg: 1.5 } }}
+    >
+      <Paper variant="outlined" sx={{ borderRadius: 1, flexShrink: 0, px: 1.25, py: 1 }}>
+        <Stack direction="row" useFlexGap sx={{ alignItems: "center", flexWrap: "wrap", gap: 0.75 }}>
+          <Box sx={{ minWidth: 220, mr: "auto" }}>
+            <Typography variant="subtitle2">{scopeLabel}</Typography>
+            <Typography variant="caption" color="text.secondary" sx={{ display: "block", fontWeight: "fontWeightBold" }}>
               {selectedSchoolName} · {visibleStudents.length}/{scopeStudents.length} học sinh
-            </div>
-          </div>
-          <AppSelect
-            aria-label="Kiểu xem"
-            className="h-10 rounded-lg border border-[#d7e0ec] bg-white px-3 text-[14px] font-bold text-slate-900 outline-none focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
+            </Typography>
+          </Box>
+          <FilterSelect
+            ariaLabel="Kiểu xem"
+            options={scopeModeOptions}
             value={scopeMode}
-            onChange={(event) => {
-              setScopeMode(event.target.value as ScopeMode);
+            onChange={(value) => {
+              setScopeMode(value as ScopeMode);
               setScopeId("");
             }}
-          >
-            {scopeModeOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </AppSelect>
-          <AppSelect
-            aria-label="Phạm vi"
-            className="h-10 max-w-[240px] rounded-lg border border-[#d7e0ec] bg-white px-3 text-[14px] font-bold text-slate-900 outline-none focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
+          />
+          <FilterSelect
+            ariaLabel="Phạm vi"
+            options={scopeOptions}
+            sx={{ maxWidth: 240 }}
             value={resolvedScopeId}
-            onChange={(event) => setScopeId(event.target.value)}
-          >
-            {scopeOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </AppSelect>
-          <div className="relative min-w-[220px] flex-1 xl:max-w-[340px]">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--erg-blue)]" />
-            <TextField
-              size="small"
-              fullWidth
-              sx={{ pl: 0 }}
-              className="[&_.MuiInputBase-root]:h-10 [&_.MuiInputBase-input]:pl-9 [&_.MuiInputBase-input]:text-[14px] [&_.MuiInputBase-input]:font-semibold"
-              onChange={(event) => setSearchValue(event.target.value)}
-              placeholder="Tìm học sinh"
-              value={searchValue}
-            />
-          </div>
-          <AppSelect
-            aria-label="Lọc xếp loại"
-            className="h-10 rounded-lg border border-[#d7e0ec] bg-white px-3 text-[14px] font-bold text-slate-900 outline-none focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
+            onChange={setScopeId}
+          />
+          <ErgSearchField
+            fullWidth={false}
+            sx={{ flex: 1, maxWidth: { lg: 340 }, minWidth: 220 }}
+            onChange={(event) => setSearchValue(event.target.value)}
+            placeholder="Tìm học sinh"
+            value={searchValue}
+          />
+          <FilterSelect
+            ariaLabel="Lọc xếp loại"
+            options={classificationFilterOptions.map((option) => ({ label: option === "all" ? "Tất cả xếp loại" : `Xếp loại ${option}`, value: option }))}
             value={classificationFilter}
-            onChange={(event) => setClassificationFilter(event.target.value as Classification | "all")}
-          >
-            {classificationFilterOptions.map((option) => (
-              <option key={option} value={option}>
-                {option === "all" ? "Tất cả xếp loại" : `Xếp loại ${option}`}
-              </option>
-            ))}
-          </AppSelect>
-          <AppSelect
-            aria-label="Lọc tiến độ"
-            className="h-10 rounded-lg border border-[#d7e0ec] bg-white px-3 text-[14px] font-bold text-slate-900 outline-none focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
+            onChange={(value) => setClassificationFilter(value as Classification | "all")}
+          />
+          <FilterSelect
+            ariaLabel="Lọc tiến độ"
+            options={progressOptions}
             value={progressFilter}
-            onChange={(event) => setProgressFilter(event.target.value as ProgressFilter)}
-          >
-            {progressOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </AppSelect>
-        </div>
-      </div>
+            onChange={(value) => setProgressFilter(value as ProgressFilter)}
+          />
+        </Stack>
+      </Paper>
 
-      <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-[#cbd7e6] bg-white shadow-[var(--shadow-xs)]">
-        <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-[#cbd7e6] px-2.5 py-1.5">
-          <h2 className="text-sm font-semibold text-slate-950">Bảng theo dõi học sinh</h2>
-          <div className="flex items-center gap-1.5 text-[13px] font-bold">
-            <span className="rounded-lg border border-emerald-200 bg-emerald-50 px-2 py-1 text-emerald-700">Hoàn thành</span>
-            <span className="rounded-lg border border-amber-200 bg-amber-50 px-2 py-1 text-amber-700">Cần hỗ trợ</span>
-            <span className="rounded-lg border border-[#dbe4f0] bg-[#f8fbff] px-2 py-1 text-slate-700">Theo lớp / khối / nhóm</span>
-          </div>
-        </div>
+      <Paper
+        variant="outlined"
+        sx={{ borderRadius: 1, display: "flex", flexDirection: "column", overflow: "hidden", flex: { lg: 1 }, minHeight: { lg: 0 } }}
+      >
+        <Stack
+          direction="row"
+          useFlexGap
+          sx={{ alignItems: "center", borderBottom: 1, borderColor: "divider", flexShrink: 0, flexWrap: "wrap", gap: 1, justifyContent: "space-between", px: 1.25, py: 0.75 }}
+        >
+          <Typography component="h2" variant="subtitle2">Bảng theo dõi học sinh</Typography>
+          <Stack direction="row" useFlexGap sx={{ alignItems: "center", flexWrap: "wrap", gap: 0.75 }}>
+            <LegendTag sx={toneSx("success")}>Hoàn thành</LegendTag>
+            <LegendTag sx={toneSx("warning")}>Cần hỗ trợ</LegendTag>
+            <LegendTag sx={{ bgcolor: "background.default", borderColor: "divider", color: "text.secondary" }}>Theo lớp / khối / nhóm</LegendTag>
+          </Stack>
+        </Stack>
 
-        <div className="min-h-0 flex-1 overflow-auto">
-          <table className="erg-data-table w-full min-w-[1260px] table-fixed border-separate border-spacing-0 text-[14px]">
-            <thead>
-              <tr className="bg-[#eef4fb] text-[13px] font-bold text-slate-700">
-                <TableHeaderCell className="sticky left-0 top-0 z-40 w-[44px]">STT</TableHeaderCell>
-                <TableHeaderCell className="sticky left-[44px] top-0 z-40 w-[260px] text-left">Học sinh</TableHeaderCell>
-                <TableHeaderCell className="sticky left-[304px] top-0 z-40 w-[96px]">Lớp</TableHeaderCell>
-                <TableHeaderCell className="sticky left-[400px] top-0 z-40 w-[112px]">
-                  <span className="mx-auto block h-7 rounded border border-[#cbd7e6] bg-white px-2 py-1.5 text-center text-[13px] font-bold text-slate-700 shadow-sm">
+        {rosterError ? (
+          <ErgErrorState description="Không tải được danh sách học sinh của lớp. Vui lòng thử lại sau." title="Chưa tải được học sinh" />
+        ) : !rosterLoading && scopeStudents.length === 0 ? (
+          <ErgEmptyState description="Lớp này chưa có học sinh đang học. Thêm học sinh vào lớp hoặc chọn lớp khác." title="Chưa có học sinh trong phạm vi này" />
+        ) : null}
+
+        <List disablePadding sx={{ display: { xs: "block", lg: "none" } }}>
+          {visibleStudents.map((student) => (
+            <ListItem key={student.id} disablePadding divider>
+              <ButtonBase
+                type="button"
+                sx={{ display: "block", minHeight: 56, px: 1.5, py: 1.25, textAlign: "left", width: "100%" }}
+                onClick={() => openStudentDetail(student)}
+              >
+                <Stack component="span" direction="row" spacing={1} sx={{ alignItems: "flex-start", justifyContent: "space-between" }}>
+                  <Box component="span" sx={{ minWidth: 0 }}>
+                    <Typography component="span" variant="subtitle2" noWrap sx={{ color: "primary.main", display: "block", fontWeight: "fontWeightBold" }}>
+                      {studentDrafts[student.id]?.name ?? student.name}
+                    </Typography>
+                    <Typography component="span" variant="caption" color="text.secondary" noWrap sx={{ display: "block", fontWeight: "fontWeightMedium" }}>
+                      {student.className} · {student.currentAssignment}
+                    </Typography>
+                  </Box>
+                  <LegendTag sx={[statusSx(student.status), { flexShrink: 0, py: 0.25 }]}>{statusLabel(student.status)}</LegendTag>
+                </Stack>
+                <Typography component="span" variant="caption" color="text.secondary" sx={{ display: "block", fontWeight: "fontWeightMedium", mt: 0.75 }}>
+                  {student.hasProgressData === false ? "Tiến độ —" : `Tiến độ ${student.progressRate}%`} · Điểm TB {student.averageScore} · {student.completedAssignments} bài xong
+                </Typography>
+              </ButtonBase>
+            </ListItem>
+          ))}
+          {visibleStudents.length === 0 ? (
+            <ListItem sx={{ justifyContent: "center", p: 3 }}>
+              <Typography variant="subtitle2" color="text.secondary">Không có học sinh phù hợp.</Typography>
+            </ListItem>
+          ) : null}
+        </List>
+        <Box sx={{ display: { xs: "none", lg: "block" }, flex: 1, minHeight: 0, overflow: "auto" }}>
+          <ErgTable sx={{ minWidth: 1260, tableLayout: "fixed", width: "100%", "& .MuiTableCell-root": { borderRight: 1, borderRightColor: "divider", height: 40, px: 1, textAlign: "center" } }}>
+            <TableHead>
+              <TableRow>
+                <TableCell sx={stickyHeadSx(0, 44)}>STT</TableCell>
+                <TableCell sx={[stickyHeadSx(44, 260), { textAlign: "left !important" }]}>Học sinh</TableCell>
+                <TableCell sx={stickyHeadSx(304, 96)}>Lớp</TableCell>
+                <TableCell sx={stickyHeadSx(400, 112)}>
+                  <Box
+                    component="span"
+                    sx={{ bgcolor: "background.paper", border: 1, borderColor: "divider", borderRadius: 0.5, boxShadow: 1, display: "block", mx: "auto", px: 1, py: 0.5 }}
+                  >
                     Xếp loại
-                  </span>
-                </TableHeaderCell>
-                <TableHeaderCell className="sticky top-0 z-30 w-[340px] text-left">Bài đang làm</TableHeaderCell>
-                <TableHeaderCell className="sticky top-0 z-30 w-[150px]">Tiến độ</TableHeaderCell>
-                <TableHeaderCell className="sticky top-0 z-30 w-[90px]">Điểm TB</TableHeaderCell>
-                <TableHeaderCell className="sticky top-0 z-30 w-[130px]">Trạng thái</TableHeaderCell>
-                <TableHeaderCell className="sticky top-0 z-30 w-[100px]">Đã xong</TableHeaderCell>
-              </tr>
-            </thead>
-            <tbody>
+                  </Box>
+                </TableCell>
+                <TableCell sx={{ textAlign: "left !important", width: 340 }}>Bài đang làm</TableCell>
+                <TableCell sx={{ width: 150 }}>Tiến độ</TableCell>
+                <TableCell sx={{ width: 90 }}>Điểm TB</TableCell>
+                <TableCell sx={{ width: 130 }}>Trạng thái</TableCell>
+                <TableCell sx={{ width: 100 }}>Đã xong</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
               {visibleStudents.map((student, index) => {
                 const classification = getStudentClassification(student, manualClassifications);
                 const status = student.status;
                 return (
-                  <tr key={student.id} className="group">
-                    <StickyCell className="left-0 z-20 w-[44px] text-center text-slate-500">{index + 1}</StickyCell>
-                    <StickyCell className="left-[44px] z-20 w-[260px]">
-                      <button
+                  <TableRow key={student.id} sx={{ "&:hover > td": { bgcolor: "background.default" } }}>
+                    <TableCell sx={[stickyBodySx(0, 44), { color: "text.secondary" }]}>{index + 1}</TableCell>
+                    <TableCell sx={[stickyBodySx(44, 260), { textAlign: "left !important" }]}>
+                      <Link
+                        component="button"
                         type="button"
-                        className="block max-w-full whitespace-normal text-left font-bold leading-5 text-[var(--erg-blue)] hover:underline"
+                        underline="hover"
+                        sx={{ display: "block", fontWeight: "fontWeightBold", maxWidth: "100%", textAlign: "left", typography: "body2", whiteSpace: "normal" }}
                         onClick={() => openStudentDetail(student)}
                       >
                         {studentDrafts[student.id]?.name ?? student.name}
-                      </button>
-                    </StickyCell>
-                    <StickyCell className="left-[304px] z-20 w-[96px] text-center font-medium text-slate-600">
+                      </Link>
+                    </TableCell>
+                    <TableCell sx={[stickyBodySx(304, 96), { color: "text.secondary", fontWeight: "fontWeightMedium" }]}>
                       {student.className}
-                    </StickyCell>
-                    <StickyCell className="left-[400px] z-20 w-[112px]">
-                      <AppSelect
-                        variant="native"
-                        data-classification-select="true"
-                        data-classification={classification}
+                    </TableCell>
+                    <TableCell sx={stickyBodySx(400, 112)}>
+                      <NativeSelect
+                        disableUnderline
                         value={classification}
                         onChange={(event) => setManualClassifications((current) => ({ ...current, [student.id]: event.target.value as Classification }))}
-                        className={cn("h-8 w-full rounded-full border text-center text-[13px] font-bold outline-none", classificationClass(classification))}
-                        style={{ textAlignLast: "center" }}
+                        inputProps={{ "data-classification-select": "true", "data-classification": classification } as object}
+                        sx={[
+                          classificationSx(classification),
+                          { border: 1, borderRadius: 999, fontWeight: "fontWeightBold", height: 32, typography: "caption", width: "100%", "& select": { pr: "20px !important", textAlign: "center", textAlignLast: "center" } },
+                        ]}
                       >
                         {classificationOptions.map((option) => (
                           <option key={option} value={option}>
                             {option}
                           </option>
                         ))}
-                      </AppSelect>
-                    </StickyCell>
-                    <TableCell className="w-[340px] text-left">
-                      <div className="whitespace-normal font-semibold leading-5 text-slate-800">{student.currentAssignment}</div>
-                      <div className="mt-1 whitespace-normal text-[13px] font-semibold leading-5 text-slate-600">{student.currentStage}</div>
+                      </NativeSelect>
                     </TableCell>
-                    <TableCell className="w-[150px]">
-                      <div className="flex items-center justify-center gap-2">
-                        <div className="h-1.5 w-20 overflow-hidden rounded-md bg-slate-100">
-                          <div className={cn("h-full rounded-full", progressColor(student.progressRate))} style={{ width: `${student.progressRate}%` }} />
-                        </div>
-                        <span className="w-8 text-right font-semibold text-slate-600">{student.progressRate}%</span>
-                      </div>
+                    <TableCell sx={{ textAlign: "left !important", width: 340 }}>
+                      <Typography variant="body2" sx={{ fontWeight: "fontWeightMedium" }}>{student.currentAssignment}</Typography>
+                      <Typography variant="caption" color="text.secondary" sx={{ display: "block", fontWeight: "fontWeightMedium", mt: 0.5 }}>{student.currentStage}</Typography>
                     </TableCell>
-                    <TableCell className={cn("w-[90px] font-semibold", scoreTone(student.averageScore))}>{student.averageScore}</TableCell>
-                    <TableCell className="w-[130px]">
-                      <span className={cn("inline-flex min-h-7 items-center rounded-lg border px-2.5 text-[13px] font-bold", statusClass(status))}>{statusLabel(status)}</span>
+                    <TableCell sx={{ width: 150 }}>
+                      {student.hasProgressData === false ? (
+                        <Typography component="span" variant="subtitle2" color="text.secondary">—</Typography>
+                      ) : (
+                        <Stack direction="row" spacing={1} sx={{ alignItems: "center", justifyContent: "center" }}>
+                          <LinearProgress
+                            variant="determinate"
+                            value={student.progressRate}
+                            color={progressColor(student.progressRate)}
+                            sx={{ borderRadius: 0.75, height: 6, width: 80 }}
+                          />
+                          <Typography component="span" variant="body2" color="text.secondary" sx={{ fontWeight: "fontWeightMedium", textAlign: "right", width: 32 }}>{student.progressRate}%</Typography>
+                        </Stack>
+                      )}
                     </TableCell>
-                    <TableCell className="w-[100px] font-medium text-slate-600">{student.completedAssignments} bài</TableCell>
-                  </tr>
+                    <TableCell sx={[{ fontWeight: "fontWeightMedium", width: 90 }, scoreSx(student.averageScore)]}>{student.averageScore}</TableCell>
+                    <TableCell sx={{ width: 130 }}>
+                      <LegendTag sx={[statusSx(status), { minHeight: 28, px: 1.25 }]}>{statusLabel(status)}</LegendTag>
+                    </TableCell>
+                    <TableCell sx={{ color: "text.secondary", fontWeight: "fontWeightMedium", width: 100 }}>{student.completedAssignments} bài</TableCell>
+                  </TableRow>
                 );
               })}
-            </tbody>
-          </table>
-        </div>
-      </div>
+            </TableBody>
+          </ErgTable>
+        </Box>
+      </Paper>
 
       {detailStudent ? (
         <StudentProfileDetailDrawer
@@ -330,20 +381,63 @@ export function ClassManagementPage({ classes, selectedClass, selectedSchoolName
           student={detailStudent}
         />
       ) : null}
-    </section>
+    </Box>
   );
 }
 
-function TableHeaderCell({ children, className }: { children: ReactNode; className?: string }) {
-  return <th className={cn("h-10 border-b border-r border-[#b8c8db] bg-[#eef4fb] px-2 text-center align-middle text-[13px] font-bold text-slate-700", className)}>{children}</th>;
+function FilterSelect({
+  ariaLabel,
+  onChange,
+  options,
+  sx,
+  value,
+}: {
+  ariaLabel: string;
+  onChange: (value: string) => void;
+  options: Array<{ label: string; value: string }>;
+  sx?: SxProps<Theme>;
+  value: string;
+}) {
+  return (
+    <ErgSelect
+      fullWidth={false}
+      size="small"
+      options={options}
+      slotProps={{ htmlInput: { "aria-label": ariaLabel } }}
+      sx={[{ minWidth: 150 }, ...(Array.isArray(sx) ? sx : [sx])]}
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+    />
+  );
 }
 
-function StickyCell({ children, className }: { children: ReactNode; className?: string }) {
-  return <td className={cn("sticky h-10 border-b border-r border-[#cbd7e6] bg-white px-2 align-middle group-hover:bg-[#f8fbff]", className)}>{children}</td>;
+function LegendTag({ children, sx }: { children: ReactNode; sx?: SxProps<Theme> }) {
+  return (
+    <Box
+      component="span"
+      sx={[
+        { alignItems: "center", border: 1, borderRadius: 1, display: "inline-flex", fontWeight: "fontWeightBold", px: 1, py: 0.5, typography: "caption" },
+        ...(Array.isArray(sx) ? sx : [sx]),
+      ]}
+    >
+      {children}
+    </Box>
+  );
 }
 
-function TableCell({ children, className }: { children: ReactNode; className?: string }) {
-  return <td className={cn("h-10 border-b border-r border-[#cbd7e6] px-2 text-center align-middle font-normal group-hover:bg-[#f8fbff]", className)}>{children}</td>;
+function stickyHeadSx(left: number, width: number) {
+  return { left, position: "sticky", top: 0, width, zIndex: 4 } as const;
+}
+
+function stickyBodySx(left: number, width: number) {
+  return { bgcolor: "background.paper", left, position: "sticky", width, zIndex: 2 } as const;
+}
+
+type Tone = "success" | "warning" | "error" | "info" | "primary";
+
+function toneSx(tone: Tone) {
+  if (tone === "primary") return { bgcolor: "action.selected", borderColor: "primary.main", color: "primary.main" };
+  return { bgcolor: `${tone}.light`, borderColor: `${tone}.main`, color: `${tone}.main` } as const;
 }
 
 function getStudentClassification(student: ClassroomStudent, manual: Record<string, Classification>): Classification {
@@ -355,26 +449,25 @@ function getStudentClassification(student: ClassroomStudent, manual: Record<stri
   return "E";
 }
 
-function classificationClass(classification: Classification) {
-  if (classification === "A") return "border-emerald-200 bg-emerald-50 text-emerald-700";
-  if (classification === "B") return "border-blue-200 bg-blue-50 text-[var(--erg-blue)]";
-  if (classification === "C") return "border-yellow-200 bg-yellow-50 text-yellow-800";
-  if (classification === "D") return "border-orange-200 bg-orange-50 text-orange-700";
-  if (classification === "E") return "border-rose-200 bg-rose-50 text-rose-700";
-  return "border-rose-200 bg-rose-50 text-rose-700";
+function classificationSx(classification: Classification) {
+  if (classification === "A") return toneSx("success");
+  if (classification === "B") return toneSx("primary");
+  if (classification === "C") return toneSx("warning");
+  if (classification === "D") return { bgcolor: "warning.light", borderColor: "warning.dark", color: "warning.dark" };
+  return toneSx("error");
 }
 
-function progressColor(progress: number) {
-  if (progress >= 80) return "bg-emerald-500";
-  if (progress >= 50) return "bg-[var(--erg-blue)]";
-  if (progress > 0) return "bg-amber-500";
-  return "bg-slate-300";
+function progressColor(progress: number): "success" | "primary" | "warning" | "inherit" {
+  if (progress >= 80) return "success";
+  if (progress >= 50) return "primary";
+  if (progress > 0) return "warning";
+  return "inherit";
 }
 
-function scoreTone(score: number) {
-  if (score >= 85) return "bg-emerald-50 text-emerald-700";
-  if (score < 60) return "bg-rose-50 text-rose-700";
-  return "text-slate-800";
+function scoreSx(score: number) {
+  if (score >= 85) return { bgcolor: "success.light", color: "success.main" };
+  if (score < 60) return { bgcolor: "error.light", color: "error.main" };
+  return { color: "text.primary" };
 }
 
 function statusLabel(status: ClassroomStudent["status"]) {
@@ -383,10 +476,10 @@ function statusLabel(status: ClassroomStudent["status"]) {
   return "Ổn định";
 }
 
-function statusClass(status: ClassroomStudent["status"]) {
-  if (status === "ahead") return "border-emerald-200 bg-emerald-50 text-emerald-700";
-  if (status === "support") return "border-amber-200 bg-amber-50 text-amber-700";
-  return "border-[#b8d6fa] bg-[var(--erg-blue-light)] text-[var(--erg-blue)]";
+function statusSx(status: ClassroomStudent["status"]) {
+  if (status === "ahead") return toneSx("success");
+  if (status === "support") return toneSx("warning");
+  return toneSx("primary");
 }
 
 function createStudentProfileDraft(student: ClassroomStudent) {

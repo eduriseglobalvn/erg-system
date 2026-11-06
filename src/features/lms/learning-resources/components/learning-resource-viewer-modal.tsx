@@ -1,17 +1,21 @@
 import { lazy, Suspense } from "react";
-import {
-  ArrowLeft,
-  ChevronRight,
-  Download,
-  FileArchive,
-  FileAudio,
-  FileQuestion,
-  Lock,
-  Play,
-  Presentation,
-  X,
-} from "lucide-react";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import AudioFileOutlinedIcon from "@mui/icons-material/AudioFileOutlined";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import CloseIcon from "@mui/icons-material/Close";
+import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
+import FolderZipOutlinedIcon from "@mui/icons-material/FolderZipOutlined";
+import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import SlideshowOutlinedIcon from "@mui/icons-material/SlideshowOutlined";
+import Box from "@mui/material/Box";
+import IconButton from "@mui/material/IconButton";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import { alpha, type SxProps, type Theme } from "@mui/material/styles";
 
+import { ErgButton } from "@/components/erg-mui";
 import type {
   LearningResourceFileType,
   LearningResourceResource,
@@ -19,40 +23,37 @@ import type {
 import { LearningStandardPlayerPanel } from "@/features/elearning/content-player/learning-standard-player-panel";
 import { displayText } from "@/features/lms/learning-resources/components/learning-resource-library-utils";
 
-function getFormatBadgeClass(fileType: LearningResourceFileType) {
-  switch (fileType) {
-    case "PDF":
-      return "bg-slate-500 text-white";
-    case "PPTX":
-      return "bg-orange-500 text-white";
-    case "VIDEO":
-      return "bg-rose-500 text-white";
-    case "AUDIO":
-      return "bg-emerald-500 text-white";
-    case "HTML5":
-      return "bg-cyan-600 text-white";
-    case "QUIZ":
-      return "bg-[var(--erg-blue)] text-white";
-    case "ZIP":
-      return "bg-slate-700 text-white";
-    case "DOCX":
-      return "bg-[var(--erg-blue)] text-white";
-    case "XLSX":
-      return "bg-emerald-600 text-white";
-    case "IMAGE":
-      return "bg-cyan-600 text-white";
-    case "LINK":
-      return "bg-[var(--erg-blue)] text-white";
-    default:
-      return "bg-slate-500 text-white";
-  }
+type PaletteTone = "primary" | "success" | "warning" | "error" | "info";
+
+const formatBadgeTones: Partial<Record<LearningResourceFileType, PaletteTone>> = {
+  PPTX: "warning",
+  VIDEO: "error",
+  AUDIO: "success",
+  HTML5: "info",
+  QUIZ: "primary",
+  DOCX: "primary",
+  XLSX: "success",
+  IMAGE: "info",
+  LINK: "primary",
+};
+
+function getFormatBadgeSx(fileType: LearningResourceFileType): SxProps<Theme> {
+  const tone = formatBadgeTones[fileType];
+  if (tone) return { bgcolor: `${tone}.main`, color: `${tone}.contrastText` };
+  return { bgcolor: fileType === "ZIP" ? "grey.700" : "grey.500", color: "common.white" };
 }
 
 function FormatBadge({ resource }: { resource: LearningResourceResource }) {
   return (
-    <span className={`rounded-lg px-2.5 py-1 text-[13px] font-bold leading-none shadow-[var(--shadow-xs)] ${getFormatBadgeClass(resource.fileType)}`}>
+    <Box
+      component="span"
+      sx={[
+        { borderRadius: 1, boxShadow: 1, fontWeight: "fontWeightBold", lineHeight: 1, px: 1.25, py: 0.5, typography: "subtitle2" },
+        getFormatBadgeSx(resource.fileType),
+      ] as SxProps<Theme>}
+    >
       {displayText(resource.formatBadge)}
-    </span>
+    </Box>
   );
 }
 
@@ -62,121 +63,162 @@ const PdfFullScreenPreview = lazy(() =>
   })),
 );
 
+const panelSx = { bgcolor: "background.paper", border: 1, borderColor: "divider", borderRadius: 1, boxShadow: 1 } as const;
+
+function SlideDeckHeader({ onClose, title }: { onClose: () => void; title: string }) {
+  return (
+    <Stack
+      direction="row"
+      spacing={1.5}
+      sx={{ alignItems: "center", bgcolor: "background.default", borderBottom: 1, borderColor: "divider", boxShadow: 1, color: "text.primary", height: 56, px: 2 }}
+    >
+      <IconButton onClick={onClose} aria-label="Quay l?i kho h?c li?u" size="small" sx={{ color: "text.secondary", ml: -0.5 }}>
+        <ArrowBackIcon />
+      </IconButton>
+      <Typography component="h1" variant="h6" noWrap sx={{ fontWeight: "fontWeightBold" }}>
+        {title}
+      </Typography>
+    </Stack>
+  );
+}
+
 function SlideDeckPreview({ resource, onClose }: { resource: LearningResourceResource; onClose: () => void }) {
   const canEmbed = Boolean(resource.viewer.embedUrl && resource.viewer.embedUrl !== "about:blank");
   const presentationTitle = displayText(resource.viewer.presentationTitle ?? resource.viewer.title);
 
   if (canEmbed) {
     return (
-      <div className="fixed inset-0 z-[240] bg-white">
-        <div className="flex h-14 items-center gap-3 border-b border-[#cbd7e6] bg-[#f8fbff] px-4 text-slate-900 shadow-sm">
-          <button
-            type="button"
-            onClick={onClose}
-            className="-ml-1 inline-flex h-8 w-8 items-center justify-center rounded-md text-slate-600 transition hover:bg-white hover:text-slate-900"
-            aria-label="Quay l?i kho h?c li?u"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </button>
-          <h1 className="truncate text-[15px] font-bold">{presentationTitle}</h1>
-        </div>
-        <div className="h-[calc(100vh-56px)] bg-[#f8fbff] px-3 py-4">
-          <iframe
+      <Box sx={{ bgcolor: "background.paper", inset: 0, position: "fixed", zIndex: 240 }}>
+        <SlideDeckHeader onClose={onClose} title={presentationTitle} />
+        <Box sx={{ bgcolor: "background.default", height: "calc(100vh - 56px)", px: 1.5, py: 2 }}>
+          <Box
+            component="iframe"
             title={presentationTitle}
             src={resource.viewer.embedUrl ?? ""}
-            className="h-full w-full border-0 bg-black"
+            sx={{ bgcolor: "common.black", border: 0, height: "100%", width: "100%" }}
             loading="lazy"
             allow="autoplay; encrypted-media"
             allowFullScreen
           />
-        </div>
-      </div>
+        </Box>
+      </Box>
     );
   }
 
   return (
-    <div className="fixed inset-0 z-[240] bg-white">
-      <div className="flex h-14 items-center gap-3 border-b border-[#cbd7e6] bg-[#f8fbff] px-4 text-slate-900 shadow-sm">
-        <button
-          type="button"
-          onClick={onClose}
-          className="-ml-1 inline-flex h-8 w-8 items-center justify-center rounded-md text-slate-600 transition hover:bg-white hover:text-slate-900"
-          aria-label="Quay l?i kho h?c li?u"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </button>
-        <h1 className="truncate text-[15px] font-bold">{presentationTitle}</h1>
-      </div>
-      <div className="flex h-[calc(100vh-56px)] items-center justify-center bg-[#f8fbff] p-8">
-        <div className="max-w-xl rounded-lg border border-dashed border-[#cbd7e6] bg-white p-6 text-center shadow-[var(--shadow-xs)]">
-          <Presentation className="mx-auto h-10 w-10 text-[var(--erg-blue)]" />
-          <h4 className="mt-4 text-lg font-semibold text-slate-950">{displayText(resource.viewer.title)}</h4>
-          <p className="mt-3 text-sm leading-6 text-slate-500">
+    <Box sx={{ bgcolor: "background.paper", inset: 0, position: "fixed", zIndex: 240 }}>
+      <SlideDeckHeader onClose={onClose} title={presentationTitle} />
+      <Box sx={{ alignItems: "center", bgcolor: "background.default", display: "flex", height: "calc(100vh - 56px)", justifyContent: "center", p: 4 }}>
+        <Box sx={{ ...panelSx, borderStyle: "dashed", maxWidth: 576, p: 3, textAlign: "center" }}>
+          <SlideshowOutlinedIcon fontSize="large" sx={{ color: "primary.main" }} />
+          <Typography component="h4" variant="h4" sx={{ mt: 2 }}>
+            {displayText(resource.viewer.title)}
+          </Typography>
+          <Typography variant="body2" sx={{ color: "text.secondary", lineHeight: 1.7, mt: 1.5 }}>
             Chưa có `embedUrl` cho bài giảng này. BE cần trả viewer URL hoặc token URL để FE mở trình chiếu.
-          </p>
-        </div>
-      </div>
-    </div>
+          </Typography>
+        </Box>
+      </Box>
+    </Box>
   );
 }
 
-const thumbnailThemes = {
-  blue: "border-[#b8d6fa] bg-[var(--erg-blue-light)] text-[var(--erg-blue)]",
-  green: "border-emerald-200 bg-emerald-50 text-emerald-900",
-  orange: "border-orange-200 bg-orange-50 text-orange-900",
-  purple: "border-[#b8d6fa] bg-[var(--erg-blue-light)] text-[var(--erg-blue)]",
-  teal: "border-cyan-200 bg-cyan-50 text-cyan-900",
-  rose: "border-rose-200 bg-rose-50 text-rose-900",
-  yellow: "border-amber-200 bg-amber-50 text-amber-900",
-  slate: "border-slate-200 bg-slate-50 text-slate-900",
-} satisfies Record<LearningResourceResource["thumbnailTheme"], string>;
+const thumbnailTones = {
+  blue: "primary",
+  green: "success",
+  orange: "warning",
+  purple: "primary",
+  teal: "info",
+  rose: "error",
+  yellow: "warning",
+  slate: null,
+} satisfies Record<LearningResourceResource["thumbnailTheme"], PaletteTone | null>;
+
+function thumbnailThemeSx(themeKey: LearningResourceResource["thumbnailTheme"]): SxProps<Theme> {
+  const tone = thumbnailTones[themeKey];
+  if (!tone) return { bgcolor: "background.default", borderColor: "divider", color: "text.primary" };
+  return (theme) => ({
+    bgcolor: alpha(theme.palette[tone].main, 0.08),
+    borderColor: alpha(theme.palette[tone].main, 0.3),
+    color: theme.palette[tone].dark,
+  });
+}
 
 function MediaPreview({ resource }: { resource: LearningResourceResource }) {
   const isAudio = resource.launchMode === "audio_player";
 
   return (
-    <div className="rounded-lg border border-[#cbd7e6] bg-white p-5 shadow-[var(--shadow-xs)]">
-      <div className={`flex min-h-[320px] items-center justify-center rounded-lg border ${thumbnailThemes[resource.thumbnailTheme]}`}>
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/90 text-slate-900 shadow-sm">
-          {isAudio ? <FileAudio className="h-8 w-8" /> : <Play className="h-9 w-9 translate-x-0.5 fill-current" />}
-        </div>
-      </div>
-      <div className="mt-5 flex items-center justify-between gap-4">
+    <Box sx={{ ...panelSx, p: 2.5 }}>
+      <Box
+        sx={[
+          { alignItems: "center", border: 1, borderRadius: 1, display: "flex", justifyContent: "center", minHeight: 320 },
+          thumbnailThemeSx(resource.thumbnailTheme),
+        ] as SxProps<Theme>}
+      >
+        <Box
+          sx={{
+            alignItems: "center",
+            bgcolor: (theme) => alpha(theme.palette.background.paper, 0.9),
+            borderRadius: "50%",
+            boxShadow: 1,
+            color: "text.primary",
+            display: "flex",
+            height: 56,
+            justifyContent: "center",
+            width: 56,
+          }}
+        >
+          {isAudio ? <AudioFileOutlinedIcon fontSize="large" /> : <PlayArrowIcon fontSize="large" sx={{ transform: "translateX(2px)" }} />}
+        </Box>
+      </Box>
+      <Stack direction="row" spacing={2} sx={{ alignItems: "center", justifyContent: "space-between", mt: 2.5 }}>
         <div>
-          <h4 className="text-base font-semibold text-slate-950">{displayText(resource.viewer.title)}</h4>
-          <p className="mt-1 text-sm text-slate-500">{displayText(resource.viewer.description)}</p>
+          <Typography component="h4" variant="h5">
+            {displayText(resource.viewer.title)}
+          </Typography>
+          <Typography variant="body2" sx={{ color: "text.secondary", mt: 0.5 }}>
+            {displayText(resource.viewer.description)}
+          </Typography>
         </div>
         {resource.viewer.duration ? (
-          <span className="rounded-lg border border-[#dbe4f0] bg-slate-50 px-3 py-1.5 text-[13px] font-bold text-slate-600">{displayText(resource.viewer.duration)}</span>
+          <Typography
+            component="span"
+            variant="subtitle2"
+            sx={{ bgcolor: "background.default", border: 1, borderColor: "divider", borderRadius: 1, color: "text.secondary", fontWeight: "fontWeightBold", px: 1.5, py: 0.75 }}
+          >
+            {displayText(resource.viewer.duration)}
+          </Typography>
         ) : null}
-      </div>
-    </div>
+      </Stack>
+    </Box>
   );
 }
 
 function FallbackPreview({ resource }: { resource: LearningResourceResource }) {
   const Icon =
     resource.launchMode === "quiz_runtime"
-      ? FileQuestion
+      ? HelpOutlineOutlinedIcon
       : resource.launchMode === "download_only"
-        ? FileArchive
-        : Lock;
+        ? FolderZipOutlinedIcon
+        : LockOutlinedIcon;
 
   return (
-    <div className="rounded-lg border border-[#cbd7e6] bg-white p-6 text-center shadow-[var(--shadow-xs)]">
-      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-md bg-[#f8fbff] text-slate-500">
-        <Icon className="h-7 w-7" />
-      </div>
-      <h4 className="mt-4 text-lg font-semibold text-slate-950">{displayText(resource.viewer.title)}</h4>
-      <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-slate-500">{displayText(resource.viewer.description)}</p>
-      <button
-        className="mt-5 inline-flex h-10 items-center gap-2 rounded-lg bg-[var(--erg-blue)] px-4 text-[14px] font-bold text-white hover:bg-[var(--erg-blue-hover)]"
-        type="button"
+    <Box sx={{ ...panelSx, p: 3, textAlign: "center" }}>
+      <Box
+        sx={{ alignItems: "center", bgcolor: "background.default", borderRadius: 0.75, color: "text.secondary", display: "flex", height: 48, justifyContent: "center", mx: "auto", width: 48 }}
       >
+        <Icon />
+      </Box>
+      <Typography component="h4" variant="h4" sx={{ mt: 2 }}>
+        {displayText(resource.viewer.title)}
+      </Typography>
+      <Typography variant="body2" sx={{ color: "text.secondary", lineHeight: 1.7, maxWidth: 576, mt: 1.5, mx: "auto" }}>
+        {displayText(resource.viewer.description)}
+      </Typography>
+      <ErgButton variant="contained" endIcon={<ChevronRightIcon fontSize="small" />} sx={{ mt: 2.5 }}>
         {resource.launchMode === "download_only" ? "Tải gói tài liệu" : "Mở khi tích hợp BE"}
-        <ChevronRight className="h-4 w-4" />
-      </button>
-    </div>
+      </ErgButton>
+    </Box>
   );
 }
 
@@ -204,41 +246,68 @@ export function ResourceViewerModal({ resource, onClose }: { resource: LearningR
   }
 
   return (
-    <div className="fixed inset-0 z-[220] overflow-y-auto bg-slate-950/45 p-0 md:p-4">
-      <div className="min-h-[100dvh] overflow-hidden border-[#cbd7e6] bg-[#f8fbff] shadow-md shadow-slate-900/10 md:mx-auto md:min-h-0 md:max-w-6xl md:rounded-lg md:border">
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#dbe4f0] bg-white px-3 py-3 md:px-4">
-          <button
-            type="button"
+    <Box sx={(theme) => ({ bgcolor: alpha(theme.palette.common.black, 0.45), inset: 0, overflowY: "auto", p: { xs: 0, md: 2 }, position: "fixed", zIndex: 220 })}>
+      <Box
+        sx={{
+          bgcolor: "background.default",
+          border: { xs: 0, md: 1 },
+          borderColor: "divider",
+          borderRadius: { md: 1 },
+          boxShadow: 3,
+          maxWidth: { md: 1152 },
+          minHeight: { xs: "100dvh", md: 0 },
+          mx: { md: "auto" },
+          overflow: "hidden",
+        }}
+      >
+        <Stack
+          direction="row"
+          sx={{
+            alignItems: "center",
+            bgcolor: "background.paper",
+            borderBottom: 1,
+            borderColor: "divider",
+            justifyContent: "space-between",
+            position: "sticky",
+            px: { xs: 1.5, md: 2 },
+            py: 1.5,
+            top: 0,
+            zIndex: 10,
+          }}
+        >
+          <ErgButton
+            variant="text"
+            color="inherit"
             onClick={onClose}
-            className="inline-flex h-11 min-w-0 items-center gap-2 rounded-lg px-2.5 text-[14px] font-bold text-slate-700 hover:bg-[#f8fbff] hover:text-[var(--erg-blue)] md:h-9"
+            startIcon={<ArrowBackIcon fontSize="small" />}
+            sx={{ color: "text.primary", fontWeight: "fontWeightBold", minHeight: { xs: 44, md: 36 }, minWidth: 0, px: 1.25, "&:hover": { color: "primary.main" } }}
           >
-            <ArrowLeft className="h-4 w-4" />
             Quay lại kho học liệu
-          </button>
-          <div className="flex items-center gap-2">
+          </ErgButton>
+          <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
             <FormatBadge resource={resource} />
             {resource.isDownloadable ? (
-              <button
-                type="button"
-                className="hidden h-9 items-center gap-2 rounded-lg border border-[#cbd7e6] bg-white px-3 text-[14px] font-bold text-slate-700 hover:border-[var(--erg-blue)] hover:bg-[#eef6ff] hover:text-[var(--erg-blue)] sm:inline-flex"
+              <ErgButton
+                variant="outlined"
+                startIcon={<FileDownloadOutlinedIcon fontSize="small" />}
+                sx={{ display: { xs: "none", sm: "inline-flex" }, fontWeight: "fontWeightBold", height: 36 }}
               >
-                <Download className="h-4 w-4" />
                 Tải xuống
-              </button>
+              </ErgButton>
             ) : null}
-            <button type="button" onClick={onClose} className="rounded-lg p-2 text-slate-500 hover:bg-[#f8fbff] hover:text-slate-800">
-              <X className="h-5 w-5" />
-            </button>
-          </div>
-        </div>
-        <div className="p-5">
+            <IconButton onClick={onClose} sx={{ color: "text.secondary" }}>
+              <CloseIcon />
+            </IconButton>
+          </Stack>
+        </Stack>
+        <Box sx={{ p: 2.5 }}>
           {resource.standardPackageId ? <LearningStandardPlayerPanel packageId={resource.standardPackageId} title={displayText(resource.viewer.title)} /> : null}
           {!resource.standardPackageId && (resource.launchMode === "video_player" || resource.launchMode === "audio_player") ? <MediaPreview resource={resource} /> : null}
           {!resource.standardPackageId && ["quiz_runtime", "download_only", "external", "html5_embed"].includes(resource.launchMode) ? (
             <FallbackPreview resource={resource} />
           ) : null}
-        </div>
-      </div>
-    </div>
+        </Box>
+      </Box>
+    </Box>
   );
 }

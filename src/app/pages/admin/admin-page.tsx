@@ -1,8 +1,8 @@
-import { LcmsErgPortalShell, LcmsPortalShell } from "@/features/lcms";
+import { AdminErgPortalShell, AdminPortalShell } from "@/features/lcms";
 
-/** Canonical Admin workspace entry. The feature implementation remains legacy-named during migration. */
+/** Canonical Admin workspace entry. */
 export function AdminPage() {
-  const Shell = LcmsErgPortalShell ?? LcmsPortalShell;
+  const Shell = AdminErgPortalShell ?? AdminPortalShell;
   return <Shell />;
 }
 

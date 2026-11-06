@@ -1,11 +1,5 @@
 import { API_ENDPOINTS } from "@/lib/api/api-endpoints";
-import {
-  classroomSchools,
-  classroomSnapshots,
-  defaultClassId,
-  defaultSchoolId,
-} from "@/features/lms/classroom/api/mock-classroom-data";
-import type { ClassroomClusterId, ClassroomSchool, ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
+import type { ClassroomClusterId, ClassroomSchool, ClassroomSnapshot } from "@/domain/school/classroom-types";
 import { apiRequest, hasApiBase } from "@/lib/api-client";
 import { runtimeFixturesEnabled } from "@/lib/runtime-fixtures";
 import { readStoredAuthSession, resolveCurrentPortal } from "@/platform/auth/api/auth-token-storage";
@@ -168,8 +162,8 @@ function tokenFingerprint(token?: string) {
 }
 
 export async function listManageableUnits() {
-  if (runtimeFixturesEnabled()) {
-    return mockBootstrap().systemUnits;
+  if (import.meta.env.DEV && runtimeFixturesEnabled()) {
+    return (await mockBootstrap()).systemUnits;
   }
 
   const session = await loadCurrentSessionBootstrap();
@@ -180,8 +174,8 @@ export async function listEducationUnits(
   params: Record<string, string | number | undefined> = {},
   signal?: AbortSignal,
 ): Promise<ListResponse<LmsEducationUnitDTO>> {
-  if (runtimeFixturesEnabled()) {
-    const items = filterEducationUnits(mockBootstrap().manageableUnits, params);
+  if (import.meta.env.DEV && runtimeFixturesEnabled()) {
+    const items = filterEducationUnits((await mockBootstrap()).manageableUnits, params);
     return { items, source: "mock", total: items.length } satisfies ListResponse<LmsEducationUnitDTO>;
   }
 
@@ -205,8 +199,10 @@ function filterEducationUnits(units: LmsEducationUnitDTO[], params: Record<strin
     .slice(0, Number.isFinite(limit) && limit > 0 ? limit : undefined);
 }
 
+const mockBootstrap = async (): Promise<LmsDashboardBootstrap> => (await import("@/test/fixtures/mock-lms-dashboard-bootstrap")).mockBootstrap();
+
 export async function loadLmsDashboardBootstrap(signal?: AbortSignal): Promise<LmsDashboardBootstrap> {
-  if (runtimeFixturesEnabled()) return mockBootstrap();
+  if (import.meta.env.DEV && runtimeFixturesEnabled()) return mockBootstrap();
 
   const session = await loadCurrentSessionBootstrap(signal);
   if (!session) throw new Error("Session bootstrap is empty.");
@@ -270,30 +266,6 @@ export async function updateEducationUnit(id: string, input: UpdateEducationUnit
     method: "PATCH",
     body: JSON.stringify(input),
   });
-}
-
-function mockBootstrap(): LmsDashboardBootstrap {
-  return {
-    classes: classroomSnapshots,
-    managementScope: { level: "class", centerId: defaultSchoolId, classId: defaultClassId },
-    manageableUnits: [
-      { id: "erg-system", type: "system", name: "Hệ thống ERG", code: "ERG-SYSTEM", status: "active" },
-      { id: "learning-resources", type: "center", name: "Studio học liệu", code: "LEARNING-RESOURCES", status: "active" },
-      ...classroomSchools.map((school) => ({ id: school.id, type: "school", name: school.name, status: "active" })),
-    ],
-    permissions: {
-      canAccessGlobalErg: true,
-      assignedCenterIds: classroomSchools.map((school) => school.id),
-      roles: ["teacher", "lms_teacher_standard"],
-      grantedPermissions: ["lms.*", "account.self.*"],
-      deniedPermissions: [],
-    },
-    schools: classroomSchools,
-    systemUnits: [
-      { id: "erg-system", type: "system", name: "Hệ thống ERG", code: "ERG-SYSTEM", status: "active" },
-      { id: "learning-resources", type: "system", name: "Studio học liệu", code: "LEARNING-RESOURCES", status: "active" },
-    ],
-  };
 }
 
 function normalizeManageableUnits(session: SessionCurrentResponseDTO): LmsEducationUnitDTO[] {
@@ -389,7 +361,7 @@ function classesToSnapshots(classes: LmsClassDTO[], units: LmsEducationUnitDTO[]
     const grade = classroom.grade?.replace(/^grade-?/i, "") || classroom.name.match(/\d+/)?.[0] || "6";
     return {
       id: classroom.id,
-      schoolId: classroom.centerId || classroom.unitId || unit?.id || defaultSchoolId,
+      schoolId: classroom.centerId || classroom.unitId || unit?.id || "",
       schoolName: classroom.centerName || unit?.name || "ERG Learning",
       clusterId: clusterByIndex(index),
       className: classroom.name,

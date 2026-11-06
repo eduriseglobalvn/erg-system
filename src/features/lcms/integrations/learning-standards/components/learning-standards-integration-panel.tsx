@@ -105,7 +105,7 @@ function XapiStatementCard({ scope, canManage, onComplete }: { scope: LearningSt
 function BoxTitle({ title, description }: { title: string; description: string }) {
   return (
     <Stack sx={{ gap: 0.5 }}>
-      <Typography sx={{ fontWeight: 850 }} variant="h6">{title}</Typography>
+      <Typography sx={{ fontWeight: 600 }} variant="h6">{title}</Typography>
       <Typography color="text.secondary" variant="body2">{description}</Typography>
     </Stack>
   );

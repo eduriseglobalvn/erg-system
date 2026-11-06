@@ -136,7 +136,7 @@ export function ContentLifecycleControls({
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button disabled={mutation.isPending} onClick={() => setDialogState(null)}>Hủy</Button>
+          <Button variant="contained" disabled={mutation.isPending} onClick={() => setDialogState(null)}>Hủy</Button>
           <Button disabled={mutation.isPending || (requiresReason && !reason.trim())} onClick={() => void confirmTransition()} variant="contained">
             {mutation.isPending ? "Đang lưu…" : "Xác nhận"}
           </Button>

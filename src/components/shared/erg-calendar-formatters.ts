@@ -74,9 +74,18 @@ export function getEmptyScopeOptionLabel(label: string) {
   return "Chưa có danh sách";
 }
 
+/** First hour the time grid scrolls to (FullCalendar-style scrollTime). */
+export const CALENDAR_SCROLL_TIME = "07:00:00";
+export const CALENDAR_HOUR_ROW_HEIGHT = 52;
+
+export function scrollTopForTime(scrollTime: string = CALENDAR_SCROLL_TIME) {
+  const [hours = "0", minutes = "0"] = scrollTime.split(":");
+  return (Number(hours) + Number(minutes) / 60) * CALENDAR_HOUR_ROW_HEIGHT;
+}
+
 export function buildHourRows() {
   return Array.from({ length: 24 }, (_, hour) => ({
-    label: hour === 0 ? "" : dayjs().hour(hour).minute(0).format("h A"),
+    label: hour === 0 ? "" : dayjs().hour(hour).minute(0).format("HH:mm"),
     value: hour,
   }));
 }

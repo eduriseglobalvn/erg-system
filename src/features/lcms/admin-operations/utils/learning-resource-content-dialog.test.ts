@@ -11,7 +11,7 @@ import {
   shouldShowContentOption,
   type ExerciseLibraryItem,
 } from "./learning-resource-content-dialog";
-import type { QuizBankItem } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
+import type { QuizBankItem } from "@/features/question-bank/types/question-bank-types";
 
 const mockExercises: ExerciseLibraryItem[] = [
   {
@@ -39,7 +39,7 @@ const mockExercises: ExerciseLibraryItem[] = [
 ];
 
 test("shows lecture and exercise options only for child content under topic or section", () => {
-  expect(getAvailableContentOptions("root", "category")).toEqual(["category"]);
+  expect(getAvailableContentOptions("root", "category" as never)).toEqual(["category"]);
   expect(getAvailableContentOptions("child", "group")).toEqual(["section"]);
   expect(getAvailableContentOptions("child", "lesson")).toEqual(["lecture", "exercise", "resource"]);
   expect(shouldShowContentOption("child", "lecture", "lesson")).toBe(true);

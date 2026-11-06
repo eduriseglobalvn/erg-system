@@ -21,16 +21,16 @@ import {
   updateSchool,
 } from "@/features/lcms/school-management/api/school-management-api";
 import type { SchoolClass, SchoolDraft, SchoolStudent, SchoolSubject } from "@/features/lcms/school-management/types/school-management-types";
-import type { SchoolClassInput, SchoolStudentInput, SchoolSubjectInput } from "@/features/lcms/school-management/api/school-management-api";
+import type { OperationalClassRecord, SchoolClassInput, SchoolStudentInput, SchoolSubjectInput } from "@/features/lcms/school-management/api/school-management-api";
 import { getDefaultTenantId } from "@/lib/graphql-client";
 import { QUERY_POLICIES } from "@/lib/query-policy";
-import { getCurrentAccount } from "@/platform/auth/api/auth-storage";
+import { getCurrentAccountId } from "@/platform/auth/api/auth-storage";
 
 export function useSchoolManagement(initialSchoolId?: string | null) {
   const queryClient = useQueryClient();
   const [selectedSchoolId, setSelectedSchoolId] = useState(initialSchoolId ?? "");
   const tenantId = getDefaultTenantId();
-  const accountId = getCurrentAccount("lcms")?.id?.trim() || "anonymous";
+  const accountId = getCurrentAccountId("lcms");
   const directoryQuery = useQuery({
     queryKey: schoolManagementQueryKeys.directory(tenantId, accountId),
     queryFn: ({ signal }) => getSchoolDirectory("", signal),
@@ -38,6 +38,13 @@ export function useSchoolManagement(initialSchoolId?: string | null) {
     gcTime: QUERY_POLICIES.transactional.gcTime,
   });
   const directorySchools = useMemo(() => directoryQuery.data?.items ?? [], [directoryQuery.data]);
+
+  // Follow the URL only when it changes, so create/archive selections are not reverted to the stale param.
+  const [seenSchoolId, setSeenSchoolId] = useState(initialSchoolId);
+  if (initialSchoolId !== seenSchoolId) {
+    setSeenSchoolId(initialSchoolId);
+    if (initialSchoolId) setSelectedSchoolId(initialSchoolId);
+  }
 
   useEffect(() => {
     if (!directorySchools.length) return;
@@ -72,7 +79,7 @@ export function useSchoolManagement(initialSchoolId?: string | null) {
 
   const saveMutation = useMutation({
     mutationFn: ({ draft, schoolId, version }: { draft: SchoolDraft; schoolId?: string; version?: number }) => (
-      schoolId ? updateSchool(schoolId, version ?? 0, draft) : createSchool(draft)
+      schoolId ? updateSchool(schoolId, version, draft) : createSchool(draft)
     ),
   });
   const archiveMutation = useMutation({ mutationFn: archiveSchool });
@@ -141,9 +148,10 @@ export function useSchoolManagement(initialSchoolId?: string | null) {
   }, [gradeUpdateMutation, refreshSchoolData, selectedSchoolId]);
 
   const addClasses = useCallback(async (rows: Array<Omit<SchoolClass, "id">>) => {
-    if (!selectedSchoolId) return;
+    if (!selectedSchoolId) return [];
+    const created: OperationalClassRecord[] = [];
     for (const row of rows) {
-      await classCreateMutation.mutateAsync({
+      const res = await classCreateMutation.mutateAsync({
         schoolId: selectedSchoolId,
         input: {
           name: row.name,
@@ -153,8 +161,10 @@ export function useSchoolManagement(initialSchoolId?: string | null) {
           status: row.status || "ACTIVE",
         },
       });
+      created.push(res);
     }
     await refreshSchoolData(selectedSchoolId);
+    return created;
   }, [classCreateMutation, refreshSchoolData, selectedSchool, selectedSchoolId]);
 
   const addStudents = useCallback(async (rows: Array<Omit<SchoolStudent, "id">>) => {
@@ -166,14 +176,15 @@ export function useSchoolManagement(initialSchoolId?: string | null) {
   }, [refreshSchoolData, selectedSchool, selectedSchoolId, studentCreateMutation, studentImportMutation]);
 
   const addSubject = useCallback(async (row: Omit<SchoolSubject, "id" | "studentCount">) => {
-    if (!selectedSchoolId) return;
-    await subjectCreateMutation.mutateAsync({
+    if (!selectedSchoolId) return undefined;
+    const created = await subjectCreateMutation.mutateAsync({
       schoolId: selectedSchoolId,
       name: row.name,
       code: row.code,
       status: row.status || "ACTIVE",
     });
     await refreshSchoolData(selectedSchoolId);
+    return created;
   }, [refreshSchoolData, selectedSchoolId, subjectCreateMutation]);
 
   const updateClassGrade = useCallback(async (classId: string, grade: string) => {

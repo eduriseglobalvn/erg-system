@@ -7,7 +7,7 @@ import School from "@mui/icons-material/School";
 import { useMutation } from "@tanstack/react-query";
 
 import Button from "@mui/material/Button";
-import { TsForm, TsFormMessage } from "@/components/ui/tanstack-form";
+import { TsForm, TsFormMessage } from "@/components/erg-mui/tanstack-form";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogTitle from "@mui/material/DialogTitle";

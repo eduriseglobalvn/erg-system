@@ -8,7 +8,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
-} from "@/components/ui/chart";
+} from "./chart-primitives";
 
 export type ErgChartConfig = ChartConfig;
 
@@ -30,14 +30,17 @@ export function ErgChartContainer({ children, config, ...props }: Omit<Component
         minHeight: 240,
         minWidth: 0,
         width: "100%",
-        "& .recharts-cartesian-axis-tick text": { fill: "text.secondary", fontFamily: "inherit", fontSize: 11 },
-        "& .recharts-cartesian-grid-horizontal line": { stroke: "divider", strokeOpacity: 0.72 },
+        "& .recharts-cartesian-axis-tick text": { fill: "text.secondary", fontFamily: "inherit", fontSize: (theme) => theme.typography.caption.fontSize, fontVariantNumeric: "tabular-nums" },
+        "& .recharts-cartesian-grid-horizontal line": { stroke: "divider", strokeOpacity: 0.72, strokeWidth: 1 },
+        "& .recharts-curve.recharts-tooltip-cursor": { stroke: "divider" },
+        "& .recharts-rectangle.recharts-tooltip-cursor": { fill: "action.hover" },
+        "& .recharts-sector": { outline: "none" },
         "& .recharts-layer": { outline: "none" },
         "& .recharts-surface": { overflow: "visible" },
         ...props.sx,
       }}
     >
-      <ChartContainer className="h-full w-full aspect-auto" config={config} initialDimension={{ height: 300, width: 720 }}>
+      <ChartContainer config={config} initialDimension={{ height: 300, width: 720 }}>
         {children}
       </ChartContainer>
     </Box>

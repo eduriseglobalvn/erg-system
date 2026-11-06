@@ -6,19 +6,15 @@ import type {
 import type { AuthSessionResponseDTO } from "@/platform/auth/api/auth-api";
 import {
   clearStoredAuthSessions,
-  hasStoredAuthCredential,
-  readTeacherSessionSnapshot,
   readStoredAuthSession,
   resolveCurrentPortal,
   writeStoredAuthIdentity,
-  TEACHER_TEMP_SESSION_KEY,
-  portalSessionKey,
   type StoredAuthSession,
   type StoredAuthIdentity,
 } from "@/platform/auth/api/auth-token-storage";
-import { clearCrossDomainSession } from "@/platform/auth/api/cross-domain-session";
 import { tr } from "@/platform/i18n";
 import { getApiBase } from "@/lib/platform";
+import { hasAdminLikeClaims } from "@/platform/auth/permissions/admin-like";
 import { PLATFORM_ROOT_ADMIN_EMAIL, projectVerifiedWorkspaces } from "@/platform/auth/permissions/workspace-capability-projection";
 import { AUTH_BYPASS_ENABLED, DEFAULT_BYPASS_ACCOUNT } from "@/platform/auth/config/auth-bypass";
 import {
@@ -36,16 +32,6 @@ const defaultAccounts: TeacherAccount[] = [];
 
 function canUseStorage() {
   return typeof window !== "undefined";
-}
-
-function parseJson<T>(value: string | null, fallback: T) {
-  if (!value) return fallback;
-
-  try {
-    return JSON.parse(value) as T;
-  } catch {
-    return fallback;
-  }
 }
 
 function writeAccounts(accounts: TeacherAccount[]) {
@@ -69,25 +55,7 @@ export function listAccounts() {
 
 function readSession(portal: StoredAuthSession["portal"] = resolveCurrentPortal()) {
   if (!canUseStorage()) return null;
-  if (portal) return readStoredAuthSession(portal) as AccountSession | null;
-
-  // Try SSO hydration first — if another portal set a cookie or passed an sso_token,
-  // Cookie hydration writes the session into localStorage before we read it;
-  // credentials are never accepted from a URL.
-  const candidates = [
-    parseJson<AccountSession | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "crm")), null),
-    parseJson<AccountSession | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "admin")), null),
-    parseJson<AccountSession | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "lms")), null),
-    parseJson<AccountSession | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "lcms")), null),
-    readTeacherSessionSnapshot() as AccountSession | null,
-  ];
-  const validSession = candidates.find(hasStoredAuthCredential);
-
-  if (!validSession && candidates.some(Boolean)) {
-    clearSession();
-  }
-
-  return validSession ?? null;
+  return readStoredAuthSession(portal) as AccountSession | null;
 }
 
 function writeSession(session: AccountSession) {
@@ -100,7 +68,6 @@ function notifyAuthAccountChanged() {
 }
 
 function clearSession() {
-  clearCrossDomainSession();
   clearStoredAuthSessions();
 }
 
@@ -126,6 +93,27 @@ export function getCurrentAccount(portal: StoredAuthSession["portal"] = resolveC
   if (requiresServerSession() && !session.accessToken) return AUTH_BYPASS_ENABLED ? DEFAULT_BYPASS_ACCOUNT : null;
 
   return listAccounts().find((account) => account.id === session.accountId) ?? accountFromSession(session) ?? (AUTH_BYPASS_ENABLED ? DEFAULT_BYPASS_ACCOUNT : null);
+}
+
+/** Account id for scoping query keys/caches; `fallback` when signed out. */
+export function getCurrentAccountId(portal: StoredAuthSession["portal"] = resolveCurrentPortal(), fallback = "anonymous") {
+  return getCurrentAccount(portal)?.id?.trim() || fallback;
+}
+
+/**
+ * Single reader of the stored session. Values are raw: callers keep their own
+ * fallbacks ("default"/"anonymous"/getDefaultTenantId()) because they are part of query keys.
+ */
+export function getAuthScope(portal: StoredAuthSession["portal"] = resolveCurrentPortal()) {
+  const session = readStoredAuthSession(portal);
+  return {
+    portal,
+    session,
+    tenantId: session?.tenantId,
+    accountId: (session as Partial<StoredAuthIdentity> | null)?.accountId,
+    roles: session?.roles ?? [],
+    permissions: session?.permissions ?? [],
+  };
 }
 
 function isBffAuthMode() {
@@ -230,7 +218,7 @@ function accountFromSession(session: AccountSession): TeacherAccount | null {
 
 function mapRoleFromRoles(roles: string[]): AccountRole {
   const normalized = roles.map((role) => role.toLowerCase());
-  if (normalized.some((role) => ["admin", "super_admin", "super-admin", "system.super_admin", "erg_super_admin", "global_admin", "lms_admin"].includes(role))) {
+  if (hasAdminLikeClaims(normalized)) {
     return "admin";
   }
   if (normalized.some((role) => ["coordinator", "manager", "center_manager"].includes(role))) return "coordinator";

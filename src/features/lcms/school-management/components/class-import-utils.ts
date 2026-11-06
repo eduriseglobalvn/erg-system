@@ -1,9 +1,15 @@
-import type { SchoolClass } from "@/features/lcms/school-management/types/school-management-types";
+import type { SchoolClass, StudentImportRow } from "@/features/lcms/school-management/types/school-management-types";
+import {
+  extractStudentsFromRosterMatrix,
+  extractTeacherFromHeader,
+  isSchoolRosterMatrix,
+} from "@/features/lcms/school-management/utils/vietnamese-school-sheet-parser";
 
 export type ClassImportPreviewRow = Omit<SchoolClass, "id"> & {
   issues: string[];
   sourceRow: number;
   valid: boolean;
+  students?: StudentImportRow[];
 };
 
 type PreviewOptions = {
@@ -12,8 +18,51 @@ type PreviewOptions = {
   usesGrades: boolean;
 };
 
-export function buildClassImportPreview(matrix: Array<Array<string | number>>, options: PreviewOptions) {
+export function buildClassImportPreview(matrix: Array<Array<string | number>>, options: PreviewOptions): ClassImportPreviewRow[] {
   if (!matrix.length) return [];
+
+  // Smart Detection: If the matrix is a Vietnamese school roster / attendance sheet
+  if (isSchoolRosterMatrix(matrix)) {
+    const students = extractStudentsFromRosterMatrix(matrix, { usesGrades: options.usesGrades });
+    const teacher = extractTeacherFromHeader(matrix);
+    const classMap = new Map<string, { count: number; grade: string; students: StudentImportRow[] }>();
+
+    for (const student of students) {
+      if (!student.className) continue;
+      const current = classMap.get(student.className) ?? { count: 0, grade: student.grade, students: [] };
+      current.count += 1;
+      current.students.push(student);
+      classMap.set(student.className, current);
+    }
+
+    const existing = new Set(options.existingClassNames.map(normalizeValue));
+
+    if (classMap.size > 0) {
+      return Array.from(classMap.entries()).map(([name, { count, grade, students: classStudents }], index): ClassImportPreviewRow => {
+        const issues: string[] = [];
+        const normalizedName = normalizeValue(name);
+        if (!name) issues.push("Thiếu tên lớp");
+        if (options.usesGrades && !grade) issues.push("Thiếu khối");
+        if (options.usesGrades && grade && options.grades.length > 0 && !options.grades.includes(grade)) {
+          issues.push(`Khối ${grade} không thuộc loại trường này`);
+        }
+        if (normalizedName && existing.has(normalizedName)) issues.push("Lớp đã tồn tại trong trường");
+
+        return {
+          grade,
+          homeroomTeacher: teacher || "Chưa gán",
+          name,
+          studentCount: count,
+          sourceRow: index + 1,
+          issues,
+          valid: issues.length === 0,
+          students: classStudents,
+        };
+      });
+    }
+  }
+
+  // Standard Flat Class List Parser
   const firstRow = matrix[0].map((cell) => normalizeHeader(String(cell)));
   const columns = resolveColumns(firstRow, options.usesGrades);
   const hasHeader = Object.values(columns).some((index) => index >= 0 && firstRow[index] && isKnownHeader(firstRow[index]));
@@ -99,5 +148,6 @@ function normalizeValue(value: string) {
 }
 
 function readCell(cells: Array<string | number>, index: number) {
-  return index < 0 ? "" : String(cells[index] ?? "").trim();
+  if (index < 0 || index >= cells.length) return "";
+  return String(cells[index] ?? "").trim();
 }

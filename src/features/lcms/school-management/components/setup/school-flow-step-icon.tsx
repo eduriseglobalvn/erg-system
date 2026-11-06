@@ -21,7 +21,7 @@ export function SchoolFlowStepIcon({ active, completed, stepNumber }: SchoolFlow
         display: "flex",
         flex: "0 0 auto",
         fontSize: 11,
-        fontWeight: 900,
+        fontWeight: 600,
         height: 22,
         justifyContent: "center",
         transition: (theme) => theme.transitions.create(["background-color", "border-color", "color"]),

@@ -6,7 +6,7 @@ import {
   resolveAssignHomeworkGradeStudentIds,
   resolveAssignHomeworkGroups,
 } from "@/features/lms/components/assign-homework-student-utils";
-import type { ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
+import type { ClassroomStudent } from "@/domain/school/classroom-types";
 
 const fallbackStudents = [
   {
@@ -41,7 +41,7 @@ test("maps BE student groups into assign-homework group options", () => {
         name: "BE Group",
         classId: "class-1",
         note: "Support",
-        color: "#0f6cbd",
+        color: "#0071E3",
         studentIds: ["student-1", "student-2"],
         studentCount: 2,
       },
@@ -50,7 +50,7 @@ test("maps BE student groups into assign-homework group options", () => {
     {
       id: "group-1",
       name: "BE Group",
-      color: "#0f6cbd",
+      color: "#0071E3",
       source: "Support",
       studentIds: ["student-1", "student-2"],
     },
@@ -59,7 +59,7 @@ test("maps BE student groups into assign-homework group options", () => {
 
 test("does not use fallback groups when assignment page is API-backed", () => {
   const fallbackGroups = [{ id: "mock-group", name: "Mock", color: "#000", source: "Mock", studentIds: ["mock-student"] }];
-  const apiGroups = [{ id: "be-group", name: "BE", color: "#0f6cbd", source: "BE", studentIds: ["be-student"] }];
+  const apiGroups = [{ id: "be-group", name: "BE", color: "#0071E3", source: "BE", studentIds: ["be-student"] }];
 
   expect(resolveAssignHomeworkGroups(undefined, fallbackGroups, true)).toEqual([]);
   expect(resolveAssignHomeworkGroups([], fallbackGroups, true)).toEqual([]);

@@ -1,0 +1,410 @@
+export type Theme = {
+  pageBackground: string;
+  playerBackground: string;
+  canvasBorder: string;
+  headerBackground: string;
+  headerText: string;
+  accentStart: string;
+  accentEnd: string;
+  optionText: string;
+  optionSelectedBackground: string;
+  inputBackground: string;
+  sidebarActiveBackground: string;
+  sidebarActiveText: string;
+};
+
+export type QuizSettings = {
+  mode: "training" | "testing";
+  timeLimitMinutes?: number;
+  passPercent: number;
+  shuffleQuestions: boolean;
+  shuffleChoices: boolean;
+  revealFeedbackPerStep: boolean;
+};
+
+export type QuizResultDisplay = {
+  passMessage: string;
+  failMessage: string;
+  reviewButtonLabel: string;
+  thankYouMessage: string;
+  showReviewButton: boolean;
+  submitAllPrompt: string;
+  confirmSubmitPrompt: string;
+  submitAllLabel: string;
+  returnToQuizLabel: string;
+  confirmYesLabel: string;
+  confirmNoLabel: string;
+};
+
+export type Feedback = {
+  correct: string;
+  incorrect: string;
+  partial: string;
+};
+
+export type QuestionImage = {
+  url: string;
+  alt?: string;
+  width?: number;
+};
+
+export type Choice = {
+  id: string;
+  label: string;
+  correct: boolean;
+  image?: QuestionImage;
+};
+
+export type MatchingPair = {
+  id: string;
+  prompt: string;
+  /** Absent in the secured player body: responses live in Question.matchingResponses. */
+  response?: string;
+  promptIcon?: string;
+  responseIcon?: string;
+  promptImage?: QuestionImage;
+  responseImage?: QuestionImage;
+};
+
+/** Shuffled response card with an opaque id (secured player body). */
+export type MatchingResponse = {
+  id: string;
+  response: string;
+  responseIcon?: string;
+  responseImage?: QuestionImage;
+};
+
+export type SequenceItem = {
+  id: string;
+  label: string;
+  image?: QuestionImage;
+};
+
+export type InlineBlank = {
+  id: string;
+  statement: string;
+  options: string[];
+  correctOptionId: string;
+  selectPosition?: "before" | "after";
+  /** Text after the last blank, like `TextBlank.suffix`. */
+  suffix?: string;
+};
+
+export type TextBlank = {
+  id: string;
+  label: string;
+  correctAnswers: string[];
+  placeholder?: string;
+  prefix?: string;
+  suffix?: string;
+};
+
+export type NumericAnswer = {
+  correctValue: number;
+  tolerance?: number;
+  unit?: string;
+};
+
+export type DragWord = {
+  id: string;
+  label: string;
+};
+
+export type DragWordSlot = {
+  id: string;
+  label: string;
+  correctWordId: string;
+  /** Text after the last blank, like `TextBlank.suffix`. */
+  suffix?: string;
+};
+
+export type DropTarget = {
+  id: string;
+  label: string;
+};
+
+export type DragDropItem = {
+  id: string;
+  label: string;
+  correctTargetId: string;
+  image?: QuestionImage;
+};
+
+export type LikertScalePoint = {
+  id: string;
+  label: string;
+  value: number;
+};
+
+export type LikertRow = {
+  id: string;
+  label: string;
+};
+
+export type EssayRubricCriterion = {
+  id: string;
+  label: string;
+  points: number;
+};
+
+export type HotspotArea = {
+  id: string;
+  shape: "rect" | "ellipse" | "polygon";
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  correct: boolean;
+  visible?: boolean;
+};
+
+export type HotspotImage = {
+  url: string;
+  width: number;
+  height: number;
+};
+
+export type QuestionKind =
+  | "single_choice"
+  | "multiple_response"
+  | "true_false"
+  | "short_answer"
+  | "numeric"
+  | "matching"
+  | "sequence"
+  | "fill_blank"
+  | "inline_choice"
+  | "select_from_lists"
+  | "drag_words"
+  | "hotspot"
+  | "drag_drop"
+  | "likert_scale"
+  | "essay";
+
+export type Question = {
+  id: string;
+  kind: QuestionKind;
+  title: string;
+  instructions?: string;
+  points: number;
+  feedback: Feedback;
+  contentImage?: QuestionImage;
+  choices?: Choice[];
+  matching?: MatchingPair[];
+  /** Present => new shape (prompts in `matching`, shuffled responses here). Absent => old shape, response id == row id. */
+  matchingResponses?: MatchingResponse[];
+  /** Answer key promptId -> responseId; only for offline packages / teacher preview. */
+  matchingKey?: Record<string, string>;
+  /** Answer key for sequence (item ids in correct order). Empty = unknown (server-graded), never fall back to received order. */
+  sequenceCorrectOrder?: string[];
+  sequenceItems?: SequenceItem[];
+  /** Authoring only: the exact text around the blanks (blanks + 1 entries). Never holds an answer; learners read the per-blank fields. */
+  sentenceParts?: string[];
+  inlineBlanks?: InlineBlank[];
+  textBlanks?: TextBlank[];
+  numericAnswer?: NumericAnswer;
+  wordBank?: DragWord[];
+  wordSlots?: DragWordSlot[];
+  dropTargets?: DropTarget[];
+  dragDropItems?: DragDropItem[];
+  likertRows?: LikertRow[];
+  likertScale?: LikertScalePoint[];
+  essayRubric?: EssayRubricCriterion[];
+  hotspotImage?: HotspotImage;
+  hotspotAreas?: HotspotArea[];
+};
+
+export type Section = {
+  id: string;
+  title: string;
+  questions: Question[];
+};
+
+export type Quiz = {
+  id: string;
+  title: string;
+  subtitle: string;
+  version: string;
+  description: string;
+  themeId: string;
+  theme: Theme;
+  settings: QuizSettings;
+  result?: QuizResultDisplay;
+  sections: Section[];
+};
+
+export type QuizSummary = {
+  id: string;
+  title: string;
+  subtitle: string;
+  version: string;
+  sectionCount: number;
+  questionCount: number;
+};
+
+export type HotspotPoint = {
+  x: number;
+  y: number;
+};
+
+export type AnswerPayload = {
+  choiceId?: string;
+  choiceIds?: string[];
+  matchingOrder?: string[];
+  matchingAssignments?: Record<string, string>;
+  matchingConnectedRows?: string[];
+  sequenceOrder?: string[];
+  inlineSelections?: Record<string, string>;
+  textResponses?: Record<string, string>;
+  numericValue?: string;
+  dragWordPlacements?: Record<string, string>;
+  dragDropPlacements?: Record<string, string>;
+  likertResponses?: Record<string, string>;
+  essayText?: string;
+  hotspotPoint?: HotspotPoint;
+};
+
+export type AnswerResult = {
+  questionId: string;
+  correct: boolean;
+  partiallyRight: boolean;
+  awardedPoints: number;
+  maxPoints: number;
+  message: string;
+  /** Answered but needs a teacher to grade it (essay); awardedPoints stays 0 until then. */
+  pendingReview?: boolean;
+  correctChoiceIds?: string[];
+  correctMatchingOrder?: string[];
+  correctSequenceOrder?: string[];
+  correctInlineSelections?: Record<string, string>;
+  correctTextResponses?: Record<string, string>;
+  correctNumericValue?: string;
+  correctDragWordPlacements?: Record<string, string>;
+  correctDragDropPlacements?: Record<string, string>;
+};
+
+export type AnswerRecord = {
+  questionId: string;
+  input: AnswerPayload;
+  result: AnswerResult;
+};
+
+export type Attempt = {
+  id: string;
+  quizId: string;
+  submittedCount: number;
+  totalQuestions: number;
+  totalScore: number;
+  maxScore: number;
+  percent: number;
+  passed: boolean;
+  answers: Record<string, AnswerRecord>;
+};
+
+/** Optional roster inside a signed portable package; validates the student identity step. */
+export type PortableRoster = {
+  classes: Array<{ code: string; name?: string; students: Array<{ code: string; name?: string }> }>;
+};
+
+export type QuizPackage = {
+  id: string;
+  roster?: PortableRoster;
+  quizId: string;
+  quizVersion: string;
+  generatedAt: string;
+  expiresAt?: string;
+  contentHash: string;
+  signature?: string;
+  publicKeyId?: string;
+  signatureAlgorithm?: string;
+  packageFormat?: "single" | "bundle";
+  minRuntimeVersion?: string;
+  downloadUrl?: string;
+  sizeBytes?: number;
+  releaseChannel?: string;
+  portableReady?: boolean;
+  etag?: string;
+  revokedAt?: string;
+  tenantId?: string;
+  quizVersionId?: string;
+  assetsManifest?: Record<string, {
+    contentBase64?: string;
+    mimeType?: string;
+    sha256?: string;
+    sizeBytes?: number;
+    url?: string;
+  }>;
+  gradingMode: "client-first" | "server-authoritative";
+  source: "local" | "server" | "tauri-cache";
+  quiz: Quiz;
+};
+
+export type AttemptEventType =
+  | "attempt_started"
+  | "answer_graded"
+  | "attempt_submitted"
+  | "sync_failed"
+  | "sync_succeeded";
+
+export type AttemptEvent = {
+  id: string;
+  attemptId: string;
+  quizId: string;
+  packageId: string;
+  type: AttemptEventType;
+  createdAt: string;
+  questionId?: string;
+  answer?: AnswerPayload;
+  result?: AnswerResult;
+  attemptSnapshot?: Attempt;
+  meta?: Record<string, unknown>;
+};
+
+export type AttemptSyncStatus = "pending" | "synced" | "failed";
+
+export type AttemptSession = {
+  attempt: Attempt;
+  package: QuizPackage;
+  events: AttemptEvent[];
+  syncStatus: AttemptSyncStatus;
+  createdAt: string;
+  updatedAt: string;
+  submittedAt?: string;
+};
+
+export type AttemptSyncPayload = {
+  attemptId: string;
+  quizId: string;
+  packageId: string;
+  packageHash: string;
+  quizVersion: string;
+  submittedAt?: string;
+  attempt: Attempt;
+  events: AttemptEvent[];
+  client: {
+    runtime: "web" | "tauri";
+    gradingStrategy: "client-first" | "server-authoritative";
+    appVersion?: string;
+  };
+};
+
+export type StudentProgressStatus = "not_started" | "in_progress" | "submitted";
+
+export type StudentProgress = {
+  id: string;
+  studentName: string;
+  quizId: string;
+  quizTitle: string;
+  mode: QuizSettings["mode"];
+  status: StudentProgressStatus;
+  currentQuestionIndex: number;
+  currentQuestionTitle: string;
+  answeredCount: number;
+  totalQuestions: number;
+  percentComplete: number;
+  score: number | null;
+  passed: boolean | null;
+  startedAt: string | null;
+  submittedAt: string | null;
+  lastActiveAt: string;
+};

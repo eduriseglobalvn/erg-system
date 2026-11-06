@@ -1,20 +1,15 @@
-import { useState } from "react";
-import { Navigate, useLocation, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "@tanstack/react-router";
 
-import { getCurrentAccount } from "@/platform/auth/api/auth-storage";
-import { readStoredAuthSession } from "@/platform/auth/api/auth-token-storage";
+import { getAuthScope, getCurrentAccount } from "@/platform/auth/api/auth-storage";
 import { getCurrentStudentSession } from "@/platform/auth/api/student-auth-storage";
 import { AuthFormPanel } from "@/platform/auth/components/auth-form-panel";
 import {
   accessDeniedPath,
   defaultPortalRedirect,
-  googleEmailFromIdToken,
   handleLoginSubmit,
-  handleRegisterSubmit,
   handleStudentLoginSubmit,
-  redirectAfterAuth,
   resolveDefaultPostLoginRedirect,
-  safely,
   sanitizeRedirect,
 } from "@/platform/auth/components/portal-login-controller";
 import { getPortalLoginCopy, type PortalKey } from "@/platform/auth/components/portal-login-copy";
@@ -22,7 +17,6 @@ import { NoticeBanner, PortalLoginShell } from "@/platform/auth/components/porta
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
 import { isAuthOnlyRedirect, sanitizeLocalRedirect } from "@/platform/auth/utils/auth-redirects";
 import { canAccessPortal } from "@/platform/auth/utils/portal-access";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { isBffAuthEnabled } from "@/lib/api-client";
 
 type AuthSession = ReturnType<typeof useAuthSession>;
@@ -38,13 +32,12 @@ export function PortalLoginPage({ badge, description, portal, title }: PortalLog
   const auth = useAuthSession(portal);
   const location = useLocation();
   const navigate = useNavigate();
-  const isMobile = useIsMobile();
   const [studentNotice, setStudentNotice] = useState<AuthSession["notice"] | null>(null);
   const requestedRedirect = new URLSearchParams(location.searchStr).get("redirect");
   const hasExplicitRedirect = Boolean(requestedRedirect && sanitizeLocalRedirect(requestedRedirect));
   const redirect = sanitizeRedirect(
     requestedRedirect,
-    resolveDefaultPostLoginRedirect(auth.account, portal, auth.session ?? readStoredAuthSession(portal)) || defaultPortalRedirect(portal),
+    resolveDefaultPostLoginRedirect(auth.account, portal, auth.session ?? getAuthScope(portal).session) || defaultPortalRedirect(portal),
   );
   const copy = getPortalLoginCopy(portal);
   const resolvedCopy = {
@@ -62,8 +55,8 @@ export function PortalLoginPage({ badge, description, portal, title }: PortalLog
   const teacherSession = isBffAuthEnabled()
     ? auth.session
     : portal === "elearning"
-      ? readStoredAuthSession("lms") ?? readStoredAuthSession("lcms") ?? readStoredAuthSession(portal)
-      : readStoredAuthSession(portal);
+      ? getAuthScope("lms").session ?? getAuthScope("lcms").session ?? getAuthScope(portal).session
+      : getAuthScope(portal).session;
   const navigateTo = (path: string) => {
     // Let the auth/account storage event render once before TanStack Router
     // evaluates the destination's workspace guard. This matters for a direct
@@ -72,36 +65,35 @@ export function PortalLoginPage({ badge, description, portal, title }: PortalLog
     window.setTimeout(() => void navigate({ href: path, replace: true }), 0);
   };
 
-  if (canAccessPortal({ portal, studentSession, teacherAccount, teacherSession })) {
-    return <Navigate replace to={redirect} />;
-  }
-  if (portal !== "elearning" && auth.account && isAuthOnlyRedirect(portal, redirect)) {
-    return <Navigate replace to={redirect} />;
-  }
-  if (portal !== "elearning" && auth.account) {
-    return <Navigate replace to={accessDeniedPath(portal, auth.account.email, redirect)} />;
-  }
+  const redirectTarget = canAccessPortal({ portal, studentSession, teacherAccount, teacherSession })
+    ? redirect
+    : portal !== "elearning" && auth.account
+      ? isAuthOnlyRedirect(portal, redirect) ? redirect : accessDeniedPath(portal, auth.account.email, redirect)
+      : null;
+
+  // A string dependency navigates once per target. <Navigate> re-fires on every render while the
+  // lazy destination is pending, which loops into "Maximum update depth exceeded".
+  useEffect(() => {
+    if (redirectTarget) void navigate({ href: redirectTarget, replace: true });
+  }, [navigate, redirectTarget]);
+
+  if (redirectTarget) return null;
 
   return (
-    <PortalLoginShell copy={resolvedCopy}>
+    <PortalLoginShell>
       <NoticeBanner notice={portal === "elearning" ? studentNotice : auth.notice} />
       <AuthFormPanel
-        mode={auth.mode}
         rememberMe={auth.rememberMe}
         showPassword={auth.showPassword}
         loginForm={auth.loginForm}
-        registerForm={auth.registerForm}
-        onModeChange={auth.setMode}
         onRememberMeChange={auth.setRememberMe}
         onShowPasswordToggle={() => auth.setShowPassword((current) => !current)}
         onLoginFormChange={auth.setLoginForm}
-        onRegisterFormChange={auth.setRegisterForm}
         onLoginSubmit={(event) =>
           portal === "elearning"
             ? handleStudentLoginSubmit(event, auth, redirect, navigateTo, setStudentNotice)
             : handleLoginSubmit(event, auth, portal, redirect, navigateTo, { hasExplicitRedirect })
         }
-        onRegisterSubmit={(event) => handleRegisterSubmit(event, auth, portal, redirect, navigateTo, { hasExplicitRedirect })}
         onForgotPassword={() => {
           if (portal === "elearning") {
             setStudentNotice({
@@ -113,24 +105,7 @@ export function PortalLoginPage({ badge, description, portal, title }: PortalLog
           }
           auth.actions.forgotPassword();
         }}
-        onProviderLogin={(provider, idToken) =>
-          void safely(
-              auth,
-            async () => {
-              const account = await auth.actions.loginByProvider(provider, idToken, portal);
-              redirectAfterAuth(account ?? getCurrentAccount(portal), portal, redirect, navigateTo, { hasExplicitRedirect });
-            },
-            () => navigateTo(accessDeniedPath(portal, googleEmailFromIdToken(idToken) || auth.loginForm.email, redirect)),
-          )
-        }
-        allowGoogle={resolvedCopy.allowGoogle}
-        allowRegister={resolvedCopy.allowRegister}
-        credentialLabel={resolvedCopy.credentialLabel}
-        credentialPlaceholder={resolvedCopy.credentialPlaceholder}
-        loginFootnote={resolvedCopy.formFootnote}
-        loginSubtitle={resolvedCopy.formSubtitle}
         loginTitle={resolvedCopy.formTitle}
-        mobileVariant={isMobile}
       />
     </PortalLoginShell>
   );

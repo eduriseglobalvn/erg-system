@@ -76,7 +76,7 @@ export const headingSx = {
   gap: 0.75,
   color: "text.primary",
   fontSize: 14,
-  fontWeight: 700,
+  fontWeight: 600,
 };
 
 export const helperSx = { mt: 0.5, color: "text.secondary", fontSize: 12 };
@@ -86,5 +86,5 @@ export const fieldSx = {
   "& .MuiInputBase-input": { py: 1, fontSize: 12, fontWeight: 500 },
 };
 
-export const actionSx = { minHeight: 32, borderRadius: 1, px: 1.75, fontSize: 12, fontWeight: 700, textTransform: "none" };
+export const actionSx = { minHeight: 32, borderRadius: 1, px: 1.75, fontSize: 12, fontWeight: 600, textTransform: "none" };
 

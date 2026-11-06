@@ -1,0 +1,349 @@
+import {
+  createQuizEditorQuiz,
+  loadQuizEditorDraft,
+  saveQuizEditorDraft,
+  type QuizEditorDraftDocument,
+} from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-api";
+import { getDefaultTenantId } from "@/lib/graphql-client";
+import { getAuthScope } from "@/platform/auth/api/auth-storage";
+
+import { createQuizDraftDeviceStore, quizDraftScope, type DeviceDraftBackup, type QuizDraftDeviceStore } from "./quiz-draft-device-store";
+import { migrateLegacyLocalDrafts, NEW_QUIZ_PREFIX } from "./quiz-draft-initial-document";
+import { QuizDraftSyncEngine, type QuizDraftSyncApi, type QuizDraftSyncDeps, type QuizDraftSyncStatus } from "./quiz-draft-sync-engine";
+import { createQuizImageUploader, uploadInlineImages } from "./upload-inline-images";
+
+export const EDIT_DEBOUNCE_MS = 300;
+const NO_COPY_OFFLINE_MESSAGE = "Cần có mạng để mở bài này lần đầu trên máy này.";
+
+export type QuizDraftSyncSessionOptions = {
+  hydrate: (doc: QuizEditorDraftDocument) => void;
+  buildCreateInput: QuizDraftSyncDeps["buildCreateInput"];
+  onQuizCreated?: (quizId: string) => void;
+  onSynced?: () => void;
+  deps?: Partial<Pick<QuizDraftSyncDeps, "store" | "api" | "isOnline" | "now">>;
+};
+
+export type QuizDraftSyncSnapshot = {
+  /** Draft keys the current engine answers to: its start key, plus the quiz id once it created the quiz. */
+  keys: readonly string[];
+  ready: boolean;
+  persistent: boolean;
+  status: QuizDraftSyncStatus;
+  quizId: string | null;
+  docVersion: number;
+  hasUnsyncedChanges: boolean;
+  recovered: { pendingEdits: number; editedAt: string } | null;
+  backups: DeviceDraftBackup[];
+};
+
+export const LOADING_SNAPSHOT: QuizDraftSyncSnapshot = {
+  keys: [], ready: false, persistent: false, status: { kind: "loading" }, quizId: null, docVersion: 0, hasUnsyncedChanges: false, recovered: null, backups: [],
+};
+
+type Slot = {
+  engine: QuizDraftSyncEngine;
+  store: QuizDraftDeviceStore;
+  scope: string;
+  keys: string[];
+  ready: boolean;
+  /** JSON of the first document after `ready` (undefined: not seen yet, null: an edit since); never an edit itself, see `change`. */
+  baselineJson: string | null | undefined;
+  /** `start()` threw; the next `open` for the same key tries again. */
+  failed: boolean;
+  backups: DeviceDraftBackup[];
+};
+
+// One id per tab, so the engine can tell this tab's device records from another tab's.
+const WRITER_ID: string =
+  globalThis.crypto?.randomUUID?.() ?? `tab-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+let defaultStore: QuizDraftDeviceStore | null = null;
+const migrations = new WeakMap<QuizDraftDeviceStore, Map<string, Promise<void>>>();
+
+function migrateOnce(store: QuizDraftDeviceStore, scope: string, tenantId: string): Promise<void> {
+  const byScope = migrations.get(store) ?? new Map<string, Promise<void>>();
+  migrations.set(store, byScope);
+  let run = byScope.get(scope);
+  if (!run) {
+    // A failed move keeps the legacy keys; the editor must still open.
+    run = migrateLegacyLocalDrafts(store, scope, tenantId, WRITER_ID).then(
+      () => undefined,
+      (error: unknown) => console.error("Cannot migrate legacy quiz drafts", error),
+    );
+    byScope.set(scope, run);
+  }
+  return run;
+}
+
+const currentScope = () => quizDraftScope(getDefaultTenantId(), getAuthScope().accountId);
+
+/** Called once per engine: its image cache (data URL → server URL, megabytes each) goes away with that engine. */
+function defaultApi(): QuizDraftSyncApi {
+  const cache = new Map<string, string>();
+  const uploader = createQuizImageUploader();
+  return {
+    createQuiz: createQuizEditorQuiz,
+    saveDraft: saveQuizEditorDraft,
+    loadDraft: (quizId) => loadQuizEditorDraft(quizId),
+    uploadImages: (doc) => uploadInlineImages(doc, uploader, undefined, undefined, cache),
+  };
+}
+
+/**
+ * Owns the engine behind `useQuizDraftSync`: one live engine at a time, the 300 ms edit debounce, and the window events.
+ * A plain object so React StrictMode's mount/unmount/mount can close and reopen it without losing an edit.
+ */
+export class QuizDraftSyncSession {
+  private latest: QuizDraftSyncSessionOptions;
+  private slot: Slot | null = null;
+  private pending: { engine: QuizDraftSyncEngine; document: QuizEditorDraftDocument } | null = null;
+  private timer: ReturnType<typeof setTimeout> | null = null;
+  private snapshot = LOADING_SNAPSHOT;
+  private readonly listeners = new Set<() => void>();
+  /** Closed engines still sending their last edit, by draft key: reopening that key waits, or it would send a stale docVersion. */
+  private readonly closing = new Map<string, Promise<void>>();
+
+  constructor(options: QuizDraftSyncSessionOptions) {
+    this.latest = options;
+  }
+
+  /** The hook passes each render's options, so callbacks are never stale. */
+  setOptions(options: QuizDraftSyncSessionOptions): void {
+    this.latest = options;
+  }
+
+  subscribe = (listener: () => void) => {
+    this.listeners.add(listener);
+    return () => {
+      this.listeners.delete(listener);
+    };
+  };
+
+  getSnapshot = () => this.snapshot;
+
+  /** Starts an engine for `draftKey`, unless the live one already answers to it (it created that quiz). */
+  open(draftKey: string, serverDraft: QuizEditorDraftDocument | undefined, settled: boolean): void {
+    const current = this.slot;
+    if (current?.keys.includes(draftKey) && !current.failed) {
+      if (draftKey === current.engine.quizId) current.keys = [draftKey]; // the new-quiz key may start a fresh quiz again
+      return;
+    }
+    this.close();
+    if (!settled) return;
+
+    const { deps = {} } = this.latest;
+    const tenantId = getDefaultTenantId();
+    const scope = currentScope();
+    const store = deps.store ?? (defaultStore ??= createQuizDraftDeviceStore());
+    const engine: QuizDraftSyncEngine = new QuizDraftSyncEngine(
+      {
+        store,
+        scope,
+        api: deps.api ?? defaultApi(),
+        writerId: WRITER_ID,
+        isOnline: deps.isOnline ?? (() => navigator.onLine),
+        now: deps.now ?? (() => new Date()),
+        buildCreateInput: (doc) => this.latest.buildCreateInput(doc),
+        // A shared computer: another account signed in here must never send these edits; they stay on the device.
+        canSend: () => currentScope() === scope,
+        onQuizCreated: (quizId) => {
+          if (this.slot?.engine === engine) this.slot.keys.push(quizId);
+          this.publish();
+          this.latest.onQuizCreated?.(quizId);
+        },
+      },
+      draftKey,
+    );
+    const slot: Slot = { engine, store, scope, keys: [draftKey], ready: false, baselineJson: undefined, failed: false, backups: [] };
+    this.slot = slot;
+    this.publish();
+    void this.load(slot, tenantId, serverDraft);
+  }
+
+  /** Called with every rendered document; forwards real edits to the engine after a 300 ms debounce. */
+  change(draftKey: string, document: QuizEditorDraftDocument): void {
+    const slot = this.slot;
+    if (!slot?.ready || !slot.keys.includes(draftKey)) return;
+    // The first document after load is the hydrated one, or with nothing to hydrate whatever the editor still shows
+    // (possibly the previous quiz, or a blank new quiz). Neither is an edit, nor is a re-rendered copy of it.
+    if (slot.baselineJson !== null) {
+      const json = JSON.stringify(document);
+      if (slot.baselineJson === undefined || json === slot.baselineJson) {
+        slot.baselineJson ??= json;
+        return;
+      }
+      slot.baselineJson = null;
+    }
+    this.pending = { engine: slot.engine, document };
+    this.clearTimer();
+    this.timer = setTimeout(() => this.flushPending(), EDIT_DEBOUNCE_MS);
+  }
+
+  /** Writes the debounced edit, then lets the engine send it once and dispose (spec §9.2: send on leaving the editor). */
+  close(): void {
+    this.flushPending();
+    const slot = this.slot;
+    this.slot = null;
+    this.publish();
+    if (!slot) return;
+    const keys = [...slot.keys];
+    const run = slot.engine.closeAndFlush().catch((error: unknown) => console.error("Cannot send the last quiz draft edit", error));
+    for (const key of keys) this.closing.set(key, run);
+    void run.then(() => {
+      for (const key of keys) if (this.closing.get(key) === run) this.closing.delete(key);
+    });
+  }
+
+  listen(target: Window): () => void {
+    const leave = () => {
+      this.flushPending();
+      void this.slot?.engine.flushNow();
+    };
+    // Signing in again usually happens in another tab or page, so retry when this one comes back.
+    const resume = () => {
+      const engine = this.slot?.engine;
+      if (engine?.status.kind === "signed-out") void engine.flushNow();
+      else if (engine?.status.kind === "offline") engine.notifyOnline(); // in case the online event was missed
+    };
+    const onVisibility = () => (target.document.visibilityState === "hidden" ? leave() : resume());
+    const onOnline = () => this.slot?.engine.notifyOnline();
+    const onOffline = () => this.slot?.engine.notifyOffline();
+    const onBeforeUnload = (event: BeforeUnloadEvent) => {
+      const unsent = this.pending !== null || this.slot?.engine.hasUnsyncedChanges;
+      this.flushPending(); // the last edit inside the 300 ms debounce still reaches the device
+      if (!unsent) return;
+      event.preventDefault();
+      event.returnValue = ""; // Safari 15 and older Chrome only ask when returnValue is set
+    };
+    const events: Array<[string, (event: never) => void]> = [
+      ["pagehide", leave], ["focus", resume], ["online", onOnline], ["offline", onOffline], ["beforeunload", onBeforeUnload],
+    ];
+    for (const [name, handler] of events) target.addEventListener(name, handler as EventListener);
+    target.document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      for (const [name, handler] of events) target.removeEventListener(name, handler as EventListener);
+      target.document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }
+
+  flushNow = async (): Promise<void> => {
+    this.flushPending();
+    const slot = this.slot;
+    if (!slot) return;
+    await slot.engine.flushNow();
+    this.refresh(slot);
+  };
+
+  resolveConflict = async (choice: "mine" | "server"): Promise<void> => {
+    const slot = this.slot;
+    if (!slot) return;
+    this.flushPending();
+    const server = await slot.engine.resolveConflict(choice);
+    if (this.slot !== slot) return;
+    if (server) this.latest.hydrate(server);
+    await this.reloadBackups(slot);
+  };
+
+  restoreBackup = (createdAt: string): void => {
+    const slot = this.slot;
+    const backup = slot?.backups.find((b) => b.createdAt === createdAt);
+    if (!slot || !backup) return;
+    this.flushPending();
+    this.latest.hydrate(backup.document);
+    slot.engine.edit(backup.document).then(
+      () => this.reloadBackups(slot),
+      (error: unknown) => console.error("Cannot restore quiz draft backup", error),
+    );
+  };
+
+  private async load(slot: Slot, tenantId: string, serverDraft: QuizEditorDraftDocument | undefined): Promise<void> {
+    await Promise.all([migrateOnce(slot.store, slot.scope, tenantId), this.closing.get(slot.keys[0]!)]);
+    if (this.slot !== slot) return;
+    let document: QuizEditorDraftDocument | null;
+    try {
+      document = await slot.engine.start(serverDraft);
+    } catch (error) {
+      console.error("Cannot open quiz draft", error);
+      slot.failed = true;
+      if (this.slot === slot) this.publishStatus({ kind: "error", message: error instanceof Error ? error.message : String(error) });
+      return;
+    }
+    if (this.slot !== slot) return;
+    // A saved quiz with no copy on this device and none from the server (offline): opening it would make whatever the
+    // editor still shows this quiz's draft. Fail like a broken start, so the next open retries.
+    if (!document && !slot.keys[0]!.startsWith(NEW_QUIZ_PREFIX)) {
+      slot.failed = true;
+      this.publishStatus({ kind: "error", message: NO_COPY_OFFLINE_MESSAGE });
+      return;
+    }
+    if (document) this.latest.hydrate(document);
+    slot.ready = true;
+    let lastKind = slot.engine.status.kind;
+    slot.engine.subscribe((status) => {
+      if (status.kind === "saved" && status.at !== null && lastKind !== "saved") this.latest.onSynced?.();
+      lastKind = status.kind;
+      this.refresh(slot);
+    });
+    this.publish();
+    const { now = () => new Date() } = this.latest.deps ?? {};
+    await slot.store.prune(slot.scope, now()).catch((error: unknown) => console.error("Cannot prune quiz drafts", error));
+    await this.reloadBackups(slot);
+  }
+
+  private async reloadBackups(slot: Slot): Promise<void> {
+    try {
+      const backups = await slot.store.listBackups(slot.scope, slot.keys[slot.keys.length - 1]);
+      slot.backups = backups.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    } catch (error) {
+      console.error("Cannot list quiz draft backups", error);
+    }
+    this.refresh(slot);
+  }
+
+  private flushPending(): void {
+    this.clearTimer();
+    const pending = this.pending;
+    this.pending = null;
+    if (!pending) return;
+    pending.engine.edit(pending.document).then(
+      () => {
+        if (this.slot?.engine === pending.engine) this.publish();
+      },
+      (error: unknown) => console.error("Cannot store quiz draft edit", error),
+    );
+  }
+
+  private clearTimer(): void {
+    if (this.timer !== null) clearTimeout(this.timer);
+    this.timer = null;
+  }
+
+  private refresh(slot: Slot): void {
+    if (this.slot === slot) this.publish();
+  }
+
+  private publishStatus(status: QuizDraftSyncStatus): void {
+    this.snapshot = { ...this.snapshot, status };
+    for (const listener of this.listeners) listener();
+  }
+
+  private publish(): void {
+    const slot = this.slot;
+    if (!slot) {
+      this.snapshot = LOADING_SNAPSHOT;
+    } else {
+      const { engine } = slot;
+      this.snapshot = {
+        keys: [...slot.keys],
+        ready: slot.ready,
+        persistent: slot.store.persistent,
+        status: engine.status,
+        quizId: engine.quizId,
+        docVersion: engine.docVersion,
+        hasUnsyncedChanges: engine.hasUnsyncedChanges,
+        recovered: engine.recovered,
+        backups: slot.backups,
+      };
+    }
+    for (const listener of this.listeners) listener();
+  }
+}

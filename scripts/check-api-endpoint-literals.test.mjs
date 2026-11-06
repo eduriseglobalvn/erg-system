@@ -13,6 +13,10 @@ test("reports backend endpoint literals outside the central registry", () => {
   assert.deepEqual(findings, [{ file: "src/feature/api.ts", line: 1 }]);
 });
 
+test("ignores type-level OpenAPI path keys", () => {
+  assert.deepEqual(findEndpointLiterals({ "src/feature/types.ts": 'type R = ApiResponseData<"/api/v1/users", "get">;' }), []);
+});
+
 test("ignores external and asset URLs", () => {
   assert.deepEqual(findEndpointLiterals({
     "src/view.ts": "fetch('https://cdn.example.com/api/image.png')",

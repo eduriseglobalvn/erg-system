@@ -7,6 +7,7 @@ import TablePagination from "@mui/material/TablePagination";
 import Typography from "@mui/material/Typography";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { ErgErrorState } from "@/components/erg-mui/erg-feedback";
 import { AuditFilterBar } from "@/features/audit/components/audit-filter-bar";
 import { AuditTable } from "@/features/audit/components/audit-table";
 import { auditQueryKeys, downloadAuditExport, listAuditEvents } from "@/features/audit/api/audit-api";
@@ -14,15 +15,14 @@ import { AUDIT_PAGE_SIZE, type AuditFilters } from "@/features/audit/types/audit
 import { hasApiBase, isBffAuthEnabled } from "@/lib/api-client";
 import { getDefaultTenantId } from "@/lib/graphql-client";
 import { QUERY_POLICIES } from "@/lib/query-policy";
-import { getCurrentAccount } from "@/platform/auth/api/auth-storage";
-import { readStoredAuthSession } from "@/platform/auth/api/auth-token-storage";
+import { getAuthScope, getCurrentAccount } from "@/platform/auth/api/auth-storage";
 import { evaluatePermission } from "@/platform/auth/permissions/permission-evaluator";
 
 export function AuditTrailWorkspace({ scopeId }: { scopeId?: string }) {
   const [filters, setFilters] = useState<AuditFilters>({ page: 0, size: AUDIT_PAGE_SIZE });
   const tenantId = getDefaultTenantId();
   const accountId = getCurrentAccount("lcms")?.id?.trim() || "bff-session";
-  const session = readStoredAuthSession("lcms");
+  const session = getAuthScope("lcms").session;
   const canRead = isBffAuthEnabled() || evaluatePermission({ permission: "lms.school.read", grantedPermissions: session?.permissions ?? [], deniedPermissions: session?.deniedPermissions ?? [] });
   const eventsQuery = useQuery({
     queryKey: auditQueryKeys.events(tenantId, accountId, "ADMIN", scopeId, filters),
@@ -31,6 +31,7 @@ export function AuditTrailWorkspace({ scopeId }: { scopeId?: string }) {
     staleTime: QUERY_POLICIES.sensitive.staleTime,
     gcTime: QUERY_POLICIES.sensitive.gcTime,
     refetchOnWindowFocus: false,
+    retry: false,
   });
   const exportMutation = useMutation({ mutationFn: (input: AuditFilters) => downloadAuditExport(input) });
   const errorMessage = getAuditErrorMessage(eventsQuery.error);
@@ -56,10 +57,10 @@ export function AuditTrailWorkspace({ scopeId }: { scopeId?: string }) {
         </Button>
       </Box>
       {exportMutation.error ? <Alert severity="error" sx={{ borderRadius: 0 }}>Không thể xuất nhật ký: {getAuditErrorMessage(exportMutation.error)}</Alert> : null}
-      <AuditFilterBar filters={filters} onChange={setFilters} onReset={() => setFilters({ page: 0, size: AUDIT_PAGE_SIZE })} />
-      {errorMessage ? <Alert severity="error" sx={{ mx: 2, mb: 2 }}>Không thể tải nhật ký: {errorMessage}</Alert> : null}
+      <AuditFilterBar filters={filters} onApply={setFilters} onReset={() => setFilters({ page: 0, size: AUDIT_PAGE_SIZE })} />
+      {errorMessage ? <Box sx={{ mx: 2, mb: 2 }}><ErgErrorState action={<Button disabled={eventsQuery.isFetching} variant="outlined" onClick={() => void eventsQuery.refetch()}>Thử lại</Button>} description={errorMessage} title="Không thể tải nhật ký" /></Box> : null}
       {!errorMessage && !eventsQuery.isLoading && eventsQuery.data?.items.length === 0 ? <Alert severity="info" sx={{ mx: 2, mb: 2 }}>Không có sự kiện phù hợp với bộ lọc và scope được backend cấp quyền.</Alert> : null}
-      <AuditTable entries={eventsQuery.data?.items ?? []} isLoading={eventsQuery.isLoading} />
+      {errorMessage ? null : <AuditTable entries={eventsQuery.data?.items ?? []} isLoading={eventsQuery.isLoading} />}
       <TablePagination
         component="div"
         count={eventsQuery.data?.totalElements ?? 0}

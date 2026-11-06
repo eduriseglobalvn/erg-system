@@ -159,8 +159,8 @@ export function CommandButton({
       className={cn(
         "inline-flex h-8 shrink-0 items-center justify-center gap-2 rounded-lg px-3 text-[13px] font-bold transition disabled:cursor-not-allowed disabled:opacity-45",
         primary && "min-w-[118px]",
-        command.tone === "primary" && "bg-[#0F6CBD] text-white hover:bg-[#0b5da5]",
-        command.tone === "blue" && "bg-[#EAF4FF] text-[#0F6CBD] hover:bg-[#dceeff]",
+        command.tone === "primary" && "bg-[#0071E3] text-white hover:bg-[#0b5da5]",
+        command.tone === "blue" && "bg-[#EAF4FF] text-[#0071E3] hover:bg-[#dceeff]",
         command.tone === "red" && "bg-[#FFF1F3] text-[#D73D50] hover:bg-[#FFE2E7]",
         command.tone === "neutral" && "bg-white text-[#637381] hover:bg-[#F4F6F8]",
         command.tone === "danger" && "bg-white text-[#B71D18] hover:bg-[#FFF1F3]",

@@ -6,12 +6,15 @@ import {
   exportQuizEditorBundle,
   loadQuizEditorDraft,
   loadQuizEditorWorkspace,
+  reorderQuizEditorSlides,
+  saveQuizEditorDraft,
+  upsertQuizEditorSlide,
+} from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-api";
+import {
   normalizeQuizEditorGroups,
   normalizeQuizPlayerTemplate,
   normalizeQuizProjectSettings,
-  reorderQuizEditorSlides,
-  upsertQuizEditorSlide,
-} from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-api";
+} from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-normalizers";
 import { apiRequest } from "@/lib/api-client";
 import { graphQlRequest } from "@/lib/graphql-client";
 
@@ -66,6 +69,12 @@ test("normalizes backend authoring draft settings into the full editor settings 
   expect(settings.questionDefaults.shuffleQuestions).toBe(true);
   expect(settings.result.passMessage).toBe("Pass");
   expect(settings.result.reviewButtonLabel).toBeTruthy();
+  expect(settings.publishedFingerprints).toBeUndefined();
+});
+
+test("keeps the publish fingerprints of a draft and drops values that are not strings", () => {
+  const settings = normalizeQuizProjectSettings({ publishedFingerprints: { s1: "1a2b", s2: 7 } });
+  expect(settings.publishedFingerprints).toEqual({ s1: "1a2b" });
 });
 
 test("normalizes backend groupId tree into editor groups without losing slides", () => {
@@ -204,6 +213,20 @@ test("creates quiz with selected question ids so quiz bank metadata stays DB-bac
     method: "POST",
     portal: "lcms",
   }));
+});
+
+test("saves the draft with its idempotency key as a header, and none when no key is given", async () => {
+  apiRequestMock.mockResolvedValue({ docVersion: 4 } as never);
+
+  await saveQuizEditorDraft({ quizId: "quiz-a", docVersion: 3, tree: [], idempotencyKey: "quiz-editor-save:quiz-a:3:7" });
+  await saveQuizEditorDraft({ quizId: "quiz-a", docVersion: 3, tree: [] });
+
+  expect(apiRequestMock).toHaveBeenNthCalledWith(1, "/api/v1/lcms/quizzes/quiz-a/draft", expect.objectContaining({
+    body: JSON.stringify({ docVersion: 3, tree: [] }),
+    headers: { "X-Idempotency-Key": "quiz-editor-save:quiz-a:3:7" },
+    method: "PUT",
+  }));
+  expect(apiRequestMock.mock.calls[1]![1]).not.toHaveProperty("headers");
 });
 
 test("deletes quiz through the BE authoring endpoint", async () => {

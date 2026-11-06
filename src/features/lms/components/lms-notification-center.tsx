@@ -21,6 +21,8 @@ import Notifications from "@mui/icons-material/Notifications";
 import NotificationsNone from "@mui/icons-material/NotificationsNone";
 import Settings from "@mui/icons-material/Settings";
 import { toast } from "sonner";
+import { ErgButton } from "@/components/erg-mui/erg-actions";
+import { ErgErrorState, ErgLoadingSkeleton } from "@/components/erg-mui/erg-feedback";
 
 import {
   fetchNotificationFeed,
@@ -37,6 +39,7 @@ import { teacherPath } from "@/platform/workspaces/workspace-paths";
 import { QUERY_POLICIES } from "@/lib/query-policy";
 
 const LMS_NOTIFICATION_PORTAL = "lms";
+const NOTIFICATION_LOAD_TIMEOUT_MS = 8000;
 
 export function LmsNotificationCenter() {
   const navigate = useNavigate();
@@ -95,7 +98,7 @@ export function LmsNotificationCenter() {
   }
 
   function markAllAsRead() {
-    void markAllReadMutation.mutateAsync();
+    markAllReadMutation.mutate();
   }
 
   function openNotification(notification: NotificationFeedItem) {
@@ -114,10 +117,21 @@ export function LmsNotificationCenter() {
   }
 
   const open = Boolean(anchorEl);
+  const [timedOut, setTimedOut] = useState(false);
+  const stillLoading = open && notificationsQuery.isLoading;
+  useEffect(() => {
+    if (!stillLoading) {
+      setTimedOut(false);
+      return;
+    }
+    const id = window.setTimeout(() => setTimedOut(true), NOTIFICATION_LOAD_TIMEOUT_MS);
+    return () => window.clearTimeout(id);
+  }, [stillLoading]);
 
   return (
     <>
       <IconButton
+        aria-label="Thông báo"
         onClick={handleOpen}
         sx={{
           color: "text.secondary",
@@ -154,9 +168,9 @@ export function LmsNotificationCenter() {
         {/* Header */}
         <Box sx={{ px: 3, py: 2, borderBottom: "1px solid", borderColor: "divider" }}>
           <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-            <Typography sx={{ fontSize: 16, fontWeight: 700 }}>Thông báo</Typography>
+            <Typography sx={{ fontSize: 16, fontWeight: 600 }}>Thông báo</Typography>
             <Stack direction="row" spacing={0.5}>
-              <Button
+              <Button variant="contained"
                 size="small"
                 onClick={markAllAsRead}
                 disabled={!unreadCount || markAllReadMutation.isPending}
@@ -184,7 +198,7 @@ export function LmsNotificationCenter() {
               onClick={() => setTab("all")}
               variant={tab === "all" ? "filled" : "outlined"}
               sx={{
-                fontWeight: 700,
+                fontWeight: 600,
                 borderRadius: 2,
                 bgcolor: tab === "all" ? "primary.light" : "transparent",
                 color: tab === "all" ? "primary.main" : "text.secondary",
@@ -196,7 +210,7 @@ export function LmsNotificationCenter() {
               onClick={() => setTab("unread")}
               variant={tab === "unread" ? "filled" : "outlined"}
               sx={{
-                fontWeight: 700,
+                fontWeight: 600,
                 borderRadius: 2,
                 bgcolor: tab === "unread" ? "primary.light" : "transparent",
                 color: tab === "unread" ? "primary.main" : "text.secondary",
@@ -208,21 +222,25 @@ export function LmsNotificationCenter() {
 
         {/* Content */}
         <Box sx={{ maxHeight: 470, overflow: "auto" }}>
-          {notificationsQuery.isLoading ? (
-            <Box sx={{ py: 6, textAlign: "center" }}>
-              <Typography sx={{ color: "text.secondary", fontWeight: 500 }}>Đang tải thông báo...</Typography>
+          {(notificationsQuery.isLoading && !timedOut) ? (
+            <Box sx={{ px: 3, py: 3 }}>
+              <ErgLoadingSkeleton rows={3} />
             </Box>
-          ) : notificationsQuery.isError ? (
-            <Box sx={{ py: 6, textAlign: "center" }}>
-              <Typography sx={{ color: "error.main", fontWeight: 500 }}>Không tải được thông báo.</Typography>
+          ) : (notificationsQuery.isError || timedOut) ? (
+            <Box sx={{ p: 3 }}>
+              <ErgErrorState
+                action={<ErgButton onClick={() => void notificationsQuery.refetch()} size="small" variant="outlined">Thử lại</ErgButton>}
+                description="Kiểm tra kết nối mạng rồi thử lại."
+                title="Không tải được thông báo"
+              />
             </Box>
           ) : latestNotifications.length ? (
             <>
               {/* Important */}
               <Box sx={{ px: 3, py: 2 }}>
                 <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1.5 }}>
-                  <Typography sx={{ fontSize: 13, fontWeight: 700 }}>Quan trọng</Typography>
-                  <Button
+                  <Typography sx={{ fontSize: 13, fontWeight: 600 }}>Quan trọng</Typography>
+                  <Button variant="contained"
                     size="small"
                     onClick={() => void navigate({ href: teacherPath("/notifications") })}
                     sx={{ fontSize: 12, fontWeight: 600, color: "primary.main", textTransform: "none", p: 0 }}
@@ -245,7 +263,7 @@ export function LmsNotificationCenter() {
 
               {/* Others */}
               <Box sx={{ px: 3, py: 2 }}>
-                <Typography sx={{ fontSize: 13, fontWeight: 700, mb: 1.5 }}>Các thông báo khác</Typography>
+                <Typography sx={{ fontSize: 13, fontWeight: 600, mb: 1.5 }}>Các thông báo khác</Typography>
                 {latestNotifications.slice(1).map((notification) => (
                   <NotificationFeedCard
                     key={notification.id}
@@ -269,12 +287,12 @@ export function LmsNotificationCenter() {
         {/* Footer */}
         <Divider />
         <Box sx={{ px: 3, py: 1.5 }}>
-          <Button
+          <Button variant="contained"
             fullWidth
             onClick={() => void navigate({ href: teacherPath("/notifications") })}
             sx={{
               fontSize: 13,
-              fontWeight: 700,
+              fontWeight: 600,
               color: "primary.main",
               textTransform: "none",
               borderRadius: 2,
@@ -419,7 +437,7 @@ function showSystemToast(notification: NotificationFeedItem, onOpenDetail: (noti
           boxShadow: "0 16px 42px rgba(15,23,42,0.16)",
         }}
       >
-        <Button
+        <Button variant="contained"
           onClick={() => {
             toast.dismiss(toastId);
             onOpenDetail(notification);

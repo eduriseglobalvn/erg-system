@@ -1,15 +1,40 @@
-import type { ReactNode } from "react";
+import { useId, type ReactNode } from "react";
 
-import { Check, ClipboardCheck, X } from "lucide-react";
+import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurnedInOutlined";
+import CheckIcon from "@mui/icons-material/Check";
+import CloseIcon from "@mui/icons-material/Close";
 
+import Box from "@mui/material/Box";
+import ButtonBase from "@mui/material/ButtonBase";
 import Chip from "@mui/material/Chip";
 import Button from "@mui/material/Button";
+import Dialog from "@mui/material/Dialog";
+import Paper from "@mui/material/Paper";
+import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
-import { cn } from "@/lib/utils";
+import Typography from "@mui/material/Typography";
+import type { SxProps, Theme } from "@mui/material/styles";
+import { ErgIconButton } from "@/components/erg-mui/erg-actions";
+import { ErgSelect } from "@/components/erg-mui/erg-form";
 import type { StudentCopy } from "./class-students-workspace.copy";
 import type { AssignmentCatalogItem, AssignmentLevel, AssignmentSubject, AssignmentTopic } from "./class-students-workspace.types";
 import { formatSelectedStudentNames } from "./class-students-workspace.utils";
-import { AppSelect } from "@/components/ui/app-select";
+
+const pickerButtonSx = (selected: boolean): SxProps<Theme> => ({
+  bgcolor: selected ? "action.selected" : "background.paper",
+  border: 1,
+  borderColor: selected ? "primary.main" : "divider",
+  borderRadius: 1,
+  display: "block",
+  p: 1.5,
+  textAlign: "left",
+  transition: "background-color 0.15s ease",
+  width: "100%",
+  "&:hover": { bgcolor: selected ? "action.selected" : "action.hover" },
+  "&.Mui-focusVisible": { outline: 2, outlineColor: "primary.main", outlineOffset: 2 },
+});
+
+const metaPillSx: SxProps<Theme> = { bgcolor: "action.hover", borderRadius: 1, px: 1, py: 0.5 };
 
 export function AssignmentDialog({
   assignments,
@@ -58,165 +83,186 @@ export function AssignmentDialog({
   subjects: AssignmentSubject[];
   topics: AssignmentTopic[];
 }) {
+  const titleId = useId();
+
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end bg-slate-950/40 p-0 backdrop-blur-sm sm:items-center sm:p-6">
-      <section
-        aria-modal="true"
-        className="flex max-h-[94vh] w-full flex-col overflow-hidden rounded-t-lg bg-white shadow-sm sm:mx-auto sm:max-w-6xl sm:rounded-lg"
-        role="dialog"
+    <Dialog
+      open
+      fullWidth
+      maxWidth="lg"
+      onClose={onClose}
+      aria-labelledby={titleId}
+      sx={{ "& .MuiDialog-container": { alignItems: { xs: "flex-end", sm: "center" } } }}
+      slotProps={{
+        paper: {
+          sx: {
+            borderRadius: { xs: "8px 8px 0 0", sm: 1 },
+            display: "flex",
+            flexDirection: "column",
+            m: { xs: 0, sm: 3 },
+            maxHeight: "94vh",
+            maxWidth: { xs: "100%", sm: "72rem" },
+            overflow: "hidden",
+            width: "100%",
+          },
+        },
+      }}
+    >
+      <Stack
+        component="header"
+        direction="row"
+        spacing={2}
+        sx={{ alignItems: "flex-start", bgcolor: "background.default", borderBottom: 1, borderColor: "divider", justifyContent: "space-between", px: { xs: 2.5, sm: 3 }, py: 2 }}
       >
-        <header className="flex items-start justify-between gap-4 border-b border-[#cbd7e6] bg-[#f8fbff] px-5 py-4 sm:px-6">
-          <div>
-            <div className="inline-flex items-center gap-2 rounded-md bg-[#ebf3fc] px-2.5 py-1 text-[13px] font-bold text-[#0f5ea8]">
-              <ClipboardCheck className="h-4 w-4" />
-              {copy.assignPanelTitle}
-            </div>
-            <h2 className="mt-3 text-lg font-semibold text-slate-950 sm:text-xl">
-              {copy.assignDialogTitle}
-            </h2>
-            <p className="mt-1 text-sm leading-6 text-slate-500">{copy.assignDialogDescription}</p>
-          </div>
-          <button
-            aria-label={copy.closeDialog}
-            className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-[#cbd7e6] bg-white text-slate-700 transition hover:bg-[#f3f4f6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--erg-blue-ring)]"
-            onClick={onClose}
-            type="button"
+        <Box>
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{ alignItems: "center", bgcolor: "action.selected", borderRadius: 1, color: "primary.main", display: "inline-flex", fontWeight: "fontWeightBold", px: 1.25, py: 0.5, typography: "caption" }}
           >
-            <X className="h-4 w-4" />
-          </button>
-        </header>
+            <AssignmentTurnedInOutlinedIcon fontSize="small" />
+            <span>{copy.assignPanelTitle}</span>
+          </Stack>
+          <Typography id={titleId} component="h2" variant="h4" sx={{ mt: 1.5 }}>
+            {copy.assignDialogTitle}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7, mt: 0.5 }}>{copy.assignDialogDescription}</Typography>
+        </Box>
+        <ErgIconButton label={copy.closeDialog} onClick={onClose} sx={{ border: 1, borderColor: "divider", borderRadius: 1, flexShrink: 0, height: 40, width: 40 }}>
+          <CloseIcon fontSize="small" />
+        </ErgIconButton>
+      </Stack>
 
-        <div className="grid min-h-0 flex-1 gap-4 overflow-y-auto bg-slate-50/80 p-4 lg:grid-cols-[300px_minmax(0,1fr)] lg:p-6">
-          <aside className="space-y-4">
-            <label className="block">
-              <span className="text-[13px] font-semibold text-slate-600">
-                {copy.subjectPickerLabel}
-              </span>
-              <AppSelect
-                aria-label={copy.subjectPickerLabel}
-                className="mt-2 h-10 w-full rounded-lg border border-[#d7e0ec] bg-white px-3 text-[14px] font-bold text-slate-950 outline-none transition focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
-                onChange={(event) => onSubjectChange(event.target.value)}
-                value={selectedSubjectId}
-              >
-                {subjects.map((subjectItem) => (
-                  <option key={subjectItem.id} value={subjectItem.id}>
-                    {subjectItem.label}
-                  </option>
-                ))}
-              </AppSelect>
-            </label>
+      <Box
+        sx={{ bgcolor: "background.default", display: "grid", flex: 1, gap: 2, gridTemplateColumns: { lg: "300px minmax(0, 1fr)" }, minHeight: 0, overflowY: "auto", p: { xs: 2, lg: 3 } }}
+      >
+        <Stack component="aside" spacing={2}>
+          <Box component="label" sx={{ display: "block" }}>
+            <Typography component="span" variant="caption" color="text.secondary" sx={{ fontWeight: "fontWeightBold" }}>
+              {copy.subjectPickerLabel}
+            </Typography>
+            <ErgSelect
+              size="small"
+              options={subjects.map((subjectItem) => ({ label: subjectItem.label, value: subjectItem.id }))}
+              slotProps={{ htmlInput: { "aria-label": copy.subjectPickerLabel } }}
+              sx={{ mt: 1 }}
+              onChange={(event) => onSubjectChange(event.target.value)}
+              value={selectedSubjectId}
+            />
+          </Box>
 
-            {selectedSubjectId ? (
-              <PickerGroup label={copy.levelPickerLabel}>
-                {levels.map((level) => {
-                  const selected = level.id === selectedLevelId;
+          {selectedSubjectId ? (
+            <PickerGroup label={copy.levelPickerLabel}>
+              {levels.map((level) => {
+                const selected = level.id === selectedLevelId;
 
-                  return (
-                    <button
-                      aria-pressed={selected}
-                      className={cn(
-                        "w-full rounded-lg border p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--erg-blue-ring)]",
-                        selected ? "border-[#b8d6fa] bg-[#ebf3fc] text-[#0f5ea8]" : "border-[#cbd7e6] bg-white/80 text-slate-700 hover:bg-white",
-                      )}
-                      key={level.id}
-                      onClick={() => onLevelChange(level.id)}
-                      type="button"
-                    >
-                      <span className="block text-sm font-semibold">{level.label}</span>
-                      <span className={cn("mt-1 block text-[13px] leading-5", selected ? "text-slate-300" : "text-slate-600")}>
-                        {level.description}
-                      </span>
-                    </button>
-                  );
-                })}
-              </PickerGroup>
-            ) : null}
-          </aside>
+                return (
+                  <ButtonBase
+                    aria-pressed={selected}
+                    key={level.id}
+                    onClick={() => onLevelChange(level.id)}
+                    sx={pickerButtonSx(selected)}
+                    type="button"
+                  >
+                    <Typography component="span" variant="subtitle2" sx={{ color: selected ? "primary.main" : "text.primary", display: "block" }}>{level.label}</Typography>
+                    <Typography component="span" variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.5 }}>
+                      {level.description}
+                    </Typography>
+                  </ButtonBase>
+                );
+              })}
+            </PickerGroup>
+          ) : null}
+        </Stack>
 
-          <div className="space-y-4">
-            <div className="rounded-lg border border-[#cbd7e6] bg-white p-4 shadow-[var(--shadow-xs)]">
-              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                <div className="min-w-0">
-                  <div className="text-sm font-semibold text-slate-950">{copy.selectedRecipientsTitle}</div>
-                  <div className="mt-1 max-w-2xl truncate text-sm text-slate-500" title={selectedStudentNames.join(", ")}>
-                    {formatSelectedStudentNames(selectedStudentNames, copy)}
-                  </div>
-                </div>
-                <Chip label={copy.selectedRecipientsCount(selectedCount)} size="small" color="secondary" />
-              </div>
-            </div>
+        <Stack spacing={2}>
+          <Paper variant="outlined" sx={{ borderRadius: 1, p: 2 }}>
+            <Stack direction={{ xs: "column", md: "row" }} spacing={1.5} sx={{ alignItems: { md: "center" }, justifyContent: { md: "space-between" } }}>
+              <Box sx={{ minWidth: 0 }}>
+                <Typography variant="subtitle2">{copy.selectedRecipientsTitle}</Typography>
+                <Typography variant="body2" color="text.secondary" noWrap sx={{ maxWidth: "42rem", mt: 0.5 }} title={selectedStudentNames.join(", ")}>
+                  {formatSelectedStudentNames(selectedStudentNames, copy)}
+                </Typography>
+              </Box>
+              <Chip label={copy.selectedRecipientsCount(selectedCount)} size="small" color="secondary" />
+            </Stack>
+          </Paper>
 
-            <div className="space-y-4">
-              {topics.map((topic, topicIndex) => (
-                <TopicAssignmentGroup
-                  copy={copy}
-                  key={topic.id}
-                  onAssignmentToggle={onAssignmentToggle}
-                  selectedAssignmentIds={selectedAssignmentIds}
-                  topic={topic}
-                  topicIndex={topicIndex}
+          <Stack spacing={2}>
+            {topics.map((topic, topicIndex) => (
+              <TopicAssignmentGroup
+                copy={copy}
+                key={topic.id}
+                onAssignmentToggle={onAssignmentToggle}
+                selectedAssignmentIds={selectedAssignmentIds}
+                topic={topic}
+                topicIndex={topicIndex}
+              />
+            ))}
+          </Stack>
+
+          <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { lg: "minmax(0, 1fr) 280px" } }}>
+            <Paper variant="outlined" sx={{ borderRadius: 1, p: 2 }}>
+              <Box component="label" sx={{ display: "block" }}>
+                <Typography component="span" variant="subtitle2" color="text.secondary">{copy.dueDateLabel}</Typography>
+                <TextField
+                  size="small"
+                  fullWidth
+                  sx={{ mt: 1 }}
+                  type="datetime-local"
+                  value={dueDate}
+                  onChange={(event) => onDueDateChange(event.target.value)}
                 />
-              ))}
-            </div>
+              </Box>
 
-            <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_280px]">
-              <div className="rounded-lg border border-[#cbd7e6] bg-white p-4 shadow-[var(--shadow-xs)]">
-                <label className="block">
-                  <span className="text-sm font-semibold text-slate-700">{copy.dueDateLabel}</span>
-                  <TextField
-                    size="small"
-                    fullWidth
-                    sx={{ mt: 1 }}
-                    type="datetime-local"
-                    value={dueDate}
-                    onChange={(event) => onDueDateChange(event.target.value)}
-                  />
-                </label>
+              <Box component="label" sx={{ display: "block", mt: 2 }}>
+                <Typography component="span" variant="subtitle2" color="text.secondary">{copy.noteLabel}</Typography>
+                <TextField
+                  multiline
+                  minRows={4}
+                  size="small"
+                  fullWidth
+                  sx={{ mt: 1 }}
+                  placeholder={copy.notePlaceholder}
+                  value={note}
+                  onChange={(event) => onNoteChange(event.target.value)}
+                />
+              </Box>
+            </Paper>
 
-                <label className="mt-4 block">
-                  <span className="text-sm font-semibold text-slate-700">{copy.noteLabel}</span>
-                  <TextField
-                    multiline
-                    minRows={4}
-                    size="small"
-                    fullWidth
-                    sx={{ mt: 1 }}
-                    placeholder={copy.notePlaceholder}
-                    value={note}
-                    onChange={(event) => onNoteChange(event.target.value)}
-                  />
-                </label>
-              </div>
+            <AssignmentSummary assignments={assignments} copy={copy} />
+          </Box>
+        </Stack>
+      </Box>
 
-              <AssignmentSummary assignments={assignments} copy={copy} />
-            </div>
-          </div>
-        </div>
-
-        <footer className="flex flex-col gap-3 border-t border-[#cbd7e6] bg-[#f8fbff] px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-          <div className="text-sm leading-6 text-slate-500">{copy.deliveryHint(selectedCount, schoolName)}</div>
-          <div className="flex flex-col gap-2 sm:flex-row">
-            <Button variant="outlined" onClick={onClose}>
-              {copy.cancelAction}
-            </Button>
-            <Button variant="contained" disabled={!canDeliver} onClick={onDeliver}>
-              {copy.deliverAction(selectedCount)}
-            </Button>
-          </div>
-        </footer>
-      </section>
-    </div>
+      <Stack
+        component="footer"
+        direction={{ xs: "column", sm: "row" }}
+        spacing={1.5}
+        sx={{ alignItems: { sm: "center" }, bgcolor: "background.default", borderColor: "divider", borderTop: 1, justifyContent: { sm: "space-between" }, px: { xs: 2.5, sm: 3 }, py: 2 }}
+      >
+        <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>{copy.deliveryHint(selectedCount, schoolName)}</Typography>
+        <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
+          <Button variant="outlined" onClick={onClose}>
+            {copy.cancelAction}
+          </Button>
+          <Button variant="contained" disabled={!canDeliver} onClick={onDeliver}>
+            {copy.deliverAction(selectedCount)}
+          </Button>
+        </Stack>
+      </Stack>
+    </Dialog>
   );
 }
 
 function PickerGroup({ children, label }: { children: ReactNode; label: string }) {
   return (
-    <div>
-      <div className="text-[13px] font-semibold text-slate-600">{label}</div>
-      <div className="mt-2 space-y-2">{children}</div>
-    </div>
+    <Box>
+      <Typography variant="caption" color="text.secondary" sx={{ display: "block", fontWeight: "fontWeightBold" }}>{label}</Typography>
+      <Stack spacing={1} sx={{ mt: 1 }}>{children}</Stack>
+    </Box>
   );
 }
 
@@ -236,98 +282,105 @@ function TopicAssignmentGroup({
   const topicLabel = topic.label || copy.otherTopicLabel;
 
   return (
-    <section className="rounded-lg border border-[#cbd7e6] bg-white p-4">
-      <div className="flex items-center gap-3">
-        <span className="grid h-8 w-8 place-items-center rounded-lg bg-slate-100 text-[13px] font-bold text-slate-700">
+    <Paper component="section" variant="outlined" sx={{ borderRadius: 1, p: 2 }}>
+      <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
+        <Box
+          component="span"
+          sx={{ bgcolor: "action.hover", borderRadius: 1, display: "grid", fontWeight: "fontWeightBold", height: 32, placeItems: "center", typography: "caption", width: 32 }}
+        >
           {topicIndex + 1}
-        </span>
-        <div>
-          <h3 className="text-sm font-semibold text-slate-950">{topicLabel}</h3>
-          <p className="mt-0.5 text-[13px] font-semibold text-slate-600">{copy.topicCount(topic.items.length)}</p>
-        </div>
-      </div>
+        </Box>
+        <Box>
+          <Typography component="h3" variant="subtitle2">{topicLabel}</Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ display: "block", fontWeight: "fontWeightBold", mt: 0.25 }}>{copy.topicCount(topic.items.length)}</Typography>
+        </Box>
+      </Stack>
 
-      <div className="mt-3 grid gap-2 md:grid-cols-2">
+      <Box sx={{ display: "grid", gap: 1, gridTemplateColumns: { md: "repeat(2, minmax(0, 1fr))" }, mt: 1.5 }}>
         {topic.items.map((item) => {
           const selected = selectedAssignmentIds.includes(item.id);
 
           return (
-            <button
+            <ButtonBase
               aria-pressed={selected}
-              className={cn(
-                "rounded-lg border p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--erg-blue-ring)]",
-                selected ? "border-[#b8d6fa] bg-[#ebf3fc]" : "border-[#cbd7e6] bg-white hover:bg-[#f8fbff]",
-              )}
               key={item.id}
               onClick={() => onAssignmentToggle(item.id)}
+              sx={pickerButtonSx(selected)}
               type="button"
             >
-              <span className="flex items-start justify-between gap-3">
-                <span className="min-w-0">
-                  <span className="block text-sm font-semibold text-slate-950">{item.activityLabel}</span>
-                  <span className="mt-2 flex flex-wrap items-center gap-2 text-[13px] font-semibold text-slate-600">
-                    <span className="rounded-md bg-slate-100 px-2 py-1">{copy.questionCountValue(item.questionCount)}</span>
-                    <span className="rounded-md bg-slate-100 px-2 py-1">
+              <Stack component="span" direction="row" spacing={1.5} sx={{ alignItems: "flex-start", justifyContent: "space-between" }}>
+                <Box component="span" sx={{ minWidth: 0 }}>
+                  <Typography component="span" variant="subtitle2" sx={{ display: "block" }}>{item.activityLabel}</Typography>
+                  <Stack component="span" direction="row" useFlexGap sx={{ alignItems: "center", color: "text.secondary", flexWrap: "wrap", fontWeight: "fontWeightBold", gap: 1, mt: 1, typography: "caption" }}>
+                    <Box component="span" sx={metaPillSx}>{copy.questionCountValue(item.questionCount)}</Box>
+                    <Box component="span" sx={metaPillSx}>
                       {copy.durationLabel}: {item.durationLabel}
-                    </span>
-                  </span>
-                </span>
-                <span className="flex shrink-0 items-center gap-2">
-                  <span
-                    className={cn(
-                      "grid h-6 w-6 place-items-center rounded-md border text-[12px] font-bold",
-                      selected ? "border-[var(--erg-blue)] bg-[var(--erg-blue)] text-white" : "border-slate-300 bg-white",
-                    )}
+                    </Box>
+                  </Stack>
+                </Box>
+                <Stack component="span" direction="row" spacing={1} sx={{ alignItems: "center", flexShrink: 0 }}>
+                  <Box
+                    component="span"
+                    sx={{
+                      bgcolor: selected ? "primary.main" : "background.paper",
+                      border: 1,
+                      borderColor: selected ? "primary.main" : "divider",
+                      borderRadius: 1,
+                      color: "primary.contrastText",
+                      display: "grid",
+                      height: 24,
+                      placeItems: "center",
+                      width: 24,
+                    }}
                   >
-                    {selected ? <Check className="h-3.5 w-3.5" strokeWidth={3} /> : null}
-                  </span>
+                    {selected ? <CheckIcon fontSize="inherit" /> : null}
+                  </Box>
                   <Chip
                     label={item.kind === "test" ? copy.testType : copy.trainType}
                     size="small"
                     color={item.kind === "test" ? "warning" : "secondary"}
                   />
-                </span>
-              </span>
-            </button>
+                </Stack>
+              </Stack>
+            </ButtonBase>
           );
         })}
-      </div>
-    </section>
+      </Box>
+    </Paper>
   );
 }
 
 function AssignmentSummary({ assignments, copy }: { assignments: AssignmentCatalogItem[]; copy: StudentCopy }) {
   if (assignments.length === 0) {
     return (
-      <div className="rounded-lg border border-dashed border-slate-300 bg-white p-4">
-        <div className="text-sm font-semibold text-slate-950">{copy.noAssignmentSelectedTitle}</div>
-        <div className="mt-2 text-sm leading-6 text-slate-500">{copy.noAssignmentSelectedDescription}</div>
-      </div>
+      <Box sx={{ bgcolor: "background.paper", border: 1, borderColor: "divider", borderRadius: 1, borderStyle: "dashed", p: 2 }}>
+        <Typography variant="subtitle2">{copy.noAssignmentSelectedTitle}</Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7, mt: 1 }}>{copy.noAssignmentSelectedDescription}</Typography>
+      </Box>
     );
   }
 
   return (
-    <div className="rounded-lg border border-[#cbd7e6] bg-[#f8fbff] p-3">
-      <div className="text-[13px] font-semibold text-slate-600">{copy.selectedActivitiesLabel}</div>
-      <div className="mt-1 text-sm font-semibold text-slate-950">{copy.selectedAssignmentsCount(assignments.length)}</div>
-      <div className="mt-2 space-y-2">
+    <Box sx={{ bgcolor: "background.paper", border: 1, borderColor: "divider", borderRadius: 1, p: 1.5 }}>
+      <Typography variant="caption" color="text.secondary" sx={{ display: "block", fontWeight: "fontWeightBold" }}>{copy.selectedActivitiesLabel}</Typography>
+      <Typography variant="subtitle2" sx={{ mt: 0.5 }}>{copy.selectedAssignmentsCount(assignments.length)}</Typography>
+      <Stack spacing={1} sx={{ mt: 1 }}>
         {assignments.slice(0, 3).map((assignment) => (
-          <div key={assignment.id} className="rounded-lg bg-white px-3 py-2">
-            <div className="line-clamp-1 text-sm font-semibold text-slate-950">{assignment.activityLabel}</div>
-            <div className="mt-1 line-clamp-1 text-[13px] leading-5 text-slate-600">
+          <Box key={assignment.id} sx={{ bgcolor: "background.default", borderRadius: 1, px: 1.5, py: 1 }}>
+            <Typography variant="subtitle2" noWrap>{assignment.activityLabel}</Typography>
+            <Typography variant="caption" color="text.secondary" noWrap sx={{ display: "block", mt: 0.5 }}>
               {assignment.levelLabel} / {assignment.topicLabel}
-            </div>
-            <div className="mt-2 flex flex-wrap items-center gap-2 text-[13px] font-semibold text-slate-600">
-              <span className="rounded-md bg-slate-100 px-2 py-1">{copy.questionCountValue(assignment.questionCount)}</span>
-              <span className="rounded-md bg-slate-100 px-2 py-1">
+            </Typography>
+            <Stack direction="row" useFlexGap sx={{ alignItems: "center", color: "text.secondary", flexWrap: "wrap", fontWeight: "fontWeightBold", gap: 1, mt: 1, typography: "caption" }}>
+              <Box component="span" sx={metaPillSx}>{copy.questionCountValue(assignment.questionCount)}</Box>
+              <Box component="span" sx={metaPillSx}>
                 {copy.durationLabel}: {assignment.durationLabel}
-              </span>
-            </div>
-          </div>
+              </Box>
+            </Stack>
+          </Box>
         ))}
-        {assignments.length > 3 ? <div className="text-[13px] font-semibold text-slate-600">+{assignments.length - 3}</div> : null}
-      </div>
-    </div>
+        {assignments.length > 3 ? <Typography variant="caption" color="text.secondary" sx={{ fontWeight: "fontWeightBold" }}>+{assignments.length - 3}</Typography> : null}
+      </Stack>
+    </Box>
   );
 }
-

@@ -18,6 +18,7 @@ FROM nginx:1.27-alpine AS runtime
 
 COPY --from=build /app/dist /opt/erg-dist
 COPY deploy/nginx/default.conf.template /etc/nginx/templates/default.conf.template
+COPY deploy/nginx/security-headers.conf /etc/nginx/security-headers.conf
 COPY deploy/docker/promote-release.sh /docker-entrypoint.d/15-promote-erg-release.sh
 RUN sed -i 's/\r$//' /docker-entrypoint.d/15-promote-erg-release.sh && chmod +x /docker-entrypoint.d/15-promote-erg-release.sh
 

@@ -159,6 +159,26 @@ export function clearStoredAuthSessions() {
   window.dispatchEvent(new CustomEvent(AUTH_SESSION_STORAGE_CHANGED_EVENT, { detail: null }));
 }
 
+const LEGACY_SSO_COOKIE = "erg_sso";
+
+/** One-time startup purge of bearer material that older builds left in localStorage and the parent-domain cookie. */
+export function purgeLegacyAuthStorage() {
+  if (!canUseStorage()) return;
+
+  removePersistedJsonValue(TEACHER_LOCAL_SESSION_KEY);
+  removePersistedJsonValue(STUDENT_LOCAL_SESSION_KEY);
+  for (const portal of ["admin", "crm", "lms", "lcms"] as const) {
+    removePersistedJsonValue(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, portal));
+  }
+
+  const expired = `${LEGACY_SSO_COOKIE}=; path=/; max-age=0`;
+  document.cookie = expired;
+  const labels = window.location.hostname.split(".");
+  for (let i = 0; i < labels.length - 1; i += 1) {
+    document.cookie = `${expired}; domain=.${labels.slice(i).join(".")}`;
+  }
+}
+
 export function readStoredAuthIdentity(portal?: StoredAuthSession["portal"]) {
   return readRawStoredAuthSession(portal);
 }
@@ -202,9 +222,21 @@ function sessionMatchesPortal(session: StoredAuthSession, portal: Exclude<NonNul
 
 function sessionMatchesRequestedPortal(session: StoredAuthSession, portal: Exclude<NonNullable<StoredAuthSession["portal"]>, "elearning">) {
   if (sessionMatchesPortal(session, portal)) return true;
-  if (portal !== "lms" || !isSharedStudentPath()) return false;
 
   const portals = session.portals ?? [];
+  const roles = (session.roles ?? []).map((r) => r.toLowerCase());
+  const hasBackOfficeEntitlement =
+    portals.includes("*") ||
+    portals.includes("admin") ||
+    portals.includes("lcms") ||
+    roles.some((r) => r.includes("admin") || r.includes("super"));
+
+  if (hasBackOfficeEntitlement && (portal === "admin" || portal === "lcms")) {
+    return true;
+  }
+
+  if (portal !== "lms" || !isSharedStudentPath()) return false;
+
   return session.portal === "admin" || session.portal === "lcms" || portals.includes("admin") || portals.includes("lcms");
 }
 

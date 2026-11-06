@@ -52,7 +52,7 @@ describe("employee management API", () => {
   test("includes tenant filters pagination and role in employee query keys", async () => {
     const { employeeManagementQueryKeys } = await import("@/features/employee-management/api/employee-management-api");
     const filters = { page: 2, limit: 50, search: "IT", status: "ACTIVE", role: "it_operator" };
-    expect(employeeManagementQueryKeys.list("tenant-a", filters)).toEqual([
+    expect(employeeManagementQueryKeys.list("tenant-a", filters as never)).toEqual([
       "employee-management",
       "tenant-a",
       "list",

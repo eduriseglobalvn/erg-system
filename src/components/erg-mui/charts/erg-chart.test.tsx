@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { ErgChartContainer, type ErgChartConfig } from "@/components/erg-mui/charts/erg-chart";
 
 const config = {
-  competency: { label: "Năng lực", color: "#2563EB" },
+  competency: { label: "Năng lực", color: "#0071E3" },
   participation: { label: "Tham gia", color: "#059669" },
 } satisfies ErgChartConfig;
 
@@ -17,7 +17,7 @@ describe("ErgChartContainer", () => {
     );
 
     const chart = screen.getByRole("img", { name: "Xu hướng đào tạo" });
-    expect(chart).toHaveStyle({ "--color-competency": "#2563EB" });
+    expect(chart).toHaveStyle({ "--color-competency": "#0071E3" });
     expect(chart).toHaveStyle({ "--color-participation": "#059669" });
     expect(screen.getByText("Dữ liệu biểu đồ")).toBeInTheDocument();
   });

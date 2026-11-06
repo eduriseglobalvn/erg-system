@@ -92,14 +92,19 @@ export function useErgCalendarWorkspace(props: ErgCalendarWorkspaceProps) {
   const visibleRange = useMemo<ErgCalendarVisibleRange>(() => {
     const from = mode === "day" || mode === "three-day"
       ? selectedDate
-      : mode === "month" || mode === "schedule"
+      : mode === "month"
+        // The month grid shows leading/trailing days of neighbouring months, so fetch the whole 6-week matrix.
+        ? visibleMonth.startOf("month").startOf("week")
+        : mode === "schedule"
         ? visibleMonth.startOf("month")
         : selectedDate.startOf("week");
     const to = mode === "day"
       ? selectedDate
       : mode === "three-day"
         ? selectedDate.add(2, "day")
-        : mode === "month" || mode === "schedule"
+        : mode === "month"
+          ? visibleMonth.startOf("month").startOf("week").add(41, "day")
+          : mode === "schedule"
           ? visibleMonth.endOf("month")
           : selectedDate.endOf("week");
     return { activeLane: calendarLane, from: from.format("YYYY-MM-DD"), mode, selectedScopeId, selectedScopeLabel, to: to.format("YYYY-MM-DD") };

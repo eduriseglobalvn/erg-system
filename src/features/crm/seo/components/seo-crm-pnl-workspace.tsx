@@ -1,7 +1,8 @@
 import Button from "@mui/material/Button";
 import { ArrowRight, ClipboardCheck, DollarSign, LineChart, UsersRound } from "lucide-react";
 
-import { DashboardMetricCard, DashboardSectionCard } from "@/components/dashboard/dashboard-page-shell";
+import { DashboardMetricCard } from "@/components/dashboard/dashboard-metric-card";
+import { DashboardSectionCard } from "@/components/dashboard/dashboard-page-shell";
 import { calculateSeoPnlSummary, costTotal, revenueNet } from "@/features/crm/seo/api/seo-crm-pnl";
 import type { SeoLeadStatus, SeoOpportunity, SeoSchoolLead } from "@/features/crm/seo/types/seo-crm-types";
 import { DecisionLine, formatCurrency, formatCurrencyCompact, formatDate, formatPercent, statusLabelMap } from "@/features/crm/seo/components/seo-crm-workspace-shared";

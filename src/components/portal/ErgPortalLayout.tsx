@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Box } from "@mui/material";
+import Box from "@mui/material/Box";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import type { DashboardLeafVariant } from "@/layouts/dashboard/types/dashboard-types";
 import { useNavigate } from "@tanstack/react-router";
@@ -11,6 +11,7 @@ import {
   COLLAPSED_SIDEBAR_WIDTH,
   EXPANDED_SIDEBAR_WIDTH,
   PORTAL_SIDEBAR_TRANSITION,
+  SIDEBAR_GUTTER,
 } from "./portal-sidebar-motion";
 import type { Workspace } from "@/platform/workspaces/workspace-domain";
 
@@ -96,9 +97,11 @@ export default function ErgPortalLayout({
       data-sidebar-width={sidebarWidth}
       data-testid="erg-portal-shell"
       sx={{
-        bgcolor: "#FFFFFF",
+        bgcolor: "background.default",
         display: "grid",
-        gridTemplateColumns: isCompact ? "minmax(0, 1fr)" : `${sidebarWidth}px minmax(0, 1fr)`,
+        gridTemplateColumns: isCompact ? "minmax(0, 1fr)" : `${sidebarWidth + SIDEBAR_GUTTER * 2}px minmax(0, 1fr)`,
+        // Pin the row to the viewport so a long menu scrolls inside the card instead of growing it.
+        gridTemplateRows: "minmax(0, 1fr)",
         height: "100dvh",
         maxWidth: "100vw",
         minHeight: "100dvh",
@@ -162,6 +165,7 @@ export default function ErgPortalLayout({
           userEmail={portalInfo?.userEmail}
           workspaceCapabilities={portalInfo?.workspaceCapabilities}
           workspacePortals={portalInfo?.workspacePortals}
+          onNavigate={(path) => void navigate({ href: path })}
         />
         <Box
           component="main"

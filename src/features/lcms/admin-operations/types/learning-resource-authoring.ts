@@ -2,7 +2,7 @@ import type {
   LearningResourceAssetDetail,
   LearningResourceResourceCard,
   LearningResourceResourceDetail,
-} from "@/features/lcms/admin-operations/api/learning-resource-authoring-api";
+} from "@/features/lms/learning-resources/api/learning-resource-authoring-api";
 import type {
   LearningResourceNode,
   LearningResourceNodeKind,

@@ -1,23 +1,24 @@
 import { alpha, createTheme } from "@mui/material/styles";
 import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
-import "@fontsource/plus-jakarta-sans/400.css";
-import "@fontsource/plus-jakarta-sans/500.css";
-import "@fontsource/plus-jakarta-sans/600.css";
-import "@fontsource/plus-jakarta-sans/700.css";
-import "@fontsource/plus-jakarta-sans/800.css";
 import "@fontsource/be-vietnam-pro/400.css";
 import "@fontsource/be-vietnam-pro/500.css";
 import "@fontsource/be-vietnam-pro/600.css";
 import "@fontsource/be-vietnam-pro/700.css";
-import "@fontsource/be-vietnam-pro/800.css";
-import "@fontsource/manrope/index.css";
+
+// Phones get 44px touch targets on every button and input; desktop keeps the dense 40/34px sizes.
+const phone = "@media (max-width: 599.95px)";
+const phoneTarget = { [phone]: { minHeight: 44 } };
+const { duration, easing } = t.motion;
+const fast = (property: string) => `${property} ${duration.fast}ms ${easing.standard}`;
+type TintColor = "success" | "warning" | "error" | "info";
+const tintColors = new Set<string>(["success", "warning", "error", "info"]);
 
 export const ergEnterpriseTheme = createTheme({
   palette: {
     primary: {
       main: t.color.primary,
       dark: t.color.primaryHover,
-      light: "#3B82D6",
+      light: "#4D9BEB",
       contrastText: "#FFFFFF",
     },
     error: {
@@ -48,23 +49,41 @@ export const ergEnterpriseTheme = createTheme({
       disabled: t.color.textSoft,
     },
   },
+  // shape.borderRadius stays 8: it is the multiplier for every numeric sx borderRadius in the app.
   shape: {
     borderRadius: t.radius.sm,
   },
+  transitions: {
+    duration: {
+      shortest: duration.instant,
+      shorter: duration.fast,
+      short: duration.base,
+      standard: duration.base,
+      complex: duration.slow,
+      enteringScreen: duration.slow,
+      leavingScreen: duration.base,
+    },
+    easing: {
+      easeInOut: easing.standard,
+      easeOut: easing.emphasized,
+      easeIn: easing.exit,
+      sharp: easing.standard,
+    },
+  },
   typography: {
     fontFamily: t.font.body,
-    h1: { fontSize: 30, fontWeight: 800, lineHeight: 1.2, letterSpacing: 0 },
-    h2: { fontSize: 26, fontWeight: 800, lineHeight: 1.24, letterSpacing: 0 },
-    h3: { fontSize: 22, fontWeight: 750, lineHeight: 1.3, letterSpacing: 0 },
-    h4: { fontSize: 20, fontWeight: 750, lineHeight: 1.35, letterSpacing: 0 },
-    h5: { fontSize: 18, fontWeight: 750, lineHeight: 1.4, letterSpacing: 0 },
-    h6: { fontSize: 16, fontWeight: 750, lineHeight: 1.45, letterSpacing: 0 },
-    subtitle1: { fontSize: 15, fontWeight: 700, lineHeight: 1.45, letterSpacing: 0 },
-    subtitle2: { fontSize: 14, fontWeight: 700, lineHeight: 1.45, letterSpacing: 0 },
-    body1: { fontSize: 15, fontWeight: 500, lineHeight: 1.55, letterSpacing: 0 },
-    body2: { fontSize: 14, fontWeight: 500, lineHeight: 1.5, letterSpacing: 0 },
-    caption: { fontSize: 12.5, fontWeight: 600, lineHeight: 1.45, letterSpacing: 0 },
-    button: { fontSize: 14, fontWeight: 750, lineHeight: 1.2, letterSpacing: 0, textTransform: "none" },
+    h1: { fontSize: 24, fontWeight: 600, lineHeight: 1.2, letterSpacing: 0 },
+    h2: { fontSize: 22, fontWeight: 600, lineHeight: 1.24, letterSpacing: 0 },
+    h3: { fontSize: 20, fontWeight: 600, lineHeight: 1.3, letterSpacing: 0 },
+    h4: { fontSize: 18, fontWeight: 600, lineHeight: 1.35, letterSpacing: 0 },
+    h5: { fontSize: 16, fontWeight: 600, lineHeight: 1.4, letterSpacing: 0 },
+    h6: { fontSize: 15, fontWeight: 600, lineHeight: 1.45, letterSpacing: 0 },
+    subtitle1: { fontSize: 14, fontWeight: 600, lineHeight: 1.45, letterSpacing: 0 },
+    subtitle2: { fontSize: 14, fontWeight: 600, lineHeight: 1.45, letterSpacing: 0 },
+    body1: { fontSize: 14, fontWeight: 400, lineHeight: 1.55, letterSpacing: 0 },
+    body2: { fontSize: 14, fontWeight: 400, lineHeight: 1.5, letterSpacing: 0 },
+    caption: { fontSize: 12, fontWeight: 500, lineHeight: 1.45, letterSpacing: 0 },
+    button: { fontSize: 14, fontWeight: 600, lineHeight: 1.2, letterSpacing: 0, textTransform: "none" },
   },
   components: {
     MuiCssBaseline: {
@@ -76,7 +95,7 @@ export const ergEnterpriseTheme = createTheme({
           textRendering: "optimizeLegibility",
         },
         "strong, b": {
-          fontWeight: 750,
+          fontWeight: 700,
         },
         "@media (prefers-reduced-motion: reduce)": {
           "*, *::before, *::after": {
@@ -94,7 +113,7 @@ export const ergEnterpriseTheme = createTheme({
       },
       styleOverrides: {
         root: {
-          transition: "background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, color 160ms ease, opacity 160ms ease, transform 160ms ease",
+          transition: ["background-color", "border-color", "box-shadow", "color", "opacity", "transform"].map(fast).join(", "),
           "&.Mui-focusVisible": {
             boxShadow: t.shadow.focus,
           },
@@ -104,13 +123,14 @@ export const ergEnterpriseTheme = createTheme({
     MuiButton: {
       defaultProps: {
         disableElevation: true,
-        variant: "contained",
+        variant: "text",
       },
       styleOverrides: {
         root: {
           minHeight: t.size.controlMd,
-          borderRadius: t.radius.md,
-          fontWeight: 750,
+          ...phoneTarget,
+          borderRadius: t.radius.control,
+          fontWeight: 600,
           letterSpacing: 0,
           paddingInline: 18,
           textTransform: "none",
@@ -132,6 +152,7 @@ export const ergEnterpriseTheme = createTheme({
         },
         sizeSmall: {
           minHeight: t.size.controlSm,
+          ...phoneTarget,
           paddingInline: 12,
         },
         sizeLarge: {
@@ -156,10 +177,16 @@ export const ergEnterpriseTheme = createTheme({
         },
       },
     },
+    MuiToggleButton: {
+      styleOverrides: {
+        root: phoneTarget,
+      },
+    },
     MuiIconButton: {
       styleOverrides: {
         root: {
-          borderRadius: t.radius.md,
+          [phone]: { minHeight: 44, minWidth: 44 },
+          borderRadius: t.radius.control,
           color: t.color.textMuted,
           "&:hover": {
             backgroundColor: t.color.surfaceMuted,
@@ -178,8 +205,15 @@ export const ergEnterpriseTheme = createTheme({
       styleOverrides: {
         root: {
           borderColor: t.color.border,
-          borderRadius: t.radius.lg,
-          boxShadow: t.shadow.xs,
+          borderRadius: t.radius.card,
+          boxShadow: "none", // shadows only for menu/popover/dialog (plan 7.1)
+        },
+      },
+    },
+    MuiPopover: {
+      styleOverrides: {
+        paper: {
+          boxShadow: t.shadow.float,
         },
       },
     },
@@ -187,9 +221,9 @@ export const ergEnterpriseTheme = createTheme({
       styleOverrides: {
         root: {
           border: `1px solid ${t.color.border}`,
-          borderRadius: t.radius.lg,
+          borderRadius: t.radius.card,
           backgroundImage: "none",
-          boxShadow: t.shadow.xs,
+          boxShadow: "none", // cards are separated by border only (plan 7.1); shadows are for menus/dialogs
         },
       },
     },
@@ -197,9 +231,10 @@ export const ergEnterpriseTheme = createTheme({
       styleOverrides: {
         root: {
           minHeight: t.size.controlMd,
-          borderRadius: t.radius.md,
+          ...phoneTarget,
+          borderRadius: t.radius.control,
           backgroundColor: t.color.surface,
-          fontWeight: 600,
+          fontWeight: 400,
           "& .MuiOutlinedInput-notchedOutline": {
             borderColor: t.color.border,
           },
@@ -227,7 +262,7 @@ export const ergEnterpriseTheme = createTheme({
       styleOverrides: {
         root: {
           color: t.color.textMuted,
-          fontWeight: 700,
+          fontWeight: 500,
           letterSpacing: 0,
           "&.Mui-focused": {
             color: t.color.primary,
@@ -238,7 +273,7 @@ export const ergEnterpriseTheme = createTheme({
     MuiFormHelperText: {
       styleOverrides: {
         root: {
-          fontWeight: 600,
+          fontWeight: 400,
           marginLeft: 2,
         },
       },
@@ -246,22 +281,45 @@ export const ergEnterpriseTheme = createTheme({
     MuiSelect: {
       styleOverrides: {
         select: {
-          fontWeight: 700,
+          fontWeight: 400,
         },
       },
     },
+    // palette.*.light is a translucent soft tint; MUI derives Alert text from it, which made the text unreadable.
+    MuiAlert: {
+      styleOverrides: {
+        root: ({ ownerState, theme }) => {
+          const severity = ownerState.severity ?? "success";
+          const action = { "& .MuiAlert-action .MuiButton-root": { whiteSpace: "nowrap" } };
+          if (ownerState.variant === "filled") return action;
+          return {
+            ...action,
+            ...(ownerState.variant === "outlined"
+              ? { borderColor: alpha(theme.palette[severity].main, 0.4) }
+              : { backgroundColor: theme.palette[severity].light }),
+            color: theme.palette.text.primary,
+            "& .MuiAlert-icon": { color: theme.palette[severity].main },
+          };
+        },
+      },
+    },
+    // Status chips: soft tint + dark text of the same hue, never solid colour with white text (plan 2.1 S12).
     MuiChip: {
       styleOverrides: {
-        root: {
-          borderRadius: t.radius.sm,
-          fontWeight: 750,
+        root: ({ ownerState }) => {
+          const base = { borderRadius: t.radius.chip, fontWeight: 600 };
+          const color = ownerState.color ?? "default";
+          if (ownerState.variant === "outlined") return base;
+          const tint = tintColors.has(color) ? t.statusTint[color as TintColor] : color === "default" ? t.statusTint.neutral : null;
+          if (!tint) return base;
+          return { ...base, backgroundColor: tint.bg, color: tint.color, "& .MuiChip-icon": { color: tint.dot } };
         },
       },
     },
     MuiDialog: {
       styleOverrides: {
         paper: {
-          borderRadius: t.radius.xl,
+          borderRadius: t.radius.shell,
           border: `1px solid ${t.color.border}`,
           boxShadow: t.shadow.md,
         },
@@ -270,7 +328,7 @@ export const ergEnterpriseTheme = createTheme({
     MuiDialogTitle: {
       styleOverrides: {
         root: {
-          fontWeight: 800,
+          fontWeight: 600,
           letterSpacing: 0,
         },
       },
@@ -281,7 +339,7 @@ export const ergEnterpriseTheme = createTheme({
           backgroundColor: t.color.surface,
           backgroundImage: "none",
           borderColor: t.color.border,
-          boxShadow: t.shadow.sm,
+          boxShadow: t.shadow.float,
         },
       },
     },
@@ -292,8 +350,8 @@ export const ergEnterpriseTheme = createTheme({
       styleOverrides: {
         paper: {
           border: `1px solid ${t.color.border}`,
-          borderRadius: t.radius.md,
-          boxShadow: t.shadow.sm,
+          borderRadius: t.radius.card,
+          boxShadow: t.shadow.float,
           marginTop: 6,
         },
         list: {
@@ -318,15 +376,14 @@ export const ergEnterpriseTheme = createTheme({
           borderBottom: `1px solid ${t.color.border}`,
           color: t.color.text,
           fontSize: 14,
-          fontWeight: 600,
-          padding: "10px 16px",
+          fontWeight: 400,
+          padding: "12px 16px",
         },
         head: {
           backgroundColor: t.color.surfaceMuted,
           color: t.color.textMuted,
-          fontSize: 12.5,
-          fontWeight: 800,
-          textTransform: "uppercase",
+          fontSize: 12,
+          fontWeight: 500,
         },
       },
     },
@@ -343,11 +400,12 @@ export const ergEnterpriseTheme = createTheme({
       styleOverrides: {
         tooltip: {
           borderRadius: t.radius.sm,
-          fontWeight: 700,
+          fontWeight: 500,
         },
       },
     },
     MuiSkeleton: {
+      defaultProps: { animation: "wave" },
       styleOverrides: {
         root: {
           borderRadius: t.radius.sm,
@@ -360,10 +418,10 @@ export const ergEnterpriseTheme = createTheme({
         root: {
           "& .MuiSnackbarContent-root": {
             backgroundColor: t.color.text,
-            borderRadius: t.radius.md,
-            boxShadow: t.shadow.sm,
+            borderRadius: t.radius.control,
+            boxShadow: t.shadow.float,
             color: t.color.surface,
-            fontWeight: 650,
+            fontWeight: 600,
           },
         },
       },

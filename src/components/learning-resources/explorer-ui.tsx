@@ -268,7 +268,7 @@ export function LearningResourceExplorerTreeRow({
       className={cn(
         "group relative flex h-8 w-full items-center justify-between gap-1 overflow-hidden rounded-md px-1.5 py-0 text-[13px] transition focus-within:ring-2 focus-within:ring-inset focus-within:ring-[#75B6F2]",
         selected
-          ? "bg-[#DCEEFF] font-semibold text-[#073B72] shadow-[inset_3px_0_0_#0F6CBD] [&_svg]:text-[#0F6CBD]"
+          ? "bg-[#DCEEFF] font-semibold text-[#073B72] shadow-[inset_3px_0_0_#0071E3] [&_svg]:text-[#0071E3]"
           : "text-[#111827] hover:bg-[#F1F4F7]",
       )}
       style={{ paddingLeft: `${indentBase + Math.min(depth, 8) * indentStep}px` }}
@@ -452,12 +452,12 @@ export function LearningResourceFolderTile({
       title={title}
       className={`group relative flex aspect-square w-full flex-col items-center justify-center overflow-hidden rounded-sm border px-4 text-center transition focus:outline-none focus:ring-2 focus:ring-[var(--erg-blue-ring)] ${
         selected
-          ? "border-[#0F6CBD] bg-[#EAF4FF] shadow-[0_0_0_3px_#DCEEFF] ring-1 ring-inset ring-[#75B6F2]"
+          ? "border-[#0071E3] bg-[#EAF4FF] shadow-[0_0_0_3px_#DCEEFF] ring-1 ring-inset ring-[#75B6F2]"
           : "border-transparent bg-transparent hover:bg-[#F1F4F7]"
       }`}
       aria-selected={selected}
     >
-      {selected ? <span className="absolute left-0 top-0 h-full w-1 bg-[#0F6CBD]" aria-hidden="true" /> : null}
+      {selected ? <span className="absolute left-0 top-0 h-full w-1 bg-[#0071E3]" aria-hidden="true" /> : null}
       <span className="absolute inset-x-0 top-[45%] flex -translate-y-1/2 items-center justify-center">
         <span>
           {icon ?? <WindowsFolderIcon size="lg" open={open} />}

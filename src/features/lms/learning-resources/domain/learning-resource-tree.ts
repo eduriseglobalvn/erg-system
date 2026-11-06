@@ -1,4 +1,4 @@
-import type { LearningResourceResourceCard, LearningResourceTaxonomyOption, LearningResourceTaxonomyResponse } from "@/features/lcms/admin-operations/api/learning-resource-authoring-api";
+import type { LearningResourceResourceCard, LearningResourceTaxonomyOption, LearningResourceTaxonomyResponse } from "@/features/lms/learning-resources/api/learning-resource-authoring-api";
 import type { LearningResourceResource } from "@/features/lms/learning-resources/api/learning-resource-data";
 
 export type LearningResourceNodeKind = "group" | "lesson" | "folder";
@@ -41,7 +41,7 @@ function belongsToSubject(option: LearningResourceTaxonomyOption, subjectId: str
 }
 
 function sortOptions<T extends LearningResourceTaxonomyOption>(items: T[]) {
-  return [...items].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0) || String(a.label ?? "").localeCompare(String(b.label ?? ""), "vi"));
+  return [...items].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0) || String(a.label ?? "").localeCompare(String(b.label ?? ""), "vi", { numeric: true }));
 }
 
 function sectionNode(section: LearningResourceTaxonomyOption, fallbackLocation: LearningResourceLocation = {}): LearningResourceNode {
@@ -53,7 +53,10 @@ function sectionNode(section: LearningResourceTaxonomyOption, fallbackLocation: 
     optionId: section.id,
     description: section.description,
     status: section.status,
-    metadata: section.metadata,
+    metadata: {
+      ...section.metadata,
+      ...(section.sortOrder != null ? { sortOrder: String(section.sortOrder) } : {}),
+    },
     location: {
       categoryId: section.categoryId || fallbackLocation.categoryId,
       sectionId: section.id,
@@ -76,7 +79,10 @@ function groupNode(
     optionId: option.id,
     description: option.description,
     status: option.status,
-    metadata: option.metadata,
+    metadata: {
+      ...option.metadata,
+      ...(option.sortOrder != null ? { sortOrder: String(option.sortOrder) } : {}),
+    },
     location,
     children: sortOptions(lessons).map((lesson) => sectionNode(lesson, location)),
   };
@@ -114,10 +120,10 @@ export function buildLearningResourceSubjects(
     if (orphanLessons.length) {
       groups.push({
         id: `group-folder-${subject.id}-uncategorized`,
-        label: "Nhóm học liệu chưa xếp",
+        label: categories.length ? "Chủ đề chưa phân chặng" : "Chủ đề học tập",
         kind: "group",
         sourceKind: "folder",
-        description: "Các bài học chưa nằm trong nhóm học liệu chuẩn.",
+        description: categories.length ? "Các bài học chưa nằm trong nhóm học liệu chuẩn." : "Các chủ đề và bài học trực tiếp của môn học.",
         location: {},
         children: orphanLessons.map((lesson) => sectionNode(lesson)),
       });

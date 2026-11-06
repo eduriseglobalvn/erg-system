@@ -1,4 +1,4 @@
-import type { LocalQuizAttemptSession } from "@/features/lcms/quiz/quiz-runtime";
+import type { LocalQuizAttemptSession } from "@/domain/quiz/quiz-runtime-types";
 import type {
   AnswerPayload,
   AnswerRecord,
@@ -7,7 +7,7 @@ import type {
   Quiz,
   QuizPackage,
   QuizResultDisplay,
-} from "@/lib/types";
+} from "@/domain/quiz/types";
 
 export type PlayerLoadState =
   | { status: "loading" }

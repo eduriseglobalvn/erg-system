@@ -1,9 +1,9 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+vi.mock("@/components/portal/use-portal-notifications", () => ({ notificationPortalFromPath: () => "lms", usePortalNotifications: () => ({ notifications: [], unreadCount: undefined }) }));
 import ErgPortalSidebar from "@/components/portal/ErgPortalSidebar";
 import type { MenuGroup } from "@/components/portal/ErgPortalLayout";
-import { ERG_ASSETS } from "@/config/seo";
 
 const routeState = vi.hoisted(() => ({ pathname: "/" }));
 
@@ -13,7 +13,7 @@ vi.mock("@tanstack/react-router", () => ({
 
 const menuGroups: MenuGroup[] = [{
   label: "Quản lý",
-  items: [{
+  items: [{ label: "Lịch toàn trung tâm", path: "/calendar" }, {
     id: "settings-group",
     label: "Thiết lập",
     children: [{ label: "Phân quyền", path: "/setting/roles" }],
@@ -27,7 +27,7 @@ function renderSidebar(collapsed = false) {
       menuGroups={menuGroups}
       onCollapsedChange={vi.fn()}
       onNavigate={vi.fn()}
-      portalInfo={{ name: "LCMS" }}
+      portalInfo={{ name: "Admin", workspaceCapabilities: ["ADMIN", "TEACHER"] }}
     />,
   );
 }
@@ -58,22 +58,27 @@ describe("ErgPortalSidebar submenu disclosure", () => {
     expect(trigger).toHaveAttribute("aria-expanded", "false");
   });
 
-  it("switches to the compact presentation without waiting for a layout timer", () => {
+  it("collapsed mode shows icon buttons with accessible names and no truncated label text", () => {
+    renderSidebar(true);
+
+    expect(screen.getByRole("button", { name: "Lịch toàn trung tâm" })).toBeInTheDocument();
+    expect(screen.queryByText("Lịch toàn trung tâm")).not.toBeInTheDocument();
+    expect(screen.queryAllByText(/.../)).toHaveLength(0);
+    expect(screen.getByRole("button", { name: "Mở rộng menu" })).toBeInTheDocument();
+  });
+
+  it("opens the portal switcher from the header in both modes and lists the accessible portals", () => {
     const view = renderSidebar();
+    fireEvent.click(screen.getByRole("button", { name: /Không gian làm việc/ }));
+    const items = screen.getAllByRole("menuitem");
+    expect(items).toHaveLength(2);
+    expect(items[0]).toHaveTextContent("Admin LMS");
+    expect(items[1]).toHaveTextContent("Giáo viên");
+    fireEvent.keyDown(screen.getByRole("menu"), { key: "Escape" });
+    view.unmount();
 
-    view.rerender(
-      <ErgPortalSidebar
-        collapsed
-        menuGroups={menuGroups}
-        onCollapsedChange={vi.fn()}
-        onNavigate={vi.fn()}
-        portalInfo={{ name: "LCMS" }}
-      />,
-    );
-
-    expect(screen.getByRole("img", { name: "ERG" })).toHaveAttribute(
-      "src",
-      ERG_ASSETS.mobileLogo,
-    );
+    renderSidebar(true);
+    fireEvent.click(screen.getByRole("button", { name: /Không gian làm việc/ }));
+    expect(screen.getAllByRole("menuitem")).toHaveLength(2);
   });
 });

@@ -15,7 +15,7 @@ describe("scoped offline JSON storage", () => {
     expect(restored).toEqual(value);
     expect(await store.get("scope-b", "attempt-1")).toBeNull();
 
-    if (restored) restored.answers.question.choiceId = "changed";
+    if (restored) (restored.answers.question as { choiceId: string }).choiceId = "changed";
     expect(await store.get<typeof value>("scope-a", "attempt-1")).toEqual(value);
   });
 

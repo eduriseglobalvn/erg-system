@@ -44,7 +44,7 @@ export function DashboardPlaceholderWorkspace({
                 <LayersRoundedIcon sx={{ fontSize: 20 }} />
               </Box>
               <Box sx={{ minWidth: 0 }}>
-                <Typography sx={{ fontWeight: 750 }} variant="subtitle1">{template?.headline ?? copy.title}</Typography>
+                <Typography sx={{ fontWeight: 600 }} variant="subtitle1">{template?.headline ?? copy.title}</Typography>
                 <Typography color="text.secondary" sx={{ lineHeight: 1.7, mt: 1, maxWidth: 760 }} variant="body2">
                   {template?.body ?? copy.description}
                 </Typography>
@@ -58,7 +58,7 @@ export function DashboardPlaceholderWorkspace({
           </Box>
 
           <Box sx={{ bgcolor: "background.paper", border: "1px solid", borderColor: "divider", borderRadius: 2, p: 2.5 }}>
-            <Stack direction="row" spacing={1} sx={{ alignItems: "center", color: "text.primary", fontSize: 14, fontWeight: 800 }}>
+            <Stack direction="row" spacing={1} sx={{ alignItems: "center", color: "text.primary", fontSize: 14, fontWeight: 600 }}>
               <ChecklistRoundedIcon color="primary" sx={{ fontSize: 18 }} />
               Checklist
             </Stack>

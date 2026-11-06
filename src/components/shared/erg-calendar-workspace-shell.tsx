@@ -36,7 +36,7 @@ dayjs.locale("vi");
 export function ErgCalendarWorkspace({
   allLaneLabel = "Tất cả", calendarListTitle = "Lịch đang hiển thị", createButtonLabel = "Tạo sự kiện",
   defaultLane, emptyDayLabel = "Không có lịch nào trong ngày này.", events, filterEventsByLane = true,
-  filterEventsByScope = true, initialDate = dayjs().format("YYYY-MM-DD"), initialMode = "week", lanes,
+  filterEventsByScope = true, initialDate = dayjs().format("YYYY-MM-DD"), initialMode: initialModeProp = "week", lanes,
   laneSummaries, monthCountLabel = "lịch", monthCountOverride, errorMessage, isLoading = false,
   mobileLayout = false, onCreateSchedule, onCreateRoom, onPreviewSchedule, onPublishScheduleBatch, onRetry,
   onVisibleRangeChange, permissions, renderEventActions, resolveEventScopeLabel, resolveEventTone,
@@ -44,6 +44,7 @@ export function ErgCalendarWorkspace({
   resolveScopeSelectLabel, scheduleCatalog, showCreateButton = true, createDialogOpen: controlledCreateDialogOpen,
   onCreateDialogOpenChange, todayDate = dayjs().format("YYYY-MM-DD"),
 }: ErgCalendarWorkspaceProps) {
+  const initialMode = mobileLayout ? "schedule" : initialModeProp;
   const [miniCalendarOpen, setMiniCalendarOpen] = useState(false);
   const workspace = useErgCalendarWorkspace({
     allLaneLabel, defaultLane, events, filterEventsByLane, filterEventsByScope, initialDate, initialMode, lanes,
@@ -80,6 +81,7 @@ export function ErgCalendarWorkspace({
           allLaneLabel={allLaneLabel} calendarLane={calendarLane} calendarLanes={calendarLanes}
           isAllLane={isAllLane} jumpToToday={jumpToToday} miniCalendarOpen={miniCalendarOpen}
           mobileLayout={mobileLayout} mode={mode} monthLabel={monthLabel} moveRange={moveRange}
+          eventDateSet={eventDateSet} onSelectDate={selectMiniCalendarDate} selectedDate={selectedDate} todayDate={todayDate}
           onModeChange={setMode} onToggleMiniCalendar={() => setMiniCalendarOpen((open) => !open)}
           rangeLabel={rangeLabel} scopeOptions={scopeOptions} scopeSelectLabel={scopeSelectLabel}
           selectedScopeId={selectedScopeId} selectedScopeLabel={selectedScopeLabel}
@@ -98,17 +100,17 @@ export function ErgCalendarWorkspace({
               <Box sx={calendarSidebarSx}>
                 <CalendarNavigatorPanel
                   calendarListTitle={resolvedCalendarListTitle} canCreate={showCreateButton && permissions?.canCreate !== false}
-                  createButtonLabel={createButtonLabel} eventDateSet={eventDateSet} laneSummaries={summaries}
+                  createButtonLabel={createButtonLabel} laneSummaries={summaries}
                   monthCount={monthCountOverride ?? filteredEvents.filter((event) => dayjs(event.date).isSame(visibleMonth, "month")).length}
                   monthCountLabel={monthCountLabel} onCreateClick={() => setCreateDialogOpen(true)}
-                  selectedSummaryLabels={visibleSummaryLabels} selectedDate={selectedDate} setSelectedDate={selectMiniCalendarDate}
-                  todayDate={todayDate} toggleSummaryLabel={toggleSummaryLabel}
+                  selectedSummaryLabels={visibleSummaryLabels} toggleSummaryLabel={toggleSummaryLabel}
                 />
               </Box>
             </Box>
           ) : null}
 
           <Box sx={calendarMainColumnSx}>
+            {isLoading ? <CalendarLoadingOverlay /> : null}
             {errorMessage ? <CalendarErrorBanner message={errorMessage} onRetry={onRetry} /> : null}
             <CalendarBoard
               emptyDayLabel={emptyDayLabel} events={filteredEvents} eventsByDate={eventsByDate}
@@ -119,7 +121,6 @@ export function ErgCalendarWorkspace({
           </Box>
         </Box>
         <EventDetailPopover anchorEl={detailAnchorEl} event={detailEvent} onClose={closeEventDetail} renderActions={renderEventActions} />
-        {isLoading ? <CalendarLoadingOverlay /> : null}
         <TeachingScheduleDialog
           catalog={scheduleCatalog ?? emptyScheduleCatalog} onClose={() => setCreateDialogOpen(false)}
           onCreateRoom={onCreateRoom} onPreview={onPreviewSchedule} onPublishBatch={onPublishScheduleBatch}

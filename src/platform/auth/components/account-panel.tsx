@@ -6,7 +6,7 @@ import ButtonBase from "@mui/material/ButtonBase";
 import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
 
-import { TsForm } from "@/components/ui/tanstack-form";
+import { TsForm } from "@/components/erg-mui/tanstack-form";
 import { getLmsPortalUrl } from "@/config/portal-urls";
 import { roleLabel, providerLabel } from "@/platform/auth/api/auth-storage";
 import { CheckIcon } from "@/platform/auth/components/auth-icons";
@@ -53,13 +53,13 @@ export function AccountPanel({
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
-      <Paper elevation={1} sx={{ bgcolor: "primary.main", border: "1px solid #0b5cab", color: "primary.contrastText", px: 3, py: 3 }}>
+      <Paper elevation={1} sx={{ bgcolor: "primary.main", border: "1px solid #0058B0", color: "primary.contrastText", px: 3, py: 3 }}>
         <Box sx={{ alignItems: { sm: "flex-start" }, display: "flex", flexDirection: { xs: "column", sm: "row" }, gap: 2.5, justifyContent: { sm: "space-between" } }}>
           <Box>
-            <Box sx={{ bgcolor: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 1, color: "rgba(255,255,255,0.75)", display: "inline-flex", fontSize: 12, fontWeight: 700, px: 1.5, py: 0.5 }}>
+            <Box sx={{ bgcolor: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 1, color: "rgba(255,255,255,0.75)", display: "inline-flex", fontSize: 12, fontWeight: 600, px: 1.5, py: 0.5 }}>
               {t("auth.accountBadge")}
             </Box>
-            <Box component="h2" sx={{ fontSize: 20, fontWeight: 700, m: 0, mt: 1.5 }}>{account.fullName}</Box>
+            <Box component="h2" sx={{ fontSize: 20, fontWeight: 600, m: 0, mt: 1.5 }}>{account.fullName}</Box>
             <Box component="p" sx={{ color: "rgba(255,255,255,0.75)", fontSize: 14, m: 0, mt: 0.75 }}>{account.email}</Box>
             <Box sx={{ alignItems: "center", display: "flex", flexWrap: "wrap", gap: 1, mt: 2 }}>
               <MetaBadge>{roleLabel(account.role)}</MetaBadge>
@@ -88,7 +88,7 @@ export function AccountPanel({
             key={item.id}
             type="button"
             onClick={() => onAccountTabChange(item.id)}
-            sx={{ border: "1px solid", borderColor: accountTab === item.id ? "#b8d6fa" : "transparent", borderRadius: 1, boxShadow: accountTab === item.id ? 1 : 0, color: accountTab === item.id ? "primary.main" : "text.secondary", fontSize: 14, fontWeight: 700, px: 2, py: 1, position: "relative", ...(accountTab === item.id ? { bgcolor: "background.paper", "&::after": { bgcolor: "primary.main", borderRadius: 999, bottom: 4, content: '\"\"', height: 2, left: 20, position: "absolute", right: 20 } } : { "&:hover": { bgcolor: "background.paper", color: "text.primary" } }) }}
+            sx={{ border: "1px solid", borderColor: accountTab === item.id ? "#b8d6fa" : "transparent", borderRadius: 1, boxShadow: accountTab === item.id ? 1 : 0, color: accountTab === item.id ? "primary.main" : "text.secondary", fontSize: 14, fontWeight: 600, px: 2, py: 1, position: "relative", ...(accountTab === item.id ? { bgcolor: "background.paper", "&::after": { bgcolor: "primary.main", borderRadius: 999, bottom: 4, content: '\"\"', height: 2, left: 20, position: "absolute", right: 20 } } : { "&:hover": { bgcolor: "background.paper", color: "text.primary" } }) }}
           >
             {item.label}
           </ButtonBase>
@@ -99,7 +99,7 @@ export function AccountPanel({
         <Box sx={{ display: "grid", gap: 3 }}>
           {accountTab === "profile" ? (
             <Paper elevation={1} sx={{ border: "1px solid", borderColor: "divider", p: 3 }}>
-              <Box><Box component="h3" sx={{ fontSize: 16, fontWeight: 700, m: 0 }}>{t("auth.accountInfo")}</Box><Box component="p" sx={{ color: "text.secondary", fontSize: 14, lineHeight: 1.75, m: 0, mt: 1 }}>{t("auth.accountInfoSubtitle")}</Box></Box>
+              <Box><Box component="h3" sx={{ fontSize: 16, fontWeight: 600, m: 0 }}>{t("auth.accountInfo")}</Box><Box component="p" sx={{ color: "text.secondary", fontSize: 14, lineHeight: 1.75, m: 0, mt: 1 }}>{t("auth.accountInfoSubtitle")}</Box></Box>
 
               <Box component={TsForm} sx={{ display: "grid", gap: 2.5, mt: 3 }} onSubmit={onProfileSubmit}>
                 <Field label={t("auth.fullName")}>
@@ -144,7 +144,7 @@ export function AccountPanel({
 
           {accountTab === "security" ? (
             <Paper elevation={1} sx={{ border: "1px solid", borderColor: "divider", p: 3 }}>
-              <Box><Box component="h3" sx={{ fontSize: 16, fontWeight: 700, m: 0 }}>{t("auth.accountSecurity")}</Box><Box component="p" sx={{ color: "text.secondary", fontSize: 14, lineHeight: 1.75, m: 0, mt: 1 }}>{t("auth.accountSecuritySubtitle")}</Box></Box>
+              <Box><Box component="h3" sx={{ fontSize: 16, fontWeight: 600, m: 0 }}>{t("auth.accountSecurity")}</Box><Box component="p" sx={{ color: "text.secondary", fontSize: 14, lineHeight: 1.75, m: 0, mt: 1 }}>{t("auth.accountSecuritySubtitle")}</Box></Box>
 
               <Box component={TsForm} sx={{ display: "grid", gap: 2.5, mt: 3 }} onSubmit={onPasswordSubmit}>
                 <Field label={t("auth.currentPassword")}>
@@ -189,7 +189,7 @@ export function AccountPanel({
 
           {accountTab === "permissions" ? (
             <Paper elevation={1} sx={{ border: "1px solid", borderColor: "divider", p: 3 }}>
-              <Box><Box component="h3" sx={{ fontSize: 16, fontWeight: 700, m: 0 }}>{t("auth.accountPermissions")}</Box><Box component="p" sx={{ color: "text.secondary", fontSize: 14, lineHeight: 1.75, m: 0, mt: 1 }}>{t("auth.accountPermissionsSubtitle")}</Box></Box>
+              <Box><Box component="h3" sx={{ fontSize: 16, fontWeight: 600, m: 0 }}>{t("auth.accountPermissions")}</Box><Box component="p" sx={{ color: "text.secondary", fontSize: 14, lineHeight: 1.75, m: 0, mt: 1 }}>{t("auth.accountPermissionsSubtitle")}</Box></Box>
 
               <Box sx={{ display: "grid", gap: 2, mt: 3 }}>
                 {capabilities.map((item) => (
@@ -207,7 +207,7 @@ export function AccountPanel({
 
         <Box sx={{ display: "grid", gap: 3 }}>
           <Paper elevation={1} sx={{ border: "1px solid", borderColor: "divider", p: 2.5 }}>
-            <Box component="h3" sx={{ fontSize: 16, fontWeight: 700, m: 0 }}>{t("auth.quickAccess")}</Box>
+            <Box component="h3" sx={{ fontSize: 16, fontWeight: 600, m: 0 }}>{t("auth.quickAccess")}</Box>
             <Box sx={{ display: "grid", gap: 1.5, mt: 2 }}>
               <ExternalQuickLinkCard href={getLmsPortalUrl()} title={t("auth.goDashboard")} caption={t("auth.goDashboardCaption")} />
               <ExternalQuickLinkCard href={getLmsPortalUrl("/student")} title={t("auth.viewStudentUi")} caption={t("auth.viewStudentUiCaption")} />
@@ -215,7 +215,7 @@ export function AccountPanel({
           </Paper>
 
           <Paper elevation={1} sx={{ border: "1px solid", borderColor: "divider", p: 2.5 }}>
-            <Box component="h3" sx={{ fontSize: 16, fontWeight: 700, m: 0 }}>{t("auth.accountSession")}</Box>
+            <Box component="h3" sx={{ fontSize: 16, fontWeight: 600, m: 0 }}>{t("auth.accountSession")}</Box>
             <Box sx={{ color: "text.secondary", display: "grid", fontSize: 14, gap: 1.5, lineHeight: 1.75, mt: 2 }}>
               <MetaRow label={t("auth.role")} value={roleLabel(account.role)} />
               <MetaRow label={t("auth.loginMethod")} value={providerLabel(account.provider)} />
@@ -225,7 +225,7 @@ export function AccountPanel({
           </Paper>
 
           <Paper elevation={0} sx={{ bgcolor: "background.default", border: "1px solid", borderColor: "divider", p: 2.5 }}>
-            <Box component="h3" sx={{ fontSize: 16, fontWeight: 700, m: 0 }}>{t("auth.nextDeploymentHint")}</Box>
+            <Box component="h3" sx={{ fontSize: 16, fontWeight: 600, m: 0 }}>{t("auth.nextDeploymentHint")}</Box>
             <Box component="p" sx={{ color: "text.secondary", fontSize: 14, lineHeight: 1.75, m: 0, mt: 1.5 }}>{t("auth.nextDeploymentHintBody")}</Box>
           </Paper>
         </Box>
@@ -237,7 +237,7 @@ export function AccountPanel({
 function ExternalQuickLinkCard({ href, title, caption }: { href: string; title: string; caption: string }) {
   return (
     <Paper component="a" elevation={0} href={href} sx={{ bgcolor: "background.default", border: "1px solid", borderColor: "divider", color: "inherit", display: "block", px: 2, py: 2, textDecoration: "none", transition: "background-color 160ms ease, border-color 160ms ease", "&:hover": { bgcolor: "background.paper", borderColor: "text.disabled" } }}>
-      <Box sx={{ fontSize: 14, fontWeight: 700 }}>{title}</Box>
+      <Box sx={{ fontSize: 14, fontWeight: 600 }}>{title}</Box>
       <Box sx={{ color: "text.secondary", fontSize: 14, lineHeight: 1.5, mt: 0.5 }}>{caption}</Box>
     </Paper>
   );

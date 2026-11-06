@@ -1,18 +1,23 @@
-import { useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { RouterProvider } from "@tanstack/react-router";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { GlobalPwaBanner } from "@/components/pwa/global-pwa-banner";
+// Update banner is not needed for first paint.
+const GlobalPwaBanner = lazy(() => import("@/components/pwa/global-pwa-banner").then((m) => ({ default: m.GlobalPwaBanner })));
 
+import { PortalNotificationsSourceContext } from "@/components/portal/use-portal-notifications";
+import { usePortalNotifications } from "@/features/notifications/hooks/use-portal-notifications";
 import { I18nProvider } from "@/platform/i18n";
 import { appQueryClient } from "@/lib/query-client";
+import { QUERY_PERSIST_MAX_AGE_MS } from "@/lib/query-policy";
 import { createAppRouter } from "@/routes/app-routes";
+import { AppErrorBoundary } from "@/routes/route-feedback";
 import { hasApiBase } from "@/lib/api-client";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
 import { createAuthRouteState } from "@/platform/auth/router/auth-route-context";
-import { clearPersistedQueryScope, createQueryPersister, isPersistableQuery, QUERY_CACHE_BUSTER, queryCacheScopeKey } from "@/lib/query-persistence";
-import { getCurrentAccount } from "@/platform/auth/api/auth-storage";
-import { readStoredAuthSession, resolveCurrentPortal } from "@/platform/auth/api/auth-token-storage";
+import { clearPersistedQueryScope, createQueryPersister, QUERY_CACHE_BUSTER, shouldDehydratePersistedQuery, queryCacheScopeKey } from "@/lib/query-persistence";
+import { getAuthScope, getCurrentAccount } from "@/platform/auth/api/auth-storage";
+import { resolveCurrentPortal } from "@/platform/auth/api/auth-token-storage";
 import { AUTH_ACCOUNT_CHANGED_EVENT } from "@/platform/auth/api/auth-storage";
 import { AUTH_SESSION_INVALID_EVENT, AUTH_SESSION_REPLACED_EVENT } from "@/lib/api-client";
 import { canonicalWorkspaceForPath } from "@/platform/workspaces/workspace-route";
@@ -20,7 +25,7 @@ import { workspaceFromLegacyPortal } from "@/platform/workspaces/legacy-portal-c
 
 function currentQueryScopeKey() {
   const portal = resolveCurrentPortal();
-  const session = readStoredAuthSession(portal);
+  const session = getAuthScope(portal).session;
   const account = getCurrentAccount(portal);
   const workspace = typeof window === "undefined"
     ? workspaceFromLegacyPortal(portal)
@@ -35,11 +40,19 @@ export default function App() {
   const persistOptions = useMemo(() => {
     return {
       persister: createQueryPersister(scopeKey),
-      maxAge: 24 * 60 * 60 * 1000,
+      maxAge: QUERY_PERSIST_MAX_AGE_MS,
       buster: QUERY_CACHE_BUSTER,
-      dehydrateOptions: { shouldDehydrateQuery: isPersistableQuery },
+      dehydrateOptions: { shouldDehydrateQuery: shouldDehydratePersistedQuery },
     };
   }, [scopeKey]);
+
+  // The app stayed up for 10s, so a later deploy may auto-reload once again (see route-feedback).
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      try { sessionStorage.removeItem("erg-chunk-reload"); } catch { /* storage unavailable */ }
+    }, 10_000);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const handleScopeChange = () => {
@@ -61,8 +74,12 @@ export default function App() {
   return (
     <PersistQueryClientProvider client={appQueryClient} persistOptions={persistOptions}>
       <I18nProvider>
-        <AppRouterProvider router={router} />
-        <GlobalPwaBanner />
+        <PortalNotificationsSourceContext.Provider value={usePortalNotifications}>
+          <AppErrorBoundary>
+            <AppRouterProvider router={router} />
+          </AppErrorBoundary>
+        </PortalNotificationsSourceContext.Provider>
+        <Suspense fallback={null}><GlobalPwaBanner /></Suspense>
       </I18nProvider>
       {showQueryDevtools ? <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" /> : null}
     </PersistQueryClientProvider>
@@ -78,7 +95,7 @@ function AppRouterProvider({ router }: { router: ReturnType<typeof createAppRout
   // valid login cannot be redirected through the public index first.
   const currentPortal = resolveCurrentPortal();
   const persistedAuth = useMemo(
-    () => ({ account: getCurrentAccount(currentPortal), session: readStoredAuthSession(currentPortal) }),
+    () => ({ account: getCurrentAccount(currentPortal), session: getAuthScope(currentPortal).session }),
     [currentPortal],
   );
   const effectiveAccount = authSession.account ?? persistedAuth.account;

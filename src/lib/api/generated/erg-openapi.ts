@@ -13,6 +13,7 @@ export interface paths {
         };
         readonly get?: never;
         readonly put?: never;
+        /** @deprecated */
         readonly post: operations["createContentAsset"];
         readonly delete?: never;
         readonly options?: never;
@@ -33,6 +34,7 @@ export interface paths {
         readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
+        /** @deprecated */
         readonly patch: operations["updateContentAsset"];
         readonly trace?: never;
     };
@@ -45,6 +47,7 @@ export interface paths {
         };
         readonly get?: never;
         readonly put?: never;
+        /** @deprecated */
         readonly post: operations["createContentItem_1"];
         readonly delete?: never;
         readonly options?: never;
@@ -62,9 +65,11 @@ export interface paths {
         readonly get?: never;
         readonly put?: never;
         readonly post?: never;
+        /** @deprecated */
         readonly delete: operations["deleteContentItem"];
         readonly options?: never;
         readonly head?: never;
+        /** @deprecated */
         readonly patch: operations["updateContentItem"];
         readonly trace?: never;
     };
@@ -77,6 +82,7 @@ export interface paths {
         };
         readonly get?: never;
         readonly put?: never;
+        /** @deprecated */
         readonly post: operations["attachContentAsset"];
         readonly delete?: never;
         readonly options?: never;
@@ -93,6 +99,7 @@ export interface paths {
         };
         readonly get?: never;
         readonly put?: never;
+        /** @deprecated */
         readonly post: operations["createGoogleSlidesLecture"];
         readonly delete?: never;
         readonly options?: never;
@@ -109,6 +116,7 @@ export interface paths {
         };
         readonly get?: never;
         readonly put?: never;
+        /** @deprecated */
         readonly post: operations["placeContentItem"];
         readonly delete?: never;
         readonly options?: never;
@@ -126,6 +134,7 @@ export interface paths {
         readonly get?: never;
         readonly put?: never;
         readonly post?: never;
+        /** @deprecated */
         readonly delete: operations["removePlacement_1"];
         readonly options?: never;
         readonly head?: never;
@@ -145,6 +154,7 @@ export interface paths {
         readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
+        /** @deprecated */
         readonly patch: operations["reorderPlacements"];
         readonly trace?: never;
     };
@@ -413,6 +423,22 @@ export interface paths {
         };
         readonly get: operations["events"];
         readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/audit/events/{eventId}/legal-hold": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put: operations["legalHold"];
         readonly post?: never;
         readonly delete?: never;
         readonly options?: never;
@@ -1012,6 +1038,22 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
+    readonly "/api/v1/curriculum/class-subjects": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["classSubjects"];
+        readonly put: operations["replaceClassSubjects"];
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
     readonly "/api/v1/curriculum/levels/{id}": {
         readonly parameters: {
             readonly query?: never;
@@ -1070,6 +1112,22 @@ export interface paths {
         readonly get?: never;
         readonly put?: never;
         readonly post: operations["createTopic"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/curriculum/program": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["program"];
+        readonly put: operations["upsertProgram"];
+        readonly post?: never;
         readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
@@ -1150,6 +1208,22 @@ export interface paths {
         readonly get?: never;
         readonly put?: never;
         readonly post: operations["createLevel"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/curriculum/teaching-plan": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["teachingPlan"];
+        readonly put: operations["upsertTeachingPlan"];
+        readonly post?: never;
         readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
@@ -2452,6 +2526,22 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
+    readonly "/api/v1/lms/attempts/{attemptId}/answers/{questionId}/grade": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post: operations["gradeAnswer"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
     readonly "/api/v1/lms/attempts/{attemptId}/draft": {
         readonly parameters: {
             readonly query?: never;
@@ -2494,6 +2584,22 @@ export interface paths {
         readonly get?: never;
         readonly put?: never;
         readonly post: operations["syncAttempt"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/lms/attempts/import": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post: operations["importPortableResult"];
         readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
@@ -2572,6 +2678,22 @@ export interface paths {
             readonly cookie?: never;
         };
         readonly get: operations["quizStudents"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/lms/quizzes/{quizId}/students/page": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["quizStudentsPage"];
         readonly put?: never;
         readonly post?: never;
         readonly delete?: never;
@@ -3412,6 +3534,22 @@ export interface paths {
         readonly patch: operations["updateProfile_1"];
         readonly trace?: never;
     };
+    readonly "/api/v1/users/me/onboarding": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post: operations["completeOnboarding_1"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
     readonly "/api/v1/users/me/password": {
         readonly parameters: {
             readonly query?: never;
@@ -4192,6 +4330,17 @@ export interface components {
             /** Format: date-time */
             readonly timestamp?: string;
         };
+        readonly ApiResponseCurriculumClassSubjectsResponse: {
+            readonly data?: components["schemas"]["CurriculumClassSubjectsResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
         readonly ApiResponseCurriculumHardDeleteResponse: {
             readonly data?: components["schemas"]["CurriculumHardDeleteResponse"];
             readonly errors?: unknown;
@@ -4225,8 +4374,30 @@ export interface components {
             /** Format: date-time */
             readonly timestamp?: string;
         };
+        readonly ApiResponseCurriculumProgramResponse: {
+            readonly data?: components["schemas"]["CurriculumProgramResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
         readonly ApiResponseCurriculumSubjectResponse: {
             readonly data?: components["schemas"]["CurriculumSubjectResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApiResponseCurriculumTeachingPlanResponse: {
+            readonly data?: components["schemas"]["CurriculumTeachingPlanResponse"];
             readonly errors?: unknown;
             readonly message?: string;
             readonly path?: string;
@@ -4458,6 +4629,17 @@ export interface components {
         };
         readonly ApiResponseHandoverResponse: {
             readonly data?: components["schemas"]["HandoverResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApiResponseImportedAttemptResponse: {
+            readonly data?: components["schemas"]["ImportedAttemptResponse"];
             readonly errors?: unknown;
             readonly message?: string;
             readonly path?: string;
@@ -4860,6 +5042,17 @@ export interface components {
         };
         readonly ApiResponsePackageResponse: {
             readonly data?: components["schemas"]["PackageResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApiResponsePageResponseAttemptResponse: {
+            readonly data?: components["schemas"]["PageResponseAttemptResponse"];
             readonly errors?: unknown;
             readonly message?: string;
             readonly path?: string;
@@ -6320,6 +6513,7 @@ export interface components {
         readonly CreateStudentRequest: {
             readonly academicClassId?: string;
             readonly address?: string;
+            readonly authUserId?: string;
             /** Format: date-time */
             readonly birthday?: string;
             /** Format: email */
@@ -6377,6 +6571,22 @@ export interface components {
             readonly signedAt?: string;
             readonly signedRevenue?: number;
             readonly status?: string;
+        };
+        readonly CurriculumClassSubjectAllocationItem: {
+            readonly classId?: string;
+            readonly subjectIds?: readonly string[];
+        };
+        readonly CurriculumClassSubjectsRequest: {
+            readonly allocations?: readonly components["schemas"]["CurriculumClassSubjectAllocationItem"][];
+            /** Format: int64 */
+            readonly expectedVersion?: number;
+        };
+        readonly CurriculumClassSubjectsResponse: {
+            readonly academicYear?: string;
+            readonly allocations?: readonly components["schemas"]["CurriculumClassSubjectAllocationItem"][];
+            readonly schoolId?: string;
+            /** Format: int64 */
+            readonly version?: number;
         };
         readonly CurriculumHardDeleteResponse: {
             readonly deleted?: boolean;
@@ -6439,6 +6649,53 @@ export interface components {
             readonly sortOrder?: number;
             readonly status?: string;
         };
+        readonly CurriculumProgramRequest: {
+            /** Format: int64 */
+            readonly expectedVersion?: number;
+            readonly name?: string;
+            readonly rows?: readonly components["schemas"]["CurriculumProgramRowRequest"][];
+            readonly status?: string;
+        };
+        readonly CurriculumProgramResponse: {
+            readonly academicYear?: string;
+            /** Format: date-time */
+            readonly createdAt?: string;
+            readonly id?: string;
+            readonly levelId?: string;
+            readonly name?: string;
+            /** Format: int64 */
+            readonly recordVersion?: number;
+            readonly rows?: readonly components["schemas"]["CurriculumProgramRowResponse"][];
+            readonly status?: string;
+            readonly subjectId?: string;
+            readonly tenantId?: string;
+            /** Format: date-time */
+            readonly updatedAt?: string;
+        };
+        readonly CurriculumProgramRowRequest: {
+            readonly id?: string;
+            /** Format: int32 */
+            readonly period?: number;
+            /** Format: int32 */
+            readonly sessions?: number;
+            readonly status?: string;
+            readonly title?: string;
+            readonly topic?: string;
+        };
+        readonly CurriculumProgramRowResponse: {
+            readonly id?: string;
+            /** Format: int32 */
+            readonly period?: number;
+            /** Format: int64 */
+            readonly recordVersion?: number;
+            /** Format: int32 */
+            readonly sessions?: number;
+            /** Format: int32 */
+            readonly sortOrder?: number;
+            readonly status?: string;
+            readonly title?: string;
+            readonly topic?: string;
+        };
         readonly CurriculumSubjectResponse: {
             readonly code?: string;
             /** Format: date-time */
@@ -6458,6 +6715,37 @@ export interface components {
         readonly CurriculumSubjectTree: {
             readonly levels?: readonly components["schemas"]["CurriculumLevelTree"][];
             readonly subject?: components["schemas"]["CurriculumSubjectResponse"];
+        };
+        readonly CurriculumTeachingPlanRequest: {
+            /** Format: int64 */
+            readonly expectedVersion?: number;
+            /** Format: int32 */
+            readonly sessionsPerDay?: number;
+            /** Format: date */
+            readonly startDate?: string;
+            readonly status?: string;
+            readonly teachingDays?: readonly number[];
+            readonly timezone?: string;
+        };
+        readonly CurriculumTeachingPlanResponse: {
+            readonly academicYear?: string;
+            /** Format: date-time */
+            readonly createdAt?: string;
+            readonly id?: string;
+            /** Format: int64 */
+            readonly recordVersion?: number;
+            readonly schoolId?: string;
+            /** Format: int32 */
+            readonly sessionsPerDay?: number;
+            /** Format: date */
+            readonly startDate?: string;
+            readonly status?: string;
+            readonly subjectId?: string;
+            readonly teachingDays?: readonly number[];
+            readonly tenantId?: string;
+            readonly timezone?: string;
+            /** Format: date-time */
+            readonly updatedAt?: string;
         };
         readonly CurriculumTopicResponse: {
             readonly code?: string;
@@ -6738,6 +7026,28 @@ export interface components {
             readonly portal?: string;
             readonly registrationToken?: string;
         };
+        readonly ImportedAttemptResponse: {
+            readonly assignmentId?: string;
+            readonly attemptId?: string;
+            readonly duplicate?: boolean;
+            readonly late?: boolean;
+            /** Format: double */
+            readonly maxScore?: number;
+            readonly passed?: boolean;
+            /** Format: double */
+            readonly percent?: number;
+            readonly quizId?: string;
+            /** Format: double */
+            readonly score?: number;
+            readonly status?: string;
+            readonly studentId?: string;
+        };
+        readonly ImportPortableResultRequest: {
+            readonly body: {
+                readonly [key: string]: unknown;
+            };
+            readonly checksum: string;
+        };
         readonly IpSecurityStatusResponse: {
             readonly allowlisted?: boolean;
             readonly blocked?: boolean;
@@ -6892,6 +7202,9 @@ export interface components {
             /** Format: date-time */
             readonly updatedAt?: string;
         };
+        readonly LegalHoldRequest: {
+            readonly legalHold?: boolean;
+        };
         readonly LifecycleResponse: {
             readonly actorId?: string;
             /** @enum {string} */
@@ -6962,6 +7275,12 @@ export interface components {
             readonly tenantId?: string;
             /** Format: date-time */
             readonly updatedAt?: string;
+        };
+        readonly ManualGradeRequest: {
+            /** Format: int64 */
+            readonly expectedVersion?: number;
+            /** Format: double */
+            readonly points: number;
         };
         readonly MarkReadResponse: {
             readonly read?: boolean;
@@ -7102,6 +7421,19 @@ export interface components {
             readonly title?: string;
             /** Format: date-time */
             readonly updatedAt?: string;
+        };
+        readonly PageResponseAttemptResponse: {
+            readonly hasNext?: boolean;
+            readonly hasPrevious?: boolean;
+            readonly items?: readonly components["schemas"]["AttemptResponse"][];
+            /** Format: int32 */
+            readonly page?: number;
+            /** Format: int32 */
+            readonly size?: number;
+            /** Format: int64 */
+            readonly totalItems?: number;
+            /** Format: int32 */
+            readonly totalPages?: number;
         };
         readonly PageResponseNotificationItemResponse: {
             readonly hasNext?: boolean;
@@ -8097,6 +8429,7 @@ export interface components {
         readonly UpdateStudentRequest: {
             readonly academicClassId?: string;
             readonly address?: string;
+            readonly authUserId?: string;
             /** Format: date-time */
             readonly birthday?: string;
             /** Format: email */
@@ -8203,11 +8536,21 @@ export interface components {
             /** Format: int64 */
             readonly version: number;
         };
+        readonly WorkspacePage: {
+            readonly hasMore?: boolean;
+            /** Format: int32 */
+            readonly page?: number;
+            /** Format: int32 */
+            readonly size?: number;
+            /** Format: int64 */
+            readonly totalSchools?: number;
+        };
         readonly WorkspaceResponse: {
             readonly followUps?: readonly components["schemas"]["FollowUpResponse"][];
             readonly handovers?: readonly components["schemas"]["HandoverResponse"][];
             readonly leads?: readonly components["schemas"]["LeadResponse"][];
             readonly opportunities?: readonly components["schemas"]["OpportunityResponse"][];
+            readonly page?: components["schemas"]["WorkspacePage"];
         };
         readonly XapiStatementRequest: {
             readonly actorId: string;
@@ -8953,6 +9296,32 @@ export interface operations {
                 };
                 content: {
                     readonly "*/*": components["schemas"]["ApiResponseAuditPage"];
+                };
+            };
+        };
+    };
+    readonly legalHold: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly eventId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["LegalHoldRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseVoid"];
                 };
             };
         };
@@ -9948,7 +10317,10 @@ export interface operations {
     };
     readonly workspace: {
         readonly parameters: {
-            readonly query?: never;
+            readonly query?: {
+                readonly page?: number;
+                readonly size?: number;
+            };
             readonly header?: never;
             readonly path?: never;
             readonly cookie?: never;
@@ -9962,6 +10334,56 @@ export interface operations {
                 };
                 content: {
                     readonly "*/*": components["schemas"]["ApiResponseWorkspaceResponse"];
+                };
+            };
+        };
+    };
+    readonly classSubjects: {
+        readonly parameters: {
+            readonly query: {
+                readonly academicYear: string;
+                readonly schoolId: string;
+            };
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseCurriculumClassSubjectsResponse"];
+                };
+            };
+        };
+    };
+    readonly replaceClassSubjects: {
+        readonly parameters: {
+            readonly query: {
+                readonly academicYear: string;
+                readonly schoolId: string;
+            };
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["CurriculumClassSubjectsRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseCurriculumClassSubjectsResponse"];
                 };
             };
         };
@@ -10080,6 +10502,58 @@ export interface operations {
                 };
                 content: {
                     readonly "*/*": components["schemas"]["ApiResponseCurriculumTopicResponse"];
+                };
+            };
+        };
+    };
+    readonly program: {
+        readonly parameters: {
+            readonly query: {
+                readonly academicYear: string;
+                readonly levelId: string;
+                readonly subjectId: string;
+            };
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseCurriculumProgramResponse"];
+                };
+            };
+        };
+    };
+    readonly upsertProgram: {
+        readonly parameters: {
+            readonly query: {
+                readonly academicYear: string;
+                readonly levelId: string;
+                readonly subjectId: string;
+            };
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["CurriculumProgramRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseCurriculumProgramResponse"];
                 };
             };
         };
@@ -10222,6 +10696,58 @@ export interface operations {
                 };
                 content: {
                     readonly "*/*": components["schemas"]["ApiResponseCurriculumLevelResponse"];
+                };
+            };
+        };
+    };
+    readonly teachingPlan: {
+        readonly parameters: {
+            readonly query: {
+                readonly academicYear: string;
+                readonly schoolId: string;
+                readonly subjectId: string;
+            };
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseCurriculumTeachingPlanResponse"];
+                };
+            };
+        };
+    };
+    readonly upsertTeachingPlan: {
+        readonly parameters: {
+            readonly query: {
+                readonly academicYear: string;
+                readonly schoolId: string;
+                readonly subjectId: string;
+            };
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["CurriculumTeachingPlanRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseCurriculumTeachingPlanResponse"];
                 };
             };
         };
@@ -12666,6 +13192,33 @@ export interface operations {
             };
         };
     };
+    readonly gradeAnswer: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly attemptId: string;
+                readonly questionId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["ManualGradeRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseAttemptResponse"];
+                };
+            };
+        };
+    };
     readonly saveDraft_1: {
         readonly parameters: {
             readonly query?: never;
@@ -12750,6 +13303,34 @@ export interface operations {
             };
         };
     };
+    readonly importPortableResult: {
+        readonly parameters: {
+            readonly query?: {
+                readonly assignmentId?: string;
+            };
+            readonly header?: {
+                readonly "X-Idempotency-Key"?: string;
+            };
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["ImportPortableResultRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseImportedAttemptResponse"];
+                };
+            };
+        };
+    };
     readonly classes: {
         readonly parameters: {
             readonly query?: {
@@ -12816,7 +13397,9 @@ export interface operations {
     };
     readonly quizPackage: {
         readonly parameters: {
-            readonly query?: never;
+            readonly query?: {
+                readonly assignmentId?: string;
+            };
             readonly header?: never;
             readonly path: {
                 readonly quizId: string;
@@ -12854,6 +13437,31 @@ export interface operations {
                 };
                 content: {
                     readonly "*/*": components["schemas"]["ApiResponseListAttemptResponse"];
+                };
+            };
+        };
+    };
+    readonly quizStudentsPage: {
+        readonly parameters: {
+            readonly query?: {
+                readonly page?: number;
+                readonly size?: number;
+            };
+            readonly header?: never;
+            readonly path: {
+                readonly quizId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponsePageResponseAttemptResponse"];
                 };
             };
         };
@@ -14353,6 +14961,30 @@ export interface operations {
                 };
                 content: {
                     readonly "*/*": components["schemas"]["ApiResponseUserResponse"];
+                };
+            };
+        };
+    };
+    readonly completeOnboarding_1: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["OnboardingRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseOnboardingResponse"];
                 };
             };
         };

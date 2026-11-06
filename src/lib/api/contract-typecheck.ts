@@ -4,13 +4,13 @@ import type {
   EmployeeListFilters,
   EmployeeStatus,
   EmployeeStatusInput,
-} from "@/features/employee-management/types/employee-management";
+} from "@/lib/api/models/employee-management";
 import type {
   PermissionCatalogFilters,
   PermissionStatus,
   PermissionStatusInput,
   SystemPermission,
-} from "@/features/access-management/types/access-management";
+} from "@/lib/api/models/access-management";
 
 type Equal<Left, Right> =
   (<Value>() => Value extends Left ? 1 : 2) extends

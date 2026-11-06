@@ -125,13 +125,13 @@ export function ShareDialog({
 
   return (
     <Dialog fullWidth maxWidth="sm" open={open} onClose={onClose}>
-      <DialogTitle sx={{ fontWeight: 900 }}>Chia sẻ bài viết</DialogTitle>
+      <DialogTitle sx={{ fontWeight: 600 }}>Chia sẻ bài viết</DialogTitle>
       <DialogContent>
         <Typography variant="body2" sx={{ color: MUI_MUTED, mb: 1.5 }}>
           Link này chỉ xem được sau khi đăng nhập tài khoản ERG Elearning.
         </Typography>
-        <Paper sx={{ bgcolor: "#F8FAFC", border: `1px solid ${MUI_DIVIDER}`, borderRadius: 2, p: 1.5 }}>
-          <Typography variant="caption" sx={{ color: MUI_MUTED, display: "block", fontWeight: 800, mb: 0.5 }}>
+        <Paper sx={{ bgcolor: "#FAFAFC", border: `1px solid ${MUI_DIVIDER}`, borderRadius: 2, p: 1.5 }}>
+          <Typography variant="caption" sx={{ color: MUI_MUTED, display: "block", fontWeight: 600, mb: 0.5 }}>
             {title || "Bài thảo luận"}
           </Typography>
           <Typography variant="body2" sx={{ color: MUI_TEXT, overflowWrap: "anywhere" }}>
@@ -140,8 +140,8 @@ export function ShareDialog({
         </Paper>
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2 }}>
-        <Button onClick={onClose} sx={{ borderRadius: 999, fontWeight: 800 }}>Đóng</Button>
-        <Button variant="contained" onClick={() => void copyLink()} sx={{ bgcolor: MUI_PRIMARY, borderRadius: 999, fontWeight: 900 }}>
+        <Button variant="contained" onClick={onClose} sx={{ borderRadius: 999, fontWeight: 600 }}>Đóng</Button>
+        <Button variant="contained" onClick={() => void copyLink()} sx={{ bgcolor: MUI_PRIMARY, borderRadius: 999, fontWeight: 600 }}>
           Copy link
         </Button>
       </DialogActions>
@@ -160,7 +160,7 @@ export function ReactionCluster({
 }) {
   if (!total) {
     return (
-      <Typography variant="caption" sx={{ color: "#65676B", fontWeight: 650 }}>
+      <Typography variant="caption" sx={{ color: "#65676B", fontWeight: 600 }}>
         Hãy là người đầu tiên thích
       </Typography>
     );
@@ -197,7 +197,7 @@ export function ReactionCluster({
           </Box>
         ))}
       </Stack>
-      <Typography variant="caption" sx={{ color: "#65676B", fontWeight: 650 }}>
+      <Typography variant="caption" sx={{ color: "#65676B", fontWeight: 600 }}>
         {total}
       </Typography>
     </Stack>
@@ -278,7 +278,7 @@ export function AttachmentGrid({
                   color: "#fff",
                   display: "flex",
                   fontSize: 26,
-                  fontWeight: 900,
+                  fontWeight: 600,
                   inset: 0,
                   justifyContent: "center",
                   position: "absolute",

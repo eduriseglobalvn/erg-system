@@ -3,7 +3,7 @@ import Button, { type ButtonProps } from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
 import IconButton, { type IconButtonProps } from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
-import { alpha, type SxProps, type Theme } from "@mui/material/styles";
+import { type SxProps, type Theme } from "@mui/material/styles";
 
 type ErgButtonProps = ButtonProps & {
   loading?: boolean;
@@ -14,18 +14,27 @@ type ErgButtonProps = ButtonProps & {
 export function ErgButton({
   children,
   disabled,
-  loading = false,
-  leadingIcon,
-  startIcon,
-  trailingIcon,
   endIcon,
+  leadingIcon,
+  loading = false,
+  startIcon,
+  sx,
+  trailingIcon,
+  variant = "contained",
   ...props
 }: ErgButtonProps) {
   return (
     <Button
       disabled={disabled || loading}
-      startIcon={loading ? <CircularProgress color="inherit" size={16} /> : (startIcon ?? leadingIcon)}
       endIcon={endIcon ?? trailingIcon}
+      startIcon={loading ? <CircularProgress color="inherit" size={16} /> : (startIcon ?? leadingIcon)}
+      sx={[
+        {
+          transition: "background-color 0.15s ease, border-color 0.15s ease",
+        },
+        ...(Array.isArray(sx) ? sx : [sx]),
+      ] as SxProps<Theme>}
+      variant={variant}
       {...props}
     >
       {children}
@@ -38,8 +47,16 @@ type ErgIconButtonProps = IconButtonProps & {
   tooltip?: string;
 };
 
-export function ErgIconButton({ label, tooltip, ...props }: ErgIconButtonProps) {
-  const button = <IconButton aria-label={label} {...props} />;
+export function ErgIconButton({ label, sx, tooltip, ...props }: ErgIconButtonProps) {
+  const button = (
+    <IconButton
+      aria-label={label}
+      sx={[
+        ...(Array.isArray(sx) ? sx : [sx]),
+      ]}
+      {...props}
+    />
+  );
   return tooltip || label ? <Tooltip title={tooltip ?? label}>{button}</Tooltip> : button;
 }
 
@@ -51,20 +68,8 @@ export function ErgToolbarButton({ active = false, sx, variant = "outlined", ...
   return (
     <ErgButton
       variant={active ? "contained" : variant}
+      size="small"
       sx={[
-        {
-          minHeight: 36,
-          px: 1.5,
-          ...(active
-            ? {}
-            : {
-                bgcolor: "background.paper",
-                color: "text.primary",
-                "&:hover": {
-                  bgcolor: (theme) => alpha(theme.palette.primary.main, 0.06),
-                },
-              }),
-        },
         ...(Array.isArray(sx) ? sx : [sx]),
       ] as SxProps<Theme>}
       {...props}

@@ -1,17 +1,15 @@
 import { useMemo, useState } from "react";
 
-import {
-  DashboardPageShell,
-  DashboardSectionCard,
-  DashboardSegmentedControl,
-  DashboardStatusBadge,
-} from "@/components/dashboard/dashboard-page-shell";
+import { DashboardPageShell, DashboardSectionCard, DashboardStatusBadge } from "@/components/dashboard/dashboard-page-shell";
+import { DashboardSegmentedControl } from "@/components/dashboard/dashboard-segmented-control";
 import Button from "@mui/material/Button";
+import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
-import type { ClassroomSchool, ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import type { ClassroomSchool, ClassroomSnapshot } from "@/domain/school/classroom-types";
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
 import { useI18n } from "@/platform/i18n";
-import { cn } from "@/lib/utils";
 import type { ManagementScope } from "@/types/scope-types";
 
 type OverviewMode = "center" | "school";
@@ -126,22 +124,22 @@ export function OverviewWorkspace({
     >
       {mode === "center" ? (
         <>
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(380px,0.9fr)]">
+          <Box sx={panelGrid("minmax(0,1.1fr) minmax(380px,0.9fr)")}>
             <UnavailablePanel title={copy.todayActionsTitle} detail={copy.todayActionsUnavailable} />
             <UnavailablePanel title={copy.assignmentTitle} detail={copy.summary.openAssignmentsUnavailable} />
-          </div>
+          </Box>
 
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
+          <Box sx={panelGrid("minmax(0,1.05fr) minmax(0,0.95fr)")}>
             <ClassFocusPanel copy={copy} snapshots={classesNeedingSupport.slice(0, 5)} onOpenLeaf={onOpenLeaf} />
             <SchoolHealthPanel copy={copy} schools={schoolsByAttention} />
-          </div>
+          </Box>
         </>
       ) : (
         <>
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(360px,0.82fr)]">
+          <Box sx={panelGrid("minmax(0,1fr) minmax(360px,0.82fr)")}>
             <SchoolHealthPanel copy={copy} schools={schoolsByAttention} showDetails />
             <ClassFocusPanel copy={copy} snapshots={classesNeedingSupport.slice(0, 5)} onOpenLeaf={onOpenLeaf} compact />
-          </div>
+          </Box>
           <ClassListPanel copy={copy} snapshots={filteredSnapshots} onOpenLeaf={onOpenLeaf} />
         </>
       )}
@@ -151,15 +149,15 @@ export function OverviewWorkspace({
 
 function SummaryStrip({ items }: { items: Array<{ label: string; value: string; detail: string }> }) {
   return (
-    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+    <Box sx={{ display: "grid", gap: 1.5, gridTemplateColumns: { xs: "minmax(0,1fr)", sm: "repeat(2, minmax(0,1fr))", lg: "repeat(4, minmax(0,1fr))" } }}>
       {items.map((item) => (
-        <div key={item.label} className="rounded-lg border border-[#cbd7e6] bg-white px-4 py-3">
-          <div className="text-[13px] font-bold text-slate-600">{item.label}</div>
-          <div className="mt-2 text-xl font-semibold text-slate-950">{item.value}</div>
-          <div className="mt-1 text-[13px] font-semibold leading-5 text-slate-600">{item.detail}</div>
-        </div>
+        <Box key={item.label} sx={{ ...cardSx, px: 2, py: 1.5 }}>
+          <Typography variant="caption" component="div" sx={{ color: "text.secondary", fontWeight: "fontWeightBold" }}>{item.label}</Typography>
+          <Typography variant="h6" component="div" sx={{ mt: 1 }}>{item.value}</Typography>
+          <Typography variant="caption" component="div" sx={{ mt: 0.5, color: "text.secondary", fontWeight: "fontWeightMedium" }}>{item.detail}</Typography>
+        </Box>
       ))}
-    </div>
+    </Box>
   );
 }
 
@@ -174,35 +172,32 @@ function SchoolHealthPanel({
 }) {
   return (
     <DashboardSectionCard title={copy.schoolHealthTitle} description={copy.schoolHealthDescription}>
-      <div className="space-y-3">
+      <Stack spacing={1.5}>
         {schools.map((school) => (
-          <article key={school.id} className="rounded-lg border border-[#cbd7e6] bg-white p-4">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-              <div>
-                <h3 className="text-sm font-semibold text-slate-950">{school.name}</h3>
-                <p className="mt-1 text-sm text-slate-500">
+          <Box component="article" key={school.id} sx={{ ...cardSx, p: 2 }}>
+            <Box sx={rowHeaderSx}>
+              <Box>
+                <Typography variant="subtitle2" component="h3">{school.name}</Typography>
+                <Typography variant="body2" sx={{ mt: 0.5, color: "text.secondary" }}>
                   {copy.schoolPrincipal}: {school.principal}
-                </p>
-              </div>
+                </Typography>
+              </Box>
               <DashboardStatusBadge label={school.metricsAvailable === false ? copy.noData : copy.schoolStatus(school.flaggedStudents)} tone={school.metricsAvailable === false ? "outline" : school.flaggedStudents > 28 ? "warning" : "success"} />
-            </div>
-            <div className="mt-4 grid gap-2 sm:grid-cols-3">
+            </Box>
+            <Box sx={miniStatGridSx}>
               <MiniStat label={copy.classroomsLabel} value={String(school.activeClasses)} />
               <MiniStat label={copy.completionLabel} value={school.metricsAvailable === false ? copy.noData : `${school.completionRate}%`} />
               <MiniStat label={copy.studentsNeedSupport} value={school.metricsAvailable === false ? copy.noData : String(school.flaggedStudents)} tone={school.metricsAvailable === false ? "default" : school.flaggedStudents > 28 ? "danger" : "default"} />
-            </div>
+            </Box>
             {showDetails ? (
-              <div className="mt-4">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="font-medium text-slate-600">{copy.averageScoreLabel}</span>
-                  <span className="font-semibold text-slate-950">{school.metricsAvailable === false ? copy.noData : school.averageScore}</span>
-                </div>
-                {school.metricsAvailable === false ? <div className="mt-2 text-sm font-medium text-slate-500">{copy.summary.metricsUnavailable}</div> : <LinearProgress variant="determinate" value={school.completionRate} sx={{ mt: 1, height: 8, borderRadius: 1, bgcolor: "grey.200" }} />}
-              </div>
+              <Box sx={{ mt: 2 }}>
+                <ProgressLabel label={copy.averageScoreLabel} value={school.metricsAvailable === false ? copy.noData : String(school.averageScore)} />
+                {school.metricsAvailable === false ? <MetricsUnavailable text={copy.summary.metricsUnavailable} /> : <LinearProgress variant="determinate" value={school.completionRate} sx={{ mt: 1, height: 8, borderRadius: 1, bgcolor: "grey.200" }} />}
+              </Box>
             ) : null}
-          </article>
+          </Box>
         ))}
-      </div>
+      </Stack>
     </DashboardSectionCard>
   );
 }
@@ -224,11 +219,11 @@ function ClassFocusPanel({
       description={copy.classFocusDescription}
       action={<Button variant="outlined" onClick={() => onOpenLeaf("class-reports")}>{copy.openClassReports}</Button>}
     >
-      <div className="space-y-3">
+      <Stack spacing={1.5}>
         {snapshots.map((snapshot) => (
           <ClassRow key={snapshot.id} compact={compact} copy={copy} snapshot={snapshot} />
         ))}
-      </div>
+      </Stack>
     </DashboardSectionCard>
   );
 }
@@ -248,34 +243,38 @@ function ClassListPanel({
       description={copy.classListDescription}
       action={<Button variant="contained" onClick={() => onOpenLeaf("class-students")}>{copy.openStudentList}</Button>}
     >
-      <div className="overflow-hidden rounded-lg border border-[#cbd7e6] bg-white">
-        <div className="hidden grid-cols-[minmax(0,1.3fr)_120px_120px_120px_130px] gap-3 border-b border-[#cbd7e6] bg-[#eef4fb] px-4 py-3 text-[13px] font-bold text-slate-700 lg:grid">
+      <Box sx={{ ...cardSx, overflow: "hidden" }}>
+        <Typography
+          variant="caption"
+          component="div"
+          sx={{ display: { xs: "none", lg: "grid" }, gridTemplateColumns: classTableColumns, gap: 1.5, borderBottom: 1, borderColor: "divider", bgcolor: "background.default", px: 2, py: 1.5, fontWeight: "fontWeightBold", color: "text.secondary" }}
+        >
           <span>{copy.classTable.className}</span>
           <span>{copy.classTable.students}</span>
           <span>{copy.classTable.assignments}</span>
           <span>{copy.classTable.completion}</span>
           <span>{copy.classTable.support}</span>
-        </div>
-        <div className="divide-y divide-slate-200">
+        </Typography>
+        <Box sx={{ "& > * + *": { borderTop: 1, borderColor: "divider" } }}>
           {snapshots.map((snapshot) => (
-            <article key={snapshot.id} className="grid gap-3 px-4 py-4 lg:grid-cols-[minmax(0,1.3fr)_120px_120px_120px_130px] lg:items-center">
-              <div>
-                <h3 className="text-sm font-semibold text-slate-950">{snapshot.className}</h3>
-                <p className="mt-1 text-sm text-slate-500">
+            <Box component="article" key={snapshot.id} sx={{ display: "grid", gap: 1.5, px: 2, py: 2, gridTemplateColumns: { lg: classTableColumns }, alignItems: { lg: "center" } }}>
+              <Box>
+                <Typography variant="subtitle2" component="h3">{snapshot.className}</Typography>
+                <Typography variant="body2" sx={{ mt: 0.5, color: "text.secondary" }}>
                   {snapshot.schoolName} - {snapshot.gradeLabel} - {snapshot.homeroomTeacher}
-                </p>
-              </div>
+                </Typography>
+              </Box>
               <CompactCell label={copy.classTable.students} value={snapshot.metricsAvailable === false ? copy.noData : String(snapshot.studentCount)} />
               <CompactCell label={copy.classTable.assignments} value={snapshot.metricsAvailable === false ? copy.noData : String(snapshot.activeAssignments)} />
               <CompactCell label={copy.classTable.completion} value={snapshot.metricsAvailable === false ? copy.noData : `${snapshot.completionRate}%`} />
-              <div>
-                <span className="font-medium text-slate-500 lg:hidden">{copy.classTable.support}: </span>
+              <Box>
+                <Box component="span" sx={mobileLabelSx}>{copy.classTable.support}: </Box>
                 <DashboardStatusBadge label={snapshot.metricsAvailable === false ? copy.noData : `${snapshot.riskStudents} ${copy.studentsNeedSupport}`} tone={snapshot.metricsAvailable === false ? "outline" : snapshot.riskStudents > 5 ? "warning" : "outline"} />
-              </div>
-            </article>
+              </Box>
+            </Box>
           ))}
-        </div>
-      </div>
+        </Box>
+      </Box>
     </DashboardSectionCard>
   );
 }
@@ -290,29 +289,28 @@ function ClassRow({
   snapshot: ClassroomSnapshot;
 }) {
   return (
-    <article className="rounded-lg border border-[#cbd7e6] bg-white p-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <h3 className="text-sm font-semibold text-slate-950">{snapshot.className}</h3>
-          <p className="mt-1 text-sm text-slate-500">
+    <Box component="article" sx={{ ...cardSx, p: 2 }}>
+      <Box sx={rowHeaderSx}>
+        <Box>
+          <Typography variant="subtitle2" component="h3">{snapshot.className}</Typography>
+          <Typography variant="body2" sx={{ mt: 0.5, color: "text.secondary" }}>
             {snapshot.schoolName} - {snapshot.gradeLabel} - {snapshot.homeroomTeacher}
-          </p>
-        </div>
+          </Typography>
+        </Box>
         <DashboardStatusBadge label={snapshot.metricsAvailable === false ? copy.noData : `${snapshot.riskStudents} ${copy.studentsNeedSupport}`} tone={snapshot.metricsAvailable === false ? "outline" : snapshot.riskStudents > 5 ? "warning" : "outline"} />
-      </div>
-      <div className="mt-4 flex items-center justify-between text-sm">
-        <span className="font-medium text-slate-600">{copy.completionLabel}</span>
-        <span className="font-semibold text-slate-950">{snapshot.metricsAvailable === false ? copy.noData : `${snapshot.completionRate}%`}</span>
-      </div>
-      {snapshot.metricsAvailable === false ? <div className="mt-2 text-sm font-medium text-slate-500">{copy.summary.metricsUnavailable}</div> : <LinearProgress variant="determinate" value={snapshot.completionRate} sx={{ mt: 1, height: 8, borderRadius: 1, bgcolor: "grey.200" }} />}
+      </Box>
+      <Box sx={{ mt: 2 }}>
+        <ProgressLabel label={copy.completionLabel} value={snapshot.metricsAvailable === false ? copy.noData : `${snapshot.completionRate}%`} />
+      </Box>
+      {snapshot.metricsAvailable === false ? <MetricsUnavailable text={copy.summary.metricsUnavailable} /> : <LinearProgress variant="determinate" value={snapshot.completionRate} sx={{ mt: 1, height: 8, borderRadius: 1, bgcolor: "grey.200" }} />}
       {!compact ? (
-        <div className="mt-4 grid gap-2 sm:grid-cols-3">
+        <Box sx={miniStatGridSx}>
           <MiniStat label={copy.classroomsStudentCount} value={snapshot.metricsAvailable === false ? copy.noData : String(snapshot.studentCount)} />
           <MiniStat label={copy.activeAssignmentsLabel} value={snapshot.metricsAvailable === false ? copy.noData : String(snapshot.activeAssignments)} />
           <MiniStat label={copy.lastActivityLabel} value={snapshot.lastSubmissionAt} />
-        </div>
+        </Box>
       ) : null}
-    </article>
+    </Box>
   );
 }
 
@@ -326,19 +324,19 @@ function MiniStat({
   value: string;
 }) {
   return (
-    <div className="rounded-lg bg-[#f8fbff] px-3 py-2">
-      <div className={cn("text-sm font-semibold text-slate-950", tone === "danger" && "text-rose-700")}>{value}</div>
-      <div className="mt-1 text-[13px] font-semibold text-slate-600">{label}</div>
-    </div>
+    <Box sx={{ borderRadius: 1, bgcolor: "background.default", px: 1.5, py: 1 }}>
+      <Typography variant="subtitle2" component="div" sx={{ color: tone === "danger" ? "error.main" : "text.primary" }}>{value}</Typography>
+      <Typography variant="caption" component="div" sx={{ mt: 0.5, color: "text.secondary", fontWeight: "fontWeightMedium" }}>{label}</Typography>
+    </Box>
   );
 }
 
 function UnavailablePanel({ detail, title }: { detail: string; title: string }) {
   return (
     <DashboardSectionCard title={title} description={detail}>
-      <div className="rounded-lg border border-dashed border-slate-300 bg-[#f8fbff] p-6 text-sm font-medium text-slate-500">
+      <Typography variant="body2" sx={{ border: 1, borderStyle: "dashed", borderColor: "divider", borderRadius: 1, bgcolor: "background.default", p: 3, color: "text.secondary", fontWeight: "fontWeightMedium" }}>
         {detail}
-      </div>
+      </Typography>
     </DashboardSectionCard>
   );
 }
@@ -353,11 +351,34 @@ function formatPercent(value: number | null) {
 
 function CompactCell({ label, value }: { label: string; value: string }) {
   return (
-    <div className="text-sm font-semibold text-slate-950">
-      <span className="font-medium text-slate-500 lg:hidden">{label}: </span>
+    <Typography variant="subtitle2" component="div">
+      <Box component="span" sx={mobileLabelSx}>{label}: </Box>
       {value}
-    </div>
+    </Typography>
   );
+}
+
+function ProgressLabel({ label, value }: { label: string; value: string }) {
+  return (
+    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <Typography variant="body2" component="span" sx={{ color: "text.secondary", fontWeight: "fontWeightMedium" }}>{label}</Typography>
+      <Typography variant="subtitle2" component="span">{value}</Typography>
+    </Box>
+  );
+}
+
+function MetricsUnavailable({ text }: { text: string }) {
+  return <Typography variant="body2" sx={{ mt: 1, color: "text.secondary", fontWeight: "fontWeightMedium" }}>{text}</Typography>;
+}
+
+const cardSx = { border: 1, borderColor: "divider", borderRadius: 1, bgcolor: "background.paper" } as const;
+const rowHeaderSx = { display: "flex", flexDirection: { xs: "column", sm: "row" }, gap: 1.5, alignItems: { sm: "flex-start" }, justifyContent: { sm: "space-between" } } as const;
+const miniStatGridSx = { mt: 2, display: "grid", gap: 1, gridTemplateColumns: { sm: "repeat(3, minmax(0,1fr))" } } as const;
+const mobileLabelSx = { display: { lg: "none" }, color: "text.secondary", fontWeight: "fontWeightMedium" } as const;
+const classTableColumns = "minmax(0,1.3fr) 120px 120px 120px 130px";
+
+function panelGrid(xlColumns: string) {
+  return { display: "grid", gap: 2, gridTemplateColumns: { xs: "minmax(0,1fr)", lg: xlColumns } } as const;
 }
 
 type OverviewCopy = typeof enCopy;

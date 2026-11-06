@@ -1,27 +1,20 @@
-import {
-  Box,
-  Button,
-  Card,
-  Chip,
-  IconButton,
-  InputAdornment,
-  MenuItem,
-  Select,
-  Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TextField,
-  Typography,
-} from "@mui/material";
-import Add from "@mui/icons-material/Add";
-import MoreVert from "@mui/icons-material/MoreVert";
-import Refresh from "@mui/icons-material/Refresh";
-import Search from "@mui/icons-material/Search";
-import type { ClassroomSnapshot, AssignmentRun } from "@/features/lms/classroom/types/classroom-types";
+import { useMemo, useState } from "react";
+import Box from "@mui/material/Box";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Typography from "@mui/material/Typography";
+import AddIcon from "@mui/icons-material/Add";
+import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
+import { ErgButton } from "@/components/erg-mui/erg-actions";
+import { ErgEmptyState, ErgStatusChip } from "@/components/erg-mui/erg-feedback";
+import { ErgSearchField, ErgSelect } from "@/components/erg-mui/erg-form";
+import { ErgPageHeader } from "@/components/erg-mui/erg-page-header";
+import { ErgDataTableShell } from "@/components/erg-mui/erg-table";
+import { formatShortDateTimeVi } from "@/features/lms/api/lms-date-label";
+import type { ClassroomSnapshot, AssignmentRun } from "@/domain/school/classroom-types";
 
 interface HomeworkPanelProps {
   selectedClass?: ClassroomSnapshot;
@@ -30,261 +23,125 @@ interface HomeworkPanelProps {
   onViewProgress: (runId: string) => void;
 }
 
-export function HomeworkPanel({
-  selectedClass,
-  runs,
-  onAssign,
-  onViewProgress,
-}: HomeworkPanelProps) {
-  return (
-    <>
-      <FilterBar
-        primaryPlaceholder="Tìm kiếm theo tên bài"
-        filters={["Môn học", "Học kỳ", "Trạng thái", "Loại bài", "Tính điểm", "Đối tượng giao"]}
-        onAssign={onAssign}
-      />
-      <Card
-        sx={{
-          borderRadius: 2,
-          boxShadow: "none",
-          border: "1px solid",
-          borderColor: "divider",
-          overflow: "hidden",
-        }}
-      >
-        <TableContainer sx={{ minWidth: 1180 }}>
-          <Table size="medium">
-            <TableHead>
-              <TableRow sx={{ bgcolor: "action.hover" }}>
-                <TableCell sx={{ fontWeight: 600, fontSize: 12, width: 72, color: "text.secondary" }}>STT</TableCell>
-                <TableCell sx={{ fontWeight: 600, fontSize: 12, color: "text.secondary" }}>Tên bài</TableCell>
-                <TableCell sx={{ fontWeight: 600, fontSize: 12, color: "text.secondary" }}>Môn học</TableCell>
-                <TableCell sx={{ fontWeight: 600, fontSize: 12, color: "text.secondary" }}>Loại bài</TableCell>
-                <TableCell sx={{ fontWeight: 600, fontSize: 12, color: "text.secondary" }}>Đối tượng</TableCell>
-                <TableCell sx={{ fontWeight: 600, fontSize: 12, color: "text.secondary" }}>Thời gian làm bài</TableCell>
-                <TableCell sx={{ fontWeight: 600, fontSize: 12, color: "text.secondary" }}>Trạng thái</TableCell>
-                <TableCell sx={{ width: 64 }} />
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {runs.map((assignment, index) => (
-                <TableRow
-                  key={assignment.id}
-                  hover
-                  sx={{
-                    "&:hover": { bgcolor: "action.hover" },
-                    cursor: "pointer",
-                  }}
-                  onClick={() => onViewProgress(assignment.id)}
-                >
-                  <TableCell sx={{ fontWeight: 500, color: "text.secondary", fontSize: 13 }}>
-                    {String(index + 1).padStart(2, "0")}
-                  </TableCell>
-                  <TableCell>
-                    <Box>
-                      <Typography
-                        sx={{
-                          fontSize: 14,
-                          fontWeight: 600,
-                          color: "primary.main",
-                          "&:hover": { color: "primary.dark" },
-                          cursor: "pointer",
-                        }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onViewProgress(assignment.id);
-                        }}
-                      >
-                        {assignment.title}
-                      </Typography>
-                      <Typography sx={{ fontSize: 12, color: "text.secondary", fontWeight: 500 }}>
-                        Công bố điểm tự động
-                      </Typography>
-                    </Box>
-                  </TableCell>
-                  <TableCell>
-                    <Typography sx={{ fontSize: 13, fontWeight: 600 }}>{assignment.subjectLabel}</Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography sx={{ fontSize: 13, color: "text.secondary" }}>
-                      {index % 2 === 0 ? "Kiểm tra đầu vào" : "Luyện tập"}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography sx={{ fontSize: 13, fontWeight: 600 }}>{selectedClass?.className ?? "Cả lớp"}</Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography sx={{ fontSize: 13, color: "text.secondary", lineHeight: 1.6 }}>
-                      21/05/2026 10:{50 + index}<br />
-                      28/05/2026 10:{50 + index}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Chip
-                      label={index > 3 ? "Đã kết thúc" : "Đang diễn ra"}
-                      size="small"
-                      sx={{
-                        fontWeight: 600,
-                        fontSize: 12,
-                        borderRadius: 1.5,
-                        bgcolor: index > 3 ? "error.light" : "success.light",
-                        color: index > 3 ? "error.dark" : "success.dark",
-                      }}
-                    />
-                  </TableCell>
-                  <TableCell align="center">
-                    <IconButton
-                      size="small"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onViewProgress(assignment.id);
-                      }}
-                      sx={{
-                        borderRadius: 1.5,
-                        color: "text.secondary",
-                        "&:hover": {
-                          bgcolor: "action.selected",
-                          color: "text.primary",
-                        },
-                      }}
-                    >
-                      <MoreVert sx={{ fontSize: 20 }} />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Card>
-    </>
-  );
+type RunStatus = "review" | "done" | "open";
+
+const ALL = "all";
+const STATUS_LABEL: Record<RunStatus, string> = { review: "Cần chấm", done: "Hoàn thành", open: "Đang diễn ra" };
+const STATUS_TONE = { review: "warning", done: "success", open: "info" } as const;
+
+export function getRunStatus(run: AssignmentRun): RunStatus {
+  if (run.needsReviewCount > 0) return "review";
+  return run.completionRate >= 100 ? "done" : "open";
 }
 
-function FilterBar({
-  filters,
-  primaryPlaceholder,
-  onAssign,
-}: {
-  filters: string[];
-  primaryPlaceholder: string;
-  onAssign: () => void;
-}) {
+export function HomeworkPanel({ selectedClass, runs, onAssign, onViewProgress }: HomeworkPanelProps) {
+  const [query, setQuery] = useState("");
+  const [subject, setSubject] = useState(ALL);
+  const [status, setStatus] = useState(ALL);
+
+  const subjectOptions = useMemo(
+    () => [
+      { label: "Tất cả môn học", value: ALL },
+      ...Array.from(new Set(runs.map((run) => run.subjectLabel).filter(Boolean))).map((s) => ({ label: s, value: s })),
+    ],
+    [runs],
+  );
+  const statusOptions = [
+    { label: "Tất cả trạng thái", value: ALL },
+    ...(Object.keys(STATUS_LABEL) as RunStatus[]).map((key) => ({ label: STATUS_LABEL[key], value: key })),
+  ];
+
+  const filtered = useMemo(() => {
+    const needle = query.trim().toLowerCase();
+    return runs.filter(
+      (run) =>
+        (!needle || run.title.toLowerCase().includes(needle)) &&
+        (subject === ALL || run.subjectLabel === subject) &&
+        (status === ALL || getRunStatus(run) === status),
+    );
+  }, [runs, query, subject, status]);
+
+  const hasFilter = Boolean(query.trim()) || subject !== ALL || status !== ALL;
   return (
-    <Card
-      sx={{
-        borderRadius: 2,
-        p: 2,
-        boxShadow: "none",
-        border: "1px solid",
-        borderColor: "divider",
-        mb: 2,
-      }}
-    >
-      <Box
-        sx={{
-          display: "grid",
-          gridTemplateColumns: { xs: "1fr", xl: "1fr auto" },
-          gap: 2,
-          alignItems: "center",
-        }}
-      >
-        <Stack direction="row" spacing={1.5} useFlexGap sx={{ gap: 1.5, flexWrap: "wrap" }}>
-          {/* Search */}
-          <TextField
-            placeholder={primaryPlaceholder}
-            size="small"
-            sx={{
-              minWidth: 240,
-              maxWidth: 520,
-              flex: 1,
-              "& .MuiOutlinedInput-root": {
-                borderRadius: 2,
-                bgcolor: "background.paper",
-              },
-            }}
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Search sx={{ fontSize: 20, color: "text.secondary" }} />
-                  </InputAdornment>
-                ),
-              },
-            }}
-          />
-
-          {/* Filter selects */}
-          {filters.map((filter) => (
-            <Select
-              key={filter}
-              size="small"
-              displayEmpty
-              sx={{
-                minWidth: 128,
-                height: 40,
-                borderRadius: 2,
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: 2,
-                },
-              }}
-              renderValue={(value) => (
-                <Typography sx={{ fontSize: 13, fontWeight: 500, color: "text.secondary" }}>
-                  {(value as string) || filter}
-                </Typography>
-              )}
-            >
-              <MenuItem value="">{filter}</MenuItem>
-            </Select>
-          ))}
-
-          {/* Reset */}
-          <Button
-            variant="outlined"
-            size="small"
-            startIcon={<Refresh sx={{ fontSize: 18 }} />}
-            sx={{
-              height: 40,
-              borderRadius: 2,
-              borderColor: "divider",
-              color: "text.primary",
-              fontWeight: 600,
-              fontSize: 13,
-              textTransform: "none",
-              "&:hover": {
-                borderColor: "primary.main",
-                bgcolor: "primary.light",
-              },
-            }}
-          >
-            Đặt lại
-          </Button>
-        </Stack>
-
-        {/* Assign button */}
-        <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-          <Button
-            variant="contained"
-            size="small"
-            startIcon={<Add sx={{ fontSize: 18 }} />}
-            onClick={onAssign}
-            sx={{
-              minWidth: 88,
-              height: 40,
-              borderRadius: 2,
-              fontWeight: 600,
-              fontSize: 14,
-              textTransform: "none",
-              boxShadow: "none",
-              "&:hover": {
-                boxShadow: "none",
-              },
-            }}
-          >
+    <>
+      <ErgPageHeader
+        description={selectedClass ? `Lớp ${selectedClass.className}` : undefined}
+        primaryAction={
+          <ErgButton leadingIcon={<AddIcon />} onClick={onAssign} variant="contained">
             Giao bài
-          </Button>
-        </Box>
+          </ErgButton>
+        }
+        title="Danh sách hoạt động"
+      />
+      <Box
+        sx={{ display: "grid", gap: 1.5, gridTemplateColumns: { xs: "1fr", md: "minmax(0, 2fr) 1fr 1fr" }, mb: 2 }}
+      >
+        <ErgSearchField
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder="Tìm theo tên bài"
+          slotProps={{ htmlInput: { "aria-label": "Tìm theo tên bài" } }}
+          value={query}
+        />
+        <ErgSelect
+          label="Môn học"
+          onChange={(event) => setSubject(event.target.value)}
+          options={subjectOptions}
+          size="small"
+          value={subject}
+        />
+        <ErgSelect
+          label="Trạng thái"
+          onChange={(event) => setStatus(event.target.value)}
+          options={statusOptions}
+          size="small"
+          value={status}
+        />
       </Box>
-    </Card>
+      {filtered.length === 0 ? (
+        <ErgEmptyState
+          description={hasFilter ? "Thử đổi từ khóa hoặc bộ lọc." : "Giao bài đầu tiên để theo dõi tiến độ của học sinh."}
+          icon={<AssignmentOutlinedIcon />}
+          title={hasFilter ? "Không có hoạt động phù hợp" : "Chưa có hoạt động nào"}
+        />
+      ) : (
+        <ErgDataTableShell>
+          <Box sx={{ overflowX: "auto" }}>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Tên bài</TableCell>
+                  <TableCell>Môn học</TableCell>
+                  <TableCell>Đối tượng</TableCell>
+                  <TableCell>Hạn nộp</TableCell>
+                  <TableCell>Đã hoàn thành</TableCell>
+                  <TableCell>Trạng thái</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {filtered.map((run) => {
+                  const runStatus = getRunStatus(run);
+                  return (
+                    <TableRow hover key={run.id} onClick={() => onViewProgress(run.id)} sx={{ cursor: "pointer" }}>
+                      <TableCell>
+                        <Typography sx={{ color: "primary.main" }} variant="body2">
+                          {run.title}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>{run.subjectLabel}</TableCell>
+                      <TableCell>{run.targetLevel || selectedClass?.className || "Cả lớp"}</TableCell>
+                      <TableCell>{formatShortDateTimeVi(run.dueLabel) || run.dueLabel}</TableCell>
+                      <TableCell>{Math.round(run.completionRate)}%</TableCell>
+                      <TableCell>
+                        <ErgStatusChip label={STATUS_LABEL[runStatus]} tone={STATUS_TONE[runStatus]} />
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </Box>
+        </ErgDataTableShell>
+      )}
+    </>
   );
 }

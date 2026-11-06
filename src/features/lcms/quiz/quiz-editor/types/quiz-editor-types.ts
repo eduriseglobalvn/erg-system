@@ -1,5 +1,5 @@
 import type { MessageKey } from "@/platform/i18n";
-import type { Question } from "@/lib/types";
+import type { Question } from "@/domain/quiz/types";
 
 export type QuestionType =
   | "multiple-choice"
@@ -17,15 +17,9 @@ export type QuestionType =
   | "likert-scale"
   | "essay";
 
-export type QuestionCreationPreset = "yes-no";
-
 export type IntroSlideKind = "intro-slide" | "user-info" | "instruction-slide";
 
 export type SlideKind = "info-slide" | "result-slide" | IntroSlideKind | QuestionType;
-
-export type QuestionManagerFilter = "all" | SlideKind;
-
-export type QuestionManagerGrouping = "type" | "group";
 
 export type QuizEditorTextStyle = {
   fontFamily: string;
@@ -204,6 +198,9 @@ export type QuizEditorSlide = {
   status?: "unsaved" | "draft" | "published";
 };
 
+/** A replacement slide, or a function of the latest slide for results that arrive after an async step. */
+export type QuizEditorSlideUpdate = QuizEditorSlide | ((current: QuizEditorSlide) => QuizEditorSlide);
+
 export type QuizProjectSettings = {
   info: {
     title: string;
@@ -254,6 +251,8 @@ export type QuizProjectSettings = {
     metaDescription: string;
     metaKeywords: string;
   };
+  /** slideId -> fingerprint at the last publish (model/quiz-publish-state.ts). Absent until the first publish. */
+  publishedFingerprints?: Record<string, string>;
 };
 
 export type QuizPlayerTemplate = {
@@ -289,9 +288,6 @@ export type SelectedEditorNode =
       type: "slide";
       groupId: string;
       slideId: string;
-    }
-  | {
-      type: "result";
     };
 
 export const questionTypeLabelKeys: Record<QuestionType, MessageKey> = {
@@ -311,27 +307,10 @@ export const questionTypeLabelKeys: Record<QuestionType, MessageKey> = {
   essay: "quiz.essay",
 };
 
-export const introSlideLabelKeys: Record<IntroSlideKind, MessageKey> = {
-  "intro-slide": "quiz.infoSlide",
-  "user-info": "quiz.userInfo",
-  "instruction-slide": "quiz.instructionSlide",
-};
-
 export function isQuestionType(kind: SlideKind): kind is QuestionType {
   return kind in questionTypeLabelKeys;
 }
 
-export function isIntroSlideKind(kind: SlideKind): kind is IntroSlideKind {
-  return kind === "intro-slide" || kind === "user-info" || kind === "instruction-slide";
-}
-
 export function isQuestionManagerSlideKind(kind: SlideKind) {
   return kind !== "info-slide" && kind !== "result-slide";
-}
-
-export function getSlideKindLabelKey(kind: SlideKind): MessageKey {
-  if (kind === "info-slide") return "quiz.infoSlide";
-  if (kind === "result-slide") return "quiz.resultsLayer";
-  if (isIntroSlideKind(kind)) return introSlideLabelKeys[kind];
-  return questionTypeLabelKeys[kind];
 }

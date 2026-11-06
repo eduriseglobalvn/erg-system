@@ -13,6 +13,8 @@ export type LmsMobileDockItem<TSection extends string> = {
   icon: LmsMobileDockIcon;
   id: TSection;
   label: string;
+  /** Opens the shell's menu sheet instead of navigating. */
+  opensMenu?: boolean;
   path: string;
 };
 
@@ -83,11 +85,11 @@ function DockButton({ active, badgeCount, icon: Icon, label, onClick }: {
       data-selected={active ? "true" : undefined}
       onClick={onClick}
       sx={{
-        bgcolor: active ? "rgba(15,108,189,0.08)" : "transparent",
+        bgcolor: active ? "rgba(0, 113, 227,0.08)" : "transparent",
         border: "1px solid",
-        borderColor: active ? "rgba(15,108,189,0.14)" : "transparent",
+        borderColor: active ? "rgba(0, 113, 227,0.14)" : "transparent",
         borderRadius: "18px",
-        boxShadow: active ? "0 6px 16px rgba(15,108,189,0.08)" : "none",
+        boxShadow: active ? "0 6px 16px rgba(0, 113, 227,0.08)" : "none",
         color: active ? "primary.main" : "text.secondary",
         display: "flex",
         flexDirection: "column",
@@ -96,7 +98,7 @@ function DockButton({ active, badgeCount, icon: Icon, label, onClick }: {
         minWidth: 0,
         px: 0.35,
         "&:active": { transform: "scale(0.97)" },
-        "&:focus-visible": { outline: "3px solid", outlineColor: "rgba(15,108,189,0.24)", outlineOffset: 2 },
+        "&:focus-visible": { outline: "3px solid", outlineColor: "rgba(0, 113, 227,0.24)", outlineOffset: 2 },
         "&:hover": { bgcolor: active ? ergEnterpriseTokens.color.primarySofter : "action.hover" },
       }}
     >
@@ -115,12 +117,12 @@ function DockButton({ active, badgeCount, icon: Icon, label, onClick }: {
       >
         <Icon sx={{ fontSize: 20 }} />
         {badgeCount ? (
-          <Box sx={{ alignItems: "center", bgcolor: "error.main", border: "2px solid", borderColor: "background.paper", borderRadius: 8, color: "error.contrastText", display: "flex", fontSize: 10, fontWeight: 800, justifyContent: "center", minHeight: 18, minWidth: 18, px: 0.25, position: "absolute", right: -6, top: -6 }}>
+          <Box sx={{ alignItems: "center", bgcolor: "error.main", border: "2px solid", borderColor: "background.paper", borderRadius: 8, color: "error.contrastText", display: "flex", fontSize: 10, fontWeight: 600, justifyContent: "center", minHeight: 18, minWidth: 18, px: 0.25, position: "absolute", right: -6, top: -6 }}>
             {badgeCount > 9 ? "9+" : badgeCount}
           </Box>
         ) : null}
       </Box>
-      <Typography color="inherit" noWrap sx={{ fontSize: 11, fontWeight: 800, lineHeight: 1, maxWidth: "100%", px: 0.25 }}>
+      <Typography color="inherit" noWrap sx={{ fontSize: 11, fontWeight: 600, lineHeight: 1, maxWidth: "100%", px: 0.25 }}>
         {label}
       </Typography>
     </ButtonBase>

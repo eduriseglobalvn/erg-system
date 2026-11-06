@@ -1,11 +1,11 @@
-import Chip from "@mui/material/Chip";
 import { CalendarClock, Handshake, LineChart, TrendingUp, UsersRound } from "lucide-react";
 
-import { DashboardMetricCard, DashboardSectionCard } from "@/components/dashboard/dashboard-page-shell";
+import { DashboardMetricCard } from "@/components/dashboard/dashboard-metric-card";
+import { DashboardSectionCard } from "@/components/dashboard/dashboard-page-shell";
 import { calculateSeoPnlSummary } from "@/features/crm/seo/api/seo-crm-pnl";
 import type { SeoFollowUp, SeoOpportunity, SeoSchoolLead } from "@/features/crm/seo/types/seo-crm-types";
 import {
-  formatCurrencyCompact, formatDate, formatPercent, pipelineStatuses, statusLabelMap, statusToneMap, toChipProps,
+  formatCurrencyCompact, formatDate, formatPercent, pipelineStatuses, statusLabelMap, statusToneMap, SeoBadge,
 } from "@/features/crm/seo/components/seo-crm-workspace-shared";
 
 export function SeoOverview({ leads, opportunities, followUps, onOpenLeaf, onSelectLead }: {
@@ -42,7 +42,7 @@ export function SeoOverview({ leads, opportunities, followUps, onOpenLeaf, onSel
                 <section key={status} className="rounded-lg border border-slate-200 bg-slate-50 p-3">
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-xs font-semibold text-slate-500">{statusLabelMap[status]}</span>
-                    <Chip label={statusLeads.length} size="small" {...toChipProps(statusToneMap[status])} />
+                    <SeoBadge tone={statusToneMap[status]} label={statusLeads.length} />
                   </div>
                   <div className="mt-3 space-y-2">
                     {statusLeads.map((lead) => (

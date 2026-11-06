@@ -1,7 +1,6 @@
-import Search from "@mui/icons-material/Search";
 import TextField from "@mui/material/TextField";
-import { AppSelect } from "@/components/ui/app-select";
-import { inputClassName } from "@/components/ui/input";
+import { AppSelect } from "@/components/erg-mui/app-select";
+import { ErgSearchField, ErgTextField } from "@/components/erg-mui";
 import { getTaxonomyIconColor, getTaxonomyIconId, taxonomyIconColorOptions, TaxonomyIcon, type TaxonomyRole } from "@/features/lcms/admin-operations/components/learning-resource-authoring-icons";
 import type { StudioNode, StudioSubject } from "@/features/lcms/admin-operations/types/learning-resource-authoring";
 import type { ExerciseLibraryItem } from "@/features/lcms/admin-operations/utils/learning-resource-content-dialog";
@@ -38,14 +37,14 @@ export function TaxonomyFields({
   onLevelChange: (value: string) => void;
   onSubjectChange: (value: string) => void;
 }) {
-  const titleLabel = role === "subject" ? "Tên môn học" : role === "level" ? "Tên level" : "Tên chủ đề";
-  const titlePlaceholder = role === "subject" ? "Ví dụ: IC3 GS6" : role === "level" ? "Ví dụ: Máy tính căn bản" : "Ví dụ: 01. Quản lý thư mục và tệp";
+  const titleLabel = role === "subject" ? "Tên môn học" : role === "level" ? "Tên chặng học (Level)" : "Tên chủ đề";
+  const titlePlaceholder = role === "subject" ? "Ví dụ: IC3 GS6" : role === "level" ? "Ví dụ: Level 1" : "Ví dụ: Máy tính căn bản";
 
   return (
-    <div className="grid gap-4">
+    <div className="grid gap-3">
       {showSubjectPicker ? (
         <Field label="Môn học">
-          <AppSelect variant="native" className={inputClassName} value={draftSubjectId} onChange={(event) => onSubjectChange(event.target.value)}>
+          <AppSelect style={{ width: "100%" }} value={draftSubjectId} onChange={(event) => onSubjectChange(event.target.value)}>
             <option value="">Chọn môn học</option>
             {subjects.map((subject) => (
               <option key={subject.id} value={subject.id}>
@@ -57,32 +56,105 @@ export function TaxonomyFields({
       ) : null}
 
       {showLevelPicker ? (
-        <Field label="Level cha">
-          <AppSelect variant="native" className={inputClassName} value={draftLevelId} onChange={(event) => onLevelChange(event.target.value)} disabled={!draftSubjectId}>
-            <option value="">Chọn level</option>
+        <Field label="Level">
+          <AppSelect style={{ width: "100%" }} value={draftLevelId} onChange={(event) => onLevelChange(event.target.value)} disabled={!draftSubjectId}>
+            <option value="">Không phân level (trực tiếp dưới môn học)</option>
             {draftLevelOptions.map((level) => (
               <option key={level.optionId ?? level.id} value={level.optionId ?? ""}>
                 {level.label}
               </option>
             ))}
           </AppSelect>
-          {draftSubjectId && !draftLevelOptions.length ? (
-            <p className="text-xs leading-5 text-[#B76E00]">Môn học này chưa có level. Hãy tạo level trước khi tạo chủ đề.</p>
-          ) : null}
         </Field>
       ) : null}
 
       <TextField fullWidth size="small" label={titleLabel} value={label} onChange={(event) => onLabelChange(event.target.value)} placeholder={titlePlaceholder} autoFocus />
 
-      <Field label="Mô tả ngắn">
-        <textarea
+      <Field label="Mô tả">
+        <ErgTextField
+          compact
+          multiline
+          minRows={2}
           value={description}
           onChange={(event) => onDescriptionChange(event.target.value)}
-          placeholder="Ghi chú ngắn để giáo viên nhận biết mục này."
-          className={cn(inputClassName, "min-h-20 resize-none py-3")}
+          placeholder="Mô tả (tùy chọn)..."
         />
       </Field>
+    </div>
+  );
+}
 
+export function LessonContainerFields({
+  draftSubjectId,
+  subjects,
+  onSubjectChange,
+  draftLevelId,
+  draftLevelOptions,
+  onLevelChange,
+  draftTopicId,
+  draftTopicOptions,
+  onTopicChange,
+}: {
+  draftSubjectId: string;
+  subjects: StudioSubject[];
+  onSubjectChange: (value: string) => void;
+  draftLevelId: string;
+  draftLevelOptions: StudioNode[];
+  onLevelChange: (value: string) => void;
+  draftTopicId: string;
+  draftTopicOptions: StudioNode[];
+  onTopicChange: (value: string) => void;
+}) {
+  return (
+    <div className="grid gap-2.5 rounded-lg border border-[#D9E2EF] bg-[#FAFAFC] p-2.5">
+      <div className="grid gap-2.5 md:grid-cols-3">
+        <Field label="Môn học">
+          <AppSelect
+            style={{ width: "100%" }}
+            value={draftSubjectId}
+            onChange={(event) => onSubjectChange(event.target.value)}
+          >
+            <option value="">Chọn môn học</option>
+            {subjects.map((subject) => (
+              <option key={subject.id} value={subject.id}>
+                {subject.label}
+              </option>
+            ))}
+          </AppSelect>
+        </Field>
+
+        <Field label="Level">
+          <AppSelect
+            style={{ width: "100%" }}
+            value={draftLevelId}
+            onChange={(event) => onLevelChange(event.target.value)}
+            disabled={!draftSubjectId}
+          >
+            <option value="">Không phân level</option>
+            {draftLevelOptions.map((level) => (
+              <option key={level.optionId ?? level.id} value={level.optionId ?? level.id}>
+                {level.label}
+              </option>
+            ))}
+          </AppSelect>
+        </Field>
+
+        <Field label="Chủ đề">
+          <AppSelect
+            style={{ width: "100%" }}
+            value={draftTopicId}
+            onChange={(event) => onTopicChange(event.target.value)}
+            disabled={!draftSubjectId}
+          >
+            <option value="">Chủ đề chung</option>
+            {draftTopicOptions.map((topic) => (
+              <option key={topic.optionId ?? topic.id} value={topic.optionId ?? topic.id}>
+                {topic.label}
+              </option>
+            ))}
+          </AppSelect>
+        </Field>
+      </div>
     </div>
   );
 }
@@ -99,12 +171,12 @@ export function LectureFields({
   onSlidesUrlChange: (value: string) => void;
 }) {
   return (
-    <div className="grid gap-4 pt-1">
-      <Field label="Tên bài giảng">
-        <input className={inputClassName} value={label} onChange={(event) => onLabelChange(event.target.value)} placeholder="Ví dụ: Bài giảng 01 - Quản lý thư mục" autoFocus />
+    <div className="grid gap-3 pt-1">
+      <Field label="Tên bài học">
+        <ErgTextField compact value={label} onChange={(event) => onLabelChange(event.target.value)} placeholder="Ví dụ: Bài 01 - Khởi động và làm quen máy tính" autoFocus />
       </Field>
-      <Field label="Link Google Slides">
-        <input className={inputClassName} value={slidesUrl} onChange={(event) => onSlidesUrlChange(event.target.value)} placeholder="Dán link edit, publish hoặc embed của Google Slides" />
+      <Field label="Link bài giảng (Google Slides)">
+        <ErgTextField compact value={slidesUrl} onChange={(event) => onSlidesUrlChange(event.target.value)} placeholder="Dán link edit, publish hoặc embed của Google Slides" />
       </Field>
     </div>
   );
@@ -135,21 +207,20 @@ export function ExerciseFields({
     <div className="grid gap-4">
       <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_180px_220px]">
         <Field label="Tìm trong Quiz bank">
-          <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#919EAB]" />
-            <input className={cn(inputClassName, "pl-9")} value={exerciseQuery} onChange={(event) => onExerciseQueryChange(event.target.value)} placeholder="Tên quiz, chủ đề, độ khó" autoFocus />
-          </div>
+          <ErgSearchField value={exerciseQuery} onChange={(event) => onExerciseQueryChange(event.target.value)} placeholder="Tên quiz, chủ đề, độ khó" autoFocus />
         </Field>
         <ReadOnlyField label="Môn học" value={selectedSubject?.label ?? "Chưa chọn"} />
         <ReadOnlyField label="Chủ đề" value={selectedNode?.label ?? "Chưa chọn"} />
       </div>
 
       <Field label="Ghi chú khi gắn bài tập">
-        <textarea
+        <ErgTextField
+          compact
+          multiline
+          minRows={2}
           value={description}
           onChange={(event) => onDescriptionChange(event.target.value)}
           placeholder="Ví dụ: Giao cuối tiết hoặc dùng để luyện tập về nhà."
-          className={cn(inputClassName, "min-h-16 resize-none py-3")}
         />
       </Field>
 
@@ -208,10 +279,10 @@ export function ResourceFields({
     <div className="grid gap-4">
       <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_180px]">
         <Field label="Tên hiển thị">
-          <input className={inputClassName} value={label} onChange={(event) => onLabelChange(event.target.value)} placeholder="Ví dụ: Tài liệu thực hành 01" autoFocus />
+          <ErgTextField compact value={label} onChange={(event) => onLabelChange(event.target.value)} placeholder="Ví dụ: Tài liệu thực hành 01" autoFocus />
         </Field>
         <Field label="Loại tài liệu">
-          <AppSelect variant="native" className={inputClassName} value={resourceFileType} onChange={(event) => onResourceFileTypeChange(event.target.value)}>
+          <AppSelect style={{ width: "100%" }} value={resourceFileType} onChange={(event) => onResourceFileTypeChange(event.target.value)}>
             <option value="PDF">PDF</option>
             <option value="PPTX">Google Slides / PPTX</option>
             <option value="VIDEO">Video</option>
@@ -223,16 +294,16 @@ export function ResourceFields({
         </Field>
       </div>
       <Field label="Link Google Drive / Google Slides">
-        <input className={inputClassName} value={resourceUrl} onChange={(event) => onResourceUrlChange(event.target.value)} placeholder="Dán link share, preview hoặc embed từ Google Drive" />
+        <ErgTextField compact value={resourceUrl} onChange={(event) => onResourceUrlChange(event.target.value)} placeholder="Dán link share, preview hoặc embed từ Google Drive" />
         <p className="text-xs leading-5 text-[#637381]">Link sẽ được gắn vào: {selectedPathLabel || "vị trí đang chọn"}.</p>
       </Field>
       <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_160px]">
         <Field label="Mô tả ngắn">
-          <textarea value={description} onChange={(event) => onDescriptionChange(event.target.value)} placeholder="Ghi chú cho giáo viên." className={cn(inputClassName, "min-h-20 resize-none py-3")} />
+          <ErgTextField compact multiline minRows={3} value={description} onChange={(event) => onDescriptionChange(event.target.value)} placeholder="Ghi chú cho giáo viên." />
         </Field>
         {resourceFileType === "PPTX" ? (
           <Field label="Tổng số slide">
-            <input className={inputClassName} value={resourceTotalSlides} onChange={(event) => onResourceTotalSlidesChange(event.target.value.replace(/[^\d]/g, ""))} inputMode="numeric" placeholder="20" />
+            <ErgTextField compact value={resourceTotalSlides} onChange={(event) => onResourceTotalSlidesChange(event.target.value.replace(/[^\d]/g, ""))} inputMode="numeric" placeholder="20" />
           </Field>
         ) : null}
       </div>
@@ -255,7 +326,7 @@ export function QuickIconPicker({
 }) {
   const resolvedIconId = getTaxonomyIconId(iconId, role);
   const resolvedColor = getTaxonomyIconColor(iconColor, role);
-  const quickColors = taxonomyIconColorOptions.filter((option) => ["#0F6CBD", "#2563EB", "#F35C6B", "#D73D50", "#475569"].includes(option.value));
+  const quickColors = taxonomyIconColorOptions.filter((option) => ["#0071E3", "#0071E3", "#F35C6B", "#D73D50", "#475569"].includes(option.value));
 
   return (
     <Field label="Icon hiển thị">
@@ -271,7 +342,7 @@ export function QuickIconPicker({
                 type="button"
                 className={cn(
                   "grid h-9 place-items-center rounded-lg border bg-white transition",
-                  resolvedIconId === getTaxonomyIconId(optionId, role) ? "ring-2 ring-[#0F6CBD]/25" : "hover:bg-[#F4F6F8]",
+                  resolvedIconId === getTaxonomyIconId(optionId, role) ? "ring-2 ring-[#0071E3]/25" : "hover:bg-[#F4F6F8]",
                 )}
                 style={{ borderColor: resolvedIconId === getTaxonomyIconId(optionId, role) ? RESOURCE_BLUE_BORDER : RESOURCE_BORDER }}
                 onClick={() => onIconChange(optionId)}
@@ -302,4 +373,3 @@ export function QuickIconPicker({
     </Field>
   );
 }
-

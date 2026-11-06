@@ -3,12 +3,12 @@ import type { Dispatch, SetStateAction } from "react";
 import type {
   CurriculumTaxonomyImpact,
   LearningResourceTaxonomyResponse,
-} from "@/features/lcms/admin-operations/api/learning-resource-authoring-api";
-import { createLearningResourceResource } from "@/features/lcms/admin-operations/api/learning-resource-authoring-api";
+} from "@/features/lms/learning-resources/api/learning-resource-authoring-api";
+import { createLearningResourceResource } from "@/features/lms/learning-resources/api/learning-resource-authoring-api";
 import { TaxonomyCreateDialog } from "@/features/lcms/admin-operations/components/learning-resource-authoring-create-dialog";
+import { TaxonomyDeleteDialog } from "@/features/lcms/admin-operations/components/learning-resource-authoring-delete-dialog";
 import {
   LocalContentEditDialog,
-  TaxonomyDeleteDialog,
   TaxonomyEditDialog,
 } from "@/features/lcms/admin-operations/components/learning-resource-authoring-edit-dialogs";
 import { nodeIdForCreated } from "@/features/lcms/admin-operations/components/learning-resource-authoring-utils";
@@ -21,7 +21,7 @@ import type {
   TaxonomyDialogState,
   TaxonomyEditTarget,
 } from "@/features/lcms/admin-operations/types/learning-resource-authoring";
-import type { QuizBankItem } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
+import type { QuizBankItem } from "@/features/question-bank/types/question-bank-types";
 
 type Props = {
   dialogState: TaxonomyDialogState;

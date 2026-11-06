@@ -9,6 +9,8 @@ import Typography from "@mui/material/Typography";
 
 import { canonicalCrmWorkspaceHostForRuntime } from "@/platform/workspaces/workspace-route";
 import type { AccessDeniedWorkspaceTarget } from "@/platform/auth/utils/access-denied";
+import { alpha } from "@mui/material/styles";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 export function AccessDeniedWorkspaceTargetCard({ target }: { target: AccessDeniedWorkspaceTarget }) {
   return (
@@ -17,29 +19,79 @@ export function AccessDeniedWorkspaceTargetCard({ target }: { target: AccessDeni
       href={workspaceHref(target)}
       sx={{
         alignItems: "center",
-        bgcolor: "common.white",
+        bgcolor: "#FFFFFF",
         border: "1px solid",
         borderColor: "divider",
-        borderRadius: 2,
+        borderRadius: "16px",
         color: "text.primary",
         display: "flex",
-        gap: 1.25,
+        gap: 1.75,
         minHeight: 76,
-        p: 1.5,
+        p: 2,
         textDecoration: "none",
-        transition: "border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease",
-        "&:hover": { borderColor: "primary.main", boxShadow: "0 8px 20px rgba(15,108,189,0.12)", transform: "translateY(-1px)" },
-        "&:focus-visible": { boxShadow: "0 0 0 3px rgba(15,108,189,0.18)", outline: "none" },
+        transition: "all 200ms cubic-bezier(0.16, 1, 0.3, 1)",
+        boxShadow: "0 2px 6px rgba(0, 0, 0, 0.02)",
+        "&:hover": {
+          borderColor: "primary.main",
+          bgcolor: "rgba(240, 247, 255, 0.5)",
+          boxShadow: `0 8px 24px ${alpha(ergEnterpriseTokens.color.primary, 0.1)}`,
+          transform: "translateY(-1px)",
+          "& .target-arrow": {
+            transform: "translateX(3px)",
+            color: "primary.main",
+          },
+        },
+        "&:focus-visible": {
+          boxShadow: `0 0 0 3px ${alpha(ergEnterpriseTokens.color.primary, 0.25)}`,
+          outline: "none",
+        },
       }}
     >
-      <Avatar sx={{ bgcolor: "rgba(15,108,189,0.1)", color: "primary.main", height: 38, width: 38 }}><WorkspaceTargetIcon workspace={target.workspace} /></Avatar>
+      <Avatar
+        sx={{
+          bgcolor: workspaceBgColor(target.workspace),
+          color: workspaceIconColor(target.workspace),
+          height: 42,
+          width: 42,
+          borderRadius: "12px",
+          border: `1px solid ${ergEnterpriseTokens.color.border}`,
+        }}
+      >
+        <WorkspaceTargetIcon workspace={target.workspace} />
+      </Avatar>
       <Box sx={{ minWidth: 0 }}>
-        <Typography sx={{ fontSize: 13, fontWeight: 800 }}>{target.label}</Typography>
-        <Typography sx={{ color: "text.secondary", fontSize: 11, lineHeight: 1.4, mt: 0.25 }}>{target.description}</Typography>
+        <Typography sx={{ fontSize: 14, fontWeight: 600, color: "text.primary", letterSpacing: "-0.01em" }}>
+          {target.label}
+        </Typography>
+        <Typography sx={{ color: "text.secondary", fontSize: 12, lineHeight: 1.45, mt: 0.25 }}>
+          {target.description}
+        </Typography>
       </Box>
-      <ArrowForwardRoundedIcon sx={{ color: "primary.main", fontSize: 19, ml: "auto" }} />
+      <ArrowForwardRoundedIcon
+        className="target-arrow"
+        sx={{
+          color: "text.disabled",
+          fontSize: 18,
+          ml: "auto",
+          transition: "transform 180ms ease, color 180ms ease",
+        }}
+      />
     </Box>
   );
+}
+
+function workspaceBgColor(workspace: AccessDeniedWorkspaceTarget["workspace"]) {
+  if (workspace === "ADMIN") return "rgba(105, 108, 255, 0.1)";
+  if (workspace === "TEACHER") return alpha(ergEnterpriseTokens.color.primary, 0.1);
+  if (workspace === "STUDENT") return alpha(ergEnterpriseTokens.color.success, 0.12);
+  return alpha(ergEnterpriseTokens.color.warning, 0.12);
+}
+
+function workspaceIconColor(workspace: AccessDeniedWorkspaceTarget["workspace"]) {
+  if (workspace === "ADMIN") return "#0071E3";
+  if (workspace === "TEACHER") return ergEnterpriseTokens.color.primary;
+  if (workspace === "STUDENT") return ergEnterpriseTokens.statusTint.success.color;
+  return "#D97706";
 }
 
 function WorkspaceTargetIcon({ workspace }: { workspace: AccessDeniedWorkspaceTarget["workspace"] }) {

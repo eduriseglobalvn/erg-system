@@ -1,4 +1,4 @@
-import type { QuestionKind, Quiz, QuizResultDisplay, Theme } from "@/lib/types";
+import type { QuestionKind, Quiz, QuizResultDisplay, Theme } from "@/domain/quiz/types";
 import type { QuizRuntimePortal } from "@/features/lcms/quiz/quiz-runtime/types/quiz-runtime-types";
 
 export const DEFAULT_QUIZ_RUNTIME_PORTAL: QuizRuntimePortal = "elearning";
@@ -37,14 +37,14 @@ export function normalizeQuizMode(value: unknown): Quiz["settings"]["mode"] {
 export function normalizeTheme(value: unknown): Theme {
   const record = isRecord(value) ? value : {};
   return {
-    pageBackground: stringValue(record.pageBackground, "#f8fafc"),
+    pageBackground: stringValue(record.pageBackground, "#FAFAFC"),
     playerBackground: stringValue(record.playerBackground, "#ffffff"),
     canvasBorder: stringValue(record.canvasBorder, "#000088"),
     headerBackground: stringValue(record.headerBackground, "#000088"),
     headerText: stringValue(record.headerText, "#ffffff"),
     accentStart: stringValue(record.accentStart, "#000088"),
     accentEnd: stringValue(record.accentEnd, "#e82828"),
-    optionText: stringValue(record.optionText, "#172033"),
+    optionText: stringValue(record.optionText, "#1D1D1F"),
     optionSelectedBackground: stringValue(record.optionSelectedBackground, "#eef2ff"),
     inputBackground: stringValue(record.inputBackground, "#ffffff"),
     sidebarActiveBackground: stringValue(record.sidebarActiveBackground, "#eef2ff"),

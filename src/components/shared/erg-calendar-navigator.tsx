@@ -26,29 +26,21 @@ export function CalendarNavigatorPanel({
   calendarListTitle,
   canCreate,
   createButtonLabel,
-  eventDateSet,
   laneSummaries,
   monthCount,
   monthCountLabel,
   onCreateClick,
   selectedSummaryLabels,
-  selectedDate,
-  setSelectedDate,
-  todayDate,
   toggleSummaryLabel,
 }: {
   calendarListTitle: string;
   canCreate: boolean;
   createButtonLabel: string;
-  eventDateSet: Set<string>;
   laneSummaries: ErgCalendarLaneSummary[];
   monthCount: number;
   monthCountLabel: string;
   onCreateClick: () => void;
   selectedSummaryLabels: Set<string>;
-  selectedDate: Dayjs;
-  setSelectedDate: (value: Dayjs) => void;
-  todayDate: string;
   toggleSummaryLabel: (label: string) => void;
 }) {
   return (
@@ -61,11 +53,9 @@ export function CalendarNavigatorPanel({
         </Tooltip>
       ) : null}
 
-      <CalendarMiniMonth eventDateSet={eventDateSet} selectedDate={selectedDate} setSelectedDate={setSelectedDate} todayDate={todayDate} />
-
       <Divider sx={{ my: 0.75, borderColor: "#E0E3E7" }} />
       <Stack spacing={0.25} sx={miniCalendarListSx}>
-        <Typography sx={{ color: "#172033", fontSize: 11.75, fontWeight: 950, letterSpacing: 0, textTransform: "uppercase" }}>
+        <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: "fontWeightMedium" }}>
           {calendarListTitle}
         </Typography>
         {laneSummaries.map((calendar) => (
@@ -76,7 +66,7 @@ export function CalendarNavigatorPanel({
               slotProps={{ input: { "aria-label": calendar.label } }}
               sx={calendarCheckboxSx(calendar.color)}
             />
-            <Typography noWrap sx={{ color: selectedSummaryLabels.has(calendar.label) ? "#425466" : "#98A2B3", fontSize: 13, fontWeight: 700, minWidth: 0 }}>
+            <Typography noWrap sx={{ color: selectedSummaryLabels.has(calendar.label) ? "#425466" : "#98A2B3", fontSize: 13, fontWeight: 600, minWidth: 0 }}>
               {calendar.label}
             </Typography>
           </Box>
