@@ -49,11 +49,13 @@ export function QuestionEditorTitlebar({ position, typeLabel, readiness, syncChi
         <ErgStatusChip icon={<WarningAmberIcon sx={{ color: "inherit !important", fontSize: tokens.size.iconSm }} />} label={readinessLabel(readiness)} tone="warning" />
       )}
       {syncChip}
-      <Box sx={{ flex: 1 }} />
-      <QuestionViewToggle onChange={onViewChange} value={view} />
-      <IconButton aria-label="Thêm thao tác" aria-haspopup="menu" onClick={(event) => setMenuAnchor(event.currentTarget)} size="small">
-        <MoreHorizIcon fontSize="small" />
-      </IconButton>
+      {/* The view toggle and its menu wrap together, so a narrow bar never strands the menu on its own line. */}
+      <Box sx={{ alignItems: "center", display: "flex", gap: 1.5, ml: "auto" }}>
+        <QuestionViewToggle onChange={onViewChange} value={view} />
+        <IconButton aria-label="Thêm thao tác" aria-haspopup="menu" onClick={(event) => setMenuAnchor(event.currentTarget)} size="small">
+          <MoreHorizIcon fontSize="small" />
+        </IconButton>
+      </Box>
       <Menu
         anchorEl={menuAnchor}
         anchorOrigin={{ horizontal: "right", vertical: "bottom" }}

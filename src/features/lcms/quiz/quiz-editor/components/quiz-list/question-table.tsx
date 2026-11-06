@@ -71,7 +71,7 @@ export function QuestionTable({ rows, topicLabel, onOpenRow, onAdd }: {
       <ErgTable>
         <TableHead>
           <TableRow>
-            {headers.map((header) => <TableCell key={header}>{header}</TableCell>)}
+            {headers.map((header) => <TableCell key={header} sx={{ whiteSpace: "nowrap" }}>{header}</TableCell>)}
           </TableRow>
         </TableHead>
         <TableBody>

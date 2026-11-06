@@ -114,7 +114,7 @@ export function QuizEditorWorkspace({
 
   return (
     <Box sx={{ display: "flex", flex: 1, flexDirection: "column", height: "100%", maxHeight: "100%", minHeight: 0, minWidth: 0, overflow: "hidden" }}>
-      <Box component="h1" sx={visuallyHidden}>{quizProject.info.title || "Soạn bài kiểm tra"}</Box>
+      <Box component="h1" sx={visuallyHidden}>{list.topicLabel ?? "Soạn bài kiểm tra"}</Box>
       <QuizListTitlebar
         courseOptions={scope.courseOptions}
         selectedCourseId={scope.selectedCourse.id}
