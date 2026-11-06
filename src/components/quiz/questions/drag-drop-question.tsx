@@ -1,6 +1,28 @@
+import Box from "@mui/material/Box";
+
+import { pieceName } from "@/components/quiz/questions/matching-question/matching-helpers";
 import { QuestionBodyWithImage } from "@/components/quiz/questions/shared";
 import type { QuestionComponentProps } from "@/components/quiz/questions/types";
+import type { DragDropItem } from "@/domain/quiz/types";
+import { ergEnterpriseTokens as tokens } from "@/themes/erg-enterprise-tokens";
 import { cn } from "@/utils/cn";
+
+/** The item's image before its label, sized like the matching pieces. Next to text it is decorative; alone it names the item. */
+function ItemFace({ item }: { item: DragDropItem }) {
+  return (
+    <>
+      {item.image?.url ? (
+        <Box
+          alt={item.image.alt || (item.label ? "" : pieceName(item.label, item.image))}
+          component="img"
+          src={item.image.url}
+          sx={{ borderRadius: `${tokens.radius.xs}px`, display: "block", maxHeight: 84, maxWidth: 150, objectFit: "cover" }}
+        />
+      ) : null}
+      {item.label}
+    </>
+  );
+}
 
 export function DragDropQuestion({
   question,
@@ -45,8 +67,8 @@ export function DragDropQuestion({
                 <div className="mt-5 flex flex-wrap gap-3.5">
                   {assignedItems.length ? (
                     assignedItems.map((item) => (
-                      <span key={item.id} className="rounded-xl border border-[rgba(0,0,136,0.12)] bg-white px-5 py-3 text-[var(--quiz-readable-size)] font-bold text-[#000088] shadow-sm">
-                        {item.label}
+                      <span key={item.id} className="inline-flex items-center gap-2 rounded-xl border border-[rgba(0,0,136,0.12)] bg-white px-5 py-3 text-[var(--quiz-readable-size)] font-bold text-[#000088] shadow-sm">
+                        <ItemFace item={item} />
                       </span>
                     ))
                   ) : (
@@ -78,7 +100,7 @@ export function DragDropQuestion({
                 )}
               >
                 <div className="flex flex-wrap items-center justify-between gap-3">
-                  <span className="text-[var(--quiz-readable-size-lg)] font-bold text-[#1D1D1F]">{item.label}</span>
+                  <span className="inline-flex items-center gap-3 text-[var(--quiz-readable-size-lg)] font-bold text-[#1D1D1F]"><ItemFace item={item} /></span>
                   {reviewMode && !isCorrect ? (
                     <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
                       Đúng: {correctTarget?.label}
