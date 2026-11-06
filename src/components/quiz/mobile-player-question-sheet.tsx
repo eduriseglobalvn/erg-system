@@ -96,11 +96,3 @@ export function MobileQuestionSheet({
   );
 }
 
-export function IntroStat({ label, value }: { label: string; value: string }) {
-  return (
-    <Box sx={{ bgcolor: tk.color.surface, border: `1px solid ${tk.color.border}`, borderRadius: `${tk.radius.control}px`, px: 1.5, py: 1.5, textAlign: "center" }}>
-      <Typography sx={{ color: tk.color.textSoft }} variant="caption">{label}</Typography>
-      <Typography sx={{ color: tk.color.primary, mt: 0.5 }} variant="body2">{value}</Typography>
-    </Box>
-  );
-}

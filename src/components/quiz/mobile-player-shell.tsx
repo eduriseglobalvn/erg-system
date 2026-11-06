@@ -84,7 +84,7 @@ export function MobilePlayerShell({
 }: MobilePlayerShellProps) {
   if (!started) {
     return (
-      <MobilePlayerIntro playerCardStyle={playerCardStyle} questions={questions} quiz={quiz} restoredDraft={restoredDraft} welcomeMeta={welcomeMeta} onStart={onStart} />
+      <MobilePlayerIntro playerCardStyle={playerCardStyle} questions={questions} quiz={quiz} answeredCount={answeredCount} restoredDraft={restoredDraft} welcomeMeta={welcomeMeta} onStart={onStart} />
     );
   }
 

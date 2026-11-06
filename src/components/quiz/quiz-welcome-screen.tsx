@@ -43,9 +43,9 @@ export function IntroFactGrid({ facts }: { facts: ReturnType<typeof buildIntroFa
   return (
     <Box component="dl" sx={{ display: "grid", gap: 1.5, gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", m: 0 }}>
       {facts.map((fact) => (
-        <Box key={fact.id} sx={{ bgcolor: tk.color.surface, border: `1px solid ${tk.color.border}`, borderRadius: `var(--quiz-radius, ${tk.radius.control}px)`, px: 2, py: 1.5 }}>
-          <Typography component="dd" sx={{ color: tk.color.text, m: 0 }} variant="h6">{fact.value}</Typography>
+        <Box key={fact.id} sx={{ display: "flex", flexDirection: "column-reverse", bgcolor: tk.color.surface, border: `1px solid ${tk.color.border}`, borderRadius: `var(--quiz-radius, ${tk.radius.control}px)`, px: 2, py: 1.5 }}>
           <Typography component="dt" sx={{ color: tk.color.textMuted }} variant="caption">{fact.label}</Typography>
+          <Typography component="dd" sx={{ color: tk.color.text, m: 0 }} variant="h6">{fact.value}</Typography>
         </Box>
       ))}
     </Box>
@@ -72,6 +72,14 @@ export function IntroStartButton({ label, onClick }: { label: string; onClick: (
   );
 }
 
+export function IntroDraftNotice({ answered, total }: { answered: number; total: number }) {
+  return (
+    <Typography role="status" sx={{ bgcolor: tk.statusTint.info.bg, borderRadius: `var(--quiz-radius, ${tk.radius.control}px)`, color: tk.statusTint.info.color, px: 2, py: 1.5 }} variant="body2">
+      Đã khôi phục bản nháp: {answered}/{total} câu đã trả lời.
+    </Typography>
+  );
+}
+
 export function IntroRules({ rules }: { rules: string[] }) {
   return rules.length ? (
     <Box component="ul" sx={{ color: tk.color.textSecondary, display: "grid", gap: 0.5, m: 0, pl: 2.5 }}>
@@ -90,7 +98,7 @@ export function QuizWelcomeScreen({
   return (
     <Box
       component="section"
-      sx={{ ...playerCardStyle, border: `1px solid ${tk.color.border}`, borderRadius: radius, display: "flex", flexDirection: "column", minHeight: 0, overflow: "auto", p: 2 }}
+      sx={{ border: `1px solid ${tk.color.border}`, ...playerCardStyle, borderRadius: radius, display: "flex", flexDirection: "column", minHeight: 0, overflow: "auto", p: 2 }}
     >
       <Box sx={{ ...canvasStyle, display: "grid", flex: 1, gap: 3, m: "auto", maxWidth: 640, p: { xs: 2, sm: 4 }, width: "100%" }}>
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
@@ -103,11 +111,7 @@ export function QuizWelcomeScreen({
         </Box>
         <IntroFactGrid facts={facts} />
         <IntroRules rules={rules} />
-        {restoredDraft ? (
-          <Typography role="status" sx={{ bgcolor: tk.statusTint.info.bg, borderRadius: `var(--quiz-radius, ${tk.radius.control}px)`, color: tk.statusTint.info.color, px: 2, py: 1.5 }} variant="body2">
-            Đã khôi phục bản nháp: {answeredCount}/{questions.length} câu đã trả lời.
-          </Typography>
-        ) : null}
+        {restoredDraft ? <IntroDraftNotice answered={answeredCount} total={questions.length} /> : null}
         <Box>
           <IntroStartButton label={restoredDraft ? "Tiếp tục làm bài" : "Bắt đầu làm bài"} onClick={onStart} />
         </Box>

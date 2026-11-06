@@ -12,13 +12,17 @@ type IntroFactSource = {
 function formatRemaining(dueAt: string, now: Date): string | null {
   const due = new Date(dueAt).getTime();
   if (Number.isNaN(due)) return null;
-  const minutes = Math.floor((due - now.getTime()) / 60_000);
-  if (minutes <= 0) return "Đã quá hạn";
+  const ms = due - now.getTime();
+  if (ms <= 0) return "Đã quá hạn";
+  if (ms < 60_000) return "Còn dưới 1 phút";
+  const minutes = Math.floor(ms / 60_000);
   const days = Math.floor(minutes / 1440);
   const hours = Math.floor((minutes % 1440) / 60);
   const rest = minutes % 60;
-  if (days > 0) return `Còn ${days} ngày ${hours} giờ`;
-  return hours > 0 ? `Còn ${hours} giờ ${rest} phút` : `Còn ${rest} phút`;
+  // A zero part is dropped ("Còn 3 giờ", not "Còn 3 giờ 0 phút").
+  if (days > 0) return `Còn ${days} ngày${hours ? ` ${hours} giờ` : ""}`;
+  if (hours > 0) return `Còn ${hours} giờ${rest ? ` ${rest} phút` : ""}`;
+  return `Còn ${rest} phút`;
 }
 
 /** Only facts that exist: a missing source field drops its tile, nothing is filled in. */

@@ -53,6 +53,12 @@ describe("QuizWelcomeScreen", () => {
     expect(screen.getByText(/2\/3 câu/)).toBeTruthy();
   });
 
+  it("practice mode has no clock rule but still autosaves", () => {
+    setup({ isTrainingMode: true, quiz: { ...quiz, settings: { ...quiz.settings, mode: "training" } } as Quiz });
+    expect(screen.queryByText(/Đồng hồ chạy/)).toBeNull();
+    expect(screen.getByText("Tự lưu sau mỗi câu")).toBeTruthy();
+  });
+
   it("source does not use lucide-react or Tailwind classes", () => {
     const source = readFileSync(resolve(__dirname, "quiz-welcome-screen.tsx"), "utf8");
     expect(source).not.toContain("lucide-react");
