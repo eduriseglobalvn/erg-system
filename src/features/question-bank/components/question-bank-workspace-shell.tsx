@@ -80,7 +80,7 @@ export function QuestionBankWorkspace({
           onAddQuestion={openCreateQuestionForm}
           onClearSelection={clearSelection}
           onCreateQuiz={createQuizFromSelection}
-          onEditQuestion={openEditQuestionForm}
+          onEditQuestion={setQuickViewQuestion}
           onLevelChange={pickLevel}
           onOpenAutoPick={() => setAutoPickOpen(true)}
           onOpenQuestion={setQuickViewQuestion}
