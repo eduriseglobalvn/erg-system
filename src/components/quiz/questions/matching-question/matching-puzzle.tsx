@@ -1,7 +1,6 @@
 import {
   DndContext,
   DragOverlay,
-  MouseSensor,
   TouchSensor,
   useDraggable,
   useDroppable,
@@ -18,6 +17,7 @@ import { ergEnterpriseTokens as tokens } from "@/themes/erg-enterprise-tokens";
 
 import { puzzleAnnouncements } from "./matching-board";
 import { PUZZLE, pieceMaxWidthFor, rowAtPoint } from "./puzzle-geometry";
+import { NonTouchPointerSensor } from "./non-touch-pointer-sensor";
 import { GripDots, PuzzlePiece } from "./puzzle-piece";
 
 export type PuzzleRow = {
@@ -105,7 +105,7 @@ export function MatchingPuzzle({ rows, mode, locked = false, onDrop }: Props) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const pendingFocus = useRef<{ row: string; piece?: string; rows: PuzzleRow[] } | null>(null);
   const sensors = useSensors(
-    useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(NonTouchPointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 120, tolerance: 6 } }),
   );
 
