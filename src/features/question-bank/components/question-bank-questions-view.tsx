@@ -11,9 +11,10 @@ import type {
   QuestionBankQuestion,
   QuestionBankSubject,
 } from "@/features/question-bank/types/question-bank-types";
+import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
 import type { QuestionBankCopy } from "./question-bank-copy";
 import { QuestionBankPageHeader } from "./question-bank-page-header";
-import { SelectControl } from "./question-bank-primitives";
+import { QuestionBankScopeControls } from "./question-bank-scope-controls";
 import { QuestionBankTopicList } from "./question-bank-topic-list";
 import { QuestionLibrary } from "./question-library";
 import { QuestionSelectionBar } from "./question-selection-bar";
@@ -78,31 +79,19 @@ export function QuestionBankQuestionsView({
   const activeTopic = levelTopics.find((topic) => topic.id === topicId);
 
   return (
-    <Stack spacing={3}>
+    <Stack spacing={2}>
       <QuestionBankPageHeader
         title={title}
         meta={activeSubject.label ? copy.pageMeta(activeSubject.label, activeLevel.label, page.totalItems) : undefined}
         controls={
-          <>
-            <Box sx={{ width: { xs: "100%", sm: 200 } }}>
-              <SelectControl
-                hideDescription
-                label={copy.subjectLabel}
-                value={activeSubject.id}
-                onChange={onSubjectChange}
-                options={subjects.map((subject) => ({ value: subject.id, label: subject.label }))}
-              />
-            </Box>
-            <Box sx={{ width: { xs: "100%", sm: 160 } }}>
-              <SelectControl
-                hideDescription
-                label={copy.levelLabel}
-                value={activeLevel.id}
-                onChange={onLevelChange}
-                options={activeSubject.levels.map((level) => ({ value: level.id, label: level.label }))}
-              />
-            </Box>
-          </>
+          <QuestionBankScopeControls
+            activeLevel={activeLevel}
+            activeSubject={activeSubject}
+            copy={copy}
+            onLevelChange={onLevelChange}
+            onSubjectChange={onSubjectChange}
+            subjects={subjects}
+          />
         }
         actions={
           <>
@@ -118,16 +107,32 @@ export function QuestionBankQuestionsView({
           </>
         }
       />
-      <Box sx={{ alignItems: "start", display: "grid", gap: 3, gridTemplateColumns: { xs: "minmax(0, 1fr)", md: "220px minmax(0, 1fr)" } }}>
-        <QuestionBankTopicList
-          activeCount={page.totalItems}
-          activeTopicId={topicId}
-          copy={copy}
-          onPick={onTopicChange}
-          topics={levelTopics}
-        />
+      {/* One card: topic column on the left, the question table on the right (canvas Main). */}
+      <Box
+        component="section"
+        sx={{
+          bgcolor: t.color.surface,
+          border: `1px solid ${t.color.border}`,
+          borderRadius: `${t.radius.card}px`,
+          display: "grid",
+          gridTemplateColumns: { xs: "minmax(0, 1fr)", md: "232px minmax(0, 1fr)" },
+          minWidth: 0,
+          overflow: "hidden",
+        }}
+      >
+        <Box sx={{ borderBottom: { xs: `1px solid ${t.color.divider}`, md: 0 }, borderRight: { md: `1px solid ${t.color.border}` }, minWidth: 0, p: 1.5 }}>
+          <QuestionBankTopicList
+            activeCount={page.totalItems}
+            activeTopicId={topicId}
+            copy={copy}
+            levelLabel={activeLevel.label}
+            onPick={onTopicChange}
+            topics={levelTopics}
+          />
+        </Box>
         <QuestionLibrary
           copy={copy}
+          heading={activeTopic?.label ?? copy.allTopics}
           isLoading={isLoading}
           loadFailed={loadFailed}
           onEditQuestion={onEditQuestion}

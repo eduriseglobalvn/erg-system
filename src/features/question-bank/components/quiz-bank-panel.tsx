@@ -1,7 +1,6 @@
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
-import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
-import Inventory2RoundedIcon from "@mui/icons-material/Inventory2Rounded";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
+import Box from "@mui/material/Box";
 import InputAdornment from "@mui/material/InputAdornment";
 import Stack from "@mui/material/Stack";
 import TableBody from "@mui/material/TableBody";
@@ -13,15 +12,21 @@ import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Typography from "@mui/material/Typography";
 
-import { ErgButton, ErgIconButton } from "@/components/erg-mui/erg-actions";
+import { ErgButton } from "@/components/erg-mui/erg-actions";
 import { ErgEmptyState, ErgSkeleton, ErgStatusChip } from "@/components/erg-mui/erg-feedback";
 import { ErgDataTableShell, ErgTable, ErgTableToolbar } from "@/components/erg-mui/erg-table";
 import { formatDateTimeVi } from "@/domain/formatters/format-date";
-import type { QuizBankItem, QuizBankStatus } from "@/features/question-bank/types/question-bank-types";
+import type {
+  QuestionBankLevel,
+  QuestionBankSubject,
+  QuizBankItem,
+  QuizBankStatus,
+} from "@/features/question-bank/types/question-bank-types";
 import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
 import type { ContentScope } from "@/types/scope-types";
 import type { QuestionBankCopy } from "./question-bank-copy";
 import { QuestionBankPageHeader } from "./question-bank-page-header";
+import { QuestionBankScopeControls, RowActionsMenu } from "./question-bank-scope-controls";
 import type { QuizKindFilter } from "./question-bank-workspace-types";
 
 export const QUIZ_STATUS_TONE: Record<QuizBankStatus, "success" | "warning" | "neutral"> = {
@@ -34,40 +39,63 @@ const wideOnly = { display: { xs: "none", md: "table-cell" } } as const;
 
 /** B1: quiz bank list. Rows open the quick view (B2); export and delete sit at the row end. */
 export function QuizBankPanel({
+  activeLevel,
+  activeSubject,
   copy,
   deletingQuizId,
   isLoading,
+  kindCounts,
   onCreateQuiz,
   onDeleteQuiz,
   onKindChange,
   onExportPortable,
+  onLevelChange,
   onPreviewQuiz,
   onSearchChange,
+  onSubjectChange,
   quizKind,
   quizzes,
   searchValue,
+  subjects,
   title,
 }: {
+  activeLevel: QuestionBankLevel;
+  activeSubject: QuestionBankSubject;
   contentScope: ContentScope;
   copy: QuestionBankCopy;
   deletingQuizId?: string;
   isLoading: boolean;
+  /** Matches per kind after search, before the kind filter. */
+  kindCounts: Record<QuizKindFilter, number>;
   onCreateQuiz: () => void;
   onDeleteQuiz: (quiz: QuizBankItem) => void;
   onExportPortable: (quiz: QuizBankItem) => void;
   onKindChange: (value: QuizKindFilter) => void;
+  onLevelChange: (levelId: string) => void;
   onPreviewQuiz: (quiz: QuizBankItem) => void;
   onSearchChange: (value: string) => void;
+  onSubjectChange: (subjectId: string) => void;
   quizKind: QuizKindFilter;
   quizzes: QuizBankItem[];
   searchValue: string;
+  subjects: QuestionBankSubject[];
   title: string;
 }) {
   return (
-    <Stack spacing={3}>
+    <Stack spacing={2}>
       <QuestionBankPageHeader
         title={title}
-        meta={copy.quizBankMeta(quizzes.length)}
+        meta={[activeSubject.label, activeLevel.label, copy.quizBankMeta(kindCounts.all)].filter(Boolean).join(" · ")}
+        controls={
+          <QuestionBankScopeControls
+            activeLevel={activeLevel}
+            activeSubject={activeSubject}
+            copy={copy}
+            onLevelChange={onLevelChange}
+            onSubjectChange={onSubjectChange}
+            subjects={subjects}
+          />
+        }
         actions={
           <ErgButton startIcon={<AddRoundedIcon />} onClick={onCreateQuiz}>
             {copy.createQuizFromBank}
@@ -75,11 +103,16 @@ export function QuizBankPanel({
         }
       />
       <ErgDataTableShell
+        sx={{ borderRadius: `${t.radius.card}px` }}
+        footer={
+          <Typography variant="caption" component="p" sx={{ color: t.color.textMuted, px: 2, py: 1.5 }}>
+            {copy.quizBankRowHint}
+          </Typography>
+        }
         toolbar={
           <ErgTableToolbar
-            title={copy.quizBankTitle}
-            actions={
-              <>
+            title={
+              <Stack direction="row" spacing={1.25} sx={{ alignItems: "center", flexWrap: "wrap" }} useFlexGap>
                 <TextField
                   value={searchValue}
                   onChange={(event) => onSearchChange(event.target.value)}
@@ -95,7 +128,7 @@ export function QuizBankPanel({
                       ),
                     },
                   }}
-                  sx={{ width: { xs: "100%", sm: 260 } }}
+                  sx={{ width: { xs: "100%", sm: 280 }, "& .MuiOutlinedInput-root": { bgcolor: t.color.surfaceMuted } }}
                 />
                 <ToggleButtonGroup
                   exclusive
@@ -106,26 +139,28 @@ export function QuizBankPanel({
                     if (value) onKindChange(value as QuizKindFilter);
                   }}
                 >
-                  <ToggleButton value="all">{copy.allQuizKinds}</ToggleButton>
-                  <ToggleButton value="train">{copy.quizKind.train}</ToggleButton>
-                  <ToggleButton value="test">{copy.quizKind.test}</ToggleButton>
+                  <ToggleButton value="all">{copy.allQuizKinds} · {kindCounts.all}</ToggleButton>
+                  <ToggleButton value="train">{copy.quizKind.train} · {kindCounts.train}</ToggleButton>
+                  <ToggleButton value="test">{copy.quizKind.test} · {kindCounts.test}</ToggleButton>
                 </ToggleButtonGroup>
-              </>
+              </Stack>
             }
           />
         }
       >
-        <ErgTable size="small" aria-label={copy.quizBankTitle}>
+        <ErgTable size="small" aria-label={copy.quizBankTitle} sx={{ "& .MuiTableCell-root": { px: 1.25 } }}>
           <TableHead>
             <TableRow>
               <TableCell>{copy.quizTable.title}</TableCell>
-              <TableCell sx={wideOnly}>{copy.quizTable.kind}</TableCell>
-              <TableCell sx={wideOnly} align="right">{copy.quizTable.count}</TableCell>
-              <TableCell sx={wideOnly}>{copy.quizTable.duration}</TableCell>
-              <TableCell sx={wideOnly}>{copy.quizTable.source}</TableCell>
-              <TableCell>{copy.quizTable.status}</TableCell>
-              <TableCell sx={wideOnly}>{copy.quizTable.updated}</TableCell>
-              <TableCell align="right">{copy.quizTable.actions}</TableCell>
+              <TableCell sx={{ ...wideOnly, width: 110 }}>{copy.quizTable.kind}</TableCell>
+              <TableCell sx={{ ...wideOnly, width: 72 }} align="right">{copy.quizTable.count}</TableCell>
+              <TableCell sx={{ ...wideOnly, width: 96 }}>{copy.quizTable.duration}</TableCell>
+              <TableCell sx={{ ...wideOnly, width: 130 }}>{copy.quizTable.source}</TableCell>
+              <TableCell sx={{ width: 130 }}>{copy.quizTable.status}</TableCell>
+              <TableCell sx={{ ...wideOnly, width: 120 }}>{copy.quizTable.updated}</TableCell>
+              <TableCell align="right" sx={{ width: 44 }}>
+                <Box component="span" sx={visuallyHidden}>{copy.quizTable.actions}</Box>
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -153,40 +188,35 @@ export function QuizBankPanel({
                   tabIndex={0}
                   sx={{ cursor: "pointer" }}
                 >
-                  <TableCell>
-                    <Typography variant="subtitle1">{quiz.title}</Typography>
+                  <TableCell sx={{ maxWidth: 0 }}>
+                    <Typography variant="subtitle2" noWrap title={quiz.title}>{quiz.title}</Typography>
                     <Typography variant="caption" component="p" noWrap sx={{ color: t.color.textMuted }}>
                       {quiz.topicLabels.join(", ") || copy.otherTopic} · {copy.scopeLabel(quiz.scope)}
                     </Typography>
                   </TableCell>
-                  <TableCell sx={wideOnly}>{copy.quizKind[quiz.kind]}</TableCell>
+                  <TableCell sx={wideOnly}>
+                    <ErgStatusChip dot={false} label={copy.quizKind[quiz.kind]} tone={quiz.kind === "test" ? "warning" : "info"} />
+                  </TableCell>
                   <TableCell sx={wideOnly} align="right">{quiz.questionCount}</TableCell>
                   <TableCell sx={{ ...wideOnly, color: t.color.textSecondary }}>{quiz.durationLabel}</TableCell>
                   <TableCell sx={{ ...wideOnly, color: t.color.textSecondary }}>{copy.sourceMode[quiz.sourceMode]}</TableCell>
                   <TableCell>
-                    <ErgStatusChip label={copy.quizStatus[quiz.status]} tone={QUIZ_STATUS_TONE[quiz.status]} />
+                    <QuizStatusText label={copy.quizStatus[quiz.status]} status={quiz.status} />
                   </TableCell>
                   <TableCell sx={{ ...wideOnly, color: t.color.textSecondary, whiteSpace: "nowrap" }}>
                     {formatDateTimeVi(quiz.updatedAt) || "—"}
                   </TableCell>
-                  <TableCell align="right" onClick={(event) => event.stopPropagation()} onKeyDown={(event) => event.stopPropagation()}>
-                    <Stack direction="row" spacing={0.5} sx={{ justifyContent: "flex-end" }}>
-                      {quiz.status === "ready" ? (
-                        <ErgIconButton label={copy.exportPortable(quiz.title)} tooltip={copy.exportPortable(quiz.title)} size="small" onClick={() => onExportPortable(quiz)}>
-                          <Inventory2RoundedIcon fontSize="small" />
-                        </ErgIconButton>
-                      ) : null}
-                      <ErgIconButton
-                        label={`${copy.deleteQuiz}: ${quiz.title}`}
-                        tooltip={copy.deleteQuiz}
-                        size="small"
-                        color="error"
-                        disabled={deletingQuizId === quiz.id}
-                        onClick={() => onDeleteQuiz(quiz)}
-                      >
-                        <DeleteOutlineRoundedIcon fontSize="small" />
-                      </ErgIconButton>
-                    </Stack>
+                  <TableCell align="right">
+                    <RowActionsMenu
+                      label={copy.moreActions(quiz.title)}
+                      items={[
+                        { key: "open", label: copy.openQuiz, onClick: () => onPreviewQuiz(quiz) },
+                        ...(quiz.status === "ready"
+                          ? [{ key: "export", label: copy.exportPortableAction, onClick: () => onExportPortable(quiz) }]
+                          : []),
+                        { key: "delete", label: copy.deleteQuiz, danger: true, disabled: deletingQuizId === quiz.id, onClick: () => onDeleteQuiz(quiz) },
+                      ]}
+                    />
                   </TableCell>
                 </TableRow>
               ))
@@ -197,6 +227,29 @@ export function QuizBankPanel({
     </Stack>
   );
 }
+
+/** Status as a coloured dot and text (canvas QuizBank), not a filled chip. */
+function QuizStatusText({ label, status }: { label: string; status: QuizBankStatus }) {
+  const tint = t.statusTint[QUIZ_STATUS_TONE[status]];
+  return (
+    <Box component="span" sx={{ alignItems: "center", color: tint.dot, display: "inline-flex", gap: 1, typography: "body2", whiteSpace: "nowrap" }}>
+      <Box component="span" sx={{ bgcolor: tint.dot, borderRadius: "50%", flex: "none", height: 8, width: 8 }} />
+      {label}
+    </Box>
+  );
+}
+
+const visuallyHidden = {
+  border: 0,
+  clip: "rect(0 0 0 0)",
+  height: 1,
+  margin: -1,
+  overflow: "hidden",
+  padding: 0,
+  position: "absolute",
+  whiteSpace: "nowrap",
+  width: 1,
+} as const;
 
 function SkeletonRows() {
   return (

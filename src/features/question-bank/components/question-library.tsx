@@ -19,6 +19,8 @@ import type { QuestionBankDifficulty, QuestionBankQuestion } from "@/features/qu
 import { useI18n } from "@/platform/i18n";
 import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
 import type { QuestionBankCopy } from "./question-bank-copy";
+import { questionBankReadiness, type QuestionBankReadiness } from "./question-bank-readiness";
+import { RowActionsMenu } from "./question-bank-scope-controls";
 
 export const DIFFICULTY_TONE: Record<QuestionBankDifficulty, "neutral" | "info" | "warning"> = {
   core: "neutral",
@@ -26,11 +28,18 @@ export const DIFFICULTY_TONE: Record<QuestionBankDifficulty, "neutral" | "info" 
   challenge: "warning",
 };
 
+const READINESS_TONE: Record<QuestionBankReadiness, "success" | "warning"> = {
+  ready: "success",
+  missingAnswer: "warning",
+  missingCorrect: "warning",
+};
+
 /** Below lg the topic column eats the width, so only checkbox, question and action stay. Widths exclude the 32px cell padding. */
 const wideOnly = { display: { xs: "none", lg: "table-cell" } } as const;
 
 export function QuestionLibrary({
   copy,
+  heading,
   isLoading,
   loadFailed = false,
   onEditQuestion,
@@ -45,6 +54,8 @@ export function QuestionLibrary({
   visibleQuestions,
 }: {
   copy: QuestionBankCopy;
+  /** The active topic's name, or "all topics". */
+  heading: string;
   isLoading: boolean;
   /** The load failed: the sync notice explains it, so no misleading "no matching questions". */
   loadFailed?: boolean;
@@ -68,10 +79,18 @@ export function QuestionLibrary({
 
   return (
     <ErgDataTableShell
+      // Sits inside the page card next to the topic column, so no border of its own.
+      sx={{ border: 0, borderRadius: 0 }}
       toolbar={
         <ErgTableToolbar
-          title={copy.libraryTitle}
-          meta={copy.libraryDescription(page.totalItems)}
+          title={
+            <>
+              {heading}{" "}
+              <Box component="span" sx={{ color: t.color.textMuted, typography: "body2" }}>
+                · {copy.questionCount(page.totalItems)}
+              </Box>
+            </>
+          }
           actions={
             <TextField
               value={searchValue}
@@ -88,7 +107,7 @@ export function QuestionLibrary({
                   ),
                 },
               }}
-              sx={{ width: { xs: "100%", sm: 280 } }}
+              sx={{ width: { xs: "100%", sm: 240 }, "& .MuiOutlinedInput-root": { bgcolor: t.color.surfaceMuted } }}
             />
           }
         />
@@ -113,7 +132,7 @@ export function QuestionLibrary({
         </Stack>
       }
     >
-      <ErgTable size="small" aria-label={copy.libraryTitle}>
+      <ErgTable size="small" aria-label={copy.libraryTitle} sx={compactCells}>
         <TableHead>
           <TableRow>
             <TableCell padding="checkbox">
@@ -128,10 +147,11 @@ export function QuestionLibrary({
             </TableCell>
             <TableCell sx={{ ...wideOnly, width: 40 }}>{copy.table.number}</TableCell>
             <TableCell>{copy.table.question}</TableCell>
-            <TableCell sx={{ ...wideOnly, width: 120 }}>{copy.table.type}</TableCell>
-            <TableCell sx={{ ...wideOnly, width: 96 }}>{copy.table.difficulty}</TableCell>
-            <TableCell sx={{ ...wideOnly, width: 80, whiteSpace: "nowrap" }}>{copy.table.used}</TableCell>
-            <TableCell align="right" sx={{ width: 64 }}>
+            <TableCell sx={{ ...wideOnly, width: 130 }}>{copy.table.type}</TableCell>
+            <TableCell sx={{ ...wideOnly, width: 80 }}>{copy.table.difficulty}</TableCell>
+            <TableCell sx={{ ...wideOnly, width: 150, whiteSpace: "nowrap" }}>{copy.table.readiness}</TableCell>
+            <TableCell align="right" sx={{ ...wideOnly, width: 64, whiteSpace: "nowrap" }}>{copy.table.used}</TableCell>
+            <TableCell align="right" sx={{ width: 36 }}>
               <Box component="span" sx={visuallyHidden}>{copy.table.actions}</Box>
             </TableCell>
           </TableRow>
@@ -142,7 +162,7 @@ export function QuestionLibrary({
           ) : visibleQuestions.length === 0 ? (
             loadFailed ? null : (
               <TableRow>
-                <TableCell colSpan={7} sx={{ py: 6 }}>
+                <TableCell colSpan={8} sx={{ py: 6 }}>
                   <ErgEmptyState title={copy.noResults} description={copy.noResultsHint} />
                 </TableCell>
               </TableRow>
@@ -150,6 +170,7 @@ export function QuestionLibrary({
           ) : (
             visibleQuestions.map((question, index) => {
               const isSelected = selected.has(question.id);
+              const readiness = questionBankReadiness(question);
               return (
                 <TableRow
                   key={question.id}
@@ -173,28 +194,30 @@ export function QuestionLibrary({
                       size="small"
                     />
                   </TableCell>
-                  <TableCell sx={{ ...wideOnly, color: t.color.textMuted }}>{firstNumber + index}</TableCell>
-                  <TableCell sx={{ minWidth: 0 }}>
-                    <Typography variant="body2" title={question.stem} sx={clampTwoLines}>
+                  <TableCell sx={{ ...wideOnly, color: t.color.textMuted, typography: "caption" }}>
+                    {String(firstNumber + index).padStart(2, "0")}
+                  </TableCell>
+                  <TableCell sx={{ maxWidth: 0 }}>
+                    <Typography variant="body2" title={question.stem} noWrap>
                       {question.stem}
                     </Typography>
-                    {question.objective ? (
-                      <Typography variant="caption" noWrap component="p" sx={{ color: t.color.textMuted, mt: 0.25 }}>
-                        {question.objective}
-                      </Typography>
-                    ) : null}
                   </TableCell>
                   <TableCell sx={{ ...wideOnly, color: t.color.textSecondary }}>
                     {translate(questionTypeLabelKeys[question.type])}
                   </TableCell>
+                  <TableCell sx={{ ...wideOnly, color: t.color.textSecondary }}>{copy.difficulty[question.difficulty]}</TableCell>
                   <TableCell sx={wideOnly}>
-                    <ErgStatusChip dot={false} label={copy.difficulty[question.difficulty]} tone={DIFFICULTY_TONE[question.difficulty]} />
+                    <ErgStatusChip label={copy.readiness[readiness]} tone={READINESS_TONE[readiness]} />
                   </TableCell>
-                  <TableCell sx={{ ...wideOnly, color: t.color.textSecondary }}>{copy.usedCount(question.usageCount)}</TableCell>
-                  <TableCell align="right" onClick={(event) => event.stopPropagation()}>
-                    <Button variant="text" size="small" onClick={() => onEditQuestion(question)}>
-                      {copy.editQuestion}
-                    </Button>
+                  <TableCell align="right" sx={{ ...wideOnly, color: t.color.textSecondary }}>{question.usageCount}</TableCell>
+                  <TableCell align="right">
+                    <RowActionsMenu
+                      label={copy.moreActions(question.stem)}
+                      items={[
+                        { key: "view", label: copy.questionQuickViewTitle, onClick: () => onOpenQuestion(question) },
+                        { key: "edit", label: copy.editQuestion, onClick: () => onEditQuestion(question) },
+                      ]}
+                    />
                   </TableCell>
                 </TableRow>
               );
@@ -206,11 +229,10 @@ export function QuestionLibrary({
   );
 }
 
-const clampTwoLines = {
-  display: "-webkit-box",
-  overflow: "hidden",
-  WebkitBoxOrient: "vertical",
-  WebkitLineClamp: 2,
+/** The canvas spaces columns 12px apart; the theme's 16px side padding per cell left the question column too narrow. */
+const compactCells = {
+  "& .MuiTableCell-root:not(.MuiTableCell-paddingCheckbox)": { px: 1.25 },
+  "& .MuiTableBody-root .MuiTableCell-root": { whiteSpace: "nowrap" },
 } as const;
 
 const visuallyHidden = {
@@ -235,11 +257,12 @@ function SkeletonRows() {
         <TableRow key={index}>
           <TableCell padding="checkbox"><ErgSkeleton variant="rounded" width={18} height={18} sx={{ mx: "auto" }} /></TableCell>
           <TableCell sx={wideOnly}><ErgSkeleton width={20} /></TableCell>
-          <TableCell><ErgSkeleton width="70%" /><ErgSkeleton width="40%" /></TableCell>
+          <TableCell><ErgSkeleton width="70%" /></TableCell>
           <TableCell sx={wideOnly}><ErgSkeleton width={90} /></TableCell>
-          <TableCell sx={wideOnly}><ErgSkeleton variant="rounded" width={64} height={22} /></TableCell>
-          <TableCell sx={wideOnly}><ErgSkeleton width={50} /></TableCell>
-          <TableCell align="right"><ErgSkeleton width={36} sx={{ ml: "auto" }} /></TableCell>
+          <TableCell sx={wideOnly}><ErgSkeleton width={56} /></TableCell>
+          <TableCell sx={wideOnly}><ErgSkeleton variant="rounded" width={88} height={22} /></TableCell>
+          <TableCell sx={wideOnly}><ErgSkeleton width={24} sx={{ ml: "auto" }} /></TableCell>
+          <TableCell align="right"><ErgSkeleton width={24} sx={{ ml: "auto" }} /></TableCell>
         </TableRow>
       ))}
     </>
