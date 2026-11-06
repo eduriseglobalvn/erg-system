@@ -745,7 +745,7 @@
   },
   "src/features/lcms/quiz/quiz-editor/components/quiz-editor-text-style.ts": {
     "hex": 0,
-    "font": 5
+    "font": 1
   },
   "src/features/lcms/quiz/quiz-runtime/api/quiz-runtime-normalization-utils.ts": {
     "hex": 12,
