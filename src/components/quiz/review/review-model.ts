@@ -2,20 +2,28 @@ import type { QuestionCell } from "@/components/quiz/question-navigator";
 import { isAnswerComplete } from "@/domain/quiz/quiz";
 import type { Attempt, Question } from "@/domain/quiz/types";
 
-/** Graded outcome of one question, in question order. */
-export type QuestionResult = { correct: boolean; points: number; skipped?: boolean; pending?: boolean };
+/** Graded outcome of one question, in question order. `partial`: earned points without full marks. */
+export type QuestionResult = { correct: boolean; points: number; skipped?: boolean; pending?: boolean; partial?: boolean };
 
 const numberVi = new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 2 });
 
-/** Final submit stores a record for every question; a blank one (incomplete input) counts as skipped. */
+/**
+ * Final submit stores a record for every question. Skipped = not answered/complete AND no points, so a
+ * half-filled fill_blank/matching that earned points is partial, not skipped.
+ */
 export function toQuestionResults(questions: Question[], attempt: Pick<Attempt, "answers">): QuestionResult[] {
   return questions.map((question) => {
     const record = attempt.answers[question.id];
+    const correct = Boolean(record?.result?.correct);
+    const pending = Boolean(record?.result?.pendingReview);
+    const points = record?.result?.awardedPoints ?? 0;
+    const graded = !correct && !pending;
     return {
-      correct: Boolean(record?.result?.correct),
-      points: record?.result?.awardedPoints ?? 0,
-      skipped: !record || !isAnswerComplete(question, record.input),
-      pending: Boolean(record?.result?.pendingReview),
+      correct,
+      points,
+      pending,
+      skipped: graded && points === 0 && (!record || !isAnswerComplete(question, record.input)),
+      partial: graded && points > 0,
     };
   });
 }
@@ -23,6 +31,7 @@ export function toQuestionResults(questions: Question[], attempt: Pick<Attempt, 
 function cellState(r: QuestionResult): QuestionCell["state"] {
   if (r.pending) return "done";
   if (r.skipped) return "skipped";
+  // Partial credit sits with "Sai" in the grid/filter (not full marks); only its label differs.
   return r.correct ? "correct" : "wrong";
 }
 
@@ -31,14 +40,14 @@ export function buildReviewCells(results: QuestionResult[], flagged: ReadonlySet
   return results.map((r, index) => ({ index, state: cellState(r), flagged: flagged.has(index), current: index === current }));
 }
 
-/** Wrong + skipped, ascending (D12 "Luyện lại n câu"). */
+/** Wrong + skipped + partial, ascending (D12 "Luyện lại n câu"). */
 export function retryIndices(results: QuestionResult[]): number[] {
   return results.flatMap((r, index) => (!r.pending && (r.skipped || !r.correct) ? [index] : []));
 }
 
 export function reviewScoreLabel(r: QuestionResult): string {
   if (r.pending) return "Chờ giáo viên chấm";
-  const status = r.skipped ? "Bỏ trống" : r.correct ? "Đúng" : "Sai";
+  const status = r.correct ? "Đúng" : r.partial ? "Đúng một phần" : r.skipped ? "Bỏ trống" : "Sai";
   return `${status} · ${numberVi.format(r.points)} điểm`;
 }
 

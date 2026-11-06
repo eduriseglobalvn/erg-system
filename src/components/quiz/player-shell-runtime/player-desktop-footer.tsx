@@ -44,7 +44,8 @@ export function PlayerDesktopFooter({
         <Box sx={{ alignItems: "center", display: "flex", flexWrap: "wrap", gap: 1, ml: "auto" }}>
           {showResultOnly ? (
             resultDisplay.showReviewButton ? (
-              <Button type="button" variant="contained" onClick={handleReviewQuiz}>Xem lại bài làm</Button>
+              // The result screen owns the one contained "Xem lại bài làm"; this is the secondary copy.
+              <Button type="button" variant="outlined" onClick={handleReviewQuiz}>Xem lại bài làm</Button>
             ) : null
           ) : isTrainingMode ? (
             // Practice never advances by itself: "Kết quả" reveals the answer, then "Câu tiếp" moves on.

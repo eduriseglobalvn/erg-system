@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { attemptElapsedSeconds, buildReviewCells, retryIndices, reviewScoreLabel, reviewScoreOutOf10, toQuestionResults } from "@/components/quiz/review/review-model";
-import { buildReviewFixture, REVIEW_SKIPPED, REVIEW_WRONG } from "@/test/fixtures/quiz-review-fixture";
+import { buildReviewFixture, reviewQuestion, REVIEW_SKIPPED, REVIEW_WRONG } from "@/test/fixtures/quiz-review-fixture";
 
 const { questions, attempt } = buildReviewFixture();
 const results = toQuestionResults(questions, attempt);
@@ -37,6 +37,21 @@ describe("review model", () => {
     const cells = buildReviewCells([{ correct: false, points: 0, pending: true }], new Set(), -1);
     expect(cells[0].state).toBe("done");
     expect(retryIndices([{ correct: false, points: 0, pending: true }])).toEqual([]);
+  });
+
+  it("partial credit is not wrong, not skipped, and is retried", () => {
+    const partial = { correct: false, points: 0.25, partial: true };
+    expect(reviewScoreLabel(partial)).toBe("Đúng một phần · 0,25 điểm");
+    expect(retryIndices([{ correct: true, points: 0.5 }, partial, { correct: false, points: 0 }])).toEqual([1, 2]);
+    expect(buildReviewCells([partial], new Set(), -1)[0].state).toBe("wrong");
+  });
+
+  it("a half-filled answer that earned points is partial, not skipped", () => {
+    const question = reviewQuestion(1);
+    const record = { questionId: "q1", input: {}, result: { questionId: "q1", correct: false, partiallyRight: true, awardedPoints: 0.25, maxPoints: 0.5, message: "" } };
+    expect(toQuestionResults([question], { answers: { q1: record } })[0]).toMatchObject({ skipped: false, partial: true, points: 0.25 });
+    const blank = { ...record, result: { ...record.result, partiallyRight: false, awardedPoints: 0 } };
+    expect(toQuestionResults([question], { answers: { q1: blank } })[0]).toMatchObject({ skipped: true, partial: false });
   });
 
   it("measures time spent from start to submit", () => {

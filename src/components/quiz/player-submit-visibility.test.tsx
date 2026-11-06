@@ -101,6 +101,22 @@ function desktop(overrides: Record<string, unknown> = {}) {
   );
 }
 
+describe("result screen", () => {
+  it("desktop has exactly one contained button (Xem lại bài làm)", () => {
+    const readyAttempt = { totalScore: 1, maxScore: 2, percent: 50, passed: false, answers: {} };
+    render(desktop({ attemptCompleted: true, readyAttempt, resultDisplay: { ...resultDisplay, showReviewButton: true } }));
+    const contained = document.querySelectorAll(".MuiButton-contained");
+    expect(contained).toHaveLength(1);
+    expect(contained[0].textContent).toBe("Xem lại bài làm");
+  });
+
+  it("mobile footer review button is not a filled button", () => {
+    render(mobile({ attemptCompleted: true }));
+    const footerReview = screen.getAllByRole("button", { name: "Xem lại bài làm" }).at(-1) as HTMLElement;
+    expect(footerReview.className).not.toContain("bg-[var(--erg-blue)]");
+  });
+});
+
 describe("submit is always available", () => {
   it("desktop testing mode shows Nộp bài before every question is answered", () => {
     render(desktop());

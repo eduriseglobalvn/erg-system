@@ -1,6 +1,5 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-
 type Props = {
   attemptCompleted: boolean;
   currentAnswerComplete: boolean;
@@ -41,7 +40,7 @@ export function MobilePlayerFooter({
         {attemptCompleted && !reviewingSubmittedAttempt ? (
           <button
             type="button"
-            className="inline-flex min-h-10 w-full items-center justify-center rounded-md bg-[var(--erg-blue)] px-4 text-sm font-semibold text-white shadow-sm"
+            className="inline-flex min-h-10 w-full items-center justify-center rounded-md border border-[var(--erg-blue)] bg-white px-4 text-sm font-semibold text-[var(--erg-blue)]"
             onClick={onReview}
           >
             Xem lại bài làm

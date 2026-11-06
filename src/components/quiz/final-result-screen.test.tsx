@@ -1,13 +1,15 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { FinalResultScreen } from "@/components/quiz/final-result-screen";
-import type { Attempt, Question, QuizResultDisplay } from "@/domain/quiz/types";
+import { ReviewLayout } from "@/components/quiz/review/review-layout";
+import type { Attempt, QuizResultDisplay } from "@/domain/quiz/types";
+import { buildReviewFixture, reviewQuestion } from "@/test/fixtures/quiz-review-fixture";
 
-const questions = [1, 2, 3].map((n) => ({ id: `q${n}`, title: `Câu ${n}` })) as unknown as Question[];
+const questions = [1, 2, 3].map(reviewQuestion);
 const attempt = {
   id: "a", quizId: "z", submittedCount: 3, totalQuestions: 3, totalScore: 1, maxScore: 3, percent: 33, passed: false,
-  answers: { q1: { result: { correct: true } }, q2: { result: { correct: false } } },
+  answers: { q1: { input: { choiceId: "q1a" }, result: { correct: true, awardedPoints: 0.5 } }, q2: { input: { choiceId: "q2b" }, result: { correct: false } } },
 } as unknown as Attempt;
 const display = { passMessage: "Đạt", failMessage: "Chưa đạt", showReviewButton: true, reviewButtonLabel: "Xem lại bài", thankYouMessage: "Cảm ơn" } as QuizResultDisplay;
 
@@ -48,6 +50,29 @@ describe("FinalResultScreen", () => {
     fireEvent.click(button);
     expect(onReview).toHaveBeenCalledTimes(1);
     expect(document.body.textContent).not.toMatch(/XP/);
+  });
+
+  it("counts a blank record as not answered and partial credit as đúng một phần", () => {
+    const answers = {
+      q1: { input: {}, result: { correct: false, awardedPoints: 0 } },
+      q2: { input: {}, result: { correct: false, partiallyRight: true, awardedPoints: 0.25 } },
+    };
+    render(<FinalResultScreen attempt={{ ...attempt, answers } as unknown as Attempt} questions={questions} resultDisplay={display} onReview={vi.fn()} onReviewQuestion={vi.fn()} onBackToList={vi.fn()} />);
+    expect(screen.getByRole("button", { name: /Câu 1: chưa làm/ })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /Câu 2: đúng một phần/ })).toBeTruthy();
+    expect(screen.getByText(/Đúng 0 · Sai 1 · Chưa làm 2/)).toBeTruthy();
+  });
+
+  it("gives the same wrong / skipped counts as the review screen (90 questions)", () => {
+    const fixture = buildReviewFixture();
+    const { unmount } = render(<FinalResultScreen attempt={fixture.attempt} questions={fixture.questions} resultDisplay={display} onReview={vi.fn()} onReviewQuestion={vi.fn()} onBackToList={vi.fn()} />);
+    expect(screen.getByText(/Đúng 78 · Sai 9 · Chưa làm 3/)).toBeTruthy();
+    unmount();
+    render(<ReviewLayout attempt={fixture.attempt} questions={fixture.questions} flagged={new Set()} current={0} elapsedSeconds={null} surface="web" onSelect={vi.fn()} onBack={vi.fn()} startLocalRetry={vi.fn()} />);
+    const aside = screen.getByTestId("review-aside");
+    expect(within(aside).getByRole("button", { name: "Sai · 9" })).toBeTruthy();
+    expect(within(aside).getByRole("button", { name: "Bỏ trống · 3" })).toBeTruthy();
+    expect(screen.getByText("78/90 câu đúng")).toBeTruthy();
   });
 
   it("shows Làm lại in practice mode", () => {

@@ -6,10 +6,11 @@ import ButtonBase from "@mui/material/ButtonBase";
 import Typography from "@mui/material/Typography";
 import type { ReactNode } from "react";
 
+import { toQuestionResults } from "@/components/quiz/review/review-model";
 import type { Attempt, Question, QuizResultDisplay } from "@/domain/quiz/types";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
-const { success, error, neutral } = ergEnterpriseTokens.statusTint;
+const { success, error, warning, neutral } = ergEnterpriseTokens.statusTint;
 
 export type FinalResultScreenProps = {
   attempt: Attempt;
@@ -27,15 +28,17 @@ export type FinalResultScreenProps = {
 };
 
 export function FinalResultScreen({ attempt, questions, resultDisplay, onReview, onReviewQuestion, onRetry, onBackToList, extraActions }: FinalResultScreenProps) {
+  // Same classification as the review screen, so counts match "Sai · n" / "Bỏ trống · n" there.
+  const results = toQuestionResults(questions, attempt);
   const rows = questions.map((question, index) => {
-    const record = attempt.answers[question.id];
-    const state: "correct" | "wrong" | "pending" | "blank" = !record
-      ? "blank"
-      : record.result?.pendingReview ? "pending" : record.result?.correct ? "correct" : "wrong";
+    const r = results[index];
+    const state: "correct" | "partial" | "wrong" | "pending" | "blank" =
+      r.pending ? "pending" : r.correct ? "correct" : r.partial ? "partial" : r.skipped ? "blank" : "wrong";
     return { question, index, state };
   });
   const correctCount = rows.filter((row) => row.state === "correct").length;
-  const wrongCount = rows.filter((row) => row.state === "wrong").length;
+  // Partial credit counts with Sai, like the review filter.
+  const wrongCount = rows.filter((row) => row.state === "wrong" || row.state === "partial").length;
   const pendingCount = rows.filter((row) => row.state === "pending").length;
   const resultMessage = attempt.passed ? resultDisplay.passMessage : resultDisplay.failMessage;
 
@@ -54,8 +57,8 @@ export function FinalResultScreen({ attempt, questions, resultDisplay, onReview,
 
       <Box component="ol" aria-label="Kết quả từng câu" sx={{ display: "grid", gap: 1, gridTemplateColumns: "repeat(auto-fill, minmax(88px, 1fr))", listStyle: "none", m: 0, p: 0 }}>
         {rows.map(({ question, index, state }) => {
-          const tint = state === "correct" ? success : state === "wrong" ? error : neutral;
-          const label = state === "correct" ? "đúng" : state === "wrong" ? "sai" : state === "pending" ? "chờ giáo viên chấm" : "chưa làm";
+          const tint = state === "correct" ? success : state === "wrong" ? error : state === "partial" ? warning : neutral;
+          const label = state === "correct" ? "đúng" : state === "partial" ? "đúng một phần" : state === "wrong" ? "sai" : state === "pending" ? "chờ giáo viên chấm" : "chưa làm";
           return (
             <li key={question.id}>
               <ButtonBase

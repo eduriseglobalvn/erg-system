@@ -24,13 +24,14 @@ const noop = () => undefined;
 
 function tone(r: QuestionResult) {
   if (r.pending) return "info" as const;
+  if (r.partial) return "warning" as const;
   if (r.skipped) return "neutral" as const;
   return r.correct ? ("success" as const) : ("error" as const);
 }
 
 export function ReviewQuestionView({ question, record, result, index, total, onPrev, onNext }: ReviewQuestionViewProps) {
   // A pending essay carries a grading note, not a solution.
-  const solution = result.pending ? "" : record?.result?.message || question.feedback[result.correct ? "correct" : "incorrect"] || "";
+  const solution = result.pending ? "" : record?.result?.message || question.feedback[result.correct ? "correct" : result.partial ? "partial" : "incorrect"] || "";
   const steps = splitFeedbackSteps(solution);
 
   return (
