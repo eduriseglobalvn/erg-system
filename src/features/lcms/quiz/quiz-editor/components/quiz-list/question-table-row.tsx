@@ -31,6 +31,7 @@ export function QuestionTableRow({ row, readiness, showTopic, onOpen }: {
   const cloud = row.onServer ? "Đã lên máy chủ" : "Chưa lên máy chủ";
   return (
     <TableRow
+      aria-label={`Mở câu ${row.number}: ${questionTitleText(slide.title)}`}
       hover
       onClick={onOpen}
       onKeyDown={(event) => {

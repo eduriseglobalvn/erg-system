@@ -62,6 +62,8 @@ describe("QuestionTable", () => {
     expect(onAdd).toHaveBeenCalledTimes(1);
     fireEvent.click(screen.getByText("2 + 2 = ?"));
     expect(onOpenRow).toHaveBeenCalledWith(topicRows[0]);
+    // A focusable row says what Enter does.
+    expect(screen.getByRole("row", { name: "Mở câu 2: (Chưa có đề bài)" })).toHaveAttribute("tabindex", "0");
   });
 
   it("in Tất cả shows each row's own topic and the hint instead of the add button", () => {
