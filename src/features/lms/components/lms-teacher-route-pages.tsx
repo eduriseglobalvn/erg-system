@@ -22,6 +22,7 @@ import {
 } from "@/features/lms/components/lms-teacher-shell-pages";
 import { getClassStudents, TeacherWorkspaceFrame } from "@/features/lms/components/lms-teacher-shell-frame";
 import { useLmsTeacherShellModel } from "@/features/lms/components/lms-teacher-shell-context";
+import { TeacherLearningHub } from "@/features/lms/learning-hub/teacher-learning-hub";
 import { LmsHomeDashboard } from "@/features/lms/components/lms-home-dashboard";
 import { classroomStudents } from "@/features/lms/classroom/api/classroom-defaults";
 import { LearningResourceDashboardScopeProvider } from "@/features/lms/learning-resources/hooks/use-learning-resource-dashboard-scope";
@@ -50,6 +51,10 @@ export function TeacherHomeRoute() {
       onOpenSchedule={() => void m.navigate({ href: teacherPath("/calendar") })}
     />
   );
+}
+
+export function TeacherLearningHubRoute() {
+  return <TeacherLearningHub />;
 }
 
 export function TeacherHomeworkRoute() {

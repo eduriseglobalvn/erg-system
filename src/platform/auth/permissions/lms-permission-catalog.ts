@@ -67,6 +67,7 @@ export const LMS_ROUTE_PERMISSIONS = {
   "homework/progress": "lms.assignment.progress.read",
   "homework/student-groups": "lms.student_group.read",
   "homework/class": "lms.class.read",
+  learning: "lms.assignment.read",
   notifications: "lms.notification.read",
   account: "account.self.read",
   "account/login-logs": "account.self.sessions.read",
