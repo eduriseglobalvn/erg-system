@@ -32,7 +32,9 @@ export function QuestionFeedbackPanel({ floating = false, result }: { floating?:
       <Box sx={{ alignItems: "center", bgcolor: headerColor, color: "common.white", display: "flex", fontSize: 16, fontWeight: 600, justifyContent: "space-between", minHeight: 48, px: 2.5 }}>
         <span>{title}</span>
       </Box>
-      <Box sx={{ color: "text.primary", fontSize: 16, lineHeight: "28px", px: 2.5, py: 2.5 }}>{message}</Box>
+      {message ? (
+        <Box data-testid="question-feedback-body" sx={{ color: "text.primary", fontSize: 16, lineHeight: "28px", px: 2.5, py: 2.5 }}>{message}</Box>
+      ) : null}
     </Box>
   );
 }

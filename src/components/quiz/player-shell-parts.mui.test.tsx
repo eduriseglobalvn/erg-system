@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { AnswerKeyCard, SubmitConfirmDialog } from "@/components/quiz/player-shell-parts";
+import { AnswerKeyCard, QuestionFeedbackPanel, SubmitConfirmDialog } from "@/components/quiz/player-shell-parts";
 import type { Question, QuizResultDisplay } from "@/domain/quiz/types";
 
 const resultDisplay: QuizResultDisplay = {
@@ -81,5 +81,18 @@ describe("AnswerKeyCard", () => {
     expect(screen.getByText("Nêu đủ ý")).toBeInTheDocument();
     expect(screen.getByText("Có ví dụ")).toBeInTheDocument();
     expect(screen.queryByText(/dđ/)).toBeNull();
+  });
+});
+
+describe("QuestionFeedbackPanel", () => {
+  it("shows no empty body when the teacher left the correct-answer feedback blank", () => {
+    render(<QuestionFeedbackPanel result={{ questionId: "q", correct: true, score: 1, maxScore: 1, message: "" } as never} />);
+    expect(screen.getByText("Đáp án chính xác!")).toBeInTheDocument();
+    expect(screen.queryByTestId("question-feedback-body")).toBeNull();
+  });
+
+  it("shows the teacher's feedback when there is some", () => {
+    render(<QuestionFeedbackPanel result={{ questionId: "q", correct: true, score: 1, maxScore: 1, message: "Giỏi lắm" } as never} />);
+    expect(screen.getByTestId("question-feedback-body")).toHaveTextContent("Giỏi lắm");
   });
 });
