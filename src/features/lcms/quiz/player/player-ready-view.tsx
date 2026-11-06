@@ -19,7 +19,7 @@ import {
   playerViewportClass,
 } from "@/components/quiz/player-shell-runtime/player-shell-styles";
 import { TimeUpOverlay } from "@/components/quiz/time-up-overlay";
-import { isAnswerComplete } from "@/domain/quiz/quiz";
+import { canGradeLocally, isAnswerComplete } from "@/domain/quiz/quiz";
 import type { QuizResultDisplay } from "@/domain/quiz/types";
 import type { PlayerShellProps } from "./player-shell-props";
 import { usePlayerReadyHandlers, type PlayerReady } from "./use-player-ready-handlers";
@@ -70,6 +70,7 @@ export function PlayerReadyView({
     };
   });
   const resultDisplay: QuizResultDisplay = { ...defaultResultDisplay, ...(readyQuiz.result ?? {}) };
+  resultDisplay.showReviewButton &&= canGradeLocally(questions); // keyless package: review would show wrong data
   const restoredDraft = loadState.status === "ready" && loadState.restored;
   const bookmarkedQuestionIds = readySession.bookmarkedQuestionIds;
   const isCurrentQuestionBookmarked = bookmarkedQuestionIds.includes(readyQuestion.id);
@@ -122,7 +123,7 @@ export function PlayerReadyView({
     currentAnswerComplete, currentQuestionSubmitted: submitted, playerCardStyle, canvasStyle, headerStyle,
     accentButtonStyle, modeBadgeStyle, question: readyQuestion, questions, quiz: readyQuiz,
     reviewingSubmittedAttempt, saveIndicator, started, submitting, submitFailed, timer: countdown,
-    onJumpToQuestion: handleJumpToQuestion, onRequestSubmit: handleRequestSubmit, onReview: handleReviewQuiz,
+    onJumpToQuestion: handleJumpToQuestion, onRequestSubmit: handleRequestSubmit, onReview: resultDisplay.showReviewButton ? handleReviewQuiz : undefined,
     onStart: handleStartQuiz, body: questionBody,
     onNext: () => setCurrentIndex((value) => Math.min(questions.length - 1, value + 1)),
     onPrev: () => setCurrentIndex((value) => Math.max(0, value - 1)),

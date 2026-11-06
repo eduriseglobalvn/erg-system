@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 import { FinalResultScreen } from "@/components/quiz/final-result-screen";
 import { ReviewLayout } from "@/components/quiz/review/review-layout";
 import type { Attempt, QuizResultDisplay } from "@/domain/quiz/types";
-import { buildReviewFixture, reviewQuestion } from "@/test/fixtures/quiz-review-fixture";
+import { buildReviewFixture, reviewQuestion, stripAnswerKeys } from "@/test/fixtures/quiz-review-fixture";
 
 const questions = [1, 2, 3].map(reviewQuestion);
 const attempt = {
@@ -73,6 +73,20 @@ describe("FinalResultScreen", () => {
     expect(within(aside).getByRole("button", { name: "Sai · 9" })).toBeTruthy();
     expect(within(aside).getByRole("button", { name: "Bỏ trống · 3" })).toBeTruthy();
     expect(screen.getByText("78/90 câu đúng")).toBeTruthy();
+  });
+
+  it("without answer keys shows only the submit result and the answered count", () => {
+    const fixture = buildReviewFixture();
+    render(<FinalResultScreen attempt={fixture.attempt} questions={stripAnswerKeys(fixture.questions)} resultDisplay={display} onReview={vi.fn()} onReviewQuestion={vi.fn()} onBackToList={vi.fn()} />);
+    expect(screen.getByTestId("result-score").textContent).toBe("39/45");
+    expect(screen.getByText("87% · Đã làm 87/90 câu")).toBeTruthy();
+    const text = document.body.textContent ?? "";
+    expect(text).not.toMatch(/Sai|Chưa làm|Đúng d/);
+    expect(screen.queryByRole("list", { name: "Kết quả từng câu" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Xem lại bài làm" })).toBeNull();
+    const contained = document.querySelectorAll(".MuiButton-contained");
+    expect(contained).toHaveLength(1);
+    expect(contained[0].textContent).toBe("Về danh sách");
   });
 
   it("shows Làm lại in practice mode", () => {

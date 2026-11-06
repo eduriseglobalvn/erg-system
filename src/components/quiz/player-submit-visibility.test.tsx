@@ -104,10 +104,26 @@ function desktop(overrides: Record<string, unknown> = {}) {
 describe("result screen", () => {
   it("desktop has exactly one contained button (Xem lại bài làm)", () => {
     const readyAttempt = { totalScore: 1, maxScore: 2, percent: 50, passed: false, answers: {} };
-    render(desktop({ attemptCompleted: true, readyAttempt, resultDisplay: { ...resultDisplay, showReviewButton: true } }));
+    const keyed = questions.map((q) => ({ ...q, choices: [{ id: "a", label: "a", correct: true }] }));
+    render(desktop({ attemptCompleted: true, questions: keyed, readyAttempt, resultDisplay: { ...resultDisplay, showReviewButton: true } }));
     const contained = document.querySelectorAll(".MuiButton-contained");
     expect(contained).toHaveLength(1);
     expect(contained[0].textContent).toBe("Xem lại bài làm");
+  });
+
+  it("desktop without answer keys offers no review; Về danh sách is the one contained button", () => {
+    const readyAttempt = { totalScore: 1, maxScore: 2, percent: 50, passed: false, answers: {} };
+    // The ready view turns showReviewButton off for keyless packages.
+    render(desktop({ attemptCompleted: true, readyAttempt, resultDisplay: { ...resultDisplay, showReviewButton: false } }));
+    expect(screen.queryByRole("button", { name: "Xem lại bài làm" })).toBeNull();
+    const contained = document.querySelectorAll(".MuiButton-contained");
+    expect(contained).toHaveLength(1);
+    expect(contained[0].textContent).toBe("Về danh sách");
+  });
+
+  it("mobile has no review button when review is unavailable (no answer keys)", () => {
+    render(mobile({ attemptCompleted: true, onReview: undefined }));
+    expect(screen.queryByRole("button", { name: "Xem lại bài làm" })).toBeNull();
   });
 
   it("mobile footer review button is not a filled button", () => {

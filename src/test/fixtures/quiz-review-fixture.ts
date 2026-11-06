@@ -57,3 +57,8 @@ export function buildReviewFixture(): { questions: Question[]; attempt: Attempt 
     },
   };
 }
+
+/** What a server-authoritative package looks like: same questions, no correct flags. */
+export function stripAnswerKeys(questions: Question[]): Question[] {
+  return questions.map((question) => ({ ...question, choices: question.choices?.map((choice) => ({ ...choice, correct: false })) }));
+}

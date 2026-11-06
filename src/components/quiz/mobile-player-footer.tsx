@@ -13,7 +13,8 @@ type Props = {
   onNext: () => void;
   onPrev: () => void;
   onRequestSubmit: () => void;
-  onReview: () => void;
+  /** Omitted when review is unavailable (no answer keys / author hid it). */
+  onReview?: () => void;
   onSubmitCurrentQuestion: () => void;
 };
 
@@ -38,13 +39,13 @@ export function MobilePlayerFooter({
     <div className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white px-3 pb-[calc(env(safe-area-inset-bottom,0px)+0.35rem)] pt-1.5">
       <div className="mx-auto max-w-md">
         {attemptCompleted && !reviewingSubmittedAttempt ? (
-          <button
+          onReview ? <button
             type="button"
             className="inline-flex min-h-10 w-full items-center justify-center rounded-md border border-[var(--erg-blue)] bg-white px-4 text-sm font-semibold text-[var(--erg-blue)]"
             onClick={onReview}
           >
             Xem lại bài làm
-          </button>
+          </button> : null
         ) : (
           isTrainingMode ? (
             <button

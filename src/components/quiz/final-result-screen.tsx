@@ -7,6 +7,7 @@ import Typography from "@mui/material/Typography";
 import type { ReactNode } from "react";
 
 import { toQuestionResults } from "@/components/quiz/review/review-model";
+import { canGradeLocally } from "@/domain/quiz/quiz";
 import type { Attempt, Question, QuizResultDisplay } from "@/domain/quiz/types";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
@@ -40,6 +41,10 @@ export function FinalResultScreen({ attempt, questions, resultDisplay, onReview,
   // Partial credit counts with Sai, like the review filter.
   const wrongCount = rows.filter((row) => row.state === "wrong" || row.state === "partial").length;
   const pendingCount = rows.filter((row) => row.state === "pending").length;
+  // Keyless (server-authoritative) package: the submit returns only score/percent/passed, so no per-question claims.
+  const gradable = canGradeLocally(questions);
+  const showReview = gradable && resultDisplay.showReviewButton;
+  const answeredCount = results.filter((r) => !r.skipped).length;
   const resultMessage = attempt.passed ? resultDisplay.passMessage : resultDisplay.failMessage;
 
   return (
@@ -50,11 +55,13 @@ export function FinalResultScreen({ attempt, questions, resultDisplay, onReview,
           {attempt.totalScore}/{attempt.maxScore}
         </Typography>
         <Typography color="text.secondary" variant="body2">
-          {attempt.percent}% · Đúng {correctCount} · Sai {wrongCount}
-          {pendingCount ? ` · Chờ chấm ${pendingCount}` : ""} · Chưa làm {rows.length - correctCount - wrongCount - pendingCount}
+          {gradable
+            ? `${attempt.percent}% · Đúng ${correctCount} · Sai ${wrongCount}${pendingCount ? ` · Chờ chấm ${pendingCount}` : ""} · Chưa làm ${rows.length - correctCount - wrongCount - pendingCount}`
+            : `${attempt.percent}% · Đã làm ${answeredCount}/${rows.length} câu`}
         </Typography>
       </Box>
 
+      {gradable ? (
       <Box component="ol" aria-label="Kết quả từng câu" sx={{ display: "grid", gap: 1, gridTemplateColumns: "repeat(auto-fill, minmax(88px, 1fr))", listStyle: "none", m: 0, p: 0 }}>
         {rows.map(({ question, index, state }) => {
           const tint = state === "correct" ? success : state === "wrong" ? error : state === "partial" ? warning : neutral;
@@ -74,15 +81,17 @@ export function FinalResultScreen({ attempt, questions, resultDisplay, onReview,
           );
         })}
       </Box>
+      ) : null}
 
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, justifyContent: "center" }}>
-        {resultDisplay.showReviewButton ? (
+        {showReview ? (
           // Fixed label (P3 L08): opens ReviewLayout; the old author label ("XEM LẠI BÀI") is no longer shown.
           <Button variant="contained" onClick={onReview}>Xem lại bài làm</Button>
         ) : null}
         {onRetry ? <Button variant="outlined" onClick={onRetry}>Làm lại</Button> : null}
         {extraActions}
-        <Button variant="outlined" onClick={onBackToList}>Về danh sách</Button>
+        {/* One contained per page: the list button takes it when there is no review. */}
+        <Button variant={showReview ? "outlined" : "contained"} onClick={onBackToList}>Về danh sách</Button>
       </Box>
       <Typography color="text.secondary" sx={{ textAlign: "center" }} variant="body2">{resultDisplay.thankYouMessage}</Typography>
     </Box>
