@@ -212,6 +212,8 @@ export type Question = {
   essayRubric?: EssayRubricCriterion[];
   hotspotImage?: HotspotImage;
   hotspotAreas?: HotspotArea[];
+  /** Set by the server-authoritative package strip: the stripped shape (correctValue 0, old-shape matching) is not a key. */
+  answerKeyStripped?: boolean;
 };
 
 export type Section = {

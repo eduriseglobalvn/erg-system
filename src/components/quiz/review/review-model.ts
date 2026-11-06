@@ -8,8 +8,8 @@ export type QuestionResult = { correct: boolean; points: number; skipped?: boole
 const numberVi = new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 2 });
 
 /**
- * Final submit stores a record for every question. Skipped = not answered/complete AND no points, so a
- * half-filled fill_blank/matching that earned points is partial, not skipped.
+ * Final submit stores a record for every question. Partial = scoreQuestion's partiallyRight or any points
+ * (floor() can award 0 on a 0,5-/1-point question); skipped = not partial AND not answered/complete.
  */
 export function toQuestionResults(questions: Question[], attempt: Pick<Attempt, "answers">): QuestionResult[] {
   return questions.map((question) => {
@@ -18,12 +18,13 @@ export function toQuestionResults(questions: Question[], attempt: Pick<Attempt, 
     const pending = Boolean(record?.result?.pendingReview);
     const points = record?.result?.awardedPoints ?? 0;
     const graded = !correct && !pending;
+    const partial = graded && (points > 0 || Boolean(record?.result?.partiallyRight));
     return {
       correct,
       points,
       pending,
-      skipped: graded && points === 0 && (!record || !isAnswerComplete(question, record.input)),
-      partial: graded && points > 0,
+      skipped: graded && !partial && (!record || !isAnswerComplete(question, record.input)),
+      partial,
     };
   });
 }

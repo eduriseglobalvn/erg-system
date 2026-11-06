@@ -400,12 +400,13 @@ function normalizeTextAnswer(value: string) {
     .replace(/\s+/g, " ");
 }
 
-/** promptId -> correct responseId; undefined when unknown (new shape without a key). Old shape: id equality. */
 /**
  * True when scoreQuestion can really grade this question here: the answer key is in the package.
- * Server-authoritative packages strip keys (no correct flags, sequenceCorrectOrder [], no matchingKey...).
+ * A stripped (server-authoritative testing) question is never gradable, even where the stripped shape still
+ * looks like a key (numeric 0, old-shape matching/sequence) or no key is needed (essay/likert).
  */
 export function hasAnswerKey(question: Question): boolean {
+  if (question.answerKeyStripped) return false;
   const every = <T>(items: T[] = [], keyed: (item: T) => boolean) => items.length > 0 && items.every(keyed);
   switch (question.kind) {
     case "single_choice":
@@ -430,9 +431,14 @@ export function hasAnswerKey(question: Question): boolean {
       return every(question.dragDropItems, (item) => Boolean(item.correctTargetId));
     case "hotspot":
       return Boolean(question.hotspotAreas?.some((area) => area.correct));
-    default:
+    case "likert_scale":
+    case "essay":
       // likert (any full answer counts) and essay (teacher-graded) need no key.
       return true;
+    default: {
+      const unhandled: never = question.kind;
+      return unhandled;
+    }
   }
 }
 
@@ -441,6 +447,7 @@ export function canGradeLocally(questions: Question[]): boolean {
   return questions.length > 0 && questions.every(hasAnswerKey);
 }
 
+/** promptId -> correct responseId; undefined when unknown (new shape without a key). Old shape: id equality. */
 export function getMatchingKey(question: Question): Record<string, string> | undefined {
   if (question.matchingKey) return question.matchingKey;
   if (question.matchingResponses) return undefined;

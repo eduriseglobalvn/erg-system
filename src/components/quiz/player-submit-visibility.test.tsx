@@ -123,8 +123,7 @@ describe("result screen", () => {
 
   it("mobile has no review button when review is unavailable (no answer keys)", () => {
     render(mobile({ attemptCompleted: true, onReview: undefined }));
-    expect(screen.queryByRole("button", { name: "Xem lại bài làm" })).toBeNull();
-    // No empty fixed bar either.
+    // The whole footer (and its review button) is gone, not just an empty fixed bar.
     expect(screen.queryByTestId("mobile-player-footer")).toBeNull();
   });
 

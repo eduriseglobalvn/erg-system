@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { attemptElapsedSeconds, buildReviewCells, retryIndices, reviewScoreLabel, reviewScoreOutOf10, toQuestionResults } from "@/components/quiz/review/review-model";
+import { scoreQuestion } from "@/domain/quiz/quiz";
+import type { Question } from "@/domain/quiz/types";
 import { buildReviewFixture, reviewQuestion, REVIEW_SKIPPED, REVIEW_WRONG } from "@/test/fixtures/quiz-review-fixture";
 
 const { questions, attempt } = buildReviewFixture();
@@ -40,18 +42,32 @@ describe("review model", () => {
   });
 
   it("partial credit is not wrong, not skipped, and is retried", () => {
-    const partial = { correct: false, points: 0.25, partial: true };
-    expect(reviewScoreLabel(partial)).toBe("Đúng một phần · 0,25 điểm");
+    const partial = { correct: false, points: 0, partial: true };
+    expect(reviewScoreLabel(partial)).toBe("Đúng một phần · 0 điểm");
     expect(retryIndices([{ correct: true, points: 0.5 }, partial, { correct: false, points: 0 }])).toEqual([1, 2]);
     expect(buildReviewCells([partial], new Set(), -1)[0].state).toBe("wrong");
   });
 
-  it("a half-filled answer that earned points is partial, not skipped", () => {
+  it("partiallyRight with floored 0 points (0,5-point question) is partial, not wrong or skipped", () => {
     const question = reviewQuestion(1);
-    const record = { questionId: "q1", input: {}, result: { questionId: "q1", correct: false, partiallyRight: true, awardedPoints: 0.25, maxPoints: 0.5, message: "" } };
-    expect(toQuestionResults([question], { answers: { q1: record } })[0]).toMatchObject({ skipped: false, partial: true, points: 0.25 });
-    const blank = { ...record, result: { ...record.result, partiallyRight: false, awardedPoints: 0 } };
+    const record = { questionId: "q1", input: { choiceId: "q1b" }, result: { questionId: "q1", correct: false, partiallyRight: true, awardedPoints: 0, maxPoints: 0.5, message: "" } };
+    expect(toQuestionResults([question], { answers: { q1: record } })[0]).toMatchObject({ skipped: false, partial: true, points: 0 });
+    const blank = { ...record, input: {}, result: { ...record.result, partiallyRight: false } };
     expect(toQuestionResults([question], { answers: { q1: blank } })[0]).toMatchObject({ skipped: true, partial: false });
+  });
+
+  it("a half-filled fill_blank graded by scoreQuestion is partial, not skipped", () => {
+    const question = {
+      id: "fb", kind: "fill_blank", title: "", points: 1, feedback: { correct: "", incorrect: "", partial: "" },
+      textBlanks: [{ id: "b1", label: "", correctAnswers: ["a"] }, { id: "b2", label: "", correctAnswers: ["b"] }],
+    } as Question;
+    const input = { textResponses: { b1: "a" } };
+    const result = scoreQuestion(question, input);
+    expect(result).toMatchObject({ partiallyRight: true, awardedPoints: 0 });
+    const [r] = toQuestionResults([question], { answers: { fb: { questionId: "fb", input, result } } });
+    expect(r).toMatchObject({ correct: false, skipped: false, partial: true, points: 0 });
+    expect(reviewScoreLabel(r)).toBe("Đúng một phần · 0 điểm");
+    expect(retryIndices([r])).toEqual([0]);
   });
 
   it("measures time spent from start to submit", () => {

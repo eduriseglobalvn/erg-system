@@ -22,8 +22,17 @@ describe("canGradeLocally", () => {
     expect(hasAnswerKey(q("fill_blank", { textBlanks: [{ id: "b", correctAnswers: [] }] as unknown as Question["textBlanks"] }))).toBe(false);
     expect(hasAnswerKey(q("numeric"))).toBe(false);
     expect(hasAnswerKey(q("numeric", { numericAnswer: { correctValue: 2, tolerance: 0 } }))).toBe(true);
+    // A real key of 0 (client-first) is a key.
+    expect(hasAnswerKey(q("numeric", { numericAnswer: { correctValue: 0, tolerance: 0 } }))).toBe(true);
     expect(hasAnswerKey(q("drag_words", { wordSlots: [{ id: "s", correctWordId: "" }] as unknown as Question["wordSlots"] }))).toBe(false);
     expect(hasAnswerKey(q("essay"))).toBe(true);
     expect(hasAnswerKey(q("likert_scale"))).toBe(true);
+  });
+
+  it("a question whose key the package stripped is never gradable, whatever its shape", () => {
+    expect(hasAnswerKey(q("numeric", { numericAnswer: { correctValue: 0, tolerance: 0 }, answerKeyStripped: true }))).toBe(false);
+    expect(hasAnswerKey(q("essay", { answerKeyStripped: true }))).toBe(false);
+    expect(hasAnswerKey(q("likert_scale", { answerKeyStripped: true }))).toBe(false);
+    expect(canGradeLocally([q("essay", { answerKeyStripped: true })])).toBe(false);
   });
 });
