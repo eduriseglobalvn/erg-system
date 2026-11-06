@@ -15,6 +15,14 @@ export type QuizThemeCopy = {
   accentColor: string;
   highlightColor: string;
   otherColor: string;
+  contrast: {
+    title: string;
+    chipPass: string;
+    chipFail: (n: number) => string;
+    pass: string;
+    fail: string;
+    pairs: { "text-bg": string; "onAccent-accent": string; "highlight-bg": string };
+  };
   layoutSection: string;
   layout: string;
   layouts: { classic: string; focus: string; split: string };
@@ -73,8 +81,16 @@ export const viCopy: QuizThemeCopy = {
   backgroundTone: "Kiểu nền",
   tones: { "soft-blue": "Xanh nhạt", paper: "Giấy", contrast: "Tương phản" },
   accentColor: "Màu nhấn",
-  highlightColor: "Màu tô phương án đang chọn",
+  highlightColor: "Màu tô đậm",
   otherColor: "Màu khác",
+  contrast: {
+    title: "Độ tương phản",
+    chipPass: "Đạt WCAG AA",
+    chipFail: (n) => `${n} cặp màu chưa đạt AA`,
+    pass: "Đạt",
+    fail: "Chưa đạt",
+    pairs: { "text-bg": "Chữ / nền", "onAccent-accent": "Chữ trên nút / màu nhấn", "highlight-bg": "Chữ trên vùng tô đậm" },
+  },
   layoutSection: "Bố cục",
   layout: "Kiểu bố cục",
   layouts: { classic: "Cổ điển", focus: "Tập trung", split: "Chia đôi" },
@@ -135,6 +151,14 @@ export const enCopy: QuizThemeCopy = {
   accentColor: "Accent color",
   highlightColor: "Selected answer fill",
   otherColor: "Other color",
+  contrast: {
+    title: "Contrast",
+    chipPass: "Meets WCAG AA",
+    chipFail: (n) => `${n} color ${n === 1 ? "pair" : "pairs"} below AA`,
+    pass: "Pass",
+    fail: "Fail",
+    pairs: { "text-bg": "Text / background", "onAccent-accent": "Text on button / accent", "highlight-bg": "Text on selected fill" },
+  },
   layoutSection: "Layout",
   layout: "Layout style",
   layouts: { classic: "Classic", focus: "Focus", split: "Split" },

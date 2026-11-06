@@ -78,4 +78,10 @@ describe("quiz theme contrast", () => {
       quizThemeToneSurface["soft-blue"] = original;
     }
   });
+
+  it("measures MUI's translucent dark contrast text flattened onto the accent", () => {
+    const pair = checkThemeContrast({ ...saved, accentColor: "#ffd54f" }, "rgba(0, 0, 0, 0.87)").find((p) => p.id === "onAccent-accent");
+    expect(pair?.ratio).toBeGreaterThan(4.5);
+    expect(pair?.pass).toBe(true);
+  });
 });

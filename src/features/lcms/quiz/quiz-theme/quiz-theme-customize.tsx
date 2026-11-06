@@ -11,6 +11,8 @@ import type { ReactNode } from "react";
 
 import { ErgButton } from "@/components/erg-mui";
 import type { QuizPlayerTemplate } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
+import type { ContrastPair } from "@/features/lcms/quiz/quiz-theme/quiz-theme-contrast";
+import { QuizThemeContrastRow } from "@/features/lcms/quiz/quiz-theme/quiz-theme-contrast-row";
 import { ChoiceGroup, SwatchPicker } from "@/features/lcms/quiz/quiz-theme/quiz-theme-controls";
 import type { QuizThemeCopy } from "@/features/lcms/quiz/quiz-theme/quiz-theme-copy";
 import { quizThemePresets, quizThemeToneSurface } from "@/features/lcms/quiz/quiz-theme/quiz-theme-presets";
@@ -20,6 +22,7 @@ type QuizThemeCustomizeProps = {
   copy: QuizThemeCopy;
   title: string;
   value: QuizPlayerTemplate;
+  contrast: ContrastPair[];
   onChange(patch: Partial<QuizPlayerTemplate>): void;
   onUndo(): void;
 };
@@ -29,7 +32,7 @@ const swatchesOf = (key: "accentColor" | "highlightColor", copy: QuizThemeCopy) 
   [...new Map(quizThemePresets.map((preset) => [preset.values[key].toLowerCase(), copy.presets[preset.id]])).entries()]
     .map(([color, name]) => ({ color, name }));
 
-export function QuizThemeCustomize({ copy, title, value, onChange, onUndo }: QuizThemeCustomizeProps) {
+export function QuizThemeCustomize({ copy, title, value, contrast, onChange, onUndo }: QuizThemeCustomizeProps) {
   return (
     <>
       <Stack direction="row" sx={{ alignItems: "center", gap: 1 }}>
@@ -51,6 +54,7 @@ export function QuizThemeCustomize({ copy, title, value, onChange, onUndo }: Qui
         />
         <SwatchPicker label={copy.accentColor} otherLabel={copy.otherColor} value={value.accentColor} swatches={swatchesOf("accentColor", copy)} onChange={(accentColor) => onChange({ accentColor })} />
         <SwatchPicker label={copy.highlightColor} otherLabel={copy.otherColor} value={value.highlightColor} swatches={swatchesOf("highlightColor", copy)} onChange={(highlightColor) => onChange({ highlightColor })} />
+        <QuizThemeContrastRow copy={copy} pairs={contrast} />
       </Section>
 
       <Section title={copy.layoutSection} summary={`${copy.layouts[value.layout]} · ${copy.sizes[value.playerSize]}`}>
