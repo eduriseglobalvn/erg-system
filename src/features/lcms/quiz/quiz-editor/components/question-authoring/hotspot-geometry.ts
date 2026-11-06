@@ -32,3 +32,18 @@ export function areaToolbarPlacement(area: { x: number; y: number; width: number
   if (area.y >= 0.15) return { left, top: `calc(${area.y * 100}% - 4px)`, transform: `${shift} translateY(-100%)` };
   return { left, top: `calc(${bottom}% - 4px)`, transform: `${shift} translateY(-100%)` };
 }
+
+const ARROWS: Record<string, [number, number]> = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] };
+const round = (value: number) => Math.round(value * 1e6) / 1e6;
+const within = (value: number, min: number, max: number) => round(Math.min(Math.max(value, min), max));
+
+/** The area after an arrow key (1% of the image, 5% with Shift): it moves, or with Alt it resizes. Null for any other key. */
+export function nudgeArea<T extends { x: number; y: number; width: number; height: number }>(area: T, key: string, { shift, alt }: { shift: boolean; alt: boolean }): T | null {
+  const dir = ARROWS[key];
+  if (!dir) return null;
+  const step = shift ? 0.05 : 0.01;
+  if (alt) {
+    return { ...area, width: within(area.width + dir[0] * step, MIN_AREA, 1 - area.x), height: within(area.height + dir[1] * step, MIN_AREA, 1 - area.y) };
+  }
+  return { ...area, x: within(area.x + dir[0] * step, 0, 1 - area.width), y: within(area.y + dir[1] * step, 0, 1 - area.height) };
+}

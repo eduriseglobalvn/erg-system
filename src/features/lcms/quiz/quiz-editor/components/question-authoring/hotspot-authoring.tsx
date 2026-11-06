@@ -6,7 +6,8 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
-import { useRef, useState, type DragEvent, type PointerEvent } from "react";
+import { visuallyHidden } from "@mui/utils";
+import { useId, useRef, useState, type DragEvent, type PointerEvent } from "react";
 
 import type { HotspotArea, Question } from "@/domain/quiz/types";
 import { QUIZ_IMAGE_TYPES } from "@/lib/media/quiz-image";
@@ -18,6 +19,7 @@ import { readQuizImage } from "./read-quiz-image";
 import { newRowId, usePendingFocus } from "./sortable-rows";
 
 type Shape = "rect" | "ellipse";
+const KEYS_HINT = "Mũi tên để di chuyển, Alt + mũi tên để đổi cỡ (giữ Shift để đi 5%).";
 const HINT = "Kéo trên ảnh để vẽ vùng. Bấm vào vùng: chọn Đúng / Nhiễu / Xoá. Kéo ảnh mới vào để thay.";
 
 /** Teacher view of a hotspot question (spec 7.1 card 13): draw areas on the image, mark each correct or a distractor. */
@@ -29,6 +31,7 @@ export function HotspotAuthoring({ question, onUpdate }: {
   const [shape, setShape] = useState<Shape>("rect");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [draft, setDraft] = useState<{ pointerId: number; start: Fraction; end: Fraction } | null>(null);
+  const keysHintId = useId();
   const imageRef = useRef<HTMLImageElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const { rootRef, focusLater } = usePendingFocus();
@@ -110,6 +113,7 @@ export function HotspotAuthoring({ question, onUpdate }: {
         />
       </Box>
       <Box sx={{ typography: "caption", color: "text.secondary" }}>{HINT}</Box>
+      <Box id={keysHintId} sx={visuallyHidden}>{KEYS_HINT}</Box>
       <Box sx={{ position: "relative", display: "inline-block", alignSelf: "flex-start", maxWidth: "100%", lineHeight: 0 }}>
         <Box
           alt={question.title}
@@ -135,6 +139,8 @@ export function HotspotAuthoring({ question, onUpdate }: {
               area={area}
               key={area.id}
               n={index + 1}
+              describedBy={keysHintId}
+              onChange={(next) => { updateAreas((list) => list.map((a) => (a.id === next.id ? next : a))); setSelectedId(next.id); }}
               onClearSelection={() => setSelectedId(null)}
               onRemove={() => remove(area.id)}
               onSelect={() => setSelectedId(area.id)}

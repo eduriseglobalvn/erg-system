@@ -238,3 +238,46 @@ describe("hotspot card and slide", () => {
     expect(readSlideReadiness(next, t).issues.map((issue) => issue.code)).not.toContain("no-image");
   });
 });
+
+describe("HotspotAuthoring keyboard", () => {
+  const box = (id: string) => areas().find((a) => a.id === id)!;
+  const start = () => render(<Harness start={withImage([area("a1")])} />);
+  const mark = () => screen.getByRole("button", { name: /^Vùng 1/ });
+
+  it("moves the focused area by 1% and by 5% with Shift", () => {
+    start();
+    fireEvent.keyDown(mark(), { key: "ArrowRight" });
+    expect(box("a1").x).toBeCloseTo(0.11);
+    fireEvent.keyDown(mark(), { key: "ArrowDown", shiftKey: true });
+    expect(box("a1").y).toBeCloseTo(0.15);
+    expect(box("a1").width).toBeCloseTo(0.2);
+  });
+
+  it("resizes with Alt+arrows, 1% or 5% with Shift, and never below the drawing minimum", () => {
+    start();
+    fireEvent.keyDown(mark(), { key: "ArrowRight", altKey: true });
+    expect(box("a1").width).toBeCloseTo(0.21);
+    fireEvent.keyDown(mark(), { key: "ArrowUp", altKey: true, shiftKey: true });
+    expect(box("a1").height).toBeCloseTo(0.15);
+    for (let i = 0; i < 6; i++) fireEvent.keyDown(mark(), { key: "ArrowLeft", altKey: true, shiftKey: true });
+    expect(box("a1").width).toBeCloseTo(0.02);
+  });
+
+  it("keeps the area inside the image", () => {
+    start();
+    for (let i = 0; i < 4; i++) fireEvent.keyDown(mark(), { key: "ArrowLeft", shiftKey: true });
+    expect(box("a1").x).toBe(0);
+    for (let i = 0; i < 30; i++) fireEvent.keyDown(mark(), { key: "ArrowRight", shiftKey: true });
+    expect(box("a1").x).toBeCloseTo(0.8);
+    for (let i = 0; i < 30; i++) fireEvent.keyDown(mark(), { key: "ArrowRight", altKey: true, shiftKey: true });
+    expect(box("a1").x + box("a1").width).toBeCloseTo(1);
+  });
+
+  it("ignores arrows during IME composition and describes the shortcuts", () => {
+    start();
+    fireEvent.keyDown(mark(), { key: "ArrowRight", isComposing: true });
+    fireEvent.keyDown(mark(), { key: "ArrowRight", keyCode: 229 });
+    expect(box("a1").x).toBeCloseTo(0.1);
+    expect(mark()).toHaveAccessibleDescription(/mũi tên để di chuyển, Alt \+ mũi tên để đổi cỡ/i);
+  });
+});
