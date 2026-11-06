@@ -5,6 +5,7 @@ import Popover from "@mui/material/Popover";
 import Typography from "@mui/material/Typography";
 import { useId } from "react";
 
+import { questionTitleText } from "@/features/lcms/quiz/quiz-editor/components/question-authoring/question-readiness";
 import type { NotReadyQuestion } from "@/features/lcms/quiz/quiz-editor/hooks/use-quiz-editor-save-publish";
 
 /** Why "Xuất bản" is not available yet: every unfinished question, one tap from its editor. */
@@ -28,7 +29,7 @@ export function PublishBlockedPopover({ anchorEl, notReady, onClose, onSelect }:
       <List dense sx={{ maxHeight: 320, maxWidth: 420, overflowY: "auto" }}>
         {notReady.map((item) => (
           <ListItemButton key={item.slideId} onClick={() => onSelect(item.slideId)}>
-            <ListItemText primary={`Câu ${item.number}: ${item.title || "(chưa có đề bài)"} — ${item.label}`} />
+            <ListItemText primary={`Câu ${item.number}: ${questionTitleText(item.title)} — ${item.label}`} />
           </ListItemButton>
         ))}
       </List>

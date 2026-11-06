@@ -183,3 +183,6 @@ export function readinessLabel(readiness: QuestionReadiness): string {
   const [first, ...rest] = readiness.issues;
   return rest.length ? `${first.message} · còn ${rest.length} chỗ khác` : first.message;
 }
+
+/** A question's title as lists show it: a blank (or spaces-only) title reads "(Chưa có đề bài)" everywhere. */
+export const questionTitleText = (title: string) => title.trim() || "(Chưa có đề bài)";

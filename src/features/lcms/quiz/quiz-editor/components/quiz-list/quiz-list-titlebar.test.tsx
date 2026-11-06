@@ -56,7 +56,7 @@ describe("QuizListTitlebar publish", () => {
     expect(onPublish).not.toHaveBeenCalled();
     expect(button).toHaveAttribute("aria-expanded", "true");
     expect(screen.getByRole("dialog", { name: "Còn 1 câu chưa sẵn sàng" })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Câu 2: (chưa có đề bài) — Chưa có đề bài" }));
+    fireEvent.click(screen.getByRole("button", { name: "Câu 2: (Chưa có đề bài) — Chưa có đề bài" }));
 
     expect(onOpenQuestion).toHaveBeenCalledWith("s2");
     await waitFor(() => expect(screen.queryByText("Còn 1 câu chưa sẵn sàng")).toBeNull());

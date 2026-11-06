@@ -7,7 +7,7 @@ import Typography from "@mui/material/Typography";
 
 import { questionTypeLabel } from "@/features/lcms/quiz/quiz-editor/components/question-authoring/question-type-catalog";
 import type { QuestionReadiness } from "@/features/lcms/quiz/quiz-editor/components/question-authoring/question-readiness";
-import { readinessLabel } from "@/features/lcms/quiz/quiz-editor/components/question-authoring/question-readiness";
+import { questionTitleText, readinessLabel } from "@/features/lcms/quiz/quiz-editor/components/question-authoring/question-readiness";
 import type { TopicRow } from "@/features/lcms/quiz/quiz-editor/model/topic-rail";
 import { ergEnterpriseTokens as tokens } from "@/themes/erg-enterprise-tokens";
 import { isQuestionType, type QuizEditorSlide } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
@@ -45,7 +45,7 @@ export function QuestionTableRow({ row, readiness, showTopic, onOpen }: {
       <TableCell sx={{ color: "text.secondary", width: 48 }}>{row.number}</TableCell>
       <TableCell>
         <Typography sx={{ fontWeight: "fontWeightMedium" }} variant="body2">
-          {slide.title.trim() || "(Chưa có đề bài)"}
+          {questionTitleText(slide.title)}
         </Typography>
       </TableCell>
       {showTopic ? <TableCell>{row.topic?.label}</TableCell> : null}

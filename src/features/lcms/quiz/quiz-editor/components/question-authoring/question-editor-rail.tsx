@@ -8,7 +8,7 @@ import { useI18n } from "@/platform/i18n";
 import { lifecycleLabel, slidePublishState } from "@/features/lcms/quiz/quiz-editor/model/quiz-publish-state";
 import type { QuizEditorGroup, QuizEditorSlide, QuizProjectSettings } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import { ergEnterpriseTokens as tokens } from "@/themes/erg-enterprise-tokens";
-import { readinessLabel } from "./question-readiness";
+import { questionTitleText, readinessLabel } from "./question-readiness";
 import { readSlideReadiness } from "./slide-question";
 
 export type RailEntry = { groupId: string; slide: QuizEditorSlide };
@@ -66,7 +66,7 @@ export function QuestionEditorRail({ groups, entries, selectedSlideId, onSelect,
                     {String(number).padStart(2, "0")}
                   </Typography>
                   <Typography component="span" noWrap sx={{ fontWeight: "inherit", maxWidth: "100%" }} variant="body2">
-                    {slide.title.trim() || "(Chưa có đề bài)"}
+                    {questionTitleText(slide.title)}
                   </Typography>
                   <Box aria-label={status.label} component="span" data-status={status.key} role="img" sx={{ bgcolor: DOT[status.key], borderRadius: "50%", height: 8, width: 8 }} />
                 </ButtonBase>
