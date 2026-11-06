@@ -93,7 +93,7 @@ export function usePlayerKeyboard({
       }
 
       // The review screen has no flag control, so F is off there (it would silently rewrite the finished session);
-      // N stays, as the review panel shows the go-to field. Held keys must not re-fire.
+      // N is swallowed on review too: the panel shows a go-to field but gets no ref, so focusGoTo is a no-op there. Held keys must not re-fire.
       if (letter === "f" && onToggleFlag && !reviewingSubmittedAttempt) {
         event.preventDefault();
         if (!event.repeat) onToggleFlag();
