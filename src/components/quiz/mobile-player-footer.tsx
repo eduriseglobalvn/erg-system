@@ -1,6 +1,5 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-import type { QuizResultDisplay } from "@/domain/quiz/types";
 
 type Props = {
   attemptCompleted: boolean;
@@ -9,7 +8,6 @@ type Props = {
   isFirstQuestion: boolean;
   isLastQuestion: boolean;
   isTrainingMode: boolean;
-  resultDisplay: QuizResultDisplay;
   reviewingSubmittedAttempt: boolean;
   submitFailed: boolean;
   submitting: boolean;
@@ -27,7 +25,6 @@ export function MobilePlayerFooter({
   isFirstQuestion,
   isLastQuestion,
   isTrainingMode,
-  resultDisplay,
   reviewingSubmittedAttempt,
   submitFailed,
   submitting,
@@ -47,7 +44,7 @@ export function MobilePlayerFooter({
             className="inline-flex min-h-10 w-full items-center justify-center rounded-md bg-[var(--erg-blue)] px-4 text-sm font-semibold text-white shadow-sm"
             onClick={onReview}
           >
-            {resultDisplay.reviewButtonLabel}
+            Xem lại bài làm
           </button>
         ) : (
           isTrainingMode ? (

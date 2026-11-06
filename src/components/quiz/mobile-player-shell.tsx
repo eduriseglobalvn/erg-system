@@ -5,7 +5,7 @@ import { MobilePlayerFooter } from "@/components/quiz/mobile-player-footer";
 import { MobilePlayerIntro } from "@/components/quiz/mobile-player-intro";
 import { MobileQuestionSheet } from "@/components/quiz/mobile-player-question-sheet";
 import type { QuestionCell } from "@/components/quiz/question-navigator";
-import type { Question, Quiz, QuizResultDisplay } from "@/domain/quiz/types";
+import type { Question, Quiz } from "@/domain/quiz/types";
 
 type MobilePlayerShellProps = {
   allQuestionsAnswered: boolean;
@@ -28,7 +28,6 @@ type MobilePlayerShellProps = {
   question: Question;
   questions: Question[];
   quiz: Quiz;
-  resultDisplay: QuizResultDisplay;
   reviewingSubmittedAttempt: boolean;
   started: boolean;
   submitting: boolean;
@@ -63,7 +62,6 @@ export function MobilePlayerShell({
   question,
   questions,
   quiz,
-  resultDisplay,
   reviewingSubmittedAttempt,
   started,
   submitting,
@@ -143,7 +141,7 @@ export function MobilePlayerShell({
         <MobilePlayerFooter
           attemptCompleted={attemptCompleted} currentAnswerComplete={currentAnswerComplete}
           currentQuestionSubmitted={currentQuestionSubmitted} isFirstQuestion={isFirstQuestion}
-          isLastQuestion={isLastQuestion} isTrainingMode={isTrainingMode} resultDisplay={resultDisplay}
+          isLastQuestion={isLastQuestion} isTrainingMode={isTrainingMode}
           reviewingSubmittedAttempt={reviewingSubmittedAttempt} submitFailed={submitFailed} submitting={submitting}
           onNext={onNext} onPrev={onPrev} onRequestSubmit={onRequestSubmit} onReview={onReview}
           onSubmitCurrentQuestion={onSubmitCurrentQuestion}

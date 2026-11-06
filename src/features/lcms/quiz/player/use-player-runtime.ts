@@ -63,6 +63,7 @@ export function usePlayerRuntime({
   const [submitDialogMode, setSubmitDialogMode] = useState<SubmitDialogMode | null>(null);
   const [reviewingSubmittedAttempt, setReviewingSubmittedAttempt] = useState(false);
   const [timeUp, setTimeUp] = useState(false);
+  const [localRetryIndices, setLocalRetryIndices] = useState<number[] | null>(null);
   const questionBodyRef = useRef<HTMLDivElement | null>(null);
   // Filled by the ready view each render: option picking, flag and go-to need the current question and session.
   const shortcutsRef = useRef<PlayerShortcuts>({});
@@ -97,11 +98,11 @@ export function usePlayerRuntime({
     isTrainingMode, lastResult, questions, reviewingAttempt, submitFailed, submitted,
   } = usePlayerDerivedState({ currentIndex, drafts, loadState, portableOffline, reviewingSubmittedAttempt, timeUp });
 
-  const { beginAttempt, finalizeAttempt, requestSubmit, submitCurrentTrainingQuestion, submitReadyAttempt } = usePlayerActions({
+  const { beginAttempt, finalizeAttempt, requestSubmit, startLocalRetry, submitCurrentTrainingQuestion, submitReadyAttempt } = usePlayerActions({
     activeAttempt, activePackage, activeQuestion, activeQuiz, activeSession, allQuestionsAnswered, attemptCompleted,
     attemptExpired, attemptScope, drafts, isTrainingMode, portableOffline, queryClient, questions, runtimePortal,
     saveAttemptAnswerAsync, submitFailed, submitting,
-    setCurrentIndex, setDrafts, setLoadState, setReviewingSubmittedAttempt,
+    setCurrentIndex, setDrafts, setLoadState, setLocalRetryIndices, setReviewingSubmittedAttempt,
     setStarted, setSubmitDialogMode, setSubmitError, setSubmitting, setTimeUp,
   });
 
@@ -130,7 +131,7 @@ export function usePlayerRuntime({
   return {
     activeAttempt, activePackage, activeQuestion, activeQuiz, activeSession, allQuestionsAnswered, attemptCompleted,
     attemptScope, beginAttempt, currentAnswerComplete, currentIndex, deadlineAt, draftAnswer, draftSync, drafts, finalizeAttempt,
-    isFirstQuestion, isLastQuestion, isMobile, isTestingMode, isTrainingMode, lastResult, loadState, network, questionBodyRef,
+    isFirstQuestion, isLastQuestion, isMobile, localRetryIndices, setLocalRetryIndices, startLocalRetry, isTestingMode, isTrainingMode, lastResult, loadState, network, questionBodyRef,
     questions, quizPackageQuery, requestSubmit, retryTimeUpSubmit, reviewingAttempt, reviewingSubmittedAttempt,
     shortcutsRef, setCurrentIndex, setDrafts, setLoadState, setStarted, setSubmitDialogMode, setSubmitError, setTimeUp,
     setReviewingSubmittedAttempt, started, submitCurrentTrainingQuestion, submitDialogMode, submitError, submitFailed,

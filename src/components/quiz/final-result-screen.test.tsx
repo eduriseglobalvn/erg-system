@@ -40,6 +40,16 @@ describe("FinalResultScreen", () => {
     expect(screen.getByText(/Chờ chấm 1/)).toBeTruthy();
   });
 
+  it("Xem lại bài làm opens the review screen", () => {
+    const onReview = vi.fn();
+    render(<FinalResultScreen attempt={attempt} questions={questions} resultDisplay={display} onReview={onReview} onReviewQuestion={vi.fn()} onBackToList={vi.fn()} />);
+    const button = screen.getByRole("button", { name: "Xem lại bài làm" });
+    expect(button.className).toContain("MuiButton-contained");
+    fireEvent.click(button);
+    expect(onReview).toHaveBeenCalledTimes(1);
+    expect(document.body.textContent).not.toMatch(/XP/);
+  });
+
   it("shows Làm lại in practice mode", () => {
     setup(vi.fn());
     expect(screen.getByRole("button", { name: "Làm lại" })).toBeTruthy();

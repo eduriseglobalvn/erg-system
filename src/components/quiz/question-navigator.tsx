@@ -6,7 +6,9 @@ import { questionGridLayout, type GridSurface } from "@/components/quiz/question
 import { ergEnterpriseTokens as tk } from "@/themes/erg-enterprise-tokens";
 
 export type QuestionCellState = "done" | "current" | "todo" | "correct" | "wrong" | "skipped";
-export type QuestionCell = { index: number; state: QuestionCellState; flagged: boolean; hidden?: boolean; answered?: boolean };
+export type QuestionCell = { index: number; state: QuestionCellState; flagged: boolean; hidden?: boolean; answered?: boolean; current?: boolean };
+// Review cells keep their result colour and mark the open question with `current` (a ring) instead of the "current" state.
+const isCurrent = (cell: QuestionCell) => cell.state === "current" || Boolean(cell.current);
 
 const STATE_ORDER: QuestionCellState[] = ["done", "current", "todo", "correct", "wrong", "skipped"];
 const STATE_LABEL: Record<QuestionCellState, string> = {
@@ -46,7 +48,7 @@ export function QuestionNavigator({ cells, surface, onSelect, legend, ariaLabel 
   const layout = questionGridLayout(cells.length, surface);
   const visible = cells.filter((cell) => !cell.hidden);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const currentIndex = cells.find((cell) => cell.state === "current")?.index;
+  const currentIndex = cells.find(isCurrent)?.index;
 
   // Opening the list lands on the question being worked on.
   useEffect(() => {
@@ -73,7 +75,7 @@ export function QuestionNavigator({ cells, surface, onSelect, legend, ariaLabel 
               key={cell.index}
               type="button"
               aria-label={cellLabel(cell)}
-              aria-current={cell.state === "current" ? "true" : undefined}
+              aria-current={isCurrent(cell) ? "true" : undefined}
               onClick={() => onSelect(cell.index)}
               sx={{
                 border: BORDER,
@@ -83,6 +85,7 @@ export function QuestionNavigator({ cells, surface, onSelect, legend, ariaLabel 
                 position: "relative",
                 typography: layout.fontSize === "caption" ? "caption" : "body2",
                 width: "100%",
+                boxShadow: cell.current ? `0 0 0 2px ${tk.color.surface}, 0 0 0 4px ${tk.color.primary}` : undefined,
                 "&::after": cell.flagged ? flagDotSx : undefined,
                 "&:focus-visible": { outline: `2px solid ${tk.color.primary}`, outlineOffset: 2 },
               }}

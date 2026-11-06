@@ -38,7 +38,6 @@ function mobile(overrides: Record<string, unknown> = {}) {
         question,
         questions,
         quiz: { title: "Bài", settings: { mode: "testing", timeLimitMinutes: 45 } },
-        resultDisplay,
         reviewingSubmittedAttempt: false,
         started: true,
         submitting: false,

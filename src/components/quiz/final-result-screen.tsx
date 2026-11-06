@@ -15,6 +15,7 @@ export type FinalResultScreenProps = {
   attempt: Attempt;
   questions: Question[];
   resultDisplay: QuizResultDisplay;
+  /** "Xem lại bài làm": the runtime opens ReviewLayout. */
   onReview: () => void;
   /** Jump into review mode at a given question index. */
   onReviewQuestion: (index: number) => void;
@@ -73,7 +74,8 @@ export function FinalResultScreen({ attempt, questions, resultDisplay, onReview,
 
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, justifyContent: "center" }}>
         {resultDisplay.showReviewButton ? (
-          <Button variant="contained" onClick={onReview}>{resultDisplay.reviewButtonLabel}</Button>
+          // Fixed label (P3 L08): opens ReviewLayout; the old author label ("XEM LẠI BÀI") is no longer shown.
+          <Button variant="contained" onClick={onReview}>Xem lại bài làm</Button>
         ) : null}
         {onRetry ? <Button variant="outlined" onClick={onRetry}>Làm lại</Button> : null}
         {extraActions}

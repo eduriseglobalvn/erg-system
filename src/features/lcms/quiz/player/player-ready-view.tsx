@@ -7,7 +7,7 @@ import { PlayerSaveIndicator, PlayerTimerText } from "@/components/quiz/player-s
 import { QuizThemeSurface } from "@/components/quiz/quiz-theme-surface";
 import { QuizWelcomeScreen } from "@/components/quiz/quiz-welcome-screen";
 import { buildSubmitSummary } from "@/components/quiz/submit-summary";
-import { LiveSubmitDialog, PlayerQuestionBody } from "./player-ready-parts";
+import { LiveSubmitDialog, PlayerQuestionBody, PlayerReviewView } from "./player-ready-parts";
 import { defaultResultDisplay } from "@/components/quiz/player-shell-runtime-model";
 import { PlayerDesktopLayout } from "@/components/quiz/player-shell-runtime/player-desktop-layout";
 import { PlayerQuestionAside } from "@/components/quiz/player-shell-runtime/player-question-aside";
@@ -37,7 +37,7 @@ export function PlayerReadyView({
 }) {
   const {
     activeSession, allQuestionsAnswered, attemptCompleted, currentAnswerComplete, currentIndex, deadlineAt, draftAnswer,
-    draftSync, drafts, isFirstQuestion, isLastQuestion, isMobile, isTestingMode, isTrainingMode, lastResult, loadState, network,
+    draftSync, drafts, isFirstQuestion, isLastQuestion, isMobile, localRetryIndices, isTestingMode, isTrainingMode, lastResult, loadState, network,
     questionBodyRef, questions, retryTimeUpSubmit, reviewingAttempt, reviewingSubmittedAttempt,
     setCurrentIndex, setSubmitDialogMode, setTimeUp, shortcutsRef, started,
     submitCurrentTrainingQuestion, submitDialogMode, submitError, submitFailed, submitted, submitting, timeUpPhase,
@@ -54,6 +54,11 @@ export function PlayerReadyView({
   const goToInputRef = useRef<HTMLInputElement | null>(null);
   // Same gates as the on-screen option: a checked practice question or a finished attempt is read-only.
   useEffect(() => {
+    // The local retry has its own on-screen controls; runtime keys (F writes a bookmark) stay off.
+    if (localRetryIndices) {
+      shortcutsRef.current = {};
+      return;
+    }
     shortcutsRef.current = {
       pickOption: (index) => {
         if (submitted || attemptCompleted || reviewingSubmittedAttempt) return;
@@ -116,7 +121,7 @@ export function PlayerReadyView({
     isBookmarked: isCurrentQuestionBookmarked, isFirstQuestion, isLastQuestion, isTestingMode, isTrainingMode,
     currentAnswerComplete, currentQuestionSubmitted: submitted, playerCardStyle, canvasStyle, headerStyle,
     accentButtonStyle, modeBadgeStyle, question: readyQuestion, questions, quiz: readyQuiz,
-    resultDisplay, reviewingSubmittedAttempt, saveIndicator, started, submitting, submitFailed, timer: countdown,
+    reviewingSubmittedAttempt, saveIndicator, started, submitting, submitFailed, timer: countdown,
     onJumpToQuestion: handleJumpToQuestion, onRequestSubmit: handleRequestSubmit, onReview: handleReviewQuiz,
     onStart: handleStartQuiz, body: questionBody,
     onNext: () => setCurrentIndex((value) => Math.min(questions.length - 1, value + 1)),
@@ -131,6 +136,10 @@ export function PlayerReadyView({
       />
     ),
   };
+
+  if (localRetryIndices || (attemptCompleted && reviewingSubmittedAttempt)) {
+    return <PlayerReviewView rt={rt} ready={ready} flagged={flaggedIndexes} />;
+  }
 
   if (!started) {
     if (isMobile) {
