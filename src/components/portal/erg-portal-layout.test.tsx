@@ -72,6 +72,9 @@ it("with mobileDock on a phone shows the dock instead of the hamburger and opens
 
   expect(screen.getByRole("navigation", { name: "Điều hướng admin" })).toBeInTheDocument();
   expect(screen.queryByRole("button", { name: "Mở menu" })).toBeNull();
+  // No permanent desktop sidebar competing with main for the single grid row.
+  expect(screen.queryByRole("button", { name: "Thu gọn menu" })).toBeNull();
+  expect(screen.getByText("Nội dung")).toBeInTheDocument();
   expect(screen.queryByRole("dialog")).toBeNull();
   fireEvent.click(screen.getByRole("button", { name: "Tất cả" }));
   expect(screen.getByRole("dialog", { name: "Tất cả chức năng" })).toBeInTheDocument();
@@ -87,4 +90,24 @@ it("keeps the hamburger and no dock on a tablet", () => {
 
   expect(screen.queryByRole("navigation", { name: "Điều hướng admin" })).toBeNull();
   expect(screen.getByRole("button", { name: "Mở menu" })).toBeInTheDocument();
+});
+
+it("closes the open sheet when the viewport leaves phone width", () => {
+  mockViewport(375);
+  // A new element each time, so React does not bail out of the re-render.
+  const tree = () => (
+    <ErgPortalLayout menuGroups={[]} mobileDock={dock} portalInfo={{ name: "Admin" }}>
+      <div>Nội dung</div>
+    </ErgPortalLayout>
+  );
+  const { rerender } = render(tree());
+  fireEvent.click(screen.getByRole("button", { name: "Tất cả" }));
+  expect(screen.getByRole("dialog", { name: "Tất cả chức năng" })).toBeInTheDocument();
+
+  mockViewport(1000);
+  rerender(tree());
+  expect(screen.queryByRole("dialog")).toBeNull();
+  mockViewport(375);
+  rerender(tree());
+  expect(screen.queryByRole("dialog")).toBeNull();
 });

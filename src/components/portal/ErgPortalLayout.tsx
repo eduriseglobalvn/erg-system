@@ -80,6 +80,8 @@ export default function ErgPortalLayout({
   const isPhone = useMediaQuery("(max-width:899px)");
   const dock = mobileDock && isPhone ? mobileDock : undefined;
   const [allOpen, setAllOpen] = useState(false);
+  // Leaving phone width closes the sheet (adjusting state while rendering, not in an effect).
+  if (!isPhone && allOpen) setAllOpen(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileNavigationOpen, setMobileNavigationOpen] = useState(false);
   const [headerScrolled, setHeaderScrolled] = useState(false);
@@ -129,21 +131,24 @@ export default function ErgPortalLayout({
         },
       }}
     >
-      {isCompact && !dock ? (
-        <ErgPortalSidebar
-          collapsed={false}
-          menuGroups={menuGroups}
-          mobile
-          onClose={() => setMobileNavigationOpen(false)}
-          onCollapsedChange={setSidebarCollapsed}
-          onNavigate={(path) => {
-            setMobileNavigationOpen(false);
-            void navigate({ href: path });
-          }}
-          open={mobileNavigationOpen}
-          portalInfo={portalInfo}
-          notificationCount={notificationCount}
-        />
+      {isCompact ? (
+        // With a dock the phone has no sidebar at all: the sheet replaces the drawer.
+        dock ? null : (
+          <ErgPortalSidebar
+            collapsed={false}
+            menuGroups={menuGroups}
+            mobile
+            onClose={() => setMobileNavigationOpen(false)}
+            onCollapsedChange={setSidebarCollapsed}
+            onNavigate={(path) => {
+              setMobileNavigationOpen(false);
+              void navigate({ href: path });
+            }}
+            open={mobileNavigationOpen}
+            portalInfo={portalInfo}
+            notificationCount={notificationCount}
+          />
+        )
       ) : (
         <ErgPortalSidebar
           collapsed={sidebarCollapsed}
@@ -192,7 +197,7 @@ export default function ErgPortalLayout({
             overflowX: "hidden",
             p: contentMode === "flush" ? 0 : { xs: 1.5, sm: 2, md: 3 },
             // Keep the last row clear of the floating dock.
-            ...(dock ? { pb: `calc(${ERG_MOBILE_DOCK_HEIGHT}px + 8px + env(safe-area-inset-bottom, 0px) + 16px)` } : {}),
+            ...(dock ? { pb: `calc(${ERG_MOBILE_DOCK_HEIGHT}px + 8px + env(safe-area-inset-bottom, 0px))` } : {}),
             width: "100%",
             bgcolor: '#FFFFFF',
           }}

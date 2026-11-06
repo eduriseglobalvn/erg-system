@@ -46,15 +46,20 @@ export function AdminAllFunctionsSheet({
   const allowed = useMemo(() => filterAdminMenuGroups(menuGroups, canAccess), [canAccess, menuGroups]);
   const visible = useMemo(() => searchGroups(allowed, search.trim().toLocaleLowerCase("vi-VN")), [allowed, search]);
 
-  function go(path: string) {
+  function close() {
+    setSearch("");
     onClose();
+  }
+
+  function go(path: string) {
+    close();
     onNavigate(path);
   }
 
   return (
     <ErgDialog
       fullScreen
-      onClose={onClose}
+      onClose={close}
       open={open}
       sx={{ "& .MuiDialog-paper": { borderRadius: `${radius.shell}px ${radius.shell}px 0 0` } }}
       title="Tất cả chức năng"

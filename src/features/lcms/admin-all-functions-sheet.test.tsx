@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { ADMIN_MENU_GROUPS } from "@/features/lcms/admin-content/admin-content-menu";
 import { AdminAllFunctionsSheet } from "@/features/lcms/admin-all-functions-sheet";
-import { canNavigateToAdminPath } from "@/features/lcms/admin-mobile-dock-config";
+import { canNavigateToAdminPath, filterAdminMenuGroups } from "@/features/lcms/admin-mobile-dock-config";
 
 function setup(canAccess: (path: string) => boolean = () => true) {
   const onNavigate = vi.fn();
@@ -12,7 +12,30 @@ function setup(canAccess: (path: string) => boolean = () => true) {
   return { onClose, onNavigate };
 }
 
+describe("admin menu permission filtering (real matrix)", () => {
+  const groupLabels = (granted: string[], denied: string[] = []) =>
+    filterAdminMenuGroups(ADMIN_MENU_GROUPS, (path) => canNavigateToAdminPath(path, granted, denied))
+      .flatMap((group) => group.items.map((item) => item.label));
+
+  it("keeps Nhân sự with full permission and drops it without", () => {
+    expect(groupLabels(["*"])).toContain("Nhân sự");
+    expect(groupLabels([])).not.toContain("Nhân sự");
+    expect(groupLabels(["lms.admin"], ["users.manage"])).not.toContain("Nhân sự");
+  });
+});
+
 describe("AdminAllFunctionsSheet", () => {
+  it("clears the search text after the sheet closes", () => {
+    const onClose = vi.fn();
+    const { rerender } = render(<AdminAllFunctionsSheet canAccess={() => true} menuGroups={ADMIN_MENU_GROUPS} onClose={onClose} onNavigate={vi.fn()} open />);
+    fireEvent.change(screen.getByRole("searchbox", { name: "Tìm chức năng" }), { target: { value: "trường" } });
+    fireEvent.click(screen.getByRole("button", { name: "Đóng" }));
+    expect(onClose).toHaveBeenCalled();
+    rerender(<AdminAllFunctionsSheet canAccess={() => true} menuGroups={ADMIN_MENU_GROUPS} onClose={onClose} onNavigate={vi.fn()} open={false} />);
+    rerender(<AdminAllFunctionsSheet canAccess={() => true} menuGroups={ADMIN_MENU_GROUPS} onClose={onClose} onNavigate={vi.fn()} open />);
+    expect(screen.getByRole("searchbox", { name: "Tìm chức năng" })).toHaveValue("");
+  });
+
   it("is a dialog titled Tất cả chức năng with the Nhân sự group", () => {
     setup();
     const dialog = screen.getByRole("dialog", { name: "Tất cả chức năng" });
