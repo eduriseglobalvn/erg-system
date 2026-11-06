@@ -36,17 +36,44 @@ describe("ChoiceOption letter key", () => {
 describe("ChoiceOption review tag", () => {
   it("labels the correct answer", () => {
     renderThemed(<ChoiceOption mode="single" onClick={noop} selected={false} reviewTag="correct">Đúng</ChoiceOption>);
-    expect(getComputedStyle(screen.getByText("Đáp án đúng")).color).toBe("rgb(22, 163, 74)");
+    expect(getComputedStyle(screen.getByText("Đáp án đúng")).color).toBe("rgb(15, 114, 51)");
   });
 
   it("labels a wrong pick in the error colour", () => {
     renderThemed(<ChoiceOption mode="single" onClick={noop} selected reviewTag="pickedWrong">Sai</ChoiceOption>);
-    expect(getComputedStyle(screen.getByText("Bạn chọn")).color).toBe("rgb(217, 45, 32)");
+    expect(getComputedStyle(screen.getByText("Bạn chọn")).color).toBe("rgb(180, 35, 24)");
   });
 
-  it("labels a correct pick as 'Bạn chọn' only", () => {
-    renderThemed(<ChoiceOption mode="single" onClick={noop} selected reviewTag="picked">Đúng</ChoiceOption>);
+  it("labels a correct pick in success colour as both", () => {
+    renderThemed(<ChoiceOption letter="A" mode="single" onClick={noop} selected reviewTag="picked">Đúng</ChoiceOption>);
+    expect(screen.getByText("Đáp án đúng · Bạn chọn")).toBeTruthy();
+    expect(getComputedStyle(screen.getByText("A")).backgroundColor).toBe("rgb(22, 163, 74)");
+  });
+
+  it("uses the dark success shade for small tag text", () => {
+    renderThemed(<ChoiceOption mode="single" onClick={noop} selected={false} reviewTag="correct">Đúng</ChoiceOption>);
+    expect(getComputedStyle(screen.getByText("Đáp án đúng")).color).not.toBe("rgb(22, 163, 74)");
+  });
+
+  it("derives tags from legacy flags", () => {
+    renderThemed(<>
+      <ChoiceOption mode="single" onClick={noop} selected={false} reviewMode showCorrect>X</ChoiceOption>
+      <ChoiceOption mode="single" onClick={noop} selected reviewMode showCorrect>Y</ChoiceOption>
+      <ChoiceOption mode="single" onClick={noop} selected reviewMode showWrong>Z</ChoiceOption>
+    </>);
+    expect(screen.getByText("Đáp án đúng")).toBeTruthy();
+    expect(screen.getByText("Đáp án đúng · Bạn chọn")).toBeTruthy();
     expect(screen.getByText("Bạn chọn")).toBeTruthy();
-    expect(screen.queryByText("Đáp án đúng")).toBeNull();
+  });
+});
+
+describe("ChoiceOption multiple mode", () => {
+  it("shows a check badge only for a selected multiple option", () => {
+    renderThemed(<>
+      <ChoiceOption letter="A" mode="multiple" onClick={noop} selected>A1</ChoiceOption>
+      <ChoiceOption letter="B" mode="multiple" onClick={noop} selected={false}>B1</ChoiceOption>
+      <ChoiceOption letter="C" mode="single" onClick={noop} selected>C1</ChoiceOption>
+    </>);
+    expect(screen.getAllByTestId("choice-check-badge")).toHaveLength(1);
   });
 });

@@ -1,4 +1,4 @@
-import CheckIcon from "@mui/icons-material/Check";
+import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
 import Box from "@mui/material/Box";
 import ButtonBase from "@mui/material/ButtonBase";
 import { alpha } from "@mui/material/styles";
@@ -24,10 +24,10 @@ type ChoiceOptionProps = {
   showWrong?: boolean;
 };
 
-const REVIEW_TAGS: Record<ChoiceReviewTag, { color: "success.main" | "error.main" | "primary.main"; label: string }> = {
-  correct: { color: "success.main", label: "Đáp án đúng" },
-  picked: { color: "primary.main", label: "Bạn chọn" },
-  pickedWrong: { color: "error.main", label: "Bạn chọn" },
+const REVIEW_TAGS: Record<ChoiceReviewTag, { color: "success.dark" | "error.dark"; label: string; tone: "success" | "error" }> = {
+  correct: { color: "success.dark", label: "Đáp án đúng", tone: "success" },
+  picked: { color: "success.dark", label: "Đáp án đúng · Bạn chọn", tone: "success" },
+  pickedWrong: { color: "error.dark", label: "Bạn chọn", tone: "error" },
 };
 
 function legacyTag({ reviewMode, selected, showCorrect, showWrong }: ChoiceOptionProps): ChoiceReviewTag | undefined {
@@ -41,8 +41,7 @@ export function ChoiceOption(props: ChoiceOptionProps) {
   const { children, disabled = false, image, letter, mode, onClick, selected } = props;
   const reviewTag = props.reviewTag ?? legacyTag(props);
   const tag = reviewTag ? REVIEW_TAGS[reviewTag] : null;
-  const keyColor = reviewTag === "correct" ? "success.main" : reviewTag === "pickedWrong" ? "error.main" : "primary.main";
-  const keyFilled = selected || reviewTag === "correct";
+  const tone = tag?.tone ?? "primary";
 
   return (
     <ButtonBase
@@ -75,11 +74,12 @@ export function ChoiceOption(props: ChoiceOptionProps) {
         component="span"
         sx={(theme) => ({
           alignItems: "center",
-          bgcolor: keyFilled ? keyColor : "background.paper",
+          bgcolor: selected ? theme.palette[tone].main : "background.paper",
           border: "1.5px solid",
-          borderColor: selected || tag ? keyColor : "divider",
+          borderColor: selected || tag ? theme.palette[tone].main : "divider",
           borderRadius: `${ergEnterpriseTokens.radius.chip}px`,
-          color: keyFilled ? theme.palette.getContrastText(reviewTag === "correct" ? theme.palette.success.main : reviewTag === "pickedWrong" ? theme.palette.error.main : theme.palette.primary.main) : "text.primary",
+          color: selected ? theme.palette.getContrastText(theme.palette[tone].main) : "text.primary",
+          position: "relative",
           display: "inline-flex",
           typography: "subtitle2",
           height: { xs: 28, sm: 32 },
@@ -88,7 +88,12 @@ export function ChoiceOption(props: ChoiceOptionProps) {
           width: { xs: 28, sm: 32 },
         })}
       >
-        {mode === "multiple" && selected && !letter ? <CheckIcon sx={{ fontSize: ergEnterpriseTokens.size.iconSm }} /> : letter}
+        {letter}
+        {mode === "multiple" && selected ? (
+          <Box component="span" data-testid="choice-check-badge" sx={(theme) => ({ alignItems: "center", bgcolor: "background.paper", border: "1px solid", borderColor: theme.palette[tone].main, borderRadius: `${ergEnterpriseTokens.radius.chip}px`, color: theme.palette[tone].main, display: "inline-flex", height: 14, justifyContent: "center", position: "absolute", right: -4, top: -4, width: 14 })}>
+            <CheckRoundedIcon sx={{ height: 10, width: 10 }} />
+          </Box>
+        ) : null}
       </Box>
 
       <Box component="span" sx={{ color: "text.primary", fontSize: "var(--quiz-readable-size-lg)", fontWeight: 600, lineHeight: 1.38, minWidth: 0 }}>
