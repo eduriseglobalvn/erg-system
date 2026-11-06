@@ -117,6 +117,7 @@ function buildQuizFromBackendDetail(
     description: stringValue(summary.description, ""),
     themeId: stringValue(summary.themeId, "erg-default"),
     theme: normalizeTheme(detail.theme),
+    ...(isRecord(settingsRecord.playerTemplate) ? { playerTemplate: settingsRecord.playerTemplate } : {}),
     settings: {
       mode,
       timeLimitMinutes: numberValue(nestedSettings.timeLimitMinutes ?? nestedSettings.maxDurationMinutes),

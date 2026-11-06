@@ -1,4 +1,5 @@
 import Box from "@mui/material/Box";
+import { quizThemeToneSurface } from "@/components/quiz/player-template-surface";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { useState } from "react";
@@ -7,7 +8,7 @@ import { ErgButton } from "@/components/erg-mui";
 import type { QuizPlayerTemplate } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import { enCopy as enThemeCopy, viCopy as viThemeCopy } from "@/features/lcms/quiz/quiz-theme/quiz-theme-copy";
 import { QuizThemeDialog } from "@/features/lcms/quiz/quiz-theme/quiz-theme-dialog";
-import { findMatchingQuizThemePreset, quizThemeToneSurface } from "@/features/lcms/quiz/quiz-theme/quiz-theme-presets";
+import { findMatchingQuizThemePreset } from "@/features/lcms/quiz/quiz-theme/quiz-theme-presets";
 import { useI18n } from "@/platform/i18n";
 import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
 import type { QuestionBankCopy } from "./question-bank-copy";

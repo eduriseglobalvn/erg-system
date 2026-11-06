@@ -50,6 +50,8 @@ export function ChoiceOption(props: ChoiceOptionProps) {
   const tag = reviewTag ? REVIEW_TAGS[reviewTag] : null;
   const tone = tag?.tone ?? "primary";
   const keyFilled = selected || reviewTag === "correct";
+  // The teacher's template colours the plain (not review) selection; the vars are unset otherwise and the fallbacks apply.
+  const themed = tone === "primary";
 
   return (
     <ButtonBase
@@ -59,10 +61,10 @@ export function ChoiceOption(props: ChoiceOptionProps) {
       onClick={() => { if (!disabled) onClick(); }}
       sx={(theme) => ({
         alignItems: "center",
-        bgcolor: selected ? alpha(theme.palette.primary.main, 0.06) : "transparent",
+        bgcolor: selected ? `var(--quiz-highlight, ${alpha(theme.palette.primary.main, 0.06)})` : "transparent",
         border: "1px solid",
-        borderColor: selected ? "primary.main" : "transparent",
-        borderRadius: `${ergEnterpriseTokens.radius.control}px`,
+        borderColor: selected ? `var(--quiz-accent, ${theme.palette.primary.main})` : "transparent",
+        borderRadius: `var(--quiz-radius, ${ergEnterpriseTokens.radius.control}px)`,
         display: "grid",
         gap: { xs: 1.5, sm: 2 },
         gridTemplateColumns: { xs: "30px minmax(0,1fr)", sm: "34px minmax(0,1fr)" },
@@ -82,11 +84,11 @@ export function ChoiceOption(props: ChoiceOptionProps) {
         component="span"
         sx={(theme) => ({
           alignItems: "center",
-          bgcolor: keyFilled ? theme.palette[tone].main : "background.paper",
+          bgcolor: keyFilled ? (themed ? `var(--quiz-accent, ${theme.palette.primary.main})` : theme.palette[tone].main) : "background.paper",
           border: "1.5px solid",
-          borderColor: selected || tag ? theme.palette[tone].main : "divider",
+          borderColor: selected || tag ? (themed ? `var(--quiz-accent, ${theme.palette.primary.main})` : theme.palette[tone].main) : "divider",
           borderRadius: `${ergEnterpriseTokens.radius.chip}px`,
-          color: keyFilled ? theme.palette.getContrastText(theme.palette[tone].main) : "text.primary",
+          color: keyFilled ? (themed ? `var(--quiz-accent-contrast, ${theme.palette.getContrastText(theme.palette.primary.main)})` : theme.palette.getContrastText(theme.palette[tone].main)) : "text.primary",
           position: "relative",
           display: "inline-flex",
           typography: "subtitle2",
@@ -104,7 +106,7 @@ export function ChoiceOption(props: ChoiceOptionProps) {
         ) : null}
       </Box>
 
-      <Box component="span" sx={{ color: "text.primary", fontSize: "var(--quiz-readable-size-lg)", fontWeight: 600, lineHeight: 1.38, minWidth: 0 }}>
+      <Box component="span" sx={{ color: selected && themed ? "var(--quiz-highlight-contrast, inherit)" : "text.primary", fontSize: "var(--quiz-readable-size-lg)", fontWeight: 600, lineHeight: 1.38, minWidth: 0 }}>
         {image ? <Box component="img" src={image.url} alt={image.alt ?? ""} sx={{ display: "block", maxHeight: 160, maxWidth: "100%", mb: 1, objectFit: "contain" }} /> : null}
         {children}
         {tag ? <Box component="span" sx={{ color: tag.color, display: "block", mt: 0.5, typography: "subtitle2" }}>{tag.label}</Box> : null}

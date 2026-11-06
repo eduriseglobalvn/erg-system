@@ -28,8 +28,9 @@ describe("ChoiceOption letter key", () => {
   it("fills with primary when selected", () => {
     renderThemed(<ChoiceOption letter="A" mode="single" onClick={noop} selected>Phương án</ChoiceOption>);
     const style = getComputedStyle(screen.getByText("A"));
-    expect(style.backgroundColor).toBe("rgb(0, 113, 227)");
-    expect(style.color).toBe("rgb(255, 255, 255)");
+    // jsdom cannot resolve var(): the template accent/contrast vars sit over the ERG primary and its contrast text.
+    expect(style.backgroundColor).toBe("var(--quiz-accent, #0071E3)");
+    expect(style.color).toBe("var(--quiz-accent-contrast, #fff)");
   });
 });
 

@@ -54,17 +54,3 @@ export function findMatchingQuizThemePreset(value: QuizPlayerTemplate) {
     (Object.keys(preset.values) as (keyof QuizThemeValues)[]).every((key) => sameField(preset.values[key], value[key])),
   );
 }
-
-type ToneSurface = { background: string; card: string; text: string; muted: string; border: string };
-
-export const quizThemeToneSurface: Record<QuizPlayerTemplate["backgroundTone"], ToneSurface> = {
-  "soft-blue": {
-    background: `linear-gradient(165deg, ${t.color.primarySoft} 0%, ${t.color.surface} 100%)`,
-    card: t.color.surface,
-    text: t.color.text,
-    muted: t.color.textMuted,
-    border: t.color.border,
-  },
-  paper: { background: t.statusTint.warning.bg, card: t.color.surface, text: t.color.text, muted: t.color.textMuted, border: t.color.border },
-  contrast: { background: t.color.text, card: "rgba(255, 255, 255, 0.08)", text: t.color.surface, muted: t.color.textSoft, border: "rgba(255, 255, 255, 0.24)" },
-};

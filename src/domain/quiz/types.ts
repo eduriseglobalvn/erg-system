@@ -230,6 +230,8 @@ export type Quiz = {
   description: string;
   themeId: string;
   theme: Theme;
+  /** Teacher-chosen player look, raw JSON from the package; validated where it is applied. */
+  playerTemplate?: Record<string, unknown>;
   settings: QuizSettings;
   result?: QuizResultDisplay;
   sections: Section[];

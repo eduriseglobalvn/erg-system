@@ -1,11 +1,11 @@
 import Box from "@mui/material/Box";
+import { quizThemeToneSurface } from "@/components/quiz/player-template-surface";
 import Stack from "@mui/material/Stack";
 import { useTheme } from "@mui/material/styles";
 import Typography from "@mui/material/Typography";
 
 import type { QuizPlayerTemplate } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import type { QuizThemeCopy } from "@/features/lcms/quiz/quiz-theme/quiz-theme-copy";
-import { quizThemeToneSurface } from "@/features/lcms/quiz/quiz-theme/quiz-theme-presets";
 import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
 
 /** Colors and radii the preview derives from the draft template. */

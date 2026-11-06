@@ -81,7 +81,8 @@ describe("QuestionNavigator grid", () => {
     expect(style(1).borderStyle).toBe("dashed");
     expect(style(2).borderStyle).toBe("solid");
     expect(style(2).borderColor).not.toBe(style(3).borderColor);
-    expect(style(4).borderColor).toBe(style(4).backgroundColor);
+    // jsdom cannot resolve var(); the done fill is the template accent over the ERG primary.
+    expect(style(4).backgroundColor).toBe("var(--quiz-accent, #0071E3)");
   });
 
   it("flag dot is 10px outer", () => {

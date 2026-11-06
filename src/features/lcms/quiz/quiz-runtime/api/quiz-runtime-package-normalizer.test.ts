@@ -129,3 +129,19 @@ describe("secured matching / sequence shapes", () => {
     expect(old?.matching?.[0].response).toBe("Meow");
   });
 });
+
+describe("player template from the package", () => {
+  const detail = (settings: unknown): BackendQuizPackage =>
+    ({ id: "p", quizId: "q", quizVersion: "1", contentHash: "h", gradingMode: "server-authoritative", source: "server",
+      quiz: { quiz: { id: "q", title: "Q" }, slides: [], settings, result: {}, theme: {} } }) as never;
+
+  it("keeps settings.playerTemplate on the quiz", () => {
+    const { quiz: loaded } = normalizeQuizPackage(detail({ playerTemplate: { accentColor: "#0071E3" } }));
+    expect(loaded.playerTemplate).toEqual({ accentColor: "#0071E3" });
+  });
+
+  it("has no playerTemplate when the package carries none or junk", () => {
+    expect(normalizeQuizPackage(detail({})).quiz).not.toHaveProperty("playerTemplate");
+    expect(normalizeQuizPackage(detail({ playerTemplate: "red" })).quiz).not.toHaveProperty("playerTemplate");
+  });
+});

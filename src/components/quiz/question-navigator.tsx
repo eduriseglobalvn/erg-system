@@ -22,8 +22,8 @@ const STATE_LABEL: Record<QuestionCellState, string> = {
 
 const BORDER = "1.5px solid";
 const stateSx: Record<QuestionCellState, object> = {
-  done: { bgcolor: tk.color.primary, borderColor: tk.color.primary, color: "common.white" },
-  current: { bgcolor: tk.color.surface, borderColor: tk.color.primary, color: tk.color.primary },
+  done: { bgcolor: `var(--quiz-accent, ${tk.color.primary})`, borderColor: `var(--quiz-accent, ${tk.color.primary})`, color: `var(--quiz-accent-contrast, ${tk.color.surface})` },
+  current: { bgcolor: tk.color.surface, borderColor: `var(--quiz-accent, ${tk.color.primary})`, color: `var(--quiz-accent, ${tk.color.primary})` },
   todo: { bgcolor: tk.color.surface, borderColor: tk.color.borderStrong, color: tk.color.textSecondary },
   correct: { bgcolor: tk.color.success, borderColor: tk.color.success, color: "common.white" },
   wrong: { bgcolor: tk.color.danger, borderColor: tk.color.danger, color: "common.white" },
