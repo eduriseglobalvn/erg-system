@@ -7,7 +7,7 @@ import type { SvgIconProps } from "@mui/material/SvgIcon";
 import Typography from "@mui/material/Typography";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
-const { color, motion, radius, shadow, size } = ergEnterpriseTokens;
+const { color, motion, radius, shadow, size, statusTint } = ergEnterpriseTokens;
 
 export const ERG_MOBILE_DOCK_HEIGHT: number = size.mobileDock;
 
@@ -103,7 +103,6 @@ function DockButton<TId extends string>({
       data-selected={active ? "true" : undefined}
       onClick={onClick}
       sx={{
-        bgcolor: active ? color.primarySofter : "transparent",
         borderRadius: `${radius.control}px`,
         color: active ? "primary.main" : "text.secondary",
         display: "flex",
@@ -111,23 +110,34 @@ function DockButton<TId extends string>({
         gap: 0.25,
         minWidth: 0,
         px: 0.25,
-        transition: `background-color ${motion.duration.fast}ms ${motion.easing.standard}`,
         "&:active": { transform: "scale(0.97)" },
         "&:focus-visible": { boxShadow: shadow.focus, outline: "none" },
-        "&:hover": { bgcolor: active ? color.primarySoft : "action.hover" },
+        "&:hover": { bgcolor: "action.hover" },
       }}
     >
-      <Box sx={{ display: "flex", position: "relative" }}>
+      <Box
+        sx={{
+          alignItems: "center",
+          bgcolor: active ? color.primarySoft : "transparent",
+          borderRadius: `${radius.chip}px`,
+          display: "flex",
+          height: size.controlSm - 6,
+          justifyContent: "center",
+          position: "relative",
+          transition: `background-color ${motion.duration.fast}ms ${motion.easing.standard}`,
+          width: size.controlLg + 2,
+        }}
+      >
         <Icon sx={{ fontSize: size.iconLg }} />
         {badge ? (
           <Box
             sx={{
               alignItems: "center",
-              bgcolor: "error.main",
+              bgcolor: statusTint.error.bg,
               border: "2px solid",
               borderColor: "background.paper",
               borderRadius: `${radius.chip}px`,
-              color: "error.contrastText",
+              color: statusTint.error.color,
               display: "flex",
               justifyContent: "center",
               minHeight: 18,
@@ -135,8 +145,8 @@ function DockButton<TId extends string>({
               minWidth: 18,
               px: 0.25,
               position: "absolute",
-              right: -10,
-              top: -8,
+              right: 0,
+              top: -6,
             }}
           >
             {badge}

@@ -46,7 +46,9 @@ describe("ErgMobileDock", () => {
     setup();
     expect(screen.getAllByRole("button")).toHaveLength(6);
     expect(screen.getByRole("button", { name: /Hộp thư/ })).toHaveAttribute("aria-current", "page");
-    expect(screen.getByRole("button", { name: "Trang chủ" })).not.toHaveAttribute("aria-current");
+    expect(document.querySelectorAll("[aria-current]")).toHaveLength(1);
+    screen.getAllByRole("button").filter((b) => !b.getAttribute("aria-label")?.startsWith("Hộp thư")).forEach((b) => expect(b).not.toHaveAttribute("aria-current"));
+    expect(screen.getByText("99+")).toBeVisible();
     expect(screen.getByRole("navigation")).toHaveAttribute("aria-label", "Điều hướng test");
   });
 
