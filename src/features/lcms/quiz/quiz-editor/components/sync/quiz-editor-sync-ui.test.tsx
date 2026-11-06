@@ -110,7 +110,7 @@ describe("QuizEditorRecoveryNotice", () => {
     const { rerender } = render(
       <QuizEditorRecoveryNotice backups={[]} dismissed={none} onDismiss={onDismiss} onRestore={vi.fn()} recovered={{ editedAt: at, pendingEdits: 3 }} />,
     );
-    fireEvent.click(screen.getByRole("button", { name: /close|đóng/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Đóng" }));
     expect(onDismiss).toHaveBeenCalledWith("recovered");
     rerender(
       <QuizEditorRecoveryNotice backups={[]} dismissed={{ ...none, recovered: true }} onDismiss={onDismiss} onRestore={vi.fn()} recovered={{ editedAt: at, pendingEdits: 3 }} />,

@@ -33,7 +33,7 @@ export function QuizEditorRecoveryNotice({ backups, dismissed, onDismiss, onRest
   return (
     <Stack spacing={1}>
       {showRecovered ? (
-        <Alert onClose={() => onDismiss("recovered")} severity="info">
+        <Alert closeText="Đóng" onClose={() => onDismiss("recovered")} severity="info">
           Có {recovered?.pendingEdits} thay đổi từ {formatTimeVi(recovered?.editedAt)} chưa gửi. Đang gửi lên máy chủ.
         </Alert>
       ) : null}
