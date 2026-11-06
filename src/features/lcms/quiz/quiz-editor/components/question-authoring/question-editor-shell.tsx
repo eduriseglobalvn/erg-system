@@ -115,7 +115,7 @@ export function QuestionEditorShell(props: Props) {
                   slide={slide}
                 />
                 <Typography color="text.secondary" variant="caption">
-                  Điểm, thời gian, trộn đáp án đặt ở Thuộc tính bài tập, không đặt ở từng câu.
+                  Điểm, thời gian, trộn đáp án đặt ở “Cài đặt gói” trong Ngân hàng câu hỏi, không đặt ở từng câu.
                 </Typography>
               </Box>
             </Box>
