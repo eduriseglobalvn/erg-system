@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ChevronLeft, List, X } from "lucide-react";
+import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
 
 import { QuestionNavigator } from "@/components/quiz/question-navigator";
@@ -57,18 +58,21 @@ export function MobileQuestionSheet({
             <X className="h-5 w-5" />
           </button>
         </div>
-        <QuestionNavigator
-          answeredQuestionIds={answeredQuestionIds}
-          className="min-h-[calc(100svh-68px)] rounded-none border-0 shadow-none"
-          currentIndex={currentIndex}
-          flaggedQuestionIds={bookmarkedQuestionIds}
-          onJumpToQuestion={(index) => {
-            onJumpToQuestion(index);
-            setOpen(false);
-          }}
-          questions={questions}
-          started
-        />
+        <Box sx={{ p: 2 }}>
+          <QuestionNavigator
+            cells={questions.map((question, index) => ({
+              index,
+              state: index === currentIndex ? "current" : answeredQuestionIds.includes(question.id) ? "done" : "todo",
+              flagged: bookmarkedQuestionIds.includes(question.id),
+            }))}
+            legend="auto"
+            onSelect={(index) => {
+              onJumpToQuestion(index);
+              setOpen(false);
+            }}
+            surface="phone"
+          />
+        </Box>
       </Drawer>
     </>
   );

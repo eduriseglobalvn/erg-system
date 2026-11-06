@@ -1,9 +1,17 @@
 import { AnswerKeyCard } from "@/components/quiz/player-shell-parts";
 import { PlayerOfflineBanner } from "@/components/quiz/player-status";
-import { QuestionNavigator } from "@/components/quiz/question-navigator";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+import ToggleButton from "@mui/material/ToggleButton";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import { useState } from "react";
+
+import { QuestionNavigator, type QuestionCell } from "@/components/quiz/question-navigator";
 import { QuestionRenderer } from "@/components/quiz/question-renderer";
 import { playerViewportClass } from "@/components/quiz/player-shell-runtime/player-shell-styles";
 import type { Question, Quiz } from "@/domain/quiz/types";
+import { ergEnterpriseTokens as tk } from "@/themes/erg-enterprise-tokens";
 import type { ComponentProps, CSSProperties } from "react";
 
 type RendererProps = ComponentProps<typeof QuestionRenderer>;
@@ -60,21 +68,49 @@ type SidebarProps = {
 };
 
 export function PlayerSidebar(props: SidebarProps) {
+  const [filter, setFilter] = useState<"all" | "unanswered" | "flagged">("all");
+  const answered = new Set(props.answeredQuestionIds);
+  const flagged = new Set(props.bookmarkedQuestionIds);
+  const query = props.query.trim().toLowerCase();
+  const cells: QuestionCell[] = props.questions.map((question, index) => {
+    const isFlagged = flagged.has(question.id);
+    const matchesFilter = filter === "all" || (filter === "unanswered" ? !answered.has(question.id) : isFlagged);
+    const matchesQuery = !query || `${index + 1}. ${question.title}`.toLowerCase().includes(query);
+    return {
+      index,
+      state: props.started && index === props.currentIndex ? "current" : answered.has(question.id) ? "done" : "todo",
+      flagged: isFlagged,
+      hidden: !(matchesFilter && matchesQuery),
+    };
+  });
+
   return (
-    <QuestionNavigator
-      answeredQuestionIds={props.answeredQuestionIds}
+    <Box
+      component="aside"
       className={playerViewportClass}
-      currentIndex={props.currentIndex}
-      flaggedQuestionIds={props.bookmarkedQuestionIds}
-      introSubtitle={props.quiz.subtitle}
-      onIntroClick={props.onIntroClick}
-      onJumpToQuestion={props.onJumpToQuestion}
-      onQueryChange={props.onQueryChange}
-      query={props.query}
-      questions={props.questions}
-      showIntro={!props.started}
-      started={props.started}
       style={props.style}
-    />
+      sx={{ bgcolor: "common.white", border: 1, borderColor: "divider", borderRadius: `${tk.radius.card}px`, display: "flex", flexDirection: "column", gap: 1, minHeight: 380, minWidth: 0, overflow: "auto", p: 1.5 }}
+    >
+      {props.started ? null : (
+        <Button type="button" variant="outlined" onClick={props.onIntroClick} sx={{ justifyContent: "flex-start" }}>
+          Trang giới thiệu{props.quiz.subtitle ? ` · ${props.quiz.subtitle}` : ""}
+        </Button>
+      )}
+      <TextField
+        fullWidth
+        size="small"
+        type="search"
+        value={props.query}
+        onChange={(event) => props.onQueryChange(event.target.value)}
+        placeholder="Tìm kiếm"
+        slotProps={{ htmlInput: { "aria-label": "Tìm kiếm câu hỏi" } }}
+      />
+      <ToggleButtonGroup exclusive fullWidth size="small" aria-label="Lọc câu hỏi" value={filter} onChange={(_event, next: typeof filter | null) => next && setFilter(next)}>
+        <ToggleButton value="all">Tất cả</ToggleButton>
+        <ToggleButton value="unanswered">Chưa làm</ToggleButton>
+        <ToggleButton value="flagged">Đã đánh dấu</ToggleButton>
+      </ToggleButtonGroup>
+      <QuestionNavigator cells={cells} legend="auto" onSelect={props.onJumpToQuestion} surface="web" />
+    </Box>
   );
 }
