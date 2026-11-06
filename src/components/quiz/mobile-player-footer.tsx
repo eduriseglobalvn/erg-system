@@ -54,10 +54,10 @@ export function MobilePlayerFooter({
             <button
               type="button"
               className="inline-flex min-h-10 w-full items-center justify-center rounded-md border border-[#b8d6fa] bg-[var(--erg-blue)] px-4 text-sm font-semibold text-white shadow-sm disabled:cursor-not-allowed disabled:opacity-40"
-              disabled={submitting || currentQuestionSubmitted || !currentAnswerComplete}
-              onClick={onSubmitCurrentQuestion}
+              disabled={currentQuestionSubmitted ? isLastQuestion : submitting || !currentAnswerComplete}
+              onClick={currentQuestionSubmitted ? onNext : onSubmitCurrentQuestion}
             >
-              {currentQuestionSubmitted ? "Đã kiểm tra" : submitting ? "Đang kiểm tra…" : "Kiểm tra đáp án"}
+              {currentQuestionSubmitted ? "Câu tiếp" : submitting ? "Đang chấm…" : "Kết quả"}
             </button>
           ) : (
           <div className={`grid gap-2 ${showSubmitAction ? "grid-cols-3" : "grid-cols-2"}`}>

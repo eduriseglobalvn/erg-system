@@ -95,7 +95,7 @@ export function PlayerReadyView({
   const questionBody = (
     <PlayerQuestionBody
       online={network.online} question={readyQuestion} value={draftAnswer} onChange={handleDraftChange}
-      submitted={submitted} result={lastResult} submitError={submitError}
+      isTrainingMode={isTrainingMode} submitted={submitted} result={lastResult} submitError={submitError}
     />
   );
   const submitDialog = submitDialogMode ? (

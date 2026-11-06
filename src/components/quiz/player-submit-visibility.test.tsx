@@ -115,10 +115,33 @@ describe("submit is always available", () => {
     expect(screen.getByRole("button", { name: "Nộp bài" })).toBeEnabled();
   });
 
-  it("practice mode labels the per-question button Kiểm tra đáp án", () => {
-    render(desktop({ isTestingMode: false, isTrainingMode: true }));
-    expect(screen.getByRole("button", { name: "Kiểm tra đáp án" })).toBeInTheDocument();
+  it("practice mode shows only Kết quả before the answer is checked, and Câu tiếp after", () => {
+    const setCurrentIndex = vi.fn();
+    const { rerender } = render(desktop({ isTestingMode: false, isTrainingMode: true }));
+    expect(screen.getByRole("button", { name: "Kết quả" })).toBeEnabled();
+    expect(screen.queryByRole("button", { name: "Câu tiếp" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Kiểm tra đáp án" })).toBeNull();
     expect(screen.queryByText("NỘP BÀI")).toBeNull();
+
+    rerender(desktop({ isTestingMode: false, isTrainingMode: true, submitted: true, setCurrentIndex }));
+    expect(screen.queryByRole("button", { name: "Kết quả" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Câu tiếp" }));
+    expect(setCurrentIndex).toHaveBeenCalledTimes(1);
+  });
+
+  it("mobile practice mode swaps the single button from Kết quả to Câu tiếp", () => {
+    const onNext = vi.fn();
+    const onSubmitCurrentQuestion = vi.fn();
+    const props = { isTestingMode: false, isTrainingMode: true, currentAnswerComplete: true, onNext, onSubmitCurrentQuestion };
+    const { rerender } = render(mobile(props));
+    fireEvent.click(screen.getByRole("button", { name: "Kết quả" }));
+    expect(onSubmitCurrentQuestion).toHaveBeenCalledTimes(1);
+    expect(onNext).not.toHaveBeenCalled();
+
+    rerender(mobile({ ...props, currentQuestionSubmitted: true }));
+    expect(screen.queryByRole("button", { name: "Kết quả" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Câu tiếp" }));
+    expect(onNext).toHaveBeenCalledTimes(1);
   });
 
   it("mobile bookmark target is at least 44px", () => {

@@ -49,7 +49,6 @@ export type UsePlayerActionsArgs = {
   setCurrentIndex: Dispatch<SetStateAction<number>>;
   setDrafts: Dispatch<SetStateAction<Record<string, AnswerPayload>>>;
   setLoadState: Dispatch<SetStateAction<PlayerLoadState>>;
-  setRecentTrainingSubmitQuestionId: Dispatch<SetStateAction<string | null>>;
   setReviewingSubmittedAttempt: Dispatch<SetStateAction<boolean>>;
   setStarted: Dispatch<SetStateAction<boolean>>;
   setSubmitDialogMode: Dispatch<SetStateAction<SubmitDialogMode | null>>;
@@ -80,7 +79,6 @@ export function usePlayerActions({
   setCurrentIndex,
   setDrafts,
   setLoadState,
-  setRecentTrainingSubmitQuestionId,
   setReviewingSubmittedAttempt,
   setStarted,
   setSubmitDialogMode,
@@ -265,7 +263,6 @@ export function usePlayerActions({
       restored: false,
       session: nextSession,
     });
-    setRecentTrainingSubmitQuestionId(activeQuestion.id);
     await localQuizAttemptStore.saveSession(nextSession);
     if (portableOffline) {
       return;
@@ -314,7 +311,6 @@ export function usePlayerActions({
   }, [
     setDrafts,
     setLoadState,
-    setRecentTrainingSubmitQuestionId,
     setSubmitError,
     activeAttempt,
     activePackage,

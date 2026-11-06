@@ -30,6 +30,13 @@ const REVIEW_TAGS: Record<ChoiceReviewTag, { color: "success.dark" | "error.dark
   pickedWrong: { color: "error.dark", label: "Bạn chọn", tone: "error" },
 };
 
+/** Review label for a checked choice: right answer unpicked, right pick, or wrong pick; none while still answering. */
+export function choiceReviewTag(reviewMode: boolean, selected: boolean, correct: boolean): ChoiceReviewTag | undefined {
+  if (!reviewMode) return undefined;
+  if (correct) return selected ? "picked" : "correct";
+  return selected ? "pickedWrong" : undefined;
+}
+
 function legacyTag({ reviewMode, selected, showCorrect, showWrong }: ChoiceOptionProps): ChoiceReviewTag | undefined {
   if (!reviewMode) return undefined;
   if (showWrong) return "pickedWrong";

@@ -47,14 +47,26 @@ export function PlayerDesktopFooter({
               <Button type="button" variant="contained" onClick={handleReviewQuiz}>{resultDisplay.reviewButtonLabel}</Button>
             ) : null
           ) : isTrainingMode ? (
-            <Button
-              type="button"
-              variant="contained"
-              disabled={submitting || submitted || !currentAnswerComplete}
-              onClick={() => void submitCurrentTrainingQuestion()}
-            >
-              {submitted ? "Đã kiểm tra" : submitting ? "Đang kiểm tra…" : "Kiểm tra đáp án"}
-            </Button>
+            // Practice never advances by itself: "Kết quả" reveals the answer, then "Câu tiếp" moves on.
+            submitted ? (
+              <Button
+                type="button"
+                variant="contained"
+                disabled={isLastQuestion}
+                onClick={() => setCurrentIndex((value) => Math.min(questions.length - 1, value + 1))}
+              >
+                Câu tiếp
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                variant="contained"
+                disabled={submitting || !currentAnswerComplete}
+                onClick={() => void submitCurrentTrainingQuestion()}
+              >
+                {submitting ? "Đang chấm…" : "Kết quả"}
+              </Button>
+            )
           ) : (
             <>
               <Button

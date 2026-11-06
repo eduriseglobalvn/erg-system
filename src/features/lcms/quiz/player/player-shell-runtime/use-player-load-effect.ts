@@ -33,7 +33,6 @@ export type UsePlayerLoadEffectArgs = {
   setSubmitDialogMode: Dispatch<SetStateAction<SubmitDialogMode | null>>;
   setReviewingSubmittedAttempt: Dispatch<SetStateAction<boolean>>;
   setTimeUp: Dispatch<SetStateAction<boolean>>;
-  setRecentTrainingSubmitQuestionId: Dispatch<SetStateAction<string | null>>;
 };
 
 export function usePlayerLoadEffect({
@@ -54,7 +53,6 @@ export function usePlayerLoadEffect({
   setSubmitDialogMode,
   setReviewingSubmittedAttempt,
   setTimeUp,
-  setRecentTrainingSubmitQuestionId,
 }: UsePlayerLoadEffectArgs) {
   useEffect(() => {
     let cancelled = false;
@@ -87,7 +85,6 @@ export function usePlayerLoadEffect({
       setSubmitDialogMode(null);
       setReviewingSubmittedAttempt(false);
       setTimeUp(false);
-      setRecentTrainingSubmitQuestionId(null);
     });
 
     async function load() {
@@ -167,7 +164,6 @@ export function usePlayerLoadEffect({
     setCurrentIndex,
     setDrafts,
     setLoadState,
-    setRecentTrainingSubmitQuestionId,
     setReviewingSubmittedAttempt,
     setStarted,
     setSubmitDialogMode,

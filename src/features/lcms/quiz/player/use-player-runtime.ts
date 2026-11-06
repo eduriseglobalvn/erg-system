@@ -63,7 +63,6 @@ export function usePlayerRuntime({
   const [submitDialogMode, setSubmitDialogMode] = useState<SubmitDialogMode | null>(null);
   const [reviewingSubmittedAttempt, setReviewingSubmittedAttempt] = useState(false);
   const [timeUp, setTimeUp] = useState(false);
-  const [recentTrainingSubmitQuestionId, setRecentTrainingSubmitQuestionId] = useState<string | null>(null);
   const questionBodyRef = useRef<HTMLDivElement | null>(null);
   // Filled by the ready view each render: option picking, flag and go-to need the current question and session.
   const shortcutsRef = useRef<PlayerShortcuts>({});
@@ -90,7 +89,6 @@ export function usePlayerRuntime({
     setSubmitDialogMode,
     setReviewingSubmittedAttempt,
     setTimeUp,
-    setRecentTrainingSubmitQuestionId,
   });
 
   const {
@@ -103,7 +101,7 @@ export function usePlayerRuntime({
     activeAttempt, activePackage, activeQuestion, activeQuiz, activeSession, allQuestionsAnswered, attemptCompleted,
     attemptExpired, attemptScope, drafts, isTrainingMode, portableOffline, queryClient, questions, runtimePortal,
     saveAttemptAnswerAsync, submitFailed, submitting,
-    setCurrentIndex, setDrafts, setLoadState, setRecentTrainingSubmitQuestionId, setReviewingSubmittedAttempt,
+    setCurrentIndex, setDrafts, setLoadState, setReviewingSubmittedAttempt,
     setStarted, setSubmitDialogMode, setSubmitError, setSubmitting, setTimeUp,
   });
 
@@ -127,11 +125,7 @@ export function usePlayerRuntime({
     setCurrentIndex,
   });
 
-  useTrainingAdvanceEffects({
-    activeQuestion, attemptCompleted, currentIndex, isLastQuestion, isTrainingMode, lastResult, paceStateUpdate,
-    questionBodyRef, questionsLength: questions.length, recentTrainingSubmitQuestionId, started,
-    setCurrentIndex, setRecentTrainingSubmitQuestionId,
-  });
+  useTrainingAdvanceEffects({ currentIndex, questionBodyRef, started });
 
   return {
     activeAttempt, activePackage, activeQuestion, activeQuiz, activeSession, allQuestionsAnswered, attemptCompleted,

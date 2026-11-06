@@ -1,7 +1,7 @@
 import Box from "@mui/material/Box";
 import type { ReactNode } from "react";
 
-import { ChoiceOption } from "@/components/quiz/questions/choice-option";
+import { ChoiceOption, choiceReviewTag } from "@/components/quiz/questions/choice-option";
 import { QuestionContentImage } from "@/components/quiz/questions/shared";
 import type { QuestionComponentProps } from "@/components/quiz/questions/types";
 import type { Question } from "@/domain/quiz/types";
@@ -21,8 +21,6 @@ export function SingleChoiceQuestion({
       <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 2, sm: 2.5 } }}>
         {choices.map((choice, index) => {
           const selected = selectedId === choice.id;
-          const showCorrect = reviewMode && choice.correct;
-          const showWrong = reviewMode && selected && !choice.correct;
           return (
             <ChoiceOption
               key={choice.id}
@@ -33,10 +31,8 @@ export function SingleChoiceQuestion({
               onClick={() => {
                 onChange({ choiceId: choice.id });
               }}
-              reviewMode={reviewMode}
+              reviewTag={choiceReviewTag(reviewMode, selected, choice.correct)}
               selected={selected}
-              showCorrect={showCorrect}
-              showWrong={showWrong}
             >
               {choice.label}
             </ChoiceOption>

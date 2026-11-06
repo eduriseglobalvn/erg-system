@@ -155,7 +155,7 @@ export function PlayerDesktopLayout({
               )}
             </div>
 
-            {lastResult && !(attemptCompleted && !reviewingSubmittedAttempt) ? (
+            {lastResult && !isTrainingMode && !(attemptCompleted && !reviewingSubmittedAttempt) ? (
               <div className="pointer-events-none absolute inset-x-4 bottom-5 z-30 flex justify-center px-3 sm:inset-x-8">
                 <QuestionFeedbackPanel result={lastResult} floating />
               </div>
