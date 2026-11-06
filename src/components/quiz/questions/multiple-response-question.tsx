@@ -19,7 +19,7 @@ export function MultipleResponseQuestion({
   return (
     <QuestionChoiceLayout question={question}>
       <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 2, sm: 2.5 } }}>
-        {choices.map((choice) => {
+        {choices.map((choice, index) => {
           const selected = selectedIds.has(choice.id);
           const showCorrect = reviewMode && choice.correct;
           const showWrong = reviewMode && selected && !choice.correct;
@@ -28,6 +28,7 @@ export function MultipleResponseQuestion({
               key={choice.id}
               disabled={submitted}
               image={choice.image}
+              letter={String.fromCharCode(65 + index)}
               mode="multiple"
               onClick={() => {
                 const next = new Set(value.choiceIds ?? []);

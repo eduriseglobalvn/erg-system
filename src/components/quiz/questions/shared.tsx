@@ -83,8 +83,8 @@ export function InlineChoiceSelect({
   const isAnswered = Boolean(selectedValue);
   const isCorrect = reviewMode && isAnswered && selectedValue === correctValue;
   const isWrong = reviewMode && isAnswered && selectedValue !== correctValue;
-  const successColor = "#118D57";
-  const dangerColor = "#e82828";
+  const successColor = "success.main";
+  const dangerColor = "error.main";
 
   return (
     <Box sx={{ flex: "none", position: "relative" }}>
@@ -104,11 +104,11 @@ export function InlineChoiceSelect({
             })
           }
           sx={{
-            bgcolor: isCorrect ? "rgba(34,197,94,0.08)" : isWrong ? "rgba(232,40,40,0.055)" : "var(--quiz-input-bg)",
+            bgcolor: isCorrect ? "success.light" : isWrong ? "error.light" : "var(--quiz-input-bg)",
             color: isCorrect ? successColor : isWrong ? dangerColor : "var(--quiz-option-text)",
             transition: "border-color 160ms ease, background-color 160ms ease",
             "& .MuiOutlinedInput-notchedOutline": {
-              borderColor: isCorrect ? "rgba(17,141,87,0.62)" : isWrong ? "rgba(232,40,40,0.62)" : "var(--quiz-canvas-border)",
+              borderColor: isCorrect ? "success.main" : isWrong ? "error.main" : "var(--quiz-canvas-border)",
             },
           }}
         >
@@ -127,7 +127,8 @@ export function InlineChoiceSelect({
           onClick={onRevealCorrectAnswer}
           size="small"
           sx={{
-            border: "1px solid rgba(232,40,40,0.45)",
+            border: "1px solid",
+            borderColor: "error.main",
             color: dangerColor,
             fontSize: isMobile ? 14 : 16,
             fontWeight: 600,
@@ -138,7 +139,7 @@ export function InlineChoiceSelect({
             transform: "translateY(-50%)",
             transition: "background-color 160ms ease",
             width: isMobile ? 24 : 28,
-            "&:hover": { bgcolor: "rgba(232,40,40,0.08)" },
+            "&:hover": { bgcolor: "error.light" },
           }}
         >
           ?
