@@ -16,6 +16,7 @@ import {
   normalizeStoredNotificationStatus,
   resolveNotificationType,
   toPageResponse,
+  toPriorityLevel,
 } from "./notification-mappers";
 import {
   DEFAULT_NOTIFICATION_PREFERENCES,
@@ -46,6 +47,7 @@ export function getMockUnreadCount(portal: NotificationPortal = "lms") {
 export function mapMockRecordToFeed(record: MockNotificationRecord): NotificationFeedItem {
   const { dateLabel, timeLabel } = formatNotificationDateLabels(record.createdAt);
   return {
+    ackedAt: null,
     actionUrl: record.actionUrl,
     bodyPreview: record.bodyPreview,
     channel: record.channel ?? "inbox",
@@ -56,8 +58,10 @@ export function mapMockRecordToFeed(record: MockNotificationRecord): Notificatio
     eventType: record.eventType,
     id: record.id,
     priority: record.priority ?? "normal",
+    priorityLevel: toPriorityLevel(record.priority),
     readAt: record.readAt ?? null,
     recipientId: record.recipientId,
+    requireReadAck: false,
     sourceId: record.sourceId,
     sourceType: record.sourceType,
     starred: record.starred,

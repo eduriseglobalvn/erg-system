@@ -2,6 +2,7 @@
 // beside this file so existing feature imports remain backward compatible.
 export * from "./notification-types";
 export {
+  ackNotification,
   archiveNotification,
   fetchNotificationDetail,
   fetchNotificationFeed,
@@ -12,6 +13,7 @@ export {
   updateNotificationPreferences,
 } from "./notification-feed-api";
 export {
+  fetchWebPushConfig,
   heartbeatNotificationDevice,
   registerNotificationDevice,
   revokeNotificationDevice,

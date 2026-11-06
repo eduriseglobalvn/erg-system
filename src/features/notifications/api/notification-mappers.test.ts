@@ -69,3 +69,29 @@ describe("notification contract mappers", () => {
     expect(normalizePortal("  LCMS  ")).toBe("lcms");
   });
 });
+
+describe("campaign inbox fields", () => {
+  test("defaults keep legacy rows unchanged", () => {
+    expect(mapNotificationItem({ id: "n1", title: "Old", priority: "high" })).toMatchObject({
+      ackedAt: null,
+      priorityLevel: "IMPORTANT",
+      requireReadAck: false,
+    });
+    expect(mapNotificationItem({ id: "n2", title: "Old", priority: "urgent" }).priorityLevel).toBe("URGENT");
+    expect(mapNotificationItem({ id: "n3", title: "Old" }).priorityLevel).toBe("INFO");
+  });
+
+  test("carries the backend campaign fields, preferring priorityLevel over legacy priority", () => {
+    const item = mapNotificationItem({
+      ackedAt: "2026-11-07T01:00:00Z",
+      campaignId: "c1",
+      id: "n1",
+      priority: "normal",
+      priorityLevel: "URGENT",
+      requireReadAck: true,
+      senderName: "Co Lan",
+      title: "Hop khan",
+    });
+    expect(item).toMatchObject({ ackedAt: "2026-11-07T01:00:00Z", campaignId: "c1", priorityLevel: "URGENT", requireReadAck: true, senderName: "Co Lan" });
+  });
+});
