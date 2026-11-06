@@ -31,7 +31,7 @@ export function useQuizList({ scope, quizId, ready, groups, quizProject, selectS
   // An open quiz no topic claims (opened by URL, or without a topic) is still listed as itself.
   const viewAll = selectedTopicId === "all" && !quizId;
   const liveSlides = useMemo(() => groups.flatMap((group) => group.slides), [groups]);
-  const { rows: topics, quizzesPending } = useLevelTopicQuizzes({
+  const { rows: topics, summaries, quizzesPending } = useLevelTopicQuizzes({
     subjectId: scope.selectedCourseId,
     levelId: scope.selectedLevelId ?? "",
     topics: scope.levelTopics,
@@ -78,5 +78,9 @@ export function useQuizList({ scope, quizId, ready, groups, quizProject, selectS
     setPending({ quizId: row.topic.quizId, slideId: row.slide.id });
   }
 
-  return { topics, topicsLoading: quizzesPending, rows, topicLabel: viewAll ? null : (selectedTopic?.label ?? quizProject.info.title), selectTopic, openRow };
+  // The try-run starts in the quiz's own mode, by the runtime's rule (settings.mode, else kind); a new quiz is "train".
+  const mode = (quizProject.settings as { mode?: unknown }).mode;
+  const quizKind = typeof mode === "string" ? mode : (summaries.find((summary) => summary.id === quizId)?.kind ?? "train");
+
+  return { topics, topicsLoading: quizzesPending, quizKind, rows, topicLabel: viewAll ? null : (selectedTopic?.label ?? quizProject.info.title), selectTopic, openRow };
 }

@@ -4,7 +4,7 @@ import type { AnswerPayload, Question } from "@/domain/quiz/types";
 export type TryRunMode = "practice" | "test";
 type Answers = Record<string, AnswerPayload>;
 
-export const defaultTryRunMode = (quizKind: string | undefined): TryRunMode => (quizKind === "test" ? "test" : "practice");
+export const defaultTryRunMode = (quizKind: string | undefined): TryRunMode => (quizKind === "test" || quizKind === "testing" ? "test" : "practice");
 
 export const isAutoGraded = (question: Question) => question.kind !== "likert_scale" && question.kind !== "essay";
 

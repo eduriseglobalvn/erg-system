@@ -23,6 +23,7 @@ export function useLevelTopicQuizzes(scope: {
   });
   return {
     rows: buildTopicRail(topics, summaries, drafts, openQuiz),
+    summaries,
     // Pending, not loading: offline the query pauses, and a topic must still not pass for one without a quiz.
     quizzesPending: workspace.isPending,
   };

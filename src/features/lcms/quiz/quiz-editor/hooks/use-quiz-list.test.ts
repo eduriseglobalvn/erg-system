@@ -9,8 +9,10 @@ import { createNewQuizProjectSettings } from "@/features/lcms/quiz/quiz-editor/a
 import type { TopicRow } from "@/features/lcms/quiz/quiz-editor/model/topic-rail";
 import type { QuizEditorGroup, QuizEditorSlide } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 
-const topics = vi.hoisted(() => ({ rows: [] as TopicRow[] }));
-vi.mock("@/features/lcms/quiz/quiz-editor/hooks/use-level-topic-quizzes", () => ({ useLevelTopicQuizzes: () => ({ rows: topics.rows, quizzesPending: false }) }));
+const topics = vi.hoisted(() => ({ rows: [] as TopicRow[], summaries: [] as { id: string; kind?: string }[] }));
+vi.mock("@/features/lcms/quiz/quiz-editor/hooks/use-level-topic-quizzes", () => ({
+  useLevelTopicQuizzes: () => ({ rows: topics.rows, summaries: topics.summaries, quizzesPending: false }),
+}));
 
 import { useQuizList } from "./use-quiz-list";
 
@@ -80,6 +82,14 @@ describe("useQuizList", () => {
     hook.rerender({ groups: [group("g9", [target])], quizId: "q2" });
     expect(selectSlide).toHaveBeenCalledWith("g9", "slide-1004");
     expect(openEditor).toHaveBeenCalledTimes(1);
+  });
+
+  it("the try-run follows the open quiz's kind, and a new quiz practises", () => {
+    topics.rows = [topic("t1", "q1")];
+    topics.summaries = [{ id: "q1", kind: "test" }];
+    expect(setup("t1", [], "q1").hook.result.current.quizKind).toBe("test");
+    expect(setup("t1", [], "").hook.result.current.quizKind).toBe("train");
+    topics.summaries = [];
   });
 
   it("keeps the questions of an open quiz that no topic claims, labelled with its title", () => {

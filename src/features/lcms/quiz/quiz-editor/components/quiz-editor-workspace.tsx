@@ -159,7 +159,7 @@ export function QuizEditorWorkspace({
                 onClose={() => setQuestionEditorOpen(false)}
                 syncChip={syncChip}
                 banner={<QuizEditorSyncNotices sync={sync} />}
-                quizKind="train"
+                quizKind={list.quizKind}
                 quizProject={quizProject}
               />
             ) : null}

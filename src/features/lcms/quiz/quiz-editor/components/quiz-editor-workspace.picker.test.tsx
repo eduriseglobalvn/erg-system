@@ -67,9 +67,10 @@ vi.mock("@/features/lcms/quiz/quiz-editor/components/quiz-list/question-table", 
   ),
 }));
 vi.mock("@/features/lcms/quiz/quiz-editor/components/question-authoring/question-editor-shell", () => ({
-  QuestionEditorShell: ({ banner, onChangeType, selectedSlide }: { banner: React.ReactNode; onChangeType: () => void; selectedSlide: { kind: string } }) => (
+  QuestionEditorShell: ({ banner, onChangeType, selectedSlide, quizKind }: { banner: React.ReactNode; onChangeType: () => void; selectedSlide: { kind: string }; quizKind?: string }) => (
     <div role="dialog" aria-label="editor-open">
       {banner}
+      <output data-testid="quiz-kind">{quizKind}</output>
       <output data-testid="kind">{selectedSlide.kind}</output>
       <button type="button" onClick={onChangeType}>change-type</button>
     </div>
@@ -78,7 +79,7 @@ vi.mock("@/features/lcms/quiz/quiz-editor/components/question-authoring/question
 
 const leaf = {} as DashboardLeaf;
 const client = new QueryClient();
-levelTopicQuizzes.mockReturnValue({ rows: [{ id: "t1", label: "Phân số", quizId: "q1", questionCount: 0, lifecycle: "draft", slides: [] }], quizzesPending: false });
+levelTopicQuizzes.mockReturnValue({ rows: [{ id: "t1", label: "Phân số", quizId: "q1", questionCount: 0, lifecycle: "draft", slides: [] }], summaries: [{ id: "q1", kind: "test" }], quizzesPending: false });
 
 describe("QuizEditorWorkspace add-question picker", () => {
   it("creates nothing when the picker is cancelled", () => {
@@ -185,6 +186,17 @@ describe("QuizEditorWorkspace add-question picker", () => {
       syncState.ready = true;
       syncState.loadFailed = false;
     }
+  });
+
+  it("opens the try-run in the open quiz's own mode", async () => {
+    render(
+      <QueryClientProvider client={client}><I18nProvider>
+        <QuizEditorWorkspace activeLeaf={leaf} quizId="q1" />
+      </I18nProvider></QueryClientProvider>,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "table-add" }));
+    fireEvent.click(screen.getByRole("button", { name: "Tạo câu Một đáp án" }));
+    expect((await screen.findByTestId("quiz-kind")).textContent).toBe("test");
   });
 
   it("feeds the open quiz's live slides to the topic rail", () => {

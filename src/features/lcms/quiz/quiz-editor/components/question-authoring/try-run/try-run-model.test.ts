@@ -24,6 +24,7 @@ const single = (id: string, correctId = "a") =>
 describe("defaultTryRunMode", () => {
   it("maps test to test, everything else to practice", () => {
     expect(defaultTryRunMode("test")).toBe("test");
+    expect(defaultTryRunMode("testing")).toBe("test");
     expect(defaultTryRunMode("train")).toBe("practice");
     expect(defaultTryRunMode(undefined)).toBe("practice");
   });
