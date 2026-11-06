@@ -21,6 +21,13 @@ const q = (id: string, title: string): Question =>
 const questions = [q("q1", "Câu một"), q("q2", "Câu hai")];
 
 describe("QuizTryRunner", () => {
+  it("shows the question title and instructions above the answers, as the learner player does", () => {
+    const withHint = { ...q("q1", "Máy tính dùng thiết bị nào để nhập chữ?"), instructions: "Chọn một đáp án" } as Question;
+    render(<QuizTryRunner questions={[withHint]} startIndex={0} initialMode="practice" />);
+    expect(screen.getByRole("heading", { name: "Máy tính dùng thiết bị nào để nhập chữ?" })).toBeInTheDocument();
+    expect(screen.getByText("Chọn một đáp án")).toBeInTheDocument();
+  });
+
   it("practice: checks an answer, shows feedback and advances", () => {
     render(<QuizTryRunner questions={questions} startIndex={0} initialMode="practice" feedback={{ q1: { correct: "Giỏi lắm" } }} />);
     const check = screen.getByRole("button", { name: "Xem kết quả" });

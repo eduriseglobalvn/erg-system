@@ -93,6 +93,9 @@ export function QuizTryRunner({ questions, startIndex, initialMode, feedback }: 
       </Box>
       <Box sx={{ alignItems: "flex-start", display: "flex", flexWrap: "wrap", gap: 2.5 }}>
         <Box sx={{ border: 1, borderColor: "divider", borderRadius: "20px", flex: "1 1 420px", maxWidth: 880, minWidth: 0, p: 3.5 }}>
+          {/* The learner player shells print the title themselves; the renderer only draws the answers. */}
+          {q.title ? <Typography component="h2" sx={{ mb: q.instructions ? 0.5 : 2.5 }} variant="h6">{q.title}</Typography> : null}
+          {q.instructions ? <Typography color="text.secondary" sx={{ mb: 2.5 }} variant="body2">{q.instructions}</Typography> : null}
           <QuestionRenderer
             onChange={(next) => setAnswers({ ...answers, [q.id]: next })}
             question={q}
