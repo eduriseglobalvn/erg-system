@@ -2,14 +2,13 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import ButtonBase from "@mui/material/ButtonBase";
 import Typography from "@mui/material/Typography";
+import visuallyHidden from "@mui/utils/visuallyHidden";
 import { Link } from "@tanstack/react-router";
 
 import { adminContentPathForSection } from "@/features/lcms/admin-content/admin-content-route";
 import { lifecycleLabel, type QuizLifecycle } from "@/features/lcms/quiz/quiz-editor/model/quiz-publish-state";
 import type { TopicRow } from "@/features/lcms/quiz/quiz-editor/model/topic-rail";
 import { ergEnterpriseTokens as tokens } from "@/themes/erg-enterprise-tokens";
-
-const visuallyHidden = { border: 0, clip: "rect(0 0 0 0)", height: 1, margin: -1, overflow: "hidden", p: 0, position: "absolute", whiteSpace: "nowrap", width: 1 } as const;
 
 const DOT: Record<QuizLifecycle, string> = {
   none: tokens.statusTint.neutral.dot,

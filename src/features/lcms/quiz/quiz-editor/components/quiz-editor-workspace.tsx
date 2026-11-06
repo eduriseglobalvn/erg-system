@@ -1,5 +1,6 @@
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
+import visuallyHidden from "@mui/utils/visuallyHidden";
 import { useEffect, useState } from "react";
 
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
@@ -112,8 +113,8 @@ export function QuizEditorWorkspace({
   const syncChip = <QuizEditorSyncChip onRetry={() => void sync.flushNow()} persistent={sync.persistent} status={sync.status} />;
 
   return (
-    <div className="flex h-full max-h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-      <h1 className="sr-only">{quizProject.info.title || "Soạn bài kiểm tra"}</h1>
+    <Box sx={{ display: "flex", flex: 1, flexDirection: "column", height: "100%", maxHeight: "100%", minHeight: 0, minWidth: 0, overflow: "hidden" }}>
+      <Box component="h1" sx={visuallyHidden}>{quizProject.info.title || "Soạn bài kiểm tra"}</Box>
       <QuizListTitlebar
         courseOptions={scope.courseOptions}
         selectedCourseId={scope.selectedCourse.id}
@@ -165,6 +166,6 @@ export function QuizEditorWorkspace({
           </QuizEditorSyncLayer>
         </Box>
       </Box>
-    </div>
+    </Box>
   );
 }
