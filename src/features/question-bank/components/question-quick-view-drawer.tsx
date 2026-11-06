@@ -4,14 +4,13 @@ import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
-import ToggleButton from "@mui/material/ToggleButton";
-import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Typography from "@mui/material/Typography";
 import { useState } from "react";
 
 import { ErgButton, ErgIconButton } from "@/components/erg-mui/erg-actions";
 import { ErgConfirmDialog } from "@/components/erg-mui/erg-confirm-dialog";
 import { ErgStatusChip } from "@/components/erg-mui/erg-feedback";
+import { QuestionViewToggle } from "@/features/lcms/quiz/quiz-editor/components/question-authoring/question-view-toggle";
 import { questionTypeLabelKeys } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import type { QuestionBankQuestion, QuizBankItem } from "@/features/question-bank/types/question-bank-types";
 import { useI18n } from "@/platform/i18n";
@@ -81,10 +80,9 @@ export function QuestionQuickViewDrawer({
           <ErgStatusChip dot={false} label={question.categoryLabel || copy.otherTopic} tone="info" />
           <ErgStatusChip dot={false} label={translate(questionTypeLabelKeys[question.type])} />
           <ErgStatusChip dot={false} label={copy.difficulty[question.difficulty]} tone={DIFFICULTY_TONE[question.difficulty]} />
-          <ToggleButtonGroup exclusive size="small" value={learnerView ? "learner" : "teacher"} aria-label={copy.viewModeLabel} onChange={(_, value) => { if (value) setLearnerView(value === "learner"); }} sx={{ ml: "auto" }}>
-            <ToggleButton value="teacher">{copy.teacherView}</ToggleButton>
-            <ToggleButton value="learner">{copy.learnerView}</ToggleButton>
-          </ToggleButtonGroup>
+          <Box sx={{ ml: "auto" }}>
+            <QuestionViewToggle value={learnerView ? "learner" : "author"} onChange={(next) => setLearnerView(next === "learner")} />
+          </Box>
         </>
       }
       footerStart={
