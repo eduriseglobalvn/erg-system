@@ -92,9 +92,9 @@ export function usePlayerKeyboard({
         return;
       }
 
-      // Flag and go-to stay available while reviewing, like their on-screen controls.
-      // Held keys must not re-fire: a repeating F would toggle the bookmark over and over.
-      if (letter === "f" && onToggleFlag) {
+      // The review screen has no flag control, so F is off there (it would silently rewrite the finished session);
+      // N stays, as the review panel shows the go-to field. Held keys must not re-fire.
+      if (letter === "f" && onToggleFlag && !reviewingSubmittedAttempt) {
         event.preventDefault();
         if (!event.repeat) onToggleFlag();
         return;

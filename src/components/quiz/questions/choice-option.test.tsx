@@ -99,3 +99,28 @@ describe("ChoiceOption multiple mode", () => {
     expect(screen.getAllByTestId("choice-check-badge")).toHaveLength(1);
   });
 });
+
+describe("ChoiceOption under a dark teacher highlight", () => {
+  const darkTheme = (ui: ReactElement) => {
+    const surface = document.body.appendChild(document.createElement("div"));
+    surface.style.setProperty("--quiz-highlight", "#14532d");
+    surface.style.setProperty("--quiz-highlight-contrast", "#fff");
+    return render(<ThemeProvider theme={ergEnterpriseTheme}>{ui}</ThemeProvider>, { container: surface.appendChild(document.createElement("div")) });
+  };
+
+  it.each([["picked", ergEnterpriseTokens.statusTint.success.bg], ["pickedWrong", ergEnterpriseTokens.statusTint.error.bg]] as const)(
+    "paints a %s option with a status tint, not the dark highlight, so the dark label stays readable",
+    (reviewTag, tint) => {
+      darkTheme(<ChoiceOption mode="single" onClick={noop} selected reviewTag={reviewTag}>Phương án</ChoiceOption>);
+      const style = getComputedStyle(screen.getByRole("button"));
+      expect(style.backgroundColor).not.toContain("--quiz-highlight");
+      expect(style.backgroundColor.toLowerCase()).toBe(tint.toLowerCase().replace(/^#(..)(..)(..)$/, (_, r, g, b) => `rgb(${parseInt(r, 16)}, ${parseInt(g, 16)}, ${parseInt(b, 16)})`));
+    },
+  );
+
+  it("keeps the highlight and its contrast text on a plain selected option", () => {
+    darkTheme(<ChoiceOption mode="single" onClick={noop} selected>Phương án</ChoiceOption>);
+    expect(getComputedStyle(screen.getByRole("button")).backgroundColor).toContain("var(--quiz-highlight");
+    expect(getComputedStyle(screen.getByText("Phương án")).color).toContain("var(--quiz-highlight-contrast");
+  });
+});

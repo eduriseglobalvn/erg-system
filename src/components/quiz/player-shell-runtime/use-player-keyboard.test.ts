@@ -125,12 +125,12 @@ describe("usePlayerKeyboard web shortcuts", () => {
     expect(fns.focusGoTo).not.toHaveBeenCalled();
   });
 
-  it("never picks an option while reviewing or submitting, but still flags while reviewing", () => {
+  it("never picks an option while reviewing or submitting, and never flags while reviewing (no flag control there)", () => {
     const reviewing = setup({ attemptCompleted: true, reviewingSubmittedAttempt: true });
     press("2");
     press("f");
     expect(reviewing.onPickOption).not.toHaveBeenCalled();
-    expect(reviewing.onToggleFlag).toHaveBeenCalledOnce();
+    expect(reviewing.onToggleFlag).not.toHaveBeenCalled();
 
     const submitting = setup({ submitting: true });
     press("3");

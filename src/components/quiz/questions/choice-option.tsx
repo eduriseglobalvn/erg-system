@@ -61,7 +61,8 @@ export function ChoiceOption(props: ChoiceOptionProps) {
       onClick={() => { if (!disabled) onClick(); }}
       sx={(theme) => ({
         alignItems: "center",
-        bgcolor: selected ? `var(--quiz-highlight, ${alpha(theme.palette.primary.main, 0.06)})` : "transparent",
+        // A checked (review) option takes the status tint: the teacher highlight may be dark, and the tag/label text is dark.
+        bgcolor: !selected ? "transparent" : tag ? ergEnterpriseTokens.statusTint[tag.tone].bg : `var(--quiz-highlight, ${alpha(theme.palette.primary.main, 0.06)})`,
         border: "1px solid",
         borderColor: selected ? `var(--quiz-accent, ${theme.palette.primary.main})` : "transparent",
         borderRadius: `var(--quiz-radius, ${ergEnterpriseTokens.radius.control}px)`,
