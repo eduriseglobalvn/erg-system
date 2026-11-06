@@ -5,8 +5,8 @@ export type QuestionListFilter = "all" | "todo" | "flagged" | "wrong" | "skipped
 
 const MATCH: Record<QuestionListFilter, (cell: QuestionCell) => boolean> = {
   all: () => true,
-  // The current question is still unanswered from the student's point of view.
-  todo: (cell) => cell.state === "todo" || cell.state === "current",
+  // The current cell hides its answered state, so `answered` (undefined = not answered) decides.
+  todo: (cell) => cell.state === "todo" || (cell.state === "current" && !cell.answered),
   flagged: (cell) => cell.flagged,
   wrong: (cell) => cell.state === "wrong",
   skipped: (cell) => cell.state === "skipped",

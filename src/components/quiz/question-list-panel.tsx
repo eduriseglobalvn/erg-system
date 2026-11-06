@@ -1,9 +1,9 @@
 import Box from "@mui/material/Box";
-import TextField from "@mui/material/TextField";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import { useState, type Ref } from "react";
 
+import { ErgTextField } from "@/components/erg-mui/erg-form";
 import { questionGridLayout, type GridSurface } from "@/components/quiz/question-grid-layout";
 import { applyFilter, filterOptions, parseGoTo, type QuestionListFilter, type QuestionListMode } from "@/components/quiz/question-list-filters";
 import { QuestionNavigator, type QuestionCell } from "@/components/quiz/question-navigator";
@@ -23,6 +23,8 @@ export function QuestionListPanel({ mode, cells, surface, onSelect, goToInputRef
   const options = filterOptions(mode, cells);
   // A filter that has emptied out (e.g. the last unanswered question was answered) falls back to "all".
   const active = options.find((o) => o.id === filter && o.count > 0)?.id ?? "all";
+  // Reset the stale choice too, otherwise it revives when the filter becomes non-empty again.
+  if (active !== filter) setFilter(active);
 
   const submitGoTo = () => {
     const result = parseGoTo(goTo, cells.length);
@@ -50,7 +52,8 @@ export function QuestionListPanel({ mode, cells, surface, onSelect, goToInputRef
       </ToggleButtonGroup>
 
       {questionGridLayout(cells.length, surface).showGoTo ? (
-        <TextField
+        <ErgTextField
+          compact
           error={error !== null}
           helperText={error}
           inputRef={goToInputRef}
@@ -60,18 +63,18 @@ export function QuestionListPanel({ mode, cells, surface, onSelect, goToInputRef
             setError(null);
           }}
           onKeyDown={(e) => {
-            if (e.key === "Enter") {
+            if (e.key === "Enter" && !e.nativeEvent.isComposing) {
               e.preventDefault();
               submitGoTo();
             }
           }}
           size="small"
-          slotProps={{ htmlInput: { inputMode: "numeric" } }}
+          slotProps={{ formHelperText: { role: "alert" }, htmlInput: { inputMode: "numeric" } }}
           value={goTo}
         />
       ) : null}
 
-      <QuestionNavigator cells={applyFilter(cells, active)} legend="auto" onSelect={onSelect} surface={surface} />
+      <QuestionNavigator ariaLabel="Lưới câu hỏi" cells={applyFilter(cells, active)} legend="auto" onSelect={onSelect} surface={surface} />
     </Box>
   );
 }

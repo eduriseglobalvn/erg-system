@@ -13,6 +13,13 @@ describe("filterOptions", () => {
     expect(labels(filterOptions("taking", cells))).toEqual(["Tất cả · 20", "Chưa làm · 4", "Đánh dấu · 2"]);
   });
 
+  it("taking mode: an answered current question is not todo", () => {
+    const cells = make(5, (i) => (i === 0 ? "current" : i === 1 ? "todo" : "done"));
+    expect(filterOptions("taking", cells)[1].count).toBe(2);
+    cells[0].answered = true;
+    expect(filterOptions("taking", cells)[1].count).toBe(1);
+  });
+
   it("review mode: all / wrong / skipped / flagged", () => {
     const cells = make(90, (i) => (i < 9 ? "wrong" : i < 12 ? "skipped" : "correct"), (i) => i < 4);
     expect(labels(filterOptions("review", cells))).toEqual(["Tất cả · 90", "Sai · 9", "Bỏ trống · 3", "Đánh dấu · 4"]);

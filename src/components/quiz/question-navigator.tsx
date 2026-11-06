@@ -6,7 +6,7 @@ import { questionGridLayout, type GridSurface } from "@/components/quiz/question
 import { ergEnterpriseTokens as tk } from "@/themes/erg-enterprise-tokens";
 
 export type QuestionCellState = "done" | "current" | "todo" | "correct" | "wrong" | "skipped";
-export type QuestionCell = { index: number; state: QuestionCellState; flagged: boolean; hidden?: boolean };
+export type QuestionCell = { index: number; state: QuestionCellState; flagged: boolean; hidden?: boolean; answered?: boolean };
 
 const STATE_ORDER: QuestionCellState[] = ["done", "current", "todo", "correct", "wrong", "skipped"];
 const STATE_LABEL: Record<QuestionCellState, string> = {
