@@ -15,16 +15,15 @@ import { ergEnterpriseTokens as tokens } from "@/themes/erg-enterprise-tokens";
 import { readinessLabel, type QuestionReadiness } from "./question-readiness";
 import { QuestionViewToggle, type QuestionView } from "./question-view-toggle";
 
-// An intro slide has no position, readiness or type change: those props are null / absent.
 type Props = {
-  position: string | null;
+  position: string;
   typeLabel: string;
-  readiness: QuestionReadiness | null;
+  readiness: QuestionReadiness;
   syncChip: ReactNode;
   view: QuestionView;
   onViewChange: (view: QuestionView) => void;
   onBack: () => void;
-  onChangeType?: () => void;
+  onChangeType: () => void;
   onDuplicate: () => void;
   onDelete: () => void;
 };
@@ -42,9 +41,9 @@ export function QuestionEditorTitlebar({ position, typeLabel, readiness, syncChi
         Danh sách câu hỏi
       </Button>
       <Divider flexItem orientation="vertical" sx={{ my: 0.5 }} />
-      {position ? <Typography component="h2" variant="subtitle2">{position}</Typography> : null}
+      <Typography component="h2" variant="subtitle2">{position}</Typography>
       <ErgStatusChip dot={false} label={typeLabel} sx={{ border: 1, borderColor: tokens.color.border }} tone="neutral" />
-      {!readiness ? null : readiness.ready ? (
+      {readiness.ready ? (
         <ErgStatusChip label={readinessLabel(readiness)} tone="success" />
       ) : (
         <ErgStatusChip icon={<WarningAmberIcon sx={{ color: "inherit !important", fontSize: tokens.size.iconSm }} />} label={readinessLabel(readiness)} tone="warning" />
@@ -63,7 +62,7 @@ export function QuestionEditorTitlebar({ position, typeLabel, readiness, syncChi
         slotProps={{ list: { "aria-label": "Thao tác câu hỏi" }, paper: { sx: { minWidth: 240 } } }}
         transformOrigin={{ horizontal: "right", vertical: "top" }}
       >
-        {onChangeType ? <MenuItem onClick={run(onChangeType)}>Đổi dạng câu hỏi…</MenuItem> : null}
+        <MenuItem onClick={run(onChangeType)}>Đổi dạng câu hỏi…</MenuItem>
         <MenuItem onClick={run(onDuplicate)}>Nhân bản</MenuItem>
         <Divider />
         <MenuItem onClick={run(onDelete)} sx={{ color: "error.main" }}>Xoá câu hỏi</MenuItem>

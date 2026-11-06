@@ -6,10 +6,9 @@ import Typography from "@mui/material/Typography";
 import { ErgConfirmDialog } from "@/components/erg-mui/erg-confirm-dialog";
 import { useI18n } from "@/platform/i18n";
 import type { QuizEditorGroup, QuizEditorSlide, QuizEditorSlideUpdate, QuizProjectSettings } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
-import { getSlideKindLabelKey, isQuestionType } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
+import { isQuestionType } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import { getFeedbackText } from "@/features/lcms/quiz/quiz-editor/components/learner-question-authoring-preview/preview-answer-feedback";
 import { ergEnterpriseTokens as tokens } from "@/themes/erg-enterprise-tokens";
-import { IntroSlideCard } from "./intro-slide-card";
 import { QuestionCard } from "./question-card";
 import { QuestionEditorRail, type RailEntry } from "./question-editor-rail";
 import { QuestionEditorTitlebar } from "./question-editor-titlebar";
@@ -43,15 +42,14 @@ export function QuestionEditorShell(props: Props) {
   const [view, setView] = useState<QuestionView>("author");
   const [confirmingDelete, setConfirmingDelete] = useState(false);
 
-  // Intro slides are not questions: they are not counted, numbered, checked for readiness or retyped.
-  const isQuestion = isQuestionType(slide.kind);
+  // Opened on question slides only: intro slides stay in the draft with no editor, and are never counted or numbered.
   const entries: RailEntry[] = groups.flatMap((group) =>
     group.slides.filter((item) => isQuestionType(item.kind)).map((item) => ({ groupId: group.id, slide: item })),
   );
   const index = entries.findIndex((entry) => entry.slide.id === slide.id);
-  const question = isQuestion ? readSlideQuestion(slide, t) : null;
-  const readiness = isQuestion ? readSlideReadiness(slide, t) : null;
-  const typeLabel = isQuestionType(slide.kind) ? questionTypeLabel(slide.kind) : t(getSlideKindLabelKey(slide.kind));
+  const question = readSlideQuestion(slide, t);
+  const readiness = readSlideReadiness(slide, t);
+  const typeLabel = isQuestionType(slide.kind) ? questionTypeLabel(slide.kind) : "";
 
   const deleteQuestion = () => {
     setConfirmingDelete(false);
@@ -84,12 +82,12 @@ export function QuestionEditorShell(props: Props) {
     >
       <QuestionEditorTitlebar
         onBack={onClose}
-        onChangeType={isQuestion ? props.onChangeType : undefined}
+        onChangeType={props.onChangeType}
         onDelete={() => setConfirmingDelete(true)}
         onDuplicate={props.onDuplicate}
         onViewChange={setView}
         readiness={readiness}
-        position={isQuestion ? `Câu ${index + 1} / ${entries.length}` : null}
+        position={`Câu ${index + 1} / ${entries.length}`}
         syncChip={props.syncChip}
         typeLabel={typeLabel}
         view={view}
@@ -108,23 +106,17 @@ export function QuestionEditorShell(props: Props) {
             />
             <Box sx={{ flex: "1 1 560px", minWidth: 0, px: 4, py: 3.5 }}>
               <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, mx: "auto", maxWidth: 720 }}>
-                {readiness ? (
-                  <>
-                    <QuestionCard
-                      key={slide.id}
-                      meta={`Câu ${index + 1} · ${typeLabel}`}
-                      onReplaceSlide={onReplaceSlide}
-                      question={question}
-                      readiness={readiness}
-                      slide={slide}
-                    />
-                    <Typography color="text.secondary" variant="caption">
-                      Điểm, thời gian, trộn đáp án đặt ở Thuộc tính bài tập, không đặt ở từng câu.
-                    </Typography>
-                  </>
-                ) : (
-                  <IntroSlideCard key={slide.id} onReplaceSlide={onReplaceSlide} slide={slide} />
-                )}
+                <QuestionCard
+                  key={slide.id}
+                  meta={`Câu ${index + 1} · ${typeLabel}`}
+                  onReplaceSlide={onReplaceSlide}
+                  question={question}
+                  readiness={readiness}
+                  slide={slide}
+                />
+                <Typography color="text.secondary" variant="caption">
+                  Điểm, thời gian, trộn đáp án đặt ở Thuộc tính bài tập, không đặt ở từng câu.
+                </Typography>
               </Box>
             </Box>
           </>

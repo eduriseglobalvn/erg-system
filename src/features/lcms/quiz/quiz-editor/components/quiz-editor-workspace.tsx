@@ -19,7 +19,7 @@ import { useQuizEditorSync } from "@/features/lcms/quiz/quiz-editor/hooks/use-qu
 import { useQuizList } from "@/features/lcms/quiz/quiz-editor/hooks/use-quiz-list";
 import { useI18n } from "@/platform/i18n";
 import type { QuestionBankQuestion } from "@/features/question-bank/types/question-bank-types";
-import { isQuestionManagerSlideKind } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
+import { isQuestionType } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 
 export function QuizEditorWorkspace({
   activeLeaf,
@@ -145,7 +145,7 @@ export function QuizEditorWorkspace({
             ) : null}
             <QuestionTable onAdd={() => typeChange.openPicker("add")} onOpenRow={list.openRow} rows={list.rows} topicLabel={list.topicLabel} />
             {typeChange.dialogs}
-            {questionEditorOpen && selectedNode.type === "slide" && selectedSlide && isQuestionManagerSlideKind(selectedSlide.kind) ? (
+            {questionEditorOpen && selectedNode.type === "slide" && selectedSlide && isQuestionType(selectedSlide.kind) ? (
               <QuestionEditorShell
                 groups={groups}
                 selectedSlide={selectedSlide}

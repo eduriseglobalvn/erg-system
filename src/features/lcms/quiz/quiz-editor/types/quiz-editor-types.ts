@@ -314,27 +314,10 @@ export const questionTypeLabelKeys: Record<QuestionType, MessageKey> = {
   essay: "quiz.essay",
 };
 
-export const introSlideLabelKeys: Record<IntroSlideKind, MessageKey> = {
-  "intro-slide": "quiz.infoSlide",
-  "user-info": "quiz.userInfo",
-  "instruction-slide": "quiz.instructionSlide",
-};
-
 export function isQuestionType(kind: SlideKind): kind is QuestionType {
   return kind in questionTypeLabelKeys;
 }
 
-export function isIntroSlideKind(kind: SlideKind): kind is IntroSlideKind {
-  return kind === "intro-slide" || kind === "user-info" || kind === "instruction-slide";
-}
-
 export function isQuestionManagerSlideKind(kind: SlideKind) {
   return kind !== "info-slide" && kind !== "result-slide";
-}
-
-export function getSlideKindLabelKey(kind: SlideKind): MessageKey {
-  if (kind === "info-slide") return "quiz.infoSlide";
-  if (kind === "result-slide") return "quiz.resultsLayer";
-  if (isIntroSlideKind(kind)) return introSlideLabelKeys[kind];
-  return questionTypeLabelKeys[kind];
 }

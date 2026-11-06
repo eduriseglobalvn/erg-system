@@ -214,18 +214,6 @@ describe("QuestionEditorShell with intro slides", () => {
     const rail = screen.getByRole("navigation", { name: "Danh sách câu hỏi" });
     expect(within(rail).queryByText("Chào mừng")).toBeNull();
   });
-
-  it("edits an intro slide's title and instructions, without readiness or a type change", () => {
-    const onReplaceSlide = vi.fn();
-    renderShell({ groups: withIntro, selectedSlide: intro, onReplaceSlide });
-    expect(screen.queryByText(/^Câu \d/)).toBeNull();
-    expect(screen.queryByText("Câu hỏi chưa có nội dung")).toBeNull();
-    fireEvent.change(screen.getByRole("textbox", { name: "Tiêu đề" }), { target: { value: "Xin chào" } });
-    expect(onReplaceSlide.mock.calls.at(-1)![0]).toMatchObject({ title: "Xin chào", kind: "intro-slide" });
-    expect(screen.getByDisplayValue("Đọc kỹ đề")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Thêm thao tác" }));
-    expect(screen.queryByRole("menuitem", { name: "Đổi dạng câu hỏi…" })).toBeNull();
-  });
 });
 
 describe("QuestionEditorShell images added while the teacher keeps typing", () => {

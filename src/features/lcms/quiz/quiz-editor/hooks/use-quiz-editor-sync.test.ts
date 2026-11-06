@@ -97,6 +97,20 @@ describe("useQuizEditorSync", () => {
     expect(api.saveQuizEditorDraft).not.toHaveBeenCalled();
   });
 
+  it("intro and instruction slides have no editor, yet every save still carries them", async () => {
+    const opened = titled("Server copy");
+    const intro = { id: "intro-1", title: "Đọc kỹ đề", kind: "intro-slide", instructions: ["Làm trong 15 phút"] };
+    api.loadQuizEditorDraft.mockResolvedValue({ ...opened, tree: [{ ...opened.tree[0]!, slides: [intro] }] });
+    const { result } = setup("q1");
+    await settle();
+    await settle();
+    act(() => result.current.editor.addQuestion("multiple-choice"));
+    await settle(5000);
+    const saved = api.saveQuizEditorDraft.mock.lastCall![0] as { tree: { slides: { id: string }[] }[] };
+    expect(saved.tree[0]!.slides[0]).toMatchObject(intro);
+    expect(saved.tree[0]!.slides).toHaveLength(2);
+  });
+
   it("resets to a blank draft when the key moves to a new quiz", async () => {
     const { result, rerender } = setup("q1");
     await settle();
