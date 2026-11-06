@@ -7,7 +7,7 @@ import {
   formatRatio,
   parseHexColor,
 } from "@/features/lcms/quiz/quiz-theme/quiz-theme-contrast";
-import { applyQuizThemePreset, quizThemePresets } from "@/features/lcms/quiz/quiz-theme/quiz-theme-presets";
+import { applyQuizThemePreset, quizThemePresets, quizThemeToneSurface } from "@/features/lcms/quiz/quiz-theme/quiz-theme-presets";
 
 const saved: QuizPlayerTemplate = {
   layout: "classic",
@@ -56,5 +56,26 @@ describe("quiz theme contrast", () => {
   it("formats with a decimal comma", () => {
     expect(formatRatio(4.54)).toBe("4,5:1");
     expect(formatRatio(null)).toBe("—");
+  });
+
+  it("truncates instead of rounding up", () => {
+    expect(formatRatio(4.49)).toBe("4,4:1");
+    expect(formatRatio(4.5)).toBe("4,5:1");
+    expect(formatRatio(2.999)).toBe("2,9:1");
+  });
+
+  it("fails highlight-bg when the highlight swallows the text", () => {
+    const pairs = checkThemeContrast({ ...saved, highlightColor: "#1D1D1F" });
+    expect(pairs.find((p) => p.id === "highlight-bg")?.pass).toBe(false);
+  });
+
+  it("fails text-bg when the tone text is too close to its background", () => {
+    const original = quizThemeToneSurface["soft-blue"];
+    quizThemeToneSurface["soft-blue"] = { ...original, text: "#EEEEEE", background: "#FFFFFF" };
+    try {
+      expect(checkThemeContrast(saved).find((p) => p.id === "text-bg")?.pass).toBe(false);
+    } finally {
+      quizThemeToneSurface["soft-blue"] = original;
+    }
   });
 });

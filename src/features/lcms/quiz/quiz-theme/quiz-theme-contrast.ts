@@ -54,5 +54,6 @@ export function checkThemeContrast(tpl: QuizPlayerTemplate, onAccent: string = t
 }
 
 export function formatRatio(r: number | null): string {
-  return r === null ? "—" : `${r.toFixed(1).replace(".", ",")}:1`;
+  // Truncate, never round: 4.4999 must not read "4,5:1" next to a fail mark.
+  return r === null ? "—" : `${(Math.floor(r * 10 + 1e-9) / 10).toFixed(1).replace(".", ",")}:1`;
 }
