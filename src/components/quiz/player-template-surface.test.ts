@@ -53,9 +53,19 @@ describe("playerTemplateToSurfaceVars", () => {
 describe("legacy editor default", () => {
   const legacy = { accentColor: "#d12b2b", highlightColor: "#ffb35c", backgroundTone: "paper", roundedCorners: false };
 
-  it("is treated as no template, case-insensitively", () => {
-    expect(playerTemplateToSurfaceVars(legacy)).toEqual({});
-    expect(playerTemplateToSurfaceVars({ ...legacy, accentColor: "#D12B2B", highlightColor: "#FFB35C" })).toEqual({});
+  const untouched = { ...legacy, backgroundTone: "soft-blue", roundedCorners: true };
+
+  it("adds no colour vars, case-insensitively, and nothing at all for the untouched default", () => {
+    expect(playerTemplateToSurfaceVars(untouched)).toEqual({});
+    expect(playerTemplateToSurfaceVars({ ...untouched, accentColor: "#D12B2B", highlightColor: "#FFB35C" })).toEqual({});
+  });
+
+  it("still applies a chosen tone or square corners on untouched colours", () => {
+    const dark = playerTemplateToSurfaceVars({ ...untouched, backgroundTone: "contrast" });
+    expect(dark["--quiz-page-bg"]).toBe(quizThemeToneSurface.contrast.background);
+    expect(dark).not.toHaveProperty("--quiz-accent");
+    expect(dark).not.toHaveProperty("--quiz-highlight");
+    expect(playerTemplateToSurfaceVars({ ...untouched, roundedCorners: false })).toEqual({ "--quiz-radius": "0px" });
   });
 
   it("still applies when only one of the two colours was changed", () => {

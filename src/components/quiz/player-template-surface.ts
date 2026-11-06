@@ -41,20 +41,22 @@ const isTone = (value: unknown): value is QuizBackgroundTone => value === "soft-
 export function playerTemplateToSurfaceVars(template: unknown): Record<string, string> {
   if (!template || typeof template !== "object" || Array.isArray(template)) return {};
   const source = template as Record<string, unknown>;
-  if (isLegacy(source.accentColor, LEGACY_DEFAULT_ACCENT) && isLegacy(source.highlightColor, LEGACY_DEFAULT_HIGHLIGHT)) return {};
+  // Untouched colours keep the ERG look; tone and corners are separate controls and still apply. The editor default
+  // tone (soft-blue) would add a page gradient the player never had, so on untouched colours only other tones apply.
+  const colorsUntouched = isLegacy(source.accentColor, LEGACY_DEFAULT_ACCENT) && isLegacy(source.highlightColor, LEGACY_DEFAULT_HIGHLIGHT);
   const vars: Record<string, string> = {};
 
-  const accent = hex(source.accentColor);
+  const accent = colorsUntouched ? null : hex(source.accentColor);
   if (accent) {
     vars["--quiz-accent"] = accent;
     vars["--quiz-accent-contrast"] = readableOn(accent);
   }
-  const highlight = hex(source.highlightColor);
+  const highlight = colorsUntouched ? null : hex(source.highlightColor);
   if (highlight) {
     vars["--quiz-highlight"] = highlight;
     vars["--quiz-highlight-contrast"] = readableOn(highlight);
   }
-  if (isTone(source.backgroundTone)) vars["--quiz-page-bg"] = quizThemeToneSurface[source.backgroundTone].background;
+  if (isTone(source.backgroundTone) && !(colorsUntouched && source.backgroundTone === "soft-blue")) vars["--quiz-page-bg"] = quizThemeToneSurface[source.backgroundTone].background;
   if (source.roundedCorners === false) vars["--quiz-radius"] = "0px";
   return vars;
 }
