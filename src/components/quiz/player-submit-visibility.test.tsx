@@ -124,10 +124,13 @@ describe("result screen", () => {
   it("mobile has no review button when review is unavailable (no answer keys)", () => {
     render(mobile({ attemptCompleted: true, onReview: undefined }));
     expect(screen.queryByRole("button", { name: "Xem lại bài làm" })).toBeNull();
+    // No empty fixed bar either.
+    expect(screen.queryByTestId("mobile-player-footer")).toBeNull();
   });
 
   it("mobile footer review button is not a filled button", () => {
     render(mobile({ attemptCompleted: true }));
+    expect(screen.getByTestId("mobile-player-footer")).toBeTruthy();
     const footerReview = screen.getAllByRole("button", { name: "Xem lại bài làm" }).at(-1) as HTMLElement;
     expect(footerReview.className).not.toContain("bg-[var(--erg-blue)]");
   });

@@ -35,17 +35,20 @@ export function MobilePlayerFooter({
   onSubmitCurrentQuestion,
 }: Props) {
   const showSubmitAction = !attemptCompleted;
+  const showResultOnly = attemptCompleted && !reviewingSubmittedAttempt;
+  // Result screen without review (keyless package): no button, so no empty fixed bar either.
+  if (showResultOnly && !onReview) return null;
   return (
-    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white px-3 pb-[calc(env(safe-area-inset-bottom,0px)+0.35rem)] pt-1.5">
+    <div data-testid="mobile-player-footer" className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white px-3 pb-[calc(env(safe-area-inset-bottom,0px)+0.35rem)] pt-1.5">
       <div className="mx-auto max-w-md">
-        {attemptCompleted && !reviewingSubmittedAttempt ? (
-          onReview ? <button
+        {showResultOnly ? (
+          <button
             type="button"
             className="inline-flex min-h-10 w-full items-center justify-center rounded-md border border-[var(--erg-blue)] bg-white px-4 text-sm font-semibold text-[var(--erg-blue)]"
             onClick={onReview}
           >
             Xem lại bài làm
-          </button> : null
+          </button>
         ) : (
           isTrainingMode ? (
             <button
