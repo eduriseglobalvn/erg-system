@@ -383,7 +383,7 @@ export function AssignHomeworkMobileView({ model }: AssignHomeworkMobileViewProp
                     resources={filteredResourceTopics.flatMap((topic) => topic.items)}
                     selectedResourceIds={selectedResourceIds}
                   />
-                  {selectedResourceIds.size === 1 ? <AssignQuizThemeSlot quizId={[...selectedResourceIds][0]} /> : null}
+                  <AssignQuizThemeSlot selectedQuizIds={selectedResourceIds} />
                   <Box sx={{ borderRadius: 2, border: 1, borderColor: "divider", bgcolor: "background.default", p: 1.5 }}>
                     <Typography variant="body2" sx={{ fontWeight: "fontWeightBold" }}>Xác nhận giao bài</Typography>
                     <Box sx={{ mt: 1, display: "grid", gap: 1 }}>

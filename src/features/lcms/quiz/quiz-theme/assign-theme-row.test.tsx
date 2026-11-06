@@ -18,6 +18,13 @@ vi.mock("@tanstack/react-router", () => ({
   ),
 }));
 
+const auth = vi.hoisted(() => ({ useAuthSession: vi.fn() }));
+vi.mock("@/platform/auth/hooks/use-auth-session", () => ({ useAuthSession: auth.useAuthSession }));
+
+const account = { id: "a1", email: "gv@erg.edu.vn", fullName: "GV" };
+const adminSession = { permissions: ["lms.quiz.create"], portals: ["lms", "lcms"], workspaces: ["ADMIN", "TEACHER"] };
+const teacherSession = { permissions: ["lms.dashboard.read"], portals: ["lms"], workspaces: ["TEACHER"] };
+
 function renderRow(quizId = "quiz-7") {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(<QueryClientProvider client={client}><AssignThemeRow quizId={quizId} /></QueryClientProvider>);
@@ -26,6 +33,7 @@ function renderRow(quizId = "quiz-7") {
 describe("AssignThemeRow", () => {
   beforeEach(() => {
     draft.loadQuizEditorDraft.mockReset();
+    auth.useAuthSession.mockReturnValue({ account, session: adminSession });
   });
 
   it("shows the quiz theme name and links to the editor with the theme panel open", async () => {
@@ -34,6 +42,16 @@ describe("AssignThemeRow", () => {
     renderRow();
     const link = await screen.findByRole("link", { name: new RegExp(`Theme bài · ${viCopy.presets.chalkboard}`) });
     expect(link.getAttribute("href")).toMatch(/\/quiz-editor\?quizId=quiz-7&panel=theme$/);
+  });
+
+  it("shows the name as plain text, with no link, when the user cannot open the editor", async () => {
+    auth.useAuthSession.mockReturnValue({ account, session: teacherSession });
+    draft.loadQuizEditorDraft.mockResolvedValue({ playerTemplate: createMockPlayerTemplate() });
+    renderRow();
+    expect(await screen.findByText(`Theme bài · ${viCopy.custom}`)).toBeInTheDocument();
+    expect(screen.queryByRole("link")).toBeNull();
+    expect(screen.queryByRole("button")).toBeNull();
+    expect(screen.getByText(/^Theme bài/)).toHaveAttribute("aria-description", "Cần quyền Admin để đổi theme");
   });
 
   it("shows a one-line skeleton while the draft loads", () => {

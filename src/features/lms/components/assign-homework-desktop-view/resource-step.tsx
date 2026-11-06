@@ -107,7 +107,7 @@ export function ResourceSelectionStep({ model }: { model: AssignHomeworkControll
             </Box>
           </Box>
           <Box sx={{ minHeight: 0, flex: 1, overflowY: "auto", p: 2 }}>
-            {selectedResourceIds.size === 1 ? <Box sx={{ mb: 1.5, "&:empty": { display: "none" } }}><AssignQuizThemeSlot quizId={[...selectedResourceIds][0]} /></Box> : null}
+            <Box sx={{ mb: 1.5, "&:empty": { display: "none" } }}><AssignQuizThemeSlot selectedQuizIds={selectedResourceIds} /></Box>
             <Box sx={{ display: "grid", gap: 1.5 }}>
               {filteredResourceTopics.map((topic) => (
                 <Box component="section" key={topic.id} sx={{ overflow: "hidden", borderRadius: 1, border: 1, borderColor: "divider", bgcolor: "background.paper", boxShadow: 1 }}>
