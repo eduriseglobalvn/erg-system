@@ -45,7 +45,7 @@ describe("QuestionNavigator grid", () => {
     expect(legend.textContent).toContain("Chưa làm");
     expect(legend.textContent).toContain("Sai");
     expect(legend.textContent).toContain("Đánh dấu");
-    expect(legend.textContent).not.toContain("Đã làm");
+    expect(legend.textContent).not.toContain("Đúng");
     expect(legend.textContent).not.toContain("Bỏ trống");
   });
 
@@ -54,6 +54,44 @@ describe("QuestionNavigator grid", () => {
     const legend = screen.getByRole("list", { name: "Chú thích" });
     expect(legend.textContent).toContain("Đã làm");
     expect(legend.textContent).not.toContain("Sai");
+  });
+
+  it("auto legend ignores the filter: hidden cells still count", () => {
+    render(<QuestionNavigator cells={[{ index: 0, state: "done", flagged: true, hidden: true }, { index: 1, state: "todo", flagged: false }]} legend="auto" onSelect={vi.fn()} surface="web" />);
+    const legend = screen.getByRole("list", { name: "Chú thích" }).textContent;
+    expect(legend).toContain("Đã làm");
+    expect(legend).toContain("Đánh dấu");
+  });
+
+  it("state styles survive the border shorthand (dashed skipped, distinct colours)", () => {
+    render(
+      <QuestionNavigator
+        cells={[
+          { index: 0, state: "skipped", flagged: false },
+          { index: 1, state: "todo", flagged: false },
+          { index: 2, state: "current", flagged: false },
+          { index: 3, state: "done", flagged: false },
+        ]}
+        legend="auto"
+        onSelect={vi.fn()}
+        surface="web"
+      />,
+    );
+    const style = (n: number) => getComputedStyle(screen.getByRole("button", { name: new RegExp(`^Câu ${n},`) }));
+    expect(style(1).borderStyle).toBe("dashed");
+    expect(style(2).borderStyle).toBe("solid");
+    expect(style(2).borderColor).not.toBe(style(3).borderColor);
+    expect(style(4).borderColor).toBe(style(4).backgroundColor);
+  });
+
+  it("flag dot is 10px outer", () => {
+    render(<QuestionNavigator cells={[{ index: 0, state: "todo", flagged: true }]} legend="auto" onSelect={vi.fn()} surface="web" />);
+    // jsdom ignores pseudo-element styles in getComputedStyle, so read emotion's emitted rule.
+    const css = Array.from(document.querySelectorAll("style")).map((el) => el.textContent ?? "").join("");
+    const rule = /::after{([^}]*)}/.exec(css)?.[1] ?? "";
+    expect(rule).toContain("box-sizing:border-box");
+    expect(rule).toContain("width:10px");
+    expect(rule).toContain("height:10px");
   });
 
   it("has no hard-coded legacy navy", () => {

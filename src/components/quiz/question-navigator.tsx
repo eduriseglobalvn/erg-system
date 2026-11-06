@@ -53,8 +53,9 @@ export function QuestionNavigator({ cells, surface, onSelect, legend, ariaLabel 
     if (box && current && layout.scroll) box.scrollTop = Math.max(0, current.offsetTop - box.clientHeight / 2);
   }, [currentIndex, layout.scroll]);
 
-  const legendStates = legend === "auto" ? STATE_ORDER.filter((state) => visible.some((cell) => cell.state === state)) : legend;
-  const showFlagLegend = visible.some((cell) => cell.flagged);
+  // From all cells, not just visible ones, so the legend doesn't jump while filtering.
+  const legendStates = legend === "auto" ? STATE_ORDER.filter((state) => cells.some((cell) => cell.state === state)) : legend;
+  const showFlagLegend = cells.some((cell) => cell.flagged);
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, minHeight: 0 }}>
@@ -73,8 +74,8 @@ export function QuestionNavigator({ cells, surface, onSelect, legend, ariaLabel 
               aria-current={cell.state === "current" ? "true" : undefined}
               onClick={() => onSelect(cell.index)}
               sx={{
-                ...stateSx[cell.state],
                 border: BORDER,
+                ...stateSx[cell.state],
                 borderRadius: `${tk.radius.control}px`,
                 height: layout.cell,
                 position: "relative",
@@ -93,7 +94,7 @@ export function QuestionNavigator({ cells, surface, onSelect, legend, ariaLabel 
       <Box component="ul" aria-label="Chú thích" sx={{ color: tk.color.textMuted, display: "flex", flexWrap: "wrap", gap: 1.5, listStyle: "none", m: 0, p: 0, typography: "caption" }}>
         {legendStates.map((state) => (
           <Box component="li" key={state} sx={{ alignItems: "center", display: "inline-flex", gap: 0.75 }}>
-            <Box component="span" aria-hidden sx={{ ...stateSx[state], border: BORDER, borderRadius: "4px", height: 12, width: 12 }} />
+            <Box component="span" aria-hidden sx={{ border: BORDER, ...stateSx[state], borderRadius: "4px", height: 12, width: 12 }} />
             {sentence(STATE_LABEL[state])}
           </Box>
         ))}
@@ -112,7 +113,7 @@ const flagDotSx = {
   bgcolor: tk.color.warning,
   border: `2px solid ${tk.color.surface}`,
   borderRadius: "50%",
-  boxSizing: "content-box",
+  boxSizing: "border-box",
   content: '""',
   height: 10,
   position: "absolute",
