@@ -9,12 +9,16 @@ import { TEACHER_LOCAL_SESSION_KEY, portalSessionKey } from "@/platform/auth/api
 import {
   campaignKeys,
   isAudienceEmpty,
+  normalizeAudience,
   useAckNotification,
   useCampaignEstimate,
+  useCancelCampaign,
+  useCreateCampaign,
   usePeopleSearch,
   useResolvePeople,
   useScheduleCampaign,
   useSendCampaign,
+  useUpdateCampaign,
 } from "./campaign-query";
 import type { CampaignAudience } from "./campaign-types";
 
@@ -72,6 +76,30 @@ test("useSendCampaign POSTs /{id}/send and invalidates every SENT/SCHEDULED/DRAF
   }
 });
 
+function seedCampaignCaches(id: string) {
+  const keys = [campaignKeys.list("SENT", false), campaignKeys.list("SCHEDULED", true), campaignKeys.list("DRAFT", true), campaignKeys.summary(), campaignKeys.detail(id)];
+  for (const key of keys) client.setQueryData(key, {});
+  return keys;
+}
+
+test.each([
+  ["useCreateCampaign", () => useCreateCampaign(), (m: unknown) => (m as ReturnType<typeof useCreateCampaign>).mutateAsync({ title: "t", body: "b", audience: { wholeTenant: true } }), "POST", "/api/v1/notification-campaigns", false],
+  ["useUpdateCampaign", () => useUpdateCampaign(), (m: unknown) => (m as ReturnType<typeof useUpdateCampaign>).mutateAsync({ id: "c1", draft: { title: "t", body: "b", audience: { wholeTenant: true } } }), "PUT", "/api/v1/notification-campaigns/c1", true],
+  ["useCancelCampaign", () => useCancelCampaign(), (m: unknown) => (m as ReturnType<typeof useCancelCampaign>).mutateAsync("c1"), "POST", "/api/v1/notification-campaigns/c1/cancel", true],
+] as const)("%s calls the API and invalidates lists and summary", async (_name, useHook, run, method, path, hasDetail) => {
+  respond({ id: "c1" });
+  const keys = seedCampaignCaches("c1");
+  const { result } = renderHook(() => useHook(), { wrapper });
+  await act(async () => {
+    await run(result.current);
+  });
+  expect(calls()[0]?.method).toBe(method);
+  expect(calls()[0]?.url).toBe("https://api.erg.test" + path);
+  for (const key of keys.slice(0, 4)) expect(client.getQueryState(key)?.isInvalidated).toBe(true);
+  // create has no id yet, so only the list-wide keys are guaranteed
+  expect(client.getQueryState(campaignKeys.detail("c1"))?.isInvalidated).toBe(hasDetail);
+});
+
 test("useScheduleCampaign sends scheduledAt in the body", async () => {
   respond({ id: "c1", status: "SCHEDULED" });
   const { result } = renderHook(() => useScheduleCampaign("2026-11-10T01:00:00.000Z"), { wrapper });
@@ -94,6 +122,17 @@ test("usePeopleSearch makes no request for fewer than 2 characters, and one for 
   await waitFor(() => expect(long.result.current.data).toEqual([{ userId: "u1", displayName: "Mai" }]));
   expect(calls()).toHaveLength(1);
   expect(calls()[0]?.url).toBe("https://api.erg.test/api/v1/notification-campaigns/people?q=Ma");
+});
+
+test("usePeopleSearch clears results when the term drops below 2 characters, without another request", async () => {
+  respond([{ userId: "u1", displayName: "Mai" }]);
+  const { result, rerender } = renderHook(({ q }: { q: string }) => usePeopleSearch(q), { wrapper, initialProps: { q: "Ma" } });
+  await waitFor(() => expect(result.current.data).toHaveLength(1));
+  rerender({ q: "M" });
+  expect(result.current.data).toBeUndefined();
+  await new Promise((resolve) => setTimeout(resolve, 400));
+  expect(result.current.data).toBeUndefined();
+  expect(calls()).toHaveLength(1);
 });
 
 test("useResolvePeople POSTs the pasted lines", async () => {
@@ -123,21 +162,68 @@ test("useCampaignEstimate stays idle for an empty audience", async () => {
   expect(result.current.fetchStatus).toBe("idle");
 });
 
-test("useCampaignEstimate debounces audience edits into a single request", async () => {
-  respond({ total: 7, students: 7 });
+test("useCampaignEstimate sends nothing before 300 ms and one request (last audience) after", async () => {
+  vi.useFakeTimers();
+  try {
+    respond({ total: 7, students: 7 });
+    const { result, rerender } = renderHook(({ audience }: { audience: CampaignAudience }) => useCampaignEstimate(audience), {
+      wrapper,
+      initialProps: { audience: {} as CampaignAudience },
+    });
+    rerender({ audience: { classIds: ["a"] } });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(150);
+    });
+    rerender({ audience: { classIds: ["a", "b"] } });
+    rerender({ audience: { classIds: ["a", "b", "c"] } });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(299);
+    });
+    expect(fetchMock).not.toHaveBeenCalled();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1);
+    });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    expect(calls()).toHaveLength(1);
+    expect(calls()[0]?.method).toBe("POST");
+    expect(JSON.parse(String(calls()[0]?.body))).toEqual({ classIds: ["a", "b", "c"] });
+    expect(result.current.data).toEqual({ total: 7, students: 7 });
+  } finally {
+    vi.useRealTimers();
+  }
+});
+
+test("useCampaignEstimate drops the previous breakdown as soon as the audience is cleared", async () => {
+  respond({ total: 3 });
   const { result, rerender } = renderHook(({ audience }: { audience: CampaignAudience }) => useCampaignEstimate(audience), {
     wrapper,
-    initialProps: { audience: {} as CampaignAudience },
+    initialProps: { audience: { classIds: ["a"] } as CampaignAudience },
   });
-  rerender({ audience: { classIds: ["a"] } });
-  rerender({ audience: { classIds: ["a", "b"] } });
-  rerender({ audience: { classIds: ["a", "b", "c"] } });
-  expect(fetchMock).not.toHaveBeenCalled();
-
-  await waitFor(() => expect(result.current.data).toEqual({ total: 7, students: 7 }));
+  await waitFor(() => expect(result.current.data).toEqual({ total: 3 }));
+  rerender({ audience: { classIds: [], wholeTenant: false } });
+  expect(result.current.data).toBeUndefined();
+  await new Promise((resolve) => setTimeout(resolve, 400));
+  expect(result.current.data).toBeUndefined();
   expect(calls()).toHaveLength(1);
-  expect(calls()[0]?.method).toBe("POST");
-  expect(JSON.parse(String(calls()[0]?.body))).toEqual({ classIds: ["a", "b", "c"] });
+});
+
+test("normalizeAudience makes element order irrelevant and drops empty parts", () => {
+  expect(normalizeAudience({ classIds: ["b", "a", "a"], userIds: [], wholeTenant: false })).toEqual({ classIds: ["a", "b"] });
+  expect(JSON.stringify(normalizeAudience({ roles: ["STUDENT"], classIds: ["x"], wholeTenant: true }))).toBe(
+    JSON.stringify(normalizeAudience({ wholeTenant: true, classIds: ["x"], roles: ["STUDENT"] })),
+  );
+});
+
+test("useCampaignEstimate shares one request between [a,b] and [b,a]", async () => {
+  respond({ total: 2 });
+  const first = renderHook(() => useCampaignEstimate({ classIds: ["a", "b"] }), { wrapper });
+  const second = renderHook(() => useCampaignEstimate({ classIds: ["b", "a"] }), { wrapper });
+  await waitFor(() => expect(first.result.current.data).toEqual({ total: 2 }));
+  await waitFor(() => expect(second.result.current.data).toEqual({ total: 2 }));
+  expect(calls()).toHaveLength(1);
 });
 
 test("useAckNotification POSTs /notifications/{id}/ack and refreshes the inbox and unread badge", async () => {

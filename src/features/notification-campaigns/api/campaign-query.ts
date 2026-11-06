@@ -36,6 +36,18 @@ const PEOPLE_DEBOUNCE_MS = 250;
 const ESTIMATE_DEBOUNCE_MS = 300;
 const realtime = { staleTime: QUERY_POLICIES.realtime.staleTime, gcTime: QUERY_POLICIES.realtime.gcTime };
 
+const ID_LISTS = ["classIds", "groupIds", "gradeIds", "schoolIds", "userIds", "roles"] as const;
+
+/** Canonical audience: sorted, de-duplicated lists, empty lists and a false wholeTenant dropped, fixed key order. Used for cache keys and the request body. */
+export function normalizeAudience(audience: CampaignAudience): CampaignAudience {
+  return {
+    ...Object.fromEntries(
+      ID_LISTS.flatMap((name) => (audience[name]?.length ? [[name, [...new Set(audience[name])].sort()]] : [])),
+    ),
+    ...(audience.wholeTenant ? { wholeTenant: true } : {}),
+  };
+}
+
 /** Same rule as the backend: nothing selected and not the whole tenant. */
 export function isAudienceEmpty(audience: CampaignAudience) {
   return (
@@ -83,25 +95,29 @@ export function useCampaignRecipients(id: string | undefined, filter: CampaignRe
 /** Debounced (300 ms) and disabled while the audience is empty. */
 export function useCampaignEstimate(audience: CampaignAudience) {
   // Debounce a string: a fresh object each render would re-arm the debouncer forever.
-  const debouncedKey = useDebouncedValue(JSON.stringify(audience), ESTIMATE_DEBOUNCE_MS);
-  const debounced = JSON.parse(debouncedKey) as CampaignAudience;
+  const debouncedKey = useDebouncedValue(JSON.stringify(normalizeAudience(audience)), ESTIMATE_DEBOUNCE_MS);
+  // An emptied audience takes effect at once (no debounce lag showing the old breakdown).
+  const effective = isAudienceEmpty(audience) ? {} : (JSON.parse(debouncedKey) as CampaignAudience);
+  const empty = isAudienceEmpty(effective);
   return useQuery({
-    queryKey: campaignKeys.estimate(debounced),
-    queryFn: ({ signal }) => estimateAudience(debounced, signal),
-    enabled: !isAudienceEmpty(audience) && !isAudienceEmpty(debounced),
-    placeholderData: keepPreviousData,
+    queryKey: campaignKeys.estimate(effective),
+    queryFn: ({ signal }) => estimateAudience(effective, signal),
+    enabled: !empty,
+    placeholderData: (previous) => (empty ? undefined : previous),
     ...realtime,
   });
 }
 
 /** No network call until the (debounced) query has at least 2 characters. */
 export function usePeopleSearch(q: string) {
-  const query = useDebouncedValue(q.trim(), PEOPLE_DEBOUNCE_MS);
+  const debounced = useDebouncedValue(q.trim(), PEOPLE_DEBOUNCE_MS);
+  // Dropping below the minimum clears the term at once, so stale results never linger.
+  const term = q.trim().length >= PEOPLE_MIN_CHARS && debounced.length >= PEOPLE_MIN_CHARS ? debounced : "";
   return useQuery({
-    queryKey: campaignKeys.people(query),
-    queryFn: ({ signal }) => searchPeople(query, signal),
-    enabled: q.trim().length >= PEOPLE_MIN_CHARS && query.length >= PEOPLE_MIN_CHARS,
-    placeholderData: keepPreviousData,
+    queryKey: campaignKeys.people(term),
+    queryFn: ({ signal }) => searchPeople(term, signal),
+    enabled: term !== "",
+    placeholderData: (previous) => (term ? previous : undefined),
     ...realtime,
   });
 }
