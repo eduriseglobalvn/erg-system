@@ -66,7 +66,7 @@ test.describe("web question list column", () => {
 });
 
 test.describe("phone matching puzzle with a 120-character answer", () => {
-  for (const width of [320, 375]) {
+  for (const width of [320, 375, 390]) {
     test.describe(`${width}px`, () => {
       test.use({ viewport: { width, height: 667 }, hasTouch: true, isMobile: true });
 
@@ -77,7 +77,22 @@ test.describe("phone matching puzzle with a 120-character answer", () => {
 
         expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
         for (const piece of await page.locator("[data-piece]").all()) {
-          expect((await piece.boundingBox())?.width ?? 0).toBeLessThanOrEqual(Math.max(120, Math.floor((width - 32 - 66) / 2)) + 1);
+          expect((await piece.boundingBox())?.width ?? 0).toBeLessThanOrEqual(Math.max(120, Math.floor((width - 32 - 26 - 66) / 2)) + 1);
+        }
+
+        // Both pieces of a row are drawn as tall as the row (the long answer wraps into a tall one).
+        const heights = await page.locator("[data-piece]").evaluateAll((nodes) => nodes.map((node) => Math.round(node.getBoundingClientRect().height)));
+        for (let row = 0; row < heights.length; row += 2) expect(heights[row]).toBe(heights[row + 1]);
+        expect(Math.max(...heights)).toBeGreaterThan(54);
+
+        // From a 343 px box up the learner board fits without scrolling inside its own box; at 320 the 120 px floor may still scroll.
+        if (width >= 375) {
+          const fits = await page.locator("[data-piece]").first().evaluate((node) => {
+            let box = node.parentElement;
+            while (box && getComputedStyle(box).overflowX !== "auto") box = box.parentElement;
+            return box ? box.scrollWidth <= box.clientWidth : false;
+          });
+          expect(fits).toBe(true);
         }
 
         const names = () => pieces.evaluateAll((nodes) => nodes.map((node) => /^Mảnh (.+), hàng/.exec(node.getAttribute("aria-label") ?? "")?.[1]));

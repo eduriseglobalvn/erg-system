@@ -4,6 +4,7 @@ import { describe, expect, test, vi } from "vitest";
 import { MatchingQuestion } from "@/components/quiz/questions/matching-question";
 import type { Question } from "@/domain/quiz/types";
 
+// Regression guard: a phone must get the puzzle, not the old select UI.
 vi.mock("@/hooks/use-mobile", () => ({
   useIsMobile: () => true,
 }));

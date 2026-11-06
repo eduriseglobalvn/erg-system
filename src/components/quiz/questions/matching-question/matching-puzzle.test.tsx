@@ -115,6 +115,21 @@ describe("MatchingPuzzle on a phone with a long answer", () => {
     expect(getComputedStyle(right).overflowWrap).toBe("anywhere");
   });
 
+  test("the number column comes off the cap and an empty trailing column takes no room", () => {
+    vi.spyOn(HTMLElement.prototype, "clientWidth", "get").mockReturnValue(343);
+    const plain = rows.map((row) => ({ ...row, trailing: undefined }));
+    const { container } = render(<MatchingPuzzle rows={plain} mode="learner" onDrop={vi.fn()} />);
+    for (const piece of Array.from(container.querySelectorAll<HTMLElement>("[data-piece]"))) expect(getComputedStyle(piece).maxWidth).toBe("125px"); // floor((343 - 26 - 48 - 18) / 2)
+    const grid = container.querySelector<HTMLElement>("[data-piece]")!.parentElement!.parentElement!;
+    expect(getComputedStyle(grid).gridTemplateColumns.split(" ")).toHaveLength(3);
+  });
+
+  test("a verdict keeps the trailing column", () => {
+    const { container } = render(<MatchingPuzzle rows={rows} mode="learner" onDrop={vi.fn()} />);
+    const grid = container.querySelector<HTMLElement>("[data-piece]")!.parentElement!.parentElement!;
+    expect(getComputedStyle(grid).gridTemplateColumns.split(" ")).toHaveLength(4);
+  });
+
   test("without a measured width (no layout) pieces keep the web cap", () => {
     const { container } = render(<MatchingPuzzle rows={rows.slice(0, 1)} mode="learner" onDrop={vi.fn()} />);
     for (const piece of Array.from(container.querySelectorAll<HTMLElement>("[data-piece]"))) expect(getComputedStyle(piece).maxWidth).toBe("380px");

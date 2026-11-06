@@ -119,7 +119,9 @@ export function MatchingPuzzle({ rows, mode, locked = false, onDrop }: Props) {
     observer.observe(node);
     return () => observer.disconnect();
   }, []);
-  const maxWidth = boxWidth > 0 ? pieceMaxWidthFor(boxWidth) : PUZZLE.maxWidth;
+  // The verdict column only exists once some row has a verdict, so a plain learner board gets the width back.
+  const hasTrailing = rows.some((row) => row.trailing);
+  const maxWidth = boxWidth > 0 ? pieceMaxWidthFor(boxWidth - PUZZLE.numberColumn) : PUZZLE.maxWidth;
 
   // A move swaps content under fixed rows, so focus follows the piece once the next rows render; a rejected move matches nothing.
   useEffect(() => {
@@ -182,7 +184,7 @@ export function MatchingPuzzle({ rows, mode, locked = false, onDrop }: Props) {
       <Box ref={scrollRef} sx={{ overflowX: "auto" }}>
         <Box
           ref={gridRef}
-          sx={{ display: "grid", gridTemplateColumns: "26px max-content max-content auto", rowGap: 1.75, alignItems: "stretch", width: "max-content", mx: "auto" }}
+          sx={{ display: "grid", gridTemplateColumns: `${PUZZLE.numberColumn}px max-content max-content${hasTrailing ? " auto" : ""}`, rowGap: 1.75, alignItems: "stretch", width: "max-content", mx: "auto" }}
         >
           {rows.map((row, index) => (
             <Fragment key={row.id}>
@@ -193,7 +195,7 @@ export function MatchingPuzzle({ rows, mode, locked = false, onDrop }: Props) {
               ) : (
                 <Box key={row.id} />
               )}
-              <Box sx={{ alignSelf: "center", pl: 1.5, minWidth: 60 }}>{row.trailing}</Box>
+              {hasTrailing ? <Box sx={{ alignSelf: "center", pl: 1.5, minWidth: 60 }}>{row.trailing}</Box> : null}
             </Fragment>
           ))}
         </Box>
