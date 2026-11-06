@@ -31,7 +31,7 @@ export function useQuizList({ scope, quizId, ready, groups, quizProject, selectS
   // An open quiz no topic claims (opened by URL, or without a topic) is still listed as itself.
   const viewAll = selectedTopicId === "all" && !quizId;
   const liveSlides = useMemo(() => groups.flatMap((group) => group.slides), [groups]);
-  const { rows: topics } = useLevelTopicQuizzes({
+  const { rows: topics, quizzesPending } = useLevelTopicQuizzes({
     subjectId: scope.selectedCourseId,
     levelId: scope.selectedLevelId ?? "",
     topics: scope.levelTopics,
@@ -78,5 +78,5 @@ export function useQuizList({ scope, quizId, ready, groups, quizProject, selectS
     setPending({ quizId: row.topic.quizId, slideId: row.slide.id });
   }
 
-  return { topics, rows, topicLabel: viewAll ? null : (selectedTopic?.label ?? quizProject.info.title), selectTopic, openRow };
+  return { topics, topicsLoading: quizzesPending, rows, topicLabel: viewAll ? null : (selectedTopic?.label ?? quizProject.info.title), selectTopic, openRow };
 }

@@ -35,6 +35,18 @@ describe("TopicRail", () => {
     expect(onSelect).toHaveBeenLastCalledWith(null);
   });
 
+  it("while the Level's quiz list loads, topics cannot be picked yet (a click would start a second quiz)", () => {
+    const onSelect = vi.fn();
+    render(<TopicRail loading onSelect={onSelect} rows={rows} selectedTopicId="all" />);
+    const hinh = screen.getByRole("button", { name: /Hình học/ });
+    expect(hinh).toBeDisabled();
+    expect(within(hinh).queryByText("Chưa có bài")).toBeNull();
+    fireEvent.click(hinh);
+    expect(onSelect).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: /Tất cả/ }));
+    expect(onSelect).toHaveBeenCalledWith(null);
+  });
+
   it("guides to the question bank when the Level has no topics, with no add-topic button", () => {
     render(<TopicRail onSelect={vi.fn()} rows={[]} selectedTopicId="all" />);
     expect(screen.getByText(/Level này chưa có chủ đề\. Thêm chủ đề ở/)).toBeInTheDocument();

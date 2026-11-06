@@ -135,7 +135,7 @@ export function QuizEditorWorkspace({
         isPublishing={isPublishing}
       />
       <Box sx={{ bgcolor: "background.default", display: "flex", flex: 1, gap: 2, minHeight: 0, p: 2 }}>
-        <TopicRail onSelect={list.selectTopic} rows={list.topics} selectedTopicId={scope.selectedTopicId} />
+        <TopicRail loading={list.topicsLoading} onSelect={list.selectTopic} rows={list.topics} selectedTopicId={scope.selectedTopicId} />
         <Box sx={{ display: "flex", flex: 1, flexDirection: "column", minHeight: 0, minWidth: 0 }}>
           <QuizEditorSyncLayer loadFailed={loadFailed} onRetry={retry} retrying={retrying} sync={sync}>
             {importNoticeCount > 0 ? (

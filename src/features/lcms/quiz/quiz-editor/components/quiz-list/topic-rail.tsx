@@ -18,20 +18,22 @@ const DOT: Record<QuizLifecycle, string> = {
   changed: tokens.statusTint.warning.dot,
 };
 
-function RailItem({ label, count, lifecycle, selected, onClick }: {
+function RailItem({ label, count, lifecycle, selected, disabled, onClick }: {
   label: string;
   count: number;
   lifecycle?: QuizLifecycle;
   selected: boolean;
+  disabled?: boolean;
   onClick: () => void;
 }) {
   return (
     <ButtonBase
       aria-current={selected ? "true" : undefined}
+      disabled={disabled}
       onClick={onClick}
       sx={{
         alignItems: "center", borderRadius: `${tokens.radius.control}px`, display: "grid", gap: 1, gridTemplateColumns: "1fr auto 8px",
-        justifyItems: "start", px: 1.5, py: 1, textAlign: "left", width: "100%",
+        justifyItems: "start", px: 1.5, py: 1, textAlign: "left", width: "100%", "&.Mui-disabled": { color: "text.disabled" },
         transition: `background-color ${tokens.motion.duration.fast}ms ${tokens.motion.easing.standard}`,
         // Same selected look as the sidebar: solid primary, white text.
         ...(selected
@@ -56,15 +58,18 @@ function RailItem({ label, count, lifecycle, selected, onClick }: {
 }
 
 /** The Level's topics; "Tất cả" (row null) only views. Topics are managed in the question bank, never added here. */
-export function TopicRail({ rows, selectedTopicId, onSelect }: {
+export function TopicRail({ rows, selectedTopicId, loading = false, onSelect }: {
   rows: TopicRow[];
   selectedTopicId: string;
+  /** The Level's quizzes are still loading: a topic picked now would look quizless and start a second quiz. */
+  loading?: boolean;
   onSelect: (row: TopicRow | null) => void;
 }) {
   return (
     <Box
       aria-label="Chủ đề"
       component="nav"
+      aria-busy={loading || undefined}
       sx={{ bgcolor: "background.paper", border: 1, borderColor: "divider", borderRadius: `${tokens.radius.card}px`, display: "flex", flexDirection: "column", flexShrink: 0, gap: 0.5, overflowY: "auto", p: 1, width: 240 }}
     >
       {rows.length ? (
@@ -78,9 +83,10 @@ export function TopicRail({ rows, selectedTopicId, onSelect }: {
           {rows.map((row) => (
             <RailItem
               count={row.questionCount}
+              disabled={loading}
               key={row.id}
               label={row.label}
-              lifecycle={row.lifecycle}
+              lifecycle={loading ? undefined : row.lifecycle}
               onClick={() => onSelect(row)}
               selected={row.id === selectedTopicId}
             />

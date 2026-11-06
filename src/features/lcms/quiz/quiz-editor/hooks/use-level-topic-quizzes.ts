@@ -1,7 +1,7 @@
 import { useQueries, useQuery } from "@tanstack/react-query";
 
 import type { QuizEditorDraftDocument } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-api";
-import { quizEditorDraftQueryOptions, quizEditorWorkspaceQueryOptions } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-query";
+import { quizEditorDraftQueryOptions, quizEditorLevelQuizzesQueryOptions } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-query";
 import { buildTopicRail, type OpenQuiz } from "@/features/lcms/quiz/quiz-editor/model/topic-rail";
 
 /** The Level's topics, each joined to its quiz and that quiz's draft, for the topic rail. */
@@ -12,8 +12,8 @@ export function useLevelTopicQuizzes(scope: {
   openQuiz?: OpenQuiz | null;
 }) {
   const { subjectId, levelId, topics, openQuiz = null } = scope;
-  const workspace = useQuery({ ...quizEditorWorkspaceQueryOptions({ subjectId, levelId, size: 50 }), enabled: Boolean(subjectId && levelId) });
-  const summaries = workspace.data?.quizzes.items ?? [];
+  const workspace = useQuery({ ...quizEditorLevelQuizzesQueryOptions({ subjectId, levelId }), enabled: Boolean(subjectId && levelId) });
+  const summaries = workspace.data ?? [];
   // Only the quizzes a topic actually shows need their draft.
   const quizIds = buildTopicRail(topics, summaries, {}).flatMap((row) => (row.quizId ? [row.quizId] : []));
   const draftQueries = useQueries({ queries: quizIds.map((quizId) => quizEditorDraftQueryOptions(quizId)) });
@@ -23,6 +23,7 @@ export function useLevelTopicQuizzes(scope: {
   });
   return {
     rows: buildTopicRail(topics, summaries, drafts, openQuiz),
-    isLoading: workspace.isLoading || draftQueries.some((query) => query.isLoading),
+    // Pending, not loading: offline the query pauses, and a topic must still not pass for one without a quiz.
+    quizzesPending: workspace.isPending,
   };
 }

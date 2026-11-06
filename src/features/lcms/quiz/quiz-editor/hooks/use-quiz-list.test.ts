@@ -10,7 +10,7 @@ import type { TopicRow } from "@/features/lcms/quiz/quiz-editor/model/topic-rail
 import type { QuizEditorGroup, QuizEditorSlide } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 
 const topics = vi.hoisted(() => ({ rows: [] as TopicRow[] }));
-vi.mock("@/features/lcms/quiz/quiz-editor/hooks/use-level-topic-quizzes", () => ({ useLevelTopicQuizzes: () => ({ rows: topics.rows, isLoading: false }) }));
+vi.mock("@/features/lcms/quiz/quiz-editor/hooks/use-level-topic-quizzes", () => ({ useLevelTopicQuizzes: () => ({ rows: topics.rows, quizzesPending: false }) }));
 
 import { useQuizList } from "./use-quiz-list";
 
