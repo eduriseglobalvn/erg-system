@@ -113,6 +113,19 @@ describe("QuestionEditorShell", () => {
     expect(screen.getByText("Luyện tập")).toBeInTheDocument();
   });
 
+  it("a new question offers both message buttons, and its try-run says \"Chính xác!\" once", () => {
+    const fresh = buildQuestionSlide("multiple-choice", createNewQuizProjectSettings(), (prefix) => `${prefix}-new`);
+    const authored: QuizEditorSlide = { ...fresh, title: "1 + 1 = ?", choices: [choice("x", "2", true), choice("y", "3")] };
+    renderShell({ groups: [{ ...groups[0]!, slides: [authored] }], selectedSlide: authored });
+    expect(screen.getByRole("button", { name: "+ Khi đúng" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "+ Khi sai" })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Học viên làm" }));
+    fireEvent.click(screen.getByText("2"));
+    fireEvent.click(screen.getByRole("button", { name: "Xem kết quả" }));
+    expect(screen.getByRole("status").textContent).toBe("Chính xác!");
+  });
+
   it("reveals the correct-answer message box", () => {
     renderShell();
     fireEvent.click(screen.getByRole("button", { name: "+ Khi đúng" }));

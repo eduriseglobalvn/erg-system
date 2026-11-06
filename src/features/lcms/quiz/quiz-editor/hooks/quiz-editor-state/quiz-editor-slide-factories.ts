@@ -37,10 +37,8 @@ export function buildQuestionSlide(
   quizProject: QuizProjectSettings,
   createId: CreateId,
 ): QuizEditorSlide {
-  const defaultFeedbackRows = createFeedbackRows(
-    quizProject.questionDefaults.correctFeedback,
-    quizProject.questionDefaults.incorrectFeedback,
-  ).map((row) =>
+  // No message yet: "+ Khi đúng" / "+ Khi sai" open the boxes (spec §5). The rows keep the points.
+  const defaultFeedbackRows = createFeedbackRows("", "").map((row) =>
     row.kind === "correct"
       ? { ...row, score: quizProject.questionDefaults.positivePoints }
       : { ...row, score: quizProject.questionDefaults.negativePoints },

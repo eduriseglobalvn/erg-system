@@ -16,6 +16,13 @@ describe("buildQuestionSlide", () => {
     expect(slide.choices!.every((choice) => choice.label === "" && !choice.correct)).toBe(true);
   });
 
+  it("starts with no feedback text, so \"+ Khi đúng\" and \"+ Khi sai\" open the boxes; the points stay", () => {
+    const settings = createNewQuizProjectSettings();
+    const slide = build("multiple-choice");
+    expect(slide.feedbackRows!.map((row) => [row.kind, row.feedback])).toEqual([["correct", ""], ["incorrect", ""]]);
+    expect(slide.feedbackRows!.find((row) => row.kind === "correct")!.score).toBe(settings.questionDefaults.positivePoints);
+  });
+
   it("starts multiple-response empty too", () => {
     const slide = build("multiple-response");
     expect(slide.choices!.every((choice) => choice.label === "" && !choice.correct)).toBe(true);
