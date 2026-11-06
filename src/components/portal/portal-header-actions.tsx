@@ -58,6 +58,8 @@ const WORKSPACE_LOCAL_PATHS: Record<Workspace, string> = {
 };
 
 type PortalHeaderActionsProps = {
+  /** The phone dock already carries Hộp thư, so the bell is redundant. */
+  hideNotifications?: boolean;
   notificationCount: number;
   onOpenNotifications: () => void;
   userName?: string;
@@ -69,6 +71,7 @@ type PortalHeaderActionsProps = {
 };
 
 export function PortalHeaderActions({
+  hideNotifications = false,
   notificationCount,
   onOpenNotifications,
   userName,
@@ -128,7 +131,7 @@ export function PortalHeaderActions({
         </Box>
       </Tooltip>
 
-      <Tooltip title="Thông báo">
+      {hideNotifications ? null : <Tooltip title="Thông báo">
         <IconButton onClick={onOpenNotifications} sx={{ ...HEADER_ICON_BUTTON_SX, height: { xs: 44, md: 32 }, width: { xs: 44, md: 32 }, ml: 0.5 }}>
           {notificationCount > 0 ? (
             <Badge badgeContent={notificationCount} color="error" max={99}>
@@ -138,7 +141,7 @@ export function PortalHeaderActions({
             <NotificationsNoneRoundedIcon sx={{ fontSize: 19 }} />
           )}
         </IconButton>
-      </Tooltip>
+      </Tooltip>}
 
       <Tooltip title={userName || "Tài khoản"}>
         <IconButton onClick={(e) => setMenuAnchor(e.currentTarget)} sx={{ bgcolor: "transparent", border: 0, borderRadius: "50%", boxShadow: "none", height: { xs: 44, md: 32 }, ml: 0.5, p: 0, width: { xs: 44, md: 32 }, "&:hover": { opacity: 0.88 } }}>

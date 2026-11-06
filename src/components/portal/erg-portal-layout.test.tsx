@@ -111,3 +111,21 @@ it("closes the open sheet when the viewport leaves phone width", () => {
   rerender(tree());
   expect(screen.queryByRole("dialog")).toBeNull();
 });
+
+it("hides the header bell on a phone with a dock and keeps it without one", () => {
+  mockViewport(375);
+  const { unmount } = render(
+    <ErgPortalLayout menuGroups={[]} mobileDock={dock} portalInfo={{ name: "Admin" }}>
+      <div>Nội dung</div>
+    </ErgPortalLayout>,
+  );
+  expect(screen.queryByRole("button", { name: "Thông báo" })).toBeNull();
+  unmount();
+
+  render(
+    <ErgPortalLayout menuGroups={[]} portalInfo={{ name: "Admin" }}>
+      <div>Nội dung</div>
+    </ErgPortalLayout>,
+  );
+  expect(screen.getByRole("button", { name: "Thông báo" })).toBeInTheDocument();
+});

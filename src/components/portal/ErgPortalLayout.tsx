@@ -176,6 +176,7 @@ export default function ErgPortalLayout({
           headerControls={headerControls}
           onMenuOpen={dock ? undefined : () => setMobileNavigationOpen(true)}
           hideIdentity={hideHeaderIdentity}
+          hideNotifications={Boolean(dock)}
           headerTrailingControls={headerTrailingControls}
           portalPlan={portalInfo?.plan}
           portalName={portalInfo?.name}
