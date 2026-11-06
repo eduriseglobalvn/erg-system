@@ -37,4 +37,10 @@ describe("Quiz Player Shell ownership", () => {
       expect(source).not.toContain("matching-question");
     }
   });
+
+  it("never pulls quiz editor code into the player", () => {
+    for (const file of [resolve(PLAYER, "player-shell.tsx"), ...RUNTIME_FILES.map((name) => resolve(PLAYER, name)), resolve(ROOT, "player-shell-runtime-model.ts")]) {
+      expect(readFileSync(file, "utf8")).not.toContain("quiz-editor");
+    }
+  });
 });

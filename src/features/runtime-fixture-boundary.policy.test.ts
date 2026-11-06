@@ -27,6 +27,8 @@ test("keeps quiz and authoring synthetic payloads behind the explicit dev gate",
   const teacherDashboard = readFileSync(resolve(process.cwd(), "src/features/lms/learning-resources/api/teacher-resource-dashboard-api.ts"), "utf8");
 
   expect(quizEditor).not.toContain("runtimeFixturesEnabled");
+  // No synthetic draft, gated or not: the editor reads the server or the device copy only.
+  expect(quizEditor).not.toMatch(/mockDraft|createMock\w*\(/);
   expect(quizPackage).toContain("runtimeFixturesEnabled()");
   expect(quizPackage).not.toMatch(/if \(!hasApiBase\(\)\)\s*{\s*return createQuizPackage/s);
   expect(attemptCommands).toContain("runtimeFixturesEnabled()");
