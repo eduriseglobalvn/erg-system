@@ -48,6 +48,7 @@ describe("QuestionTypePickerDialog", () => {
   it("does not create while an IME composition is running", () => {
     const { onPick, search } = setup();
     fireEvent.keyDown(search, { key: "Enter", isComposing: true });
+    fireEvent.keyDown(search, { key: "Enter", keyCode: 229 });
     expect(onPick).not.toHaveBeenCalled();
   });
 

@@ -106,6 +106,7 @@ describe("TrueFalseAuthoring", () => {
     const input = screen.getByRole("textbox", { name: "Nội dung phương án 1" });
     fireEvent.change(input, { target: { value: "Có" } });
     fireEvent.keyDown(input, { key: "Enter", isComposing: true });
+    fireEvent.keyDown(input, { key: "Enter", keyCode: 229 });
     expect(screen.getByRole("textbox", { name: "Nội dung phương án 1" })).toBeInTheDocument();
   });
 });

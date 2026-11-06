@@ -84,7 +84,7 @@ export function LikertAuthoring({ question, onChange }: { question: Question; on
                     inputProps={{ "aria-label": `Nhận định ${index + 1}` }}
                     onChange={(e) => setRows(rows.map((r) => (r.id === row.id ? { ...r, label: e.target.value } : r)))}
                     onKeyDown={(e) => {
-                      if (e.nativeEvent.isComposing || e.key !== "Enter" || index !== rows.length - 1 || !row.label.trim()) return;
+                      if (e.nativeEvent.isComposing || e.keyCode === 229 || e.key !== "Enter" || index !== rows.length - 1 || !row.label.trim()) return;
                       e.preventDefault();
                       addRow();
                     }}

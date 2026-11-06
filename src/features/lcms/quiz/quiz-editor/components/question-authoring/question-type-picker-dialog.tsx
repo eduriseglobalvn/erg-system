@@ -61,7 +61,7 @@ export function QuestionTypePickerDialog({
   const active = entries.find((entry) => entry.type === activeType) ?? entries[0];
 
   function handleKeyDown(event: KeyboardEvent) {
-    if (event.key === "Enter" && active && !event.nativeEvent.isComposing) {
+    if (event.key === "Enter" && active && !event.nativeEvent.isComposing && event.keyCode !== 229) {
       event.preventDefault();
       pick(active.type);
     } else if ((event.key === "ArrowDown" || event.key === "ArrowUp") && entries.length > 0) {

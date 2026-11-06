@@ -35,7 +35,7 @@ function EditableLabel({ label, ariaLabel, onCommit }: { label: string; ariaLabe
       <Box
         aria-label={`${label}, nhấn Enter để sửa`}
         onDoubleClick={open}
-        onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && !e.nativeEvent.isComposing) { e.preventDefault(); open(); } }}
+        onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && !e.nativeEvent.isComposing && e.keyCode !== 229) { e.preventDefault(); open(); } }}
         ref={labelRef}
         role="button"
         sx={{ typography: "body1", fontWeight: "fontWeightMedium", cursor: "text", py: 0.5 }}
@@ -53,7 +53,7 @@ function EditableLabel({ label, ariaLabel, onCommit }: { label: string; ariaLabe
       onBlur={() => finish(true, false)}
       onChange={(e) => setDraft({ text: e.target.value, from: label })}
       onKeyDown={(e) => {
-        if (e.nativeEvent.isComposing) return;
+        if (e.nativeEvent.isComposing || e.keyCode === 229) return;
         if (e.key === "Enter") { e.preventDefault(); finish(true, true); }
         if (e.key === "Escape") { e.stopPropagation(); finish(false, true); }
       }}

@@ -51,7 +51,7 @@ export function ChoiceRow(props: {
           fullWidth
           inputProps={{ "aria-label": `Nội dung phương án ${n}`, "data-input-id": choice.id }}
           onChange={(e) => props.onPatch({ label: e.target.value })}
-          onKeyDown={(e) => { if (e.key === "Enter" && !e.nativeEvent.isComposing) { e.preventDefault(); if (!e.repeat && choice.label.trim()) props.onEnter(); } }}
+          onKeyDown={(e) => { if (e.key === "Enter" && !e.nativeEvent.isComposing && e.keyCode !== 229) { e.preventDefault(); if (!e.repeat && choice.label.trim()) props.onEnter(); } }}
           placeholder={`Phương án ${n}`}
           sx={{ typography: "body1", fontWeight: "fontWeightMedium" }}
           value={choice.label}

@@ -85,6 +85,13 @@ describe("SequenceAuthoring", () => {
     expect(last().sequenceCorrectOrder).toEqual(last().sequenceItems!.map((i) => i.id));
   });
 
+  it("does not append on an Enter that ends an IME composition", () => {
+    const { onChange } = setup(base(3));
+    fireEvent.keyDown(screen.getByPlaceholderText("Bước 3"), { key: "Enter", isComposing: true });
+    fireEvent.keyDown(screen.getByPlaceholderText("Bước 3"), { key: "Enter", keyCode: 229 });
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
   it("does not append a blank step on Enter in an empty last step", () => {
     const q = base(3);
     q.sequenceItems![2].label = "  ";

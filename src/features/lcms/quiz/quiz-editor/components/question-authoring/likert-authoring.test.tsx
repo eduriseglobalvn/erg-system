@@ -63,6 +63,15 @@ describe("LikertAuthoring", () => {
     expect(screen.getAllByPlaceholderText("Nhập nhận định")).toHaveLength(2);
   });
 
+  it("an Enter that ends an IME composition does not append a row", () => {
+    render(<Harness start={mk(["a", "b"])} />);
+    const input = screen.getAllByPlaceholderText("Nhập nhận định")[0];
+    fireEvent.change(input, { target: { value: "x" } });
+    fireEvent.keyDown(input, { key: "Enter", isComposing: true });
+    fireEvent.keyDown(input, { key: "Enter", keyCode: 229 });
+    expect(screen.getAllByPlaceholderText("Nhập nhận định")).toHaveLength(1);
+  });
+
   it("editing a header label switches the select to Tự đặt", () => {
     render(<Harness start={mk(["Không đồng ý", "Đồng ý"])} />);
     fireEvent.change(screen.getByRole("textbox", { name: "Nhãn mức 1" }), { target: { value: "Xyz" } });

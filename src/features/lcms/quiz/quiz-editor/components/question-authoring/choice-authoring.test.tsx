@@ -106,6 +106,7 @@ describe("ChoiceAuthoring", () => {
   it("does not append while an IME composition is active", () => {
     const { onChange } = setup(base([], 3));
     fireEvent.keyDown(screen.getByPlaceholderText("Phương án 3"), { key: "Enter", isComposing: true });
+    fireEvent.keyDown(screen.getByPlaceholderText("Phương án 3"), { key: "Enter", keyCode: 229 });
     expect(onChange).not.toHaveBeenCalled();
   });
 
