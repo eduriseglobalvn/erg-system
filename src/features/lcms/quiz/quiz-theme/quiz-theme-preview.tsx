@@ -46,7 +46,7 @@ export function QuizThemePreview({ copy, value }: PreviewProps) {
           background: style.tone.background,
           border: `1px solid ${t.color.border}`,
           borderRadius: `${t.radius.card}px`,
-          // A phone frame is ~375px and a desktop one ~1024px; both are drawn scaled down to this column's width.
+          // Phone is a narrow 260px mock with the question list hidden; desktop uses the full column width.
           maxWidth: phone ? PHONE_WIDTH : "none",
           minHeight: phone ? 440 : 360,
           mx: "auto",

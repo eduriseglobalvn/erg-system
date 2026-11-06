@@ -154,3 +154,21 @@ describe("QuizThemeDialog footer", () => {
     expect(onApply).toHaveBeenCalledWith(applyQuizThemePreset(custom, defaultQuizThemePreset));
   });
 });
+
+describe("QuizThemeDialog right/wrong options on the dark contrast tone", () => {
+  const dark = { ...saved, backgroundTone: "contrast" as const };
+  const colorOf = (text: string) => getComputedStyle(within(preview()).getByText(text).parentElement!).color;
+
+  it.each([
+    ["Đúng", ["SUM"]],
+    ["Sai", ["SUM", "COUNT"]],
+  ])("keeps the %s option text dark, not the white tone text", (stateName, options) => {
+    renderDialog(dark);
+    const whiteText = colorOf("AVERAGE");
+    fireEvent.click(screen.getByRole("button", { name: stateName }));
+    for (const option of options) {
+      expect(colorOf(option)).not.toBe(whiteText);
+      expect(colorOf(option)).not.toBe("");
+    }
+  });
+});

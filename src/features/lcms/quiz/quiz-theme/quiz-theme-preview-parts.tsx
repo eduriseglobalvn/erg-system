@@ -35,6 +35,12 @@ type PreviewProps = { copy: QuizThemeCopy; value: QuizPlayerTemplate };
 const RIGHT_OPTION = 1;
 const WRONG_OPTION = 0;
 
+/** Opaque light fills with their own dark text: readable on every theme, including the dark "contrast" tone. */
+const fixedLook = {
+  right: { tint: t.statusTint.success, border: t.color.success },
+  wrong: { tint: t.statusTint.error, border: t.color.danger },
+} as const;
+
 /** How an option reads in each state; right/wrong colors are fixed tokens, never theme colors. */
 function optionRole(state: PreviewState, index: number) {
   if (state === "playing") return index === RIGHT_OPTION ? "selected" : null;
@@ -80,17 +86,17 @@ export function PreviewQuestionCard({ copy, value, state, phone }: PreviewProps 
       {copy.preview.options.map((option, index) => {
         const role = optionRole(state, index);
         const selected = role === "selected";
-        const fixed = role === "right" ? t.color.success : role === "wrong" ? t.color.danger : null;
+        const fixed = role === "right" || role === "wrong" ? fixedLook[role] : null;
         return (
           <Stack
             key={option}
             direction="row"
             sx={{
               alignItems: "center",
-              bgcolor: role === "right" ? t.color.successSoft : role === "wrong" ? t.color.dangerSoft : selected ? value.highlightColor : style.tone.card,
-              border: `1.5px solid ${fixed ?? (selected ? value.accentColor : style.tone.border)}`,
+              bgcolor: fixed ? fixed.tint.bg : selected ? value.highlightColor : style.tone.card,
+              border: `1.5px solid ${fixed ? fixed.border : selected ? value.accentColor : style.tone.border}`,
               borderRadius: style.radius(12),
-              color: selected ? style.onHighlight : style.tone.text,
+              color: fixed ? fixed.tint.color : selected ? style.onHighlight : style.tone.text,
               gap: 1.25,
               px: 1.5,
               py: 0.75,
@@ -103,7 +109,7 @@ export function PreviewQuestionCard({ copy, value, state, phone }: PreviewProps 
                   bgcolor: selected ? value.accentColor : "transparent",
                   border: `1.5px solid ${selected ? value.accentColor : style.tone.border}`,
                   borderRadius: "50%",
-                  color: selected ? style.onAccent : style.tone.muted,
+                  color: fixed ? fixed.tint.color : selected ? style.onAccent : style.tone.muted,
                   display: "grid",
                   flex: "none",
                   height: 22,
@@ -116,7 +122,7 @@ export function PreviewQuestionCard({ copy, value, state, phone }: PreviewProps 
             ) : null}
             <Typography variant="body2" sx={{ flex: 1 }}>{option}</Typography>
             {fixed ? (
-              <Typography variant="caption" sx={{ color: fixed, fontWeight: "fontWeightBold" }}>
+              <Typography variant="caption" sx={{ color: fixed.tint.color, fontWeight: "fontWeightBold" }}>
                 {role === "right" ? copy.preview.correctAnswer : copy.preview.yourChoice}
               </Typography>
             ) : null}
