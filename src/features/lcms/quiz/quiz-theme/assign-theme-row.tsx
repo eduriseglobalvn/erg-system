@@ -1,8 +1,9 @@
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import Box from "@mui/material/Box";
 import ButtonBase from "@mui/material/ButtonBase";
 import Typography from "@mui/material/Typography";
-import Tooltip from "@mui/material/Tooltip";
 import { Link } from "@tanstack/react-router";
+import { useId } from "react";
 
 import { ErgSkeleton } from "@/components/erg-mui/erg-feedback";
 import { adminContentPathForSection } from "@/features/lcms/admin-content/admin-content-route";
@@ -19,6 +20,7 @@ const rowSx = { alignItems: "center", border: 1, borderColor: "divider", borderR
 /** The theme lives on the quiz, not the assignment: this row shows it and jumps to the editor's theme dialog. */
 export function AssignThemeRow({ quizId }: { quizId: string }) {
   const draft = useQuizEditorDraftQuery(quizId);
+  const captionId = useId();
   const { account, session } = useAuthSession("lms");
   // The editor route needs the ADMIN workspace and lms.quiz.create: same check as the route guard, so we never offer a dead link.
   const canEdit = resolveAuthRouteAccess(
@@ -30,9 +32,10 @@ export function AssignThemeRow({ quizId }: { quizId: string }) {
   const label = `Theme bài · ${themeNameFor(draft.data?.playerTemplate, viCopy)}`;
   if (!canEdit) {
     return (
-      <Tooltip title="Cần quyền Admin để đổi theme">
-        <Typography aria-description="Cần quyền Admin để đổi theme" component="div" sx={rowSx} variant="body2">{label}</Typography>
-      </Tooltip>
+      <Box aria-describedby={captionId} aria-label={label} role="group" sx={rowSx}>
+        <Typography component="span" variant="body2">{label}</Typography>
+        <Typography color="text.secondary" component="span" id={captionId} variant="caption">Cần quyền Admin để đổi theme</Typography>
+      </Box>
     );
   }
   return (

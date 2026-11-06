@@ -7,6 +7,7 @@ export type QuizThemeCopy = {
   groups: Record<QuizThemeGroup | "all", string>;
   presets: Record<QuizThemePresetId, string>;
   custom: string;
+  defaultTheme: string;
   customizeFrom: (name: string) => string;
   undo: string;
   colorSection: string;
@@ -87,6 +88,7 @@ export const viCopy: QuizThemeCopy = {
     lavender: "Tím mộng",
   },
   custom: "Tuỳ chỉnh",
+  defaultTheme: "Mặc định",
   customizeFrom: (name) => `Tự chỉnh từ “${name}”`,
   undo: "Hoàn tác",
   colorSection: "Màu và nền",
@@ -162,6 +164,7 @@ export const enCopy: QuizThemeCopy = {
     lavender: "Lavender",
   },
   custom: "Custom",
+  defaultTheme: "Default",
   customizeFrom: (name) => `Customize “${name}”`,
   undo: "Undo",
   colorSection: "Colors and background",

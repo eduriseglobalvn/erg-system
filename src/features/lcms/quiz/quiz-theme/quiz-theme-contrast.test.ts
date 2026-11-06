@@ -84,4 +84,16 @@ describe("quiz theme contrast", () => {
     expect(pair?.ratio).toBeGreaterThan(4.5);
     expect(pair?.pass).toBe(true);
   });
+
+  it("measures the highlight pair with the text the preview draws on the fill", () => {
+    const xanhOnContrast = { ...applyQuizThemePreset(saved, quizThemePresets.find((p) => p.id === "erg-blue")!), backgroundTone: "contrast" as const };
+    const find = (pairs: ReturnType<typeof checkThemeContrast>) => pairs.find((p) => p.id === "highlight-bg");
+    // Old default: the tone's white text on the pale fill (1.1:1).
+    expect(find(checkThemeContrast(xanhOnContrast))?.pass).toBe(false);
+    const readable = find(checkThemeContrast(xanhOnContrast, "#ffffff", "rgba(0, 0, 0, 0.87)"));
+    expect(readable?.pass).toBe(true);
+    expect(readable?.ratio).toBeGreaterThan(3);
+    // A genuinely bad pair still fails: dark text on a dark fill.
+    expect(find(checkThemeContrast({ ...saved, highlightColor: "#1D1D1F" }, "#ffffff", "rgba(0, 0, 0, 0.87)"))?.pass).toBe(false);
+  });
 });

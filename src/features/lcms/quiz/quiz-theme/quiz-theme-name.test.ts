@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { createMockPlayerTemplate } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-project-defaults";
-import { viCopy } from "@/features/lcms/quiz/quiz-theme/quiz-theme-copy";
+import { enCopy, viCopy } from "@/features/lcms/quiz/quiz-theme/quiz-theme-copy";
 import { applyQuizThemePreset, quizThemePresets } from "@/features/lcms/quiz/quiz-theme/quiz-theme-presets";
 import { themeNameFor } from "@/features/lcms/quiz/quiz-theme/quiz-theme-name";
 
@@ -10,6 +10,12 @@ const chalkboard = quizThemePresets.find((preset) => preset.id === "chalkboard")
 describe("themeNameFor", () => {
   it("names a template that matches a preset", () => {
     expect(themeNameFor(applyQuizThemePreset(createMockPlayerTemplate(), chalkboard), viCopy)).toBe(viCopy.presets.chalkboard);
+  });
+
+  it("names the built-in player default Mặc định, not Tuỳ chỉnh", () => {
+    expect(themeNameFor(createMockPlayerTemplate(), viCopy)).toBe("Mặc định");
+    expect(themeNameFor({ ...createMockPlayerTemplate(), showToolbar: false, rolledPaper: true }, viCopy)).toBe("Mặc định");
+    expect(themeNameFor(createMockPlayerTemplate(), enCopy)).toBe("Default");
   });
 
   it("calls a template that matches no preset Tuỳ chỉnh", () => {

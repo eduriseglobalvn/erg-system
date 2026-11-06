@@ -38,8 +38,9 @@ function QuizThemeDialogBody({ value, questionCount, onClose, onApply }: QuizThe
   const copy = locale === "vi" ? viCopy : enCopy;
   const [draft, setDraft] = useState(value);
   const matched = findMatchingQuizThemePreset(draft);
-  // Same on-accent colour the preview draws, so the verdict matches what the learner sees.
-  const contrast = checkThemeContrast(draft, usePreviewStyle(draft).onAccent);
+  // Same on-accent / on-highlight colours the preview draws, so the verdict matches what the learner sees.
+  const { onAccent, onHighlight } = usePreviewStyle(draft);
+  const contrast = checkThemeContrast(draft, onAccent, onHighlight);
   const failing = contrast.filter((pair) => !pair.pass).length;
   const customizeTitle = matched ? copy.customizeFrom(copy.presets[matched.id]) : copy.custom;
 

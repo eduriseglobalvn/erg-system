@@ -49,8 +49,9 @@ function flattenOnto(fg: string, bg: string): string {
 /**
  * `onAccent` is the text colour the player draws on accent fills; white unless the caller
  * resolves it from the MUI theme (palette.getContrastText), as the preview does.
+ * `onHighlight` is the same for the selected-option fill; it defaults to the tone's own text.
  */
-export function checkThemeContrast(tpl: QuizPlayerTemplate, onAccent: string = t.color.surface): ContrastPair[] {
+export function checkThemeContrast(tpl: QuizPlayerTemplate, onAccent: string = t.color.surface, onHighlight?: string): ContrastPair[] {
   const tone = quizThemeToneSurface[tpl.backgroundTone] ?? quizThemeToneSurface["soft-blue"];
   const pair = (id: ContrastPair["id"], fg: string, bg: string, min: ContrastPair["min"]): ContrastPair => {
     const ratio = contrastRatio(fg, bg);
@@ -59,7 +60,7 @@ export function checkThemeContrast(tpl: QuizPlayerTemplate, onAccent: string = t
   return [
     pair("text-bg", tone.text, solidOf(tone.background), 4.5),
     pair("onAccent-accent", flattenOnto(onAccent, tpl.accentColor), tpl.accentColor, 4.5),
-    pair("highlight-bg", tone.text, tpl.highlightColor, 3),
+    pair("highlight-bg", flattenOnto(onHighlight ?? tone.text, tpl.highlightColor), tpl.highlightColor, 3),
   ];
 }
 

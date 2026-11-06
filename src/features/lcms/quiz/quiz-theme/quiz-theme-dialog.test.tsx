@@ -65,6 +65,12 @@ describe("QuizThemeDialog contrast", () => {
     expect(screen.getByText("Đạt WCAG AA")).toBeInTheDocument();
   });
 
+  it("does not warn about the selected-option text on ERG Xanh with the contrast tone", () => {
+    // The preview draws dark getContrastText on the pale fill; measuring the tone's white text gave a phantom 1.1:1 fail.
+    renderDialog({ ...applyQuizThemePreset(saved, defaultQuizThemePreset), backgroundTone: "contrast" });
+    expect(screen.getByText("Đạt WCAG AA")).toBeInTheDocument();
+  });
+
   it("collapses layout, option and sound sections by default", () => {
     renderDialog(saved);
     for (const name of ["Bố cục", "Phương án và nút", "Âm thanh"]) {

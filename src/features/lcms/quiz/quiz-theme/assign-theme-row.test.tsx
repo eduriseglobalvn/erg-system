@@ -46,12 +46,21 @@ describe("AssignThemeRow", () => {
 
   it("shows the name as plain text, with no link, when the user cannot open the editor", async () => {
     auth.useAuthSession.mockReturnValue({ account, session: teacherSession });
-    draft.loadQuizEditorDraft.mockResolvedValue({ playerTemplate: createMockPlayerTemplate() });
+    draft.loadQuizEditorDraft.mockResolvedValue({ playerTemplate: { ...createMockPlayerTemplate(), accentColor: "#123456" } });
     renderRow();
     expect(await screen.findByText(`Theme bài · ${viCopy.custom}`)).toBeInTheDocument();
     expect(screen.queryByRole("link")).toBeNull();
     expect(screen.queryByRole("button")).toBeNull();
-    expect(screen.getByText(/^Theme bài/)).toHaveAttribute("aria-description", "Cần quyền Admin để đổi theme");
+    // The reason is visible text tied to the row, not a tooltip on a non-focusable element or aria-description.
+    const row = screen.getByText(/^Theme bài/).closest("[aria-describedby]")!;
+    expect(row.getAttribute("aria-describedby")).toBe(screen.getByText("Cần quyền Admin để đổi theme").id);
+    expect(row.hasAttribute("aria-description")).toBe(false);
+  });
+
+  it("names a quiz that still has the built-in player default Mặc định", async () => {
+    draft.loadQuizEditorDraft.mockResolvedValue({ playerTemplate: createMockPlayerTemplate() });
+    renderRow();
+    expect(await screen.findByRole("link", { name: new RegExp(`Theme bài · ${viCopy.defaultTheme}`) })).toBeInTheDocument();
   });
 
   it("shows a one-line skeleton while the draft loads", () => {
