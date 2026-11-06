@@ -57,11 +57,6 @@ export function PortableExamPage({ workspace }: PortableExamPageProps) {
           portableOffline={quizPackage.gradingMode === "client-first"}
           portablePackage={quizPackage}
           runtimePortal={activeRuntimePortal}
-          welcomeMeta={{
-            courseLabel: quizPackage.quiz.title,
-            reviewContent: quizPackage.quiz.description,
-            subjectLabel: "Bài thi từ tệp",
-          }}
         />
       </Box>
     );

@@ -1,7 +1,5 @@
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
-export const navButtonClass =
-  "inline-flex min-h-9 min-w-[108px] items-center justify-center gap-1.5 whitespace-nowrap rounded-full border border-transparent px-4 text-xs font-extrabold text-white shadow-[0_12px_26px_rgba(0,0,136,0.18)] transition hover:-translate-y-0.5 hover:shadow-[0_16px_30px_rgba(0,0,136,0.22)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0";
 export const playerViewportClass = "lg:h-[calc(100vh-3.75rem)]";
 // Two columns of equal height: question card on the left, 340px question list on the right.
 export const playerGridClass = `grid gap-3 lg:grid-cols-[minmax(0,1fr)_340px] lg:grid-rows-[minmax(0,1fr)] lg:items-stretch ${playerViewportClass}`;

@@ -14,9 +14,7 @@ import { PlayerQuestionAside } from "@/components/quiz/player-shell-runtime/play
 import { buildFooterMessage, buildTakingCells, pickChoiceAnswer } from "@/components/quiz/player-shell-runtime/player-shell-runtime-helpers";
 import {
   buildPlayerStyles,
-  navButtonClass,
   playerGridClass,
-  playerViewportClass,
 } from "@/components/quiz/player-shell-runtime/player-shell-styles";
 import { TimeUpOverlay } from "@/components/quiz/time-up-overlay";
 import { canGradeLocally, isAnswerComplete } from "@/domain/quiz/quiz";
@@ -121,10 +119,10 @@ export function PlayerReadyView({
     allQuestionsAnswered, answeredCount, attemptCompleted, cells, footerMessage,
     isBookmarked: isCurrentQuestionBookmarked, isFirstQuestion, isLastQuestion, isTestingMode, isTrainingMode,
     currentAnswerComplete, currentQuestionSubmitted: submitted, playerCardStyle, canvasStyle, headerStyle,
-    accentButtonStyle, modeBadgeStyle, question: readyQuestion, questions, quiz: readyQuiz,
+    accentButtonStyle, question: readyQuestion, questions, quiz: readyQuiz,
     reviewingSubmittedAttempt, saveIndicator, started, submitting, submitFailed, timer: countdown,
     onJumpToQuestion: handleJumpToQuestion, onRequestSubmit: handleRequestSubmit, onReview: resultDisplay.showReviewButton ? handleReviewQuiz : undefined,
-    onStart: handleStartQuiz, body: questionBody,
+    onStart: handleStartQuiz, body: questionBody, restoredDraft, welcomeMeta,
     onNext: () => setCurrentIndex((value) => Math.min(questions.length - 1, value + 1)),
     onPrev: () => setCurrentIndex((value) => Math.max(0, value - 1)),
     onSubmitCurrentQuestion: () => void submitCurrentTrainingQuestion(),
@@ -154,11 +152,9 @@ export function PlayerReadyView({
     return (
       <QuizThemeSurface quiz={readyQuiz} className={`quiz-player-shell ${playerGridClass}`}>
         <QuizWelcomeScreen
-          accentButtonStyle={accentButtonStyle} answeredCount={answeredCount} canvasStyle={canvasStyle}
-          isTestingMode={isTestingMode} isTrainingMode={isTrainingMode} modeBadgeStyle={modeBadgeStyle}
-          navButtonClass={navButtonClass} onStart={handleStartQuiz} playerCardStyle={playerCardStyle}
-          playerViewportClass={playerViewportClass} questions={questions} quiz={readyQuiz}
-          restoredDraft={restoredDraft} welcomeMeta={welcomeMeta}
+          answeredCount={answeredCount} canvasStyle={canvasStyle} isTrainingMode={isTrainingMode}
+          onStart={handleStartQuiz} playerCardStyle={playerCardStyle}
+          questions={questions} quiz={readyQuiz} restoredDraft={restoredDraft} welcomeMeta={welcomeMeta}
         />
 
         <PlayerQuestionAside cells={cells} onSelect={handleJumpToQuestion} />

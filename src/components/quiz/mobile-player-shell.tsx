@@ -4,6 +4,7 @@ import type { CSSProperties, ReactNode } from "react";
 import { MobilePlayerFooter } from "@/components/quiz/mobile-player-footer";
 import { MobilePlayerIntro } from "@/components/quiz/mobile-player-intro";
 import { MobileQuestionSheet } from "@/components/quiz/mobile-player-question-sheet";
+import type { QuizWelcomeMeta } from "@/components/quiz/quiz-welcome-screen";
 import type { QuestionCell } from "@/components/quiz/question-navigator";
 import type { Question, Quiz } from "@/domain/quiz/types";
 
@@ -24,7 +25,6 @@ type MobilePlayerShellProps = {
   canvasStyle: CSSProperties;
   headerStyle: CSSProperties;
   accentButtonStyle: CSSProperties;
-  modeBadgeStyle: CSSProperties;
   question: Question;
   questions: Question[];
   quiz: Quiz;
@@ -44,6 +44,8 @@ type MobilePlayerShellProps = {
   onToggleBookmark: () => void;
   body: ReactNode;
   resultBody?: ReactNode;
+  restoredDraft?: boolean;
+  welcomeMeta?: QuizWelcomeMeta;
 };
 
 export function MobilePlayerShell({
@@ -58,7 +60,6 @@ export function MobilePlayerShell({
   currentAnswerComplete,
   currentQuestionSubmitted,
   playerCardStyle,
-  modeBadgeStyle,
   question,
   questions,
   quiz,
@@ -78,10 +79,12 @@ export function MobilePlayerShell({
   onToggleBookmark,
   body,
   resultBody,
+  restoredDraft,
+  welcomeMeta,
 }: MobilePlayerShellProps) {
   if (!started) {
     return (
-      <MobilePlayerIntro modeBadgeStyle={modeBadgeStyle} playerCardStyle={playerCardStyle} questions={questions} quiz={quiz} onStart={onStart} />
+      <MobilePlayerIntro playerCardStyle={playerCardStyle} questions={questions} quiz={quiz} restoredDraft={restoredDraft} welcomeMeta={welcomeMeta} onStart={onStart} />
     );
   }
 

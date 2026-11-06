@@ -103,10 +103,6 @@
     "hex": 1,
     "font": 0
   },
-  "src/components/quiz/mobile-player-intro.tsx": {
-    "hex": 1,
-    "font": 0
-  },
   "src/components/quiz/mobile-player-shell.tsx": {
     "hex": 2,
     "font": 0
@@ -153,10 +149,6 @@
   },
   "src/components/quiz/questions/text-response-question.tsx": {
     "hex": 7,
-    "font": 0
-  },
-  "src/components/quiz/quiz-welcome-screen.tsx": {
-    "hex": 33,
     "font": 0
   },
   "src/components/shared/DataTable.tsx": {
