@@ -255,8 +255,8 @@ export function StudentDashboardWorkspaceRuntime() {
   }
 
   const mobileDockItems = useMemo(() => [
-    ...copy.navItems.map((item) => ({ ...item, key: item.key as StudentDockPageKey })),
-    { key: "account" as const, label: locale === "vi" ? "Hồ sơ" : "Profile", icon: null },
+    ...copy.navItems.map((item) => ({ key: item.key as StudentDockPageKey, label: item.label })),
+    { key: "account" as const, label: locale === "vi" ? "Hồ sơ" : "Profile" },
   ], [copy.navItems, locale]);
 
   const backToDashboard = () => setViewState({ type: "dashboard" });
@@ -344,7 +344,7 @@ export function StudentDashboardWorkspaceRuntime() {
         {announcementToast}
         <StudentDashboardMobileShell
           activePage={activePage} announcementUnreadCount={unreadAnnouncementCount}
-          dockItems={mobileDockItems} studentName={account?.name ?? dashboardProfile.name} onPageChange={handlePageChange}
+          dockItems={mobileDockItems} onPageChange={handlePageChange}
         >
           <Box sx={{ pb: 2.5, pt: 4, px: 2 }}>{dashboardViews}</Box>
         </StudentDashboardMobileShell>
