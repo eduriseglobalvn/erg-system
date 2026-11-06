@@ -4,9 +4,7 @@ import { tr } from "@/platform/i18n";
 import type {
   QuizEditorChoice,
   QuizEditorFeedbackRow,
-  QuizEditorFinalSlideOptions,
   QuizEditorGroup,
-  QuizEditorSlide,
   QuizEditorSlideOptions,
   QuizPlayerTemplate,
   QuizProjectSettings,
@@ -42,22 +40,6 @@ export function createMockQuestionOptions(
     limitResponses: false,
     limitResponsesValue: 1,
     ...patch,
-  };
-}
-
-export function createMockFinalSlideOptions(): QuizEditorFinalSlideOptions {
-  return {
-    whenQuizFinished: tr("quiz.showSlideWithResults"),
-    showUserScore: false,
-    showPassingScore: false,
-    allowReview: false,
-    showCorrectAnswers: false,
-    showDetailedReport: false,
-    showResultsByGroup: false,
-    showAnswerResults: false,
-    allowPrintResults: false,
-    allowRetry: false,
-    retryLabel: tr("quiz.retryOnce"),
   };
 }
 
@@ -167,20 +149,5 @@ export function createNewQuizProjectSettings(title?: string): QuizProjectSetting
         testTitle: title || "Bài kiểm tra mới",
       },
     },
-  };
-}
-
-export function createMockResultSlide(): QuizEditorSlide {
-  return {
-    id: "slide-results",
-    title: tr("common.quizResults"),
-    kind: "result-slide",
-    textStyle: defaultQuizTextStyle,
-    activeResultTab: "passed",
-    finishAction: tr("quiz.closeBrowserWindow"),
-    options: {
-      finalSlide: createMockFinalSlideOptions(),
-    },
-    layers: [tr("quiz.resultsLayer")],
   };
 }

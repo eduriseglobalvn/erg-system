@@ -21,10 +21,6 @@ export type IntroSlideKind = "intro-slide" | "user-info" | "instruction-slide";
 
 export type SlideKind = "info-slide" | "result-slide" | IntroSlideKind | QuestionType;
 
-export type QuestionManagerFilter = "all" | SlideKind;
-
-export type QuestionManagerGrouping = "type" | "group";
-
 export type QuizEditorTextStyle = {
   fontFamily: string;
   fontSize: number;
@@ -292,9 +288,6 @@ export type SelectedEditorNode =
       type: "slide";
       groupId: string;
       slideId: string;
-    }
-  | {
-      type: "result";
     };
 
 export const questionTypeLabelKeys: Record<QuestionType, MessageKey> = {

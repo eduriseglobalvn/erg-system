@@ -64,7 +64,6 @@ export const viMessages1 = {
   "common.logout": "Đăng xuất",
   "common.correct": "Đúng:",
   "common.incorrect": "Sai:",
-  "common.quizResults": "Kết quả bài kiểm tra",
   "common.passedFailed": "Đạt / Trượt",
   "common.welcome": "Chào mừng",
   "common.questionTitleDefault": "Tiêu đề câu hỏi",
@@ -78,10 +77,7 @@ export const viMessages1 = {
   "quiz.choices": "Lựa chọn",
   "quiz.resultSlideStatus": "Trang kết quả",
   "quiz.resultStatus": "Kết quả bài kiểm tra",
-  "quiz.closeBrowserWindow": "Đóng cửa sổ trình duyệt",
-  "quiz.showSlideWithResults": "Hiển thị trang có kết quả",
   "quiz.showPassingScore": "Hiển thị điểm đạt",
-  "quiz.retryOnce": "Một lần",
   "quiz.greatYoureSharp": "Tuyệt vời! Bạn làm rất tốt!",
   "quiz.tryAgainMessage": "Cố gắng lên! Hãy thử lại.",
 

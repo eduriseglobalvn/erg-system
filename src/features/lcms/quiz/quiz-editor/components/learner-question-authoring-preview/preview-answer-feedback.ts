@@ -93,7 +93,3 @@ export function updateFeedbackText(
     },
   ];
 }
-
-export function isInstructionLikeSlide(kind: QuizEditorSlide["kind"]) {
-  return kind === "instruction-slide" || kind === "intro-slide" || kind === "info-slide" || kind === "user-info";
-}

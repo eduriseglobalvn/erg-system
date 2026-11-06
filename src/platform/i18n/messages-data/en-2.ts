@@ -138,7 +138,6 @@ export const enMessages2 = {
   "quiz.defaultIncorrectFeedback": "Not quite right yet.",
   "quiz.introWelcome": "Welcome",
   "quiz.introInstruction": "Instruction",
-  "quiz.resultsLayer": "Quiz Results",
   "quiz.resultsThemeName": "Theme Harmony 5",
   "quiz.formTabHome": "Home",
   "quiz.formTabHelp": "Help",

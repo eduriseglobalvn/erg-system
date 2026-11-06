@@ -138,7 +138,6 @@ export const viMessages2 = {
   "quiz.defaultIncorrectFeedback": "Chưa đúng, hãy thử lại.",
   "quiz.introWelcome": "Chào mừng",
   "quiz.introInstruction": "Hướng dẫn",
-  "quiz.resultsLayer": "Kết quả bài kiểm tra",
   "quiz.resultsThemeName": "Theme Harmony 5",
   "quiz.formTabHome": "Home",
   "quiz.formTabHelp": "Help",

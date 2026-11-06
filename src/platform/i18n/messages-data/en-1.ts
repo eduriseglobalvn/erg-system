@@ -64,7 +64,6 @@ export const enMessages1 = {
   "common.logout": "Log out",
   "common.correct": "Correct:",
   "common.incorrect": "Incorrect:",
-  "common.quizResults": "Quiz Results",
   "common.passedFailed": "Passed / Failed",
   "common.welcome": "Welcome",
   "common.questionTitleDefault": "Question Title",
@@ -78,10 +77,7 @@ export const enMessages1 = {
   "quiz.choices": "Choices",
   "quiz.resultSlideStatus": "Result Slide",
   "quiz.resultStatus": "Quiz Results",
-  "quiz.closeBrowserWindow": "Close browser window",
-  "quiz.showSlideWithResults": "Show slide with results",
   "quiz.showPassingScore": "Show passing score",
-  "quiz.retryOnce": "Once",
   "quiz.greatYoureSharp": "Great! You’re sharp!",
   "quiz.tryAgainMessage": "Keep going! Try again.",
 

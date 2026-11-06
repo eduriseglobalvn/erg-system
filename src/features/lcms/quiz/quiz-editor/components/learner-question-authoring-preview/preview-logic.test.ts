@@ -3,7 +3,6 @@ import { describe, expect, test } from "vitest";
 import {
   createPreviewAnswer,
   getFeedbackText,
-  isInstructionLikeSlide,
   updateFeedbackText,
 } from "@/features/lcms/quiz/quiz-editor/components/learner-question-authoring-preview/preview-answer-feedback";
 import {
@@ -65,11 +64,6 @@ describe("feedback helpers", () => {
       "no",
     );
     expect(rows[1]).toMatchObject({ id: "feedback-incorrect", kind: "incorrect", feedback: "no", score: 0 });
-  });
-
-  test("isInstructionLikeSlide", () => {
-    expect(isInstructionLikeSlide("intro-slide")).toBe(true);
-    expect(isInstructionLikeSlide("matching")).toBe(false);
   });
 });
 

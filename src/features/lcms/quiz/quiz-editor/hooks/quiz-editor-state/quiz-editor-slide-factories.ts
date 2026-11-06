@@ -4,7 +4,6 @@ import { likertPresetLabels } from "@/features/lcms/quiz/quiz-editor/components/
 import {
   createMockChoice,
   createMockFeedbackRows,
-  createMockFinalSlideOptions,
   createMockQuestionOptions,
 } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-project-defaults";
 import type {
@@ -12,7 +11,6 @@ import type {
   QuizEditorChoice,
   QuizEditorDragDropItem,
   QuizEditorFeedbackRow,
-  QuizEditorFinalSlideOptions,
   QuizEditorSlide,
   QuizEditorSlideOptions,
   QuizProjectSettings,
@@ -30,10 +28,6 @@ function createQuestionOptions(
   patch: Partial<QuizEditorSlideOptions> = {},
 ): QuizEditorSlideOptions {
   return createMockQuestionOptions(patch);
-}
-
-export function createFinalSlideOptions(): QuizEditorFinalSlideOptions {
-  return createMockFinalSlideOptions();
 }
 
 type CreateId = (prefix: string) => string;
