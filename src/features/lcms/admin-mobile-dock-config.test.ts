@@ -35,6 +35,15 @@ describe("admin dock visibility", () => {
     expect(ids).toEqual(["home", "calendar", "all"]);
   });
 
+  it("keeps Tất cả for a session that cannot open the admin root, so permitted pages stay reachable", () => {
+    const ids = visibleAdminDockItems((path) => canNavigateToAdminPath(path, ["lms.school.read"])).map((item) => item.id);
+    expect(ids).toEqual(["schools", "all"]);
+  });
+
+  it("labels the first tab Trang chủ", () => {
+    expect(ADMIN_MOBILE_DOCK_ITEMS[0]).toMatchObject({ id: "home", label: "Trang chủ" });
+  });
+
   it("opens the sheet from Tất cả and never lists Nhân sự on the dock", () => {
     expect(ADMIN_MOBILE_DOCK_ITEMS.find((item) => item.id === "all")?.opensSheet).toBe(true);
     expect(ADMIN_MOBILE_DOCK_ITEMS.map((item) => item.label)).not.toContain("Nhân sự");

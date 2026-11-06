@@ -46,6 +46,10 @@ describe("Teacher workspace navigation state", () => {
     expect(visibleLmsDockItems(() => true).find((item) => item.id === "account")?.opensSheet).toBe(true);
   });
 
+  it("keeps the Tài khoản sheet entry even when the account route is not permitted", () => {
+    expect(visibleLmsDockItems((path) => !path.endsWith("/account")).map((item) => item.id)).toEqual(["home", "calendar", "learning", "inbox", "timekeeping", "account"]);
+  });
+
   it("titles the mobile top bar by screen instead of the dock tab", () => {
     expect(resolveMobileTitle("/teacher/homework/exercise-bank", "learning", "Bài tập")).toBe("Kho luyện tập");
     expect(resolveMobileTitle("/teacher/homework/progress", "learning", "Bài tập")).toBe("Tiến độ học tập");

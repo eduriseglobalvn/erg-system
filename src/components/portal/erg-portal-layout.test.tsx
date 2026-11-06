@@ -56,7 +56,7 @@ const dock = {
   ariaLabel: "Điều hướng admin",
   activeId: "home",
   items: [
-    { id: "home", label: "Hôm nay", path: "/admin", icon: HomeIcon },
+    { id: "home", label: "Trang chủ", path: "/admin", icon: HomeIcon },
     { id: "all", label: "Tất cả", path: "/admin", icon: HomeIcon, opensSheet: true },
   ],
   renderSheet: ({ open }: { open: boolean }) => (open ? <div role="dialog" aria-label="Tất cả chức năng" /> : null),
@@ -112,14 +112,22 @@ it("closes the open sheet when the viewport leaves phone width", () => {
   expect(screen.queryByRole("dialog")).toBeNull();
 });
 
-it("hides the header bell on a phone with a dock and keeps it without one", () => {
+it("hides the header bell on a phone only when the dock carries the inbox tab", () => {
   mockViewport(375);
-  const { unmount } = render(
-    <ErgPortalLayout menuGroups={[]} mobileDock={dock} portalInfo={{ name: "Admin" }}>
+  const dockWithInbox = { ...dock, items: [...dock.items, { id: "inbox", label: "Hộp thư", path: "/admin/notifications", icon: HomeIcon }] };
+  const { unmount, rerender } = render(
+    <ErgPortalLayout menuGroups={[]} mobileDock={dockWithInbox} portalInfo={{ name: "Admin" }}>
       <div>Nội dung</div>
     </ErgPortalLayout>,
   );
   expect(screen.queryByRole("button", { name: "Thông báo" })).toBeNull();
+
+  rerender(
+    <ErgPortalLayout menuGroups={[]} mobileDock={dock} portalInfo={{ name: "Admin" }}>
+      <div>Nội dung</div>
+    </ErgPortalLayout>,
+  );
+  expect(screen.getByRole("button", { name: "Thông báo" })).toBeInTheDocument();
   unmount();
 
   render(

@@ -15,12 +15,12 @@ export type AdminMobileSection = "home" | "calendar" | "schools" | "inbox" | "ti
 
 // Hộp thư and Chấm công point at routes later plans create; canNavigateToAdminPath hides them until the route matrix has a row.
 export const ADMIN_MOBILE_DOCK_ITEMS: ReadonlyArray<ErgMobileDockItem<AdminMobileSection>> = [
-  { id: "home", label: "Hôm nay", path: adminPath("/"), icon: TodayRoundedIcon },
+  { id: "home", label: "Trang chủ", path: adminPath("/"), icon: TodayRoundedIcon },
   { id: "calendar", label: "Lịch", path: adminPath("/calendar"), icon: CalendarMonthRoundedIcon },
   { id: "schools", label: "Trường học", path: adminPath("/schools/list"), icon: SchoolRoundedIcon },
   { id: "inbox", label: "Hộp thư", path: adminPath("/notifications"), icon: InboxRoundedIcon },
   { id: "timekeeping", label: "Chấm công", path: adminPath("/employees/timekeeping"), icon: FingerprintRoundedIcon },
-  // Opens the "Tất cả chức năng" sheet; the path (home) is only used for the permission check.
+  // Opens the "Tất cả chức năng" sheet, which filters its own entries; never permission-gated here.
   { id: "all", label: "Tất cả", path: adminPath("/"), icon: AppsRoundedIcon, opensSheet: true },
 ];
 
@@ -31,7 +31,7 @@ export function canNavigateToAdminPath(path: string, grantedPermissions: readonl
 }
 
 export function visibleAdminDockItems(canAccess: (path: string) => boolean): Array<ErgMobileDockItem<AdminMobileSection>> {
-  return ADMIN_MOBILE_DOCK_ITEMS.filter((item) => canAccess(item.path));
+  return ADMIN_MOBILE_DOCK_ITEMS.filter((item) => item.opensSheet || canAccess(item.path));
 }
 
 const SECTION_PREFIXES: ReadonlyArray<readonly [Exclude<AdminMobileSection, "home" | "all">, readonly string[]]> = [

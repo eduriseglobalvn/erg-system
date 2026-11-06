@@ -127,12 +127,12 @@ const lmsMobileDockItems: Array<ErgMobileDockItem<LmsMobileSection>> = [
   { id: "inbox", label: "Hộp thư", path: teacherPath("/notifications"), icon: InboxRoundedIcon },
   // The timekeeping route is not built yet; canAccess hides this tab until it exists.
   { id: "timekeeping", label: "Chấm công", path: teacherPath("/timekeeping"), icon: FingerprintRoundedIcon },
-  // Opens the account sheet in LmsMobileShell; the path is only used for the permission check.
+  // Opens the account sheet in LmsMobileShell; never permission-gated here, the sheet carries other screens too.
   { id: "account", label: "Tài khoản", path: teacherPath("/account"), icon: AccountCircleRoundedIcon, opensSheet: true },
 ];
 
 export function visibleLmsDockItems(canAccess: (path: string) => boolean): Array<ErgMobileDockItem<LmsMobileSection>> {
-  return lmsMobileDockItems.filter((item) => canAccess(item.path));
+  return lmsMobileDockItems.filter((item) => item.opensSheet || canAccess(item.path));
 }
 
 /** Screens that are neither on the dock nor in the Học tập hub; listed in the account sheet so nothing becomes unreachable on mobile. */

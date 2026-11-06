@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { seedAuthenticatedPortal } from "./fixtures/portal-smoke-fixtures";
+import { portalHost, seedAuthenticatedPortal } from "./fixtures/portal-smoke-fixtures";
 import { setupPortalNetwork } from "./fixtures/portal-smoke-network";
 
 test("teacher phone dock: expected items, no header bell, no horizontal overflow", async ({ page }) => {
@@ -21,11 +21,11 @@ test("teacher phone dock: expected items, no header bell, no horizontal overflow
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
 });
 
-// Admin runs under ErgPortalLayout, the only shell where the generic header bell is hidden by the dock.
+// Admin runs under ErgPortalLayout; its dock has no Hộp thư tab yet.
 test.describe("admin phone dock", () => {
-  test.use({ baseURL: "https://lcms.erg.edu.local:3001" });
+  test.use({ baseURL: portalHost("lcms") });
 
-  test("shows the dock, no header bell, no horizontal overflow", async ({ page }) => {
+  test("shows the dock, keeps the header bell until the Hộp thư tab exists, no horizontal overflow", async ({ page }) => {
     await setupPortalNetwork(page, "lcms");
     await seedAuthenticatedPortal(page, "lcms");
     await page.setViewportSize({ width: 375, height: 667 });
@@ -34,7 +34,8 @@ test.describe("admin phone dock", () => {
     const dock = page.getByRole("navigation", { name: "Điều hướng admin" });
     await expect(dock).toBeVisible({ timeout: 30_000 });
     await expect(dock.getByRole("button", { name: /^Tất cả/ })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Thông báo", exact: true })).toHaveCount(0);
+    // The admin Hộp thư tab is hidden until its route lands, so the header bell is the only way in.
+    await expect(page.getByRole("button", { name: "Thông báo", exact: true })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
   });
 });
