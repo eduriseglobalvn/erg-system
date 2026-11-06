@@ -124,3 +124,13 @@ describe("SequenceAuthoring", () => {
     expect(last().sequenceItems![0].image).toBeUndefined();
   });
 });
+
+describe("SequenceAuthoring add button", () => {
+  it("looks like the other add buttons (dashed, left aligned) and still adds a step", () => {
+    const { last } = setup(base());
+    const add = screen.getByRole("button", { name: "Thêm bước" });
+    expect(getComputedStyle(add).borderStyle).toBe("dashed");
+    fireEvent.click(add);
+    expect(last().sequenceItems).toHaveLength(4);
+  });
+});

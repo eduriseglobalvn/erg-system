@@ -5,6 +5,7 @@ import { DndContext, type DragEndEvent } from "@dnd-kit/core";
 import { useState } from "react";
 
 import type { Question, SequenceItem } from "@/domain/quiz/types";
+import { ergEnterpriseTokens as tokens } from "@/themes/erg-enterprise-tokens";
 import { moveChoice } from "./move-choice";
 import { readQuizImage } from "./read-quiz-image";
 import { SequenceStepRow } from "./sequence-step-row";
@@ -74,7 +75,19 @@ export function SequenceAuthoring({ question, onUpdate }: {
           />
         ))}
       </DndContext>
-      <Box><Button onClick={append} startIcon={<AddIcon />} variant="text">Thêm bước</Button></Box>
+      <Box>
+        <Button
+          onClick={append}
+          startIcon={<AddIcon />}
+          sx={{
+            justifyContent: "flex-start", height: 44, width: "min(420px, 100%)", px: 2, color: "primary.main",
+            border: "1.5px dashed", borderColor: tokens.color.border, borderRadius: `${tokens.radius.card}px`,
+          }}
+          variant="text"
+        >
+          Thêm bước
+        </Button>
+      </Box>
     </Box>
   );
 }
