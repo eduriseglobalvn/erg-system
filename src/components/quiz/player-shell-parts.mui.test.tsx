@@ -2,66 +2,51 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { AnswerKeyCard, QuestionFeedbackPanel, SubmitConfirmDialog } from "@/components/quiz/player-shell-parts";
-import type { Question, QuizResultDisplay } from "@/domain/quiz/types";
+import type { Question } from "@/domain/quiz/types";
 
-const resultDisplay: QuizResultDisplay = {
-  passMessage: "Đạt",
-  failMessage: "Chưa đạt",
-  reviewButtonLabel: "Xem láº¡i",
-  thankYouMessage: "Cảm ơn",
-  showReviewButton: true,
-  submitAllPrompt: "Nộp tất cả?",
-  confirmSubmitPrompt: "Xác nhận nộp?",
-  submitAllLabel: "Nộp bài",
-  returnToQuizLabel: "Quay láº¡i",
-  confirmYesLabel: "Đồng ý",
-  confirmNoLabel: "Hủy",
-};
+const base = { submitting: false, remainingSeconds: 192, attemptsLeft: 1, onCancel: vi.fn(), onConfirm: vi.fn(), onJump: vi.fn() };
+const partial = { unanswered: [7, 15], flagged: [12], answeredCount: 18 };
 
-describe("SubmitConfirmDialog MUI migration", () => {
-  it("exposes a labelled modal and preserves confirm behavior", () => {
+describe("SubmitConfirmDialog", () => {
+  it("lists unanswered and flagged question numbers with the lead text", () => {
+    render(<SubmitConfirmDialog {...base} summary={partial} />);
+
+    expect(screen.getByRole("dialog", { name: "Nộp bài?" })).toBeInTheDocument();
+    expect(screen.getByText("Còn 03:12. Sau khi nộp không sửa được nữa, bạn còn 1 lần làm lại.")).toBeInTheDocument();
+    expect(screen.getByText("2 câu chưa làm")).toBeInTheDocument();
+    expect(screen.getByText("Chưa làm tính 0 điểm")).toBeInTheDocument();
+    expect(screen.getByText("1 câu đánh dấu xem lại")).toBeInTheDocument();
+    expect(screen.getByText("18 câu đã làm")).toBeInTheDocument();
+    for (const n of ["7", "15", "12"]) expect(screen.getByRole("button", { name: n })).toBeInTheDocument();
+  });
+
+  it("omits the empty groups when everything is answered", () => {
+    render(<SubmitConfirmDialog {...base} summary={{ unanswered: [], flagged: [], answeredCount: 20 }} />);
+
+    expect(screen.getByText("20 câu đã làm")).toBeInTheDocument();
+    expect(screen.queryByText(/câu chưa làm/)).toBeNull();
+    expect(screen.queryByText(/đánh dấu xem lại/)).toBeNull();
+  });
+
+  it("jumps to the clicked question and closes", () => {
+    const onJump = vi.fn();
+    const onCancel = vi.fn();
+    render(<SubmitConfirmDialog {...base} onCancel={onCancel} onJump={onJump} summary={partial} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "7" }));
+    expect(onJump).toHaveBeenCalledWith(6);
+    expect(onCancel).toHaveBeenCalledOnce();
+  });
+
+  it("keeps working with Làm tiếp and Nộp bài", () => {
+    const onCancel = vi.fn();
     const onConfirm = vi.fn();
+    render(<SubmitConfirmDialog {...base} onCancel={onCancel} onConfirm={onConfirm} summary={partial} />);
 
-    render(
-      <SubmitConfirmDialog
-        mode="confirm"
-        resultDisplay={resultDisplay}
-        submitting={false}
-        onCancel={vi.fn()}
-        onConfirm={onConfirm}
-      />,
-    );
-
-    expect(screen.getByRole("dialog", { name: "Xác nhận nộp bài" })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Đồng ý" }));
+    fireEvent.click(screen.getByRole("button", { name: "Làm tiếp" }));
+    expect(onCancel).toHaveBeenCalledOnce();
+    fireEvent.click(screen.getByRole("button", { name: "Nộp bài" }));
     expect(onConfirm).toHaveBeenCalledOnce();
-  });
-
-  it("summarises unanswered and flagged questions and jumps to the first unanswered", () => {
-    const onGoToUnanswered = vi.fn();
-    render(
-      <SubmitConfirmDialog
-        mode="confirm"
-        resultDisplay={resultDisplay}
-        submitting={false}
-        unansweredCount={3}
-        flaggedCount={2}
-        onCancel={vi.fn()}
-        onConfirm={vi.fn()}
-        onGoToUnanswered={onGoToUnanswered}
-      />,
-    );
-
-    expect(screen.getByText("Còn 3 câu chưa làm, 2 câu đánh dấu")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Đến câu chưa làm" }));
-    expect(onGoToUnanswered).toHaveBeenCalledOnce();
-  });
-
-  it("hides the jump button when everything is answered", () => {
-    render(
-      <SubmitConfirmDialog mode="all-answered" resultDisplay={resultDisplay} submitting={false} onCancel={vi.fn()} onConfirm={vi.fn()} onGoToUnanswered={vi.fn()} />,
-    );
-    expect(screen.queryByRole("button", { name: "Đến câu chưa làm" })).toBeNull();
   });
 });
 

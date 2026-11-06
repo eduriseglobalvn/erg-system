@@ -15,8 +15,8 @@ type PlayerCountdownProps = {
   children: (remainingSeconds: number) => ReactNode;
 };
 
-/** Owns the 1s tick so the (very large) player shell does not re-render every second. */
-export function PlayerCountdown({ session, deadlineAt, active, localClock = false, onExpiredChange, children }: PlayerCountdownProps) {
+/** Whole seconds left until `deadlineAt` (ticks every second), or null while unknown. */
+export function useRemainingSeconds({ session, deadlineAt, active, localClock = false }: Pick<PlayerCountdownProps, "session" | "deadlineAt" | "active" | "localClock">) {
   const [remaining, setRemaining] = useState<number | null>(null);
 
   useEffect(() => {
@@ -30,6 +30,12 @@ export function PlayerCountdown({ session, deadlineAt, active, localClock = fals
     return () => window.clearInterval(timerId);
   }, [active, deadlineAt, localClock, session]);
 
+  return remaining;
+}
+
+/** Owns the 1s tick so the (very large) player shell does not re-render every second. */
+export function PlayerCountdown({ session, deadlineAt, active, localClock = false, onExpiredChange, children }: PlayerCountdownProps) {
+  const remaining = useRemainingSeconds({ session, deadlineAt, active, localClock });
   const expired = remaining === 0;
   useEffect(() => {
     onExpiredChange(expired);

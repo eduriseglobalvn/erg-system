@@ -1,4 +1,4 @@
-import { isAnswerComplete, normalizeAnswerForSubmission } from "@/domain/quiz/quiz";
+import { normalizeAnswerForSubmission } from "@/domain/quiz/quiz";
 import type { AnswerPayload, Question } from "@/domain/quiz/types";
 
 /** `localClock` (portable/offline only): there is no server, so the device clock is the reference. */
@@ -102,9 +102,4 @@ export function formatTimer(totalSeconds: number) {
   const minutes = Math.floor(safeSeconds / 60);
   const seconds = safeSeconds % 60;
   return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
-}
-
-/** Index of the first question without a complete answer, or -1 when everything is answered. */
-export function firstUnansweredIndex(questions: Question[], drafts: Record<string, AnswerPayload>) {
-  return questions.findIndex((question) => !isAnswerComplete(question, drafts[question.id]));
 }

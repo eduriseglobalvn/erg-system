@@ -1,4 +1,5 @@
-import { AnswerKeyCard } from "@/components/quiz/player-shell-parts";
+import { useRemainingSeconds } from "@/components/quiz/player-countdown";
+import { AnswerKeyCard, SubmitConfirmDialog } from "@/components/quiz/player-shell-parts";
 import { PracticeFeedbackPanel } from "@/components/quiz/practice-feedback-panel";
 import { PlayerOfflineBanner } from "@/components/quiz/player-status";
 import { QuestionRenderer } from "@/components/quiz/question-renderer";
@@ -45,4 +46,14 @@ export function PlayerQuestionBody({ online, question: readyQuestion, value, onC
 
     </>
   );
+}
+
+type LiveSubmitDialogProps = Omit<ComponentProps<typeof SubmitConfirmDialog>, "remainingSeconds"> & {
+  countdown: Parameters<typeof useRemainingSeconds>[0];
+};
+
+/** Own ticking clock so the player shell does not re-render every second while the dialog is open. */
+export function LiveSubmitDialog({ countdown, ...dialogProps }: LiveSubmitDialogProps) {
+  const remainingSeconds = useRemainingSeconds(countdown);
+  return <SubmitConfirmDialog {...dialogProps} remainingSeconds={remainingSeconds} />;
 }

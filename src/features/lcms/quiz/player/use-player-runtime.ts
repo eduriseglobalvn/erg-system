@@ -112,7 +112,7 @@ export function usePlayerRuntime({
 
   const { phase: timeUpPhase, retry: retryTimeUpSubmit } = useTimeUpSubmit({
     activeAttempt, activePackage, activeSession, attemptCompleted, attemptScope, isTestingMode, started,
-    submitReadyAttempt, submitting, timeUp, setLoadState, setSubmitError, setSubmitting,
+    submitReadyAttempt, submitting, timeUp, setLoadState, setSubmitDialogMode, setSubmitError, setSubmitting,
   });
 
   usePlayerKeyboard({

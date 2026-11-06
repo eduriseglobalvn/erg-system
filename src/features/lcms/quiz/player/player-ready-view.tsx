@@ -3,11 +3,11 @@ import { useEffect, useRef } from "react";
 import { PlayerCountdown } from "@/components/quiz/player-countdown";
 import { MobilePlayerShell } from "@/components/quiz/mobile-player-shell";
 import { FinalResultScreen } from "@/components/quiz/final-result-screen";
-import { SubmitConfirmDialog } from "@/components/quiz/player-shell-parts";
 import { PlayerSaveIndicator, PlayerTimerText } from "@/components/quiz/player-status";
 import { QuizThemeSurface } from "@/components/quiz/quiz-theme-surface";
 import { QuizWelcomeScreen } from "@/components/quiz/quiz-welcome-screen";
-import { PlayerQuestionBody } from "./player-ready-parts";
+import { buildSubmitSummary } from "@/components/quiz/submit-summary";
+import { LiveSubmitDialog, PlayerQuestionBody } from "./player-ready-parts";
 import { defaultResultDisplay } from "@/components/quiz/player-shell-runtime-model";
 import { PlayerDesktopLayout } from "@/components/quiz/player-shell-runtime/player-desktop-layout";
 import { PlayerQuestionAside } from "@/components/quiz/player-shell-runtime/player-question-aside";
@@ -48,7 +48,7 @@ export function PlayerReadyView({
   const readyQuestion = ready.question;
   const readySession = ready.session;
   const {
-    handleBackToList, handleFinalizeAttempt, handleGoToUnanswered, handleJumpToQuestion, handleRequestSubmit,
+    handleBackToList, handleFinalizeAttempt, handleJumpToQuestion, handleRequestSubmit,
     handleReviewQuestion, handleReviewQuiz, handleStartQuiz, handleToggleBookmark, handleDraftChange, retryHandler,
   } = usePlayerReadyHandlers(rt, ready);
   const goToInputRef = useRef<HTMLInputElement | null>(null);
@@ -99,13 +99,13 @@ export function PlayerReadyView({
     />
   );
   const submitDialog = submitDialogMode ? (
-    <SubmitConfirmDialog
-      mode={submitDialogMode}
-      resultDisplay={resultDisplay}
+    <LiveSubmitDialog
+      countdown={countdownProps}
+      summary={buildSubmitSummary(questions.length, answeredIndexes, flaggedIndexes)}
+      // The attempt limit is not part of the player runtime yet; null drops the "bạn còn n lần làm lại" clause.
+      attemptsLeft={null}
       submitting={submitting}
-      unansweredCount={questions.length - answeredCount}
-      flaggedCount={bookmarkedQuestionIds.length}
-      onGoToUnanswered={handleGoToUnanswered}
+      onJump={handleJumpToQuestion}
       onCancel={() => setSubmitDialogMode(null)}
       onConfirm={() => void handleFinalizeAttempt()}
     />

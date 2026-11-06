@@ -113,7 +113,7 @@
   },
   "src/components/quiz/player-shell-parts.tsx": {
     "hex": 2,
-    "font": 10
+    "font": 6
   },
   "src/components/quiz/player-shell-runtime/player-desktop-layout.tsx": {
     "hex": 1,
