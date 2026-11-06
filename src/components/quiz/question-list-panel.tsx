@@ -1,7 +1,7 @@
 import Box from "@mui/material/Box";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
-import { useState, type Ref } from "react";
+import { useState, type ComponentProps, type Ref } from "react";
 
 import { ErgTextField } from "@/components/erg-mui/erg-form";
 import { questionGridLayout, type GridSurface } from "@/components/quiz/question-grid-layout";
@@ -14,9 +14,10 @@ type QuestionListPanelProps = {
   surface: GridSurface;
   onSelect: (index: number) => void;
   goToInputRef?: Ref<HTMLInputElement>;
+  gridMaxHeight?: ComponentProps<typeof QuestionNavigator>["gridMaxHeight"];
 };
 
-export function QuestionListPanel({ mode, cells, surface, onSelect, goToInputRef }: QuestionListPanelProps) {
+export function QuestionListPanel({ mode, cells, surface, onSelect, goToInputRef, gridMaxHeight }: QuestionListPanelProps) {
   const [filter, setFilter] = useState<QuestionListFilter>("all");
   const [goTo, setGoTo] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -45,7 +46,8 @@ export function QuestionListPanel({ mode, cells, surface, onSelect, goToInputRef
         value={active}
       >
         {options.map((o) => (
-          <ToggleButton key={o.id} value={o.id} sx={{ textTransform: "none" }}>
+          // One line even with 4 chips in the 340px column: content-sized, tight padding, caption type.
+          <ToggleButton key={o.id} value={o.id} sx={{ flex: "1 1 auto", px: 0.5, textTransform: "none", typography: "caption", whiteSpace: "nowrap" }}>
             {`${o.label} · ${o.count}`}
           </ToggleButton>
         ))}
@@ -74,7 +76,7 @@ export function QuestionListPanel({ mode, cells, surface, onSelect, goToInputRef
         />
       ) : null}
 
-      <QuestionNavigator ariaLabel="Lưới câu hỏi" cells={applyFilter(cells, active)} legend="auto" onSelect={onSelect} surface={surface} />
+      <QuestionNavigator ariaLabel="Lưới câu hỏi" cells={applyFilter(cells, active)} gridMaxHeight={gridMaxHeight} legend="auto" onSelect={onSelect} surface={surface} />
     </Box>
   );
 }

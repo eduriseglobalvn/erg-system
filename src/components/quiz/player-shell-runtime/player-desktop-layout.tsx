@@ -1,20 +1,23 @@
 import type { ComponentProps, CSSProperties, ReactNode, RefObject } from "react";
 import { Flag } from "lucide-react";
 
+import { ErgButton } from "@/components/erg-mui/erg-actions";
 import { PlayerCountdown } from "@/components/quiz/player-countdown";
 import { FinalResultScreen } from "@/components/quiz/final-result-screen";
 import { QuestionFeedbackPanel } from "@/components/quiz/player-shell-parts";
 import { PlayerTimerText } from "@/components/quiz/player-status";
-import { playerViewportClass } from "@/components/quiz/player-shell-runtime/player-shell-styles";
+import { playerGridClass } from "@/components/quiz/player-shell-runtime/player-shell-styles";
+import { PlayerQuestionAside } from "@/components/quiz/player-shell-runtime/player-question-aside";
+import type { QuestionCell } from "@/components/quiz/question-navigator";
 import { PlayerDesktopFooter } from "@/components/quiz/player-shell-runtime/player-desktop-footer";
 import type { AnswerRecord, Attempt, Question, QuizResultDisplay } from "@/domain/quiz/types";
 
 export type PlayerDesktopLayoutProps = {
-  accentButtonStyle: CSSProperties;
   allQuestionsAnswered: boolean;
   answeredCount: number;
   attemptCompleted: boolean;
   canvasStyle: CSSProperties;
+  cells: QuestionCell[];
   countdownProps: Omit<ComponentProps<typeof PlayerCountdown>, "children">;
   currentAnswerComplete: boolean;
   currentIndex: number;
@@ -35,13 +38,13 @@ export type PlayerDesktopLayoutProps = {
   resultDisplay: QuizResultDisplay;
   reviewingSubmittedAttempt: boolean;
   saveIndicator: ReactNode;
-  secondaryButtonStyle: CSSProperties;
   submitFailed: boolean;
   submitted: boolean;
   submitting: boolean;
   handleRequestSubmit: () => void;
   handleReviewQuiz: () => void;
   onBackToList: () => void;
+  onJumpToQuestion: (index: number) => void;
   onRetry?: () => void;
   handleToggleBookmark: () => Promise<void>;
   setCurrentIndex: (update: (value: number) => number) => void;
@@ -49,11 +52,11 @@ export type PlayerDesktopLayoutProps = {
 };
 
 export function PlayerDesktopLayout({
-  accentButtonStyle,
   allQuestionsAnswered,
   answeredCount,
   attemptCompleted,
   canvasStyle,
+  cells,
   countdownProps,
   currentAnswerComplete,
   currentIndex,
@@ -74,21 +77,22 @@ export function PlayerDesktopLayout({
   resultDisplay,
   reviewingSubmittedAttempt,
   saveIndicator,
-  secondaryButtonStyle,
   submitFailed,
   submitted,
   submitting,
   handleRequestSubmit,
   handleReviewQuiz,
   onBackToList,
+  onJumpToQuestion,
   onRetry,
   handleToggleBookmark,
   setCurrentIndex,
   submitCurrentTrainingQuestion,
 }: PlayerDesktopLayoutProps) {
   return (
-        <section
-          className={`flex min-w-0 flex-col rounded-lg border border-slate-200 bg-white p-1.5 sm:p-2 ${playerViewportClass}`}
+    <div className={playerGridClass}>
+        <article
+          className="flex min-h-0 min-w-0 flex-col rounded-lg border border-slate-200 bg-white p-1.5 sm:p-2"
           style={playerCardStyle}
         >
           <div className="flex min-h-8 items-center justify-between gap-2 px-1 pb-1.5 text-xs text-slate-500 sm:px-2">
@@ -156,13 +160,22 @@ export function PlayerDesktopLayout({
           </div>
 
           <PlayerDesktopFooter
-            accentButtonStyle={accentButtonStyle} attemptCompleted={attemptCompleted} currentAnswerComplete={currentAnswerComplete}
+            attemptCompleted={attemptCompleted} currentAnswerComplete={currentAnswerComplete}
             footerMessage={footerMessage} isFirstQuestion={isFirstQuestion} isLastQuestion={isLastQuestion}
             isTrainingMode={isTrainingMode} modeBadgeStyle={modeBadgeStyle} questions={questions} resultDisplay={resultDisplay}
-            reviewingSubmittedAttempt={reviewingSubmittedAttempt} secondaryButtonStyle={secondaryButtonStyle}
-            submitFailed={submitFailed} submitted={submitted} submitting={submitting} handleRequestSubmit={handleRequestSubmit}
-            handleReviewQuiz={handleReviewQuiz} setCurrentIndex={setCurrentIndex} submitCurrentTrainingQuestion={submitCurrentTrainingQuestion}
+            reviewingSubmittedAttempt={reviewingSubmittedAttempt} submitted={submitted} submitting={submitting}
+            handleReviewQuiz={handleReviewQuiz} setCurrentIndex={setCurrentIndex}
+            submitCurrentTrainingQuestion={submitCurrentTrainingQuestion}
           />
-        </section>
+        </article>
+
+        <PlayerQuestionAside cells={cells} onSelect={onJumpToQuestion}>
+          {isTrainingMode || attemptCompleted ? null : (
+            <ErgButton fullWidth disabled={submitting} variant="contained" onClick={handleRequestSubmit}>
+              {submitting ? "Đang nộp…" : submitFailed ? "Thử nộp lại" : "Nộp bài"}
+            </ErgButton>
+          )}
+        </PlayerQuestionAside>
+    </div>
   );
 }

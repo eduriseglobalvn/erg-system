@@ -54,7 +54,6 @@ export function usePlayerRuntime({
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [draftSync, setDraftSync] = useState<DraftSyncState>({ status: "idle" });
-  const [sidebarQuery, setSidebarQuery] = useState("");
   const [submitDialogMode, setSubmitDialogMode] = useState<SubmitDialogMode | null>(null);
   const [reviewingSubmittedAttempt, setReviewingSubmittedAttempt] = useState(false);
   const [timeUp, setTimeUp] = useState(false);
@@ -80,7 +79,6 @@ export function usePlayerRuntime({
     setDrafts,
     setSubmitting,
     setSubmitError,
-    setSidebarQuery,
     setSubmitDialogMode,
     setReviewingSubmittedAttempt,
     setTimeUp,
@@ -129,8 +127,8 @@ export function usePlayerRuntime({
     attemptScope, beginAttempt, currentAnswerComplete, currentIndex, deadlineAt, draftAnswer, draftSync, drafts, finalizeAttempt,
     isFirstQuestion, isLastQuestion, isMobile, isTestingMode, isTrainingMode, lastResult, loadState, network, questionBodyRef,
     questions, quizPackageQuery, requestSubmit, retryTimeUpSubmit, reviewingAttempt, reviewingSubmittedAttempt,
-    setCurrentIndex, setDrafts, setLoadState, setStarted, setSubmitDialogMode, setSubmitError, setTimeUp, setSidebarQuery,
-    setReviewingSubmittedAttempt, sidebarQuery, started, submitCurrentTrainingQuestion, submitDialogMode, submitError, submitFailed,
+    setCurrentIndex, setDrafts, setLoadState, setStarted, setSubmitDialogMode, setSubmitError, setTimeUp,
+    setReviewingSubmittedAttempt, started, submitCurrentTrainingQuestion, submitDialogMode, submitError, submitFailed,
     submitted, submitting, timeUpPhase,
   };
 }

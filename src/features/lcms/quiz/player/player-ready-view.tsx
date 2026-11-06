@@ -5,13 +5,15 @@ import { SubmitConfirmDialog } from "@/components/quiz/player-shell-parts";
 import { PlayerSaveIndicator, PlayerTimerText } from "@/components/quiz/player-status";
 import { QuizThemeSurface } from "@/components/quiz/quiz-theme-surface";
 import { QuizWelcomeScreen } from "@/components/quiz/quiz-welcome-screen";
-import { PlayerQuestionBody, PlayerSidebar } from "./player-ready-parts";
+import { PlayerQuestionBody } from "./player-ready-parts";
 import { defaultResultDisplay } from "@/components/quiz/player-shell-runtime-model";
 import { PlayerDesktopLayout } from "@/components/quiz/player-shell-runtime/player-desktop-layout";
-import { buildFooterMessage } from "@/components/quiz/player-shell-runtime/player-shell-runtime-helpers";
+import { PlayerQuestionAside } from "@/components/quiz/player-shell-runtime/player-question-aside";
+import { buildFooterMessage, buildTakingCells } from "@/components/quiz/player-shell-runtime/player-shell-runtime-helpers";
 import {
   buildPlayerStyles,
   navButtonClass,
+  playerGridClass,
   playerViewportClass,
 } from "@/components/quiz/player-shell-runtime/player-shell-styles";
 import { TimeUpOverlay } from "@/components/quiz/time-up-overlay";
@@ -35,7 +37,7 @@ export function PlayerReadyView({
     activeSession, allQuestionsAnswered, attemptCompleted, currentAnswerComplete, currentIndex, deadlineAt, draftAnswer,
     draftSync, drafts, isFirstQuestion, isLastQuestion, isMobile, isTestingMode, isTrainingMode, lastResult, loadState, network,
     questionBodyRef, questions, retryTimeUpSubmit, reviewingAttempt, reviewingSubmittedAttempt,
-    setCurrentIndex, setStarted, setSidebarQuery, setSubmitDialogMode, setTimeUp, sidebarQuery, started,
+    setCurrentIndex, setSubmitDialogMode, setTimeUp, started,
     submitCurrentTrainingQuestion, submitDialogMode, submitError, submitFailed, submitted, submitting, timeUpPhase,
   } = rt;
   const readyQuiz = ready.quiz;
@@ -48,15 +50,16 @@ export function PlayerReadyView({
     handleReviewQuestion, handleReviewQuiz, handleStartQuiz, handleToggleBookmark, handleDraftChange, retryHandler,
   } = usePlayerReadyHandlers(rt, ready);
   const resultDisplay: QuizResultDisplay = { ...defaultResultDisplay, ...(readyQuiz.result ?? {}) };
-  const answeredCount = questions.filter((question) => isAnswerComplete(question, drafts[question.id])).length;
   const restoredDraft = loadState.status === "ready" && loadState.restored;
   const bookmarkedQuestionIds = readySession.bookmarkedQuestionIds;
   const isCurrentQuestionBookmarked = bookmarkedQuestionIds.includes(readyQuestion.id);
-  const answeredQuestionIds = questions
-    .filter((question) => isAnswerComplete(question, drafts[question.id]))
-    .map((question) => question.id);
+  const answeredIndexes = new Set(questions.flatMap((question, index) => (isAnswerComplete(question, drafts[question.id]) ? [index] : [])));
+  const flaggedIndexes = new Set(questions.flatMap((question, index) => (bookmarkedQuestionIds.includes(question.id) ? [index] : [])));
+  const answeredCount = answeredIndexes.size;
+  // -1 before the quiz starts: no question is current on the welcome page.
+  const cells = buildTakingCells(questions.length, answeredIndexes, flaggedIndexes, started ? currentIndex : -1);
 
-  const { playerCardStyle, canvasStyle, headerStyle, accentButtonStyle, secondaryButtonStyle, modeBadgeStyle } =
+  const { playerCardStyle, canvasStyle, headerStyle, accentButtonStyle, modeBadgeStyle } =
     buildPlayerStyles(isTrainingMode);
 
   const countdownProps = {
@@ -80,15 +83,6 @@ export function PlayerReadyView({
       submitted={submitted} result={lastResult} submitError={submitError}
     />
   );
-  const sidebar = (
-    <PlayerSidebar
-      answeredQuestionIds={answeredQuestionIds} bookmarkedQuestionIds={bookmarkedQuestionIds} currentIndex={currentIndex}
-      quiz={readyQuiz} query={sidebarQuery} questions={questions} started={started} style={playerCardStyle}
-      onIntroClick={() => setStarted(false)} onJumpToQuestion={handleJumpToQuestion} onQueryChange={setSidebarQuery}
-    />
-  );
-
-
   const submitDialog = submitDialogMode ? (
     <SubmitConfirmDialog
       mode={submitDialogMode}
@@ -103,11 +97,10 @@ export function PlayerReadyView({
   ) : null;
 
   const mobileShellProps = {
-    allQuestionsAnswered, answeredCount, answeredQuestionIds, attemptCompleted,
-    bookmarkCount: bookmarkedQuestionIds.length, bookmarkedQuestionIds, currentIndex, footerMessage,
+    allQuestionsAnswered, answeredCount, attemptCompleted, cells, footerMessage,
     isBookmarked: isCurrentQuestionBookmarked, isFirstQuestion, isLastQuestion, isTestingMode, isTrainingMode,
     currentAnswerComplete, currentQuestionSubmitted: submitted, playerCardStyle, canvasStyle, headerStyle,
-    accentButtonStyle, secondaryButtonStyle, modeBadgeStyle, question: readyQuestion, questions, quiz: readyQuiz,
+    accentButtonStyle, modeBadgeStyle, question: readyQuestion, questions, quiz: readyQuiz,
     resultDisplay, reviewingSubmittedAttempt, saveIndicator, started, submitting, submitFailed, timer: countdown,
     onJumpToQuestion: handleJumpToQuestion, onRequestSubmit: handleRequestSubmit, onReview: handleReviewQuiz,
     onStart: handleStartQuiz, body: questionBody,
@@ -134,7 +127,7 @@ export function PlayerReadyView({
     }
 
     return (
-      <QuizThemeSurface quiz={readyQuiz} className="quiz-player-shell grid gap-3 lg:grid-cols-[minmax(0,1fr)_192px]">
+      <QuizThemeSurface quiz={readyQuiz} className={`quiz-player-shell ${playerGridClass}`}>
         <QuizWelcomeScreen
           accentButtonStyle={accentButtonStyle} answeredCount={answeredCount} canvasStyle={canvasStyle}
           isTestingMode={isTestingMode} isTrainingMode={isTrainingMode} modeBadgeStyle={modeBadgeStyle}
@@ -143,7 +136,7 @@ export function PlayerReadyView({
           restoredDraft={restoredDraft} welcomeMeta={welcomeMeta}
         />
 
-        {sidebar}
+        <PlayerQuestionAside cells={cells} onSelect={handleJumpToQuestion} />
       </QuizThemeSurface>
     );
   }
@@ -159,24 +152,22 @@ export function PlayerReadyView({
   }
 
   return (
-    <QuizThemeSurface quiz={readyQuiz} className="quiz-player-shell grid gap-3 lg:grid-cols-[minmax(0,1fr)_192px]">
+    <QuizThemeSurface quiz={readyQuiz} className="quiz-player-shell">
       <PlayerDesktopLayout
-        accentButtonStyle={accentButtonStyle} allQuestionsAnswered={allQuestionsAnswered}
+        allQuestionsAnswered={allQuestionsAnswered}
         answeredCount={answeredCount} attemptCompleted={attemptCompleted} canvasStyle={canvasStyle}
-        countdownProps={countdownProps} currentAnswerComplete={currentAnswerComplete} currentIndex={currentIndex}
+        cells={cells} countdownProps={countdownProps} currentAnswerComplete={currentAnswerComplete} currentIndex={currentIndex}
         footerMessage={footerMessage} isCurrentQuestionBookmarked={isCurrentQuestionBookmarked}
         isFirstQuestion={isFirstQuestion} isLastQuestion={isLastQuestion} isTestingMode={isTestingMode}
         isTrainingMode={isTrainingMode} lastResult={lastResult} modeBadgeStyle={modeBadgeStyle}
         playerCardStyle={playerCardStyle} questionBody={questionBody} questionBodyRef={questionBodyRef}
         questions={questions} readyAttempt={readyAttempt} readyQuestion={readyQuestion} resultDisplay={resultDisplay}
         reviewingSubmittedAttempt={reviewingSubmittedAttempt} saveIndicator={saveIndicator}
-        secondaryButtonStyle={secondaryButtonStyle} submitFailed={submitFailed} submitted={submitted}
+        submitFailed={submitFailed} submitted={submitted}
         submitting={submitting} handleRequestSubmit={handleRequestSubmit} handleReviewQuiz={handleReviewQuiz}
-        onBackToList={handleBackToList} onRetry={retryHandler} handleToggleBookmark={handleToggleBookmark}
+        onBackToList={handleBackToList} onJumpToQuestion={handleJumpToQuestion} onRetry={retryHandler} handleToggleBookmark={handleToggleBookmark}
         setCurrentIndex={setCurrentIndex} submitCurrentTrainingQuestion={submitCurrentTrainingQuestion}
       />
-
-      {sidebar}
 
       {submitDialog}
       <TimeUpOverlay phase={timeUpPhase} onRetry={retryTimeUpSubmit} />

@@ -38,9 +38,11 @@ type QuestionNavigatorProps = {
   onSelect: (index: number) => void;
   legend: QuestionCellState[] | "auto";
   ariaLabel?: string;
+  /** Cap on the scrolling grid; pass "none" when a parent (the phone sheet) already bounds the height. */
+  gridMaxHeight?: number | "none";
 };
 
-export function QuestionNavigator({ cells, surface, onSelect, legend, ariaLabel = "Danh sách câu hỏi" }: QuestionNavigatorProps) {
+export function QuestionNavigator({ cells, surface, onSelect, legend, ariaLabel = "Danh sách câu hỏi", gridMaxHeight = 320 }: QuestionNavigatorProps) {
   const layout = questionGridLayout(cells.length, surface);
   const visible = cells.filter((cell) => !cell.hidden);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -63,9 +65,9 @@ export function QuestionNavigator({ cells, surface, onSelect, legend, ariaLabel 
         ref={scrollRef}
         role="group"
         aria-label={ariaLabel}
-        sx={{ maxHeight: layout.scroll ? 320 : undefined, minHeight: 0, overflowY: layout.scroll ? "auto" : "visible", p: 0.5, position: "relative" }}
+        sx={{ maxHeight: layout.scroll ? gridMaxHeight : undefined, minHeight: 0, overflowY: layout.scroll ? "auto" : "visible", p: 0.5, position: "relative" }}
       >
-        <Box sx={{ display: "grid", gap: `${layout.gap}px`, gridTemplateColumns: `repeat(${layout.columns}, ${layout.cell}px)`, justifyContent: "center" }}>
+        <Box sx={{ display: "grid", gap: `${layout.gap}px`, gridTemplateColumns: `repeat(${layout.columns}, minmax(0, ${layout.cell}px))`, justifyContent: "center" }}>
           {visible.map((cell) => (
             <ButtonBase
               key={cell.index}
@@ -77,10 +79,10 @@ export function QuestionNavigator({ cells, surface, onSelect, legend, ariaLabel 
                 border: BORDER,
                 ...stateSx[cell.state],
                 borderRadius: `${tk.radius.control}px`,
-                height: layout.cell,
+                aspectRatio: "1 / 1",
                 position: "relative",
                 typography: layout.fontSize === "caption" ? "caption" : "body2",
-                width: layout.cell,
+                width: "100%",
                 "&::after": cell.flagged ? flagDotSx : undefined,
                 "&:focus-visible": { outline: `2px solid ${tk.color.primary}`, outlineOffset: 2 },
               }}

@@ -107,10 +107,6 @@
     "hex": 1,
     "font": 0
   },
-  "src/components/quiz/mobile-player-question-sheet.tsx": {
-    "hex": 1,
-    "font": 0
-  },
   "src/components/quiz/mobile-player-shell.tsx": {
     "hex": 2,
     "font": 0
@@ -124,12 +120,8 @@
     "font": 0
   },
   "src/components/quiz/player-shell-runtime/player-shell-styles.ts": {
-    "hex": 4,
+    "hex": 3,
     "font": 0
-  },
-  "src/components/quiz/question-navigator.tsx": {
-    "hex": 13,
-    "font": 17
   },
   "src/components/quiz/questions/choice-option.tsx": {
     "hex": 12,

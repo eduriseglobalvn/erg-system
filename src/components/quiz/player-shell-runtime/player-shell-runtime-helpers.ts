@@ -1,4 +1,5 @@
 import type { QuizRuntimePortal } from "@/domain/quiz/quiz-runtime-types";
+import type { QuestionCell } from "@/components/quiz/question-navigator";
 import { isEventRecord } from "@/components/quiz/player-shell-runtime-model";
 import type { LocalQuizAttemptSession } from "@/domain/quiz/quiz-runtime-types";
 
@@ -36,5 +37,15 @@ export function buildFooterMessage({
         ? "Tất cả câu hỏi đã có câu trả lời. Bạn có thể nộp bài."
         : isTrainingMode
           ? "Chọn đáp án rồi bấm Nộp bài cho từng câu. Có thể dùng mục lục để chuyển câu."
-          : "Dùng Quay lại / Tiếp theo để rà soát bài trước khi nộp.";
+          : "Dùng Câu trước / Câu tiếp để rà soát bài trước khi nộp.";
+}
+
+/** Grid cells while taking: `answered` stays true on the current cell so the "Chưa làm" count is right. Pass -1 before the quiz starts. */
+export function buildTakingCells(total: number, answered: ReadonlySet<number>, flagged: ReadonlySet<number>, current: number): QuestionCell[] {
+  return Array.from({ length: total }, (_, index) => ({
+    index,
+    state: index === current ? "current" : answered.has(index) ? "done" : "todo",
+    flagged: flagged.has(index),
+    answered: answered.has(index),
+  }));
 }

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   buildFooterMessage,
+  buildTakingCells,
   buildReconnectSignature,
   offlineAttemptScope,
 } from "@/components/quiz/player-shell-runtime/player-shell-runtime-helpers";
@@ -51,4 +52,22 @@ describe("player styles", () => {
     expect(buildPlayerStyles(false).modeBadgeStyle.color).toBe("#b91c1c");
   });
 
+});
+
+describe("buildTakingCells", () => {
+  const cells = buildTakingCells(20, new Set(Array.from({ length: 16 }, (_, i) => i)), new Set([2, 9]), 2);
+
+  it("marks the current cell, keeps its flag and its answered state", () => {
+    expect(cells[2]).toEqual({ index: 2, state: "current", flagged: true, answered: true });
+  });
+
+  it("maps answered to done and the rest to todo", () => {
+    expect(cells[0].state).toBe("done");
+    expect(cells[16]).toEqual({ index: 16, state: "todo", flagged: false, answered: false });
+    expect(cells[9].flagged).toBe(true);
+  });
+
+  it("has no current cell before the quiz starts", () => {
+    expect(buildTakingCells(3, new Set(), new Set(), -1).some((cell) => cell.state === "current")).toBe(false);
+  });
 });
