@@ -25,7 +25,7 @@ function setup(selectedTopicId: string, groups: QuizEditorGroup[], quizId = "") 
   const scope = { selectedCourseId: "c", selectedLevelId: "l", selectedTopicId, levelTopics: [], handleTopicChange: calls.handleTopicChange };
   const hook = renderHook((props: { groups: QuizEditorGroup[]; quizId?: string }) =>
     useQuizList({ scope, quizId: props.quizId ?? quizId, ready: true, groups: props.groups, quizProject: createNewQuizProjectSettings(), selectSlide: calls.selectSlide, openQuiz: calls.openQuiz, openEditor: calls.openEditor }),
-  { initialProps: { groups }, wrapper });
+  { initialProps: { groups } as { groups: QuizEditorGroup[]; quizId?: string }, wrapper });
   return { ...calls, hook, client };
 }
 
