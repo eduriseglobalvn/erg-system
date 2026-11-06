@@ -21,6 +21,19 @@ const ACTION_HINTS: Partial<Record<string, Record<string, string>>> = {
   "true-false": { "no-correct": "Chưa có phương án đúng. Bấm ô chữ cái để chọn đáp án đúng." },
 };
 
+/** The yellow strip set right above the spot it is about (spec §5). */
+function IssueStrip({ lines }: { lines: string[] }) {
+  if (!lines.length) return null;
+  return (
+    <Box role="status" sx={{ bgcolor: tokens.statusTint.warning.bg, borderRadius: `${tokens.radius.control}px`, color: tokens.statusTint.warning.color, display: "flex", gap: 1, px: 1.5, py: 1, typography: "body2" }}>
+      <WarningAmberIcon fontSize="small" />
+      <Box>
+        {lines.map((line, index) => <div key={`${index}:${line}`}>{line}</div>)}
+      </Box>
+    </Box>
+  );
+}
+
 type Props = {
   slide: QuizEditorSlide;
   question: Question | null;
@@ -32,9 +45,12 @@ type Props = {
 export function QuestionCard({ slide, question, meta, readiness, onReplaceSlide }: Props) {
   const { t } = useI18n();
   const hints = ACTION_HINTS[slide.kind] ?? {};
-  const titleIssue = readiness.issues.find((issue) => issue.area === "title");
+  const titleIssues = readiness.issues.filter((issue) => issue.area === "title").map((issue) => issue.message);
+  // A hotspot's image is its answer canvas, so "Chưa có ảnh" sits with the answers, first.
   // MatchingAuthoring shows pair-key itself, next to its confirm button.
-  const answerIssues = readiness.issues.filter((issue) => issue.area === "answers" && issue.code !== "pair-key");
+  const answerIssues = readiness.issues
+    .filter((issue) => issue.area !== "title" && issue.code !== "pair-key")
+    .map((issue) => hints[issue.code] ?? issue.message);
   const write = (next: Question) => onReplaceSlide(writeSlideQuestion(slide, next));
   // Results of async steps (image processing) patch the latest slide, so edits made meanwhile survive.
   const updateLatest = (change: (latest: Question) => Question) =>
@@ -57,6 +73,7 @@ export function QuestionCard({ slide, question, meta, readiness, onReplaceSlide 
   return (
     <Box sx={{ bgcolor: "background.paper", border: 1, borderColor: "divider", borderRadius: `${tokens.radius.card}px`, display: "flex", flexDirection: "column", gap: 2.25, p: 3.5 }}>
       <Typography color="text.secondary" variant="caption">{meta}</Typography>
+      <IssueStrip lines={titleIssues} />
       <Box>
         <InputBase
           fullWidth
@@ -70,17 +87,9 @@ export function QuestionCard({ slide, question, meta, readiness, onReplaceSlide 
           }}
           value={slide.title}
         />
-        {titleIssue ? <Typography color="warning.main" sx={{ px: 1.5 }} variant="caption">{titleIssue.message}</Typography> : null}
       </Box>
       {slide.kind === "hotspot" ? null : <QuestionImageSlot label="Thêm ảnh cho câu hỏi" media={slide.media} onChange={setMedia} />}
-      {answerIssues.length ? (
-        <Box role="status" sx={{ bgcolor: tokens.statusTint.warning.bg, borderRadius: `${tokens.radius.control}px`, color: tokens.statusTint.warning.color, display: "flex", gap: 1, px: 1.5, py: 1, typography: "body2" }}>
-          <WarningAmberIcon fontSize="small" />
-          <Box>
-            {answerIssues.map((issue) => <div key={issue.code}>{hints[issue.code] ?? issue.message}</div>)}
-          </Box>
-        </Box>
-      ) : null}
+      <IssueStrip lines={answerIssues} />
       {question ? <AnswerArea onChange={write} onUpdate={updateLatest} question={question} slide={slide} /> : null}
       <QuestionFeedbackLine onChange={(feedbackRows) => onReplaceSlide({ ...slide, feedbackRows })} points={question?.points ?? 0} slide={slide} />
     </Box>

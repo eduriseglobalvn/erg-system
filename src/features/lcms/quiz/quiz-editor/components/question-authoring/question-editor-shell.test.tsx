@@ -126,6 +126,20 @@ describe("QuestionEditorShell", () => {
     expect(screen.getByRole("status").textContent).toBe("Chính xác!");
   });
 
+  it("says a missing title in the yellow strip right above the title box", () => {
+    renderShell();
+    const title = screen.getByRole("textbox", { name: "Đề bài" });
+    const strip = screen.getAllByRole("status").find((item) => item.textContent === "Chưa có đề bài")!;
+    expect(strip).toBeDefined();
+    expect(strip.compareDocumentPosition(title) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it("says a hotspot has no image yet in the yellow strip", () => {
+    const hotspot: QuizEditorSlide = { id: "h1", title: "Chỉ ra thủ đô", kind: "hotspot" };
+    renderShell({ groups: [{ ...groups[0]!, slides: [hotspot] }], selectedSlide: hotspot });
+    expect(screen.getAllByRole("status").some((item) => item.textContent?.includes("Chưa có ảnh"))).toBe(true);
+  });
+
   it("reveals the correct-answer message box", () => {
     renderShell();
     fireEvent.click(screen.getByRole("button", { name: "+ Khi đúng" }));
