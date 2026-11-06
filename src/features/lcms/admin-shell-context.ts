@@ -13,6 +13,8 @@ export type AdminShellModel = {
   legacyPathname: string;
   pendingQuestionImports: QuestionBankQuestion[];
   quizEditorQuizId: string | null;
+  /** `?panel=theme` on the quiz editor URL. */
+  quizEditorThemeRequested: boolean;
   tenantId: string;
   onClearQuestionImports: () => void;
   onCreateQuizFromBank: (questions: QuestionBankQuestion[], options?: CreateQuizFromBankOptions) => void;

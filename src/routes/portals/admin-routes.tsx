@@ -9,7 +9,7 @@ import {
   lcmsWorkspacePaths,
 } from "@/app/portal-route-registry";
 import { enforcePermissionRoute, enforceWorkspaceRoute } from "@/app/router/route-guards";
-import { ADMIN_CONTENT_HOME_PATH, ADMIN_CONTENT_ROUTE_PATHS, canonicalAdminWorkspacePath } from "@/features/lcms/admin-content/admin-content-route";
+import { ADMIN_CONTENT_HOME_PATH, ADMIN_CONTENT_ROUTE_PATHS, adminContentPathForSection, canonicalAdminWorkspacePath } from "@/features/lcms/admin-content/admin-content-route";
 import { adminPath } from "@/platform/workspaces/workspace-paths";
 import { RoutePendingSkeleton } from "@/routes/route-feedback";
 import { authedRoute, permissionStaticData, ProfileBody, rootRoute } from "@/routes/portals/route-shared";
@@ -43,11 +43,20 @@ const adminShellRoute = createRoute({
   component: lazyRouteComponent(() => import("@/app/pages/admin/admin-page")),
 });
 
+function validateQuizEditorSearch(search: Record<string, unknown>): { quizId?: string; panel?: "theme" } {
+  return {
+    ...(typeof search.quizId === "string" && search.quizId ? { quizId: search.quizId } : {}),
+    ...(search.panel === "theme" ? { panel: "theme" as const } : {}),
+  };
+}
+
 const adminContentRoutes = ADMIN_CONTENT_ROUTE_PATHS.map((contentPath) =>
   createRoute({
     getParentRoute: () => adminShellRoute,
     path: contentPath,
     staticData: permissionStaticData(contentPath, "ADMIN"),
+    // Only the quiz editor reads search: `panel=theme` opens its theme dialog (link from Giao bài).
+    ...(contentPath === adminContentPathForSection("quiz-editor") ? { validateSearch: validateQuizEditorSearch } : {}),
     component: contentPath === ADMIN_CONTENT_HOME_PATH ? page("AdminContentOverviewRoute") : page("AdminContentWorkspaceRoute"),
   }),
 );

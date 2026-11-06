@@ -16,7 +16,7 @@ type Option = { id: string; label: string };
 /** Môn, Level, the save chip and the screen's one contained button, with the server's refusal right under it. */
 export function QuizListTitlebar({
   courseOptions, selectedCourseId, levelOptions, selectedLevelId, onChangeCourse, onChangeLevel,
-  syncChip, playerTemplate, questionCount, onApplyTheme, themeDisabled, onPublish, publishBlockedReason, publishReadinessOnly, notReady, onOpenQuestion,
+  syncChip, playerTemplate, questionCount, onApplyTheme, themeDisabled, themeRequested, onThemeRequestHandled, onPublish, publishBlockedReason, publishReadinessOnly, notReady, onOpenQuestion,
   publishFailure, onDismissPublishFailure, isPublishing,
 }: {
   courseOptions: Option[];
@@ -32,6 +32,10 @@ export function QuizListTitlebar({
   onApplyTheme: (next: QuizPlayerTemplate) => void;
   /** The template is replaced when the draft loads, so a theme applied before that would be lost. */
   themeDisabled: boolean;
+  /** The link from Giao bài (`panel=theme`) wants the dialog open as soon as the draft is ready. */
+  themeRequested?: boolean;
+  /** Called when that request is done (dialog closed), so the caller can drop `panel=theme` from the URL. */
+  onThemeRequestHandled?: () => void;
   onPublish: () => void;
   publishBlockedReason: string | null;
   publishReadinessOnly: boolean;
@@ -42,6 +46,13 @@ export function QuizListTitlebar({
   isPublishing: boolean;
 }) {
   const [themeOpen, setThemeOpen] = useState(false);
+  const [requestDismissed, setRequestDismissed] = useState(false);
+  const dialogOpen = themeOpen || Boolean(themeRequested && !themeDisabled && !requestDismissed);
+  const closeTheme = () => {
+    setThemeOpen(false);
+    setRequestDismissed(true);
+    if (themeRequested) onThemeRequestHandled?.();
+  };
   const [popoverAnchor, setPopoverAnchor] = useState<HTMLElement | null>(null);
   const select = (label: string, value: string, options: Option[], onChange: (value: string) => void) => (
     <ErgSelect
@@ -101,10 +112,10 @@ export function QuizListTitlebar({
       <QuizThemeDialog
         onApply={(next) => {
           onApplyTheme(next);
-          setThemeOpen(false);
+          closeTheme();
         }}
-        onClose={() => setThemeOpen(false)}
-        open={themeOpen}
+        onClose={closeTheme}
+        open={dialogOpen}
         questionCount={questionCount}
         value={playerTemplate}
       />

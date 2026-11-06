@@ -6,6 +6,7 @@ import { ErgSearchField, ErgSelect } from "@/components/erg-mui/erg-form";
 import {
   AssignmentCheckbox,
 } from "@/features/lms/components/assign-homework-parts";
+import { AssignQuizThemeSlot } from "@/features/lms/components/assign-quiz-theme-slot";
 import type { AssignHomeworkController } from "@/features/lms/components/use-assign-homework-controller";
 
 const pillSx = { borderRadius: 1, px: 1.5, py: 0.5, fontWeight: "fontWeightMedium", color: "primary.main" } as const;
@@ -106,6 +107,7 @@ export function ResourceSelectionStep({ model }: { model: AssignHomeworkControll
             </Box>
           </Box>
           <Box sx={{ minHeight: 0, flex: 1, overflowY: "auto", p: 2 }}>
+            {selectedResourceIds.size === 1 ? <Box sx={{ mb: 1.5, "&:empty": { display: "none" } }}><AssignQuizThemeSlot quizId={[...selectedResourceIds][0]} /></Box> : null}
             <Box sx={{ display: "grid", gap: 1.5 }}>
               {filteredResourceTopics.map((topic) => (
                 <Box component="section" key={topic.id} sx={{ overflow: "hidden", borderRadius: 1, border: 1, borderColor: "divider", bgcolor: "background.paper", boxShadow: 1 }}>
