@@ -16,7 +16,7 @@ type Option = { id: string; label: string };
 /** Môn, Level, the save chip and the screen's one contained button, with the server's refusal right under it. */
 export function QuizListTitlebar({
   courseOptions, selectedCourseId, levelOptions, selectedLevelId, onChangeCourse, onChangeLevel,
-  syncChip, playerTemplate, onApplyTheme, themeDisabled, onPublish, publishBlockedReason, publishReadinessOnly, notReady, onOpenQuestion,
+  syncChip, playerTemplate, questionCount, onApplyTheme, themeDisabled, onPublish, publishBlockedReason, publishReadinessOnly, notReady, onOpenQuestion,
   publishFailure, onDismissPublishFailure, isPublishing,
 }: {
   courseOptions: Option[];
@@ -27,6 +27,8 @@ export function QuizListTitlebar({
   onChangeLevel: (levelId: string) => void;
   syncChip: ReactNode;
   playerTemplate: QuizPlayerTemplate;
+  /** Question slides in the draft: the theme applies to all of them. */
+  questionCount: number;
   onApplyTheme: (next: QuizPlayerTemplate) => void;
   /** The template is replaced when the draft loads, so a theme applied before that would be lost. */
   themeDisabled: boolean;
@@ -103,6 +105,7 @@ export function QuizListTitlebar({
         }}
         onClose={() => setThemeOpen(false)}
         open={themeOpen}
+        questionCount={questionCount}
         value={playerTemplate}
       />
       <PublishBlockedPopover

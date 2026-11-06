@@ -29,6 +29,7 @@ function renderBar(props: Partial<Parameters<typeof QuizListTitlebar>[0]> = {}) 
       syncChip={null}
       {...handlers}
       playerTemplate={playerTemplate}
+      questionCount={0}
       themeDisabled={false}
       {...props}
     />

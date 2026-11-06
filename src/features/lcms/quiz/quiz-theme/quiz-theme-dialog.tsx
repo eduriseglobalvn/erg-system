@@ -5,7 +5,7 @@ import { ErgButton, ErgDialog, ErgStatusChip } from "@/components/erg-mui";
 import type { QuizPlayerTemplate } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import { checkThemeContrast } from "@/features/lcms/quiz/quiz-theme/quiz-theme-contrast";
 import { QuizThemeCustomize } from "@/features/lcms/quiz/quiz-theme/quiz-theme-customize";
-import { enCopy, viCopy } from "@/features/lcms/quiz/quiz-theme/quiz-theme-copy";
+import { applyLabel, enCopy, viCopy } from "@/features/lcms/quiz/quiz-theme/quiz-theme-copy";
 import { QuizThemeLibrary } from "@/features/lcms/quiz/quiz-theme/quiz-theme-library";
 import {
   applyQuizThemePreset,
@@ -20,6 +20,8 @@ import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
 type QuizThemeDialogProps = {
   open: boolean;
   value: QuizPlayerTemplate;
+  /** Questions the theme will apply to; shown in the apply button. */
+  questionCount?: number;
   onClose(): void;
   onApply(next: QuizPlayerTemplate): void;
 };
@@ -31,7 +33,7 @@ export function QuizThemeDialog(props: QuizThemeDialogProps) {
 
 const column = { display: "flex", flexDirection: "column", gap: 1.5, minWidth: 0 } as const;
 
-function QuizThemeDialogBody({ value, onClose, onApply }: QuizThemeDialogProps) {
+function QuizThemeDialogBody({ value, questionCount, onClose, onApply }: QuizThemeDialogProps) {
   const { locale } = useI18n();
   const copy = locale === "vi" ? viCopy : enCopy;
   const [draft, setDraft] = useState(value);
@@ -64,10 +66,10 @@ function QuizThemeDialogBody({ value, onClose, onApply }: QuizThemeDialogProps) 
             {copy.resetDefault}
           </ErgButton>
           <Box sx={{ flex: 1 }} />
-          <ErgButton variant="text" onClick={onClose}>
+          <ErgButton variant="outlined" onClick={onClose}>
             {copy.cancel}
           </ErgButton>
-          <ErgButton onClick={() => onApply(draft)}>{copy.apply}</ErgButton>
+          <ErgButton onClick={() => onApply(draft)}>{applyLabel(questionCount, copy)}</ErgButton>
         </>
       }
     >

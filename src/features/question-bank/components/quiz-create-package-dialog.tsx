@@ -110,7 +110,7 @@ export function QuizCreatePackageDialog({ copy, draft, mode = "create", question
           <Typography variant="caption" color="text.secondary">{copy.acceptPartialHint}</Typography>
         </Stack>
 
-        <QuizCreateThemeRow copy={copy} value={draft.playerTemplate} onChange={(playerTemplate) => onChange({ ...draft, playerTemplate })} />
+        <QuizCreateThemeRow copy={copy} value={draft.playerTemplate} questionCount={questions.length} onChange={(playerTemplate) => onChange({ ...draft, playerTemplate })} />
       </Stack>
     </ErgDialog>
   );

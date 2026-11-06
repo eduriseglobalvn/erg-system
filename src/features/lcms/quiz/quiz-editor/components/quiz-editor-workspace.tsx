@@ -124,6 +124,7 @@ export function QuizEditorWorkspace({
         onChangeLevel={scope.handleLevelChange}
         syncChip={syncChip}
         playerTemplate={playerTemplate}
+        questionCount={questionManagerSlides.length}
         onApplyTheme={updatePlayerTemplate}
         themeDisabled={!sync.ready}
         onPublish={() => void handlePublish()}

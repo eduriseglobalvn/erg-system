@@ -15,9 +15,10 @@ import type { QuestionBankCopy } from "./question-bank-copy";
 const bar = { height: 5, borderRadius: `${t.radius.xs / 2}px` } as const;
 
 /** Current quiz theme (name + mini swatch) with a button that opens the shared theme picker. */
-export function QuizCreateThemeRow({ copy, value, onChange }: {
+export function QuizCreateThemeRow({ copy, value, questionCount, onChange }: {
   copy: QuestionBankCopy;
   value: QuizPlayerTemplate;
+  questionCount: number;
   onChange: (value: QuizPlayerTemplate) => void;
 }) {
   const { locale } = useI18n();
@@ -39,7 +40,7 @@ export function QuizCreateThemeRow({ copy, value, onChange }: {
         <Typography variant="body2" noWrap>{name}</Typography>
       </Stack>
       <ErgButton variant="text" onClick={() => setOpen(true)}>{copy.changeThemeAction}</ErgButton>
-      <QuizThemeDialog open={open} value={value} onClose={() => setOpen(false)} onApply={(next) => { onChange(next); setOpen(false); }} />
+      <QuizThemeDialog open={open} value={value} questionCount={questionCount} onClose={() => setOpen(false)} onApply={(next) => { onChange(next); setOpen(false); }} />
     </Stack>
   );
 }

@@ -52,11 +52,23 @@ export type QuizThemeCopy = {
     feedbackScreen: string;
     summaryScreen: string;
     note: string;
+    stateLabel: string;
+    states: { playing: string; correct: string; wrong: string };
+    deviceLabel: string;
+    devices: { phone: string; desktop: string };
+    yourChoice: string;
+    correctAnswer: string;
   };
   resetDefault: string;
   cancel: string;
   apply: string;
+  applyCount: (n: number) => string;
 };
+
+/** "Áp dụng cho 20 câu"; the bare verb when the count is unknown or zero. */
+export function applyLabel(count: number | undefined, copy: QuizThemeCopy = viCopy): string {
+  return count ? copy.applyCount(count) : copy.apply;
+}
 
 export const viCopy: QuizThemeCopy = {
   title: "Theme của bài tập",
@@ -120,10 +132,17 @@ export const viCopy: QuizThemeCopy = {
     feedbackScreen: "Phản hồi đúng / sai · màu cố định",
     summaryScreen: "Màn tổng kết",
     note: "Theme chỉ đổi cách hiển thị. Màu Đúng (xanh lá) và Sai (đỏ) cố định ở mọi theme để học viên không nhầm.",
+    stateLabel: "Trạng thái câu hỏi",
+    states: { playing: "Đang làm", correct: "Đúng", wrong: "Sai" },
+    deviceLabel: "Thiết bị",
+    devices: { phone: "Điện thoại", desktop: "Máy tính" },
+    yourChoice: "Bạn chọn",
+    correctAnswer: "Đáp án đúng",
   },
   resetDefault: "Về mặc định",
   cancel: "Hủy",
   apply: "Áp dụng",
+  applyCount: (n) => `Áp dụng cho ${n} câu`,
 };
 
 export const enCopy: QuizThemeCopy = {
@@ -188,8 +207,15 @@ export const enCopy: QuizThemeCopy = {
     feedbackScreen: "Right / wrong feedback · fixed colors",
     summaryScreen: "Summary screen",
     note: "A theme only changes the look. Right (green) and wrong (red) colors stay fixed in every theme so learners are never confused.",
+    stateLabel: "Question state",
+    states: { playing: "In progress", correct: "Correct", wrong: "Wrong" },
+    deviceLabel: "Device",
+    devices: { phone: "Phone", desktop: "Desktop" },
+    yourChoice: "Your pick",
+    correctAnswer: "Correct answer",
   },
   resetDefault: "Reset to default",
   cancel: "Cancel",
   apply: "Apply",
+  applyCount: (n) => `Apply to ${n} ${n === 1 ? "question" : "questions"}`,
 };
