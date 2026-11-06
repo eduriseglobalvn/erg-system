@@ -137,3 +137,47 @@ describe("usePlayerKeyboard web shortcuts", () => {
     expect(submitting.onPickOption).not.toHaveBeenCalled();
   });
 });
+
+describe("usePlayerKeyboard repeat and shift", () => {
+  const press = (key: string, init: KeyboardEventInit = {}) =>
+    window.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, ...init }));
+
+  function setup() {
+    const fns = { onPickOption: vi.fn(), onToggleFlag: vi.fn(), focusGoTo: vi.fn() };
+    const setCurrentIndex = mount(fns);
+    return { ...fns, setCurrentIndex };
+  }
+
+  it("ignores auto-repeat for F, N and digits", () => {
+    const fns = setup();
+    press("f", { repeat: true });
+    press("n", { repeat: true });
+    press("2", { repeat: true });
+    expect(fns.onToggleFlag).not.toHaveBeenCalled();
+    expect(fns.focusGoTo).not.toHaveBeenCalled();
+    expect(fns.onPickOption).not.toHaveBeenCalled();
+    press("f");
+    expect(fns.onToggleFlag).toHaveBeenCalledOnce();
+  });
+
+  it("keeps repeating arrows", () => {
+    const fns = setup();
+    press("ArrowRight", { repeat: true });
+    expect(fns.setCurrentIndex).toHaveBeenCalledOnce();
+  });
+
+  it("accepts Shift+F and Shift+N but never with ctrl, and still ignores Shift+arrow/digit", () => {
+    const fns = setup();
+    press("F", { shiftKey: true });
+    press("N", { shiftKey: true });
+    expect(fns.onToggleFlag).toHaveBeenCalledOnce();
+    expect(fns.focusGoTo).toHaveBeenCalledOnce();
+    press("F", { ctrlKey: true, shiftKey: true });
+    press("f", { ctrlKey: true });
+    expect(fns.onToggleFlag).toHaveBeenCalledOnce();
+    press("ArrowRight", { shiftKey: true });
+    press("2", { shiftKey: true });
+    expect(fns.setCurrentIndex).not.toHaveBeenCalled();
+    expect(fns.onPickOption).not.toHaveBeenCalled();
+  });
+});

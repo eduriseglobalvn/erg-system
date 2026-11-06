@@ -50,7 +50,13 @@ export function usePlayerKeyboard({
 }: UsePlayerKeyboardArgs) {
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
-      if (event.defaultPrevented || event.isComposing || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) {
+      if (event.defaultPrevented || event.isComposing || event.altKey || event.ctrlKey || event.metaKey) {
+        return;
+      }
+
+      // Shift only matters for non-letters: Shift+F / Shift+N still count; Enter, arrows and digits ignore Shift.
+      const letter = event.key.toLowerCase();
+      if (event.shiftKey && letter !== "f" && letter !== "n") {
         return;
       }
 
@@ -85,15 +91,15 @@ export function usePlayerKeyboard({
       }
 
       // Flag and go-to stay available while reviewing, like their on-screen controls.
-      const letter = event.key.toLowerCase();
+      // Held keys must not re-fire: a repeating F would toggle the bookmark over and over.
       if (letter === "f" && onToggleFlag) {
         event.preventDefault();
-        onToggleFlag();
+        if (!event.repeat) onToggleFlag();
         return;
       }
       if (letter === "n" && focusGoTo) {
         event.preventDefault();
-        focusGoTo();
+        if (!event.repeat) focusGoTo();
         return;
       }
 
@@ -102,7 +108,7 @@ export function usePlayerKeyboard({
       }
 
       if (onPickOption && /^[1-9]$/.test(event.key)) {
-        onPickOption(Number(event.key) - 1);
+        if (!event.repeat) onPickOption(Number(event.key) - 1);
         return;
       }
 
