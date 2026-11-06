@@ -123,7 +123,8 @@ export function usePeopleSearch(q: string) {
 }
 
 export function useResolvePeople() {
-  return useMutation({ mutationFn: resolvePeople });
+  // The paste panel shows its own notice; no duplicate global toast.
+  return useMutation({ mutationFn: resolvePeople, meta: { silent: true } });
 }
 
 /** Every box list, the summary and (when known) the detail depend on the status of a campaign. */

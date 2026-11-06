@@ -63,3 +63,12 @@ test("'Bỏ cả lớp' removes a class and the final button follows the total",
   fireEvent.click(within(screen.getByRole("region", { name: /7A/ })).getByRole("button", { name: "Bỏ cả lớp" }));
   expect(screen.getByRole("button", { name: "Xong · 76 người" })).toBeInTheDocument();
 });
+
+test("dropping the errors while on the Lỗi view returns to the full list", () => {
+  render(<Harness />);
+  fireEvent.click(screen.getByRole("button", { name: "Lỗi 2" }));
+  expect(screen.queryByRole("region", { name: /7A/ })).toBeNull();
+  fireEvent.click(screen.getByRole("button", { name: "Bỏ 2 dòng" }));
+  expect(screen.getByRole("button", { name: "Tất cả 126" })).toHaveAttribute("aria-pressed", "true");
+  expect(screen.getByRole("region", { name: /7A/ })).toBeInTheDocument();
+});

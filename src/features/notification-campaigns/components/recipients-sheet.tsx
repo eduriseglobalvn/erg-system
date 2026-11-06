@@ -22,15 +22,18 @@ export function RecipientsSheet({ draft, onChange, onClose, open }: Props) {
   const phone = useMediaQuery(useTheme().breakpoints.down("sm"));
   const [filter, setFilter] = useState<RecipientFilter>("ALL");
   const errorCount = draft.errors.length;
-  // The error chip vanishes once the lines are dropped; fall back to the full list.
-  const active: RecipientFilter = filter === "ERRORS" && errorCount === 0 ? "ALL" : filter;
+  // The error chip vanishes once the lines are dropped; reset so a later error does not reopen that view.
+  if (filter === "ERRORS" && errorCount === 0) setFilter("ALL");
+  const active = filter;
 
   const groups = useMemo(() => {
     const byKey = new Map<string, AudienceDraft["picked"]>();
     for (const card of draft.picked) {
       if (active !== "ALL" && card.role !== active) continue;
       const key = groupKeyOf(card);
-      byKey.set(key, [...(byKey.get(key) ?? []), card]);
+      const bucket = byKey.get(key);
+      if (bucket) bucket.push(card);
+      else byKey.set(key, [card]);
     }
     return [...byKey].map(([key, cards]) => ({ key, cards, isClass: cards[0]?.role === "STUDENT" }));
   }, [draft.picked, active]);
@@ -45,7 +48,7 @@ export function RecipientsSheet({ draft, onChange, onClose, open }: Props) {
     >
       <Stack spacing={2}>
         <RecipientFilterChips active={active} errorCount={errorCount} onChange={setFilter} picked={draft.picked} />
-        <Typography aria-live="polite" color="text.secondary" variant="body2">
+        <Typography color="text.secondary" variant="body2">
           Chỉ tính người có tài khoản; người trùng chỉ nhận một lần.
         </Typography>
         {active === "ALL" || active === "ERRORS" ? (

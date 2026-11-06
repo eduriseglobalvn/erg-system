@@ -41,7 +41,11 @@ export function PeoplePicker({ draft, onChange }: Props) {
         onInputChange={(_event, value, reason) => reason !== "reset" && setInput(value)}
         options={options}
         renderInput={(params) => (
-          <ErgTextField {...params} aria-describedby={helpId} label="Tìm theo tên, mã, số điện thoại hoặc email" />
+          <ErgTextField
+            {...params}
+            label="Tìm theo tên, mã, số điện thoại hoặc email"
+            slotProps={{ ...params.slotProps, htmlInput: { ...params.slotProps.htmlInput, "aria-describedby": helpId } }}
+          />
         )}
         renderOption={({ key, ...props }, option) => (
           <li key={key} {...props}>

@@ -10,7 +10,7 @@ import type { RecipientCard } from "../api/campaign-types";
 const FIRST_PAGE = 5;
 const MORE_STEP = 100;
 
-export type RecipientGroup = { cards: RecipientCard[]; isClass: boolean; key: string };
+type RecipientGroup = { cards: RecipientCard[]; isClass: boolean; key: string };
 type Props = { groups: RecipientGroup[]; onRemove: (userId: string) => void; onRemoveGroup: (key: string) => void };
 
 export function RecipientGroupList({ groups, onRemove, onRemoveGroup }: Props) {

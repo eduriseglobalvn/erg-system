@@ -22,7 +22,7 @@ export function PickedPeopleSummary({ draft, onChange, onOpenSheet }: Props) {
           key={card.userId}
           label={card.displayName}
           onDelete={() => onChange(removePicked(draft, card.userId ?? ""))}
-          deleteIcon={<CancelIcon aria-label={`Bỏ ${card.displayName}`} role="button" />}
+          deleteIcon={<CancelIcon aria-label={`Bỏ ${card.displayName}`} />}
         />
       ))}
       {picked.length > MAX_CHIPS ? <Chip clickable label={`+${picked.length - MAX_CHIPS} người`} onClick={onOpenSheet} /> : null}

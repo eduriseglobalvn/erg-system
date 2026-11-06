@@ -33,3 +33,9 @@ test("removePickedGroup drops a whole class", () => {
   expect(groupKeyOf(card("u1"))).toBe("7A");
   expect(removePickedGroup(draft, "7A").picked.map((c) => c.userId)).toEqual(["u2", "t1"]);
 });
+
+test("switching scope stops sending the previous scope's list", () => {
+  const draft: AudienceDraft = { ...emptyDraft("CLASS"), classIds: ["c1"], roles: ["TEACHER"] };
+  expect(toCampaignAudience(draft)).toMatchObject({ classIds: ["c1"], roles: [] });
+  expect(toCampaignAudience({ ...draft, scope: "ROLE" })).toMatchObject({ classIds: [], roles: ["TEACHER"] });
+});

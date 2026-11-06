@@ -5,7 +5,7 @@ import type { AudienceBreakdown, CampaignAudience } from "../api/campaign-types"
 
 type ViewProps = { breakdown?: AudienceBreakdown; error?: unknown; loading?: boolean };
 
-export function formatBreakdown(b: AudienceBreakdown): string {
+function formatBreakdown(b: AudienceBreakdown): string {
   const parts = [
     `Ước tính ${b.total ?? 0} người nhận`,
     ...(b.teachers ? [`${b.teachers} GV`] : []),

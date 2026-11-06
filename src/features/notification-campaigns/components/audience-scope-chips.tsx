@@ -13,6 +13,9 @@ type Props = {
 
 /** "Gửi đến" scope as a radiogroup: one tab stop, arrow keys move and select. */
 export function AudienceScopeChips({ allowed, onChange, value }: Props) {
+  // A value outside `allowed` (e.g. TENANT left over for a teacher) must not leave the group without a tab stop.
+  const tabbable = allowed.includes(value) ? value : allowed[0];
+
   function onKeyDown(event: KeyboardEvent<HTMLElement>) {
     const step = event.key === "ArrowRight" || event.key === "ArrowDown" ? 1 : event.key === "ArrowLeft" || event.key === "ArrowUp" ? -1 : 0;
     if (!step) return;
@@ -36,7 +39,7 @@ export function AudienceScopeChips({ allowed, onChange, value }: Props) {
           label={SCOPE_LABELS[scope]}
           onClick={() => onChange(scope)}
           role="radio"
-          tabIndex={scope === value ? 0 : -1}
+          tabIndex={scope === tabbable ? 0 : -1}
           variant={scope === value ? "filled" : "outlined"}
         />
       ))}

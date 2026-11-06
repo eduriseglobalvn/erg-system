@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, expect, test, vi } from "vitest";
 
 import type { RecipientCard } from "../api/campaign-types";
-import { emptyDraft } from "../model/audience-draft";
+import { addPicked, emptyDraft } from "../model/audience-draft";
 import { AudienceEstimateView } from "./audience-estimate-line";
 import { AudienceScopeChips } from "./audience-scope-chips";
 import { PeoplePicker } from "./people-picker";
@@ -96,4 +96,53 @@ test("picked summary shows 2 chips then '+N người' that opens the sheet", asy
   fireEvent.click(screen.getByText("+2 người"));
   expect(onOpenSheet).toHaveBeenCalled();
   expect(screen.getByLabelText("Bỏ Trần Lan")).toBeInTheDocument();
+});
+
+test("scope chips: a value outside allowed leaves the first allowed chip tabbable", () => {
+  render(<AudienceScopeChips allowed={["CLASS", "GROUP", "PEOPLE"]} onChange={vi.fn()} value="TENANT" />);
+  const radios = screen.getAllByRole("radio");
+  expect(radios.map((r) => r.getAttribute("tabindex"))).toEqual(["0", "-1", "-1"]);
+  expect(radios.every((r) => r.getAttribute("aria-checked") === "false")).toBe(true);
+});
+
+test("people picker input is described by the 20-results hint", () => {
+  render(<PeoplePicker draft={emptyDraft("PEOPLE")} onChange={vi.fn()} />);
+  const hint = screen.getByText("Hiện tối đa 20 kết quả.");
+  expect(screen.getByRole("combobox").getAttribute("aria-describedby")).toContain(hint.id);
+});
+
+test("paste: a person picked while the list is resolving is kept", async () => {
+  let finish: (v: unknown) => void = () => undefined;
+  resolve.mutateAsync.mockReturnValue(new Promise((r) => { finish = r; }));
+  const onChange = vi.fn();
+  const { rerender } = render(<PeoplePicker draft={emptyDraft("PEOPLE")} onChange={onChange} />);
+  fireEvent.change(screen.getByLabelText("Dán danh sách"), { target: { value: "HS0712" } });
+  fireEvent.click(screen.getByRole("button", { name: "Kiểm tra danh sách" }));
+  rerender(<PeoplePicker draft={addPicked(emptyDraft("PEOPLE"), [lan])} onChange={onChange} />);
+  finish({ matched: [minh], notFound: ["X1"], ambiguous: [] });
+  await waitFor(() => expect(onChange).toHaveBeenCalled());
+  expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ picked: [lan, minh], errors: ["X1"] }));
+});
+
+test("file import: a person picked while the file is resolving is kept", async () => {
+  let finish: (v: unknown) => void = () => undefined;
+  resolve.mutateAsync.mockReturnValue(new Promise((r) => { finish = r; }));
+  const onChange = vi.fn();
+  const { rerender } = render(<PeoplePicker draft={emptyDraft("PEOPLE")} onChange={onChange} />);
+  const input = screen.getByLabelText("Chọn tệp danh sách người nhận");
+  fireEvent.change(input, { target: { files: [new File(["HS0712\n"], "ds.csv")] } });
+  await waitFor(() => expect(resolve.mutateAsync).toHaveBeenCalledWith(["HS0712"]));
+  rerender(<PeoplePicker draft={addPicked(emptyDraft("PEOPLE"), [lan])} onChange={onChange} />);
+  finish({ matched: [minh], notFound: [], ambiguous: [] });
+  await waitFor(() => expect(onChange).toHaveBeenCalled());
+  expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ picked: [lan, minh] }));
+});
+
+test("file import: an oversize file shows the size error and calls nothing", async () => {
+  render(<PeoplePicker draft={emptyDraft("PEOPLE")} onChange={vi.fn()} />);
+  fireEvent.change(screen.getByLabelText("Chọn tệp danh sách người nhận"), {
+    target: { files: [new File([new Uint8Array(2 * 1024 * 1024 + 1)], "big.csv")] },
+  });
+  expect(await screen.findByText(/Tệp quá lớn \(tối đa 2 MB\)/)).toBeInTheDocument();
+  expect(resolve.mutateAsync).not.toHaveBeenCalled();
 });
