@@ -1,6 +1,6 @@
 // Dev-only page for src/test/e2e/quiz-player-grid.spec.ts: renders the real question-list UI with a
 // 90-question quiz so the layout can be checked in a browser without a backend. Never imported by app code.
-import { StrictMode } from "react";
+import { StrictMode, useState } from "react";
 import { createRoot } from "react-dom/client";
 
 import "@/styles/globals.css";
@@ -10,8 +10,11 @@ import { MobileQuestionSheet } from "@/components/quiz/mobile-player-question-sh
 import { PlayerDesktopLayout } from "@/components/quiz/player-shell-runtime/player-desktop-layout";
 import { PlayerQuestionAside } from "@/components/quiz/player-shell-runtime/player-question-aside";
 import { buildTakingCells } from "@/components/quiz/player-shell-runtime/player-shell-runtime-helpers";
+import { MatchingQuestion } from "@/components/quiz/questions/matching-question";
 import { QuestionListPanel } from "@/components/quiz/question-list-panel";
 import type { QuestionCell } from "@/components/quiz/question-navigator";
+import { createInitialAnswer } from "@/domain/quiz/quiz";
+import type { Question } from "@/domain/quiz/types";
 import ErgMuiProvider from "@/themes/ErgMuiProvider";
 
 const params = new URLSearchParams(window.location.search);
@@ -40,7 +43,28 @@ const desktopProps = {
   setCurrentIndex: noop, submitCurrentTrainingQuestion: async () => undefined,
 };
 
+const LONG_ANSWER = "Đáp án rất dài ".repeat(9).slice(0, 120);
+const matchingQuestion: Question = {
+  id: "qm", kind: "matching", title: "Ghép", points: 3, feedback: { correct: "", incorrect: "", partial: "" },
+  matching: [
+    { id: "m1", prompt: "Ctrl + C", response: LONG_ANSWER },
+    { id: "m2", prompt: "Ctrl + V", response: "Dán" },
+    { id: "m3", prompt: "Ctrl + X", response: "Cắt" },
+  ],
+};
+
+function MatchingHarness() {
+  const [value, setValue] = useState(() => createInitialAnswer(matchingQuestion));
+  return (
+    <div style={{ padding: 16 }}>
+      <MatchingQuestion question={matchingQuestion} value={value} onChange={(next) => setValue((prev) => ({ ...prev, ...next }))} />
+      <div style={{ height: 1600 }}>Trang nền cao hơn màn hình</div>
+    </div>
+  );
+}
+
 function Harness() {
+  if (view === "matching") return <MatchingHarness />;
   if (view === "player") {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return <div style={{ padding: 12 }}><PlayerDesktopLayout {...(desktopProps as any)} /></div>;

@@ -147,10 +147,6 @@
     "hex": 5,
     "font": 0
   },
-  "src/components/quiz/questions/matching-question/matching-mobile.tsx": {
-    "hex": 2,
-    "font": 0
-  },
   "src/components/quiz/questions/shared.tsx": {
     "hex": 0,
     "font": 1

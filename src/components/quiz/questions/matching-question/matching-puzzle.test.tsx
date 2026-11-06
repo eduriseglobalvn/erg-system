@@ -98,3 +98,25 @@ describe("MatchingPuzzle focus and measurement", () => {
     expect(right).toBe(pathRight(200, 80));
   });
 });
+
+describe("MatchingPuzzle on a phone with a long answer", () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  test("pieces stay within the phone width and the two pieces of a row share a minimum height", () => {
+    vi.spyOn(HTMLElement.prototype, "clientWidth", "get").mockReturnValue(343);
+    const long = "Đáp án rất dài ".repeat(8).slice(0, 120);
+    const longRows: PuzzleRow[] = [{ ...rows[0], right: long, rightName: long }, rows[1]];
+    const { container } = render(<MatchingPuzzle rows={longRows} mode="learner" onDrop={vi.fn()} />);
+    const pieces = Array.from(container.querySelectorAll<HTMLElement>("[data-piece]"));
+    expect(pieces).toHaveLength(4);
+    for (const piece of pieces) expect(parseInt(getComputedStyle(piece).maxWidth, 10)).toBeLessThanOrEqual(138);
+    const [left, right] = pieces;
+    expect(getComputedStyle(right).minHeight).toBe(getComputedStyle(left).minHeight);
+    expect(getComputedStyle(right).overflowWrap).toBe("anywhere");
+  });
+
+  test("without a measured width (no layout) pieces keep the web cap", () => {
+    const { container } = render(<MatchingPuzzle rows={rows.slice(0, 1)} mode="learner" onDrop={vi.fn()} />);
+    for (const piece of Array.from(container.querySelectorAll<HTMLElement>("[data-piece]"))) expect(getComputedStyle(piece).maxWidth).toBe("380px");
+  });
+});

@@ -64,3 +64,55 @@ test.describe("web question list column", () => {
     expect(await noHorizontalOverflow(review.getByRole("group", { name: "Lọc câu hỏi" })) ).toBe(true);
   });
 });
+
+test.describe("phone matching puzzle with a 120-character answer", () => {
+  for (const width of [320, 375]) {
+    test.describe(`${width}px`, () => {
+      test.use({ viewport: { width, height: 667 }, hasTouch: true, isMobile: true });
+
+      test("pieces wrap, the page never scrolls sideways and dragging a piece to another row swaps them", async ({ page }) => {
+        await page.goto("/src/test/e2e/harness/quiz-list-harness.html?view=matching");
+        const pieces = page.getByRole("button", { name: /^Mảnh / });
+        await expect(pieces).toHaveCount(3);
+
+        expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+        for (const piece of await page.locator("[data-piece]").all()) {
+          expect((await piece.boundingBox())?.width ?? 0).toBeLessThanOrEqual(Math.max(120, Math.floor((width - 32 - 66) / 2)) + 1);
+        }
+
+        const names = () => pieces.evaluateAll((nodes) => nodes.map((node) => /^Mảnh (.+), hàng/.exec(node.getAttribute("aria-label") ?? "")?.[1]));
+        const before = await names();
+        const from = (await pieces.nth(0).boundingBox())!;
+        const to = (await pieces.nth(2).boundingBox())!;
+        // A long press arms the touch sensor, then the finger moves to row 3.
+        const client = await page.context().newCDPSession(page);
+        const touch = (type: "touchStart" | "touchMove" | "touchEnd", x: number, y: number) =>
+          client.send("Input.dispatchTouchEvent", { type, touchPoints: type === "touchEnd" ? [] : [{ x, y }] });
+        const sx = from.x + from.width / 2, sy = from.y + from.height / 2;
+        await touch("touchStart", sx, sy);
+        await page.waitForTimeout(250);
+        for (let i = 1; i <= 8; i++) await touch("touchMove", sx, sy + ((to.y + to.height / 2 - sy) * i) / 8);
+        await touch("touchEnd", 0, 0);
+        const after = await names();
+        expect(after[0]).not.toBe(before[0]);
+        expect(after[2]).toBe(before[0]);
+      });
+
+      test("a quick swipe that starts on a piece scrolls the page and moves nothing", async ({ page }) => {
+        await page.goto("/src/test/e2e/harness/quiz-list-harness.html?view=matching");
+        const pieces = page.getByRole("button", { name: /^Mảnh / });
+        const before = await pieces.evaluateAll((nodes) => nodes.map((node) => node.getAttribute("aria-label")));
+        const box = (await pieces.nth(0).boundingBox())!;
+        const client = await page.context().newCDPSession(page);
+        const x = box.x + box.width / 2, y = box.y + box.height / 2;
+        const touch = (type: "touchStart" | "touchMove" | "touchEnd", ty: number) => client.send("Input.dispatchTouchEvent", { type, touchPoints: type === "touchEnd" ? [] : [{ x, y: ty }] });
+        await touch("touchStart", y);
+        for (let i = 1; i <= 12; i++) { await touch("touchMove", y - i * 15); await page.waitForTimeout(16); }
+        await touch("touchEnd", 0);
+        await page.waitForTimeout(300);
+        expect(await page.evaluate(() => document.scrollingElement?.scrollTop ?? 0)).toBeGreaterThan(0);
+        expect(await pieces.evaluateAll((nodes) => nodes.map((node) => node.getAttribute("aria-label")))).toEqual(before);
+      });
+    });
+  }
+});

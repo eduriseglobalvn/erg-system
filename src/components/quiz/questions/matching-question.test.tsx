@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { describe, expect, test, vi } from "vitest";
 
 import { MatchingQuestion } from "@/components/quiz/questions/matching-question";
@@ -25,27 +25,12 @@ const question: Question = {
   ],
 };
 
-describe("MatchingQuestion mobile", () => {
-  test("opens answer picker and returns matchingAssignments on selection", () => {
-    const onChange = vi.fn();
+describe("MatchingQuestion on a phone", () => {
+  test("renders the same puzzle as the web, with no select", () => {
+    render(<MatchingQuestion question={question} value={{}} onChange={vi.fn()} />);
 
-    render(
-      <MatchingQuestion
-        question={question}
-        value={{}}
-        onChange={onChange}
-      />,
-    );
-
-    fireEvent.click(screen.getByRole("button", { name: /hiển thị url của trang web hiện tại/i }));
-    expect(screen.getByText("Chọn đáp án")).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole("button", { name: /hộp địa chỉ/i }));
-
-    expect(onChange).toHaveBeenCalledWith({
-      matchingAssignments: {
-        "m-1": "m-1",
-      },
-    });
+    expect(screen.getAllByRole("button", { name: /^Mảnh / })).toHaveLength(2);
+    expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
+    expect(screen.queryByText("Chọn đáp án")).not.toBeInTheDocument();
   });
 });
