@@ -1,15 +1,11 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const mocks = vi.hoisted(() => ({
-  navigate: vi.fn(),
-  session: { permissions: [] as string[], deniedPermissions: [] as string[] },
-}));
-
-vi.mock("@tanstack/react-router", () => ({ useNavigate: () => mocks.navigate }));
-vi.mock("@/platform/auth/hooks/use-auth-session", () => ({ useAuthSession: () => ({ session: mocks.session }) }));
-
+import { LmsTeacherShellContext } from "@/features/lms/components/lms-teacher-shell-context";
+import type { LmsTeacherShellController } from "@/features/lms/components/use-lms-teacher-shell-controller";
 import { TeacherLearningHub } from "./teacher-learning-hub";
+
+const navigate = vi.fn();
 
 const ALL = [
   "lms.assignment.read",
@@ -21,14 +17,22 @@ const ALL = [
   "lms.report.read",
 ];
 
+function renderHub(granted: string[], denied: string[] = []) {
+  const model = { deniedPermissions: denied, grantedPermissions: granted, navigate } as unknown as LmsTeacherShellController;
+  return render(
+    <LmsTeacherShellContext.Provider value={model}>
+      <TeacherLearningHub />
+    </LmsTeacherShellContext.Provider>,
+  );
+}
+
+const without = (permission: string) => ALL.filter((p) => p !== permission);
+
 describe("TeacherLearningHub", () => {
-  beforeEach(() => {
-    mocks.navigate.mockReset();
-    mocks.session = { permissions: ALL, deniedPermissions: [] };
-  });
+  beforeEach(() => navigate.mockReset());
 
   it("links to every learning screen with a single contained button", () => {
-    const { container } = render(<TeacherLearningHub />);
+    const { container } = renderHub(ALL);
     const hrefs = screen.getAllByRole("link").map((link) => link.getAttribute("href"));
     expect(hrefs).toEqual(
       expect.arrayContaining([
@@ -43,23 +47,47 @@ describe("TeacherLearningHub", () => {
     expect(container.querySelectorAll(".MuiButton-contained")).toHaveLength(1);
   });
 
-  it("navigates in-app instead of reloading", () => {
-    render(<TeacherLearningHub />);
-    fireEvent.click(screen.getByRole("link", { name: /Tiến độ học tập/ }));
-    expect(mocks.navigate).toHaveBeenCalledWith({ href: "/teacher/homework/progress" });
-  });
-
-  it("hides entries the user has no permission for", () => {
-    mocks.session = { permissions: ALL.filter((p) => p !== "lms.report.read"), deniedPermissions: [] };
-    render(<TeacherLearningHub />);
-    expect(screen.queryByRole("link", { name: /Báo cáo/ })).toBeNull();
-    expect(screen.getByRole("link", { name: /Tiến độ học tập/ })).toBeInTheDocument();
-  });
-
-  it("filters entries with the quick search", () => {
-    render(<TeacherLearningHub />);
-    fireEvent.change(screen.getByRole("textbox", { name: "Tìm nhanh" }), { target: { value: "báo cáo" } });
+  it("follows the shell model's permissions (no auth session is provided at all)", () => {
+    renderHub(["lms.assignment.read", "lms.report.read"]);
     expect(screen.getByRole("link", { name: /Báo cáo/ })).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /Tiến độ học tập/ })).toBeNull();
+  });
+
+  it("navigates in-app instead of reloading", () => {
+    renderHub(ALL);
+    fireEvent.click(screen.getByRole("link", { name: /Tiến độ học tập/ }));
+    expect(navigate).toHaveBeenCalledWith({ href: "/teacher/homework/progress" });
+  });
+
+  it.each([
+    ["lms.report.read", /Báo cáo/],
+    ["lms.student_group.read", /Nhóm học sinh/],
+    ["lms.assignment.create", /Giao bài tập/],
+    ["lms.exercise.read", /Kho luyện tập/],
+  ])("hides the entry that needs %s", (permission, name) => {
+    const full = renderHub(ALL);
+    expect(screen.getByRole("link", { name })).toBeInTheDocument();
+    full.unmount();
+    renderHub(without(permission));
+    expect(screen.queryByRole("link", { name })).toBeNull();
+  });
+
+  it("hides entries that are explicitly denied", () => {
+    renderHub(ALL, ["lms.report.read"]);
+    expect(screen.queryByRole("link", { name: /Báo cáo/ })).toBeNull();
+  });
+
+  it("filters by the text each entry renders", () => {
+    renderHub(ALL);
+    const search = screen.getByRole("textbox", { name: "Tìm nhanh" });
+    fireEvent.change(search, { target: { value: "báo cáo" } });
+    expect(screen.getByRole("link", { name: /Báo cáo/ })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Tiến độ học tập/ })).toBeNull();
+    // "theo dõi" is only in a row's hidden description, so it must not match.
+    fireEvent.change(search, { target: { value: "theo dõi" } });
+    expect(screen.queryByRole("link", { name: /Tiến độ học tập/ })).toBeNull();
+    // A card's description is rendered, so it matches.
+    fireEvent.change(search, { target: { value: "soạn" } });
+    expect(screen.getByRole("link", { name: /Giao bài tập/ })).toBeInTheDocument();
   });
 });

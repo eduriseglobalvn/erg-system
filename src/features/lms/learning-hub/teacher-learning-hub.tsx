@@ -1,5 +1,4 @@
 import { useState, type MouseEvent } from "react";
-import { useNavigate } from "@tanstack/react-router";
 import AssignmentTurnedInRoundedIcon from "@mui/icons-material/AssignmentTurnedInRounded";
 import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
 import FactCheckRoundedIcon from "@mui/icons-material/FactCheckRounded";
@@ -14,9 +13,10 @@ import Typography from "@mui/material/Typography";
 
 import { ErgButton } from "@/components/erg-mui/erg-actions";
 import { ErgSearchField } from "@/components/erg-mui/erg-form";
+import { useLmsTeacherShellModel } from "@/features/lms/components/lms-teacher-shell-context";
 import { canNavigateToLmsPath } from "@/features/lms/navigation/lms-navigation";
-import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
 import { teacherPath } from "@/platform/workspaces/workspace-paths";
+import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
 
 type HubEntry = { description: string; icon: typeof SchoolRoundedIcon; label: string; path: string };
 
@@ -39,26 +39,27 @@ const LIST: HubEntry[] = [
   { description: "Tổng hợp kết quả của lớp.", icon: FactCheckRoundedIcon, label: "Báo cáo", path: teacherPath("/reports") },
 ];
 
-const cardSx = { bgcolor: "background.paper", border: 1, borderColor: "divider", borderRadius: 2, p: 2 } as const;
+const cardSx = { bgcolor: "background.paper", border: 1, borderColor: "divider", borderRadius: `${t.radius.card}px`, p: 2 } as const;
 
 /** Học tập tab of the teacher mobile dock: the only mobile entry to assigning, the exercise bank, progress, classes and reports. */
 export function TeacherLearningHub() {
-  const navigate = useNavigate();
-  const { session } = useAuthSession("lms");
+  // Same permission source as the dock tab that leads here.
+  const { deniedPermissions, grantedPermissions, navigate } = useLmsTeacherShellModel();
   const [query, setQuery] = useState("");
 
   const needle = query.trim().toLowerCase();
-  const visible = (entry: HubEntry) =>
-    canNavigateToLmsPath(entry.path, session?.permissions, session?.deniedPermissions) &&
-    (!needle || `${entry.label} ${entry.description}`.toLowerCase().includes(needle));
+  // Search only what the entry renders: cards show a description, list rows do not.
+  const visible = (entry: HubEntry, showsDescription: boolean) =>
+    canNavigateToLmsPath(entry.path, grantedPermissions, deniedPermissions) &&
+    (!needle || (showsDescription ? `${entry.label} ${entry.description}` : entry.label).toLowerCase().includes(needle));
   const open = (path: string) => (event: MouseEvent) => {
     if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     event.preventDefault();
     void navigate({ href: path });
   };
 
-  const cards = [ASSIGN, EXERCISE_BANK].filter(visible);
-  const rows = LIST.filter(visible);
+  const cards = [ASSIGN, EXERCISE_BANK].filter((entry) => visible(entry, true));
+  const rows = LIST.filter((entry) => visible(entry, false));
 
   return (
     <Stack spacing={2} sx={{ px: { xs: 1.5, sm: 2 }, py: 2 }}>
