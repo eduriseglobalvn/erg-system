@@ -20,3 +20,21 @@ test("teacher phone dock: expected items, no header bell, no horizontal overflow
   await expect(page.getByRole("button", { name: "Thông báo", exact: true })).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
 });
+
+// Admin runs under ErgPortalLayout, the only shell where the generic header bell is hidden by the dock.
+test.describe("admin phone dock", () => {
+  test.use({ baseURL: "https://lcms.erg.edu.local:3001" });
+
+  test("shows the dock, no header bell, no horizontal overflow", async ({ page }) => {
+    await setupPortalNetwork(page, "lcms");
+    await seedAuthenticatedPortal(page, "lcms");
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.goto("/admin", { waitUntil: "domcontentloaded", timeout: 20_000 });
+
+    const dock = page.getByRole("navigation", { name: "Điều hướng admin" });
+    await expect(dock).toBeVisible({ timeout: 30_000 });
+    await expect(dock.getByRole("button", { name: /^Tất cả/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Thông báo", exact: true })).toHaveCount(0);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+  });
+});
