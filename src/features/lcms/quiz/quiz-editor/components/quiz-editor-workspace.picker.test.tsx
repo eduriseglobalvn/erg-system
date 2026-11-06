@@ -49,10 +49,13 @@ vi.mock("@/features/lcms/quiz/quiz-editor/hooks/use-quiz-editor-sync", () => ({
 vi.mock("@/features/lcms/quiz/quiz-editor/hooks/use-quiz-editor-imported-questions", () => ({
   useQuizEditorImportedQuestions: () => 0,
 }));
-vi.mock("@/features/lcms/quiz/quiz-editor/components/sync/quiz-editor-sync-layer", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@/features/lcms/quiz/quiz-editor/components/sync/quiz-editor-sync-layer")>()),
-  QuizEditorSyncLayer: ({ children, sync }: { children: React.ReactNode; sync: { ready: boolean } }) => (sync.ready ? <>{children}</> : <p>Đang mở bản nháp</p>),
-}));
+vi.mock("@/features/lcms/quiz/quiz-editor/components/sync/quiz-editor-sync-layer", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/features/lcms/quiz/quiz-editor/components/sync/quiz-editor-sync-layer")>();
+  // A failed load renders the real layer: its retry button shares the screen with the title bar.
+  const QuizEditorSyncLayer = (props: Parameters<typeof actual.QuizEditorSyncLayer>[0]) =>
+    props.loadFailed ? <actual.QuizEditorSyncLayer {...props} /> : props.sync.ready ? <>{props.children}</> : <p>Đang mở bản nháp</p>;
+  return { ...actual, QuizEditorSyncLayer };
+});
 vi.mock("@/features/lcms/quiz/quiz-editor/components/sync/quiz-editor-sync-chip", () => ({ QuizEditorSyncChip: () => null }));
 vi.mock("@/features/lcms/quiz/quiz-editor/hooks/use-level-topic-quizzes", () => ({ useLevelTopicQuizzes: levelTopicQuizzes }));
 vi.mock("@/features/lcms/quiz/quiz-editor/components/quiz-list/question-table", () => ({
@@ -75,7 +78,7 @@ vi.mock("@/features/lcms/quiz/quiz-editor/components/question-authoring/question
 
 const leaf = {} as DashboardLeaf;
 const client = new QueryClient();
-levelTopicQuizzes.mockReturnValue({ rows: [{ id: "t1", label: "Phân số", quizId: "q1", questionCount: 0, lifecycle: "draft", slides: [] }], isLoading: false });
+levelTopicQuizzes.mockReturnValue({ rows: [{ id: "t1", label: "Phân số", quizId: "q1", questionCount: 0, lifecycle: "draft", slides: [] }], quizzesPending: false });
 
 describe("QuizEditorWorkspace add-question picker", () => {
   it("creates nothing when the picker is cancelled", () => {
@@ -165,6 +168,23 @@ describe("QuizEditorWorkspace add-question picker", () => {
     expect(document.querySelectorAll(".MuiButton-contained")).toHaveLength(1);
     expect(screen.getByRole("button", { name: "Giao diện bài" })).toBeInTheDocument();
     expect(within(screen.getByRole("navigation", { name: "Chủ đề" })).getByRole("button", { name: /Phân số/ })).toHaveAttribute("aria-current", "true");
+  });
+
+  it("still shows one contained button when the draft failed to load: the retry is outlined", () => {
+    syncState.ready = false;
+    syncState.loadFailed = true;
+    try {
+      render(
+        <QueryClientProvider client={client}><I18nProvider>
+          <QuizEditorWorkspace activeLeaf={leaf} />
+        </I18nProvider></QueryClientProvider>,
+      );
+      expect(screen.getByRole("button", { name: "Thử lại" })).toHaveClass("MuiButton-outlined");
+      expect(document.querySelectorAll(".MuiButton-contained")).toHaveLength(1);
+    } finally {
+      syncState.ready = true;
+      syncState.loadFailed = false;
+    }
   });
 
   it("feeds the open quiz's live slides to the topic rail", () => {

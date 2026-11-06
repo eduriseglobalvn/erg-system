@@ -52,7 +52,7 @@ export function QuizEditorSyncLayer({ children, loadFailed, onRetry, retrying, s
     return (
       <Box sx={{ p: 2.5 }}>
         <ErgErrorState
-          action={<ErgButton loading={retrying} onClick={onRetry} variant="contained">Thử lại</ErgButton>}
+          action={<ErgButton loading={retrying} onClick={onRetry} variant="outlined">Thử lại</ErgButton>}
           description={sync.status.kind === "error" ? sync.status.message : "Kiểm tra kết nối mạng rồi thử lại."}
           title="Chưa mở được bản nháp"
         />
