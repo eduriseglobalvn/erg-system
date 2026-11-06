@@ -2,9 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import {
   buildFooterMessage,
+  buildKeyHint,
   buildTakingCells,
   buildReconnectSignature,
   offlineAttemptScope,
+  pickChoiceAnswer,
 } from "@/components/quiz/player-shell-runtime/player-shell-runtime-helpers";
 import { buildPlayerStyles } from "@/components/quiz/player-shell-runtime/player-shell-styles";
 
@@ -69,5 +71,39 @@ describe("buildTakingCells", () => {
 
   it("has no current cell before the quiz starts", () => {
     expect(buildTakingCells(3, new Set(), new Set(), -1).some((cell) => cell.state === "current")).toBe(false);
+  });
+});
+
+const choices = ["a", "b", "c"].map((id) => ({ id, label: id, correct: false }));
+
+describe("pickChoiceAnswer", () => {
+  it("selects the i-th choice of a single-choice or true/false question", () => {
+    expect(pickChoiceAnswer({ kind: "single_choice", choices }, {}, 1)).toEqual({ choiceId: "b" });
+    expect(pickChoiceAnswer({ kind: "true_false", choices }, { choiceId: "a" }, 2)).toEqual({ choiceId: "c" });
+  });
+
+  it("toggles the i-th choice of a multiple-response question", () => {
+    expect(pickChoiceAnswer({ kind: "multiple_response", choices }, { choiceIds: ["a"] }, 1)).toEqual({ choiceIds: ["a", "b"] });
+    expect(pickChoiceAnswer({ kind: "multiple_response", choices }, { choiceIds: ["a", "b"] }, 0)).toEqual({ choiceIds: ["b"] });
+  });
+
+  it("does nothing past the last choice or for question types without lettered options", () => {
+    expect(pickChoiceAnswer({ kind: "single_choice", choices }, {}, 3)).toBeNull();
+    expect(pickChoiceAnswer({ kind: "short_answer", choices }, {}, 0)).toBeNull();
+    expect(pickChoiceAnswer({ kind: "single_choice" }, {}, 0)).toBeNull();
+  });
+});
+
+describe("buildKeyHint", () => {
+  it("lists only the keys that do something", () => {
+    expect(buildKeyHint({ kind: "single_choice", choices: [...choices, { id: "d", label: "d", correct: false }] }, 10)).toBe("1–4 chọn · ← → đổi câu · F đánh dấu");
+    expect(buildKeyHint({ kind: "multiple_response", choices }, 21)).toBe("1–3 chọn · ← → đổi câu · F đánh dấu · N đi tới câu");
+    expect(buildKeyHint({ kind: "single_choice", choices: choices.slice(0, 1) }, 5)).toBe("1 chọn · ← → đổi câu · F đánh dấu");
+    expect(buildKeyHint({ kind: "essay" }, 5)).toBe("← → đổi câu · F đánh dấu");
+  });
+
+  it("caps the range at 9", () => {
+    const many = Array.from({ length: 12 }, (_, i) => ({ id: `c${i}`, label: "x", correct: false }));
+    expect(buildKeyHint({ kind: "single_choice", choices: many }, 5)).toContain("1–9 chọn");
   });
 });

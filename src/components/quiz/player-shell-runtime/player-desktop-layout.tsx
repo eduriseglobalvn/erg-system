@@ -1,4 +1,4 @@
-import type { ComponentProps, CSSProperties, ReactNode, RefObject } from "react";
+import type { ComponentProps, CSSProperties, ReactNode, Ref, RefObject } from "react";
 import { Flag } from "lucide-react";
 
 import { ErgButton } from "@/components/erg-mui/erg-actions";
@@ -9,6 +9,7 @@ import { PlayerTimerText } from "@/components/quiz/player-status";
 import { playerGridClass } from "@/components/quiz/player-shell-runtime/player-shell-styles";
 import { PlayerQuestionAside } from "@/components/quiz/player-shell-runtime/player-question-aside";
 import type { QuestionCell } from "@/components/quiz/question-navigator";
+import { buildKeyHint } from "@/components/quiz/player-shell-runtime/player-shell-runtime-helpers";
 import { PlayerDesktopFooter } from "@/components/quiz/player-shell-runtime/player-desktop-footer";
 import type { AnswerRecord, Attempt, Question, QuizResultDisplay } from "@/domain/quiz/types";
 
@@ -22,6 +23,7 @@ export type PlayerDesktopLayoutProps = {
   currentAnswerComplete: boolean;
   currentIndex: number;
   footerMessage: string;
+  goToInputRef?: Ref<HTMLInputElement>;
   isCurrentQuestionBookmarked: boolean;
   isFirstQuestion: boolean;
   isLastQuestion: boolean;
@@ -61,6 +63,7 @@ export function PlayerDesktopLayout({
   currentAnswerComplete,
   currentIndex,
   footerMessage,
+  goToInputRef,
   isCurrentQuestionBookmarked,
   isFirstQuestion,
   isLastQuestion,
@@ -162,14 +165,14 @@ export function PlayerDesktopLayout({
           <PlayerDesktopFooter
             attemptCompleted={attemptCompleted} currentAnswerComplete={currentAnswerComplete}
             footerMessage={footerMessage} isFirstQuestion={isFirstQuestion} isLastQuestion={isLastQuestion}
-            isTrainingMode={isTrainingMode} modeBadgeStyle={modeBadgeStyle} questions={questions} resultDisplay={resultDisplay}
+            isTrainingMode={isTrainingMode} keyHint={buildKeyHint(readyQuestion, questions.length)} modeBadgeStyle={modeBadgeStyle} questions={questions} resultDisplay={resultDisplay}
             reviewingSubmittedAttempt={reviewingSubmittedAttempt} submitted={submitted} submitting={submitting}
             handleReviewQuiz={handleReviewQuiz} setCurrentIndex={setCurrentIndex}
             submitCurrentTrainingQuestion={submitCurrentTrainingQuestion}
           />
         </article>
 
-        <PlayerQuestionAside cells={cells} onSelect={onJumpToQuestion}>
+        <PlayerQuestionAside cells={cells} goToInputRef={goToInputRef} onSelect={onJumpToQuestion}>
           {isTrainingMode || attemptCompleted ? null : (
             <ErgButton fullWidth disabled={submitting} variant="contained" onClick={handleRequestSubmit}>
               {submitting ? "Đang nộp…" : submitFailed ? "Thử nộp lại" : "Nộp bài"}

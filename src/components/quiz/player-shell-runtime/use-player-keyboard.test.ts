@@ -61,3 +61,79 @@ describe("usePlayerKeyboard arrows (modes)", () => {
     expect(setCurrentIndex).toHaveBeenCalledOnce();
   });
 });
+
+describe("usePlayerKeyboard web shortcuts", () => {
+  const press = (key: string, init: KeyboardEventInit = {}, target: EventTarget = window) =>
+    target.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, ...init }));
+
+  function setup(overrides: Partial<UsePlayerKeyboardArgs> = {}) {
+    const fns = { onPickOption: vi.fn(), onToggleFlag: vi.fn(), focusGoTo: vi.fn() };
+    mount({ ...fns, ...overrides });
+    return fns;
+  }
+
+  it("picks the n-th option with 1-9, flags with F/f, focuses go-to with N", () => {
+    const fns = setup();
+    press("2");
+    press("9");
+    press("F");
+    press("f");
+    press("N");
+    expect(fns.onPickOption.mock.calls).toEqual([[1], [8]]);
+    expect(fns.onToggleFlag).toHaveBeenCalledTimes(2);
+    expect(fns.focusGoTo).toHaveBeenCalledOnce();
+  });
+
+  it("ignores 0 and keys it was not given a handler for", () => {
+    const fns = setup({ focusGoTo: undefined });
+    press("0");
+    press("n");
+    expect(fns.onPickOption).not.toHaveBeenCalled();
+    expect(fns.focusGoTo).not.toHaveBeenCalled();
+  });
+
+  it.each(["input", "textarea"])("does nothing while typing in a %s", (tag) => {
+    const fns = setup();
+    const setCurrentIndex = mount();
+    const el = document.body.appendChild(document.createElement(tag));
+    for (const key of ["2", "F", "N", "ArrowLeft"]) press(key, {}, el);
+    el.remove();
+    expect(fns.onPickOption).not.toHaveBeenCalled();
+    expect(fns.onToggleFlag).not.toHaveBeenCalled();
+    expect(fns.focusGoTo).not.toHaveBeenCalled();
+    expect(setCurrentIndex).not.toHaveBeenCalled();
+  });
+
+  it("does nothing inside a contenteditable element", () => {
+    const fns = setup();
+    const el = document.body.appendChild(document.createElement("div"));
+    el.contentEditable = "true";
+    // jsdom does not implement isContentEditable, so mirror it.
+    Object.defineProperty(el, "isContentEditable", { value: true });
+    for (const key of ["2", "F", "N"]) press(key, {}, el);
+    el.remove();
+    expect(fns.onPickOption).not.toHaveBeenCalled();
+    expect(fns.onToggleFlag).not.toHaveBeenCalled();
+    expect(fns.focusGoTo).not.toHaveBeenCalled();
+  });
+
+  it.each(["ctrlKey", "metaKey", "altKey"] as const)("ignores shortcuts with %s held", (modifier) => {
+    const fns = setup();
+    for (const key of ["2", "F", "N"]) press(key, { [modifier]: true });
+    expect(fns.onPickOption).not.toHaveBeenCalled();
+    expect(fns.onToggleFlag).not.toHaveBeenCalled();
+    expect(fns.focusGoTo).not.toHaveBeenCalled();
+  });
+
+  it("never picks an option while reviewing or submitting, but still flags while reviewing", () => {
+    const reviewing = setup({ attemptCompleted: true, reviewingSubmittedAttempt: true });
+    press("2");
+    press("f");
+    expect(reviewing.onPickOption).not.toHaveBeenCalled();
+    expect(reviewing.onToggleFlag).toHaveBeenCalledOnce();
+
+    const submitting = setup({ submitting: true });
+    press("3");
+    expect(submitting.onPickOption).not.toHaveBeenCalled();
+  });
+});

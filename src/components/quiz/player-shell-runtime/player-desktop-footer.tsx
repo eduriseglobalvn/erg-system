@@ -13,6 +13,7 @@ export type PlayerDesktopFooterProps = {
   isFirstQuestion: boolean;
   isLastQuestion: boolean;
   isTrainingMode: boolean;
+  keyHint: string;
   modeBadgeStyle: CSSProperties;
   questions: Question[];
   resultDisplay: QuizResultDisplay;
@@ -26,7 +27,7 @@ export type PlayerDesktopFooterProps = {
 
 export function PlayerDesktopFooter({
   attemptCompleted, currentAnswerComplete, footerMessage, isFirstQuestion, isLastQuestion,
-  isTrainingMode, modeBadgeStyle, questions, resultDisplay, reviewingSubmittedAttempt,
+  isTrainingMode, keyHint, modeBadgeStyle, questions, resultDisplay, reviewingSubmittedAttempt,
   submitted, submitting, handleReviewQuiz, setCurrentIndex, submitCurrentTrainingQuestion,
 }: PlayerDesktopFooterProps) {
   const showResultOnly = attemptCompleted && !reviewingSubmittedAttempt;
@@ -78,7 +79,7 @@ export function PlayerDesktopFooter({
       </Box>
       {attemptCompleted || isTrainingMode ? null : (
         <Typography sx={{ color: tk.color.textMuted, textAlign: "right" }} variant="caption">
-          1–4 chọn · ← → đổi câu · F đánh dấu
+          {keyHint}
         </Typography>
       )}
     </Box>

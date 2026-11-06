@@ -11,6 +11,10 @@ export type UsePlayerKeyboardArgs = {
   isTestingMode: boolean;
   isTrainingMode: boolean;
   loadStatus: PlayerLoadState["status"];
+  /** Web shortcuts: `1`-`9` (0-based index), `F` and `N`. Each is optional; the caller decides what a key may do right now. */
+  onPickOption?: (index: number) => void;
+  onToggleFlag?: () => void;
+  focusGoTo?: () => void;
   questionsLength: number;
   requestSubmit: () => void;
   reviewingSubmittedAttempt: boolean;
@@ -31,6 +35,9 @@ export function usePlayerKeyboard({
   isTestingMode,
   isTrainingMode,
   loadStatus,
+  onPickOption,
+  onToggleFlag,
+  focusGoTo,
   questionsLength,
   requestSubmit,
   reviewingSubmittedAttempt,
@@ -77,7 +84,25 @@ export function usePlayerKeyboard({
         return;
       }
 
+      // Flag and go-to stay available while reviewing, like their on-screen controls.
+      const letter = event.key.toLowerCase();
+      if (letter === "f" && onToggleFlag) {
+        event.preventDefault();
+        onToggleFlag();
+        return;
+      }
+      if (letter === "n" && focusGoTo) {
+        event.preventDefault();
+        focusGoTo();
+        return;
+      }
+
       if (attemptCompleted || reviewingSubmittedAttempt) {
+        return;
+      }
+
+      if (onPickOption && /^[1-9]$/.test(event.key)) {
+        onPickOption(Number(event.key) - 1);
         return;
       }
 
@@ -107,6 +132,9 @@ export function usePlayerKeyboard({
     isTestingMode,
     isTrainingMode,
     loadStatus,
+    onPickOption,
+    onToggleFlag,
+    focusGoTo,
     questionsLength,
     requestSubmit,
     reviewingSubmittedAttempt,

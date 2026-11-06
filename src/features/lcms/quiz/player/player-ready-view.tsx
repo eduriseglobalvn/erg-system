@@ -1,3 +1,5 @@
+import { useEffect, useRef } from "react";
+
 import { PlayerCountdown } from "@/components/quiz/player-countdown";
 import { MobilePlayerShell } from "@/components/quiz/mobile-player-shell";
 import { FinalResultScreen } from "@/components/quiz/final-result-screen";
@@ -9,7 +11,7 @@ import { PlayerQuestionBody } from "./player-ready-parts";
 import { defaultResultDisplay } from "@/components/quiz/player-shell-runtime-model";
 import { PlayerDesktopLayout } from "@/components/quiz/player-shell-runtime/player-desktop-layout";
 import { PlayerQuestionAside } from "@/components/quiz/player-shell-runtime/player-question-aside";
-import { buildFooterMessage, buildTakingCells } from "@/components/quiz/player-shell-runtime/player-shell-runtime-helpers";
+import { buildFooterMessage, buildTakingCells, pickChoiceAnswer } from "@/components/quiz/player-shell-runtime/player-shell-runtime-helpers";
 import {
   buildPlayerStyles,
   navButtonClass,
@@ -37,7 +39,7 @@ export function PlayerReadyView({
     activeSession, allQuestionsAnswered, attemptCompleted, currentAnswerComplete, currentIndex, deadlineAt, draftAnswer,
     draftSync, drafts, isFirstQuestion, isLastQuestion, isMobile, isTestingMode, isTrainingMode, lastResult, loadState, network,
     questionBodyRef, questions, retryTimeUpSubmit, reviewingAttempt, reviewingSubmittedAttempt,
-    setCurrentIndex, setSubmitDialogMode, setTimeUp, started,
+    setCurrentIndex, setSubmitDialogMode, setTimeUp, shortcutsRef, started,
     submitCurrentTrainingQuestion, submitDialogMode, submitError, submitFailed, submitted, submitting, timeUpPhase,
   } = rt;
   const readyQuiz = ready.quiz;
@@ -49,6 +51,19 @@ export function PlayerReadyView({
     handleBackToList, handleFinalizeAttempt, handleGoToUnanswered, handleJumpToQuestion, handleRequestSubmit,
     handleReviewQuestion, handleReviewQuiz, handleStartQuiz, handleToggleBookmark, handleDraftChange, retryHandler,
   } = usePlayerReadyHandlers(rt, ready);
+  const goToInputRef = useRef<HTMLInputElement | null>(null);
+  // Same gates as the on-screen option: a checked practice question or a finished attempt is read-only.
+  useEffect(() => {
+    shortcutsRef.current = {
+      pickOption: (index) => {
+        if (submitted || attemptCompleted || reviewingSubmittedAttempt) return;
+        const next = pickChoiceAnswer(readyQuestion, draftAnswer, index);
+        if (next) handleDraftChange(next);
+      },
+      toggleFlag: () => void handleToggleBookmark(),
+      focusGoTo: () => goToInputRef.current?.focus(),
+    };
+  });
   const resultDisplay: QuizResultDisplay = { ...defaultResultDisplay, ...(readyQuiz.result ?? {}) };
   const restoredDraft = loadState.status === "ready" && loadState.restored;
   const bookmarkedQuestionIds = readySession.bookmarkedQuestionIds;
@@ -157,7 +172,7 @@ export function PlayerReadyView({
         allQuestionsAnswered={allQuestionsAnswered}
         answeredCount={answeredCount} attemptCompleted={attemptCompleted} canvasStyle={canvasStyle}
         cells={cells} countdownProps={countdownProps} currentAnswerComplete={currentAnswerComplete} currentIndex={currentIndex}
-        footerMessage={footerMessage} isCurrentQuestionBookmarked={isCurrentQuestionBookmarked}
+        footerMessage={footerMessage} goToInputRef={goToInputRef} isCurrentQuestionBookmarked={isCurrentQuestionBookmarked}
         isFirstQuestion={isFirstQuestion} isLastQuestion={isLastQuestion} isTestingMode={isTestingMode}
         isTrainingMode={isTrainingMode} lastResult={lastResult} modeBadgeStyle={modeBadgeStyle}
         playerCardStyle={playerCardStyle} questionBody={questionBody} questionBodyRef={questionBodyRef}

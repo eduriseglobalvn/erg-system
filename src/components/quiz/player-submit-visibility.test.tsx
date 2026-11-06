@@ -7,6 +7,7 @@ import { PlayerDesktopLayout } from "@/components/quiz/player-shell-runtime/play
 import { buildTakingCells } from "@/components/quiz/player-shell-runtime/player-shell-runtime-helpers";
 
 const question = { id: "q1", kind: "single_choice", title: "Câu 1", points: 1 };
+const choices = ["a", "b", "c", "d"].map((id) => ({ id, label: id, correct: false }));
 const questions = Array.from({ length: 20 }, (_, i) => ({ ...question, id: `q${i + 1}` }));
 const cells = buildTakingCells(20, new Set([0, 1]), new Set([3]), 0);
 const resultDisplay = { reviewButtonLabel: "Xem lại", passMessage: "Đạt", failMessage: "Chưa đạt" };
@@ -82,7 +83,7 @@ function desktop(overrides: Record<string, unknown> = {}) {
         questionBodyRef: { current: null },
         questions,
         readyAttempt: {},
-        readyQuestion: question,
+        readyQuestion: { ...question, choices },
         resultDisplay,
         reviewingSubmittedAttempt: false,
         saveIndicator: <span>Đã lưu 10:42</span>,
@@ -150,6 +151,12 @@ describe("balanced two-column web layout", () => {
     expect(within(card).getByRole("button", { name: "Câu trước" })).toBeDisabled();
     expect(within(card).getByText("1–4 chọn · ← → đổi câu · F đánh dấu")).toBeInTheDocument();
     expect(within(card).queryByRole("button", { name: "Nộp bài" })).toBeNull();
+  });
+
+  it("only hints the keys that work: N appears with more than 20 questions, 1–n follows the choices", () => {
+    const many = Array.from({ length: 25 }, (_, i) => ({ ...question, id: `q${i + 1}` }));
+    render(desktop({ questions: many, cells: buildTakingCells(25, new Set(), new Set(), 0), readyQuestion: { ...question, choices: choices.slice(0, 3) } }));
+    expect(screen.getByText("1–3 chọn · ← → đổi câu · F đánh dấu · N đi tới câu")).toBeInTheDocument();
   });
 
   it("jumps from the list and moves with Câu tiếp", () => {

@@ -24,6 +24,12 @@ import { getDefaultTenantId } from "@/lib/graphql-client";
 import { getCurrentElearningViewerSession } from "@/platform/auth/api/elearning-viewer-session";
 import type { PlayerShellProps } from "./player-shell-props";
 
+export type PlayerShortcuts = {
+  pickOption?: (index: number) => void;
+  toggleFlag?: () => void;
+  focusGoTo?: () => void;
+};
+
 export function usePlayerRuntime({
   assignmentId,
   quizId,
@@ -59,6 +65,8 @@ export function usePlayerRuntime({
   const [timeUp, setTimeUp] = useState(false);
   const [recentTrainingSubmitQuestionId, setRecentTrainingSubmitQuestionId] = useState<string | null>(null);
   const questionBodyRef = useRef<HTMLDivElement | null>(null);
+  // Filled by the ready view each render: option picking, flag and go-to need the current question and session.
+  const shortcutsRef = useRef<PlayerShortcuts>({});
   const paceStateUpdate = usePacedStateBatch();
   const { mutateAsync: saveAttemptAnswerAsync } = useSaveAttemptAnswerMutation();
   const { mutateAsync: saveAttemptDraftAsync } = useSaveAttemptDraftMutation();
@@ -112,6 +120,9 @@ export function usePlayerRuntime({
   usePlayerKeyboard({
     allQuestionsAnswered, attemptExpired, attemptCompleted, beginAttempt, finalizeAttempt, isTestingMode,
     isTrainingMode, loadStatus: loadState.status, questionsLength: questions.length, requestSubmit,
+    onPickOption: (index) => shortcutsRef.current.pickOption?.(index),
+    onToggleFlag: () => shortcutsRef.current.toggleFlag?.(),
+    focusGoTo: () => shortcutsRef.current.focusGoTo?.(),
     reviewingSubmittedAttempt, started, submitCurrentTrainingQuestion, submitDialogMode, submitFailed, submitting,
     setCurrentIndex,
   });
@@ -127,7 +138,7 @@ export function usePlayerRuntime({
     attemptScope, beginAttempt, currentAnswerComplete, currentIndex, deadlineAt, draftAnswer, draftSync, drafts, finalizeAttempt,
     isFirstQuestion, isLastQuestion, isMobile, isTestingMode, isTrainingMode, lastResult, loadState, network, questionBodyRef,
     questions, quizPackageQuery, requestSubmit, retryTimeUpSubmit, reviewingAttempt, reviewingSubmittedAttempt,
-    setCurrentIndex, setDrafts, setLoadState, setStarted, setSubmitDialogMode, setSubmitError, setTimeUp,
+    shortcutsRef, setCurrentIndex, setDrafts, setLoadState, setStarted, setSubmitDialogMode, setSubmitError, setTimeUp,
     setReviewingSubmittedAttempt, started, submitCurrentTrainingQuestion, submitDialogMode, submitError, submitFailed,
     submitted, submitting, timeUpPhase,
   };
