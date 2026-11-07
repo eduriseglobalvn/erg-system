@@ -25,7 +25,7 @@ const page = (name: keyof Awaited<ReturnType<typeof routePages>>) => lazyRouteCo
 
 const composePage = (name: "AdminNotificationComposePage" | "TeacherNotificationComposePage") =>
   lazyRouteComponent(() => import("@/app/pages/shared/notification-compose-page"), name);
-const inboxPage = (name: "AdminNotificationsPage" | "AdminNotificationDetailPage") =>
+const inboxPage = (name: "AdminNotificationsPage" | "AdminNotificationDetailPage" | "AdminCampaignDetailPage") =>
   lazyRouteComponent(() => import("@/app/pages/shared/notification-inbox-page"), name);
 
 const CONTENT_REDIRECTED_SEGMENTS = ["questions", "quiz-bank", "quiz-editor"];
@@ -85,6 +85,14 @@ const adminNotificationDetailRoute = createRoute({
   path: "/admin/notifications/$notificationId",
   staticData: permissionStaticData(adminPath("/notifications"), "ADMIN"),
   component: inboxPage("AdminNotificationDetailPage"),
+});
+
+// One sent campaign (KPIs, recipients); "sent/" keeps it apart from compose and $notificationId. Inherits the notifications row.
+const adminCampaignDetailRoute = createRoute({
+  getParentRoute: () => adminShellRoute,
+  path: "/admin/notifications/sent/$campaignId",
+  staticData: permissionStaticData(adminPath("/notifications"), "ADMIN"),
+  component: inboxPage("AdminCampaignDetailPage"),
 });
 
 // Legacy alias of settings/roles.
@@ -170,6 +178,7 @@ export const adminAuthedRoutes = [
     ...adminMenuRoutes,
     adminNotificationComposeEditRoute,
     adminNotificationDetailRoute,
+    adminCampaignDetailRoute,
     ...adminIntegrationRoutes.map(([path, pageName]) =>
       createRoute({ getParentRoute: () => adminShellRoute, path, staticData: permissionStaticData(path, "ADMIN"), component: page(pageName) }),
     ),

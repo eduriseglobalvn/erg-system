@@ -2,8 +2,9 @@ import { useNavigate, useParams } from "@tanstack/react-router";
 import Box from "@mui/material/Box";
 
 import { AdminInboxScreen } from "@/features/notification-campaigns/components/admin-inbox-screen";
+import { CampaignDetailPage } from "@/features/notification-campaigns/components/campaign-detail-page";
 import { canSendCampaigns } from "@/features/notification-campaigns/model/can-send-campaigns";
-import { notificationComposePath } from "@/features/notification-campaigns/model/campaign-paths";
+import { notificationComposePath, notificationsHomePath } from "@/features/notification-campaigns/model/campaign-paths";
 import { InboxList } from "@/features/notifications/components/inbox-list";
 import { NotificationDetail } from "@/features/notifications/components/notification-detail";
 import { ADMIN_NOTIFICATION_PORTAL, TEACHER_NOTIFICATION_PORTAL } from "@/platform/workspaces/workspace-notification-portal";
@@ -24,6 +25,19 @@ export function AdminNotificationDetailPage() {
     <Box sx={pageSx}>
       <NotificationDetail portal={ADMIN_NOTIFICATION_PORTAL} notificationId={notificationId} onBack={() => void navigate({ href: adminPath("/notifications") })} />
     </Box>
+  );
+}
+
+/** /admin/notifications/sent/$campaignId: KPIs and recipients of one sent campaign */
+export function AdminCampaignDetailPage() {
+  const navigate = useNavigate();
+  const { campaignId = "" } = useParams({ strict: false });
+  return (
+    <CampaignDetailPage
+      campaignId={campaignId}
+      onBack={() => void navigate({ href: notificationsHomePath("admin") })}
+      onEdit={(id) => void navigate({ href: notificationComposePath("admin", id) })}
+    />
   );
 }
 

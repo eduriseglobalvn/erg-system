@@ -1,4 +1,4 @@
-import { keepPreviousData, useMutation, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useInfiniteQuery, useMutation, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 
 import { ackNotification, notificationQueryKeys, type NotificationPortal } from "@/features/notifications/api/notification-api";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
@@ -25,7 +25,7 @@ export const campaignKeys = {
   lists: () => [...campaignKeys.all, "list"] as const,
   list: (box: CampaignBox, mine: boolean) => [...campaignKeys.lists(), box, mine] as const,
   detail: (id: string) => [...campaignKeys.all, "detail", id] as const,
-  recipients: (id: string, filter: CampaignRecipientFilter, page: number) => [...campaignKeys.detail(id), "recipients", filter, page] as const,
+  recipients: (id: string, filter: CampaignRecipientFilter) => [...campaignKeys.detail(id), "recipients", filter] as const,
   summary: () => [...campaignKeys.all, "summary"] as const,
   estimate: (audience: CampaignAudience) => [...campaignKeys.all, "estimate", audience] as const,
   people: (q: string) => [...campaignKeys.all, "people", q] as const,
@@ -82,12 +82,14 @@ export function useCampaignSummary() {
   });
 }
 
-export function useCampaignRecipients(id: string | undefined, filter: CampaignRecipientFilter = "ALL", page = 0) {
-  return useQuery({
-    queryKey: campaignKeys.recipients(id ?? "", filter, page),
-    queryFn: ({ signal }) => fetchCampaignRecipients(id as string, { filter, page }, signal),
+/** Recipients of a sent campaign, one server page (20) per "Xem thêm". */
+export function useCampaignRecipients(id: string | undefined, filter: CampaignRecipientFilter = "ALL") {
+  return useInfiniteQuery({
+    queryKey: campaignKeys.recipients(id ?? "", filter),
+    queryFn: ({ pageParam, signal }) => fetchCampaignRecipients(id as string, { filter, page: pageParam }, signal),
+    initialPageParam: 0,
+    getNextPageParam: (last) => (last.hasNext ? (last.page ?? 0) + 1 : undefined),
     enabled: Boolean(id),
-    placeholderData: keepPreviousData,
     ...realtime,
   });
 }

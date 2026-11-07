@@ -10,3 +10,6 @@ export const notificationComposePath = (kind: ComposePortalKind, campaignId?: st
 
 /** Where the sender lands after sending: the admin Đã gửi box, or the teacher Hộp thư. */
 export const notificationsHomePath = (kind: ComposePortalKind) => `${base(kind, "/notifications")}${kind === "admin" ? "?tab=SENT" : ""}`;
+
+/** Admin detail of one sent campaign (KPIs + recipients); "sent/" keeps it apart from compose and the inbox $notificationId. */
+export const campaignDetailPath = (campaignId: string) => adminPath(`/notifications/sent/${encodeURIComponent(campaignId)}`);

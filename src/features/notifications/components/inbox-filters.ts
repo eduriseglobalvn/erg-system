@@ -30,10 +30,11 @@ export function filterInbox(items: InboxItem[], f: InboxFilter): InboxItem[] {
 }
 
 const TABS: Record<InboxWorkspace, InboxTab[]> = {
-  // Admin boxes: received inbox, campaigns sent, drafts.
+  // Admin boxes: received inbox, campaigns sent (BE box SENT = sending/sent/failed), scheduled, drafts.
   ADMIN: [
     { id: "INBOX", label: "Nhận" },
     { id: "SENT", label: "Đã gửi" },
+    { id: "SCHEDULED", label: "Lên lịch" },
     { id: "DRAFT", label: "Nháp" },
   ],
   TEACHER: [

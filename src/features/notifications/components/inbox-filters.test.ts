@@ -32,7 +32,7 @@ describe("filterInbox", () => {
 describe("inboxTabsFor", () => {
   const labels = (workspace: Parameters<typeof inboxTabsFor>[0]) => inboxTabsFor(workspace).map((tab) => tab.label);
 
-  test("admin: Nhận, Đã gửi, Nháp", () => expect(labels("ADMIN")).toEqual(["Nhận", "Đã gửi", "Nháp"]));
+  test("admin: Nhận, Đã gửi, Lên lịch, Nháp", () => expect(labels("ADMIN")).toEqual(["Nhận", "Đã gửi", "Lên lịch", "Nháp"]));
   test("teacher: Tất cả, Trung tâm, Hệ thống", () => expect(labels("TEACHER")).toEqual(["Tất cả", "Trung tâm", "Hệ thống"]));
   test("student: Tất cả, Chưa đọc", () => expect(labels("STUDENT")).toEqual(["Tất cả", "Chưa đọc"]));
 });

@@ -16,7 +16,7 @@ import type { CampaignAudience, CampaignBox, CampaignResponse, CampaignStatus } 
 import { ROLE_LABELS, type AudienceRole } from "../model/audience-draft";
 import { formatCountVi } from "../model/campaign-form-schema";
 
-const STATUS: Record<CampaignStatus, { label: string; tone: "success" | "info" | "warning" | "error" | "neutral" }> = {
+export const CAMPAIGN_STATUS: Record<CampaignStatus, { label: string; tone: "success" | "info" | "warning" | "error" | "neutral" }> = {
   DRAFT: { label: "Nháp", tone: "neutral" },
   SCHEDULED: { label: "Đã hẹn giờ", tone: "info" },
   SENDING: { label: "Đang gửi", tone: "info" },
@@ -59,9 +59,17 @@ function campaignTime(campaign: CampaignResponse) {
   return formatDateTimeVi(campaign.sentAt ?? campaign.updatedAt ?? campaign.createdAt);
 }
 
-function CampaignRow({ campaign, onEdit }: { campaign: CampaignResponse; onEdit: (id: string) => void }) {
-  const status = STATUS[campaign.status ?? "DRAFT"];
-  const editable = (campaign.status === "DRAFT" || campaign.status === "SCHEDULED") && campaign.id;
+const BOX_COPY: Record<CampaignBox, { label: string; empty: string }> = {
+  SENT: { label: "Thông báo đã gửi", empty: "Chưa gửi thông báo nào." },
+  SCHEDULED: { label: "Thông báo đã hẹn giờ", empty: "Chưa hẹn giờ thông báo nào." },
+  DRAFT: { label: "Bản nháp", empty: "Chưa có bản nháp." },
+};
+
+type RowActions = { onEdit: (id: string) => void; onOpen: (id: string) => void };
+
+function CampaignRow({ campaign, onEdit, onOpen }: RowActions & { campaign: CampaignResponse }) {
+  const status = CAMPAIGN_STATUS[campaign.status ?? "DRAFT"];
+  const editable = campaign.status === "DRAFT" || campaign.status === "SCHEDULED";
   const content = (
     <Box sx={{ minWidth: 0, flex: 1 }}>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -76,8 +84,8 @@ function CampaignRow({ campaign, onEdit }: { campaign: CampaignResponse; onEdit:
   );
   return (
     <ListItem disablePadding divider>
-      {editable ? (
-        <ListItemButton onClick={() => onEdit(campaign.id as string)} sx={{ gap: 1, px: 2, py: 1.5, minHeight: 64 }}>
+      {campaign.id ? (
+        <ListItemButton onClick={() => (editable ? onEdit : onOpen)(campaign.id as string)} sx={{ gap: 1, px: 2, py: 1.5, minHeight: 64 }}>
           {content}
           <ChevronRightRoundedIcon aria-hidden sx={{ color: "text.secondary" }} />
         </ListItemButton>
@@ -88,8 +96,8 @@ function CampaignRow({ campaign, onEdit }: { campaign: CampaignResponse; onEdit:
   );
 }
 
-/** Own campaigns of one box; drafts and scheduled ones open the compose page. */
-export function SentCampaignList({ box, onEdit }: { box: CampaignBox; onEdit: (id: string) => void }) {
+/** Own campaigns of one box; drafts and scheduled ones open the compose page, the others their detail. */
+export function SentCampaignList({ box, onEdit, onOpen }: RowActions & { box: CampaignBox }) {
   const query = useCampaigns(box, true);
   const campaigns = query.data?.items ?? [];
 
@@ -103,10 +111,10 @@ export function SentCampaignList({ box, onEdit }: { box: CampaignBox; onEdit: (i
       />
     );
   }
-  if (!campaigns.length) return <ErgEmptyState title={box === "DRAFT" ? "Chưa có bản nháp." : "Chưa gửi thông báo nào."} />;
+  if (!campaigns.length) return <ErgEmptyState title={BOX_COPY[box].empty} />;
   return (
-    <List aria-label={box === "DRAFT" ? "Bản nháp" : "Thông báo đã gửi"} disablePadding sx={cardSx}>
-      {campaigns.map((campaign) => <CampaignRow key={campaign.id} campaign={campaign} onEdit={onEdit} />)}
+    <List aria-label={BOX_COPY[box].label} disablePadding sx={cardSx}>
+      {campaigns.map((campaign) => <CampaignRow key={campaign.id} campaign={campaign} onEdit={onEdit} onOpen={onOpen} />)}
     </List>
   );
 }
