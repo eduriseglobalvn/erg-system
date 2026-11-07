@@ -1,5 +1,4 @@
 import { Suspense } from "react";
-import { useParams } from "@tanstack/react-router";
 import Box from "@mui/material/Box";
 
 import { HomeworkPanel } from "@/features/lms/components/homework-panel";
@@ -13,8 +12,6 @@ import {
   LearningResourceLibraryPage,
   LmsAccountPage,
   LmsLoginLogsPage,
-  LmsNotificationDetailPage,
-  LmsNotificationListPage,
   ScoreSheetPanel,
   StudentGroupsPage,
   TeachingSchedulePanel,
@@ -141,17 +138,6 @@ export function TeacherClassManagementRoute() {
       />
     </Suspense>
   );
-}
-
-export function TeacherNotificationsRoute() {
-  const { navigate } = useLmsTeacherShellModel();
-  return <LmsNotificationListPage onOpenDetail={(id) => void navigate({ href: `${teacherPath("/notifications")}/${id}` })} />;
-}
-
-export function TeacherNotificationDetailRoute() {
-  const { navigate } = useLmsTeacherShellModel();
-  const { notificationId } = useParams({ from: "/_authed/_teacherShell/teacher/notifications/$notificationId" });
-  return <LmsNotificationDetailPage notificationId={notificationId ?? ""} onBack={() => void navigate({ href: teacherPath("/notifications") })} />;
 }
 
 export function TeacherAccountRoute() {

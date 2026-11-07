@@ -60,13 +60,3 @@ export const LmsLoginLogsPage = lazy(() =>
     default: module.LmsLoginLogsPage,
   })),
 );
-export const LmsNotificationDetailPage = lazy(() =>
-  import("@/features/lms/components/lms-notification-detail-page").then((module) => ({
-    default: module.LmsNotificationDetailPage,
-  })),
-);
-export const LmsNotificationListPage = lazy(() =>
-  import("@/features/lms/components/lms-notification-detail-page").then((module) => ({
-    default: module.LmsNotificationListPage,
-  })),
-);

@@ -34,6 +34,7 @@ import {
 import {
   ScoresView,
 } from "@/features/elearning/student-dashboard/components/student-dashboard-scores-view";
+import { StudentInboxView } from "@/features/elearning/student-dashboard/components/student-inbox-view";
 import {
   enCopy,
   viCopy,
@@ -317,11 +318,15 @@ export function StudentDashboardWorkspaceRuntime() {
         />
       ) : null}
       {activePage === "announcements" ? (
-        <AnnouncementsView
-          announcements={teacherAnnouncements}
-          copy={copy}
-          selectedAnnouncementId={selectedAnnouncementId}
-        />
+        <>
+          {/* Signed-in viewers only: a guest has no inbox. Same portal as the quiz runtime (teacher preview reads lms). */}
+          {account ? <Box sx={{ mb: 3 }}><StudentInboxView portal={quizRuntimePortal} /></Box> : null}
+          <AnnouncementsView
+            announcements={teacherAnnouncements}
+            copy={copy}
+            selectedAnnouncementId={selectedAnnouncementId}
+          />
+        </>
       ) : null}
       {activePage === "account" ? (
         <AccountView

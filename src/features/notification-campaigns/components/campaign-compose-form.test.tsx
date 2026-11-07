@@ -100,7 +100,7 @@ test("retrying a failed send reuses the created campaign", async () => {
   fireEvent.click(primary());
   expect(await screen.findByRole("alert")).toHaveTextContent("Mất kết nối");
   fireEvent.click(primary());
-  await waitFor(() => expect(navigate).toHaveBeenCalledWith({ href: "/admin/notifications" }));
+  await waitFor(() => expect(navigate).toHaveBeenCalledWith({ href: "/admin/notifications?tab=SENT" }));
   expect(create.mutateAsync).toHaveBeenCalledTimes(1);
   expect(update.mutateAsync).toHaveBeenCalledWith(expect.objectContaining({ id: "c5" }));
   expect(send.mutateAsync).toHaveBeenCalledTimes(2);
@@ -188,7 +188,7 @@ test("schedule: the chosen local time is sent as ISO", async () => {
   fireEvent.click(primary());
   await waitFor(() => expect(schedule.mutateAsync).toHaveBeenCalledWith("c2"));
   expect(schedule.at).toBe(new Date(at.getFullYear(), at.getMonth(), at.getDate(), at.getHours()).toISOString());
-  expect(navigate).toHaveBeenCalledWith({ href: "/admin/notifications" });
+  expect(navigate).toHaveBeenCalledWith({ href: "/admin/notifications?tab=SENT" });
 });
 
 test("a 403 from the backend is shown inline", async () => {

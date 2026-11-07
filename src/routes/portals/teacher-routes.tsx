@@ -17,6 +17,8 @@ type LmsPath = (typeof lmsPaths)[number];
 const routePages = () => import("@/features/lms/components/lms-teacher-route-pages");
 const page = (name: keyof Awaited<ReturnType<typeof routePages>>) => lazyRouteComponent(routePages, name);
 const composePage = lazyRouteComponent(() => import("@/app/pages/shared/notification-compose-page"), "TeacherNotificationComposePage");
+const inboxPage = (name: "TeacherNotificationsPage" | "TeacherNotificationDetailPage") =>
+  lazyRouteComponent(() => import("@/app/pages/shared/notification-inbox-page"), name);
 
 /** One child route per Teacher page; adding a path to `lmsPaths` fails type-checking until it has a page. */
 const TEACHER_PAGES: Record<LmsPath, ReturnType<typeof page>> = {
@@ -29,7 +31,7 @@ const TEACHER_PAGES: Record<LmsPath, ReturnType<typeof page>> = {
   "homework/class": page("TeacherClassManagementRoute"),
   "homework/student-groups": page("TeacherStudentGroupsRoute"),
   learning: page("TeacherLearningHubRoute"),
-  notifications: page("TeacherNotificationsRoute"),
+  notifications: inboxPage("TeacherNotificationsPage"),
   "notifications/compose": composePage,
   account: page("TeacherAccountRoute"),
   "account/login-logs": page("TeacherLoginLogsRoute"),
@@ -68,7 +70,7 @@ const teacherNotificationDetailRoute = createRoute({
   getParentRoute: () => teacherShellRoute,
   path: "/teacher/notifications/$notificationId",
   staticData: permissionStaticData(teacherPath("/notifications"), "TEACHER"),
-  component: page("TeacherNotificationDetailRoute"),
+  component: inboxPage("TeacherNotificationDetailPage"),
 });
 
 const teacherNotificationComposeEditRoute = createRoute({

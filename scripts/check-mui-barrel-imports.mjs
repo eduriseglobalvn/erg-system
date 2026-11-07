@@ -23,7 +23,7 @@ const allowlist = new Set([
   "src/features/lcms/lcms-erg-portal-shell.tsx", "src/features/lcms/pages/lcms-dashboard.tsx", "src/features/lcms/pages/lcms-erg-workspaces.tsx",
   "src/features/lcms/quiz/quiz-editor/components/question-editor-dialog.tsx", "src/features/lcms/quiz/quiz-editor/components/ribbon/form-view-ribbon.tsx",
   "src/features/lcms/quiz/quiz-editor/components/ribbon/ribbon-menus.tsx", "src/features/lms/components/attendance-sheet-panel.tsx",
-  "src/features/lms/components/homework-panel.tsx", "src/features/lms/components/lms-notification-center.tsx", "src/features/lms/components/lms-teacher-shell.tsx",
+  "src/features/lms/components/homework-panel.tsx", "src/features/lms/components/lms-teacher-shell.tsx",
   "src/features/lms/components/score-sheet-panel.tsx", "src/features/lms/components/student-groups-page.tsx", "src/features/lms/weekly-class-log/components/weekly-class-log-page.tsx",
 ]);
 for (const file of files) {

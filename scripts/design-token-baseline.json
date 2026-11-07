@@ -971,10 +971,6 @@
     "hex": 0,
     "font": 5
   },
-  "src/features/lms/components/lms-notification-center.tsx": {
-    "hex": 6,
-    "font": 36
-  },
   "src/features/lms/components/lms-teacher-shell-config.tsx": {
     "hex": 0,
     "font": 8
@@ -1027,17 +1023,13 @@
     "hex": 0,
     "font": 6
   },
-  "src/features/lms/mobile/components/lms-bottom-dock.tsx": {
-    "hex": 0,
-    "font": 5
-  },
   "src/features/lms/mobile/components/lms-mobile-shell.tsx": {
     "hex": 0,
     "font": 7
   },
   "src/features/lms/mobile/components/lms-mobile-top-bar.tsx": {
     "hex": 0,
-    "font": 11
+    "font": 10
   },
   "src/features/lms/mobile/components/lms-pwa-setup-sheet.tsx": {
     "hex": 0,

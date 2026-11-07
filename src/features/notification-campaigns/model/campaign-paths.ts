@@ -8,5 +8,5 @@ const base = (kind: ComposePortalKind, path: string) => (kind === "admin" ? admi
 export const notificationComposePath = (kind: ComposePortalKind, campaignId?: string) =>
   base(kind, campaignId ? `/notifications/compose/${encodeURIComponent(campaignId)}` : "/notifications/compose");
 
-/** Where the sender lands after sending. The sent list arrives with task 9 on this same path. */
-export const notificationsHomePath = (kind: ComposePortalKind) => base(kind, "/notifications");
+/** Where the sender lands after sending: the admin Đã gửi box, or the teacher Hộp thư. */
+export const notificationsHomePath = (kind: ComposePortalKind) => `${base(kind, "/notifications")}${kind === "admin" ? "?tab=SENT" : ""}`;

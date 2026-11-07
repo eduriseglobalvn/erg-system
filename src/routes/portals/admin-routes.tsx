@@ -25,6 +25,8 @@ const page = (name: keyof Awaited<ReturnType<typeof routePages>>) => lazyRouteCo
 
 const composePage = (name: "AdminNotificationComposePage" | "TeacherNotificationComposePage") =>
   lazyRouteComponent(() => import("@/app/pages/shared/notification-compose-page"), name);
+const inboxPage = (name: "AdminNotificationsPage" | "AdminNotificationDetailPage") =>
+  lazyRouteComponent(() => import("@/app/pages/shared/notification-inbox-page"), name);
 
 const CONTENT_REDIRECTED_SEGMENTS = ["questions", "quiz-bank", "quiz-editor"];
 
@@ -35,6 +37,7 @@ function adminPageFor(wPath: string) {
   if (wPath === "employees") return page("AdminEmployeesRoute");
   if (wPath === "employees/access-logs") return page("AdminEmployeeAccessLogsRoute");
   if (wPath === "ui-kit") return page("AdminUiKitRoute");
+  if (wPath === "notifications") return inboxPage("AdminNotificationsPage");
   if (wPath === "notifications/compose") return composePage("AdminNotificationComposePage");
   if (wPath === "schools" || wPath.startsWith("schools/")) return page("AdminSchoolsRoute");
   return page("AdminGenericRoute");
@@ -74,6 +77,14 @@ const adminNotificationComposeEditRoute = createRoute({
   path: "/admin/notifications/compose/$campaignId",
   staticData: permissionStaticData(adminPath("/notifications/compose"), "ADMIN"),
   component: composePage("AdminNotificationComposePage"),
+});
+
+// One inbox message; the matrix row of notifications covers its children (every admin reads their own inbox).
+const adminNotificationDetailRoute = createRoute({
+  getParentRoute: () => adminShellRoute,
+  path: "/admin/notifications/$notificationId",
+  staticData: permissionStaticData(adminPath("/notifications"), "ADMIN"),
+  component: inboxPage("AdminNotificationDetailPage"),
 });
 
 // Legacy alias of settings/roles.
@@ -158,6 +169,7 @@ export const adminAuthedRoutes = [
     ...adminContentRoutes,
     ...adminMenuRoutes,
     adminNotificationComposeEditRoute,
+    adminNotificationDetailRoute,
     ...adminIntegrationRoutes.map(([path, pageName]) =>
       createRoute({ getParentRoute: () => adminShellRoute, path, staticData: permissionStaticData(path, "ADMIN"), component: page(pageName) }),
     ),
