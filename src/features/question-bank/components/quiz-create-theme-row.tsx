@@ -1,4 +1,5 @@
 import Box from "@mui/material/Box";
+import { quizThemeToneSurface } from "@/components/quiz/player-template-surface";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { useState } from "react";
@@ -7,7 +8,7 @@ import { ErgButton } from "@/components/erg-mui";
 import type { QuizPlayerTemplate } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import { enCopy as enThemeCopy, viCopy as viThemeCopy } from "@/features/lcms/quiz/quiz-theme/quiz-theme-copy";
 import { QuizThemeDialog } from "@/features/lcms/quiz/quiz-theme/quiz-theme-dialog";
-import { findMatchingQuizThemePreset, quizThemeToneSurface } from "@/features/lcms/quiz/quiz-theme/quiz-theme-presets";
+import { findMatchingQuizThemePreset } from "@/features/lcms/quiz/quiz-theme/quiz-theme-presets";
 import { useI18n } from "@/platform/i18n";
 import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
 import type { QuestionBankCopy } from "./question-bank-copy";
@@ -15,9 +16,10 @@ import type { QuestionBankCopy } from "./question-bank-copy";
 const bar = { height: 5, borderRadius: `${t.radius.xs / 2}px` } as const;
 
 /** Current quiz theme (name + mini swatch) with a button that opens the shared theme picker. */
-export function QuizCreateThemeRow({ copy, value, onChange }: {
+export function QuizCreateThemeRow({ copy, value, questionCount, onChange }: {
   copy: QuestionBankCopy;
   value: QuizPlayerTemplate;
+  questionCount: number;
   onChange: (value: QuizPlayerTemplate) => void;
 }) {
   const { locale } = useI18n();
@@ -39,7 +41,7 @@ export function QuizCreateThemeRow({ copy, value, onChange }: {
         <Typography variant="body2" noWrap>{name}</Typography>
       </Stack>
       <ErgButton variant="text" onClick={() => setOpen(true)}>{copy.changeThemeAction}</ErgButton>
-      <QuizThemeDialog open={open} value={value} onClose={() => setOpen(false)} onApply={(next) => { onChange(next); setOpen(false); }} />
+      <QuizThemeDialog open={open} value={value} questionCount={questionCount} onClose={() => setOpen(false)} onApply={(next) => { onChange(next); setOpen(false); }} />
     </Stack>
   );
 }

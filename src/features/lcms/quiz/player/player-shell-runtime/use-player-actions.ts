@@ -49,7 +49,8 @@ export type UsePlayerActionsArgs = {
   setCurrentIndex: Dispatch<SetStateAction<number>>;
   setDrafts: Dispatch<SetStateAction<Record<string, AnswerPayload>>>;
   setLoadState: Dispatch<SetStateAction<PlayerLoadState>>;
-  setRecentTrainingSubmitQuestionId: Dispatch<SetStateAction<string | null>>;
+  /** Non-null switches the finished player into LocalRetryPlayer (D12). */
+  setLocalRetryIndices: Dispatch<SetStateAction<number[] | null>>;
   setReviewingSubmittedAttempt: Dispatch<SetStateAction<boolean>>;
   setStarted: Dispatch<SetStateAction<boolean>>;
   setSubmitDialogMode: Dispatch<SetStateAction<SubmitDialogMode | null>>;
@@ -80,7 +81,7 @@ export function usePlayerActions({
   setCurrentIndex,
   setDrafts,
   setLoadState,
-  setRecentTrainingSubmitQuestionId,
+  setLocalRetryIndices,
   setReviewingSubmittedAttempt,
   setStarted,
   setSubmitDialogMode,
@@ -265,7 +266,6 @@ export function usePlayerActions({
       restored: false,
       session: nextSession,
     });
-    setRecentTrainingSubmitQuestionId(activeQuestion.id);
     await localQuizAttemptStore.saveSession(nextSession);
     if (portableOffline) {
       return;
@@ -314,7 +314,6 @@ export function usePlayerActions({
   }, [
     setDrafts,
     setLoadState,
-    setRecentTrainingSubmitQuestionId,
     setSubmitError,
     activeAttempt,
     activePackage,
@@ -370,5 +369,12 @@ export function usePlayerActions({
     setSubmitDialogMode(allQuestionsAnswered ? "all-answered" : "confirm");
   }, [allQuestionsAnswered, attemptExpired, submitFailed, setSubmitDialogMode, setSubmitError]);
 
-  return { beginAttempt, finalizeAttempt, requestSubmit, submitCurrentTrainingQuestion, submitReadyAttempt };
+  // D12 "Luyện lại n câu": only flips UI state. LocalRetryPlayer keeps its own answers in memory, so the
+  // attempt store, offline queue, draft PUT and submit are never reached; the finished attempt stays as is.
+  const startLocalRetry = useCallback((indices: number[]) => {
+    if (indices.length === 0) return;
+    setLocalRetryIndices([...indices].sort((a, b) => a - b));
+  }, [setLocalRetryIndices]);
+
+  return { startLocalRetry, beginAttempt, finalizeAttempt, requestSubmit, submitCurrentTrainingQuestion, submitReadyAttempt };
 }

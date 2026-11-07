@@ -1,0 +1,69 @@
+import HomeIcon from "@mui/icons-material/Home";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
+
+import { ErgMobileDock, formatDockBadge, type ErgMobileDockItem } from "./erg-mobile-dock";
+
+type Id = "home" | "inbox" | "a" | "b" | "c" | "more";
+
+const items: Array<ErgMobileDockItem<Id>> = [
+  { id: "home", label: "Trang chủ", icon: HomeIcon, path: "/home" },
+  { id: "inbox", label: "Hộp thư", icon: HomeIcon, path: "/inbox", badgeCount: 120 },
+  { id: "a", label: "Mục A", icon: HomeIcon, path: "/a" },
+  { id: "b", label: "Mục B", icon: HomeIcon, path: "/b" },
+  { id: "c", label: "Mục C", icon: HomeIcon, path: "/c" },
+  { id: "more", label: "Thêm", icon: HomeIcon, path: "", opensSheet: true },
+];
+
+function setup() {
+  const onNavigate = vi.fn();
+  const onOpenSheet = vi.fn();
+  render(
+    <ErgMobileDock
+      activeId="inbox"
+      ariaLabel="Điều hướng test"
+      hideAt="xl"
+      items={items}
+      onNavigate={onNavigate}
+      onOpenSheet={onOpenSheet}
+    />,
+  );
+  return { onNavigate, onOpenSheet };
+}
+
+describe("formatDockBadge", () => {
+  it("formats counts", () => {
+    expect(formatDockBadge(undefined)).toBeNull();
+    expect(formatDockBadge(0)).toBeNull();
+    expect(formatDockBadge(7)).toBe("7");
+    expect(formatDockBadge(99)).toBe("99");
+    expect(formatDockBadge(100)).toBe("99+");
+  });
+});
+
+describe("ErgMobileDock", () => {
+  it("renders one button per item and marks only the active one", () => {
+    setup();
+    expect(screen.getAllByRole("button")).toHaveLength(6);
+    expect(screen.getByRole("button", { name: /Hộp thư/ })).toHaveAttribute("aria-current", "page");
+    expect(document.querySelectorAll("[aria-current]")).toHaveLength(1);
+    screen.getAllByRole("button").filter((b) => !b.getAttribute("aria-label")?.startsWith("Hộp thư")).forEach((b) => expect(b).not.toHaveAttribute("aria-current"));
+    expect(screen.getByText("99+")).toBeVisible();
+    expect(screen.getByRole("navigation")).toHaveAttribute("aria-label", "Điều hướng test");
+  });
+
+  it("navigates on a normal item", () => {
+    const { onNavigate } = setup();
+    fireEvent.click(screen.getByRole("button", { name: "Trang chủ" }));
+    expect(onNavigate).toHaveBeenCalledWith("/home");
+  });
+
+  it("opens the sheet instead of navigating", () => {
+    const { onNavigate, onOpenSheet } = setup();
+    const more = screen.getByRole("button", { name: "Thêm" });
+    expect(more).toHaveAttribute("aria-haspopup", "dialog");
+    fireEvent.click(more);
+    expect(onOpenSheet).toHaveBeenCalledTimes(1);
+    expect(onNavigate).not.toHaveBeenCalled();
+  });
+});

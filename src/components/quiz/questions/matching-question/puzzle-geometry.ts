@@ -1,4 +1,8 @@
-export const PUZZLE = { gap: 48, knob: 18, maxWidth: 380, minHeight: 54 } as const;
+export const PUZZLE = { gap: 48, knob: 18, maxWidth: 380, minHeight: 54, numberColumn: 26 } as const;
+
+/** Widest a piece may be: the web cap, or on a phone half of what is left once the gap and the knob are taken out (never below 120). */
+export const pieceMaxWidthFor = (containerWidth: number): number =>
+  Math.min(PUZZLE.maxWidth, Math.max(120, Math.floor((containerWidth - PUZZLE.gap - PUZZLE.knob) / 2)));
 
 /** Left piece: rounded box with the notch cut into the right edge, drawn at its real size so the notch never stretches. */
 export function pathLeft(w: number, h: number): string {

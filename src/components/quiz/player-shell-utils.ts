@@ -1,4 +1,4 @@
-import { isAnswerComplete, normalizeAnswerForSubmission } from "@/domain/quiz/quiz";
+import { normalizeAnswerForSubmission } from "@/domain/quiz/quiz";
 import type { AnswerPayload, Question } from "@/domain/quiz/types";
 
 /** `localClock` (portable/offline only): there is no server, so the device clock is the reference. */
@@ -102,46 +102,4 @@ export function formatTimer(totalSeconds: number) {
   const minutes = Math.floor(safeSeconds / 60);
   const seconds = safeSeconds % 60;
   return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
-}
-
-export function questionLabel(question: Question) {
-  switch (question.kind) {
-    case "single_choice":
-      return "Chọn 1 đáp án";
-    case "multiple_response":
-      return "Chọn nhiều đáp án";
-    case "true_false":
-      return "Đúng / Sai";
-    case "short_answer":
-      return "Trả lời ngắn";
-    case "numeric":
-      return "Số học";
-    case "matching":
-      return "Nối cặp";
-    case "sequence":
-      return "Sắp xếp thứ tự";
-    case "fill_blank":
-      return "Điền chỗ trống";
-    case "inline_choice":
-      return "Chọn trong dòng";
-    case "select_from_lists":
-      return "Chọn từ danh sách";
-    case "drag_words":
-      return "Kéo từ";
-    case "hotspot":
-      return "Điểm nóng";
-    case "drag_drop":
-      return "Kéo và thả";
-    case "likert_scale":
-      return "Thang Likert";
-    case "essay":
-      return "Tự luận";
-    default:
-      return "Câu hỏi";
-  }
-}
-
-/** Index of the first question without a complete answer, or -1 when everything is answered. */
-export function firstUnansweredIndex(questions: Question[], drafts: Record<string, AnswerPayload>) {
-  return questions.findIndex((question) => !isAnswerComplete(question, drafts[question.id]));
 }

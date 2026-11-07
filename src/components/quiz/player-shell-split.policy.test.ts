@@ -21,7 +21,7 @@ describe("Quiz Player Shell ownership", () => {
   it("keeps runtime, navigation, mobile and result owners explicit", () => {
     const runtime = RUNTIME_FILES.map((file) => readFileSync(resolve(PLAYER, file), "utf8")).join("\n");
 
-    expect(runtime).toContain("QuestionNavigator");
+    expect(runtime).toContain("PlayerQuestionAside");
     expect(runtime).toContain("MobilePlayerShell");
     expect(runtime).toContain("FinalResultScreen");
     expect(runtime).toContain("player-shell-runtime-model");

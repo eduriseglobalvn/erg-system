@@ -82,17 +82,19 @@ test("Teacher mobile dock keeps selected state and leaves the assignment action 
   await page.setViewportSize({ width: 375, height: 812 });
 
   const cases = [
-    { route: "/teacher/homework/assign", label: "Giao bài" },
-    { route: "/teacher/homework/exercise-bank", label: "Kho bài" },
+    // Labels from lms-teacher-shell-config (lmsMobileDockItems); homework screens light Học tập.
+    { route: "/teacher/homework/assign", label: "Học tập" },
+    { route: "/teacher/homework/exercise-bank", label: "Học tập" },
     { route: "/teacher/calendar", label: "Lịch" },
-    { route: "/teacher/notifications", label: "Thông báo" },
+    { route: "/teacher/notifications", label: "Hộp thư" },
   ];
 
-  const dock = page.locator('nav[aria-label="Điều hướng LMS mobile"]');
+  const dock = page.getByRole("navigation", { name: "Điều hướng giáo viên" });
   for (const item of cases) {
     await page.goto(item.route, { waitUntil: "domcontentloaded", timeout: 20_000 });
     await expect(dock).toBeVisible();
-    await expect(dock.getByRole("button", { name: item.label, exact: true })).toHaveAttribute("aria-current", "page");
+    // A badge may follow the label in the accessible name (Hộp thư 3).
+    await expect(dock.getByRole("button", { name: new RegExp(`^${item.label}`) })).toHaveAttribute("aria-current", "page");
   }
 
   await page.goto("/teacher/homework/assign", { waitUntil: "domcontentloaded", timeout: 20_000 });

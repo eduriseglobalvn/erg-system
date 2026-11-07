@@ -9,7 +9,7 @@ import {
   lcmsWorkspacePaths,
 } from "@/app/portal-route-registry";
 import { enforcePermissionRoute, enforceWorkspaceRoute } from "@/app/router/route-guards";
-import { ADMIN_CONTENT_HOME_PATH, ADMIN_CONTENT_ROUTE_PATHS, canonicalAdminWorkspacePath } from "@/features/lcms/admin-content/admin-content-route";
+import { ADMIN_CONTENT_HOME_PATH, ADMIN_CONTENT_ROUTE_PATHS, adminContentPathForSection, canonicalAdminWorkspacePath, validateQuizEditorSearch } from "@/features/lcms/admin-content/admin-content-route";
 import { adminPath } from "@/platform/workspaces/workspace-paths";
 import { RoutePendingSkeleton } from "@/routes/route-feedback";
 import { authedRoute, permissionStaticData, ProfileBody, rootRoute } from "@/routes/portals/route-shared";
@@ -23,7 +23,16 @@ const QuestionTypeDemoPage = lazy(() =>
 const routePages = () => import("@/features/lcms/admin-route-pages");
 const page = (name: keyof Awaited<ReturnType<typeof routePages>>) => lazyRouteComponent(routePages, name);
 
+const composePage = (name: "AdminNotificationComposePage" | "TeacherNotificationComposePage") =>
+  lazyRouteComponent(() => import("@/app/pages/shared/notification-compose-page"), name);
+const inboxPage = (name: "AdminNotificationsPage" | "AdminNotificationDetailPage" | "AdminCampaignDetailPage") =>
+  lazyRouteComponent(() => import("@/app/pages/shared/notification-inbox-page"), name);
+const timekeepingPages = () => import("@/features/timekeeping/components/timekeeping-route-pages");
+const timekeepingPage = (name: keyof Awaited<ReturnType<typeof timekeepingPages>>) => lazyRouteComponent(timekeepingPages, name);
+
 const CONTENT_REDIRECTED_SEGMENTS = ["questions", "quiz-bank", "quiz-editor"];
+// Redirect aliases of a renamed screen: they get no page of their own.
+const REDIRECT_ONLY_SEGMENTS = ["setting/setting-center-role", "employees/face-detection"];
 
 /** Component of the Admin menu entries that have their own screen; every other entry uses the generic host. */
 function adminPageFor(wPath: string) {
@@ -31,7 +40,13 @@ function adminPageFor(wPath: string) {
   if (wPath === "settings/roles") return page("AdminRolesRoute");
   if (wPath === "employees") return page("AdminEmployeesRoute");
   if (wPath === "employees/access-logs") return page("AdminEmployeeAccessLogsRoute");
+  if (wPath === "employees/timekeeping") return timekeepingPage("AdminTimekeepingTodayRoute");
+  if (wPath === "employees/timesheet") return timekeepingPage("AdminTimesheetRoute");
+  if (wPath === "employees/teacher-absence") return timekeepingPage("AdminTimekeepingApprovalsRoute");
+  if (wPath === "employees/timekeeping-settings") return timekeepingPage("AdminTimekeepingSettingsRoute");
   if (wPath === "ui-kit") return page("AdminUiKitRoute");
+  if (wPath === "notifications") return inboxPage("AdminNotificationsPage");
+  if (wPath === "notifications/compose") return composePage("AdminNotificationComposePage");
   if (wPath === "schools" || wPath.startsWith("schools/")) return page("AdminSchoolsRoute");
   return page("AdminGenericRoute");
 }
@@ -48,12 +63,14 @@ const adminContentRoutes = ADMIN_CONTENT_ROUTE_PATHS.map((contentPath) =>
     getParentRoute: () => adminShellRoute,
     path: contentPath,
     staticData: permissionStaticData(contentPath, "ADMIN"),
+    // Only the quiz editor reads search: `panel=theme` opens its theme dialog (link from Giao bài).
+    ...(contentPath === adminContentPathForSection("quiz-editor") ? { validateSearch: validateQuizEditorSearch } : {}),
     component: contentPath === ADMIN_CONTENT_HOME_PATH ? page("AdminContentOverviewRoute") : page("AdminContentWorkspaceRoute"),
   }),
 );
 
 const adminMenuRoutes = lcmsWorkspacePaths
-  .filter((wPath) => !CONTENT_REDIRECTED_SEGMENTS.includes(wPath) && wPath !== "setting/setting-center-role")
+  .filter((wPath) => !CONTENT_REDIRECTED_SEGMENTS.includes(wPath) && !REDIRECT_ONLY_SEGMENTS.includes(wPath))
   .map((wPath) => {
     const path = canonicalAdminWorkspacePath(`/${wPath}`);
     return createRoute({
@@ -64,6 +81,30 @@ const adminMenuRoutes = lcmsWorkspacePaths
     });
   });
 
+// Edit a saved draft / scheduled campaign; the matrix row of notifications/compose covers its children.
+const adminNotificationComposeEditRoute = createRoute({
+  getParentRoute: () => adminShellRoute,
+  path: "/admin/notifications/compose/$campaignId",
+  staticData: permissionStaticData(adminPath("/notifications/compose"), "ADMIN"),
+  component: composePage("AdminNotificationComposePage"),
+});
+
+// One inbox message; the matrix row of notifications covers its children (every admin reads their own inbox).
+const adminNotificationDetailRoute = createRoute({
+  getParentRoute: () => adminShellRoute,
+  path: "/admin/notifications/$notificationId",
+  staticData: permissionStaticData(adminPath("/notifications"), "ADMIN"),
+  component: inboxPage("AdminNotificationDetailPage"),
+});
+
+// One campaign (KPIs, recipients); "sent/" keeps it apart from compose and $notificationId. Own matrix row: the send permission.
+const adminCampaignDetailRoute = createRoute({
+  getParentRoute: () => adminShellRoute,
+  path: "/admin/notifications/sent/$campaignId",
+  staticData: permissionStaticData(adminPath("/notifications/sent"), "ADMIN"),
+  component: inboxPage("AdminCampaignDetailPage"),
+});
+
 // Legacy alias of settings/roles.
 const settingCenterRoleRedirectRoute = createRoute({
   getParentRoute: () => authedRoute,
@@ -71,6 +112,16 @@ const settingCenterRoleRedirectRoute = createRoute({
   staticData: permissionStaticData(canonicalAdminWorkspacePath("/setting/setting-center-role"), "ADMIN"),
   beforeLoad: () => {
     throw redirect({ href: adminPath("/settings/roles"), replace: true });
+  },
+});
+
+// The face-detection screen became timekeeping settings.
+const faceDetectionRedirectRoute = createRoute({
+  getParentRoute: () => authedRoute,
+  path: canonicalAdminWorkspacePath("/employees/face-detection"),
+  staticData: permissionStaticData(canonicalAdminWorkspacePath("/employees/face-detection"), "ADMIN"),
+  beforeLoad: () => {
+    throw redirect({ href: adminPath("/employees/timekeeping-settings"), replace: true });
   },
 });
 
@@ -141,10 +192,14 @@ export const adminAuthedRoutes = [
   adminProfileRoute,
   questionTypesRoute,
   settingCenterRoleRedirectRoute,
+  faceDetectionRedirectRoute,
   adminShellRoute.addChildren([
     adminIndexRoute,
     ...adminContentRoutes,
     ...adminMenuRoutes,
+    adminNotificationComposeEditRoute,
+    adminNotificationDetailRoute,
+    adminCampaignDetailRoute,
     ...adminIntegrationRoutes.map(([path, pageName]) =>
       createRoute({ getParentRoute: () => adminShellRoute, path, staticData: permissionStaticData(path, "ADMIN"), component: page(pageName) }),
     ),

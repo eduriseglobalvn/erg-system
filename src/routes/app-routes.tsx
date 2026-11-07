@@ -8,7 +8,7 @@ import { authRoutes } from "@/routes/portals/auth-routes";
 import { crmRoutes } from "@/routes/portals/crm-routes";
 import { catchAllRoute, legacyRoutes } from "@/routes/portals/legacy-routes";
 import { publicRoutes } from "@/routes/portals/public-routes";
-import { authedRoute, rootRoute } from "@/routes/portals/route-shared";
+import { authedRoute, notificationLinkRoute, rootRoute } from "@/routes/portals/route-shared";
 import { studentRoutes } from "@/routes/portals/student-routes";
 import { teacherRoutes } from "@/routes/portals/teacher-routes";
 
@@ -17,6 +17,7 @@ export const routeTree = rootRoute.addChildren([
   ...authRoutes,
   ...adminRoutes,
   authedRoute.addChildren([...adminAuthedRoutes, ...teacherRoutes, ...studentRoutes, ...crmRoutes]),
+  notificationLinkRoute,
   ...legacyRoutes,
   catchAllRoute,
 ]);

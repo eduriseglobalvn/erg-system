@@ -101,6 +101,8 @@ export function AdminContentWorkspaceRoute() {
         onOpenQuiz={(quizId) => void navigate({ href: `${adminContentPathForSection("quiz-editor")}?quizId=${encodeURIComponent(quizId)}` })}
         pendingQuestionImports={model.pendingQuestionImports}
         quizEditorQuizId={model.quizEditorQuizId}
+        quizEditorThemeRequested={model.quizEditorThemeRequested}
+        onQuizEditorThemeHandled={() => void navigate({ href: `${adminContentPathForSection("quiz-editor")}?quizId=${encodeURIComponent(model.quizEditorQuizId ?? "")}`, replace: true })}
         selectedClassId=""
         selectedSchoolId=""
         onQuestionImportsHandled={model.onClearQuestionImports}

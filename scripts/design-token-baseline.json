@@ -83,14 +83,6 @@
     "hex": 3,
     "font": 5
   },
-  "src/components/portal/portal-header-notification-item.tsx": {
-    "hex": 10,
-    "font": 4
-  },
-  "src/components/portal/portal-header-notifications.tsx": {
-    "hex": 11,
-    "font": 8
-  },
   "src/components/portal/portal-sidebar-report-icon.tsx": {
     "hex": 2,
     "font": 1
@@ -103,37 +95,25 @@
     "hex": 1,
     "font": 0
   },
-  "src/components/quiz/mobile-player-intro.tsx": {
-    "hex": 1,
-    "font": 0
-  },
-  "src/components/quiz/mobile-player-question-sheet.tsx": {
-    "hex": 1,
-    "font": 0
-  },
   "src/components/quiz/mobile-player-shell.tsx": {
     "hex": 2,
     "font": 0
   },
   "src/components/quiz/player-shell-parts.tsx": {
     "hex": 2,
-    "font": 10
+    "font": 6
   },
   "src/components/quiz/player-shell-runtime/player-desktop-layout.tsx": {
     "hex": 1,
     "font": 0
   },
   "src/components/quiz/player-shell-runtime/player-shell-styles.ts": {
-    "hex": 4,
+    "hex": 3,
     "font": 0
   },
-  "src/components/quiz/question-navigator.tsx": {
-    "hex": 13,
-    "font": 17
-  },
   "src/components/quiz/questions/choice-option.tsx": {
-    "hex": 12,
-    "font": 3
+    "hex": 0,
+    "font": 1
   },
   "src/components/quiz/questions/drag-drop-question.tsx": {
     "hex": 7,
@@ -155,20 +135,12 @@
     "hex": 5,
     "font": 0
   },
-  "src/components/quiz/questions/matching-question/matching-mobile.tsx": {
-    "hex": 2,
-    "font": 0
-  },
   "src/components/quiz/questions/shared.tsx": {
-    "hex": 2,
+    "hex": 0,
     "font": 1
   },
   "src/components/quiz/questions/text-response-question.tsx": {
     "hex": 7,
-    "font": 0
-  },
-  "src/components/quiz/quiz-welcome-screen.tsx": {
-    "hex": 33,
     "font": 0
   },
   "src/components/shared/DataTable.tsx": {
@@ -971,10 +943,6 @@
     "hex": 0,
     "font": 5
   },
-  "src/features/lms/components/lms-notification-center.tsx": {
-    "hex": 6,
-    "font": 36
-  },
   "src/features/lms/components/lms-teacher-shell-config.tsx": {
     "hex": 0,
     "font": 8
@@ -1027,17 +995,13 @@
     "hex": 0,
     "font": 6
   },
-  "src/features/lms/mobile/components/lms-bottom-dock.tsx": {
-    "hex": 0,
-    "font": 5
-  },
   "src/features/lms/mobile/components/lms-mobile-shell.tsx": {
     "hex": 0,
     "font": 7
   },
   "src/features/lms/mobile/components/lms-mobile-top-bar.tsx": {
     "hex": 0,
-    "font": 11
+    "font": 10
   },
   "src/features/lms/mobile/components/lms-pwa-setup-sheet.tsx": {
     "hex": 0,

@@ -40,3 +40,11 @@ export function formatTimeVi(value: string | number | Date | null | undefined): 
   const d = new Date(value);
   return Number.isNaN(d.getTime()) ? "" : `${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
+
+/** True for a real calendar date written yyyy-MM-dd ("2026-13-45" and "2026-02-30" are not). */
+export function isIsoDate(value: string): boolean {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!m) return false;
+  const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+  return d.getFullYear() === Number(m[1]) && d.getMonth() === Number(m[2]) - 1 && d.getDate() === Number(m[3]);
+}

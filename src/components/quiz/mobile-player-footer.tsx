@@ -1,7 +1,5 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-import type { QuizResultDisplay } from "@/domain/quiz/types";
-
 type Props = {
   attemptCompleted: boolean;
   currentAnswerComplete: boolean;
@@ -9,14 +7,14 @@ type Props = {
   isFirstQuestion: boolean;
   isLastQuestion: boolean;
   isTrainingMode: boolean;
-  resultDisplay: QuizResultDisplay;
   reviewingSubmittedAttempt: boolean;
   submitFailed: boolean;
   submitting: boolean;
   onNext: () => void;
   onPrev: () => void;
   onRequestSubmit: () => void;
-  onReview: () => void;
+  /** Omitted when review is unavailable (no answer keys / author hid it). */
+  onReview?: () => void;
   onSubmitCurrentQuestion: () => void;
 };
 
@@ -27,7 +25,6 @@ export function MobilePlayerFooter({
   isFirstQuestion,
   isLastQuestion,
   isTrainingMode,
-  resultDisplay,
   reviewingSubmittedAttempt,
   submitFailed,
   submitting,
@@ -38,26 +35,29 @@ export function MobilePlayerFooter({
   onSubmitCurrentQuestion,
 }: Props) {
   const showSubmitAction = !attemptCompleted;
+  const showResultOnly = attemptCompleted && !reviewingSubmittedAttempt;
+  // Result screen without review (keyless package): no button, so no empty fixed bar either.
+  if (showResultOnly && !onReview) return null;
   return (
-    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white px-3 pb-[calc(env(safe-area-inset-bottom,0px)+0.35rem)] pt-1.5">
+    <div data-testid="mobile-player-footer" className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white px-3 pb-[calc(env(safe-area-inset-bottom,0px)+0.35rem)] pt-1.5">
       <div className="mx-auto max-w-md">
-        {attemptCompleted && !reviewingSubmittedAttempt ? (
+        {showResultOnly ? (
           <button
             type="button"
-            className="inline-flex min-h-10 w-full items-center justify-center rounded-md bg-[var(--erg-blue)] px-4 text-sm font-semibold text-white shadow-sm"
+            className="inline-flex min-h-10 w-full items-center justify-center rounded-md border border-[var(--erg-blue)] bg-white px-4 text-sm font-semibold text-[var(--erg-blue)]"
             onClick={onReview}
           >
-            {resultDisplay.reviewButtonLabel}
+            Xem lại bài làm
           </button>
         ) : (
           isTrainingMode ? (
             <button
               type="button"
               className="inline-flex min-h-10 w-full items-center justify-center rounded-md border border-[#b8d6fa] bg-[var(--erg-blue)] px-4 text-sm font-semibold text-white shadow-sm disabled:cursor-not-allowed disabled:opacity-40"
-              disabled={submitting || currentQuestionSubmitted || !currentAnswerComplete}
-              onClick={onSubmitCurrentQuestion}
+              disabled={currentQuestionSubmitted ? isLastQuestion : submitting || !currentAnswerComplete}
+              onClick={currentQuestionSubmitted ? onNext : onSubmitCurrentQuestion}
             >
-              {currentQuestionSubmitted ? "Đã kiểm tra" : submitting ? "Đang kiểm tra…" : "Kiểm tra đáp án"}
+              {currentQuestionSubmitted ? "Câu tiếp" : submitting ? "Đang chấm…" : "Kết quả"}
             </button>
           ) : (
           <div className={`grid gap-2 ${showSubmitAction ? "grid-cols-3" : "grid-cols-2"}`}>

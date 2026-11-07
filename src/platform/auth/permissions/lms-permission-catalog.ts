@@ -50,9 +50,17 @@ export const LMS_PERMISSION_CATALOG = [
   "account.self.recovery_email.update",
   "account.self.password.change",
   "account.self.sessions.read",
+  "timekeeping.self",
+  "timekeeping.approve",
+  "timekeeping.manage",
 ] as const;
 
 export type LmsPermission = (typeof LMS_PERMISSION_CATALOG)[number];
+
+/** Permissions of other BE modules that guard a Teacher route (not part of the lms.* role templates). */
+export const LMS_CROSS_MODULE_ROUTE_PERMISSIONS = ["notification.campaign.send"] as const;
+
+export type LmsRoutePermission = LmsPermission | (typeof LMS_CROSS_MODULE_ROUTE_PERMISSIONS)[number];
 
 export const LMS_PROTECTED_ROUTES = [...lmsPaths] as const;
 
@@ -67,7 +75,9 @@ export const LMS_ROUTE_PERMISSIONS = {
   "homework/progress": "lms.assignment.progress.read",
   "homework/student-groups": "lms.student_group.read",
   "homework/class": "lms.class.read",
+  learning: "lms.assignment.read",
   notifications: "lms.notification.read",
+  "notifications/compose": "notification.campaign.send",
   account: "account.self.read",
   "account/login-logs": "account.self.sessions.read",
   score: "lms.grade.read",
@@ -76,7 +86,12 @@ export const LMS_ROUTE_PERMISSIONS = {
   "class-log": "lms.class_log.read",
   reports: "lms.report.read",
   resources: "lms.resource.read",
-} as const satisfies Record<LmsProtectedRoute, LmsPermission>;
+  timekeeping: "timekeeping.self",
+  "timekeeping/punch": "timekeeping.self",
+  "timekeeping/timesheet": "timekeeping.self",
+  "timekeeping/requests": "timekeeping.self",
+  "timekeeping/approvals": "timekeeping.approve",
+} as const satisfies Record<LmsProtectedRoute, LmsRoutePermission>;
 
 type LmsRoleGroupTemplate = {
   name: string;

@@ -21,12 +21,12 @@ import { fetchUnreadNotificationCount, notificationQueryKeys } from "@/features/
 import { isSchedulePublishedNotification, resolveLmsTeacherRuns } from "@/features/lms/components/lms-teacher-shell-utils";
 import {
   LMS_MENU_GROUPS,
-  lmsMobileDockItems,
   lmsMobileMoreItems,
   lmsNavItems,
-  resolveMobileSection,
+  resolveLmsMobileSection,
   resolveMobileTitle,
   resolveSection,
+  visibleLmsDockItems,
 } from "@/features/lms/components/lms-teacher-shell-config";
 import { teachingCalendarQueryKeys } from "@/features/teaching-calendar/api/teaching-calendar-api";
 import { canNavigateToLmsPath, filterLmsNavigation } from "@/features/lms/navigation/lms-navigation";
@@ -54,7 +54,7 @@ export function useLmsTeacherShellController() {
   const pathname = location.pathname;
   const progressAssignmentId = new URLSearchParams(location.searchStr).get("assignmentId");
   const activeSection = resolveSection(pathname);
-  const activeMobileSection = resolveMobileSection(pathname);
+  const activeMobileSection = resolveLmsMobileSection(pathname);
   const shouldLoadHomeworkWorkspace = activeSection === "home" || activeSection === "homework";
   const initialScope = useMemo(
     () => getPersistedJsonValue<StoredTeacherScope>(TEACHER_SCOPE_STORAGE_KEY, {}),
@@ -148,10 +148,7 @@ export function useLmsTeacherShellController() {
   const selectedSchool = schools.find((school) => school.id === selectedSchoolId) ?? schools[0] ?? (apiBacked ? undefined : classroomSchools[0]);
   const selectedSchoolName = selectedSchool?.name ?? "ERG";
   const activeNav = lmsNavItems.find((item) => item.id === activeSection) ?? lmsNavItems[0];
-  const activeMobileNav = {
-    ...(lmsMobileDockItems.find((item) => item.id === activeMobileSection) ?? lmsMobileDockItems[0]),
-    label: resolveMobileTitle(pathname, activeMobileSection, activeNav.label),
-  };
+  const activeMobileNav = { label: resolveMobileTitle(pathname, activeMobileSection, activeNav.label) };
   const teacherName = account?.fullName || "Lê Thị Thùy";
   const teacherEmail = account?.email || "teacher@erg.edu.vn";
   const learningResourceScope = useMemo(
@@ -179,9 +176,8 @@ export function useLmsTeacherShellController() {
   );
   const mobileDockItems = useMemo(
     () =>
-      lmsMobileDockItems
-        .filter((item) => canNavigateToLmsPath(item.path, grantedPermissions, deniedPermissions))
-        .map((item) => (item.id === "more" ? { ...item, badgeCount: unreadNotificationCount } : item)),
+      visibleLmsDockItems((path) => canNavigateToLmsPath(path, grantedPermissions, deniedPermissions))
+        .map((item) => (item.id === "inbox" ? { ...item, badgeCount: unreadNotificationCount } : item)),
     [deniedPermissions, grantedPermissions, unreadNotificationCount],
   );
   const mobileMoreItems = useMemo(

@@ -30,11 +30,9 @@ export type UsePlayerLoadEffectArgs = {
   setDrafts: Dispatch<SetStateAction<Record<string, AnswerPayload>>>;
   setSubmitting: Dispatch<SetStateAction<boolean>>;
   setSubmitError: Dispatch<SetStateAction<string | null>>;
-  setSidebarQuery: Dispatch<SetStateAction<string>>;
   setSubmitDialogMode: Dispatch<SetStateAction<SubmitDialogMode | null>>;
   setReviewingSubmittedAttempt: Dispatch<SetStateAction<boolean>>;
   setTimeUp: Dispatch<SetStateAction<boolean>>;
-  setRecentTrainingSubmitQuestionId: Dispatch<SetStateAction<string | null>>;
 };
 
 export function usePlayerLoadEffect({
@@ -52,11 +50,9 @@ export function usePlayerLoadEffect({
   setDrafts,
   setSubmitting,
   setSubmitError,
-  setSidebarQuery,
   setSubmitDialogMode,
   setReviewingSubmittedAttempt,
   setTimeUp,
-  setRecentTrainingSubmitQuestionId,
 }: UsePlayerLoadEffectArgs) {
   useEffect(() => {
     let cancelled = false;
@@ -86,11 +82,9 @@ export function usePlayerLoadEffect({
       setDrafts({});
       setSubmitting(false);
       setSubmitError(null);
-      setSidebarQuery("");
       setSubmitDialogMode(null);
       setReviewingSubmittedAttempt(false);
       setTimeUp(false);
-      setRecentTrainingSubmitQuestionId(null);
     });
 
     async function load() {
@@ -170,9 +164,7 @@ export function usePlayerLoadEffect({
     setCurrentIndex,
     setDrafts,
     setLoadState,
-    setRecentTrainingSubmitQuestionId,
     setReviewingSubmittedAttempt,
-    setSidebarQuery,
     setStarted,
     setSubmitDialogMode,
     setSubmitError,

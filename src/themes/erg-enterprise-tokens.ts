@@ -76,6 +76,7 @@ export const ergEnterpriseTokens = {
     controlLg: 46,
     header: 64,
     sidebar: 264,
+    mobileDock: 72,
     // Icon sizes: inline in text, menu rows, phone dock.
     iconSm: 16,
     iconMd: 20,

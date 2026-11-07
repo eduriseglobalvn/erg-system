@@ -3,6 +3,7 @@ import { useState, type ReactNode } from "react";
 
 import { OfflineShellStatus } from "@/components/erg-mui/offline";
 import { ERG_ASSETS } from "@/config/seo";
+import { ERG_MOBILE_DOCK_HEIGHT } from "@/components/portal/erg-mobile-dock";
 import { StudentDashboardBottomDock } from "@/features/elearning/student-dashboard/components/student-dashboard-bottom-dock";
 import type { StudentDockPageKey, StudentPageKey } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
 import { LmsPwaSetupSheet } from "@/features/lms/mobile/components/lms-pwa-setup-sheet";
@@ -18,14 +19,12 @@ export function StudentDashboardMobileShell({
   announcementUnreadCount = 0,
   children,
   dockItems,
-  studentName,
   onPageChange,
 }: {
   activePage: StudentPageKey;
   announcementUnreadCount?: number;
   children: ReactNode;
-  dockItems: Array<{ key: StudentDockPageKey; label: string; icon: ReactNode }>;
-  studentName: string;
+  dockItems: Array<{ key: StudentDockPageKey; label: string; }>;
   onPageChange: (page: StudentDockPageKey) => void;
 }) {
   const installPrompt = useInstallPrompt();
@@ -71,8 +70,8 @@ export function StudentDashboardMobileShell({
           minHeight: 0,
           overflowY: "auto",
           overscrollBehavior: "contain",
-          // Room for the floating dock (60px + 16px offset + breathing space).
-          pb: "calc(112px + env(safe-area-inset-bottom, 0px))",
+          // Room for the shared dock (height + 8px gap + safe area) plus breathing space.
+          pb: `calc(${ERG_MOBILE_DOCK_HEIGHT}px + 8px + env(safe-area-inset-bottom, 0px) + 16px)`,
         }}
       >
         <Box sx={{ maxWidth: 448, mx: "auto" }}>
@@ -84,7 +83,6 @@ export function StudentDashboardMobileShell({
         activePage={activePage}
         announcementUnreadCount={announcementUnreadCount}
         items={dockItems}
-        studentName={studentName}
         onPageChange={onPageChange}
       />
 

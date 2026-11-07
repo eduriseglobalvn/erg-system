@@ -44,3 +44,11 @@ test("rejects backslash, protocol-relative and absolute redirect targets", () =>
   expect(sanitizeLocalRedirect("https://evil.com")).toBeNull();
   expect(sanitizeLocalRedirect("/teacher/home")).toBe("/teacher/home");
 });
+
+test("allows the /notifications push link as a login return target, nothing that only looks like it", () => {
+  expect(sanitizeLocalRedirect("/notifications/abc")).toBe("/notifications/abc");
+  expect(buildLoginRedirectTarget("/notifications/abc")).toBe("/login?redirect=%2Fnotifications%2Fabc");
+  expect(sanitizeLocalRedirect("/notificationsX")).toBeNull();
+  expect(sanitizeLocalRedirect("/notifications.evil")).toBeNull();
+  expect(sanitizeLocalRedirect("//notifications")).toBeNull();
+});

@@ -27,7 +27,5 @@ describe("portal header ownership", () => {
     ]) {
       expect(source(name).split(/\r?\n/).length, name).toBeLessThanOrEqual(220);
     }
-
-    expect(source("portal-header-notification-data.ts")).toContain("PORTAL_NOTIFICATIONS");
   });
 });

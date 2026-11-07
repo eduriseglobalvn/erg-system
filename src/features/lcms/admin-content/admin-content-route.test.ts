@@ -7,6 +7,7 @@ import {
   canonicalAdminContentPath,
   isAdminContentPath,
   legacyAdminContentPath,
+  validateQuizEditorSearch,
 } from "./admin-content-route";
 
 describe("Admin content route contract", () => {
@@ -33,5 +34,22 @@ describe("Admin content route contract", () => {
     expect(legacyAdminContentPath("/admin/content/quiz-editor")).toBe("/quiz-editor");
     expect(adminContentSectionForPath("/admin/content/quiz-bank")?.key).toBe("quiz-bank");
     expect(adminContentSectionForPath("/admin/content/structure")?.key).toBe("structure");
+  });
+});
+
+describe("validateQuizEditorSearch", () => {
+  it("keeps panel=theme and drops any other panel", () => {
+    expect(validateQuizEditorSearch({ quizId: "q1", panel: "theme" })).toEqual({ quizId: "q1", panel: "theme" });
+    expect(validateQuizEditorSearch({ quizId: "q1", panel: "other" })).toEqual({ quizId: "q1" });
+  });
+
+  it("keeps a numeric quizId (parsed from digits) as a string", () => {
+    expect(validateQuizEditorSearch({ quizId: 123 })).toEqual({ quizId: "123" });
+  });
+
+  it("ignores junk without throwing", () => {
+    expect(validateQuizEditorSearch({ quizId: { a: 1 }, panel: ["theme"], extra: true })).toEqual({});
+    expect(validateQuizEditorSearch({ quizId: "" })).toEqual({});
+    expect(validateQuizEditorSearch({})).toEqual({});
   });
 });

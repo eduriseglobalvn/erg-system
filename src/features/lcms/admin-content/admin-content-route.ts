@@ -119,3 +119,12 @@ export function legacyAdminWorkspacePath(pathname: string) {
   if (contentPath !== normalizePath(pathname)) return contentPath;
   return stripWorkspacePath(pathname, "ADMIN");
 }
+
+/** Search of the quiz editor route. The default search parser JSON-parses all-digit values, so a numeric quizId arrives as a number. */
+export function validateQuizEditorSearch(search: Record<string, unknown>): { quizId?: string; panel?: "theme" } {
+  const quizId = typeof search.quizId === "number" ? String(search.quizId) : search.quizId;
+  return {
+    ...(typeof quizId === "string" && quizId ? { quizId } : {}),
+    ...(search.panel === "theme" ? { panel: "theme" as const } : {}),
+  };
+}

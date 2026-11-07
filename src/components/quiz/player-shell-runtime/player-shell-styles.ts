@@ -1,8 +1,8 @@
-export const navButtonClass =
-  "inline-flex min-h-9 min-w-[108px] items-center justify-center gap-1.5 whitespace-nowrap rounded-full border border-transparent px-4 text-xs font-extrabold text-white shadow-[0_12px_26px_rgba(0,0,136,0.18)] transition hover:-translate-y-0.5 hover:shadow-[0_16px_30px_rgba(0,0,136,0.22)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0";
-export const secondaryButtonClass =
-  "inline-flex min-h-9 min-w-[108px] items-center justify-center gap-1.5 whitespace-nowrap rounded-full border px-4 text-xs font-extrabold shadow-sm transition hover:-translate-y-0.5 hover:bg-white disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
+
 export const playerViewportClass = "lg:h-[calc(100vh-3.75rem)]";
+// Two columns of equal height: question card on the left, 340px question list on the right.
+export const playerGridClass = `grid gap-3 lg:grid-cols-[minmax(0,1fr)_340px] lg:grid-rows-[minmax(0,1fr)] lg:items-stretch ${playerViewportClass}`;
 
 export function buildPlayerStyles(isTrainingMode: boolean) {
   const playerCardStyle = {
@@ -18,13 +18,9 @@ export function buildPlayerStyles(isTrainingMode: boolean) {
     color: "var(--quiz-header-text)",
   };
   const accentButtonStyle = {
-    backgroundColor: "#000088",
+    backgroundColor: "var(--quiz-accent, #000088)",
+    color: `var(--quiz-accent-contrast, ${ergEnterpriseTokens.color.surface})`,
     boxShadow: "0 10px 24px rgba(0,0,136,0.18)",
-  };
-  const secondaryButtonStyle = {
-    borderColor: "rgba(0,0,136,0.18)",
-    backgroundColor: "rgba(255,255,255,0.72)",
-    color: "#000088",
   };
   const modeBadgeStyle = isTrainingMode
     ? {
@@ -35,5 +31,5 @@ export function buildPlayerStyles(isTrainingMode: boolean) {
         backgroundColor: "rgba(232,40,40,0.10)",
         color: "#b91c1c",
       };
-  return { playerCardStyle, canvasStyle, headerStyle, accentButtonStyle, secondaryButtonStyle, modeBadgeStyle };
+  return { playerCardStyle, canvasStyle, headerStyle, accentButtonStyle, modeBadgeStyle };
 }

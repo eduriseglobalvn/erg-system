@@ -1,84 +1,98 @@
-import { useState } from "react";
-import { ChevronLeft, List, X } from "lucide-react";
+import ExpandLessRoundedIcon from "@mui/icons-material/ExpandLessRounded";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import Drawer from "@mui/material/Drawer";
+import Typography from "@mui/material/Typography";
+import { useState } from "react";
 
-import { QuestionNavigator } from "@/components/quiz/question-navigator";
-import type { Question } from "@/domain/quiz/types";
+import { QuestionListPanel } from "@/components/quiz/question-list-panel";
+import type { QuestionCell } from "@/components/quiz/question-navigator";
+import { ergEnterpriseTokens as tk } from "@/themes/erg-enterprise-tokens";
 
+// Opening the sheet lands on the question being worked on.
+function centerCurrentCell(node: HTMLElement | null) {
+  node?.querySelector('[aria-current="true"]')?.scrollIntoView?.({ block: "center" });
+}
+
+/** Header trigger "Câu n/N" plus the bottom sheet that lists every question. */
 export function MobileQuestionSheet({
-  answeredQuestionIds,
-  bookmarkCount,
-  bookmarkedQuestionIds,
-  currentIndex,
-  questions,
+  cells,
   onJumpToQuestion,
+  onRequestSubmit,
 }: {
-  answeredQuestionIds: string[];
-  bookmarkCount: number;
-  bookmarkedQuestionIds: string[];
-  currentIndex: number;
-  questions: Question[];
+  cells: QuestionCell[];
   onJumpToQuestion: (index: number) => void;
+  /** Omitted when the player offers no whole-quiz submit (practice mode). */
+  onRequestSubmit?: () => void;
 }) {
   const [open, setOpen] = useState(false);
+  const current = cells.find((cell) => cell.state === "current")?.index ?? 0;
+  const flagged = cells.filter((cell) => cell.flagged).length;
+  const close = () => setOpen(false);
+
   return (
     <>
-      <button
+      <Button
+        endIcon={<ExpandLessRoundedIcon />}
+        size="small"
+        sx={{ color: tk.color.text }}
         type="button"
-        aria-label="Mở mục lục câu hỏi"
-        className="grid h-11 w-11 place-items-center text-[var(--erg-blue)] transition"
+        variant="text"
         onClick={() => setOpen(true)}
       >
-        <List className="h-4 w-4" />
-      </button>
+        {`Câu ${current + 1}/${cells.length}`}
+      </Button>
       <Drawer
-        anchor="top"
+        anchor="bottom"
         open={open}
-        onClose={() => setOpen(false)}
-        slotProps={{ paper: { sx: { height: "100svh", maxHeight: "100svh", width: "100vw", maxWidth: "none", backgroundColor: "#f7f8fb" } } }}
+        onClose={close}
+        slotProps={{
+          paper: {
+            sx: {
+              bgcolor: tk.color.surface,
+              borderTopLeftRadius: `${tk.radius.shell}px`,
+              borderTopRightRadius: `${tk.radius.shell}px`,
+              display: "flex",
+              flexDirection: "column",
+              maxHeight: "80vh",
+            },
+          },
+        }}
       >
-        <div className="relative border-b border-slate-200 bg-white px-4 py-3">
-          <button
-            type="button"
-            aria-label="Đóng mục lục câu hỏi"
-            className="absolute left-4 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center text-[var(--erg-blue)]"
-            onClick={() => setOpen(false)}
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </button>
-          <div className="text-center text-base font-semibold text-slate-900">Mục lục</div>
-          <div className="text-center text-xs font-semibold text-slate-500">{bookmarkCount} câu đã đánh dấu</div>
-          <button
-            type="button"
-            aria-label="Đóng mục lục câu hỏi"
-            className="absolute right-4 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center text-[var(--erg-blue)]"
-            onClick={() => setOpen(false)}
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-        <QuestionNavigator
-          answeredQuestionIds={answeredQuestionIds}
-          className="min-h-[calc(100svh-68px)] rounded-none border-0 shadow-none"
-          currentIndex={currentIndex}
-          flaggedQuestionIds={bookmarkedQuestionIds}
-          onJumpToQuestion={(index) => {
-            onJumpToQuestion(index);
-            setOpen(false);
-          }}
-          questions={questions}
-          started
-        />
+        <Box sx={{ borderBottom: `1px solid ${tk.color.divider}`, flexShrink: 0, px: 2, py: 1.5, textAlign: "center" }}>
+          <Typography component="h2" variant="subtitle1">Danh sách câu hỏi</Typography>
+          <Typography sx={{ color: tk.color.textMuted }} variant="caption">{flagged} câu đã đánh dấu</Typography>
+        </Box>
+        <Box ref={centerCurrentCell} sx={{ display: "flex", flex: "1 1 auto", flexDirection: "column", minHeight: 0, p: 2 }}>
+          <QuestionListPanel
+            cells={cells}
+            gridMaxHeight="none"
+            mode="taking"
+            surface="phone"
+            onSelect={(index) => {
+              onJumpToQuestion(index);
+              close();
+            }}
+          />
+        </Box>
+        <Box sx={{ borderTop: `1px solid ${tk.color.divider}`, display: "flex", flexShrink: 0, gap: 1.5, p: 2 }}>
+          <Button fullWidth type="button" variant="outlined" onClick={close}>Làm tiếp</Button>
+          {onRequestSubmit ? (
+            <Button
+              fullWidth
+              type="button"
+              variant="contained"
+              onClick={() => {
+                close();
+                onRequestSubmit();
+              }}
+            >
+              Nộp bài
+            </Button>
+          ) : null}
+        </Box>
       </Drawer>
     </>
   );
 }
 
-export function IntroStat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-md border border-slate-200 bg-white px-3 py-3 text-center shadow-sm">
-      <div className="text-[11px] font-semibold text-slate-400">{label}</div>
-      <div className="mt-1 text-sm font-medium text-[var(--erg-blue)]">{value}</div>
-    </div>
-  );
-}

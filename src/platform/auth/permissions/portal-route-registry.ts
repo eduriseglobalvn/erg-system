@@ -31,6 +31,8 @@ export const lcmsWorkspacePaths = [
   "employees",
   "employees/access-logs",
   "employees/face-detection",
+  "employees/timekeeping",
+  "employees/timekeeping-settings",
   "employees/timesheet",
   "employees/teacher-absence",
   "report/dashboard-report",
@@ -55,6 +57,8 @@ export const lcmsWorkspacePaths = [
   "integration/setting-zalo-account",
   "integration/setting-center-api-key",
   "calendar",
+  "notifications",
+  "notifications/compose",
   "ui-kit",
 ] as const;
 
@@ -91,7 +95,9 @@ export const lmsPaths = [
   "homework/progress",
   "homework/class",
   "homework/student-groups",
+  "learning",
   "notifications",
+  "notifications/compose",
   "account",
   "account/login-logs",
   "score",
@@ -100,4 +106,9 @@ export const lmsPaths = [
   "class-log",
   "resources",
   "reports",
+  "timekeeping",
+  "timekeeping/punch",
+  "timekeeping/timesheet",
+  "timekeeping/requests",
+  "timekeeping/approvals",
 ] as const;

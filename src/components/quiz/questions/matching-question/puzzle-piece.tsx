@@ -33,11 +33,13 @@ export function PuzzlePiece({
   side,
   tone,
   children,
+  maxWidth = PUZZLE.maxWidth,
   sx,
 }: {
   side: "left" | "right";
   tone: PieceTone;
   children: ReactNode;
+  maxWidth?: number;
   sx?: SxProps<Theme>;
 }) {
   const theme = useTheme();
@@ -60,11 +62,14 @@ export function PuzzlePiece({
   return (
     <Box
       ref={ref}
+      data-piece={side}
       sx={[
         {
           position: "relative",
           minHeight: PUZZLE.minHeight,
-          maxWidth: PUZZLE.maxWidth,
+          maxWidth,
+          overflowWrap: "anywhere",
+          py: 1.25,
           display: "flex",
           alignItems: "center",
           gap: 1,

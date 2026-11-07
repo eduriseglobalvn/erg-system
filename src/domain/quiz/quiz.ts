@@ -400,6 +400,53 @@ function normalizeTextAnswer(value: string) {
     .replace(/\s+/g, " ");
 }
 
+/**
+ * True when scoreQuestion can really grade this question here: the answer key is in the package.
+ * A stripped (server-authoritative testing) question is never gradable, even where the stripped shape still
+ * looks like a key (numeric 0, old-shape matching/sequence) or no key is needed (essay/likert).
+ */
+export function hasAnswerKey(question: Question): boolean {
+  if (question.answerKeyStripped) return false;
+  const every = <T>(items: T[] = [], keyed: (item: T) => boolean) => items.length > 0 && items.every(keyed);
+  switch (question.kind) {
+    case "single_choice":
+    case "true_false":
+    case "multiple_response":
+      return Boolean(question.choices?.some((choice) => choice.correct));
+    case "matching":
+      return (question.matching?.length ?? 0) > 0 && getMatchingKey(question) !== undefined;
+    case "sequence":
+      return getSequenceCorrectOrder(question).length > 0;
+    case "inline_choice":
+    case "select_from_lists":
+      return every(question.inlineBlanks, (blank) => Boolean(blank.correctOptionId));
+    case "short_answer":
+    case "fill_blank":
+      return every(question.textBlanks, (blank) => blank.correctAnswers.length > 0);
+    case "numeric":
+      return Number.isFinite(question.numericAnswer?.correctValue);
+    case "drag_words":
+      return every(question.wordSlots, (slot) => Boolean(slot.correctWordId));
+    case "drag_drop":
+      return every(question.dragDropItems, (item) => Boolean(item.correctTargetId));
+    case "hotspot":
+      return Boolean(question.hotspotAreas?.some((area) => area.correct));
+    case "likert_scale":
+    case "essay":
+      // likert (any full answer counts) and essay (teacher-graded) need no key.
+      return true;
+    default: {
+      const unhandled: never = question.kind;
+      return unhandled;
+    }
+  }
+}
+
+/** Per-question correctness (review, Luyện lại, Sai/Chưa làm counts) is only shown when this holds. */
+export function canGradeLocally(questions: Question[]): boolean {
+  return questions.length > 0 && questions.every(hasAnswerKey);
+}
+
 /** promptId -> correct responseId; undefined when unknown (new shape without a key). Old shape: id equality. */
 export function getMatchingKey(question: Question): Record<string, string> | undefined {
   if (question.matchingKey) return question.matchingKey;

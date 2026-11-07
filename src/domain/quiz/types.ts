@@ -212,6 +212,8 @@ export type Question = {
   essayRubric?: EssayRubricCriterion[];
   hotspotImage?: HotspotImage;
   hotspotAreas?: HotspotArea[];
+  /** Set by the server-authoritative package strip: the stripped shape (correctValue 0, old-shape matching) is not a key. */
+  answerKeyStripped?: boolean;
 };
 
 export type Section = {
@@ -228,6 +230,8 @@ export type Quiz = {
   description: string;
   themeId: string;
   theme: Theme;
+  /** Teacher-chosen player look, raw JSON from the package; validated where it is applied. */
+  playerTemplate?: Record<string, unknown>;
   settings: QuizSettings;
   result?: QuizResultDisplay;
   sections: Section[];

@@ -1,4 +1,5 @@
 import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
+import { quizThemeToneSurface } from "@/components/quiz/player-template-surface";
 import Box from "@mui/material/Box";
 import ButtonBase from "@mui/material/ButtonBase";
 import Chip from "@mui/material/Chip";
@@ -11,7 +12,6 @@ import {
   type QuizPlayerThemePreset,
   type QuizThemeGroup,
   quizThemePresets,
-  quizThemeToneSurface,
 } from "@/features/lcms/quiz/quiz-theme/quiz-theme-presets";
 import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
 
