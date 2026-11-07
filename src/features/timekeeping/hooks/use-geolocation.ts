@@ -15,6 +15,7 @@ export function useGeolocation(opts: { timeoutMs?: number } = {}): {
   const [reading, setReading] = useState<GeoReading | null>(null);
   const [error, setError] = useState<GeoError | null>(null);
   const watchId = useRef<number | null>(null);
+  const hasFix = useRef(false);
 
   const stop = useCallback(() => {
     if (watchId.current !== null) navigator.geolocation?.clearWatch(watchId.current);
@@ -29,6 +30,7 @@ export function useGeolocation(opts: { timeoutMs?: number } = {}): {
     watchId.current = navigator.geolocation.watchPosition(
       (position) => {
         setError(null);
+        hasFix.current = true;
         setReading({
           lat: position.coords.latitude,
           lng: position.coords.longitude,
@@ -37,8 +39,12 @@ export function useGeolocation(opts: { timeoutMs?: number } = {}): {
         });
       },
       (failure) => {
-        setReading(null); // never keep a stale fix once the device reports a problem
-        setError(ERROR_BY_CODE[failure.code] ?? "unavailable");
+        const next = ERROR_BY_CODE[failure.code] ?? "unavailable";
+        // A stationary phone can time out after a good fix: keep that fix (the watch keeps running). A denial always drops it.
+        if (next !== "denied" && hasFix.current) return;
+        hasFix.current = false;
+        setReading(null);
+        setError(next);
       },
       { enableHighAccuracy: true, timeout: timeoutMs, maximumAge: 0 },
     );

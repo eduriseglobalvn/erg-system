@@ -34,7 +34,7 @@ function canSeeAllRequests(): boolean {
 export function ApprovalsPage() {
   const canAll = useMemo(() => canSeeAllRequests(), []);
   const { search, update: updateSearch } = useApprovalsSearch(canAll);
-  const isMobile = useMediaQuery(useTheme().breakpoints.down("md"));
+  const isMobile = useMediaQuery(useTheme().breakpoints.down("md"), { noSsr: true });
   const schools = useTimekeepingSchools();
   const pending = usePendingApprovalCount(true);
   const overdue = useOverdueApprovalCount();

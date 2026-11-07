@@ -20,7 +20,7 @@ import type { ErgMobileDockItem } from "@/components/portal/erg-mobile-dock";
 import { LEARNING_RESOURCE_WORKSPACE_LABEL } from "@/components/learning-resources/learning-resource-workspace-labels";
 import { teacherPath } from "@/platform/workspaces/workspace-paths";
 
-export type LmsSection = "home" | "homework" | "score" | "attendance" | "schedule" | "classLog" | "resources" | "reports";
+export type LmsSection = "home" | "homework" | "score" | "attendance" | "schedule" | "classLog" | "resources" | "reports" | "timekeeping";
 export type LmsMobileSection = "home" | "calendar" | "learning" | "inbox" | "timekeeping" | "account";
 
 
@@ -40,6 +40,7 @@ export const lmsNavItems: NavItem[] = [
   { id: "classLog", label: "Sổ đầu bài", path: teacherPath("/class-log"), icon: MenuBookRoundedIcon },
   { id: "resources", label: LEARNING_RESOURCE_WORKSPACE_LABEL, path: teacherPath("/resources"), icon: FolderRoundedIcon },
   { id: "reports", label: "Báo cáo", path: teacherPath("/reports"), icon: FileText },
+  { id: "timekeeping", label: "Chấm công", path: teacherPath("/timekeeping"), icon: FingerprintRoundedIcon },
 ];
 
 export const LMS_MENU_GROUPS: MenuGroup[] = [
@@ -118,6 +119,22 @@ export const LMS_MENU_GROUPS: MenuGroup[] = [
       },
     ],
   },
+  {
+    label: "Chấm công",
+    items: [
+      {
+        id: "timekeeping",
+        label: "Chấm công",
+        icon: <FingerprintRoundedIcon />,
+        children: [
+          { id: "timekeeping-today", label: "Chấm công hôm nay", path: teacherPath("/timekeeping") },
+          { id: "timekeeping-timesheet", label: "Bảng công", path: teacherPath("/timekeeping/timesheet") },
+          { id: "timekeeping-requests", label: "Đơn từ", path: teacherPath("/timekeeping/requests") },
+          { id: "timekeeping-approvals", label: "Duyệt đơn", path: teacherPath("/timekeeping/approvals") },
+        ],
+      },
+    ],
+  },
 ];
 
 const lmsMobileDockItems: Array<ErgMobileDockItem<LmsMobileSection>> = [
@@ -125,7 +142,6 @@ const lmsMobileDockItems: Array<ErgMobileDockItem<LmsMobileSection>> = [
   { id: "calendar", label: "Lịch", path: teacherPath("/calendar"), icon: CalendarMonthRoundedIcon },
   { id: "learning", label: "Học tập", path: teacherPath("/learning"), icon: SchoolRoundedIcon },
   { id: "inbox", label: "Hộp thư", path: teacherPath("/notifications"), icon: InboxRoundedIcon },
-  // The timekeeping route is not built yet; canAccess hides this tab until it exists.
   { id: "timekeeping", label: "Chấm công", path: teacherPath("/timekeeping"), icon: FingerprintRoundedIcon },
   // Opens the account sheet in LmsMobileShell; never permission-gated here, the sheet carries other screens too.
   { id: "account", label: "Tài khoản", path: teacherPath("/account"), icon: AccountCircleRoundedIcon, opensSheet: true },

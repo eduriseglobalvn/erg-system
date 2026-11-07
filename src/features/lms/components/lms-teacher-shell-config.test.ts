@@ -71,6 +71,8 @@ describe("Teacher workspace navigation state", () => {
     ["/teacher/homework/exercise-bank/item-1", "homework"],
     ["/teacher/calendar/week/2026-08-12", "schedule"],
     ["/teacher/notifications/notification-1", "homework"],
+    ["/teacher/timekeeping/timesheet", "timekeeping"],
+    ["/teacher/timekeeping/approvals", "timekeeping"],
   ] as const)("keeps the desktop section context for nested route %s", (pathname, expected) => {
     expect(resolveSection(pathname)).toBe(expected);
   });

@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { QUERY_POLICIES } from "@/lib/query-policy";
 import { timekeepingApi } from "./timekeeping-api";
-import type { ApprovalBox, PunchInput } from "./timekeeping-types";
+import type { PunchInput } from "./timekeeping-types";
 
 // Never opt `clock` or `today` into meta.persist: stale punch state offline is worse than none (see query-persistence.ts).
 export const timekeepingKeys = {
@@ -14,7 +14,6 @@ export const timekeepingKeys = {
   myRequests: (status?: string) => ["timekeeping", "requests", "mine", status ?? "all"] as const,
   request: (id: string) => ["timekeeping", "requests", id] as const,
   approvalsCount: ["timekeeping", "approvals", "count"] as const,
-  approvals: (box: ApprovalBox, type?: string) => ["timekeeping", "approvals", box, type ?? "all"] as const,
 };
 
 export function useTimekeepingToday(enabled = true) {

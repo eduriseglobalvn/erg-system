@@ -43,6 +43,7 @@ const TEACHER_PAGES: Record<LmsPath, ReturnType<typeof page>> = {
   "timekeeping/punch": timekeepingPage("TeacherTimekeepingPunchRoute"),
   "timekeeping/timesheet": timekeepingPage("TeacherTimekeepingTimesheetRoute"),
   "timekeeping/requests": timekeepingPage("TeacherTimekeepingRequestsRoute"),
+  "timekeeping/approvals": timekeepingPage("TeacherTimekeepingApprovalsRoute"),
 };
 
 // Pathless layout: the shell (school/class state, chrome) renders the pages below in its <Outlet />.

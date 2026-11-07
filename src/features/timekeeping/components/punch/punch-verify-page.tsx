@@ -140,6 +140,11 @@ export function PunchVerifyPage() {
         />
       ) : null}
       <PunchChecksList rows={rows} />
+      {geo.error === "timeout" || geo.error === "unavailable" ? (
+        <Button onClick={requestGps} variant="outlined">
+          Thử lại vị trí
+        </Button>
+      ) : null}
       {outside ? (
         <ErgTextField label="Lý do chấm ngoài vùng" multiline onChange={(e) => setReason(e.target.value)} required value={reason} />
       ) : null}

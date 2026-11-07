@@ -37,6 +37,11 @@ export function TeacherTimekeepingRequestsRoute() {
   return <RequestsScreen />;
 }
 
+/** A03 for approvers without the ADMIN workspace (Tổ trưởng, Phó hiệu trưởng); the approver notification links here. */
+export function TeacherTimekeepingApprovalsRoute() {
+  return <ApprovalsPage />;
+}
+
 export function AdminTimekeepingTodayRoute() {
   // noSsr: read the real width on the first render, so a phone never mounts the desktop board first.
   const isMobile = useMediaQuery(useTheme().breakpoints.down("md"), { noSsr: true });

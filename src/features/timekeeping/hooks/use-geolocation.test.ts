@@ -46,8 +46,7 @@ test("stores the latest reading", () => {
   expect(result.current.error).toBeNull();
 });
 
-test("clears the last fix when a later error arrives", () => {
-  setSecure(true);
+function watchWithFix() {
   let fail!: (e: { code: number }) => void;
   const watchPosition = vi.fn((ok: (p: unknown) => void, onError: (e: { code: number }) => void) => {
     fail = onError;
@@ -55,10 +54,25 @@ test("clears the last fix when a later error arrives", () => {
     return 1;
   });
   Object.defineProperty(navigator, "geolocation", { configurable: true, value: { watchPosition, clearWatch: vi.fn() } });
+  return (code: number) => fail({ code });
+}
+
+test.each([2, 3])("keeps the last good fix when error code %i arrives after it", (code) => {
+  setSecure(true);
+  const fail = watchWithFix();
   const { result } = renderHook(() => useGeolocation());
   act(() => result.current.request());
-  expect(result.current.reading).not.toBeNull();
-  act(() => fail({ code: 3 }));
+  act(() => fail(code));
+  expect(result.current.reading).toEqual({ lat: 21, lng: 105, accuracyM: 12, at: 1 });
+  expect(result.current.error).toBeNull();
+});
+
+test("drops the fix when permission is revoked after it", () => {
+  setSecure(true);
+  const fail = watchWithFix();
+  const { result } = renderHook(() => useGeolocation());
+  act(() => result.current.request());
+  act(() => fail(1));
   expect(result.current.reading).toBeNull();
-  expect(result.current.error).toBe("timeout");
+  expect(result.current.error).toBe("denied");
 });
