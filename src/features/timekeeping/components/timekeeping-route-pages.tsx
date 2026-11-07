@@ -1,9 +1,12 @@
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { useTheme } from "@mui/material/styles";
 import { useSearch } from "@tanstack/react-router";
 
 import { isIsoDate } from "@/domain/formatters/format-date";
 import { ApprovalsPage } from "../admin/approvals/approvals-page";
 import { AdminTimesheetPage } from "../admin/admin-timesheet-page";
 import { TimekeepingSettingsPage } from "../admin/settings/timekeeping-settings-page";
+import { AdminTimekeepingMobile } from "../admin/admin-timekeeping-mobile";
 import { AdminTodayPage } from "../admin/admin-today-page";
 import { DayDetailPage } from "./my-timesheet/day-detail-page";
 import { MyTimesheetPage } from "./my-timesheet/my-timesheet-page";
@@ -35,7 +38,9 @@ export function TeacherTimekeepingRequestsRoute() {
 }
 
 export function AdminTimekeepingTodayRoute() {
-  return <AdminTodayPage />;
+  // noSsr: read the real width on the first render, so a phone never mounts the desktop board first.
+  const isMobile = useMediaQuery(useTheme().breakpoints.down("md"), { noSsr: true });
+  return isMobile ? <AdminTimekeepingMobile /> : <AdminTodayPage />;
 }
 
 export function AdminTimesheetRoute() {

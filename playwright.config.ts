@@ -46,6 +46,7 @@ export default defineConfig({
         viewport: { width: 375, height: 667 },
       },
     },
+    { name: "timekeeping-admin-mobile", testMatch: /timekeeping-admin-mobile[.]spec[.]ts/, use: { baseURL: portalHost("lcms"), viewport: { width: 375, height: 667 } } },
     { name: "crm", testMatch: /crm\.smoke\.spec\.ts/, use: { baseURL: portalHost("crm") } },
     { name: "elearning", testMatch: /elearning\.smoke\.spec\.ts/, use: { baseURL: portalHost("elearning") } },
   ],
