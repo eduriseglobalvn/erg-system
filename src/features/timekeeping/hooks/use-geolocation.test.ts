@@ -25,7 +25,7 @@ test("insecure context reports 'insecure' without touching the geolocation API",
 
 test("maps PERMISSION_DENIED to 'denied' and watches with high accuracy, no cache", () => {
   setSecure(true);
-  const watchPosition = vi.fn((_ok: unknown, fail: (e: { code: number }) => void) => { fail({ code: 1 }); return 7; });
+  const watchPosition = vi.fn((_ok: unknown, fail: (e: { code: number }) => void, _options?: unknown) => { fail({ code: 1 }); return 7; });
   Object.defineProperty(navigator, "geolocation", { configurable: true, value: { watchPosition, clearWatch: vi.fn() } });
   const { result } = renderHook(() => useGeolocation());
   act(() => result.current.request());
