@@ -22,6 +22,7 @@ interface HeaderProps {
   headerControls?: ReactNode;
   headerTrailingControls?: ReactNode;
   hideIdentity?: boolean;
+  hideNotifications?: boolean;
   portalPlan?: string;
   portalName?: string;
   notificationCount?: number;
@@ -42,6 +43,7 @@ export default function ErgPortalHeader({
   headerControls,
   headerTrailingControls,
   hideIdentity = false,
+  hideNotifications = false,
   portalPlan,
   portalName,
   notificationCount = 0,
@@ -91,6 +93,7 @@ export default function ErgPortalHeader({
           <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
             <Box sx={{ display: { xs: "inline-flex", lg: "none" } }}>
               <PortalHeaderActions
+                hideNotifications={hideNotifications}
                 notificationCount={unreadCount ?? notificationCount}
                 onOpenNotifications={() => setNotificationOpen(true)}
                 userName={userName}

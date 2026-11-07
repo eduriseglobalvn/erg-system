@@ -31,6 +31,7 @@ export default defineConfig({
     { name: "workspace-responsive", testMatch: /workspace-responsive\.spec\.ts/, use: { baseURL: portalHost("lms") } },
     { name: "teacher-pwa-calendar-home", testMatch: /teacher-pwa-calendar-home\.spec\.ts/, use: { baseURL: portalHost("lms") } },
     { name: "teacher-mobile-calendar", testMatch: /teacher-mobile-calendar\.spec\.ts/, use: { baseURL: portalHost("lms") } },
+    { name: "mobile-dock", testMatch: /mobile-dock[.]spec[.]ts/, use: { baseURL: portalHost("lms") } },
     { name: "crm", testMatch: /crm\.smoke\.spec\.ts/, use: { baseURL: portalHost("crm") } },
     { name: "elearning", testMatch: /elearning\.smoke\.spec\.ts/, use: { baseURL: portalHost("elearning") } },
   ],

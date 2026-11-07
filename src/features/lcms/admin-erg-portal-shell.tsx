@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import ErgPortalLayout from "@/components/portal/ErgPortalLayout";
 import { hasApiBase } from "@/lib/api-client";
+import { AUTH_BYPASS_ENABLED } from "@/platform/auth/config/auth-bypass";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
 import { Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import type { QuestionBankQuestion } from "@/features/question-bank/types/question-bank-types";
@@ -21,6 +22,12 @@ import {
   canonicalAdminWorkspacePath,
   legacyAdminWorkspacePath,
 } from "@/features/lcms/admin-content/admin-content-route";
+import { AdminAllFunctionsSheet } from "@/features/lcms/admin-all-functions-sheet";
+import {
+  canNavigateToAdminPath,
+  resolveAdminMobileSection,
+  visibleAdminDockItems,
+} from "@/features/lcms/admin-mobile-dock-config";
 import { AdminShellContext, type AdminShellModel } from "@/features/lcms/admin-shell-context";
 import {
   createClientIdempotencyKey,
@@ -69,6 +76,20 @@ export default function AdminErgPortalShell() {
     [account, session?.portals, session?.workspaces],
   );
 
+  const mobileDock = useMemo(() => {
+    // Dev bypass grants every permission but routes that do not exist yet stay hidden.
+    const granted = AUTH_BYPASS_ENABLED ? ["*"] : session?.permissions;
+    const canAccess = (path: string) => canNavigateToAdminPath(path, granted, session?.deniedPermissions);
+    return {
+      ariaLabel: "Điều hướng admin",
+      activeId: resolveAdminMobileSection(pathname),
+      items: visibleAdminDockItems(canAccess),
+      renderSheet: (sheet: { open: boolean; onClose: () => void; onNavigate: (path: string) => void }) => (
+        <AdminAllFunctionsSheet canAccess={canAccess} menuGroups={ADMIN_MENU_GROUPS} {...sheet} />
+      ),
+    };
+  }, [pathname, session?.deniedPermissions, session?.permissions]);
+
   function openLeaf(leafId: string) {
     if (leafId === "admin-learning-structure") {
       void navigate({ href: adminContentPathForSection("structure") });
@@ -115,6 +136,7 @@ export default function AdminErgPortalShell() {
       contentMode={isPreservedWorkspace || isSchoolManagement ? "flush" : "padded"}
       hideHeaderIdentity
       menuGroups={ADMIN_MENU_GROUPS}
+      mobileDock={mobileDock}
       portalInfo={portalInfo}
     >
       <AdminShellContext.Provider value={model}>

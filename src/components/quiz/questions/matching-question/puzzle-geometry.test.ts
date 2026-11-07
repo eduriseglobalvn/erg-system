@@ -1,6 +1,13 @@
 import { describe, expect, test } from "vitest";
 
-import { pathLeft, pathRight, rowAtPoint } from "./puzzle-geometry";
+import { PUZZLE, pathLeft, pathRight, rowAtPoint } from "./puzzle-geometry";
+
+describe("puzzle sizes", () => {
+  test("apart pieces sit 48 px from each other and a piece is at most 380 px wide", () => {
+    expect(PUZZLE.gap).toBe(48);
+    expect(PUZZLE.maxWidth).toBe(380);
+  });
+});
 
 describe("puzzle paths", () => {
   test("the left piece has its notch in the right edge", () => {

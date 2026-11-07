@@ -91,6 +91,7 @@ export const lmsPaths = [
   "homework/progress",
   "homework/class",
   "homework/student-groups",
+  "learning",
   "notifications",
   "account",
   "account/login-logs",

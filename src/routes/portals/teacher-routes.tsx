@@ -27,6 +27,7 @@ const TEACHER_PAGES: Record<LmsPath, ReturnType<typeof page>> = {
   "homework/progress": page("TeacherHomeworkProgressRoute"),
   "homework/class": page("TeacherClassManagementRoute"),
   "homework/student-groups": page("TeacherStudentGroupsRoute"),
+  learning: page("TeacherLearningHubRoute"),
   notifications: page("TeacherNotificationsRoute"),
   account: page("TeacherAccountRoute"),
   "account/login-logs": page("TeacherLoginLogsRoute"),
