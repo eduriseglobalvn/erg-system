@@ -1,10 +1,11 @@
 import Box from "@mui/material/Box";
 import { useState } from "react";
 
-import { ErgButton, ErgDialog } from "@/components/erg-mui";
+import { ErgButton, ErgDialog, ErgStatusChip } from "@/components/erg-mui";
 import type { QuizPlayerTemplate } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
+import { checkThemeContrast } from "@/features/lcms/quiz/quiz-theme/quiz-theme-contrast";
 import { QuizThemeCustomize } from "@/features/lcms/quiz/quiz-theme/quiz-theme-customize";
-import { enCopy, viCopy } from "@/features/lcms/quiz/quiz-theme/quiz-theme-copy";
+import { applyLabel, enCopy, viCopy } from "@/features/lcms/quiz/quiz-theme/quiz-theme-copy";
 import { QuizThemeLibrary } from "@/features/lcms/quiz/quiz-theme/quiz-theme-library";
 import {
   applyQuizThemePreset,
@@ -12,12 +13,15 @@ import {
   findMatchingQuizThemePreset,
 } from "@/features/lcms/quiz/quiz-theme/quiz-theme-presets";
 import { QuizThemePreview } from "@/features/lcms/quiz/quiz-theme/quiz-theme-preview";
+import { usePreviewStyle } from "@/features/lcms/quiz/quiz-theme/quiz-theme-preview-parts";
 import { useI18n } from "@/platform/i18n";
 import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
 
 type QuizThemeDialogProps = {
   open: boolean;
   value: QuizPlayerTemplate;
+  /** Questions the theme will apply to; shown in the apply button. */
+  questionCount?: number;
   onClose(): void;
   onApply(next: QuizPlayerTemplate): void;
 };
@@ -29,11 +33,15 @@ export function QuizThemeDialog(props: QuizThemeDialogProps) {
 
 const column = { display: "flex", flexDirection: "column", gap: 1.5, minWidth: 0 } as const;
 
-function QuizThemeDialogBody({ value, onClose, onApply }: QuizThemeDialogProps) {
+function QuizThemeDialogBody({ value, questionCount, onClose, onApply }: QuizThemeDialogProps) {
   const { locale } = useI18n();
   const copy = locale === "vi" ? viCopy : enCopy;
   const [draft, setDraft] = useState(value);
   const matched = findMatchingQuizThemePreset(draft);
+  // Same on-accent / on-highlight colours the preview draws, so the verdict matches what the learner sees.
+  const { onAccent, onHighlight } = usePreviewStyle(draft);
+  const contrast = checkThemeContrast(draft, onAccent, onHighlight);
+  const failing = contrast.filter((pair) => !pair.pass).length;
   const customizeTitle = matched ? copy.customizeFrom(copy.presets[matched.id]) : copy.custom;
 
   return (
@@ -41,7 +49,17 @@ function QuizThemeDialogBody({ value, onClose, onApply }: QuizThemeDialogProps) 
       open
       maxWidth="lg"
       onClose={onClose}
-      title={copy.title}
+      title={
+        <>
+          {copy.title}
+          <ErgStatusChip
+            component="span"
+            status={failing ? "warning" : "success"}
+            label={failing ? copy.contrast.chipFail(failing) : copy.contrast.chipPass}
+            sx={{ ml: 1.5, verticalAlign: "middle" }}
+          />
+        </>
+      }
       description={copy.description}
       actions={
         <>
@@ -49,10 +67,10 @@ function QuizThemeDialogBody({ value, onClose, onApply }: QuizThemeDialogProps) 
             {copy.resetDefault}
           </ErgButton>
           <Box sx={{ flex: 1 }} />
-          <ErgButton variant="text" onClick={onClose}>
+          <ErgButton variant="outlined" onClick={onClose}>
             {copy.cancel}
           </ErgButton>
-          <ErgButton onClick={() => onApply(draft)}>{copy.apply}</ErgButton>
+          <ErgButton onClick={() => onApply(draft)}>{applyLabel(questionCount, copy)}</ErgButton>
         </>
       }
     >
@@ -75,6 +93,7 @@ function QuizThemeDialogBody({ value, onClose, onApply }: QuizThemeDialogProps) 
             copy={copy}
             title={customizeTitle}
             value={draft}
+            contrast={contrast}
             onChange={(patch) => setDraft({ ...draft, ...patch })}
             onUndo={() => setDraft(value)}
           />

@@ -55,6 +55,7 @@ export default function AdminErgPortalShell() {
     const value = new URLSearchParams(location.searchStr).get("quizId")?.trim();
     return value || null;
   }, [location.searchStr]);
+  const quizEditorThemeRequested = new URLSearchParams(location.searchStr).get("panel") === "theme";
   const activeItem = useMemo(() => resolveActiveMenuItem(pathname), [pathname]);
   const activeLeaf = useMemo(() => (activeItem ? toDashboardLeaf(activeItem) : null), [activeItem]);
   const isPreservedWorkspace = Boolean(
@@ -125,6 +126,7 @@ export default function AdminErgPortalShell() {
     legacyPathname,
     pendingQuestionImports,
     quizEditorQuizId,
+    quizEditorThemeRequested,
     tenantId,
     onClearQuestionImports: () => setPendingQuestionImports([]),
     onCreateQuizFromBank: (questions, options) => void createQuizFromBankQuestions(questions, options),

@@ -69,6 +69,8 @@ function DashboardContentInner({
   onOpenQuiz,
   pendingQuestionImports,
   quizEditorQuizId,
+  quizEditorThemeRequested,
+  onQuizEditorThemeHandled,
   selectedClassId,
   selectedSchoolId,
   onQuestionImportsHandled,
@@ -85,6 +87,8 @@ function DashboardContentInner({
   onOpenQuiz?: (quizId: string) => void;
   pendingQuestionImports: QuestionBankQuestion[];
   quizEditorQuizId?: string | null;
+  quizEditorThemeRequested?: boolean;
+  onQuizEditorThemeHandled?: () => void;
   selectedClassId: string;
   selectedSchoolId: string;
   onQuestionImportsHandled: () => void;
@@ -119,6 +123,8 @@ function DashboardContentInner({
           onQuizCreated={onOpenQuiz}
           pendingImportedQuestions={pendingQuestionImports}
           onImportedQuestionsHandled={onQuestionImportsHandled}
+          themePanelRequested={quizEditorThemeRequested}
+          onThemePanelHandled={onQuizEditorThemeHandled}
         />
       </Box>
     );

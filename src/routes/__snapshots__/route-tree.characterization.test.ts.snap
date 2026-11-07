@@ -971,7 +971,7 @@ exports[`route tree characterization (must not change during refactors) > regist
   "/admin/content | guard=true | component=true | validate=false",
   "/admin/content/questions | guard=true | component=true | validate=false",
   "/admin/content/quiz-bank | guard=true | component=true | validate=false",
-  "/admin/content/quiz-editor | guard=true | component=true | validate=false",
+  "/admin/content/quiz-editor | guard=true | component=true | validate=true",
   "/admin/content/resources | guard=true | component=true | validate=false",
   "/admin/content/structure | guard=true | component=true | validate=false",
   "/admin/customers | guard=true | component=true | validate=false",

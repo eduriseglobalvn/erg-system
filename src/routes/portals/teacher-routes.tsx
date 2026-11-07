@@ -1,7 +1,9 @@
+import { lazy, Suspense } from "react";
 import { createRoute, lazyRouteComponent } from "@tanstack/react-router";
 
 import { lmsPaths } from "@/app/portal-route-registry";
 import { enforcePermissionRoute } from "@/app/router/route-guards";
+import { AssignQuizThemeSlotProvider } from "@/features/lms/components/assign-quiz-theme-slot";
 import { teacherPath } from "@/platform/workspaces/workspace-paths";
 import {
   authedRoute,
@@ -17,12 +19,28 @@ type LmsPath = (typeof lmsPaths)[number];
 const routePages = () => import("@/features/lms/components/lms-teacher-route-pages");
 const page = (name: keyof Awaited<ReturnType<typeof routePages>>) => lazyRouteComponent(routePages, name);
 
+const AssignThemeRow = lazy(() =>
+  import("@/features/lcms/quiz/quiz-theme/assign-theme-row").then((module) => ({ default: module.AssignThemeRow })),
+);
+const renderAssignThemeRow = (quizId: string) => (
+  <Suspense fallback={null}>
+    <AssignThemeRow quizId={quizId} />
+  </Suspense>
+);
+const TeacherAssignHomeworkRoute = page("TeacherAssignHomeworkRoute");
+// lms may not import lcms: the quiz theme row (lcms) reaches the assign form through its slot.
+const TeacherAssignHomeworkWithTheme = () => (
+  <AssignQuizThemeSlotProvider value={renderAssignThemeRow}>
+    <TeacherAssignHomeworkRoute />
+  </AssignQuizThemeSlotProvider>
+);
+
 /** One child route per Teacher page; adding a path to `lmsPaths` fails type-checking until it has a page. */
 const TEACHER_PAGES: Record<LmsPath, ReturnType<typeof page>> = {
   home: page("TeacherHomeRoute"),
   dashboard: page("TeacherHomeRoute"),
   homework: page("TeacherHomeworkRoute"),
-  "homework/assign": page("TeacherAssignHomeworkRoute"),
+  "homework/assign": TeacherAssignHomeworkWithTheme,
   "homework/exercise-bank": page("TeacherExerciseBankRoute"),
   "homework/progress": page("TeacherHomeworkProgressRoute"),
   "homework/class": page("TeacherClassManagementRoute"),

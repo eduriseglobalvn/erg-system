@@ -28,12 +28,17 @@ export function QuizEditorWorkspace({
   onQuizCreated,
   pendingImportedQuestions = [],
   onImportedQuestionsHandled,
+  themePanelRequested,
+  onThemePanelHandled,
 }: {
   activeLeaf: DashboardLeaf;
   quizId?: string | null;
   onQuizCreated?: (quizId: string) => void;
   pendingImportedQuestions?: QuestionBankQuestion[];
   onImportedQuestionsHandled?: () => void;
+  /** `panel=theme` in the URL: open the theme dialog once the draft is ready. */
+  themePanelRequested?: boolean;
+  onThemePanelHandled?: () => void;
 }) {
   void activeLeaf;
   const { t } = useI18n();
@@ -124,8 +129,11 @@ export function QuizEditorWorkspace({
         onChangeLevel={scope.handleLevelChange}
         syncChip={syncChip}
         playerTemplate={playerTemplate}
+        questionCount={questionManagerSlides.length}
         onApplyTheme={updatePlayerTemplate}
         themeDisabled={!sync.ready}
+        themeRequested={themePanelRequested}
+        onThemeRequestHandled={onThemePanelHandled}
         onPublish={() => void handlePublish()}
         publishBlockedReason={sync.ready ? publishBlockedReason : loadFailed ? "Chưa mở được bản nháp" : "Đang mở bản nháp"}
         publishReadinessOnly={sync.ready && publishReadinessOnly}
