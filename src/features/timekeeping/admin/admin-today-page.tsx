@@ -1,5 +1,6 @@
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import Box from "@mui/material/Box";
+import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 
 import { formatTimeVi, isIsoDate, todayInput } from "@/domain/formatters/format-date";
@@ -9,11 +10,13 @@ import { ErgErrorState, ErgSkeleton } from "@/components/erg-mui/erg-feedback";
 import { ErgPageHeader } from "@/components/erg-mui/erg-page-header";
 import { adminPath } from "@/platform/workspaces/workspace-paths";
 import { useAdminToday, useTimekeepingSchools } from "../api/timekeeping-admin-query";
+import type { ActionItem } from "../api/timekeeping-types";
 import { weekdayDateVi } from "../components/punch/punch-format";
 import { ActionItemsCard } from "./action-items-card";
 import { BySiteCard } from "./by-site-card";
 import { exportTodayPunches } from "./export-timesheet";
 import { PunchInHistogram } from "./punch-in-histogram";
+import { PunchReviewDialog } from "./punch-review-dialog";
 import { RecentPunchesTable } from "./recent-punches-table";
 import { SchoolFilter } from "./school-filter";
 import { TodayKpiRow } from "./today-kpi-row";
@@ -29,6 +32,7 @@ export function AdminTodayPage() {
   const schoolId = search.schoolId ?? "";
   const date = search.date && isIsoDate(search.date) ? search.date : todayInput();
   const { data, isLoading, isError, refetch, dataUpdatedAt } = useAdminToday(schoolId, date);
+  const [reviewing, setReviewing] = useState<ActionItem | null>(null);
   const go = (href: string) => void navigate({ href: adminPath(href) });
   const updated = dataUpdatedAt ? formatTimeVi(new Date(dataUpdatedAt)) : "";
   const siteCount = schools.data?.length;
@@ -61,12 +65,14 @@ export function AdminTodayPage() {
             <PunchInHistogram buckets={data.inBuckets ?? []} />
             <ActionItemsCard
               items={data.actionItems ?? []}
+              onReview={setReviewing}
               onOpen={(item) => go(`${APPROVALS}?id=${encodeURIComponent(item.targetId ?? "")}`)}
               onView={() => go(`/employees/timesheet${schoolId ? `?schoolId=${encodeURIComponent(schoolId)}` : ""}`)}
             />
           </Box>
           <RecentPunchesTable punches={data.recentPunches ?? []} updatedAt={updated} />
           <BySiteCard sites={data.bySite ?? []} />
+          {reviewing ? <PunchReviewDialog item={reviewing} onClose={() => setReviewing(null)} punch={data.recentPunches?.find((p) => p.id === reviewing.targetId)} /> : null}
         </>
       )}
     </Box>

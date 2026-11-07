@@ -2,7 +2,7 @@ import { getBackOfficePortal } from "@/lib/api-client";
 import { API_ENDPOINTS } from "@/lib/api/api-endpoints";
 import { createApiClient } from "@/lib/api/create-api-client";
 import { withQuery } from "./timekeeping-api";
-import type { PeriodLockView, RemindResult, Timesheet, TodayDashboard } from "./timekeeping-types";
+import type { PeriodLockView, PunchReviewCommand, RecentPunch, RemindResult, Timesheet, TodayDashboard } from "./timekeeping-types";
 
 const client = () => createApiClient({ portal: getBackOfficePortal(), auth: "required" });
 const endpoints = API_ENDPOINTS.timekeeping.admin;
@@ -21,4 +21,6 @@ export const timekeepingAdminApi = {
     client().request<PeriodLockView>(endpoints.periodLock(period), { method: "POST", body: JSON.stringify({ schoolId }) }),
   reopenPeriod: (period: string, schoolId: string, reason: string) =>
     client().request<PeriodLockView>(endpoints.periodReopen(period), { method: "POST", body: JSON.stringify({ schoolId, reason }) }),
+  reviewPunch: (id: string, body: PunchReviewCommand) =>
+    client().request<RecentPunch>(endpoints.punchReview(id), { method: "POST", body: JSON.stringify(body) }),
 };

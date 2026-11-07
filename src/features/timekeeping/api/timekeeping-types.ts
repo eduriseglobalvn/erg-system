@@ -22,6 +22,7 @@ export type LeavePreview = Schemas["LeavePreview"];
 export type ExplanationContext = Schemas["ExplanationContext"];
 
 export type ApprovalPage = Schemas["ApprovalPage"];
+export type ApprovalItem = Schemas["ApprovalItem"];
 export type ApprovalDetail = Schemas["ApprovalDetail"];
 export type ApprovalComment = Schemas["ApprovalComment"];
 export type BulkApproveCommand = Schemas["BulkApproveCommand"];
@@ -32,6 +33,7 @@ export type Timesheet = Schemas["Timesheet"];
 export type TimesheetRow = Schemas["TimesheetRow"];
 export type ActionItem = Schemas["ActionItem"];
 export type RecentPunch = Schemas["RecentPunch"];
+export type PunchReviewCommand = Schemas["PunchReviewCommand"];
 export type PeriodLockView = Schemas["PeriodLockView"];
 export type RemindResult = Schemas["RemindResult"];
 

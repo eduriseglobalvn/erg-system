@@ -14,12 +14,14 @@ type ActionItemsCardProps = {
   items: readonly ActionItem[];
   /** Opens the person's sheet (A02) for "Xem". */
   onView: (item: ActionItem) => void;
+  /** Opens the punch review dialog for PUNCH_REVIEW items; without it "Xem" falls back to `onView`. */
+  onReview?: (item: ActionItem) => void;
   /** Opens the request (A03) for "Mở". */
   onOpen: (item: ActionItem) => void;
 };
 
 /** "Cần xử lý ngay": Nhắc sends a punch reminder to the item's user; Xem / Mở navigate. */
-export function ActionItemsCard({ items, onOpen, onView }: ActionItemsCardProps) {
+export function ActionItemsCard({ items, onOpen, onReview, onView }: ActionItemsCardProps) {
   const remind = useRemind();
   const shown = items.filter((item) => KNOWN_KINDS.includes(item.kind ?? ""));
   const sendReminder = (item: ActionItem) =>
@@ -40,7 +42,7 @@ export function ActionItemsCard({ items, onOpen, onView }: ActionItemsCardProps)
                 {item.kind === "NOT_PUNCHED_PERIOD_SOON" && item.userId ? (
                   <ErgButton aria-label={`Nhắc ${item.userName ?? ""}`.trim()} disabled={remind.isPending} onClick={() => sendReminder(item)} size="small" variant="text">Nhắc</ErgButton>
                 ) : null}
-                <ErgButton aria-label={`Xem ${item.userName ?? ""}`.trim()} onClick={() => onView(item)} size="small" variant="text">Xem</ErgButton>
+                <ErgButton aria-label={`Xem ${item.userName ?? ""}`.trim()} onClick={() => (item.kind === "PUNCH_REVIEW" && onReview ? onReview(item) : onView(item))} size="small" variant="text">Xem</ErgButton>
                 {item.kind === "REQUEST_OVERDUE" ? (
                   <ErgButton aria-label={`Mở đơn của ${item.userName ?? ""}`.trim()} onClick={() => onOpen(item)} size="small" variant="text">Mở</ErgButton>
                 ) : null}

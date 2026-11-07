@@ -6,10 +6,12 @@ import { QUERY_POLICIES } from "@/lib/query-policy";
 import { getCurrentAccountId } from "@/platform/auth/api/auth-storage";
 import { timekeepingAdminApi, type AdminTimesheetParams } from "./timekeeping-admin-api";
 import { timekeepingKeys } from "./timekeeping-query";
+import type { PunchReviewCommand } from "./timekeeping-types";
 
 const adminKeys = {
   today: (schoolId: string, date: string) => [...timekeepingKeys.root, "admin", "today", schoolId, date] as const,
   timesheet: (params: AdminTimesheetParams) => [...timekeepingKeys.root, "admin", "timesheet", params] as const,
+  todayRoot: [...timekeepingKeys.root, "admin", "today"] as const,
   timesheetRoot: [...timekeepingKeys.root, "admin", "timesheet"] as const,
 };
 
@@ -46,6 +48,16 @@ export function useAdminTimesheet(params: AdminTimesheetParams, enabled = true) 
 
 export function useRemind() {
   return useMutation({ mutationFn: (userIds: string[]) => timekeepingAdminApi.remind(userIds) });
+}
+
+/** Reviewing a FLAGGED / PENDING_REVIEW punch; the error shows in the dialog. */
+export function usePunchReview() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    meta: { silent: true },
+    mutationFn: ({ id, ...body }: PunchReviewCommand & { id: string }) => timekeepingAdminApi.reviewPunch(id, body),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: adminKeys.todayRoot }),
+  });
 }
 
 /** Lock/reopen errors (409 "Còn n đơn chưa duyệt…") show inside the dialog, so the global toast is silenced. */

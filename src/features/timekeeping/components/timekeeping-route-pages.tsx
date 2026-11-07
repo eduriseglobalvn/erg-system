@@ -3,6 +3,7 @@ import { useSearch } from "@tanstack/react-router";
 
 import { isIsoDate } from "@/domain/formatters/format-date";
 import { ErgPageHeader } from "@/components/erg-mui/erg-page-header";
+import { ApprovalsPage } from "../admin/approvals/approvals-page";
 import { AdminTimesheetPage } from "../admin/admin-timesheet-page";
 import { AdminTodayPage } from "../admin/admin-today-page";
 import { DayDetailPage } from "./my-timesheet/day-detail-page";
@@ -52,7 +53,7 @@ export function AdminTimesheetRoute() {
 }
 
 export function AdminTimekeepingApprovalsRoute() {
-  return <TimekeepingPageShell description="Đơn chờ duyệt và đơn đã xử lý." title="Duyệt đơn" />;
+  return <ApprovalsPage />;
 }
 
 export function AdminTimekeepingSettingsRoute() {
