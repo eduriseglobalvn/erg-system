@@ -27,6 +27,7 @@ export function RangeRequestForm({ type, initial }: { type: Extract<RequestType,
 
   return (
     <RequestFormFrame
+      editingPending={initial?.status === "PENDING"}
       error={submit.error}
       onBack={() => nav.toPicker()}
       onSaveDraft={() => send(false)}

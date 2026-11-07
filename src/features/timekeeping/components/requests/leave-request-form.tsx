@@ -56,6 +56,7 @@ export function LeaveRequestForm({ initial }: { initial?: RequestView }) {
 
   return (
     <RequestFormFrame
+      editingPending={initial?.status === "PENDING"}
       error={submit.error}
       onBack={() => nav.toPicker()}
       onSaveDraft={() => send(false)}

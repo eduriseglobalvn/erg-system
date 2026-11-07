@@ -54,7 +54,9 @@ export function useExplanationContext(date: string | undefined) {
 
 /**
  * Save a request and optionally send it. A draft that was saved but not sent (e.g. the send was refused for balance)
- * is updated, not duplicated, on the next try. Editing a pending request cancels it first: the backend only updates drafts.
+ * is updated, not duplicated, on the next try. Editing a pending request saves the new draft first, then cancels the old request
+ * (the backend only updates drafts, and its overlap/limit checks run at submit, so a draft never clashes with the request it replaces);
+ * a failure while saving leaves the old request untouched.
  */
 export function useSaveRequest(editing?: RequestView) {
   const queryClient = useQueryClient();
@@ -65,16 +67,22 @@ export function useSaveRequest(editing?: RequestView) {
     retry: false,
     meta: { silent: true }, // the form shows the failure inline
     mutationFn: async ({ command, send }: { command: RequestCommand; send: boolean }): Promise<RequestView> => {
+      const saved = draftId.current ? await timekeepingApi.updateRequest(draftId.current, command) : await timekeepingApi.createRequest(command);
+      draftId.current = saved.id;
       if (editing?.status === "PENDING" && editing.id && !cancelled.current) {
         await timekeepingApi.cancelRequest(editing.id);
         cancelled.current = true;
       }
-      const saved = draftId.current ? await timekeepingApi.updateRequest(draftId.current, command) : await timekeepingApi.createRequest(command);
-      draftId.current = saved.id;
       return send ? timekeepingApi.submitRequest(saved.id as string) : saved;
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: timekeepingKeys.root }),
   });
+}
+
+/** The teacher's PENDING explanation for `date`, if any. `loading` is true until the list answered (or failed, then no request is known). */
+export function usePendingExplanation(date: string | undefined) {
+  const { data, isPending } = useMyRequests("PENDING");
+  return { loading: isPending, request: data?.items?.find((r) => r.type === "EXPLANATION" && r.workDate === date) };
 }
 
 export function useCancelRequest() {

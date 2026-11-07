@@ -20,7 +20,10 @@ export function monthGridCells(period: string, days: readonly MonthDayView[], to
   return cells;
 }
 
-/** Latest MISSING_PUNCH day; an approved explanation turns the day into a normal one on the server, so what is left is unexplained. */
+/** Missing-punch chip text by which punch is missing. */
+export const MISSING_TITLE = { IN: "Thiếu giờ vào", OUT: "Thiếu giờ ra" } as const;
+
+/** Latest MISSING_PUNCH day. Only an approved explanation changes the day; one still pending leaves it MISSING_PUNCH, so callers check pending requests before offering "Giải trình". */
 export function firstIssue(days: readonly MonthDayView[]): MonthDayView | null {
   return days.filter((day) => day.status === "MISSING_PUNCH" && day.date).sort((a, b) => (b.date ?? "").localeCompare(a.date ?? ""))[0] ?? null;
 }

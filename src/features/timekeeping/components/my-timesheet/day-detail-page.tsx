@@ -7,13 +7,15 @@ import { ErgButton, ErgIconButton } from "@/components/erg-mui/erg-actions";
 import { ErgErrorState, ErgSkeleton, ErgStatusChip } from "@/components/erg-mui/erg-feedback";
 import { formatDateVi } from "@/domain/formatters/format-date";
 import { teacherPath } from "@/platform/workspaces/workspace-paths";
+import { usePendingExplanation } from "../../api/timekeeping-request-query";
 import { useTimekeepingDay, useTimekeepingMonth } from "../../api/timekeeping-query";
 import type { DayDetailView } from "../../api/timekeeping-types";
 import { dayCodeFor } from "../../model/day-codes";
 import { PunchCard } from "../punch/punch-card";
 import { hhmm } from "../punch/punch-format";
 import { PunchRow } from "./punch-row";
-import { unitsVi } from "./timesheet-summary";
+import { PendingExplanationNote } from "./pending-explanation-note";
+import { MISSING_TITLE, unitsVi } from "./timesheet-summary";
 
 function Line({ label, value }: { label: string; value: string }) {
   return (
@@ -44,7 +46,8 @@ type DayDetailPageProps = { date: string };
 export function DayDetailPage({ date }: DayDetailPageProps) {
   const navigate = useNavigate();
   const { data: day, isError, refetch } = useTimekeepingDay(date);
-  const { data: month } = useTimekeepingMonth(date.slice(0, 7));
+  const { data: month, isPending: monthPending } = useTimekeepingMonth(date.slice(0, 7));
+  const pending = usePendingExplanation(date);
   const go = (path: string) => void navigate({ href: teacherPath(path) });
   const code = day?.status ? dayCodeFor(day.status, day.leaveKind) : null;
 
@@ -58,7 +61,7 @@ export function DayDetailPage({ date }: DayDetailPageProps) {
       <Box sx={{ alignItems: "center", display: "flex", gap: 1 }}>
         <ErgIconButton label="Quay lại bảng công" onClick={() => go(`/timekeeping/timesheet?period=${date.slice(0, 7)}`)}><ArrowBackIcon /></ErgIconButton>
         <Typography component="h1" variant="h5">{formatDateVi(date)}</Typography>
-        {code ? <ErgStatusChip label={explainable && day?.missing === "OUT" ? "Thiếu giờ ra" : code.label} tone={code.tone} /> : null}
+        {code ? <ErgStatusChip label={explainable && day?.missing ? MISSING_TITLE[day.missing] : code.label} tone={code.tone} /> : null}
       </Box>
       {isError ? (
         <ErgErrorState action={<ErgButton onClick={() => void refetch()} variant="outlined">Tải lại</ErgButton>} description="Không tải được chi tiết ngày." title="Có lỗi xảy ra" />
@@ -76,8 +79,10 @@ export function DayDetailPage({ date }: DayDetailPageProps) {
             <Line label="Công" value={provisionalText(day)} />
             {(day.periods?.length ?? 0) > 0 ? <Line label="Minh chứng tự đính kèm" value={`Lịch dạy ${day.shift?.name?.toLowerCase() ?? "trong ngày"}`} /> : null}
           </PunchCard>
-          {explainable ? (
-            blockedText ? (
+          {explainable && !monthPending && !pending.loading ? (
+            pending.request?.id ? (
+              <PendingExplanationNote onOpen={() => go(`/timekeeping/requests?id=${encodeURIComponent(pending.request?.id as string)}`)} />
+            ) : blockedText ? (
               <Typography color="text.secondary" variant="body2">{blockedText}</Typography>
             ) : (
               <ErgButton fullWidth onClick={() => go(`/timekeeping/requests?new=explanation&date=${date}`)}>Giải trình chấm công</ErgButton>

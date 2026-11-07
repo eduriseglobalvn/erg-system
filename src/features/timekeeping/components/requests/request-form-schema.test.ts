@@ -51,5 +51,6 @@ describe("parseRequestsSearch", () => {
     expect(parseRequestsSearch({ edit: "r1" })).toEqual({ view: "edit", id: "r1" });
     expect(parseRequestsSearch({ id: "r1", new: "leave" })).toEqual({ view: "detail", id: "r1" });
     expect(parseRequestsSearch({ id: 5 })).toEqual({ view: "list" });
+    expect(parseRequestsSearch({ new: "explanation", date: "2026-13-45" })).toEqual({ view: "form", type: "explanation", date: undefined });
   });
 });

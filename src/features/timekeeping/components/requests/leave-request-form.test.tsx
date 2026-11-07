@@ -3,7 +3,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ApiClientError } from "@/lib/api-client/errors";
-import type { LeavePreview } from "../../api/timekeeping-types";
+import type { LeavePreview, RequestView } from "../../api/timekeeping-types";
 import { LeaveRequestForm } from "./leave-request-form";
 
 const h = vi.hoisted(() => ({
@@ -21,10 +21,12 @@ const PREVIEW: LeavePreview = {
   approvers: [{ stepNo: 1, displayName: "Trần Minh", title: "Quản lý trực tiếp" }, { stepNo: 2, displayName: "Lê Hoa", title: "Phó hiệu trưởng" }],
 };
 
-function renderForm() {
+const PENDING_LEAVE: RequestView = { id: "old1", status: "PENDING", type: "LEAVE", leaveKind: "ANNUAL", fromDate: "2026-11-10", toDate: "2026-11-11", note: "Việc gia đình" };
+
+function renderForm(initial?: RequestView) {
   h.api.previewLeave.mockResolvedValue(PREVIEW);
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(<QueryClientProvider client={client}><LeaveRequestForm /></QueryClientProvider>);
+  return render(<QueryClientProvider client={client}><LeaveRequestForm initial={initial} /></QueryClientProvider>);
 }
 
 afterEach(() => vi.clearAllMocks());
@@ -56,7 +58,7 @@ describe("LeaveRequestForm (G08)", () => {
   it("keeps the form open and shows the server message when the balance is not enough", async () => {
     renderForm();
     h.api.createRequest.mockResolvedValue({ id: "r1", status: "DRAFT" });
-    h.api.submitRequest.mockRejectedValue(new ApiClientError("Phép năm còn 1,5 ngày, không đủ cho 2 ngày", "INSUFFICIENT_BALANCE", 422));
+    h.api.submitRequest.mockRejectedValue(new ApiClientError("Phép năm còn 1,5 ngày, không đủ cho 2 ngày", "INSUFFICIENT_LEAVE", 422));
     fireEvent.change(screen.getByLabelText("Lý do"), { target: { value: "Việc gia đình" } });
     fireEvent.click(screen.getByRole("button", { name: "Gửi đơn" }));
     expect(await screen.findByText("Phép năm còn 1,5 ngày, không đủ cho 2 ngày")).toBeInTheDocument();
@@ -79,6 +81,38 @@ describe("LeaveRequestForm (G08)", () => {
     await waitFor(() => expect(h.navigate).toHaveBeenCalledWith(expect.objectContaining({ href: expect.stringContaining("?id=r1"), replace: true })));
     expect(h.api.createRequest).toHaveBeenCalledTimes(1);
     expect(h.api.updateRequest).toHaveBeenCalledWith("r1", expect.any(Object));
+  });
+
+  it("editing a pending request saves the new draft, then cancels the old one, then sends", async () => {
+    renderForm(PENDING_LEAVE);
+    expect(screen.getByText(/Sửa đơn đang chờ sẽ huỷ đơn hiện tại và gửi lại đơn mới/)).toBeInTheDocument();
+    h.api.createRequest.mockResolvedValue({ id: "new1", status: "DRAFT" });
+    h.api.cancelRequest.mockResolvedValue({ id: "old1", status: "CANCELLED" });
+    h.api.submitRequest.mockResolvedValue({ id: "new1", status: "PENDING" });
+    fireEvent.click(screen.getByRole("button", { name: "Gửi đơn" }));
+    await waitFor(() => expect(h.api.submitRequest).toHaveBeenCalledWith("new1"));
+    expect(h.api.cancelRequest).toHaveBeenCalledWith("old1");
+    const order = (m: { mock: { invocationCallOrder: number[] } }) => m.mock.invocationCallOrder[0];
+    expect(order(h.api.createRequest)).toBeLessThan(order(h.api.cancelRequest));
+    expect(order(h.api.cancelRequest)).toBeLessThan(order(h.api.submitRequest));
+  });
+
+  it("leaves the old pending request alone when saving the new one fails", async () => {
+    renderForm(PENDING_LEAVE);
+    h.api.createRequest.mockRejectedValue(new ApiClientError("Ngày kết thúc phải sau ngày bắt đầu", "INVALID_RANGE", 400));
+    fireEvent.click(screen.getByRole("button", { name: "Gửi đơn" }));
+    expect(await screen.findByText("Ngày kết thúc phải sau ngày bắt đầu")).toBeInTheDocument();
+    expect(h.api.cancelRequest).not.toHaveBeenCalled();
+    expect(h.api.submitRequest).not.toHaveBeenCalled();
+  });
+
+  it("shows a generic text, not the raw message, for server errors", async () => {
+    renderForm();
+    h.api.createRequest.mockRejectedValue(new ApiClientError("java.lang.NullPointerException at ...", "INTERNAL", 500));
+    fireEvent.change(screen.getByLabelText("Lý do"), { target: { value: "Việc gia đình" } });
+    fireEvent.click(screen.getByRole("button", { name: "Gửi đơn" }));
+    expect(await screen.findByText("Có lỗi xảy ra, thử lại.")).toBeInTheDocument();
+    expect(screen.queryByText(/NullPointer/)).not.toBeInTheDocument();
   });
 
   it("shows the field error and sends nothing when the reason is empty", async () => {

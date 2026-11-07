@@ -1,6 +1,7 @@
 import Box from "@mui/material/Box";
 import { useSearch } from "@tanstack/react-router";
 
+import { isIsoDate } from "@/domain/formatters/format-date";
 import { ErgPageHeader } from "@/components/erg-mui/erg-page-header";
 import { DayDetailPage } from "./my-timesheet/day-detail-page";
 import { MyTimesheetPage } from "./my-timesheet/my-timesheet-page";
@@ -29,7 +30,7 @@ export function TeacherTimekeepingPunchRoute() {
 /** G04 month view; `?date=yyyy-MM-dd` switches the same route to the G05 day detail. */
 export function TeacherTimekeepingTimesheetRoute() {
   const search = useSearch({ strict: false }) as { date?: unknown; period?: unknown };
-  const date = typeof search.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(search.date) ? search.date : undefined;
+  const date = typeof search.date === "string" && isIsoDate(search.date) ? search.date : undefined;
   const currentPeriod = periodOf(new Date());
   const period = typeof search.period === "string" && /^\d{4}-(0[1-9]|1[0-2])$/.test(search.period) ? search.period : currentPeriod;
   return date ? <DayDetailPage date={date} /> : <MyTimesheetPage currentPeriod={currentPeriod} period={period} />;

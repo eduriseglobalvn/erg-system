@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 
 import type { RequestCommand, RequestView } from "../../api/timekeeping-types";
@@ -14,9 +14,12 @@ export function useRequestSubmit(editing?: RequestView) {
   const save = useSaveRequest(editing);
   const nav = useRequestsNav();
   const [attempted, setAttempted] = useState(false);
+  const busy = useRef(false); // a double tap in the same tick must not start a second save
   const run = async (command: RequestCommand | null, send: boolean) => {
+    if (busy.current) return;
     setAttempted(true);
     if (!command) return;
+    busy.current = true;
     try {
       const saved = await save.mutateAsync({ command, send });
       if (send && saved.id) nav.toDetail(saved.id, true);
@@ -26,6 +29,8 @@ export function useRequestSubmit(editing?: RequestView) {
       }
     } catch {
       // the failure is in save.error and rendered by the form
+    } finally {
+      busy.current = false;
     }
   };
   return { attempted, run, pending: save.isPending, error: save.error ? requestErrorText(save.error) : null };

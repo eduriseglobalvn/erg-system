@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { DayDetailView } from "../../api/timekeeping-types";
 import { DayDetailPage } from "./day-detail-page";
 
-const api = vi.hoisted(() => ({ month: vi.fn(), day: vi.fn() }));
+const api = vi.hoisted(() => ({ month: vi.fn(), day: vi.fn(), myRequests: vi.fn() }));
 vi.mock("../../api/timekeeping-api", () => ({ timekeepingApi: api }));
 vi.mock("@tanstack/react-router", () => ({ useNavigate: () => vi.fn() }));
 
@@ -22,8 +22,9 @@ const DAY: DayDetailView = {
   units: 0.5,
 };
 
-function renderPage(day: DayDetailView = DAY, locked = false) {
+function renderPage(day: DayDetailView = DAY, locked = false, pending: object[] = []) {
   api.day.mockResolvedValue(day);
+  api.myRequests.mockResolvedValue({ items: pending });
   api.month.mockResolvedValue({ locked });
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(<QueryClientProvider client={client}><DayDetailPage date="2026-10-14" /></QueryClientProvider>);
@@ -50,6 +51,18 @@ describe("DayDetailPage (G05)", () => {
     const { container } = renderPage(withPhoto);
     await screen.findByText("Vào");
     expect(container.querySelector("img")?.getAttribute("loading")).toBe("lazy");
+  });
+
+  it("offers the pending explanation instead of a second one", async () => {
+    renderPage(DAY, false, [{ id: "r7", type: "EXPLANATION", status: "PENDING", workDate: "2026-10-14" }]);
+    expect(await screen.findByText("Đã gửi giải trình, chờ duyệt")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Xem đơn" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Giải trình chấm công" })).not.toBeInTheDocument();
+  });
+
+  it("ignores pending explanations of other days", async () => {
+    renderPage(DAY, false, [{ id: "r8", type: "EXPLANATION", status: "PENDING", workDate: "2026-10-13" }]);
+    expect(await screen.findByRole("button", { name: "Giải trình chấm công" })).toBeInTheDocument();
   });
 
   it("replaces the button with the reason when the period is locked", async () => {

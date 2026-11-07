@@ -47,7 +47,9 @@ export function ExplanationForm({ date, initial }: { date?: string; initial?: Re
     if (suggestedOut && !edited.current) form.setFieldValue("proposedOut", suggestedOut);
   }, [form, suggestedOut]);
 
-  const errors = validateExplanation(values, ctx ?? {});
+  // Editing a pending explanation frees its own slot, so the monthly limit must not block the replacement.
+  const editingPending = initial?.status === "PENDING";
+  const errors = validateExplanation(values, editingPending ? {} : (ctx ?? {}));
   const shown = submit.attempted ? errors : {};
   const remaining = ctx?.remaining;
   const send = () =>
@@ -66,6 +68,7 @@ export function ExplanationForm({ date, initial }: { date?: string; initial?: Re
 
   return (
     <RequestFormFrame
+      editingPending={editingPending}
       error={submit.error ?? errors.form}
       onBack={() => nav.toList()}
       onSubmit={send}

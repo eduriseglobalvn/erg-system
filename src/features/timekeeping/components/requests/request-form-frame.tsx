@@ -6,6 +6,8 @@ import type { FormEvent, ReactNode } from "react";
 import { ErgButton, ErgIconButton } from "@/components/erg-mui/erg-actions";
 import { ErgPageHeader } from "@/components/erg-mui/erg-page-header";
 
+const EDIT_PENDING_NOTICE = "Sửa đơn đang chờ sẽ huỷ đơn hiện tại và gửi lại đơn mới; đơn mới có mã mới và người duyệt phải xem lại.";
+
 type RequestFormFrameProps = {
   title: string;
   description?: string;
@@ -14,6 +16,8 @@ type RequestFormFrameProps = {
   /** Message from the last failed save/send, shown next to the buttons. */
   error?: string | null;
   submitDisabled?: boolean;
+  /** Editing a request that is already pending: saving replaces it, so say what happens. */
+  editingPending?: boolean;
   onBack: () => void;
   onSubmit: () => void;
   /** Omit for forms with no draft (the explanation form). */
@@ -22,7 +26,7 @@ type RequestFormFrameProps = {
 };
 
 /** Header (back, title, "Lưu nháp" text button, the page's single contained submit) and the error line shared by the request forms. */
-export function RequestFormFrame({ title, description, submitLabel, pending, error, submitDisabled, onBack, onSubmit, onSaveDraft, children }: RequestFormFrameProps) {
+export function RequestFormFrame({ title, description, submitLabel, pending, error, submitDisabled, editingPending, onBack, onSubmit, onSaveDraft, children }: RequestFormFrameProps) {
   const submit = (event: FormEvent) => {
     event.preventDefault();
     onSubmit();
@@ -40,6 +44,7 @@ export function RequestFormFrame({ title, description, submitLabel, pending, err
         }
         title={title}
       />
+      {editingPending ? <Alert severity="info">{EDIT_PENDING_NOTICE}</Alert> : null}
       {error ? <Alert severity="error">{error}</Alert> : null}
       {children}
     </Box>

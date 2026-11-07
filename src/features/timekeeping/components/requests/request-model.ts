@@ -1,4 +1,4 @@
-import { formatDateTimeVi, formatDateVi, formatTimeVi } from "@/domain/formatters/format-date";
+import { formatDateTimeVi, formatDateVi, formatTimeVi, isIsoDate } from "@/domain/formatters/format-date";
 import type { LeaveKind, RequestType, RequestView } from "../../api/timekeeping-types";
 import { unitsVi } from "../my-timesheet/timesheet-summary";
 import type { DayPart, ExplanationReason } from "./request-form-schema";
@@ -12,7 +12,6 @@ export type RequestsView =
   | { view: "detail"; id: string };
 
 const FORM_TYPES: readonly RequestFormType[] = ["leave", "explanation", "wfh", "business"];
-const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 export const API_TYPE: Record<RequestFormType, RequestType> = { leave: "LEAVE", explanation: "EXPLANATION", wfh: "WFH", business: "BUSINESS" };
 export const FORM_TYPE: Record<RequestType, RequestFormType> = { LEAVE: "leave", EXPLANATION: "explanation", WFH: "wfh", BUSINESS: "business" };
@@ -29,7 +28,7 @@ export function parseRequestsSearch(search: Record<string, unknown>): RequestsVi
   const type = FORM_TYPES.find((known) => known === created);
   if (!type) return { view: "picker" };
   const date = text("date");
-  return { view: "form", type, date: date && ISO_DATE.test(date) ? date : undefined };
+  return { view: "form", type, date: date && isIsoDate(date) ? date : undefined };
 }
 
 export const LEAVE_KIND_LABEL: Record<LeaveKind, string> = {
@@ -74,12 +73,14 @@ export function requestTimeText(r: RequestView): string {
   return `${from} – ${to}`;
 }
 
-const NETWORK_MESSAGE = "Không kết nối được máy chủ. Thông tin bạn nhập vẫn được giữ, hãy thử lại.";
+const NETWORK_MESSAGE = "Không kết nối được máy chủ, thử lại. Thông tin bạn nhập vẫn được giữ.";
+const GENERIC_MESSAGE = "Có lỗi xảy ra, thử lại.";
 
-/** The server's Vietnamese message for API errors (422 balance, 409 overlap/locked, 422 no approver, 429 remind); a fixed text when the network failed. */
+/** The server's Vietnamese message only for 4xx answers (422 leave, 409 overlap/locked, 422 no approver, 429 remind); a fixed text for network and server failures. */
 export function requestErrorText(error: unknown): string {
   const status = (error as { status?: unknown } | null)?.status;
-  return typeof status !== "number" || status === 0 || !(error instanceof Error) || !error.message ? NETWORK_MESSAGE : error.message;
+  if (typeof status !== "number" || status === 0 || !(error instanceof Error)) return NETWORK_MESSAGE;
+  return status >= 400 && status < 500 && error.message ? error.message : GENERIC_MESSAGE;
 }
 
 export type TimelineStep = { state: "done" | "current" | "todo" | "rejected"; title: string; meta: string };

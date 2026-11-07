@@ -56,7 +56,8 @@ export const TIMEKEEPING_ERROR_CODES = [
   "NO_APPROVER",
   "REQUEST_OVERLAP",
   "REMIND_TOO_SOON",
-  "INSUFFICIENT_BALANCE",
+  "INSUFFICIENT_BALANCE", // approval side (bulk approve)
+  "INSUFFICIENT_LEAVE", // teacher request submit
   "EXPLANATION_LIMIT",
   "EXPLANATION_WINDOW",
 ] as const;

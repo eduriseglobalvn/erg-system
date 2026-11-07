@@ -72,7 +72,7 @@ export function MyTimesheetPage({ period, currentPeriod }: MyTimesheetPageProps)
           <PunchCard>
             <MonthCalendarGrid days={days} onSelect={(date) => go(`/timekeeping/timesheet?date=${date}`)} period={period} />
           </PunchCard>
-          {issue ? <MissingDayCard issue={issue} locked={Boolean(data.locked)} onExplain={(date) => go(`/timekeeping/requests?new=explanation&date=${date}`)} /> : null}
+          {issue ? <MissingDayCard issue={issue} locked={Boolean(data.locked)} onExplain={(date) => go(`/timekeeping/requests?new=explanation&date=${date}`)} onOpenRequest={(id) => go(`/timekeeping/requests?id=${encodeURIComponent(id)}`)} /> : null}
         </>
       )}
     </Box>
