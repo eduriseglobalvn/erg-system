@@ -1,4 +1,5 @@
 import { API_ENDPOINTS } from "@/lib/api/api-endpoints";
+import type { components } from "@/lib/api/generated/erg-openapi";
 import { apiRequest } from "@/lib/api-client";
 import { runtimeFixturesEnabled } from "@/lib/runtime-fixtures";
 import type {
@@ -39,6 +40,19 @@ export async function registerNotificationDevice(input: NotificationDeviceRegist
       portal,
     }),
     portal: toApiPortal(portal),
+  });
+}
+
+export type WebPushConfig = components["schemas"]["WebPushConfigResponse"];
+
+/** VAPID public key for Web Push; `enabled: false` when the server has no VAPID keys. */
+export async function fetchWebPushConfig(portal: NotificationPortal = "lms", signal?: AbortSignal) {
+  if (runtimeFixturesEnabled()) {
+    return { enabled: false } satisfies WebPushConfig;
+  }
+  return apiRequest<WebPushConfig>(API_ENDPOINTS.notifications.webPushConfig, {
+    portal: toApiPortal(normalizePortal(portal)),
+    ...(signal ? { signal } : {}),
   });
 }
 

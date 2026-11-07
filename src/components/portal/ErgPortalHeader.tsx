@@ -6,11 +6,11 @@ import IconButton from "@mui/material/IconButton";
 import Toolbar from "@mui/material/Toolbar";
 import type { SxProps, Theme } from "@mui/material/styles";
 import { useState, type ReactNode } from "react";
+import { useLocation } from "@tanstack/react-router";
 import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
 
 import { PortalHeaderActions } from "./portal-header-actions";
 import { PortalHeaderIdentity } from "./portal-header-identity";
-import type { PortalNotificationTab } from "./portal-header-notification-data";
 import { PortalHeaderNotifications } from "./portal-header-notifications";
 import { portalHeaderAppBarSx } from "./portal-header-styles";
 import { notificationPortalFromPath, usePortalNotifications } from "./use-portal-notifications";
@@ -56,13 +56,10 @@ export default function ErgPortalHeader({
   onNavigate,
   onSignOut,
 }: HeaderProps) {
-  const [notificationOpen, setNotificationOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<PortalNotificationTab>("all");
-  const { notifications, unreadCount } = usePortalNotifications(
-    notificationPortalFromPath(typeof window === "undefined" ? "" : window.location.pathname),
-    activeTab,
-    notificationOpen,
-  );
+  const pathname = useLocation()?.pathname ?? "";
+  const [notificationAnchor, setNotificationAnchor] = useState<HTMLElement | null>(null);
+  const notifications = usePortalNotifications(notificationPortalFromPath(pathname), Boolean(notificationAnchor));
+  const unreadCount = notifications.unreadCount;
 
   // Menu-level pages carry their own title (design canvas): no empty bar on desktop, the phone keeps it for the menu button.
   const desktopEmpty = hideIdentity && !headerControls && !headerTrailingControls;
@@ -95,7 +92,7 @@ export default function ErgPortalHeader({
               <PortalHeaderActions
                 hideNotifications={hideNotifications}
                 notificationCount={unreadCount ?? notificationCount}
-                onOpenNotifications={() => setNotificationOpen(true)}
+                onOpenNotifications={setNotificationAnchor}
                 userName={userName}
                 userEmail={userEmail}
                 onNavigate={onNavigate}
@@ -108,11 +105,11 @@ export default function ErgPortalHeader({
         </Toolbar>
       </AppBar>
       <PortalHeaderNotifications
-        activeTab={activeTab}
-        notifications={notifications}
-        onClose={() => setNotificationOpen(false)}
-        onTabChange={setActiveTab}
-        open={notificationOpen}
+        anchorEl={notificationAnchor}
+        onClose={() => setNotificationAnchor(null)}
+        onNavigate={onNavigate}
+        pathname={pathname}
+        state={notifications}
       />
     </>
   );

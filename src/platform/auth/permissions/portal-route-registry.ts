@@ -55,6 +55,8 @@ export const lcmsWorkspacePaths = [
   "integration/setting-zalo-account",
   "integration/setting-center-api-key",
   "calendar",
+  "notifications",
+  "notifications/compose",
   "ui-kit",
 ] as const;
 
@@ -93,6 +95,7 @@ export const lmsPaths = [
   "homework/student-groups",
   "learning",
   "notifications",
+  "notifications/compose",
   "account",
   "account/login-logs",
   "score",

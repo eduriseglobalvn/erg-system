@@ -34,6 +34,8 @@ import {
 import {
   ScoresView,
 } from "@/features/elearning/student-dashboard/components/student-dashboard-scores-view";
+import { useUnreadNotificationCount } from "@/features/notifications/hooks/use-unread-notification-count";
+import { StudentInboxView } from "@/features/elearning/student-dashboard/components/student-inbox-view";
 import {
   enCopy,
   viCopy,
@@ -172,10 +174,8 @@ export function StudentDashboardWorkspaceRuntime() {
   const pinnedAnnouncement = teacherAnnouncements.find((announcement) => announcement.isPinned) ?? teacherAnnouncements[0];
   const latestAnnouncement = teacherAnnouncements[0];
   const { announcementPopupOpen, setAnnouncementPopupOpen } = useAnnouncementPopup(latestAnnouncement, viewState.type === "quiz");
-  const unreadAnnouncementCount = useMemo(
-    () => teacherAnnouncements.filter((announcement) => !readAnnouncementIds.includes(announcement.id)).length,
-    [readAnnouncementIds, teacherAnnouncements],
-  );
+  // The dock/menu badge is the Hộp thư inbox's own unread count (same portal and cache as StudentInboxView), not the old announcements.
+  const unreadInboxCount = useUnreadNotificationCount(quizRuntimePortal, Boolean(account)) ?? 0;
   const discussionPreview = useMemo(() => getDiscussionOverviewPreview(discussion.discussionPosts), [discussion.discussionPosts]);
 
   useEffect(() => {
@@ -317,11 +317,15 @@ export function StudentDashboardWorkspaceRuntime() {
         />
       ) : null}
       {activePage === "announcements" ? (
-        <AnnouncementsView
-          announcements={teacherAnnouncements}
-          copy={copy}
-          selectedAnnouncementId={selectedAnnouncementId}
-        />
+        <>
+          {/* Signed-in viewers only: a guest has no inbox. Same portal as the quiz runtime (teacher preview reads lms). */}
+          {account ? <Box sx={{ mb: 3 }}><StudentInboxView portal={quizRuntimePortal} /></Box> : null}
+          <AnnouncementsView
+            announcements={teacherAnnouncements}
+            copy={copy}
+            selectedAnnouncementId={selectedAnnouncementId}
+          />
+        </>
       ) : null}
       {activePage === "account" ? (
         <AccountView
@@ -343,7 +347,7 @@ export function StudentDashboardWorkspaceRuntime() {
         <StudentPreviewBanner preview={studentPreview} />
         {announcementToast}
         <StudentDashboardMobileShell
-          activePage={activePage} announcementUnreadCount={unreadAnnouncementCount}
+          activePage={activePage} announcementUnreadCount={unreadInboxCount}
           dockItems={mobileDockItems} onPageChange={handlePageChange}
         >
           <Box sx={{ pb: 2.5, pt: 4, px: 2 }}>{dashboardViews}</Box>
@@ -363,7 +367,7 @@ export function StudentDashboardWorkspaceRuntime() {
         dashboardProfile={dashboardProfile}
         notificationAnchor={notificationAnchor}
         notifications={discussion.discussionNotifications}
-        unreadAnnouncementCount={unreadAnnouncementCount}
+        unreadAnnouncementCount={unreadInboxCount}
         onAccountOpen={() => handlePageChange("account")}
         onNotificationClose={() => setNotificationAnchor(null)}
         onNotificationClick={handleDiscussionNotificationClick}

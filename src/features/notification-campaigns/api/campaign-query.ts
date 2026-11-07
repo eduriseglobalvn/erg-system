@@ -1,0 +1,195 @@
+import { keepPreviousData, useInfiniteQuery, useMutation, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
+
+import { ackNotification, notificationQueryKeys, type NotificationPortal } from "@/features/notifications/api/notification-api";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import { QUERY_POLICIES } from "@/lib/query-policy";
+
+import {
+  cancelCampaign,
+  createCampaign,
+  estimateAudience,
+  fetchCampaign,
+  fetchCampaignRecipients,
+  fetchCampaigns,
+  fetchCampaignSummary,
+  resolvePeople,
+  scheduleCampaign,
+  searchPeople,
+  sendCampaign,
+  updateCampaign,
+} from "./campaign-api";
+import type { CampaignAudience, CampaignBox, CampaignDraftRequest, CampaignRecipientFilter } from "./campaign-types";
+
+export const campaignKeys = {
+  all: ["campaigns"] as const,
+  lists: () => [...campaignKeys.all, "list"] as const,
+  list: (box: CampaignBox, mine: boolean) => [...campaignKeys.lists(), box, mine] as const,
+  detail: (id: string) => [...campaignKeys.all, "detail", id] as const,
+  recipients: (id: string, filter: CampaignRecipientFilter) => [...campaignKeys.detail(id), "recipients", filter] as const,
+  summary: () => [...campaignKeys.all, "summary"] as const,
+  estimate: (audience: CampaignAudience) => [...campaignKeys.all, "estimate", audience] as const,
+  people: (q: string) => [...campaignKeys.all, "people", q] as const,
+};
+
+const PEOPLE_MIN_CHARS = 2;
+const PEOPLE_DEBOUNCE_MS = 250;
+const ESTIMATE_DEBOUNCE_MS = 300;
+const realtime = { staleTime: QUERY_POLICIES.realtime.staleTime, gcTime: QUERY_POLICIES.realtime.gcTime };
+
+const ID_LISTS = ["classIds", "groupIds", "gradeIds", "schoolIds", "userIds", "roles"] as const;
+
+/** Canonical audience: sorted, de-duplicated lists, empty lists and a false wholeTenant dropped, fixed key order. Used for cache keys and the request body. */
+export function normalizeAudience(audience: CampaignAudience): CampaignAudience {
+  return {
+    ...Object.fromEntries(
+      ID_LISTS.flatMap((name) => (audience[name]?.length ? [[name, [...new Set(audience[name])].sort()]] : [])),
+    ),
+    ...(audience.wholeTenant ? { wholeTenant: true } : {}),
+  };
+}
+
+/** Same rule as the backend: nothing selected and not the whole tenant. */
+export function isAudienceEmpty(audience: CampaignAudience) {
+  return (
+    !audience.wholeTenant &&
+    [audience.classIds, audience.groupIds, audience.gradeIds, audience.schoolIds, audience.userIds, audience.roles].every((list) => !list?.length)
+  );
+}
+
+export function useCampaigns(box: CampaignBox, mine: boolean, page = 0) {
+  return useQuery({
+    queryKey: [...campaignKeys.list(box, mine), page],
+    queryFn: ({ signal }) => fetchCampaigns({ box, mine, page }, signal),
+    placeholderData: keepPreviousData,
+    ...realtime,
+  });
+}
+
+export function useCampaign(id: string | undefined) {
+  return useQuery({
+    queryKey: campaignKeys.detail(id ?? ""),
+    queryFn: ({ signal }) => fetchCampaign(id as string, signal),
+    enabled: Boolean(id),
+    ...realtime,
+  });
+}
+
+export function useCampaignSummary() {
+  return useQuery({
+    queryKey: campaignKeys.summary(),
+    queryFn: ({ signal }) => fetchCampaignSummary(signal),
+    ...realtime,
+  });
+}
+
+/** Recipients of a sent campaign, one server page (20) per "Xem thêm". */
+export function useCampaignRecipients(id: string | undefined, filter: CampaignRecipientFilter = "ALL") {
+  return useInfiniteQuery({
+    queryKey: campaignKeys.recipients(id ?? "", filter),
+    queryFn: ({ pageParam, signal }) => fetchCampaignRecipients(id as string, { filter, page: pageParam }, signal),
+    initialPageParam: 0,
+    getNextPageParam: (last) => (last.hasNext ? (last.page ?? 0) + 1 : undefined),
+    enabled: Boolean(id),
+    ...realtime,
+  });
+}
+
+/** Debounced (300 ms) and disabled while the audience is empty. */
+export function useCampaignEstimate(audience: CampaignAudience) {
+  // Debounce a string: a fresh object each render would re-arm the debouncer forever.
+  const debouncedKey = useDebouncedValue(JSON.stringify(normalizeAudience(audience)), ESTIMATE_DEBOUNCE_MS);
+  // An emptied audience takes effect at once (no debounce lag showing the old breakdown).
+  const effective = isAudienceEmpty(audience) ? {} : (JSON.parse(debouncedKey) as CampaignAudience);
+  const empty = isAudienceEmpty(effective);
+  return useQuery({
+    queryKey: campaignKeys.estimate(effective),
+    queryFn: ({ signal }) => estimateAudience(effective, signal),
+    enabled: !empty,
+    placeholderData: (previous) => (empty ? undefined : previous),
+    ...realtime,
+  });
+}
+
+/** No network call until the (debounced) query has at least 2 characters. */
+export function usePeopleSearch(q: string) {
+  const debounced = useDebouncedValue(q.trim(), PEOPLE_DEBOUNCE_MS);
+  // Dropping below the minimum clears the term at once, so stale results never linger.
+  const term = q.trim().length >= PEOPLE_MIN_CHARS && debounced.length >= PEOPLE_MIN_CHARS ? debounced : "";
+  return useQuery({
+    queryKey: campaignKeys.people(term),
+    queryFn: ({ signal }) => searchPeople(term, signal),
+    enabled: term !== "",
+    placeholderData: (previous) => (term ? previous : undefined),
+    ...realtime,
+  });
+}
+
+export function useResolvePeople() {
+  // The paste panel shows its own notice; no duplicate global toast.
+  return useMutation({ mutationFn: resolvePeople, meta: { silent: true } });
+}
+
+/** Every box list, the summary and (when known) the detail depend on the status of a campaign. */
+function invalidateCampaigns(queryClient: QueryClient, id?: string) {
+  return Promise.all([
+    queryClient.invalidateQueries({ queryKey: campaignKeys.lists() }),
+    queryClient.invalidateQueries({ queryKey: campaignKeys.summary() }),
+    ...(id ? [queryClient.invalidateQueries({ queryKey: campaignKeys.detail(id) })] : []),
+  ]);
+}
+
+export function useCreateCampaign() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (draft: CampaignDraftRequest) => createCampaign(draft),
+    // The compose form shows these errors inline (role=alert); no global toast on top.
+    meta: { silent: true },
+    onSuccess: () => invalidateCampaigns(queryClient),
+  });
+}
+
+export function useUpdateCampaign() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, draft }: { id: string; draft: CampaignDraftRequest }) => updateCampaign(id, draft),
+    meta: { silent: true },
+    onSuccess: (_data, { id }) => invalidateCampaigns(queryClient, id),
+  });
+}
+
+export function useSendCampaign() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => sendCampaign(id),
+    meta: { silent: true },
+    onSuccess: (_data, id) => invalidateCampaigns(queryClient, id),
+  });
+}
+
+export function useScheduleCampaign(scheduledAt: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => scheduleCampaign(id, scheduledAt),
+    meta: { silent: true },
+    onSuccess: (_data, id) => invalidateCampaigns(queryClient, id),
+  });
+}
+
+export function useCancelCampaign() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => cancelCampaign(id),
+    // The confirm dialog shows the error inline.
+    meta: { silent: true },
+    onSuccess: (_data, id) => invalidateCampaigns(queryClient, id),
+  });
+}
+
+/** Read-ack from the inbox; refreshes that portal's inbox, detail and unread badge. */
+export function useAckNotification(portal: NotificationPortal = "lms") {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => ackNotification(id, portal),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: notificationQueryKeys.root(portal) }),
+  });
+}

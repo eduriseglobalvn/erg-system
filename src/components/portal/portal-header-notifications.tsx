@@ -1,49 +1,115 @@
-import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
+import { useEffect, useId, useRef, useState, type MouseEvent } from "react";
 import Box from "@mui/material/Box";
-import Drawer from "@mui/material/Drawer";
-import IconButton from "@mui/material/IconButton";
+import Button from "@mui/material/Button";
 import List from "@mui/material/List";
+import Popover from "@mui/material/Popover";
 import Typography from "@mui/material/Typography";
 
-import type { PortalNotification, PortalNotificationTab } from "./portal-header-notification-data";
+import { ErgSkeleton } from "@/components/erg-mui";
+import { adminPath, teacherPath } from "@/platform/workspaces/workspace-paths";
+
 import { PortalHeaderNotificationItem } from "./portal-header-notification-item";
+import type { PortalNotificationsState } from "./use-portal-notifications";
 
 type PortalHeaderNotificationsProps = {
-  activeTab: PortalNotificationTab;
-  notifications: PortalNotification[];
+  /** The bell (or the account tile on the desktop sidebar); focus goes back to it on close. */
+  anchorEl: HTMLElement | null;
+  state: PortalNotificationsState;
+  pathname: string;
+  /** Sidebar: opens to the right of the anchor, bottom-aligned. Header (default): below the bell, right-aligned. */
+  placement?: "header" | "sidebar";
   onClose: () => void;
-  onTabChange: (tab: PortalNotificationTab) => void;
-  open: boolean;
+  onNavigate?: (path: string) => void;
 };
 
-export function PortalHeaderNotifications({ activeTab, notifications, onClose, onTabChange, open }: PortalHeaderNotificationsProps) {
-  return (
-    <Drawer anchor="right" open={open} onClose={onClose} sx={{ "& .MuiDrawer-paper": { width: 400, bgcolor: "#FFFFFF", border: "none", boxShadow: "-4px 0 20px rgba(0,0,0,0.08)" } }}>
-      <Box sx={{ alignItems: "center", borderBottom: "1px solid rgba(145,158,171,0.12)", display: "flex", height: 72, justifyContent: "space-between", px: 3 }}>
-        <Typography sx={{ color: "#1C252E", fontSize: 20, fontWeight: 600 }}>Thông báo</Typography>
-        <IconButton onClick={onClose} sx={{ color: "#637381" }}><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M15 5L5 15M5 5L15 15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg></IconButton>
-      </Box>
-      <Box sx={{ borderBottom: "1px solid rgba(145,158,171,0.12)", display: "flex", px: 3 }}>
-        <NotificationTab active={activeTab === "all"} label="Tất cả" onClick={() => onTabChange("all")} />
-        <NotificationTab active={activeTab === "unread"} label="Chưa đọc" onClick={() => onTabChange("unread")} spaced />
-      </Box>
-      <Box sx={{ flex: 1, overflow: "auto" }}>
-        {notifications.length === 0 ? (
-          <Box sx={{ alignItems: "center", display: "flex", flexDirection: "column", justifyContent: "center", py: 8 }}>
-            <CheckCircleRoundedIcon sx={{ color: "#919EAB", fontSize: 48, mb: 2 }} />
-            <Typography sx={{ color: "#637381", fontSize: 14, fontWeight: 400 }}>Không có thông báo nào</Typography>
-          </Box>
-        ) : (
-          <List disablePadding>{notifications.map((notification, index) => <PortalHeaderNotificationItem isLast={index === notifications.length - 1} key={notification.id} notification={notification} />)}</List>
-        )}
-      </Box>
-      <Box sx={{ borderTop: "1px solid rgba(145,158,171,0.12)", p: 2 }}>
-        <Box sx={{ alignItems: "center", bgcolor: "#F4F6F8", borderRadius: "8px", color: "#1C252E", cursor: "pointer", display: "flex", fontSize: 14, fontWeight: 500, justifyContent: "center", p: 1.5, "&:hover": { bgcolor: "#EEF0FF" } }}>Xem thêm thông báo</Box>
-      </Box>
-    </Drawer>
-  );
+/** Where this workspace keeps its inbox; students and CRM have no routed inbox, so no links. */
+function inboxBase(pathname: string) {
+  const segment = pathname.split("/").filter(Boolean)[0];
+  if (segment === "admin") return adminPath("/notifications");
+  if (segment === "teacher") return teacherPath("/notifications");
+  return undefined;
 }
 
-function NotificationTab({ active, label, onClick, spaced = false }: { active: boolean; label: string; onClick: () => void; spaced?: boolean }) {
-  return <Box onClick={onClick} sx={{ borderBottom: active ? "2px solid #0071E3" : "2px solid transparent", color: active ? "#1C252E" : "#637381", cursor: "pointer", fontSize: 14, fontWeight: active ? 600 : 400, ml: spaced ? 3 : 0, pb: 2, pt: 2 }}>{label}</Box>;
+const PLACEMENTS = {
+  header: { anchorOrigin: { vertical: "bottom", horizontal: "right" }, transformOrigin: { vertical: "top", horizontal: "right" } },
+  sidebar: { anchorOrigin: { vertical: "top", horizontal: "right" }, transformOrigin: { vertical: "bottom", horizontal: "left" } },
+} as const;
+
+export function PortalHeaderNotifications({ anchorEl, state, pathname, placement = "header", onClose, onNavigate }: PortalHeaderNotificationsProps) {
+  const titleId = useId();
+  const base = inboxBase(pathname);
+  const { notifications, isPending, isError, refetch, markRead } = state;
+  const unreadIds = notifications.filter((item) => item.unread).map((item) => item.id);
+  const [marking, setMarking] = useState(false);
+  // The parent clears anchorEl when closing, so remember what opened us to give focus back after the exit transition.
+  const returnFocusRef = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    if (anchorEl) returnFocusRef.current = anchorEl;
+  }, [anchorEl]);
+
+  const markShownRead = () => {
+    setMarking(true);
+    void Promise.resolve(markRead(unreadIds)).finally(() => setMarking(false));
+  };
+
+  // Plain left-click goes through the router when the shell gave us one; modified clicks keep the anchor's default.
+  const open = (event: MouseEvent<HTMLElement>, href?: string) => {
+    if (href && onNavigate && event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey) {
+      event.preventDefault();
+      onNavigate(href);
+    }
+    onClose();
+  };
+
+  return (
+    <Popover
+      anchorEl={anchorEl}
+      open={Boolean(anchorEl)}
+      onClose={onClose}
+      {...PLACEMENTS[placement]}
+      slotProps={{
+        paper: { role: "dialog", "aria-labelledby": titleId, sx: { maxWidth: "calc(100vw - 32px)", mt: placement === "header" ? 0.5 : 0, width: 380 } },
+        transition: { onExited: () => returnFocusRef.current?.focus() },
+      }}
+    >
+      <Box sx={{ alignItems: "center", borderBottom: 1, borderColor: "divider", display: "flex", gap: 1, minHeight: 48, pl: 2, pr: 1 }}>
+        <Typography id={titleId} component="h2" variant="subtitle1" sx={{ flex: 1 }}>Thông báo</Typography>
+        <Button variant="text" size="small" aria-busy={marking} disabled={marking || unreadIds.length === 0} onClick={markShownRead} sx={{ minHeight: 44 }}>Đánh dấu đã đọc</Button>
+      </Box>
+      <Box sx={{ maxHeight: "min(60vh, 480px)", overflowY: "auto" }}>
+        {isPending ? (
+          <Box role="status" aria-label="Đang tải thông báo" sx={{ display: "grid", gap: 1.5, p: 2 }}>
+            {[0, 1, 2].map((n) => <ErgSkeleton key={n} variant="rounded" height={44} />)}
+          </Box>
+        ) : isError && notifications.length === 0 ? (
+          <Box sx={{ display: "grid", gap: 1, justifyItems: "center", p: 3 }}>
+            <Typography variant="body2" color="text.secondary">Không tải được thông báo.</Typography>
+            <Button variant="outlined" size="small" onClick={() => refetch()} sx={{ minHeight: 44 }}>Thử lại</Button>
+          </Box>
+        ) : notifications.length === 0 ? (
+          <Typography variant="body2" color="text.secondary" sx={{ p: 3, textAlign: "center" }}>Chưa có thông báo</Typography>
+        ) : (
+          <>
+            {isError ? (
+              // A failed refresh keeps the last list on screen; only say so inline.
+              <Box role="alert" sx={{ alignItems: "center", bgcolor: "action.hover", display: "flex", gap: 1, px: 2, py: 0.5 }}>
+                <Typography variant="caption" color="text.secondary" sx={{ flex: 1 }}>Không cập nhật được thông báo.</Typography>
+                <Button variant="text" size="small" onClick={() => refetch()} sx={{ minHeight: 44 }}>Thử lại</Button>
+              </Box>
+            ) : null}
+            <List disablePadding aria-label="Thông báo mới nhất">
+              {notifications.map((notification) => (
+                <PortalHeaderNotificationItem key={notification.id} notification={notification} href={base ? `${base}/${encodeURIComponent(notification.id)}` : undefined} onOpen={open} />
+              ))}
+            </List>
+          </>
+        )}
+      </Box>
+      {base ? (
+        <Box sx={{ borderTop: 1, borderColor: "divider", p: 1 }}>
+          <Button variant="text" fullWidth href={base} onClick={(event) => open(event, base)} sx={{ minHeight: 44 }}>Mở trang Thông báo</Button>
+        </Box>
+      ) : null}
+    </Popover>
+  );
 }

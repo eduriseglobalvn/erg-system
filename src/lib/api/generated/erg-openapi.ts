@@ -1691,7 +1691,7 @@ export interface paths {
         readonly delete: operations["delete_2"];
         readonly options?: never;
         readonly head?: never;
-        readonly patch?: never;
+        readonly patch: operations["update_2"];
         readonly trace?: never;
     };
     readonly "/api/v1/lcms/quizzes/{quizId}/bundle": {
@@ -2782,6 +2782,166 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
+    readonly "/api/v1/notification-campaigns": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["listCampaigns"];
+        readonly put?: never;
+        readonly post: operations["createCampaign"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/notification-campaigns/{id}": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["getCampaign"];
+        readonly put: operations["updateCampaign"];
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/notification-campaigns/{id}/cancel": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post: operations["cancelCampaign"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/notification-campaigns/{id}/recipients": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["listCampaignRecipients"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/notification-campaigns/{id}/schedule": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post: operations["scheduleCampaign"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/notification-campaigns/{id}/send": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post: operations["sendCampaign"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/notification-campaigns/estimate": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post: operations["estimateAudience"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/notification-campaigns/people": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["searchPeople"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/notification-campaigns/people/resolve": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post: operations["resolvePeople"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/notification-campaigns/summary": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["campaignSummary"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
     readonly "/api/v1/notification-devices": {
         readonly parameters: {
             readonly query?: never;
@@ -2846,6 +3006,22 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
+    readonly "/api/v1/notification-devices/web-push-config": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["webPushConfig"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
     readonly "/api/v1/notifications": {
         readonly parameters: {
             readonly query?: never;
@@ -2873,6 +3049,22 @@ export interface paths {
         readonly put?: never;
         readonly post?: never;
         readonly delete: operations["archive_1"];
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/notifications/{id}/ack": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post: operations["ack"];
+        readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
         readonly patch?: never;
@@ -3782,6 +3974,13 @@ export interface components {
             readonly recoveryEmailVerified?: boolean;
             readonly status?: string;
         };
+        readonly AckResponse: {
+            /** Format: date-time */
+            readonly ackedAt?: string;
+            readonly id?: string;
+            /** Format: date-time */
+            readonly readAt?: string;
+        };
         readonly ActivityListResponse: {
             readonly items?: readonly components["schemas"]["ActivityResponse"][];
             readonly meta?: components["schemas"]["Meta"];
@@ -3863,6 +4062,11 @@ export interface components {
         readonly AdminUpdateUserStatusRequest: {
             readonly status: string;
         };
+        readonly AmbiguousLine: {
+            /** Format: int32 */
+            readonly candidates?: number;
+            readonly line?: string;
+        };
         readonly AnswerResultResponse: {
             readonly attemptId?: string;
             readonly questionId?: string;
@@ -3870,6 +4074,17 @@ export interface components {
         };
         readonly ApiResponseAcademicYearResponse: {
             readonly data?: components["schemas"]["AcademicYearResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApiResponseAckResponse: {
+            readonly data?: components["schemas"]["AckResponse"];
             readonly errors?: unknown;
             readonly message?: string;
             readonly path?: string;
@@ -3991,6 +4206,17 @@ export interface components {
         };
         readonly ApiResponseAttemptSyncResponse: {
             readonly data?: components["schemas"]["AttemptSyncResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApiResponseAudienceBreakdown: {
+            readonly data?: components["schemas"]["AudienceBreakdown"];
             readonly errors?: unknown;
             readonly message?: string;
             readonly path?: string;
@@ -4156,6 +4382,28 @@ export interface components {
         };
         readonly ApiResponseCalendarWorkspaceResponse: {
             readonly data?: components["schemas"]["CalendarWorkspaceResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApiResponseCampaignResponse: {
+            readonly data?: components["schemas"]["CampaignResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApiResponseCampaignSummaryResponse: {
+            readonly data?: components["schemas"]["CampaignSummaryResponse"];
             readonly errors?: unknown;
             readonly message?: string;
             readonly path?: string;
@@ -4880,6 +5128,17 @@ export interface components {
             /** Format: date-time */
             readonly timestamp?: string;
         };
+        readonly ApiResponseListRecipientCard: {
+            readonly data?: readonly components["schemas"]["RecipientCard"][];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
         readonly ApiResponseListRoleResponse: {
             readonly data?: readonly components["schemas"]["RoleResponse"][];
             readonly errors?: unknown;
@@ -5062,6 +5321,28 @@ export interface components {
             /** Format: date-time */
             readonly timestamp?: string;
         };
+        readonly ApiResponsePageResponseCampaignRecipientResponse: {
+            readonly data?: components["schemas"]["PageResponseCampaignRecipientResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApiResponsePageResponseCampaignResponse: {
+            readonly data?: components["schemas"]["PageResponseCampaignResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
         readonly ApiResponsePageResponseNotificationItemResponse: {
             readonly data?: components["schemas"]["PageResponseNotificationItemResponse"];
             readonly errors?: unknown;
@@ -5218,6 +5499,17 @@ export interface components {
         };
         readonly ApiResponseReportJobResponse: {
             readonly data?: components["schemas"]["ReportJobResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApiResponseResolvePeopleResult: {
+            readonly data?: components["schemas"]["ResolvePeopleResult"];
             readonly errors?: unknown;
             readonly message?: string;
             readonly path?: string;
@@ -5469,6 +5761,17 @@ export interface components {
             /** Format: date-time */
             readonly timestamp?: string;
         };
+        readonly ApiResponseUpdateQuizResponse: {
+            readonly data?: components["schemas"]["UpdateQuizResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
         readonly ApiResponseUserCreatedResponse: {
             readonly data?: components["schemas"]["UserCreatedResponse"];
             readonly errors?: unknown;
@@ -5526,6 +5829,17 @@ export interface components {
         };
         readonly ApiResponseVoid: {
             readonly data?: unknown;
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApiResponseWebPushConfigResponse: {
+            readonly data?: components["schemas"]["WebPushConfigResponse"];
             readonly errors?: unknown;
             readonly message?: string;
             readonly path?: string;
@@ -5775,6 +6089,20 @@ export interface components {
             readonly conflicts?: readonly string[];
             readonly serverAttempt?: components["schemas"]["AttemptResponse"];
             readonly status?: string;
+        };
+        readonly AudienceBreakdown: {
+            /** Format: int32 */
+            readonly duplicatesMerged?: number;
+            /** Format: int32 */
+            readonly picked?: number;
+            /** Format: int32 */
+            readonly staff?: number;
+            /** Format: int32 */
+            readonly students?: number;
+            /** Format: int32 */
+            readonly teachers?: number;
+            /** Format: int32 */
+            readonly total?: number;
         };
         readonly AuditEntry: {
             readonly action?: string;
@@ -6131,6 +6459,94 @@ export interface components {
             readonly tenantId?: string;
             readonly to?: string;
             readonly viewMode?: string;
+        };
+        readonly CampaignAudience: {
+            readonly classIds?: readonly string[];
+            readonly gradeIds?: readonly string[];
+            readonly groupIds?: readonly string[];
+            readonly roles?: readonly string[];
+            readonly schoolIds?: readonly string[];
+            readonly userIds?: readonly string[];
+            readonly wholeTenant?: boolean;
+        };
+        readonly CampaignDraftRequest: {
+            readonly audience: components["schemas"]["CampaignAudience"];
+            readonly body: string;
+            /** @description INFO | IMPORTANT | URGENT (default INFO) */
+            readonly priority?: string;
+            /** @description Send a push to the recipients' devices too (default true) */
+            readonly pushEnabled?: boolean;
+            readonly requireReadAck?: boolean;
+            readonly title: string;
+        };
+        readonly CampaignRecipientResponse: {
+            /** Format: date-time */
+            readonly ackedAt?: string;
+            readonly displayName?: string;
+            /** Format: date-time */
+            readonly readAt?: string;
+            readonly userId?: string;
+        };
+        readonly CampaignResponse: {
+            /**
+             * Format: int64
+             * @description Recipients who acknowledged reading
+             */
+            readonly ackedCount?: number;
+            readonly audience?: components["schemas"]["CampaignAudience"];
+            readonly body?: string;
+            /** Format: date-time */
+            readonly createdAt?: string;
+            readonly createdBy?: string;
+            /** Format: int32 */
+            readonly estimatedCount?: number;
+            readonly id?: string;
+            /** @enum {string} */
+            readonly priority?: "INFO" | "IMPORTANT" | "URGENT";
+            readonly pushEnabled?: boolean;
+            /** Format: int64 */
+            readonly recipientCount?: number;
+            readonly requireReadAck?: boolean;
+            /** Format: int32 */
+            readonly resolvedCount?: number;
+            /** Format: date-time */
+            readonly scheduledAt?: string;
+            /** @description ADMIN or TEACHER */
+            readonly senderRole?: string;
+            /** Format: date-time */
+            readonly sentAt?: string;
+            /** @enum {string} */
+            readonly status?: "DRAFT" | "SCHEDULED" | "SENDING" | "SENT" | "CANCELLED" | "FAILED";
+            readonly title?: string;
+            /** Format: date-time */
+            readonly updatedAt?: string;
+            /**
+             * Format: int64
+             * @description Recipients who opened the message
+             */
+            readonly viewedCount?: number;
+        };
+        readonly CampaignSummaryResponse: {
+            /**
+             * Format: double
+             * @description Viewed recipients / recipients over campaigns sent this month, 0..1 (0 when none)
+             */
+            readonly avgViewedRate?: number;
+            /**
+             * Format: int64
+             * @description Campaigns sent since the start of the current month (Asia/Ho_Chi_Minh)
+             */
+            readonly sentThisMonth?: number;
+            /**
+             * Format: int64
+             * @description Sent campaigns requiring acknowledgement with at least one recipient not acknowledged
+             */
+            readonly unackedCampaigns?: number;
+            /**
+             * Format: int64
+             * @description Recipients who have not acknowledged, over sent campaigns that require acknowledgement
+             */
+            readonly unackedTotal?: number;
         };
         readonly CertificateResponse: {
             readonly certificateNumber?: string;
@@ -6825,6 +7241,8 @@ export interface components {
             readonly permissionState?: string;
             readonly platform?: string;
             readonly portal?: string;
+            /** @description FCM or WEB_PUSH */
+            readonly transport?: string;
         };
         readonly EducationUnitItem: {
             readonly id?: string;
@@ -7327,8 +7745,11 @@ export interface components {
             readonly totalPages?: number;
         };
         readonly NotificationItemResponse: {
+            /** Format: date-time */
+            readonly ackedAt?: string;
             readonly actionUrl?: string;
             readonly bodyPreview?: string;
+            readonly campaignId?: string;
             readonly channel?: string;
             /** Format: date-time */
             readonly createdAt?: string;
@@ -7338,9 +7759,18 @@ export interface components {
             readonly eventType?: string;
             readonly id?: string;
             readonly priority?: string;
+            /**
+             * @description priority normalised to INFO|IMPORTANT|URGENT (legacy normal->INFO, high->IMPORTANT); the raw priority field is unchanged for existing clients
+             * @enum {string}
+             */
+            readonly priorityLevel?: "INFO" | "IMPORTANT" | "URGENT";
             /** Format: date-time */
             readonly readAt?: string;
             readonly recipientId?: string;
+            /** @description true only for a campaign message whose campaign asks for a read acknowledgement */
+            readonly requireReadAck?: boolean;
+            /** @description display name of the campaign creator; null when unknown */
+            readonly senderName?: string;
             readonly sourceId?: string;
             readonly sourceType?: string;
             readonly status?: string;
@@ -7426,6 +7856,32 @@ export interface components {
             readonly hasNext?: boolean;
             readonly hasPrevious?: boolean;
             readonly items?: readonly components["schemas"]["AttemptResponse"][];
+            /** Format: int32 */
+            readonly page?: number;
+            /** Format: int32 */
+            readonly size?: number;
+            /** Format: int64 */
+            readonly totalItems?: number;
+            /** Format: int32 */
+            readonly totalPages?: number;
+        };
+        readonly PageResponseCampaignRecipientResponse: {
+            readonly hasNext?: boolean;
+            readonly hasPrevious?: boolean;
+            readonly items?: readonly components["schemas"]["CampaignRecipientResponse"][];
+            /** Format: int32 */
+            readonly page?: number;
+            /** Format: int32 */
+            readonly size?: number;
+            /** Format: int64 */
+            readonly totalItems?: number;
+            /** Format: int32 */
+            readonly totalPages?: number;
+        };
+        readonly PageResponseCampaignResponse: {
+            readonly hasNext?: boolean;
+            readonly hasPrevious?: boolean;
+            readonly items?: readonly components["schemas"]["CampaignResponse"][];
             /** Format: int32 */
             readonly page?: number;
             /** Format: int32 */
@@ -7646,6 +8102,12 @@ export interface components {
             /** Format: int32 */
             readonly version?: number;
         };
+        readonly RecipientCard: {
+            readonly displayName?: string;
+            readonly meta?: string;
+            readonly role?: string;
+            readonly userId?: string;
+        };
         readonly RecordAttainmentRequest: {
             readonly classId?: string;
             readonly competencyId: string;
@@ -7695,6 +8157,8 @@ export interface components {
             readonly client?: components["schemas"]["DeviceClientRequest"];
             readonly endpoint?: string;
             readonly firebaseInstallationId?: string;
+            /** @description PushSubscription.toJSON().keys; required for WEB_PUSH */
+            readonly keys?: components["schemas"]["WebPushKeysRequest"];
             readonly locale?: string;
             readonly permissionState?: string;
             readonly platform: string;
@@ -7702,6 +8166,8 @@ export interface components {
             readonly registrationToken?: string;
             readonly serviceWorkerScope?: string;
             readonly timezone?: string;
+            /** @description FCM (default) or WEB_PUSH */
+            readonly transport?: string;
         };
         readonly ReorderGroup: {
             readonly groupId?: string;
@@ -7754,6 +8220,14 @@ export interface components {
                 readonly [key: string]: unknown;
             };
             readonly status?: string;
+        };
+        readonly ResolvePeopleRequest: {
+            readonly lines: readonly string[];
+        };
+        readonly ResolvePeopleResult: {
+            readonly ambiguous?: readonly components["schemas"]["AmbiguousLine"][];
+            readonly matched?: readonly components["schemas"]["RecipientCard"][];
+            readonly notFound?: readonly string[];
         };
         readonly RetryRequest: {
             /** Format: int64 */
@@ -7872,6 +8346,13 @@ export interface components {
         readonly SaveQuestionResponse: {
             readonly questionId?: string;
             readonly status?: string;
+        };
+        readonly ScheduleCampaignRequest: {
+            /**
+             * Format: date-time
+             * @description Must be in (now, now + 30 days]
+             */
+            readonly scheduledAt: string;
         };
         readonly SchoolContactResponse: {
             readonly email?: string;
@@ -8402,6 +8883,17 @@ export interface components {
             };
             readonly teaching_philosophy?: string;
         };
+        readonly UpdateQuizRequest: {
+            readonly kind?: string;
+            readonly title?: string;
+        };
+        readonly UpdateQuizResponse: {
+            readonly kind?: string;
+            readonly quizId?: string;
+            readonly title?: string;
+            /** Format: date-time */
+            readonly updatedAt?: string;
+        };
         readonly UpdateRecipientsRequest: {
             readonly classId?: string;
             readonly groupId?: string;
@@ -8535,6 +9027,15 @@ export interface components {
         readonly VersionRequest: {
             /** Format: int64 */
             readonly version: number;
+        };
+        readonly WebPushConfigResponse: {
+            readonly enabled?: boolean;
+            /** @description VAPID applicationServerKey (base64url); null when Web Push is disabled */
+            readonly publicKey?: string;
+        };
+        readonly WebPushKeysRequest: {
+            readonly auth?: string;
+            readonly p256dh?: string;
         };
         readonly WorkspacePage: {
             readonly hasMore?: boolean;
@@ -11527,6 +12028,32 @@ export interface operations {
             };
         };
     };
+    readonly update_2: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly quizId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["UpdateQuizRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseUpdateQuizResponse"];
+                };
+            };
+        };
+    };
     readonly exportActive: {
         readonly parameters: {
             readonly query?: never;
@@ -13604,6 +14131,289 @@ export interface operations {
             };
         };
     };
+    readonly listCampaigns: {
+        readonly parameters: {
+            readonly query?: {
+                readonly box?: string;
+                readonly mine?: boolean;
+                readonly page?: number;
+                readonly size?: number;
+            };
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponsePageResponseCampaignResponse"];
+                };
+            };
+        };
+    };
+    readonly createCampaign: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["CampaignDraftRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseCampaignResponse"];
+                };
+            };
+        };
+    };
+    readonly getCampaign: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly id: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseCampaignResponse"];
+                };
+            };
+        };
+    };
+    readonly updateCampaign: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly id: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["CampaignDraftRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseCampaignResponse"];
+                };
+            };
+        };
+    };
+    readonly cancelCampaign: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly id: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseCampaignResponse"];
+                };
+            };
+        };
+    };
+    readonly listCampaignRecipients: {
+        readonly parameters: {
+            readonly query?: {
+                readonly filter?: string;
+                readonly page?: number;
+                readonly size?: number;
+            };
+            readonly header?: never;
+            readonly path: {
+                readonly id: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponsePageResponseCampaignRecipientResponse"];
+                };
+            };
+        };
+    };
+    readonly scheduleCampaign: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly id: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["ScheduleCampaignRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseCampaignResponse"];
+                };
+            };
+        };
+    };
+    readonly sendCampaign: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly id: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseCampaignResponse"];
+                };
+            };
+        };
+    };
+    readonly estimateAudience: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["CampaignAudience"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseAudienceBreakdown"];
+                };
+            };
+        };
+    };
+    readonly searchPeople: {
+        readonly parameters: {
+            readonly query?: {
+                readonly q?: string;
+            };
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseListRecipientCard"];
+                };
+            };
+        };
+    };
+    readonly resolvePeople: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["ResolvePeopleRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseResolvePeopleResult"];
+                };
+            };
+        };
+    };
+    readonly campaignSummary: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseCampaignSummaryResponse"];
+                };
+            };
+        };
+    };
     readonly register: {
         readonly parameters: {
             readonly query?: never;
@@ -13700,6 +14510,26 @@ export interface operations {
             };
         };
     };
+    readonly webPushConfig: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseWebPushConfigResponse"];
+                };
+            };
+        };
+    };
     readonly list: {
         readonly parameters: {
             readonly query?: {
@@ -13769,6 +14599,30 @@ export interface operations {
                 };
                 content: {
                     readonly "*/*": components["schemas"]["ApiResponseArchiveResponse"];
+                };
+            };
+        };
+    };
+    readonly ack: {
+        readonly parameters: {
+            readonly query?: {
+                readonly portal?: string;
+            };
+            readonly header?: never;
+            readonly path: {
+                readonly id: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseAckResponse"];
                 };
             };
         };

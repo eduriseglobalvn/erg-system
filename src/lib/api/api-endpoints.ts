@@ -7,6 +7,7 @@ const permissionsRoot = "/api/v1/permissions" satisfies ContractPath;
 const rolesRoot = "/api/v1/roles" satisfies ContractPath;
 const usersRoot = "/api/v1/users";
 const curriculumRoot = "/api/v1/curriculum";
+const notificationCampaignsRoot = "/api/v1/notification-campaigns" satisfies ContractPath;
 
 export const API_ENDPOINTS = {
   access: {
@@ -232,10 +233,24 @@ export const API_ENDPOINTS = {
     detail: (notificationId: string) => path(`/api/v1/notifications/${encodeApiPathSegment(notificationId)}`),
     read: (notificationId: string) => path(`/api/v1/notifications/${encodeApiPathSegment(notificationId)}/read`),
     readAll: path("/api/v1/notifications/read-all"),
+    ack: (notificationId: string) => path(`/api/v1/notifications/${encodeApiPathSegment(notificationId)}/ack`),
     preferences: path("/api/v1/notifications/preferences"),
     unregisterDevice: path("/api/v1/notification-devices/unregister"),
     heartbeat: path("/api/v1/notification-devices/heartbeat"),
     device: (deviceId: string) => path(`/api/v1/notification-devices/${encodeApiPathSegment(deviceId)}`),
+    webPushConfig: path("/api/v1/notification-devices/web-push-config"),
+  },
+  notificationCampaigns: {
+    root: path(notificationCampaignsRoot),
+    estimate: path(`${notificationCampaignsRoot}/estimate`),
+    people: path(`${notificationCampaignsRoot}/people`),
+    resolvePeople: path(`${notificationCampaignsRoot}/people/resolve`),
+    summary: path(`${notificationCampaignsRoot}/summary`),
+    detail: (id: string) => path(`${notificationCampaignsRoot}/${encodeApiPathSegment(id)}`),
+    send: (id: string) => path(`${notificationCampaignsRoot}/${encodeApiPathSegment(id)}/send`),
+    schedule: (id: string) => path(`${notificationCampaignsRoot}/${encodeApiPathSegment(id)}/schedule`),
+    cancel: (id: string) => path(`${notificationCampaignsRoot}/${encodeApiPathSegment(id)}/cancel`),
+    recipients: (id: string) => path(`${notificationCampaignsRoot}/${encodeApiPathSegment(id)}/recipients`),
   },
   userAdmin: {
     accessScopes: (userId: string) => path(`/api/v1/users/${encodeApiPathSegment(userId)}/access-scopes`),

@@ -18,6 +18,9 @@ type LmsPath = (typeof lmsPaths)[number];
 
 const routePages = () => import("@/features/lms/components/lms-teacher-route-pages");
 const page = (name: keyof Awaited<ReturnType<typeof routePages>>) => lazyRouteComponent(routePages, name);
+const composePage = lazyRouteComponent(() => import("@/app/pages/shared/notification-compose-page"), "TeacherNotificationComposePage");
+const inboxPage = (name: "TeacherNotificationsPage" | "TeacherNotificationDetailPage" | "TeacherCampaignDetailPage") =>
+  lazyRouteComponent(() => import("@/app/pages/shared/notification-inbox-page"), name);
 
 const AssignThemeRow = lazy(() =>
   import("@/features/lcms/quiz/quiz-theme/assign-theme-row").then((module) => ({ default: module.AssignThemeRow })),
@@ -46,7 +49,8 @@ const TEACHER_PAGES: Record<LmsPath, ReturnType<typeof page>> = {
   "homework/class": page("TeacherClassManagementRoute"),
   "homework/student-groups": page("TeacherStudentGroupsRoute"),
   learning: page("TeacherLearningHubRoute"),
-  notifications: page("TeacherNotificationsRoute"),
+  notifications: inboxPage("TeacherNotificationsPage"),
+  "notifications/compose": composePage,
   account: page("TeacherAccountRoute"),
   "account/login-logs": page("TeacherLoginLogsRoute"),
   score: page("TeacherScoreRoute"),
@@ -84,7 +88,22 @@ const teacherNotificationDetailRoute = createRoute({
   getParentRoute: () => teacherShellRoute,
   path: "/teacher/notifications/$notificationId",
   staticData: permissionStaticData(teacherPath("/notifications"), "TEACHER"),
-  component: page("TeacherNotificationDetailRoute"),
+  component: inboxPage("TeacherNotificationDetailPage"),
+});
+
+// One of the teacher's own campaigns (KPIs, recipients); needs the send permission (matrix row notifications/sent).
+const teacherCampaignDetailRoute = createRoute({
+  getParentRoute: () => teacherShellRoute,
+  path: "/teacher/notifications/sent/$campaignId",
+  staticData: permissionStaticData(teacherPath("/notifications/sent"), "TEACHER"),
+  component: inboxPage("TeacherCampaignDetailPage"),
+});
+
+const teacherNotificationComposeEditRoute = createRoute({
+  getParentRoute: () => teacherShellRoute,
+  path: "/teacher/notifications/compose/$campaignId",
+  staticData: permissionStaticData(teacherPath("/notifications/compose"), "TEACHER"),
+  component: composePage,
 });
 
 // Standalone pages: same session/host guard, but not inside the Teacher shell.
@@ -117,7 +136,7 @@ const learningOutcomesTeacherRoute = createRoute({
 });
 
 export const teacherRoutes = [
-  teacherShellRoute.addChildren([teacherIndexRoute, ...teacherPageRoutes, teacherNotificationDetailRoute]),
+  teacherShellRoute.addChildren([teacherIndexRoute, ...teacherPageRoutes, teacherNotificationDetailRoute, teacherCampaignDetailRoute, teacherNotificationComposeEditRoute]),
   teacherProfileRoute,
   teacherPortableExamRoute,
   teacherDesktopReleaseRoute,

@@ -1,5 +1,6 @@
 import { API_ENDPOINTS } from "@/lib/api/api-endpoints";
 import { apiRequest } from "@/lib/api-client";
+import type { components } from "@/lib/api/generated/erg-openapi";
 import { runtimeFixturesEnabled } from "@/lib/runtime-fixtures";
 import type {
   NotificationDetailResponse,
@@ -29,6 +30,8 @@ import {
   markMockNotificationRead,
   setMockNotificationPreferences,
 } from "./notification-mock-store";
+
+type AckResult = components["schemas"]["AckResponse"];
 
 export async function fetchNotificationFeed(input: { page?: number; portal?: NotificationPortal; size?: number; status?: NotificationStatusFilter } = {}, signal?: AbortSignal) {
   const portal = normalizePortal(input.portal);
@@ -110,6 +113,27 @@ export async function markNotificationRead(notificationId: string, portal: Notif
   search.set("portal", normalizedPortal);
   return apiRequest<{ read: boolean; updated: number }>(`${API_ENDPOINTS.notifications.read(notificationId)}?${search.toString()}`, {
     method: "PATCH",
+    portal: toApiPortal(normalizedPortal),
+  });
+}
+
+/** Read-acknowledgement of a campaign message; the server also marks it read. */
+export async function ackNotification(notificationId: string, portal: NotificationPortal = "lms") {
+  if (!notificationId) {
+    throw new Error("notificationId is required.");
+  }
+
+  const normalizedPortal = normalizePortal(portal);
+
+  if (runtimeFixturesEnabled()) {
+    markMockNotificationRead(normalizedPortal, notificationId);
+    return;
+  }
+
+  const search = new URLSearchParams();
+  search.set("portal", normalizedPortal);
+  await apiRequest<AckResult>(`${API_ENDPOINTS.notifications.ack(notificationId)}?${search.toString()}`, {
+    method: "POST",
     portal: toApiPortal(normalizedPortal),
   });
 }

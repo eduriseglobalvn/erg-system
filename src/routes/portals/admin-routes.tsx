@@ -23,6 +23,11 @@ const QuestionTypeDemoPage = lazy(() =>
 const routePages = () => import("@/features/lcms/admin-route-pages");
 const page = (name: keyof Awaited<ReturnType<typeof routePages>>) => lazyRouteComponent(routePages, name);
 
+const composePage = (name: "AdminNotificationComposePage" | "TeacherNotificationComposePage") =>
+  lazyRouteComponent(() => import("@/app/pages/shared/notification-compose-page"), name);
+const inboxPage = (name: "AdminNotificationsPage" | "AdminNotificationDetailPage" | "AdminCampaignDetailPage") =>
+  lazyRouteComponent(() => import("@/app/pages/shared/notification-inbox-page"), name);
+
 const CONTENT_REDIRECTED_SEGMENTS = ["questions", "quiz-bank", "quiz-editor"];
 
 /** Component of the Admin menu entries that have their own screen; every other entry uses the generic host. */
@@ -32,6 +37,8 @@ function adminPageFor(wPath: string) {
   if (wPath === "employees") return page("AdminEmployeesRoute");
   if (wPath === "employees/access-logs") return page("AdminEmployeeAccessLogsRoute");
   if (wPath === "ui-kit") return page("AdminUiKitRoute");
+  if (wPath === "notifications") return inboxPage("AdminNotificationsPage");
+  if (wPath === "notifications/compose") return composePage("AdminNotificationComposePage");
   if (wPath === "schools" || wPath.startsWith("schools/")) return page("AdminSchoolsRoute");
   return page("AdminGenericRoute");
 }
@@ -65,6 +72,30 @@ const adminMenuRoutes = lcmsWorkspacePaths
       component: adminPageFor(wPath),
     });
   });
+
+// Edit a saved draft / scheduled campaign; the matrix row of notifications/compose covers its children.
+const adminNotificationComposeEditRoute = createRoute({
+  getParentRoute: () => adminShellRoute,
+  path: "/admin/notifications/compose/$campaignId",
+  staticData: permissionStaticData(adminPath("/notifications/compose"), "ADMIN"),
+  component: composePage("AdminNotificationComposePage"),
+});
+
+// One inbox message; the matrix row of notifications covers its children (every admin reads their own inbox).
+const adminNotificationDetailRoute = createRoute({
+  getParentRoute: () => adminShellRoute,
+  path: "/admin/notifications/$notificationId",
+  staticData: permissionStaticData(adminPath("/notifications"), "ADMIN"),
+  component: inboxPage("AdminNotificationDetailPage"),
+});
+
+// One campaign (KPIs, recipients); "sent/" keeps it apart from compose and $notificationId. Own matrix row: the send permission.
+const adminCampaignDetailRoute = createRoute({
+  getParentRoute: () => adminShellRoute,
+  path: "/admin/notifications/sent/$campaignId",
+  staticData: permissionStaticData(adminPath("/notifications/sent"), "ADMIN"),
+  component: inboxPage("AdminCampaignDetailPage"),
+});
 
 // Legacy alias of settings/roles.
 const settingCenterRoleRedirectRoute = createRoute({
@@ -147,6 +178,9 @@ export const adminAuthedRoutes = [
     adminIndexRoute,
     ...adminContentRoutes,
     ...adminMenuRoutes,
+    adminNotificationComposeEditRoute,
+    adminNotificationDetailRoute,
+    adminCampaignDetailRoute,
     ...adminIntegrationRoutes.map(([path, pageName]) =>
       createRoute({ getParentRoute: () => adminShellRoute, path, staticData: permissionStaticData(path, "ADMIN"), component: page(pageName) }),
     ),

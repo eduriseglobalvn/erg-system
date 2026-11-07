@@ -29,8 +29,19 @@ describe("route/resource/action permission matrix", () => {
     ["/student", "STUDENT", "elearning.assignment.read_self"],
     ["/student/exams/portable", "STUDENT", "elearning.assignment.read_self"],
     ["/student/downloads/desktop", "STUDENT", "elearning.assignment.read_self"],
+    ["/admin/notifications/compose", "ADMIN", "notification.campaign.send"],
+    ["/admin/notifications/compose/c1", "ADMIN", "notification.campaign.send"],
+    ["/teacher/notifications/compose", "TEACHER", "notification.campaign.send"],
+    ["/teacher/notifications/compose/c1", "TEACHER", "notification.campaign.send"],
+    ["/teacher/notifications/n1", "TEACHER", "lms.notification.read"],
   ] as const)("maps %s to %s permission %s", (path, workspace, permission) => {
     expect(routePermissionForPath(path, workspace)).toMatchObject({ permission });
+  });
+
+  it.each(["/admin/notifications", "/admin/notifications/n1"])("opens the admin inbox %s with lms.admin or the send permission", (path) => {
+    const entry = routePermissionForPath(path, "ADMIN");
+    expect(entry).toMatchObject({ path: "/admin/notifications", permission: "lms.admin", alternatePermissions: ["notification.campaign.send"] });
+    expect(routePermissionForPath("/admin/notifications/compose", "ADMIN")?.alternatePermissions).toBeUndefined();
   });
 
   it("fails closed for an unknown protected route instead of inventing a permission", () => {
