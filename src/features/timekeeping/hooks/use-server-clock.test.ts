@@ -42,3 +42,21 @@ test("re-measures on visibility change at most every 5 minutes", async () => {
   act(() => { document.dispatchEvent(new Event("visibilitychange")); });
   expect(clock).toHaveBeenCalledTimes(2);
 });
+
+test("retries with backoff until the first success, then re-measures on the 5-minute interval", async () => {
+  clock.mockRejectedValueOnce(new Error("offline")).mockRejectedValueOnce(new Error("offline"));
+  clock.mockImplementation(async () => ({ serverTime: new Date().toISOString() }));
+  const { result, unmount } = renderHook(() => useServerClock());
+  await act(async () => { await vi.advanceTimersByTimeAsync(0); });
+  expect(result.current.ready).toBe(false);
+  await act(async () => { await vi.advanceTimersByTimeAsync(2_000); });
+  expect(result.current.ready).toBe(false);
+  await act(async () => { await vi.advanceTimersByTimeAsync(5_000); });
+  expect(result.current.ready).toBe(true);
+  expect(clock).toHaveBeenCalledTimes(3);
+  await act(async () => { await vi.advanceTimersByTimeAsync(SERVER_CLOCK_REMEASURE_MS); });
+  expect(clock).toHaveBeenCalledTimes(4);
+  unmount();
+  await act(async () => { await vi.advanceTimersByTimeAsync(SERVER_CLOCK_REMEASURE_MS * 2); });
+  expect(clock).toHaveBeenCalledTimes(4);
+});

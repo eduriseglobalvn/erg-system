@@ -36,7 +36,10 @@ export function useGeolocation(opts: { timeoutMs?: number } = {}): {
           at: position.timestamp,
         });
       },
-      (failure) => setError(ERROR_BY_CODE[failure.code] ?? "unavailable"),
+      (failure) => {
+        setReading(null); // never keep a stale fix once the device reports a problem
+        setError(ERROR_BY_CODE[failure.code] ?? "unavailable");
+      },
       { enableHighAccuracy: true, timeout: timeoutMs, maximumAge: 0 },
     );
   }, [stop, timeoutMs]);

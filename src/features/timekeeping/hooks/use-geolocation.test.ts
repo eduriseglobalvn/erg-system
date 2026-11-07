@@ -45,3 +45,20 @@ test("stores the latest reading", () => {
   expect(result.current.reading).toEqual({ lat: 21, lng: 105, accuracyM: 12, at: 1_000 });
   expect(result.current.error).toBeNull();
 });
+
+test("clears the last fix when a later error arrives", () => {
+  setSecure(true);
+  let fail!: (e: { code: number }) => void;
+  const watchPosition = vi.fn((ok: (p: unknown) => void, onError: (e: { code: number }) => void) => {
+    fail = onError;
+    ok({ coords: { latitude: 21, longitude: 105, accuracy: 12 }, timestamp: 1 });
+    return 1;
+  });
+  Object.defineProperty(navigator, "geolocation", { configurable: true, value: { watchPosition, clearWatch: vi.fn() } });
+  const { result } = renderHook(() => useGeolocation());
+  act(() => result.current.request());
+  expect(result.current.reading).not.toBeNull();
+  act(() => fail({ code: 3 }));
+  expect(result.current.reading).toBeNull();
+  expect(result.current.error).toBe("timeout");
+});

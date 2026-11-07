@@ -14,6 +14,7 @@ export function useCameraCapture(): {
 } {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const mounted = useRef(true);
   const supported = typeof navigator !== "undefined" && typeof navigator.mediaDevices?.getUserMedia === "function";
 
   const stop = useCallback(() => {
@@ -25,14 +26,23 @@ export function useCameraCapture(): {
   const start = useCallback(async () => {
     stop();
     const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user", width: { ideal: 1280 } }, audio: false });
-    streamRef.current = stream;
     const video = videoRef.current;
-    if (!video) return;
+    // Unmounted (or no element) while the permission prompt was open: release the camera at once.
+    if (!mounted.current || !video) {
+      stream.getTracks().forEach((track) => track.stop());
+      return;
+    }
+    streamRef.current = stream;
     // iOS 15 refuses inline autoplay unless both are set on the element before play().
     video.muted = true;
     video.playsInline = true;
     video.srcObject = stream;
-    await video.play();
+    try {
+      await video.play();
+    } catch (error) {
+      stop();
+      throw error;
+    }
   }, [stop]);
 
   const capture = useCallback(async () => {
@@ -48,6 +58,12 @@ export function useCameraCapture(): {
     });
   }, []);
 
-  useEffect(() => stop, [stop]);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      stop();
+    };
+  }, [stop]);
   return { videoRef, start, stop, capture, supported, fallbackInputProps: { type: "file", accept: "image/*", capture: "user" } };
 }

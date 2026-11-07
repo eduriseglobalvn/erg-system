@@ -13,6 +13,7 @@ export const timekeepingKeys = {
   day: (date: string) => ["timekeeping", "day", date] as const,
   myRequests: (status?: string) => ["timekeeping", "requests", "mine", status ?? "all"] as const,
   request: (id: string) => ["timekeeping", "requests", id] as const,
+  approvalsCount: ["timekeeping", "approvals", "count"] as const,
   approvals: (box: ApprovalBox, type?: string) => ["timekeeping", "approvals", box, type ?? "all"] as const,
 };
 
@@ -48,7 +49,7 @@ export function useTimekeepingDay(date: string | undefined) {
 /** Pending approvals for the admin menu badge; `enabled` should be the caller's `timekeeping.approve` check. */
 export function usePendingApprovalCount(enabled: boolean) {
   return useQuery({
-    queryKey: timekeepingKeys.approvals("MINE"),
+    queryKey: timekeepingKeys.approvalsCount,
     queryFn: ({ signal }) => timekeepingApi.approvals({ box: "MINE", size: 1 }, signal),
     select: (page) => page.total ?? 0,
     enabled,
