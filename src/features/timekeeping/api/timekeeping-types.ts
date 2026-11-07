@@ -10,6 +10,7 @@ export type PunchResult = Schemas["PunchResult"];
 export type MonthView = Schemas["MonthView"];
 export type MonthDayView = Schemas["MonthDayView"];
 export type DayDetailView = Schemas["DayDetailView"];
+export type DayPunchView = Schemas["DayPunchView"];
 export type DayStatus = NonNullable<Schemas["MonthDayView"]["status"]>;
 
 export type RequestCommand = Schemas["RequestCommand"];

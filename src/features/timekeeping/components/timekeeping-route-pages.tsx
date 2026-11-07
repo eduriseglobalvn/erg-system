@@ -1,7 +1,11 @@
 import Box from "@mui/material/Box";
+import { useSearch } from "@tanstack/react-router";
 
 import { ErgPageHeader } from "@/components/erg-mui/erg-page-header";
+import { DayDetailPage } from "./my-timesheet/day-detail-page";
+import { MyTimesheetPage } from "./my-timesheet/my-timesheet-page";
 import { PunchTodayPage } from "./punch/punch-today-page";
+import { periodOf } from "./punch/punch-format";
 import { PunchVerifyPage } from "./punch/punch-verify-page";
 
 /** Empty screens with a title; the G/A screens (later tasks) replace the bodies. */
@@ -21,8 +25,13 @@ export function TeacherTimekeepingPunchRoute() {
   return <PunchVerifyPage />;
 }
 
+/** G04 month view; `?date=yyyy-MM-dd` switches the same route to the G05 day detail. */
 export function TeacherTimekeepingTimesheetRoute() {
-  return <TimekeepingPageShell description="Công, đi muộn và nghỉ phép theo tháng." title="Bảng công của tôi" />;
+  const search = useSearch({ strict: false }) as { date?: unknown; period?: unknown };
+  const date = typeof search.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(search.date) ? search.date : undefined;
+  const currentPeriod = periodOf(new Date());
+  const period = typeof search.period === "string" && /^\d{4}-(0[1-9]|1[0-2])$/.test(search.period) ? search.period : currentPeriod;
+  return date ? <DayDetailPage date={date} /> : <MyTimesheetPage currentPeriod={currentPeriod} period={period} />;
 }
 
 export function TeacherTimekeepingRequestsRoute() {
