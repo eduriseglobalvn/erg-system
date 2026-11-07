@@ -4,6 +4,7 @@ import FlagRoundedIcon from "@mui/icons-material/FlagRounded";
 import DashboardRoundedIcon from "@mui/icons-material/DashboardRounded";
 import EventAvailableRoundedIcon from "@mui/icons-material/EventAvailableRounded";
 import ExtensionRoundedIcon from "@mui/icons-material/ExtensionRounded";
+import FingerprintRoundedIcon from "@mui/icons-material/FingerprintRounded";
 import FolderRoundedIcon from "@mui/icons-material/FolderRounded";
 import HowToRegRoundedIcon from "@mui/icons-material/HowToRegRounded";
 import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
@@ -142,6 +143,17 @@ export const ADMIN_BASE_MENU_GROUPS: MenuGroup[] = [
           },
         ],
       }),
+      item({
+        id: "timekeeping",
+        label: "Chấm công",
+        icon: <FingerprintRoundedIcon />,
+        children: [
+          { id: "timekeeping-today", label: "Hôm nay", path: "/employees/timekeeping", description: "Ai đã chấm, ai chưa chấm và các trường hợp cần xử lý." },
+          { id: "timekeeping-timesheet", label: "Bảng công", path: "/employees/timesheet", description: "Bảng công tháng của nhân sự, chốt kỳ và xuất Excel." },
+          { id: "timekeeping-approvals", label: "Duyệt đơn", path: "/employees/teacher-absence", description: "Duyệt đơn nghỉ phép, giải trình, làm việc tại nhà và công tác." },
+          { id: "timekeeping-settings", label: "Cấu hình chấm công", path: "/employees/timekeeping-settings", description: "Địa điểm, ca làm, chính sách và ngày lễ." },
+        ],
+      }),
     ],
   },
   {
@@ -166,6 +178,18 @@ export const ADMIN_BASE_MENU_GROUPS: MenuGroup[] = [
     ],
   },
 ];
+
+/** Drops "Chấm công" entries the session cannot open and shows the pending-approval count on "Duyệt đơn". */
+export function withTimekeepingMenuState(groups: MenuGroup[], canAccess: (path: string) => boolean, pendingApprovals = 0): MenuGroup[] {
+  const refine = (menuItem: MenuItem): MenuItem[] => {
+    if (menuItem.id !== "timekeeping") return [menuItem];
+    const children = (menuItem.children ?? [])
+      .filter((child) => !child.path || canAccess(child.path))
+      .map((child) => (child.id === "timekeeping-approvals" && pendingApprovals > 0 ? { ...child, badge: pendingApprovals > 99 ? "99+" : String(pendingApprovals) } : child));
+    return children.length ? [{ ...menuItem, children }] : [];
+  };
+  return groups.map((group) => ({ ...group, items: group.items.flatMap(refine) }));
+}
 
 // Báo cáo (7 màn), Tổng đài, Zalo và API key bị ẩn: backend chưa có API đọc/ghi tương ứng (KE_HOACH 7.6). Chỉ thêm lại khi có endpoint thật.
 export const LCMS_MENU_GROUPS = ADMIN_BASE_MENU_GROUPS;

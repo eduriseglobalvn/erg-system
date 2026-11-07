@@ -31,6 +31,8 @@ export const lcmsWorkspacePaths = [
   "employees",
   "employees/access-logs",
   "employees/face-detection",
+  "employees/timekeeping",
+  "employees/timekeeping-settings",
   "employees/timesheet",
   "employees/teacher-absence",
   "report/dashboard-report",
@@ -104,4 +106,9 @@ export const lmsPaths = [
   "class-log",
   "resources",
   "reports",
+  "timekeeping",
+  "timekeeping/punch",
+  "timekeeping/timesheet",
+  "timekeeping/requests",
+  "timekeeping/approvals",
 ] as const;

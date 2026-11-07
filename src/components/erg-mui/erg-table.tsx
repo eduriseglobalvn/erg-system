@@ -9,10 +9,12 @@ import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
 type ErgDataTableShellProps = PaperProps & {
   footer?: ReactNode;
   toolbar?: ReactNode;
+  /** Names the horizontally scrolling area and makes it keyboard-focusable (arrow keys scroll). */
+  scrollLabel?: string;
 };
 
 /** Card around a table: 1px border, no shadow at rest (design system: shadow only on floating surfaces). */
-export function ErgDataTableShell({ children, footer, toolbar, sx, ...props }: ErgDataTableShellProps) {
+export function ErgDataTableShell({ children, footer, scrollLabel, toolbar, sx, ...props }: ErgDataTableShellProps) {
   return (
     <Paper
       elevation={0}
@@ -32,7 +34,7 @@ export function ErgDataTableShell({ children, footer, toolbar, sx, ...props }: E
       {...props}
     >
       {toolbar}
-      <TableContainer sx={{ minHeight: 0 }}>{children}</TableContainer>
+      <TableContainer {...(scrollLabel ? { "aria-label": scrollLabel, role: "region", tabIndex: 0 } : {})} sx={{ minHeight: 0 }}>{children}</TableContainer>
       {footer}
     </Paper>
   );

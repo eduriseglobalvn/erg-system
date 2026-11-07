@@ -6,8 +6,18 @@ import { createStore, del, get, set } from "idb-keyval";
 export const QUERY_CACHE_BUSTER = "erg-query-cache-v6";
 export const QUERY_CACHE_STORAGE_KEY = `ERG_QUERY_CACHE:${QUERY_CACHE_BUSTER}`;
 
-export function shouldDehydratePersistedQuery(query: Pick<Query, "meta" | "state">) {
+// Punch state is only true right now: never restore it from disk, even if a query opts in by mistake.
+const NEVER_PERSISTED_TIMEKEEPING_QUERIES = new Set(["clock", "today"]);
+
+export function shouldDehydratePersistedQuery(query: Pick<Query, "meta" | "state"> & { queryKey?: readonly unknown[] }) {
+  const [root, name] = query.queryKey ?? [];
+  if (root === "timekeeping" && typeof name === "string" && NEVER_PERSISTED_TIMEKEEPING_QUERIES.has(name)) return false;
   return query.state.status === "success" && query.meta?.persist === true;
+}
+
+// The library default dehydrates paused mutations so they replay after reload. A punch queued offline must not be sent later.
+export function shouldDehydratePersistedMutation() {
+  return false;
 }
 
 export function queryCacheScopeKey(scope: { portal: string; workspace?: string; tenantId: string; accountId: string }) {

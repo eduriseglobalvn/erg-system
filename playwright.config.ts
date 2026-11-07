@@ -32,6 +32,21 @@ export default defineConfig({
     { name: "teacher-pwa-calendar-home", testMatch: /teacher-pwa-calendar-home\.spec\.ts/, use: { baseURL: portalHost("lms") } },
     { name: "teacher-mobile-calendar", testMatch: /teacher-mobile-calendar\.spec\.ts/, use: { baseURL: portalHost("lms") } },
     { name: "mobile-dock", testMatch: /mobile-dock[.]spec[.]ts/, use: { baseURL: portalHost("lms") } },
+    {
+      name: "timekeeping-punch",
+      testMatch: /timekeeping-punch[.]spec[.]ts/,
+      use: {
+        baseURL: portalHost("lms"),
+        geolocation: { latitude: 21.0285, longitude: 105.8542, accuracy: 20 },
+        launchOptions: {
+          // Chrome serves a synthetic camera and auto-accepts the permission prompt; launchOptions replaces the default, so keep the host rule.
+          args: ["--host-resolver-rules=MAP *.erg.edu.local 127.0.0.1", "--use-fake-device-for-media-stream", "--use-fake-ui-for-media-stream"],
+        },
+        permissions: ["geolocation", "camera"],
+        viewport: { width: 375, height: 667 },
+      },
+    },
+    { name: "timekeeping-admin-mobile", testMatch: /timekeeping-admin-mobile[.]spec[.]ts/, use: { baseURL: portalHost("lcms"), viewport: { width: 375, height: 667 } } },
     { name: "crm", testMatch: /crm\.smoke\.spec\.ts/, use: { baseURL: portalHost("crm") } },
     { name: "quiz-player-grid", testMatch: /quiz-player-grid.spec.ts/, use: { baseURL: "https://127.0.0.1:3001" } },
     { name: "elearning", testMatch: /elearning\.smoke\.spec\.ts/, use: { baseURL: portalHost("elearning") } },

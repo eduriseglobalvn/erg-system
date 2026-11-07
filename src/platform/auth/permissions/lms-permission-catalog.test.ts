@@ -18,7 +18,7 @@ describe("LMS permission catalog", () => {
   test("uses unique canonical dot-notation permissions", () => {
     expect(new Set(LMS_PERMISSION_CATALOG).size).toBe(LMS_PERMISSION_CATALOG.length);
     expect(
-      LMS_PERMISSION_CATALOG.every((permission) => /^(lms|account)(?:\.[a-z_]+){2,4}$/.test(permission)),
+      LMS_PERMISSION_CATALOG.every((permission) => /^(?:(?:lms|account)(?:\.[a-z_]+){2,4}|timekeeping\.(?:self|approve|manage))$/.test(permission)),
     ).toBe(true);
   });
 

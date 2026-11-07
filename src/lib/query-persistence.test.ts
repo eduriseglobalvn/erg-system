@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 
-import { shouldDehydratePersistedQuery, queryCacheScopeKey, QUERY_CACHE_BUSTER, QUERY_CACHE_STORAGE_KEY } from "@/lib/query-persistence";
+import { shouldDehydratePersistedMutation, shouldDehydratePersistedQuery, queryCacheScopeKey, QUERY_CACHE_BUSTER, QUERY_CACHE_STORAGE_KEY } from "@/lib/query-persistence";
 import { persistedQueryMeta } from "@/lib/query-policy";
 
 test("dehydrates only successful queries flagged with meta.persist", () => {
@@ -43,4 +43,12 @@ test("persister returns real promises and restores a persisted client", async ()
   expect(await restoring).toEqual(client);
   await persister.removeClient();
   expect(await persister.restoreClient()).toBeUndefined();
+});
+
+test("never persists timekeeping clock/today queries or any mutation, even paused ones", () => {
+  const persisted = { meta: { persist: true }, state: { status: "success" } };
+  expect(shouldDehydratePersistedQuery({ ...persisted, queryKey: ["timekeeping", "today"] } as never)).toBe(false);
+  expect(shouldDehydratePersistedQuery({ ...persisted, queryKey: ["timekeeping", "clock"] } as never)).toBe(false);
+  expect(shouldDehydratePersistedQuery({ ...persisted, queryKey: ["timekeeping", "month", "2026-11"] } as never)).toBe(true);
+  expect(shouldDehydratePersistedMutation()).toBe(false);
 });
