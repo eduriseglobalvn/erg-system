@@ -23,6 +23,9 @@ const QuestionTypeDemoPage = lazy(() =>
 const routePages = () => import("@/features/lcms/admin-route-pages");
 const page = (name: keyof Awaited<ReturnType<typeof routePages>>) => lazyRouteComponent(routePages, name);
 
+const composePage = (name: "AdminNotificationComposePage" | "TeacherNotificationComposePage") =>
+  lazyRouteComponent(() => import("@/app/pages/shared/notification-compose-page"), name);
+
 const CONTENT_REDIRECTED_SEGMENTS = ["questions", "quiz-bank", "quiz-editor"];
 
 /** Component of the Admin menu entries that have their own screen; every other entry uses the generic host. */
@@ -32,6 +35,7 @@ function adminPageFor(wPath: string) {
   if (wPath === "employees") return page("AdminEmployeesRoute");
   if (wPath === "employees/access-logs") return page("AdminEmployeeAccessLogsRoute");
   if (wPath === "ui-kit") return page("AdminUiKitRoute");
+  if (wPath === "notifications/compose") return composePage("AdminNotificationComposePage");
   if (wPath === "schools" || wPath.startsWith("schools/")) return page("AdminSchoolsRoute");
   return page("AdminGenericRoute");
 }
@@ -63,6 +67,14 @@ const adminMenuRoutes = lcmsWorkspacePaths
       component: adminPageFor(wPath),
     });
   });
+
+// Edit a saved draft / scheduled campaign; the matrix row of notifications/compose covers its children.
+const adminNotificationComposeEditRoute = createRoute({
+  getParentRoute: () => adminShellRoute,
+  path: "/admin/notifications/compose/$campaignId",
+  staticData: permissionStaticData(adminPath("/notifications/compose"), "ADMIN"),
+  component: composePage("AdminNotificationComposePage"),
+});
 
 // Legacy alias of settings/roles.
 const settingCenterRoleRedirectRoute = createRoute({
@@ -145,6 +157,7 @@ export const adminAuthedRoutes = [
     adminIndexRoute,
     ...adminContentRoutes,
     ...adminMenuRoutes,
+    adminNotificationComposeEditRoute,
     ...adminIntegrationRoutes.map(([path, pageName]) =>
       createRoute({ getParentRoute: () => adminShellRoute, path, staticData: permissionStaticData(path, "ADMIN"), component: page(pageName) }),
     ),

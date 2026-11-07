@@ -16,6 +16,7 @@ type LmsPath = (typeof lmsPaths)[number];
 
 const routePages = () => import("@/features/lms/components/lms-teacher-route-pages");
 const page = (name: keyof Awaited<ReturnType<typeof routePages>>) => lazyRouteComponent(routePages, name);
+const composePage = lazyRouteComponent(() => import("@/app/pages/shared/notification-compose-page"), "TeacherNotificationComposePage");
 
 /** One child route per Teacher page; adding a path to `lmsPaths` fails type-checking until it has a page. */
 const TEACHER_PAGES: Record<LmsPath, ReturnType<typeof page>> = {
@@ -29,6 +30,7 @@ const TEACHER_PAGES: Record<LmsPath, ReturnType<typeof page>> = {
   "homework/student-groups": page("TeacherStudentGroupsRoute"),
   learning: page("TeacherLearningHubRoute"),
   notifications: page("TeacherNotificationsRoute"),
+  "notifications/compose": composePage,
   account: page("TeacherAccountRoute"),
   "account/login-logs": page("TeacherLoginLogsRoute"),
   score: page("TeacherScoreRoute"),
@@ -69,6 +71,13 @@ const teacherNotificationDetailRoute = createRoute({
   component: page("TeacherNotificationDetailRoute"),
 });
 
+const teacherNotificationComposeEditRoute = createRoute({
+  getParentRoute: () => teacherShellRoute,
+  path: "/teacher/notifications/compose/$campaignId",
+  staticData: permissionStaticData(teacherPath("/notifications/compose"), "TEACHER"),
+  component: composePage,
+});
+
 // Standalone pages: same session/host guard, but not inside the Teacher shell.
 const teacherProfileRoute = createRoute({
   getParentRoute: () => authedRoute,
@@ -99,7 +108,7 @@ const learningOutcomesTeacherRoute = createRoute({
 });
 
 export const teacherRoutes = [
-  teacherShellRoute.addChildren([teacherIndexRoute, ...teacherPageRoutes, teacherNotificationDetailRoute]),
+  teacherShellRoute.addChildren([teacherIndexRoute, ...teacherPageRoutes, teacherNotificationDetailRoute, teacherNotificationComposeEditRoute]),
   teacherProfileRoute,
   teacherPortableExamRoute,
   teacherDesktopReleaseRoute,

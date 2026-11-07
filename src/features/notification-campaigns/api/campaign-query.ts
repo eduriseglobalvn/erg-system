@@ -140,6 +140,8 @@ export function useCreateCampaign() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (draft: CampaignDraftRequest) => createCampaign(draft),
+    // The compose form shows these errors inline (role=alert); no global toast on top.
+    meta: { silent: true },
     onSuccess: () => invalidateCampaigns(queryClient),
   });
 }
@@ -148,6 +150,7 @@ export function useUpdateCampaign() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, draft }: { id: string; draft: CampaignDraftRequest }) => updateCampaign(id, draft),
+    meta: { silent: true },
     onSuccess: (_data, { id }) => invalidateCampaigns(queryClient, id),
   });
 }
@@ -156,6 +159,7 @@ export function useSendCampaign() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => sendCampaign(id),
+    meta: { silent: true },
     onSuccess: (_data, id) => invalidateCampaigns(queryClient, id),
   });
 }
@@ -164,6 +168,7 @@ export function useScheduleCampaign(scheduledAt: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => scheduleCampaign(id, scheduledAt),
+    meta: { silent: true },
     onSuccess: (_data, id) => invalidateCampaigns(queryClient, id),
   });
 }

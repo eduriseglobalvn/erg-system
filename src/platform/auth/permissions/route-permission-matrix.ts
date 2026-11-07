@@ -1,13 +1,13 @@
 import { ADMIN_CONTENT_ROUTE_PATHS, ADMIN_ENTERPRISE_CONNECTORS_PATH, ADMIN_LEARNING_STANDARDS_PATH, crmPaths, lcmsWorkspacePaths, lmsPaths } from "@/platform/auth/permissions/portal-route-registry";
-import { LMS_ROUTE_PERMISSIONS, type LmsPermission } from "@/platform/auth/permissions/lms-permission-catalog";
+import { LMS_ROUTE_PERMISSIONS, type LmsRoutePermission } from "@/platform/auth/permissions/lms-permission-catalog";
 import type { Workspace } from "@/platform/workspaces/workspace-domain";
 import { adminPath, studentPath, teacherPath } from "@/platform/workspaces/workspace-paths";
 
-export type PermissionAction = "read" | "create" | "update" | "delete" | "manage" | "assign" | "publish" | "submit" | "launch";
+export type PermissionAction = "read" | "create" | "update" | "delete" | "manage" | "assign" | "publish" | "submit" | "launch" | "send";
 
 /** Permission names published by the BE permission catalog/runtime bindings. */
 export type RoutePermission =
-  | LmsPermission
+  | LmsRoutePermission
   | "lms.admin"
   | "lms.school.read"
   | "lms.school.create"
@@ -79,7 +79,7 @@ const ADMIN_CONTENT_PERMISSIONS: Record<string, Pick<RoutePermissionEntry, "reso
   "/admin/content/quiz-editor": { resource: "quiz", action: "create", permission: "lms.quiz.create" },
 };
 
-const ADMIN_EXTRA_PERMISSIONS: Record<string, Pick<RoutePermissionEntry, "resource" | "action" | "permission">> = {
+const ADMIN_EXTRA_PERMISSIONS: Record<string, Pick<RoutePermissionEntry, "resource" | "action" | "permission" | "matchChildren">> = {
   "question-types": { resource: "quiz", action: "read", permission: "lms.quiz.read" },
   "settings/permissions": { resource: "permission", action: "read", permission: "rbac.permission.read" },
   "settings/roles": { resource: "role", action: "read", permission: "rbac.role.read" },
@@ -93,6 +93,8 @@ const ADMIN_EXTRA_PERMISSIONS: Record<string, Pick<RoutePermissionEntry, "resour
   "report/cash-flow-report": { resource: "report", action: "read", permission: "operations.manage" },
   "report/pnl-report": { resource: "report", action: "read", permission: "crm.analytics.read" },
   "learning-outcomes": { resource: "learning-outcomes", action: "manage", permission: "learning.outcomes.manage" },
+  // Children: /admin/notifications/compose/$campaignId.
+  "notifications/compose": { resource: "notification.campaign", action: "send", permission: "notification.campaign.send", matchChildren: true },
 };
 
 function adminEntry(path: string): RoutePermissionEntry {
@@ -123,14 +125,14 @@ function adminEntry(path: string): RoutePermissionEntry {
   return { path: normalizedPath, workspace: "ADMIN", resource: "admin", action: "manage", permission: "lms.admin" };
 }
 
-function permissionMetadata(permission: LmsPermission): Pick<RoutePermissionEntry, "resource" | "action"> {
+function permissionMetadata(permission: LmsRoutePermission): Pick<RoutePermissionEntry, "resource" | "action"> {
   const parts = permission.split(".");
   return { resource: parts.slice(1, -1).join(".") || parts[0], action: (parts.at(-1) ?? "read") as PermissionAction };
 }
 
 function teacherEntry(path: string): RoutePermissionEntry {
   const route = path.replace(/^\/+|\/+$/g, "") as keyof typeof LMS_ROUTE_PERMISSIONS;
-  const permission = LMS_ROUTE_PERMISSIONS[route] as LmsPermission;
+  const permission = LMS_ROUTE_PERMISSIONS[route] as LmsRoutePermission;
   return { path: teacherPath(`/${route}`), workspace: "TEACHER", ...permissionMetadata(permission), permission };
 }
 
@@ -166,7 +168,8 @@ export const ROUTE_PERMISSION_MATRIX: readonly RoutePermissionEntry[] = [
   { path: "/teacher", workspace: "TEACHER", resource: "dashboard", action: "read", permission: "lms.dashboard.read" },
   { path: "/teacher/exams/portable", workspace: "TEACHER", resource: "exam.portable", action: "launch", permission: "lms.quiz.read" },
   { path: "/teacher/downloads/desktop", workspace: "TEACHER", resource: "desktop.release", action: "read", permission: "lms.dashboard.read" },
-  ...lmsPaths.map((path) => (path === "notifications" ? { ...teacherEntry(path), matchChildren: true } : teacherEntry(path))),
+  // notifications/$id and notifications/compose/$campaignId inherit their parent row.
+  ...lmsPaths.map((path) => (path === "notifications" || path === "notifications/compose" ? { ...teacherEntry(path), matchChildren: true } : teacherEntry(path))),
   { path: "/student", workspace: "STUDENT", resource: "assignment", action: "read", permission: "elearning.assignment.read_self", alternatePermissions: STUDENT_PREVIEW_ALTERNATES },
   { path: "/student/exams/portable", workspace: "STUDENT", resource: "exam.portable", action: "launch", permission: "elearning.assignment.read_self", alternatePermissions: STUDENT_PREVIEW_ALTERNATES },
   { path: "/student/downloads/desktop", workspace: "STUDENT", resource: "desktop.release", action: "read", permission: "elearning.assignment.read_self", alternatePermissions: STUDENT_PREVIEW_ALTERNATES },

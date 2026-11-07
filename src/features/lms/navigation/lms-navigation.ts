@@ -1,5 +1,5 @@
 import { evaluatePermission } from "@/platform/auth/permissions/permission-evaluator";
-import { LMS_ROUTE_PERMISSIONS, type LmsPermission } from "@/platform/auth/permissions/lms-permission-catalog";
+import { LMS_ROUTE_PERMISSIONS, type LmsRoutePermission } from "@/platform/auth/permissions/lms-permission-catalog";
 
 type NavigationItem = {
   path?: string;
@@ -10,7 +10,7 @@ type NavigationGroup<Item extends NavigationItem> = {
   items: Item[];
 };
 
-export function permissionForLmsPath(path: string): LmsPermission | null {
+export function permissionForLmsPath(path: string): LmsRoutePermission | null {
   const normalized = normalizeLmsPath(path);
   const route = Object.keys(LMS_ROUTE_PERMISSIONS)
     .sort((left, right) => right.length - left.length)

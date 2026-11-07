@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 
 import { lmsPaths } from "@/platform/auth/permissions/portal-route-registry";
 import {
+  LMS_CROSS_MODULE_ROUTE_PERMISSIONS,
   LMS_PERMISSION_CATALOG,
   LMS_PROTECTED_ROUTES,
   LMS_ROLE_GROUP_TEMPLATES,
@@ -22,7 +23,7 @@ describe("LMS permission catalog", () => {
   });
 
   test("references only permissions that exist in the catalog", () => {
-    const knownPermissions = new Set<string>(LMS_PERMISSION_CATALOG);
+    const knownPermissions = new Set<string>([...LMS_PERMISSION_CATALOG, ...LMS_CROSS_MODULE_ROUTE_PERMISSIONS]);
 
     Object.values(LMS_ROUTE_PERMISSIONS).forEach((permission) => {
       expect(knownPermissions.has(permission)).toBe(true);
