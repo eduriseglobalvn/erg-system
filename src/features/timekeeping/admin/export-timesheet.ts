@@ -69,6 +69,7 @@ export async function exportTimesheet(schoolId: string, period: string) {
       if (!next.rows?.length) break;
       rows.push(...next.rows);
     }
+    if (rows.length < (first.total ?? 0)) toast.warning(`Chỉ xuất được ${rows.length}/${first.total} nhân sự do vượt giới hạn trang, hãy kiểm tra file trước khi dùng tính lương.`);
     await save(timesheetToRows({ ...first, rows }), "Bảng công", `bang-cong-${period}.xlsx`);
   } catch {
     toast.error("Không xuất được file Excel, thử lại.");

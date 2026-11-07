@@ -33,7 +33,7 @@ function canSeeAllRequests(): boolean {
 /** A03: list on the left, detail on the right; below `md` the detail replaces the list (`?id=`, back returns). */
 export function ApprovalsPage() {
   const canAll = useMemo(() => canSeeAllRequests(), []);
-  const { search, update } = useApprovalsSearch(canAll);
+  const { search, update: updateSearch } = useApprovalsSearch(canAll);
   const isMobile = useMediaQuery(useTheme().breakpoints.down("md"));
   const schools = useTimekeepingSchools();
   const pending = usePendingApprovalCount(true);
@@ -53,6 +53,11 @@ export function ApprovalsPage() {
     else if (opened.current) { document.getElementById(approvalRowId(opened.current))?.focus(); opened.current = undefined; }
   }, [search.id]);
 
+  // A new tab or filter is a new selection: ticks from the previous view must not reach a bulk action.
+  const update: typeof updateSearch = (patch, push) => {
+    if (Object.keys(patch).some((key) => key !== "id")) setTicked(new Set());
+    updateSearch(patch, push);
+  };
   const toggle = (id: string) => setTicked((prev) => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next; });
   const toggleAll = () => setTicked(checked.size === items.length ? new Set() : new Set(items.map((i) => i.request?.id as string)));
   const schoolName = (id?: string) => schools.data?.find((s) => s.id === id)?.name;

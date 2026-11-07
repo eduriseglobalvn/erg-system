@@ -56,7 +56,7 @@ export function usePunchReview() {
   return useMutation({
     meta: { silent: true },
     mutationFn: ({ id, ...body }: PunchReviewCommand & { id: string }) => timekeepingAdminApi.reviewPunch(id, body),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: adminKeys.todayRoot }),
+    onSuccess: () => Promise.all([queryClient.invalidateQueries({ queryKey: adminKeys.todayRoot }), queryClient.invalidateQueries({ queryKey: adminKeys.timesheetRoot })]),
   });
 }
 

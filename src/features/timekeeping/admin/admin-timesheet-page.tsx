@@ -7,6 +7,7 @@ import TablePagination from "@mui/material/TablePagination";
 import Typography from "@mui/material/Typography";
 
 import { ErgButton, ErgIconButton } from "@/components/erg-mui/erg-actions";
+import { ErgConfirmDialog } from "@/components/erg-mui/erg-confirm-dialog";
 import { ErgEmptyState, ErgErrorState, ErgSkeleton } from "@/components/erg-mui/erg-feedback";
 import { ErgSearchField, ErgSelect } from "@/components/erg-mui/erg-form";
 import { ErgPageHeader } from "@/components/erg-mui/erg-page-header";
@@ -45,6 +46,8 @@ export function AdminTimesheetPage() {
   const [teams, setTeams] = useState<string[]>([]);
   const [page, setPage] = useState(0);
   const [size, setSize] = useState(50);
+  const [exporting, setExporting] = useState(false);
+  const [confirmExport, setConfirmExport] = useState(false);
   const debouncedQ = useDebouncedValue(q.trim(), 300);
   const { data, isLoading, isError, refetch } = useAdminTimesheet({ schoolId, period, team: team || undefined, q: debouncedQ || undefined, page, size });
   const rows = data?.rows ?? [];
@@ -54,6 +57,15 @@ export function AdminTimesheetPage() {
   if (seen.some((value) => !teams.includes(value))) setTeams([...new Set([...teams, ...seen])].sort());
 
   const reset = () => setPage(0);
+  const runExport = async () => {
+    setConfirmExport(false);
+    setExporting(true);
+    try {
+      await exportTimesheet(schoolId, period);
+    } finally {
+      setExporting(false);
+    }
+  };
   const schoolName = schools.data?.find((school) => school.id === schoolId)?.name ?? "";
   const description = [`Kỳ ${periodRange(period)}`, `Công chuẩn ${data?.standardDays ?? "—"} ngày`, schoolName, data ? `${data.total ?? 0} nhân sự` : ""].filter(Boolean).join(" · ");
   const teamOptions = [{ label: "Tất cả tổ", value: "" }, ...teams.map((value) => ({ label: teamLabel(value), value }))];
@@ -64,7 +76,7 @@ export function AdminTimesheetPage() {
         description={description}
         primaryAction={
           <>
-            <ErgButton disabled={!schoolId} onClick={() => void exportTimesheet(schoolId, period)} startIcon={<FileDownloadOutlinedIcon />} variant="outlined">Xuất cho tính lương</ErgButton>
+            <ErgButton disabled={!schoolId} loading={exporting} onClick={() => (data?.stage === "LOCKED" ? void runExport() : setConfirmExport(true))} startIcon={<FileDownloadOutlinedIcon />} variant="outlined">Xuất cho tính lương</ErgButton>
             {data?.stage ? <PeriodLockAction period={period} schoolId={schoolId} stage={data.stage} /> : null}
           </>
         }
@@ -107,6 +119,14 @@ export function AdminTimesheetPage() {
           rows={rows}
         />
       )}
+      <ErgConfirmDialog
+        confirmLabel="Vẫn xuất"
+        description="Kỳ chưa chốt, số liệu có thể thay đổi. File xuất lúc này không nên dùng để tính lương chính thức."
+        onCancel={() => setConfirmExport(false)}
+        onConfirm={() => void runExport()}
+        open={confirmExport}
+        title="Xuất bảng công khi kỳ chưa chốt?"
+      />
     </Box>
   );
 }

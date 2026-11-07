@@ -2,12 +2,15 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tansta
 
 import { QUERY_POLICIES } from "@/lib/query-policy";
 import { timekeepingApi } from "./timekeeping-api";
+import { timekeepingKeys } from "./timekeeping-query";
 import type { ApprovalBox } from "./timekeeping-types";
 
 export type ApprovalFilters = { box: ApprovalBox; type?: string; siteId?: string; due?: string };
 
 const APPROVALS = ["timekeeping", "approvals"] as const;
 const REQUESTS = ["timekeeping", "requests"] as const;
+/** Admin today board and monthly timesheet: a decision changes leave and explanation days there. */
+const ADMIN = [...timekeepingKeys.root, "admin"] as const;
 /** First page only: the backend cap for bulk approve is 50, so one page of 50 is also the selectable set. */
 export const APPROVALS_PAGE_SIZE = 50;
 
@@ -46,7 +49,7 @@ export function useApprovalDetail(id: string | undefined) {
 /** Lists, the menu badge count (approvalsCount sits under the same prefix) and the teachers' own requests all change. */
 function useInvalidateApprovals() {
   const queryClient = useQueryClient();
-  return () => Promise.all([queryClient.invalidateQueries({ queryKey: APPROVALS }), queryClient.invalidateQueries({ queryKey: REQUESTS })]);
+  return () => Promise.all([queryClient.invalidateQueries({ queryKey: APPROVALS }), queryClient.invalidateQueries({ queryKey: REQUESTS }), queryClient.invalidateQueries({ queryKey: ADMIN })]);
 }
 
 /** Errors show inline next to the buttons, so the global toast is silenced. */

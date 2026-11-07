@@ -61,7 +61,7 @@ export function TimesheetGrid({ footer, period, rows }: TimesheetGridProps) {
   const dayOf = (id: string) => (/^d\d+$/.test(id) ? Number(id.slice(1)) : 0);
 
   return (
-    <ErgDataTableShell footer={footer} sx={{ "& .MuiTableContainer-root": { maxHeight: "calc(100vh - 360px)", minHeight: 320 } }}>
+    <ErgDataTableShell footer={footer} scrollLabel="Bảng công tháng, cuộn ngang bằng phím mũi tên" sx={{ "& .MuiTableContainer-root": { maxHeight: "calc(100vh - 360px)", minHeight: 320 } }}>
       <ErgTable aria-label={`Bảng công tháng ${period}`} sx={{ tableLayout: "fixed", width: NAME_WIDTH + length * DAY_WIDTH + TOTALS.length * TOTAL_WIDTH }}>
         <TableHead>
           {table.getHeaderGroups().map((group) => (
@@ -86,7 +86,7 @@ export function TimesheetGrid({ footer, period, rows }: TimesheetGridProps) {
             <TableRow hover key={row.id}>
               {row.getVisibleCells().map((cell) => {
                 const day = dayOf(cell.column.id);
-                if (!day) return <TableCell key={cell.id} sx={cell.column.id === "name" ? { ...stickyName, zIndex: 1 } : { ...compact, fontVariantNumeric: "tabular-nums" }}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>;
+                if (!day) return <TableCell component={cell.column.id === "name" ? "th" : undefined} key={cell.id} scope={cell.column.id === "name" ? "row" : undefined} sx={cell.column.id === "name" ? { ...stickyName, zIndex: 1 } : { ...compact, fontVariantNumeric: "tabular-nums" }}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>;
                 const meta = codeMeta(codeOf(row.original, day));
                 const tint = meta ? t.statusTint[meta.tone] : null;
                 return (

@@ -23,15 +23,18 @@ export function useSettingsSave(onSiteSaved: (id: string) => void) {
   const run = async ({ policy, schoolId, site }: SaveInput) => {
     setError(null);
     setPending(true);
+    let siteSaved = false;
     try {
       if (site) {
         const saved = await saveSite.mutateAsync({ id: site.id, body: formToSiteCommand(site.form, schoolId) });
+        siteSaved = true;
         if (saved.id) onSiteSaved(saved.id);
       }
       if (policy) setEffectiveFrom((await savePolicy.mutateAsync({ schoolId, body: formToPolicyCommand(policy) })).effectiveFrom);
-      toast.success("Đã lưu cấu hình chấm công");
+      toast.success(site && policy ? "Đã lưu địa điểm và chính sách" : site ? "Đã lưu địa điểm" : "Đã lưu chính sách");
     } catch (failure) {
-      setError(requestErrorText(failure));
+      const reason = requestErrorText(failure);
+      setError(siteSaved ? `Đã lưu địa điểm, chưa lưu được chính sách: ${reason}` : reason);
     } finally {
       setPending(false);
     }

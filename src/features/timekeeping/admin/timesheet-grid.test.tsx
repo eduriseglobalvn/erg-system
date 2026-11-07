@@ -14,7 +14,8 @@ describe("TimesheetGrid", () => {
     render(<TimesheetGrid period="2026-10" rows={ROWS} />);
     expect(screen.getAllByRole("row")).toHaveLength(3);
     const first = screen.getAllByRole("row")[1];
-    expect(within(first).getAllByRole("cell")).toHaveLength(1 + 31 + 6);
+    expect(within(first).getByRole("rowheader")).toHaveTextContent("Nguyễn Văn A");
+    expect(within(first).getAllByRole("cell")).toHaveLength(31 + 6);
     expect(within(first).getByText("Nguyễn Văn A")).toBeInTheDocument();
     expect(within(first).getByRole("img", { name: "Ngày 1: Đủ công" })).toHaveTextContent("X");
     expect(within(first).getByRole("img", { name: "Ngày 7: Thiếu chấm" })).toHaveTextContent("KC");
