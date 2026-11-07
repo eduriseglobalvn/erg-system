@@ -69,6 +69,8 @@ export type NotificationDeviceRegistrationInput = {
   client?: NotificationDeviceClientInfo;
   endpoint?: string;
   firebaseInstallationId?: string;
+  /** PushSubscription.toJSON().keys; required by the server for WEB_PUSH. */
+  keys?: { auth?: string; p256dh?: string };
   locale?: string;
   permissionState: NotificationPermissionState;
   platform: NotificationDeliveryPlatform;
@@ -76,6 +78,8 @@ export type NotificationDeviceRegistrationInput = {
   registrationToken?: string;
   serviceWorkerScope?: string;
   timezone?: string;
+  /** Server default is FCM; browser subscriptions send WEB_PUSH. */
+  transport?: "FCM" | "WEB_PUSH";
 };
 
 export type NotificationDeviceRegistrationResponse = {

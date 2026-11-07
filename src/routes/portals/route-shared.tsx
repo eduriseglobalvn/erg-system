@@ -1,15 +1,16 @@
 import { lazy, Suspense, useEffect, type ReactNode } from "react";
-import { createRoute, createRootRouteWithContext, Outlet, useLocation } from "@tanstack/react-router";
+import { createRoute, createRootRouteWithContext, Outlet, redirect, useLocation } from "@tanstack/react-router";
 
 import { shouldRedirectLocalPortal } from "@/config/portal-urls";
 import { RootLayout } from "@/layouts/root-layout";
 import { AuthenticatedAccountGate, PortalAuthGate } from "@/platform/auth/components/portal-route-gates";
 import type { AuthRouteState } from "@/platform/auth/router/auth-route-context";
 import { buildPortalHostUrl } from "@/app/router/portal-host-url";
-import { authedBeforeLoad, authedWorkspaceForPath } from "@/app/router/route-guards";
+import { authedBeforeLoad, authedWorkspaceForPath, withFreshAuth } from "@/app/router/route-guards";
 import { routePermissionForPath, type RoutePermission } from "@/platform/auth/permissions/route-permission-matrix";
 import { legacyPortalFromWorkspace } from "@/platform/workspaces/legacy-portal-compat";
 import type { Workspace } from "@/platform/workspaces/workspace-domain";
+import { notificationRedirectHref } from "@/routes/notification-redirect";
 import { RoutePendingSkeleton } from "@/routes/route-feedback";
 
 type AppRouterContext = {
@@ -70,6 +71,20 @@ function AuthedLayout() {
     </PortalAuthGate>
   );
 }
+
+/**
+ * Push deep link `/notifications/{id}` (pwa-push.js, BE payload): a pure redirect into the signed-in
+ * workspace's detail page, or login and back. The target route's matrix row does the permission check.
+ */
+export const notificationLinkRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/notifications/$notificationId",
+  beforeLoad: ({ context, location }) =>
+    withFreshAuth(context.auth, (auth) => {
+      // The raw segment, not the decoded param: an encoded "/" or ".." must not survive into the target path.
+      throw redirect({ href: notificationRedirectHref(location.pathname.split("/")[2] ?? "", auth), replace: true });
+    }),
+});
 
 /** Session + permission + canonical host for every converted workspace, checked once. */
 export const authedRoute = createRoute({

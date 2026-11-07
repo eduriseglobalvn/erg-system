@@ -54,6 +54,8 @@ const SAFE_REDIRECT_PATH_PREFIXES = [
   "/home",
   "/resources",
   "/profile",
+  // Push deep link /notifications/{id}; it redirects into the signed-in workspace.
+  "/notifications",
   "/calendar",
   "/homework",
   "/classes",

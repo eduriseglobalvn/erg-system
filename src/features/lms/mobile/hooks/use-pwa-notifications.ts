@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
+  fetchWebPushConfig,
   heartbeatNotificationDevice,
   registerNotificationDevice,
   revokeNotificationDevice,
@@ -139,7 +140,7 @@ export function usePwaNotifications(portal: PwaNotificationPortal = DEFAULT_NOTI
         return permission;
       }
 
-      const currentRegistration = await ensureBrowserPushRegistration();
+      const currentRegistration = await ensureBrowserPushRegistration(portal);
       await syncRegistrationWithApi(currentRegistration, portal);
       setState("enabled");
       return "granted" as const;
@@ -264,6 +265,8 @@ async function buildDeviceRegistrationInput(
     firebaseInstallationId: pushRegistration.firebaseInstallationId,
     registrationToken: pushRegistration.registrationToken,
     endpoint: pushRegistration.endpoint,
+    keys: pushRegistration.keys,
+    transport: pushRegistration.transport,
     serviceWorkerScope: registration.scope,
     permissionState: toNotificationPermissionState(Notification.permission),
     locale: readLocale(),
@@ -274,10 +277,14 @@ async function buildDeviceRegistrationInput(
 
 // Adapter boundary: future Firebase/Tauri providers can replace this without coupling the hook to an SDK import.
 async function resolvePushRegistrationAdapter(subscription: PushSubscription) {
+  const keys = subscription.toJSON().keys;
   return {
     endpoint: subscription.endpoint,
     firebaseInstallationId: undefined,
+    // Browser subscriptions are VAPID Web Push; FCM stays for the native apps.
+    keys: keys ? { auth: keys.auth, p256dh: keys.p256dh } : undefined,
     registrationToken: subscription.endpoint,
+    transport: "WEB_PUSH" as const,
   };
 }
 
@@ -295,16 +302,18 @@ async function readCurrentBrowserPushRegistration(): Promise<BrowserPushRegistra
   return { registration, subscription };
 }
 
-async function ensureBrowserPushRegistration(): Promise<BrowserPushRegistration> {
+async function ensureBrowserPushRegistration(portal: PwaNotificationPortal): Promise<BrowserPushRegistration> {
   const registration = await navigator.serviceWorker.ready;
   const existingSubscription = await registration.pushManager.getSubscription();
   if (existingSubscription) {
     return { registration, subscription: existingSubscription };
   }
 
-  const publicKey = import.meta.env.VITE_WEB_PUSH_PUBLIC_KEY?.trim();
+  // The VAPID key comes from the server; without it there is nothing to subscribe to.
+  const config = await fetchWebPushConfig(portal);
+  const publicKey = config.enabled ? config.publicKey?.trim() : undefined;
   if (!publicKey) {
-    throw new PushConfigurationError("Chua cau hinh VITE_WEB_PUSH_PUBLIC_KEY.");
+    throw new PushConfigurationError("Máy chủ chưa bật Web Push.");
   }
 
   const subscription = await registration.pushManager.subscribe({
