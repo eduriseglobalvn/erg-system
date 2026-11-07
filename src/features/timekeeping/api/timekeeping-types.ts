@@ -37,6 +37,18 @@ export type PunchReviewCommand = Schemas["PunchReviewCommand"];
 export type PeriodLockView = Schemas["PeriodLockView"];
 export type RemindResult = Schemas["RemindResult"];
 
+export type SiteConfig = Schemas["SiteConfig"];
+export type SiteCommand = Schemas["SiteCommand"];
+export type ShiftConfig = Schemas["ShiftConfig"];
+export type ShiftCommand = Schemas["ShiftCommand"];
+export type PolicyConfig = Schemas["PolicyConfig"];
+export type PolicyCommand = Schemas["PolicyCommand"];
+export type PolicyVersions = Schemas["PolicyVersions"];
+export type HolidayConfig = Schemas["HolidayConfig"];
+export type HolidayCommand = Schemas["HolidayCommand"];
+export type RemoteRuleConfig = Schemas["RemoteRuleConfig"];
+export type RemoteRuleCommand = Schemas["RemoteRuleCommand"];
+
 export type PunchDirection = "IN" | "OUT";
 export type ApprovalBox = "MINE" | "DONE" | "ALL";
 

@@ -1,10 +1,9 @@
-import Box from "@mui/material/Box";
 import { useSearch } from "@tanstack/react-router";
 
 import { isIsoDate } from "@/domain/formatters/format-date";
-import { ErgPageHeader } from "@/components/erg-mui/erg-page-header";
 import { ApprovalsPage } from "../admin/approvals/approvals-page";
 import { AdminTimesheetPage } from "../admin/admin-timesheet-page";
+import { TimekeepingSettingsPage } from "../admin/settings/timekeeping-settings-page";
 import { AdminTodayPage } from "../admin/admin-today-page";
 import { DayDetailPage } from "./my-timesheet/day-detail-page";
 import { MyTimesheetPage } from "./my-timesheet/my-timesheet-page";
@@ -12,15 +11,6 @@ import { RequestsScreen } from "./requests/requests-screen";
 import { PunchTodayPage } from "./punch/punch-today-page";
 import { periodOf } from "./punch/punch-format";
 import { PunchVerifyPage } from "./punch/punch-verify-page";
-
-/** Empty screens with a title; the G/A screens (later tasks) replace the bodies. */
-function TimekeepingPageShell({ title, description }: { title: string; description: string }) {
-  return (
-    <Box sx={{ px: { xs: 2, sm: 3 }, py: 2 }}>
-      <ErgPageHeader description={description} title={title} />
-    </Box>
-  );
-}
 
 export function TeacherTimekeepingHomeRoute() {
   return <PunchTodayPage />;
@@ -57,5 +47,5 @@ export function AdminTimekeepingApprovalsRoute() {
 }
 
 export function AdminTimekeepingSettingsRoute() {
-  return <TimekeepingPageShell description="Địa điểm, ca làm, chính sách và ngày lễ." title="Cấu hình chấm công" />;
+  return <TimekeepingSettingsPage />;
 }
