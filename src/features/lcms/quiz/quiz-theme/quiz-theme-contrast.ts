@@ -1,5 +1,5 @@
 import type { QuizPlayerTemplate } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
-import { quizThemeToneSurface } from "@/features/lcms/quiz/quiz-theme/quiz-theme-presets";
+import { quizThemeToneSurface } from "@/components/quiz/player-template-surface";
 import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
 
 export type ContrastPair = {

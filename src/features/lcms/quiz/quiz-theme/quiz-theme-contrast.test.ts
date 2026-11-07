@@ -7,7 +7,8 @@ import {
   formatRatio,
   parseHexColor,
 } from "@/features/lcms/quiz/quiz-theme/quiz-theme-contrast";
-import { applyQuizThemePreset, quizThemePresets, quizThemeToneSurface } from "@/features/lcms/quiz/quiz-theme/quiz-theme-presets";
+import { quizThemeToneSurface } from "@/components/quiz/player-template-surface";
+import { applyQuizThemePreset, quizThemePresets } from "@/features/lcms/quiz/quiz-theme/quiz-theme-presets";
 
 const saved: QuizPlayerTemplate = {
   layout: "classic",
