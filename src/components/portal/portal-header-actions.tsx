@@ -61,7 +61,7 @@ type PortalHeaderActionsProps = {
   /** The phone dock already carries Hộp thư, so the bell is redundant. */
   hideNotifications?: boolean;
   notificationCount: number;
-  onOpenNotifications: () => void;
+  onOpenNotifications: (anchor: HTMLElement) => void;
   userName?: string;
   userEmail?: string;
   workspaceCapabilities?: readonly Workspace[];
@@ -132,7 +132,7 @@ export function PortalHeaderActions({
       </Tooltip>
 
       {hideNotifications ? null : <Tooltip title="Thông báo">
-        <IconButton onClick={onOpenNotifications} sx={{ ...HEADER_ICON_BUTTON_SX, height: { xs: 44, md: 32 }, width: { xs: 44, md: 32 }, ml: 0.5 }}>
+        <IconButton aria-haspopup="dialog" aria-label={notificationCount > 0 ? `Thông báo, ${notificationCount} chưa đọc` : "Thông báo"} onClick={(event) => onOpenNotifications(event.currentTarget)} sx={{ ...HEADER_ICON_BUTTON_SX, height: { xs: 44, md: 32 }, width: { xs: 44, md: 32 }, ml: 0.5 }}>
           {notificationCount > 0 ? (
             <Badge badgeContent={notificationCount} color="error" max={99}>
               <NotificationsNoneRoundedIcon sx={{ fontSize: 19 }} />

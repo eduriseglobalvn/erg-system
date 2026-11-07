@@ -37,6 +37,15 @@ describe("Student PWA mobile UI policy", () => {
     expect(dock).toContain("ErgMobileDock");
   });
 
+  it("feeds the dock and menu badge from the Hộp thư inbox unread count, not the old announcements", () => {
+    const runtime = readSibling("./student-dashboard-workspace-runtime.tsx");
+
+    expect(runtime).toContain("useUnreadNotificationCount(quizRuntimePortal");
+    expect(runtime).toContain("announcementUnreadCount={unreadInboxCount}");
+    expect(runtime).toContain("unreadAnnouncementCount={unreadInboxCount}");
+    expect(runtime).not.toMatch(/const unreadAnnouncementCount/);
+  });
+
   it("uses no KPI tiles and no ALL CAPS labels on the mobile overview", () => {
     const overview = readSibling("./student-dashboard-mobile-overview.tsx");
 

@@ -83,14 +83,6 @@
     "hex": 3,
     "font": 5
   },
-  "src/components/portal/portal-header-notification-item.tsx": {
-    "hex": 10,
-    "font": 4
-  },
-  "src/components/portal/portal-header-notifications.tsx": {
-    "hex": 11,
-    "font": 8
-  },
   "src/components/portal/portal-sidebar-report-icon.tsx": {
     "hex": 2,
     "font": 1

@@ -17,7 +17,7 @@ test("teacher phone dock: expected items, no header bell, no horizontal overflow
     await expect(dock.getByRole("button", { name: new RegExp(`^${label}`) })).toBeVisible();
   }
   await expect(dock.getByRole("button")).toHaveCount(5);
-  await expect(page.getByRole("button", { name: "Thông báo", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /^Thông báo/ })).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
 });
 
@@ -35,7 +35,7 @@ test.describe("admin phone dock", () => {
     await expect(dock).toBeVisible({ timeout: 30_000 });
     await expect(dock.getByRole("button", { name: /^Tất cả/ })).toBeVisible();
     await expect(dock.getByRole("button", { name: /^Hộp thư/ })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Thông báo", exact: true })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /^Thông báo/ })).toHaveCount(0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
   });
 });
