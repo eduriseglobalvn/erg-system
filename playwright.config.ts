@@ -33,6 +33,7 @@ export default defineConfig({
     { name: "teacher-mobile-calendar", testMatch: /teacher-mobile-calendar\.spec\.ts/, use: { baseURL: portalHost("lms") } },
     { name: "mobile-dock", testMatch: /mobile-dock[.]spec[.]ts/, use: { baseURL: portalHost("lms") } },
     { name: "crm", testMatch: /crm\.smoke\.spec\.ts/, use: { baseURL: portalHost("crm") } },
+    { name: "quiz-player-grid", testMatch: /quiz-player-grid.spec.ts/, use: { baseURL: "https://127.0.0.1:3001" } },
     { name: "elearning", testMatch: /elearning\.smoke\.spec\.ts/, use: { baseURL: portalHost("elearning") } },
   ],
   webServer: {

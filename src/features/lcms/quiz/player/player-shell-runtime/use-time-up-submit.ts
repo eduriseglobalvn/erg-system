@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type Dispatch, type SetStateAction } from "react";
 
-import type { PlayerLoadState } from "@/components/quiz/player-shell-runtime-model";
+import type { PlayerLoadState, SubmitDialogMode } from "@/components/quiz/player-shell-runtime-model";
 import { createEmptyAttempt, localQuizAttemptStore } from "@/features/lcms/quiz/quiz-runtime";
 import type { LocalQuizAttemptSession, QuizRuntimePortal } from "@/domain/quiz/quiz-runtime-types";
 import type { Attempt, QuizPackage } from "@/domain/quiz/types";
@@ -21,6 +21,7 @@ export type UseTimeUpSubmitArgs = {
   submitting: boolean;
   timeUp: boolean;
   setLoadState: Dispatch<SetStateAction<PlayerLoadState>>;
+  setSubmitDialogMode: Dispatch<SetStateAction<SubmitDialogMode | null>>;
   setSubmitError: Dispatch<SetStateAction<string | null>>;
   setSubmitting: Dispatch<SetStateAction<boolean>>;
 };
@@ -44,6 +45,7 @@ export function useTimeUpSubmit({
   submitting,
   timeUp,
   setLoadState,
+  setSubmitDialogMode,
   setSubmitError,
   setSubmitting,
 }: UseTimeUpSubmitArgs) {
@@ -68,6 +70,8 @@ export function useTimeUpSubmit({
     }
     if (firedForRef.current === activeSession.attemptId) return;
     firedForRef.current = activeSession.attemptId;
+    // A "Nộp bài?" dialog left open would offer a second submit (button / Enter) on top of this one.
+    setSubmitDialogMode(null);
 
     void (async () => {
       setPhase("submitting");
@@ -95,7 +99,7 @@ export function useTimeUpSubmit({
         setSubmitting(false);
       }
     })();
-  }, [started, isTestingMode, attemptCompleted, timeUp, submitting, activePackage, activeSession, activeAttempt, attemptScope, submitReadyAttempt, retryTick, setLoadState, setSubmitError, setSubmitting]);
+  }, [started, isTestingMode, attemptCompleted, timeUp, submitting, activePackage, activeSession, activeAttempt, attemptScope, submitReadyAttempt, retryTick, setLoadState, setSubmitDialogMode, setSubmitError, setSubmitting]);
 
   return { phase: attemptCompleted ? ("idle" as const) : phase, retry };
 }

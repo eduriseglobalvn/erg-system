@@ -2,13 +2,11 @@ import Box from "@mui/material/Box";
 
 import { dropPiece, readBoard } from "@/components/quiz/questions/matching-question/matching-board";
 import { pieceName } from "@/components/quiz/questions/matching-question/matching-helpers";
-import { MatchingMobile } from "@/components/quiz/questions/matching-question/matching-mobile";
 import { MatchingPuzzle, type PuzzleRow } from "@/components/quiz/questions/matching-question/matching-puzzle";
 import { QuestionBodyWithImage } from "@/components/quiz/questions/shared";
 import type { QuestionComponentProps } from "@/components/quiz/questions/types";
 import { getMatchingKey } from "@/domain/quiz/quiz";
 import type { QuestionImage } from "@/domain/quiz/types";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 const VERDICT = {
   correct: { text: "✓ Đúng", color: "success.main" },
@@ -28,11 +26,8 @@ const side = (text: string, image?: QuestionImage, icon?: string) => (
   </>
 );
 
-/** Learners match on the shared puzzle by swapping right pieces between rows (spec 7.1); phones keep the select UI. */
+/** Learners match on the shared puzzle by swapping right pieces between rows (spec 7.1), on phones too. */
 export function MatchingQuestion({ question, value, submitted = false, reviewMode = false, result, onChange }: QuestionComponentProps) {
-  const isMobile = useIsMobile();
-  if (isMobile) return <MatchingMobile question={question} value={value} submitted={submitted} reviewMode={reviewMode} onChange={onChange} />;
-
   const board = readBoard(question, value);
   const pairs = question.matching ?? [];
   const key = getMatchingKey(question);

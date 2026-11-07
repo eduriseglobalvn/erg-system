@@ -1,4 +1,5 @@
 import ExpandMoreRoundedIcon from "@mui/icons-material/ExpandMoreRounded";
+import { quizThemeToneSurface } from "@/components/quiz/player-template-surface";
 import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
@@ -15,7 +16,7 @@ import type { ContrastPair } from "@/features/lcms/quiz/quiz-theme/quiz-theme-co
 import { QuizThemeContrastRow } from "@/features/lcms/quiz/quiz-theme/quiz-theme-contrast-row";
 import { ChoiceGroup, SwatchPicker } from "@/features/lcms/quiz/quiz-theme/quiz-theme-controls";
 import type { QuizThemeCopy } from "@/features/lcms/quiz/quiz-theme/quiz-theme-copy";
-import { quizThemePresets, quizThemeToneSurface } from "@/features/lcms/quiz/quiz-theme/quiz-theme-presets";
+import { quizThemePresets } from "@/features/lcms/quiz/quiz-theme/quiz-theme-presets";
 import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
 
 type QuizThemeCustomizeProps = {

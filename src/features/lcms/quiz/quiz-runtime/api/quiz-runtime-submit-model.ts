@@ -1,5 +1,5 @@
 import { createAttemptSession, gradeAttemptLocally } from "@/domain/quiz/assessment-engine";
-import { getAllQuestions } from "@/domain/quiz/quiz";
+import { canGradeLocally, getAllQuestions } from "@/domain/quiz/quiz";
 import type { Attempt, Quiz, QuizPackage } from "@/domain/quiz/types";
 import type { FinalSubmitPayload, RuntimeServerAttemptSnapshot, SubmitAttemptInput } from "@/features/lcms/quiz/quiz-runtime/types/quiz-runtime-types";
 import { isRecord } from "@/features/lcms/quiz/quiz-runtime/api/quiz-runtime-normalization-utils";
@@ -80,7 +80,12 @@ export function normalizeSubmitResponse(response: BackendSubmitAttemptResponse, 
 }
 
 function aggregateSubmitResponseToAttempt(response: BackendSubmitAttemptAggregate, input: SubmitAttemptInput): Attempt {
-  const answers = Object.fromEntries(
+  const allQuestions = getAllQuestions(input.quizPackage.quiz);
+  // The backend returns totals only. With the keys in the package, per-question results are re-graded here
+  // (totals stay the server's); without keys they stay unknown placeholders and the UI hides them.
+  const answers = canGradeLocally(allQuestions)
+    ? gradeFinalAttemptLocally(input.quizPackage, input.attemptId, input.payload.answers).answers
+    : Object.fromEntries(
     Object.entries(input.payload.answers).map(([questionId, answer]) => [
       questionId,
       {
@@ -96,7 +101,7 @@ function aggregateSubmitResponseToAttempt(response: BackendSubmitAttemptAggregat
       },
     ]),
   ) as Attempt["answers"];
-  const totalQuestions = getAllQuestions(input.quizPackage.quiz).length;
+  const totalQuestions = allQuestions.length;
 
   return {
     id: input.attemptId,

@@ -62,8 +62,6 @@ export function StudentQuizSession({
   }, [preview]);
   const subjectLabel = assignment.subjectLabel ?? "Chưa có môn học";
   const teacherName = assignment.teacherName ?? "Chưa có giáo viên";
-  const subtitle = assignment.subtitle ?? "Chưa có mô tả";
-  const lastActivityLabel = assignment.lastActivityLabel ?? "Chưa có hoạt động";
   return (
     <Box
       sx={{
@@ -128,14 +126,7 @@ export function StudentQuizSession({
           quizId={assignment.quizId}
           portableOffline={preview}
           runtimePortal={runtimePortal}
-          welcomeMeta={{
-            authorName: teacherName,
-            courseLabel: assignment.title,
-            dueLabel: assignment.dueLabel,
-            reviewContent: subtitle,
-            subjectLabel,
-            topics: [subjectLabel, assignment.statusLabel, lastActivityLabel],
-          }}
+          welcomeMeta={{ dueAt: assignment.dueAt, subjectLabel: assignment.subjectLabel }}
         />
       </Box>
     </Box>

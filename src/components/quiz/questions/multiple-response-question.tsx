@@ -1,7 +1,7 @@
 import Box from "@mui/material/Box";
 import type { ReactNode } from "react";
 
-import { ChoiceOption } from "@/components/quiz/questions/choice-option";
+import { ChoiceOption, choiceReviewTag } from "@/components/quiz/questions/choice-option";
 import { QuestionContentImage } from "@/components/quiz/questions/shared";
 import type { QuestionComponentProps } from "@/components/quiz/questions/types";
 import type { Question } from "@/domain/quiz/types";
@@ -19,15 +19,14 @@ export function MultipleResponseQuestion({
   return (
     <QuestionChoiceLayout question={question}>
       <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 2, sm: 2.5 } }}>
-        {choices.map((choice) => {
+        {choices.map((choice, index) => {
           const selected = selectedIds.has(choice.id);
-          const showCorrect = reviewMode && choice.correct;
-          const showWrong = reviewMode && selected && !choice.correct;
           return (
             <ChoiceOption
               key={choice.id}
               disabled={submitted}
               image={choice.image}
+              letter={String.fromCharCode(65 + index)}
               mode="multiple"
               onClick={() => {
                 const next = new Set(value.choiceIds ?? []);
@@ -35,10 +34,8 @@ export function MultipleResponseQuestion({
                 else next.add(choice.id);
                 onChange({ choiceIds: [...next] });
               }}
-              reviewMode={reviewMode}
+              reviewTag={choiceReviewTag(reviewMode, selected, choice.correct)}
               selected={selected}
-              showCorrect={showCorrect}
-              showWrong={showWrong}
             >
               {choice.label}
             </ChoiceOption>

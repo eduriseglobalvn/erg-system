@@ -57,6 +57,7 @@ export function normalizeQuizPackage(value: BackendQuizPackage): QuizPackage {
 export function stripQuizAnswerKey(quiz: Quiz): Quiz {
   const strip = (question: Question): Question => ({
     ...question,
+    answerKeyStripped: true,
     ...(question.choices ? { choices: question.choices.map((choice) => ({ ...choice, correct: false })) } : {}),
     ...(question.inlineBlanks ? { inlineBlanks: question.inlineBlanks.map((blank) => ({ ...blank, correctOptionId: "" })) } : {}),
     ...(question.textBlanks ? { textBlanks: question.textBlanks.map((blank) => ({ ...blank, correctAnswers: [] })) } : {}),
@@ -116,6 +117,7 @@ function buildQuizFromBackendDetail(
     description: stringValue(summary.description, ""),
     themeId: stringValue(summary.themeId, "erg-default"),
     theme: normalizeTheme(detail.theme),
+    ...(isRecord(settingsRecord.playerTemplate) ? { playerTemplate: settingsRecord.playerTemplate } : {}),
     settings: {
       mode,
       timeLimitMinutes: numberValue(nestedSettings.timeLimitMinutes ?? nestedSettings.maxDurationMinutes),

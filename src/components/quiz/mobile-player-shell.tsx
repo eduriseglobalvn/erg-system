@@ -4,16 +4,15 @@ import type { CSSProperties, ReactNode } from "react";
 import { MobilePlayerFooter } from "@/components/quiz/mobile-player-footer";
 import { MobilePlayerIntro } from "@/components/quiz/mobile-player-intro";
 import { MobileQuestionSheet } from "@/components/quiz/mobile-player-question-sheet";
-import type { Question, Quiz, QuizResultDisplay } from "@/domain/quiz/types";
+import type { QuizWelcomeMeta } from "@/components/quiz/quiz-welcome-screen";
+import type { QuestionCell } from "@/components/quiz/question-navigator";
+import type { Question, Quiz } from "@/domain/quiz/types";
 
 type MobilePlayerShellProps = {
   allQuestionsAnswered: boolean;
   answeredCount: number;
-  answeredQuestionIds: string[];
   attemptCompleted: boolean;
-  bookmarkCount: number;
-  bookmarkedQuestionIds: string[];
-  currentIndex: number;
+  cells: QuestionCell[];
   footerMessage: string;
   isBookmarked: boolean;
   isFirstQuestion: boolean;
@@ -26,12 +25,9 @@ type MobilePlayerShellProps = {
   canvasStyle: CSSProperties;
   headerStyle: CSSProperties;
   accentButtonStyle: CSSProperties;
-  secondaryButtonStyle: CSSProperties;
-  modeBadgeStyle: CSSProperties;
   question: Question;
   questions: Question[];
   quiz: Quiz;
-  resultDisplay: QuizResultDisplay;
   reviewingSubmittedAttempt: boolean;
   started: boolean;
   submitting: boolean;
@@ -42,22 +38,20 @@ type MobilePlayerShellProps = {
   onNext: () => void;
   onPrev: () => void;
   onRequestSubmit: () => void;
-  onReview: () => void;
+  onReview?: () => void;
   onStart: () => void;
   onSubmitCurrentQuestion: () => void;
   onToggleBookmark: () => void;
   body: ReactNode;
   resultBody?: ReactNode;
+  restoredDraft?: boolean;
+  welcomeMeta?: QuizWelcomeMeta;
 };
 
 export function MobilePlayerShell({
   answeredCount,
-  answeredQuestionIds,
   attemptCompleted,
-  bookmarkCount,
-  bookmarkedQuestionIds,
-
-  currentIndex,
+  cells,
   isBookmarked,
   isFirstQuestion,
   isLastQuestion,
@@ -66,11 +60,9 @@ export function MobilePlayerShell({
   currentAnswerComplete,
   currentQuestionSubmitted,
   playerCardStyle,
-  modeBadgeStyle,
   question,
   questions,
   quiz,
-  resultDisplay,
   reviewingSubmittedAttempt,
   started,
   submitting,
@@ -87,10 +79,12 @@ export function MobilePlayerShell({
   onToggleBookmark,
   body,
   resultBody,
+  restoredDraft,
+  welcomeMeta,
 }: MobilePlayerShellProps) {
   if (!started) {
     return (
-      <MobilePlayerIntro modeBadgeStyle={modeBadgeStyle} playerCardStyle={playerCardStyle} questions={questions} quiz={quiz} onStart={onStart} />
+      <MobilePlayerIntro playerCardStyle={playerCardStyle} questions={questions} quiz={quiz} answeredCount={answeredCount} restoredDraft={restoredDraft} welcomeMeta={welcomeMeta} onStart={onStart} />
     );
   }
 
@@ -103,12 +97,7 @@ export function MobilePlayerShell({
       >
         <div className="sticky top-0 z-30 border-b border-slate-200 bg-white">
           <div className="mx-auto grid min-h-12 max-w-md grid-cols-[1fr_auto_1fr] items-center gap-2 px-4 py-1">
-            <div className="flex min-w-0 items-center">{isTestingMode && !attemptCompleted ? timer : null}</div>
-            <div className="text-center text-sm font-semibold text-slate-700">
-              {attemptCompleted && !reviewingSubmittedAttempt ? quiz.title : `Câu ${currentIndex + 1} / ${questions.length}`}
-              {saveIndicator ? <div>{saveIndicator}</div> : null}
-            </div>
-            <div className="flex items-center justify-end gap-1 text-slate-400">
+            <div className="flex items-center justify-start text-slate-400">
               <button
                 type="button"
                 aria-label={isBookmarked ? "Bỏ đánh dấu câu hỏi" : "Đánh dấu câu hỏi"}
@@ -117,15 +106,19 @@ export function MobilePlayerShell({
               >
                 <Flag className={`h-4 w-4 ${isBookmarked ? "fill-current text-[#FF5630]" : ""}`} />
               </button>
-              <MobileQuestionSheet
-                answeredQuestionIds={answeredQuestionIds}
-                bookmarkCount={bookmarkCount}
-                bookmarkedQuestionIds={bookmarkedQuestionIds}
-                currentIndex={currentIndex}
-                questions={questions}
-                onJumpToQuestion={onJumpToQuestion}
-              />
             </div>
+            <div className="flex min-w-0 flex-col items-center text-center">
+              {attemptCompleted && !reviewingSubmittedAttempt ? null : (
+                <MobileQuestionSheet
+                  cells={cells}
+                  onJumpToQuestion={onJumpToQuestion}
+                  onRequestSubmit={isTrainingMode || attemptCompleted ? undefined : onRequestSubmit}
+                />
+              )}
+              <span className="max-w-full truncate text-xs text-slate-500">{quiz.title}</span>
+              {saveIndicator ? <div>{saveIndicator}</div> : null}
+            </div>
+            <div className="flex min-w-0 items-center justify-end">{isTestingMode && !attemptCompleted ? timer : null}</div>
           </div>
         </div>
 
@@ -151,7 +144,7 @@ export function MobilePlayerShell({
         <MobilePlayerFooter
           attemptCompleted={attemptCompleted} currentAnswerComplete={currentAnswerComplete}
           currentQuestionSubmitted={currentQuestionSubmitted} isFirstQuestion={isFirstQuestion}
-          isLastQuestion={isLastQuestion} isTrainingMode={isTrainingMode} resultDisplay={resultDisplay}
+          isLastQuestion={isLastQuestion} isTrainingMode={isTrainingMode}
           reviewingSubmittedAttempt={reviewingSubmittedAttempt} submitFailed={submitFailed} submitting={submitting}
           onNext={onNext} onPrev={onPrev} onRequestSubmit={onRequestSubmit} onReview={onReview}
           onSubmitCurrentQuestion={onSubmitCurrentQuestion}
