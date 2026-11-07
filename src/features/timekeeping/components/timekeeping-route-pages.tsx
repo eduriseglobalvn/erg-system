@@ -3,6 +3,8 @@ import { useSearch } from "@tanstack/react-router";
 
 import { isIsoDate } from "@/domain/formatters/format-date";
 import { ErgPageHeader } from "@/components/erg-mui/erg-page-header";
+import { AdminTimesheetPage } from "../admin/admin-timesheet-page";
+import { AdminTodayPage } from "../admin/admin-today-page";
 import { DayDetailPage } from "./my-timesheet/day-detail-page";
 import { MyTimesheetPage } from "./my-timesheet/my-timesheet-page";
 import { RequestsScreen } from "./requests/requests-screen";
@@ -42,11 +44,11 @@ export function TeacherTimekeepingRequestsRoute() {
 }
 
 export function AdminTimekeepingTodayRoute() {
-  return <TimekeepingPageShell description="Ai đã chấm, ai chưa chấm và các trường hợp cần xử lý." title="Chấm công hôm nay" />;
+  return <AdminTodayPage />;
 }
 
 export function AdminTimesheetRoute() {
-  return <TimekeepingPageShell description="Bảng công tháng của nhân sự." title="Bảng công" />;
+  return <AdminTimesheetPage />;
 }
 
 export function AdminTimekeepingApprovalsRoute() {

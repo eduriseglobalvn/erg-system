@@ -25,7 +25,7 @@ import type {
 const client = () => createApiClient({ portal: getBackOfficePortal(), auth: "required" });
 const endpoints = API_ENDPOINTS.timekeeping;
 
-function withQuery(path: string, params: Record<string, string | number | boolean | undefined>) {
+export function withQuery(path: string, params: Record<string, string | number | boolean | undefined>) {
   const search = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) if (value !== undefined && value !== "") search.set(key, String(value));
   const suffix = search.toString();

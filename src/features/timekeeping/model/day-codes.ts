@@ -24,3 +24,11 @@ export function dayCodeFor(status: DayStatus, leaveKind?: LeaveKind | null) {
     ? { code: "KP" as const, label: "Nghỉ không lương", tone: "error" as const }
     : base;
 }
+
+const BY_CODE = new Map<string, { label: string; tone: DayCodeTone }>([
+  ...Object.values(DAY_CODE).filter((entry) => entry.code).map((entry) => [entry.code, entry] as const).reverse(),
+  ["KP", { label: "Nghỉ không lương", tone: "error" }],
+]);
+
+/** Label and tone of a code string from the admin sheet (X, M, ½, P, Ô, CT, KC, KP, L); null for "" (no shift). KC reads "Thiếu chấm". */
+export const codeMeta = (code: string | undefined) => (code ? BY_CODE.get(code) ?? null : null);

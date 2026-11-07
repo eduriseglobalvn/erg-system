@@ -17,12 +17,18 @@ type ErgConfirmDialogProps = {
   cancelLabel?: string;
   destructive?: boolean;
   loading?: boolean;
+  /** Khoá nút xác nhận, ví dụ khi chưa nhập lý do. */
+  confirmDisabled?: boolean;
+  /** Nội dung thêm dưới phần mô tả: ô nhập lý do, thông báo lỗi. */
+  children?: ReactNode;
   onConfirm: () => void;
   onCancel: () => void;
 };
 
 export function ErgConfirmDialog({
   cancelLabel = "Huỷ",
+  children,
+  confirmDisabled = false,
   confirmLabel,
   description,
   destructive = false,
@@ -41,12 +47,13 @@ export function ErgConfirmDialog({
         {impact ? (
           <Typography sx={{ fontSize: 14, fontWeight: 500, mt: description ? 1.5 : 0 }}>{impact}</Typography>
         ) : null}
+        {children}
       </DialogContent>
       <DialogActions>
         <ErgButton disabled={loading} onClick={onCancel} variant="text">
           {cancelLabel}
         </ErgButton>
-        <ErgButton color={destructive ? "error" : "primary"} loading={loading} onClick={onConfirm} variant="contained">
+        <ErgButton color={destructive ? "error" : "primary"} disabled={confirmDisabled} loading={loading} onClick={onConfirm} variant="contained">
           {confirmLabel}
         </ErgButton>
       </DialogActions>

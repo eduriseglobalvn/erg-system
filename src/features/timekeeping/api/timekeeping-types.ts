@@ -29,6 +29,11 @@ export type BulkApproveResult = Schemas["BulkApproveResult"];
 
 export type TodayDashboard = Schemas["TodayDashboard"];
 export type Timesheet = Schemas["Timesheet"];
+export type TimesheetRow = Schemas["TimesheetRow"];
+export type ActionItem = Schemas["ActionItem"];
+export type RecentPunch = Schemas["RecentPunch"];
+export type PeriodLockView = Schemas["PeriodLockView"];
+export type RemindResult = Schemas["RemindResult"];
 
 export type PunchDirection = "IN" | "OUT";
 export type ApprovalBox = "MINE" | "DONE" | "ALL";
