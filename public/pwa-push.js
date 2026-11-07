@@ -9,6 +9,8 @@ self.addEventListener("push", (event) => {
     body: payload.body || "Ban co thong bao moi tu LMS.",
     data: toClickData(payload),
     icon: payload.icon || DEFAULT_NOTIFICATION_ICON,
+    // URGENT messages stay on screen until the user acts (server sets requireInteraction).
+    requireInteraction: payload.requireInteraction,
     tag: payload.tag || payload.notificationId || payload.recipientId || payload.sourceId || "erg-lms-notification",
   };
 
@@ -75,9 +77,11 @@ function normalizePushPayload(rawPayload) {
     notificationId,
     portal: readString(data.portal) || "lms",
     recipientId,
+    requireInteraction: data.requireInteraction === true || rawPayload.requireInteraction === true,
     sourceId,
     tag: readString(data.tag),
     title: readString(notification.title) || readString(data.title),
+    url: readString(data.url) || readString(rawPayload.url),
   };
 }
 
@@ -88,10 +92,15 @@ function toClickData(payload) {
     portal: payload.portal || "lms",
     recipientId: payload.recipientId,
     sourceId: payload.sourceId,
+    url: payload.url,
   };
 }
 
 function resolveTargetUrl(data) {
+  // Web Push payload link (e.g. /notifications/{id}); only same-origin targets are followed.
+  const url = data.url && sameOriginHref(data.url);
+  if (url) return url;
+
   if (data.deeplink) {
     const deeplink = toSameOriginUrl(data.deeplink);
     if (deeplink) return deeplink;
@@ -127,14 +136,15 @@ function readFcmOptions(rawPayload) {
 }
 
 function toSameOriginUrl(value) {
+  return sameOriginHref(value) || new URL("/notifications?source=push", self.location.origin).href;
+}
+
+function sameOriginHref(value) {
   try {
     const url = new URL(value, self.location.origin);
-    if (url.origin !== self.location.origin) {
-      return new URL("/notifications?source=push", self.location.origin).href;
-    }
-    return url.href;
+    return url.origin === self.location.origin ? url.href : undefined;
   } catch {
-    return new URL("/notifications?source=push", self.location.origin).href;
+    return undefined;
   }
 }
 

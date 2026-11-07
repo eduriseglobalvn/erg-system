@@ -17,7 +17,7 @@ type LmsPath = (typeof lmsPaths)[number];
 const routePages = () => import("@/features/lms/components/lms-teacher-route-pages");
 const page = (name: keyof Awaited<ReturnType<typeof routePages>>) => lazyRouteComponent(routePages, name);
 const composePage = lazyRouteComponent(() => import("@/app/pages/shared/notification-compose-page"), "TeacherNotificationComposePage");
-const inboxPage = (name: "TeacherNotificationsPage" | "TeacherNotificationDetailPage") =>
+const inboxPage = (name: "TeacherNotificationsPage" | "TeacherNotificationDetailPage" | "TeacherCampaignDetailPage") =>
   lazyRouteComponent(() => import("@/app/pages/shared/notification-inbox-page"), name);
 
 /** One child route per Teacher page; adding a path to `lmsPaths` fails type-checking until it has a page. */
@@ -73,6 +73,14 @@ const teacherNotificationDetailRoute = createRoute({
   component: inboxPage("TeacherNotificationDetailPage"),
 });
 
+// One of the teacher's own campaigns (KPIs, recipients); needs the send permission (matrix row notifications/sent).
+const teacherCampaignDetailRoute = createRoute({
+  getParentRoute: () => teacherShellRoute,
+  path: "/teacher/notifications/sent/$campaignId",
+  staticData: permissionStaticData(teacherPath("/notifications/sent"), "TEACHER"),
+  component: inboxPage("TeacherCampaignDetailPage"),
+});
+
 const teacherNotificationComposeEditRoute = createRoute({
   getParentRoute: () => teacherShellRoute,
   path: "/teacher/notifications/compose/$campaignId",
@@ -110,7 +118,7 @@ const learningOutcomesTeacherRoute = createRoute({
 });
 
 export const teacherRoutes = [
-  teacherShellRoute.addChildren([teacherIndexRoute, ...teacherPageRoutes, teacherNotificationDetailRoute, teacherNotificationComposeEditRoute]),
+  teacherShellRoute.addChildren([teacherIndexRoute, ...teacherPageRoutes, teacherNotificationDetailRoute, teacherCampaignDetailRoute, teacherNotificationComposeEditRoute]),
   teacherProfileRoute,
   teacherPortableExamRoute,
   teacherDesktopReleaseRoute,

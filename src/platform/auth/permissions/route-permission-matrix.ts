@@ -172,6 +172,9 @@ export const ROUTE_PERMISSION_MATRIX: readonly RoutePermissionEntry[] = [
   { path: "/teacher/downloads/desktop", workspace: "TEACHER", resource: "desktop.release", action: "read", permission: "lms.dashboard.read" },
   // notifications/$id and notifications/compose/$campaignId inherit their parent row.
   ...lmsPaths.map((path) => (path === "notifications" || path === "notifications/compose" ? { ...teacherEntry(path), matchChildren: true } : teacherEntry(path))),
+  // Campaign detail (children: $campaignId): senders only, same permission as compose.
+  { path: "/admin/notifications/sent", workspace: "ADMIN", resource: "notification.campaign", action: "send", permission: "notification.campaign.send", matchChildren: true },
+  { path: "/teacher/notifications/sent", workspace: "TEACHER", resource: "notification.campaign", action: "send", permission: "notification.campaign.send", matchChildren: true },
   { path: "/student", workspace: "STUDENT", resource: "assignment", action: "read", permission: "elearning.assignment.read_self", alternatePermissions: STUDENT_PREVIEW_ALTERNATES },
   { path: "/student/exams/portable", workspace: "STUDENT", resource: "exam.portable", action: "launch", permission: "elearning.assignment.read_self", alternatePermissions: STUDENT_PREVIEW_ALTERNATES },
   { path: "/student/downloads/desktop", workspace: "STUDENT", resource: "desktop.release", action: "read", permission: "elearning.assignment.read_self", alternatePermissions: STUDENT_PREVIEW_ALTERNATES },

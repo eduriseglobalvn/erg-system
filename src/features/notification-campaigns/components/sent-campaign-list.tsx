@@ -12,6 +12,7 @@ import { ContentPendingSkeleton } from "@/routes/route-feedback";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 import { useCampaigns } from "../api/campaign-query";
+import { CancelScheduleButton } from "./cancel-schedule-button";
 import type { CampaignAudience, CampaignBox, CampaignResponse, CampaignStatus } from "../api/campaign-types";
 import { ROLE_LABELS, type AudienceRole } from "../model/audience-draft";
 import { formatCountVi } from "../model/campaign-form-schema";
@@ -92,6 +93,12 @@ function CampaignRow({ campaign, onEdit, onOpen }: RowActions & { campaign: Camp
       ) : (
         <Box sx={{ display: "flex", width: "100%", px: 2, py: 1.5 }}>{content}</Box>
       )}
+      {/* Beside the row button, not inside it: a button may not nest in a button. */}
+      {campaign.status === "SCHEDULED" && campaign.id ? (
+        <Box sx={{ display: "flex", alignItems: "center", pr: 2 }}>
+          <CancelScheduleButton campaignId={campaign.id} title={campaign.title} />
+        </Box>
+      ) : null}
     </ListItem>
   );
 }

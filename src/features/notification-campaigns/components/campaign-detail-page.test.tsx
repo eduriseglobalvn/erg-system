@@ -8,7 +8,8 @@ import { CampaignDetailPage } from "./campaign-detail-page";
 
 const api = vi.hoisted(() => ({
   campaign: undefined as CampaignResponse | undefined,
-  failCampaign: false,
+  failCampaign: false as false | { status?: number },
+  cancel: vi.fn(),
   pages: {} as Record<string, CampaignRecipient[][]>,
   recipientCalls: [] as Array<{ filter?: string; page?: number }>,
 }));
@@ -16,9 +17,10 @@ const api = vi.hoisted(() => ({
 vi.mock("../api/campaign-api", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../api/campaign-api")>()),
   fetchCampaign: async () => {
-    if (api.failCampaign) throw new Error("boom");
+    if (api.failCampaign) throw Object.assign(new Error("boom"), api.failCampaign);
     return api.campaign;
   },
+  cancelCampaign: (id: string) => api.cancel(id),
   fetchCampaignRecipients: async (_id: string, input: { filter?: string; page?: number }) => {
     api.recipientCalls.push(input);
     const pages = api.pages[input.filter ?? "ALL"] ?? [[]];
@@ -41,6 +43,9 @@ const sent: CampaignResponse = {
   ackedCount: 120,
 };
 
+const toast = vi.hoisted(() => ({ success: vi.fn(), error: vi.fn() }));
+vi.mock("sonner", () => ({ toast }));
+
 function wrap(ui: ReactNode) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(<QueryClientProvider client={client}>{ui}</QueryClientProvider>);
@@ -49,6 +54,8 @@ function wrap(ui: ReactNode) {
 beforeEach(() => {
   api.campaign = sent;
   api.failCampaign = false;
+  api.cancel.mockReset();
+  toast.success.mockReset();
   api.recipientCalls = [];
   api.pages = {
     ALL: [
@@ -60,7 +67,8 @@ beforeEach(() => {
 });
 
 test("sent campaign: heading, status, KPIs, recipients with read/ack times, load more", async () => {
-  wrap(<CampaignDetailPage campaignId="c1" onBack={vi.fn()} onEdit={vi.fn()} />);
+  const onBack = vi.fn();
+  wrap(<CampaignDetailPage campaignId="c1" onBack={onBack} onEdit={vi.fn()} />);
 
   expect(await screen.findByRole("heading", { level: 1, name: "Lịch nghỉ lễ 2/9" })).toBeInTheDocument();
   expect(screen.getByText("Đã gửi")).toBeInTheDocument();
@@ -69,6 +77,9 @@ test("sent campaign: heading, status, KPIs, recipients with read/ack times, load
   expect(screen.getByText("Đã xác nhận")).toBeInTheDocument();
   expect(screen.getByText("60%")).toBeInTheDocument();
   expect(screen.queryByRole("button", { name: "Sửa" })).toBeNull();
+  expect(screen.queryByRole("button", { name: /Hủy hẹn/ })).toBeNull();
+  fireEvent.click(screen.getByRole("button", { name: "Thông báo đã gửi" }));
+  expect(onBack).toHaveBeenCalledWith("SENT");
 
   const list = await screen.findByRole("list", { name: "Người nhận" });
   const first = within(list).getByText("Nguyễn An").closest("li") as HTMLElement;
@@ -112,18 +123,57 @@ test("without read-ack there is no ack KPI and no Chưa xác nhận filter; no r
 
 test("a scheduled campaign shows when it goes out and the single Sửa action", async () => {
   const onEdit = vi.fn();
+  const onBack = vi.fn();
   api.campaign = { ...sent, status: "SCHEDULED", sentAt: undefined, scheduledAt: new Date(2026, 10, 10, 6, 30).toISOString() };
-  wrap(<CampaignDetailPage campaignId="c1" onBack={vi.fn()} onEdit={onEdit} />);
+  wrap(<CampaignDetailPage campaignId="c1" onBack={onBack} onEdit={onEdit} />);
 
   expect(await screen.findByText(/Hẹn gửi 10\/11\/2026 06:30/)).toBeInTheDocument();
   expect(screen.queryByRole("list", { name: "Người nhận" })).toBeNull();
   fireEvent.click(screen.getByRole("button", { name: "Sửa" }));
   expect(onEdit).toHaveBeenCalledWith("c1");
   expect(api.recipientCalls).toHaveLength(0);
+  fireEvent.click(screen.getByRole("button", { name: "Lên lịch" }));
+  expect(onBack).toHaveBeenCalledWith("SCHEDULED");
+});
+
+test("Hủy hẹn asks first, then cancels and confirms with a toast", async () => {
+  api.campaign = { ...sent, status: "SCHEDULED", sentAt: undefined, scheduledAt: new Date(2026, 10, 10, 6, 30).toISOString() };
+  api.cancel.mockResolvedValue({ ...api.campaign, status: "CANCELLED" });
+  wrap(<CampaignDetailPage campaignId="c1" onBack={vi.fn()} onEdit={vi.fn()} />);
+
+  fireEvent.click(await screen.findByRole("button", { name: "Hủy hẹn" }));
+  const dialog = screen.getByRole("dialog", { name: "Hủy hẹn gửi?" });
+  expect(dialog).toHaveTextContent("Thông báo sẽ không được gửi.");
+  expect(api.cancel).not.toHaveBeenCalled();
+  fireEvent.click(within(dialog).getByRole("button", { name: "Hủy hẹn" }));
+  await vi.waitFor(() => expect(toast.success).toHaveBeenCalledWith("Đã hủy hẹn gửi."));
+  expect(api.cancel).toHaveBeenCalledWith("c1");
+});
+
+test("a failed cancel keeps the dialog open with the error inline", async () => {
+  api.campaign = { ...sent, status: "SCHEDULED", sentAt: undefined };
+  api.cancel.mockRejectedValue(new Error("Đã quá giờ hẹn"));
+  wrap(<CampaignDetailPage campaignId="c1" onBack={vi.fn()} onEdit={vi.fn()} />);
+
+  fireEvent.click(await screen.findByRole("button", { name: "Hủy hẹn" }));
+  const dialog = screen.getByRole("dialog");
+  fireEvent.click(within(dialog).getByRole("button", { name: "Hủy hẹn" }));
+  expect(await within(dialog).findByRole("alert")).toHaveTextContent("Đã quá giờ hẹn");
+  expect(toast.success).not.toHaveBeenCalled();
+});
+
+test.each([403, 404])("a %i shows the no-access copy with a way back, no retry", async (status) => {
+  api.failCampaign = { status };
+  const onBack = vi.fn();
+  wrap(<CampaignDetailPage campaignId="c1" onBack={onBack} onEdit={vi.fn()} />);
+  expect(await screen.findByText("Bạn không có quyền xem hoặc thông báo không tồn tại")).toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: "Thử lại" })).toBeNull();
+  fireEvent.click(within(screen.getByRole("alert")).getByRole("button", { name: "Quay lại" }));
+  expect(onBack).toHaveBeenCalledWith("SENT");
 });
 
 test("a failed load shows the error state with Thử lại", async () => {
-  api.failCampaign = true;
+  api.failCampaign = { status: 500 };
   wrap(<CampaignDetailPage campaignId="c1" onBack={vi.fn()} onEdit={vi.fn()} />);
   expect(await screen.findByText("Không tải được thông báo")).toBeInTheDocument();
   expect(screen.getByRole("button", { name: "Thử lại" })).toBeInTheDocument();

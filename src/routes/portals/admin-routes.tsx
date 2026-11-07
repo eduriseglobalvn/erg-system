@@ -87,11 +87,11 @@ const adminNotificationDetailRoute = createRoute({
   component: inboxPage("AdminNotificationDetailPage"),
 });
 
-// One sent campaign (KPIs, recipients); "sent/" keeps it apart from compose and $notificationId. Inherits the notifications row.
+// One campaign (KPIs, recipients); "sent/" keeps it apart from compose and $notificationId. Own matrix row: the send permission.
 const adminCampaignDetailRoute = createRoute({
   getParentRoute: () => adminShellRoute,
   path: "/admin/notifications/sent/$campaignId",
-  staticData: permissionStaticData(adminPath("/notifications"), "ADMIN"),
+  staticData: permissionStaticData(adminPath("/notifications/sent"), "ADMIN"),
   component: inboxPage("AdminCampaignDetailPage"),
 });
 

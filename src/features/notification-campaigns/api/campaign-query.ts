@@ -179,6 +179,8 @@ export function useCancelCampaign() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => cancelCampaign(id),
+    // The confirm dialog shows the error inline.
+    meta: { silent: true },
     onSuccess: (_data, id) => invalidateCampaigns(queryClient, id),
   });
 }

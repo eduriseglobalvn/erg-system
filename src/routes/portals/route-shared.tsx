@@ -81,7 +81,7 @@ export const notificationLinkRoute = createRoute({
   path: "/notifications/$notificationId",
   beforeLoad: ({ context, location }) =>
     withFreshAuth(context.auth, (auth) => {
-      // The raw segment, not the decoded param: an encoded "/" or ".." must not survive into the target path.
+      // location.pathname may already be decoded; the id allowlist in notificationRedirectHref is what keeps "/", ".." and "%" out of the target.
       throw redirect({ href: notificationRedirectHref(location.pathname.split("/")[2] ?? "", auth), replace: true });
     }),
 });

@@ -3,9 +3,8 @@ import Box from "@mui/material/Box";
 
 import { AdminInboxScreen } from "@/features/notification-campaigns/components/admin-inbox-screen";
 import { CampaignDetailPage } from "@/features/notification-campaigns/components/campaign-detail-page";
-import { canSendCampaigns } from "@/features/notification-campaigns/model/can-send-campaigns";
-import { notificationComposePath, notificationsHomePath } from "@/features/notification-campaigns/model/campaign-paths";
-import { InboxList } from "@/features/notifications/components/inbox-list";
+import { TeacherInboxScreen } from "@/features/notification-campaigns/components/teacher-inbox-screen";
+import { type ComposePortalKind, notificationComposePath, notificationsBoxPath } from "@/features/notification-campaigns/model/campaign-paths";
 import { NotificationDetail } from "@/features/notifications/components/notification-detail";
 import { ADMIN_NOTIFICATION_PORTAL, TEACHER_NOTIFICATION_PORTAL } from "@/platform/workspaces/workspace-notification-portal";
 import { adminPath, teacherPath } from "@/platform/workspaces/workspace-paths";
@@ -28,31 +27,27 @@ export function AdminNotificationDetailPage() {
   );
 }
 
-/** /admin/notifications/sent/$campaignId: KPIs and recipients of one sent campaign */
-export function AdminCampaignDetailPage() {
+/** <workspace>/notifications/sent/$campaignId: KPIs and recipients of one campaign; back returns to its box. */
+function CampaignDetailRoutePage({ kind }: { kind: ComposePortalKind }) {
   const navigate = useNavigate();
   const { campaignId = "" } = useParams({ strict: false });
   return (
     <CampaignDetailPage
       campaignId={campaignId}
-      onBack={() => void navigate({ href: notificationsHomePath("admin") })}
-      onEdit={(id) => void navigate({ href: notificationComposePath("admin", id) })}
+      onBack={(box) => void navigate({ href: notificationsBoxPath(kind, box) })}
+      onEdit={(id) => void navigate({ href: notificationComposePath(kind, id) })}
     />
   );
 }
 
-/** /teacher/notifications (N12) */
+export const AdminCampaignDetailPage = () => <CampaignDetailRoutePage kind="admin" />;
+export const TeacherCampaignDetailPage = () => <CampaignDetailRoutePage kind="teacher" />;
+
+/** /teacher/notifications (N12), plus the sender's own campaigns */
 export function TeacherNotificationsPage() {
-  const navigate = useNavigate();
   return (
     <Box sx={pageSx}>
-      <InboxList
-        portal={TEACHER_NOTIFICATION_PORTAL}
-        workspace="TEACHER"
-        title="Hộp thư"
-        onOpen={(item) => void navigate({ href: `${teacherPath("/notifications")}/${encodeURIComponent(item.id)}` })}
-        onCompose={canSendCampaigns(TEACHER_NOTIFICATION_PORTAL) ? () => void navigate({ href: notificationComposePath("teacher") }) : undefined}
-      />
+      <TeacherInboxScreen />
     </Box>
   );
 }

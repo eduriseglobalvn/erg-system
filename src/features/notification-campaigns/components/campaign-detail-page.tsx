@@ -7,9 +7,10 @@ import { formatDateTimeVi } from "@/domain/formatters/format-date";
 import { ContentPendingSkeleton } from "@/routes/route-feedback";
 
 import { useCampaign } from "../api/campaign-query";
-import type { CampaignResponse } from "../api/campaign-types";
+import type { CampaignBox, CampaignResponse } from "../api/campaign-types";
 import { formatCountVi } from "../model/campaign-form-schema";
 import { CampaignRecipientList } from "./campaign-recipient-list";
+import { CancelScheduleButton } from "./cancel-schedule-button";
 import { audienceScopeLabel, CAMPAIGN_STATUS, viewedPercent } from "./sent-campaign-list";
 
 const SENDER: Record<string, string> = { ADMIN: "Quản trị viên", TEACHER: "Giáo viên" };
@@ -33,15 +34,34 @@ function kpis(campaign: CampaignResponse): ErgMetricItem[] {
   return items;
 }
 
-type Props = { campaignId: string; onBack: () => void; onEdit: (id: string) => void };
+/** The box the campaign is listed in, and the back link that returns there. */
+function boxOf(campaign: CampaignResponse | undefined): { box: CampaignBox; label: string } {
+  if (campaign?.status === "SCHEDULED") return { box: "SCHEDULED", label: "Lên lịch" };
+  if (campaign?.status === "DRAFT") return { box: "DRAFT", label: "Nháp" };
+  return { box: "SENT", label: campaign ? "Thông báo đã gửi" : "Quay lại" };
+}
+
+type Props = { campaignId: string; onBack: (box: CampaignBox) => void; onEdit: (id: string) => void };
 
 /** One campaign the admin sent: who it reached, who has seen / acknowledged it. Drafts and scheduled ones can be edited. */
 export function CampaignDetailPage({ campaignId, onBack, onEdit }: Props) {
   const query = useCampaign(campaignId);
 
+  const back = boxOf(query.data);
+  const errorStatus = (query.error as { status?: number } | null)?.status;
+
   let content;
   if (query.isPending) content = <ContentPendingSkeleton />;
-  else if (query.isError || !query.data) {
+  else if (errorStatus === 403 || errorStatus === 404) {
+    // Retrying cannot help: another sender's campaign, or it no longer exists.
+    content = (
+      <ErgErrorState
+        title="Bạn không có quyền xem hoặc thông báo không tồn tại"
+        description="Thông báo có thể đã bị xoá, hoặc chỉ người gửi xem được."
+        action={<ErgButton variant="outlined" onClick={() => onBack(back.box)}>Quay lại</ErgButton>}
+      />
+    );
+  } else if (query.isError || !query.data) {
     content = (
       <ErgErrorState
         title="Không tải được thông báo"
@@ -66,6 +86,7 @@ export function CampaignDetailPage({ campaignId, onBack, onEdit }: Props) {
             </Typography>
           </Box>
           <ErgStatusChip label={status.label} tone={status.tone} />
+          {campaign.status === "SCHEDULED" ? <CancelScheduleButton campaignId={campaignId} /> : null}
           {editable ? <ErgButton variant="contained" onClick={() => onEdit(campaignId)}>Sửa</ErgButton> : null}
         </Box>
         <Typography variant="body2" sx={{ color: "text.secondary" }}>
@@ -85,7 +106,7 @@ export function CampaignDetailPage({ campaignId, onBack, onEdit }: Props) {
   return (
     <Box component="article" sx={{ display: "grid", gap: 2, maxWidth: 960, mx: "auto", px: { xs: 2, sm: 3 }, py: 3, width: "100%" }}>
       <Box>
-        <ErgButton variant="text" startIcon={<ArrowBackRoundedIcon />} onClick={onBack}>Thông báo đã gửi</ErgButton>
+        <ErgButton variant="text" startIcon={<ArrowBackRoundedIcon />} onClick={() => onBack(back.box)}>{back.label}</ErgButton>
       </Box>
       {content}
     </Box>

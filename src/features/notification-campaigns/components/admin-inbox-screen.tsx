@@ -110,7 +110,7 @@ export function AdminInboxScreen() {
   const tab = tabs.find((candidate) => candidate.id === requested)?.id ?? "INBOX";
   const compose = () => void navigate({ href: notificationComposePath("admin") });
   const edit = (id: string) => void navigate({ href: notificationComposePath("admin", id) });
-  const open = (id: string) => void navigate({ href: campaignDetailPath(id) });
+  const open = (id: string) => void navigate({ href: campaignDetailPath("admin", id) });
   const table = tab === "SENT" && desktop;
 
   return (

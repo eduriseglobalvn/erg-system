@@ -31,13 +31,18 @@ describe("/notifications/$id push deep link", () => {
     expect(notificationRedirectHref("abc", anon)).toBe("/login?redirect=%2Fnotifications%2Fabc");
   });
 
-  it.each(["../x", "..", "//evil", "%2F%2Fevil", "a b", "abc?x=1", "https:evil", ""])(
+  it.each(["../x", "..", "//evil", "%2F%2Fevil", "%2e%2e", "a\\b", "abé", "x".repeat(129), "a b", "abc?x=1", "https:evil", ""])(
     "treats %j as no id: lands on the inbox, never on another path",
     (id) => {
       expect(notificationRedirectHref(id, session(["TEACHER"]))).toBe("/teacher/notifications");
       expect(notificationRedirectHref(id, anon)).toBe("/login?redirect=%2Fnotifications");
     },
   );
+
+  it("accepts an id at the 128-character limit", () => {
+    const id = "x".repeat(128);
+    expect(notificationRedirectHref(id, session(["TEACHER"]))).toBe(`/teacher/notifications/${id}`);
+  });
 
   it("keeps UUID ids as one path segment", () => {
     const id = "3f2d7cb4-9467-7e4c-9b1d-2a0f00e1a1b2";

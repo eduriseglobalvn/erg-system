@@ -11,5 +11,8 @@ export const notificationComposePath = (kind: ComposePortalKind, campaignId?: st
 /** Where the sender lands after sending: the admin Đã gửi box, or the teacher Hộp thư. */
 export const notificationsHomePath = (kind: ComposePortalKind) => `${base(kind, "/notifications")}${kind === "admin" ? "?tab=SENT" : ""}`;
 
-/** Admin detail of one sent campaign (KPIs + recipients); "sent/" keeps it apart from compose and the inbox $notificationId. */
-export const campaignDetailPath = (campaignId: string) => adminPath(`/notifications/sent/${encodeURIComponent(campaignId)}`);
+/** One box of the sender's campaigns on the Hộp thư page (`?tab=`). */
+export const notificationsBoxPath = (kind: ComposePortalKind, box: "SENT" | "SCHEDULED" | "DRAFT") => `${base(kind, "/notifications")}?tab=${box}`;
+
+/** Detail of one campaign (KPIs + recipients); "sent/" keeps it apart from compose and the inbox $notificationId. */
+export const campaignDetailPath = (kind: ComposePortalKind, campaignId: string) => base(kind, `/notifications/sent/${encodeURIComponent(campaignId)}`);
