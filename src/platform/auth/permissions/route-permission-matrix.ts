@@ -3,7 +3,7 @@ import { LMS_ROUTE_PERMISSIONS, type LmsPermission } from "@/platform/auth/permi
 import type { Workspace } from "@/platform/workspaces/workspace-domain";
 import { adminPath, studentPath, teacherPath } from "@/platform/workspaces/workspace-paths";
 
-export type PermissionAction = "read" | "create" | "update" | "delete" | "manage" | "assign" | "publish" | "submit" | "launch";
+export type PermissionAction = "read" | "create" | "update" | "delete" | "manage" | "assign" | "publish" | "submit" | "launch" | "self" | "approve";
 
 /** Permission names published by the BE permission catalog/runtime bindings. */
 export type RoutePermission =
@@ -93,6 +93,10 @@ const ADMIN_EXTRA_PERMISSIONS: Record<string, Pick<RoutePermissionEntry, "resour
   "report/cash-flow-report": { resource: "report", action: "read", permission: "operations.manage" },
   "report/pnl-report": { resource: "report", action: "read", permission: "crm.analytics.read" },
   "learning-outcomes": { resource: "learning-outcomes", action: "manage", permission: "learning.outcomes.manage" },
+  "employees/timekeeping": { resource: "timekeeping", action: "manage", permission: "timekeeping.manage" },
+  "employees/timesheet": { resource: "timekeeping", action: "manage", permission: "timekeeping.manage" },
+  "employees/timekeeping-settings": { resource: "timekeeping", action: "manage", permission: "timekeeping.manage" },
+  "employees/teacher-absence": { resource: "timekeeping", action: "approve", permission: "timekeeping.approve" },
 };
 
 function adminEntry(path: string): RoutePermissionEntry {

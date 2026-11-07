@@ -27,7 +27,13 @@ describe("resolveAdminMobileSection", () => {
 describe("admin dock visibility", () => {
   it("hides tabs whose route does not exist yet, whatever the permissions", () => {
     const ids = visibleAdminDockItems((path) => canNavigateToAdminPath(path, ["*"])).map((item) => item.id);
-    expect(ids).toEqual(["home", "calendar", "schools", "all"]);
+    expect(ids).toEqual(["home", "calendar", "schools", "timekeeping", "all"]);
+  });
+
+  it("shows Chấm công only with timekeeping.manage", () => {
+    const only = (permissions: string[]) => visibleAdminDockItems((path) => canNavigateToAdminPath(path, permissions)).map((item) => item.id);
+    expect(only(["timekeeping.manage"])).toEqual(["timekeeping", "all"]);
+    expect(only(["timekeeping.approve"])).toEqual(["all"]);
   });
 
   it("hides tabs the session has no permission for, but keeps Tất cả", () => {

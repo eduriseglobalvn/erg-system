@@ -23,7 +23,12 @@ const QuestionTypeDemoPage = lazy(() =>
 const routePages = () => import("@/features/lcms/admin-route-pages");
 const page = (name: keyof Awaited<ReturnType<typeof routePages>>) => lazyRouteComponent(routePages, name);
 
+const timekeepingPages = () => import("@/features/timekeeping/components/timekeeping-route-pages");
+const timekeepingPage = (name: keyof Awaited<ReturnType<typeof timekeepingPages>>) => lazyRouteComponent(timekeepingPages, name);
+
 const CONTENT_REDIRECTED_SEGMENTS = ["questions", "quiz-bank", "quiz-editor"];
+// Redirect aliases of a renamed screen: they get no page of their own.
+const REDIRECT_ONLY_SEGMENTS = ["setting/setting-center-role", "employees/face-detection"];
 
 /** Component of the Admin menu entries that have their own screen; every other entry uses the generic host. */
 function adminPageFor(wPath: string) {
@@ -31,6 +36,10 @@ function adminPageFor(wPath: string) {
   if (wPath === "settings/roles") return page("AdminRolesRoute");
   if (wPath === "employees") return page("AdminEmployeesRoute");
   if (wPath === "employees/access-logs") return page("AdminEmployeeAccessLogsRoute");
+  if (wPath === "employees/timekeeping") return timekeepingPage("AdminTimekeepingTodayRoute");
+  if (wPath === "employees/timesheet") return timekeepingPage("AdminTimesheetRoute");
+  if (wPath === "employees/teacher-absence") return timekeepingPage("AdminTimekeepingApprovalsRoute");
+  if (wPath === "employees/timekeeping-settings") return timekeepingPage("AdminTimekeepingSettingsRoute");
   if (wPath === "ui-kit") return page("AdminUiKitRoute");
   if (wPath === "schools" || wPath.startsWith("schools/")) return page("AdminSchoolsRoute");
   return page("AdminGenericRoute");
@@ -53,7 +62,7 @@ const adminContentRoutes = ADMIN_CONTENT_ROUTE_PATHS.map((contentPath) =>
 );
 
 const adminMenuRoutes = lcmsWorkspacePaths
-  .filter((wPath) => !CONTENT_REDIRECTED_SEGMENTS.includes(wPath) && wPath !== "setting/setting-center-role")
+  .filter((wPath) => !CONTENT_REDIRECTED_SEGMENTS.includes(wPath) && !REDIRECT_ONLY_SEGMENTS.includes(wPath))
   .map((wPath) => {
     const path = canonicalAdminWorkspacePath(`/${wPath}`);
     return createRoute({
@@ -71,6 +80,16 @@ const settingCenterRoleRedirectRoute = createRoute({
   staticData: permissionStaticData(canonicalAdminWorkspacePath("/setting/setting-center-role"), "ADMIN"),
   beforeLoad: () => {
     throw redirect({ href: adminPath("/settings/roles"), replace: true });
+  },
+});
+
+// The face-detection screen became timekeeping settings.
+const faceDetectionRedirectRoute = createRoute({
+  getParentRoute: () => authedRoute,
+  path: canonicalAdminWorkspacePath("/employees/face-detection"),
+  staticData: permissionStaticData(canonicalAdminWorkspacePath("/employees/face-detection"), "ADMIN"),
+  beforeLoad: () => {
+    throw redirect({ href: adminPath("/employees/timekeeping-settings"), replace: true });
   },
 });
 
@@ -141,6 +160,7 @@ export const adminAuthedRoutes = [
   adminProfileRoute,
   questionTypesRoute,
   settingCenterRoleRedirectRoute,
+  faceDetectionRedirectRoute,
   adminShellRoute.addChildren([
     adminIndexRoute,
     ...adminContentRoutes,

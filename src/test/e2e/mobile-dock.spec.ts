@@ -12,11 +12,11 @@ test("teacher phone dock: expected items, no header bell, no horizontal overflow
   const dock = page.getByRole("navigation", { name: "Điều hướng giáo viên" });
   // The dev server compiles the teacher chunk on first hit.
   await expect(dock).toBeVisible({ timeout: 30_000 });
-  // Chấm công joins the dock only once the attendance feature lands; today the dock has 5 items.
-  for (const label of ["Hôm nay", "Lịch", "Học tập", "Hộp thư", "Tài khoản"]) {
+  // Chấm công shows for holders of timekeeping.self (the smoke session holds every permission).
+  for (const label of ["Hôm nay", "Lịch", "Học tập", "Hộp thư", "Chấm công", "Tài khoản"]) {
     await expect(dock.getByRole("button", { name: new RegExp(`^${label}`) })).toBeVisible();
   }
-  await expect(dock.getByRole("button")).toHaveCount(5);
+  await expect(dock.getByRole("button")).toHaveCount(6);
   await expect(page.getByRole("button", { name: "Thông báo", exact: true })).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
 });

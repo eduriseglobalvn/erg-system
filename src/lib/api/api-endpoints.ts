@@ -7,6 +7,7 @@ const permissionsRoot = "/api/v1/permissions" satisfies ContractPath;
 const rolesRoot = "/api/v1/roles" satisfies ContractPath;
 const usersRoot = "/api/v1/users";
 const curriculumRoot = "/api/v1/curriculum";
+const timekeepingRoot = "/api/v1/timekeeping";
 
 export const API_ENDPOINTS = {
   access: {
@@ -236,6 +237,50 @@ export const API_ENDPOINTS = {
     unregisterDevice: path("/api/v1/notification-devices/unregister"),
     heartbeat: path("/api/v1/notification-devices/heartbeat"),
     device: (deviceId: string) => path(`/api/v1/notification-devices/${encodeApiPathSegment(deviceId)}`),
+  },
+  timekeeping: {
+    me: {
+      clock: "/api/v1/timekeeping/me/clock" satisfies ContractPath,
+      today: "/api/v1/timekeeping/me/today" satisfies ContractPath,
+      punches: "/api/v1/timekeeping/me/punches" satisfies ContractPath,
+      faceConsent: "/api/v1/timekeeping/me/face-consent" satisfies ContractPath,
+      month: "/api/v1/timekeeping/me/month" satisfies ContractPath,
+      day: (date: string) => path(`${timekeepingRoot}/me/days/${encodeApiPathSegment(date)}`),
+    },
+    requests: {
+      root: "/api/v1/timekeeping/requests" satisfies ContractPath,
+      mine: "/api/v1/timekeeping/requests/mine" satisfies ContractPath,
+      previewLeave: "/api/v1/timekeeping/requests/preview-leave" satisfies ContractPath,
+      explanationContext: "/api/v1/timekeeping/requests/explanation-context" satisfies ContractPath,
+      detail: (id: string) => path(`${timekeepingRoot}/requests/${encodeApiPathSegment(id)}`),
+      submit: (id: string) => path(`${timekeepingRoot}/requests/${encodeApiPathSegment(id)}/submit`),
+      cancel: (id: string) => path(`${timekeepingRoot}/requests/${encodeApiPathSegment(id)}/cancel`),
+      remind: (id: string) => path(`${timekeepingRoot}/requests/${encodeApiPathSegment(id)}/remind`),
+    },
+    approvals: {
+      root: "/api/v1/timekeeping/approvals" satisfies ContractPath,
+      bulkApprove: "/api/v1/timekeeping/approvals/bulk-approve" satisfies ContractPath,
+      detail: (requestId: string) => path(`${timekeepingRoot}/approvals/${encodeApiPathSegment(requestId)}`),
+      approve: (requestId: string) => path(`${timekeepingRoot}/approvals/${encodeApiPathSegment(requestId)}/approve`),
+      reject: (requestId: string) => path(`${timekeepingRoot}/approvals/${encodeApiPathSegment(requestId)}/reject`),
+    },
+    admin: {
+      today: "/api/v1/timekeeping/admin/today" satisfies ContractPath,
+      timesheet: "/api/v1/timekeeping/admin/timesheet" satisfies ContractPath,
+      remind: "/api/v1/timekeeping/admin/remind" satisfies ContractPath,
+      periodLock: (period: string) => path(`${timekeepingRoot}/admin/periods/${encodeApiPathSegment(period)}/lock`),
+      periodReopen: (period: string) => path(`${timekeepingRoot}/admin/periods/${encodeApiPathSegment(period)}/reopen`),
+      punchReview: (id: string) => path(`${timekeepingRoot}/admin/punches/${encodeApiPathSegment(id)}/review`),
+      sites: "/api/v1/timekeeping/admin/sites" satisfies ContractPath,
+      site: (id: string) => path(`${timekeepingRoot}/admin/sites/${encodeApiPathSegment(id)}`),
+      shifts: "/api/v1/timekeeping/admin/shifts" satisfies ContractPath,
+      shift: (id: string) => path(`${timekeepingRoot}/admin/shifts/${encodeApiPathSegment(id)}`),
+      holidays: "/api/v1/timekeeping/admin/holidays" satisfies ContractPath,
+      holiday: (id: string) => path(`${timekeepingRoot}/admin/holidays/${encodeApiPathSegment(id)}`),
+      remoteRules: "/api/v1/timekeeping/admin/remote-rules" satisfies ContractPath,
+      remoteRule: (id: string) => path(`${timekeepingRoot}/admin/remote-rules/${encodeApiPathSegment(id)}`),
+      policy: (schoolId: string) => path(`${timekeepingRoot}/admin/policies/${encodeApiPathSegment(schoolId)}`),
+    },
   },
   userAdmin: {
     accessScopes: (userId: string) => path(`/api/v1/users/${encodeApiPathSegment(userId)}/access-scopes`),

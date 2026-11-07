@@ -16,6 +16,8 @@ type LmsPath = (typeof lmsPaths)[number];
 
 const routePages = () => import("@/features/lms/components/lms-teacher-route-pages");
 const page = (name: keyof Awaited<ReturnType<typeof routePages>>) => lazyRouteComponent(routePages, name);
+const timekeepingPages = () => import("@/features/timekeeping/components/timekeeping-route-pages");
+const timekeepingPage = (name: keyof Awaited<ReturnType<typeof timekeepingPages>>) => lazyRouteComponent(timekeepingPages, name);
 
 /** One child route per Teacher page; adding a path to `lmsPaths` fails type-checking until it has a page. */
 const TEACHER_PAGES: Record<LmsPath, ReturnType<typeof page>> = {
@@ -37,6 +39,10 @@ const TEACHER_PAGES: Record<LmsPath, ReturnType<typeof page>> = {
   "class-log": page("TeacherClassLogRoute"),
   resources: page("TeacherResourcesRoute"),
   reports: page("TeacherReportsRoute"),
+  timekeeping: timekeepingPage("TeacherTimekeepingHomeRoute"),
+  "timekeeping/punch": timekeepingPage("TeacherTimekeepingPunchRoute"),
+  "timekeeping/timesheet": timekeepingPage("TeacherTimekeepingTimesheetRoute"),
+  "timekeeping/requests": timekeepingPage("TeacherTimekeepingRequestsRoute"),
 };
 
 // Pathless layout: the shell (school/class state, chrome) renders the pages below in its <Outlet />.

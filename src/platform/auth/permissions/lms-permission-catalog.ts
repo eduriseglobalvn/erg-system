@@ -50,6 +50,9 @@ export const LMS_PERMISSION_CATALOG = [
   "account.self.recovery_email.update",
   "account.self.password.change",
   "account.self.sessions.read",
+  "timekeeping.self",
+  "timekeeping.approve",
+  "timekeeping.manage",
 ] as const;
 
 export type LmsPermission = (typeof LMS_PERMISSION_CATALOG)[number];
@@ -77,6 +80,10 @@ export const LMS_ROUTE_PERMISSIONS = {
   "class-log": "lms.class_log.read",
   reports: "lms.report.read",
   resources: "lms.resource.read",
+  timekeeping: "timekeeping.self",
+  "timekeeping/punch": "timekeeping.self",
+  "timekeeping/timesheet": "timekeeping.self",
+  "timekeeping/requests": "timekeeping.self",
 } as const satisfies Record<LmsProtectedRoute, LmsPermission>;
 
 type LmsRoleGroupTemplate = {
