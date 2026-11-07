@@ -2,7 +2,7 @@ import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import { useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { ErgButton } from "@/components/erg-mui/erg-actions";
 import { ErgTextField } from "@/components/erg-mui/erg-form";
@@ -45,6 +45,9 @@ export function PunchVerifyPage() {
   const [facing, setFacing] = useState<CameraFacing>("user");
   const [reason, setReason] = useState("");
   const [result, setResult] = useState<PunchResult | null>(null);
+  // Synchronous guard: attempt.pending only flips once the request starts, after the async photo capture.
+  const submittingRef = useRef(false);
+  const [submitting, setSubmitting] = useState(false);
   const attempt = usePunchAttempt(() => setConsentGiven(false));
 
   const needsFace = today?.requireFace !== false;
@@ -83,13 +86,13 @@ export function PunchVerifyPage() {
   const direction = today?.in ? "OUT" : "IN";
   const verb = direction === "IN" ? "vào" : "ra";
   const outside = today ? !today.remote && isOutsideZone(today, geo.reading) : false;
-  const rows = today ? buildPunchChecks({ today, geo: geo.reading, geoError: geo.error, photo, serverNow }) : [];
+  const rows = today ? buildPunchChecks({ today, geo: geo.reading, geoError: geo.error, photo, serverNow, clockReady: clock.ready }) : [];
   const waitingForGps = needsGps && !geo.reading;
   const waitingForPhoto = needsFace && !photo && !liveCamera;
-  const blocked = !online || !today || needsConsent || attempt.pending || waitingForGps || waitingForPhoto
+  const blocked = !online || !today || needsConsent || attempt.pending || submitting || waitingForGps || waitingForPhoto
     || rows.some((row) => row.state === "fail") || (outside && !reason.trim());
 
-  const onPunch = async () => {
+  const runPunch = async () => {
     if (!today) return;
     let evidence = photo;
     if (liveCamera && !attempt.isRetry()) {
@@ -107,6 +110,18 @@ export function PunchVerifyPage() {
     if (done) {
       stop();
       setResult(done);
+    }
+  };
+
+  const onPunch = async () => {
+    if (submittingRef.current) return;
+    submittingRef.current = true;
+    setSubmitting(true);
+    try {
+      await runPunch();
+    } finally {
+      submittingRef.current = false;
+      setSubmitting(false);
     }
   };
 
@@ -130,7 +145,7 @@ export function PunchVerifyPage() {
       ) : null}
       {attempt.error ? <Alert severity="error">{attempt.error}</Alert> : null}
       {!online ? <Alert severity="warning">Cần có mạng để chấm công</Alert> : null}
-      <ErgButton disabled={blocked} fullWidth loading={attempt.pending} onClick={() => void onPunch()} variant="contained">
+      <ErgButton disabled={blocked} fullWidth loading={attempt.pending || submitting} onClick={() => void onPunch()} variant="contained">
         {liveCamera ? `Chụp & chấm ${verb}` : `Chấm ${verb}`}
       </ErgButton>
       <Button onClick={() => go(`${teacherPath("/timekeeping/requests")}?new=explanation`)} variant="text">

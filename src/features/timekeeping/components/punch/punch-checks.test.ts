@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { TodayView } from "../../api/timekeeping-types";
 import { buildPunchChecks, minutesVsShiftLabel } from "./punch-checks";
-import { NEARBY_FIX, TODAY } from "./punch-fixtures";
+import { NEARBY_FIX, TODAY } from "@/test/fixtures/timekeeping-punch-fixtures";
 
 const base = { today: TODAY as TodayView, geo: NEARBY_FIX, geoError: null, photo: null, serverNow: new Date(2026, 10, 6, 7, 31, 5) };
 const row = (id: string, rows = buildPunchChecks(base)) => rows.find((r) => r.id === id);

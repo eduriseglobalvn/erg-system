@@ -61,6 +61,8 @@ export function buildPunchChecks(i: {
   geoError: string | null;
   photo: Blob | null;
   serverNow: Date;
+  /** False until the first server-clock measurement; the time row then waits instead of showing device time. */
+  clockReady?: boolean;
 }): CheckRow[] {
   const rows: CheckRow[] = [];
   if (!i.today.remote) {
@@ -69,7 +71,7 @@ export function buildPunchChecks(i: {
       i.geoError
         ? { id: "realLocation", state: "fail", title: "Vị trí thật", detail: "Chưa đọc được tín hiệu GPS" }
         : i.geo
-          ? { id: "realLocation", state: "ok", title: "Vị trí thật", detail: `Tín hiệu GPS từ thiết bị · sai số ±${Math.round(i.geo.accuracyM)} m` }
+          ? { id: "realLocation", state: "ok", title: "Vị trí thật", detail: "Đã đọc GPS từ thiết bị" }
           : { id: "realLocation", state: "pending", title: "Vị trí thật", detail: "Đang chờ tín hiệu GPS" },
     );
   }
@@ -83,9 +85,9 @@ export function buildPunchChecks(i: {
   }
   rows.push({
     id: "serverTime",
-    state: "ok",
+    state: i.clockReady === false ? "pending" : "ok",
     title: "Giờ máy chủ",
-    detail: `${hms(i.serverNow)} · giờ chấm tính theo máy chủ, không theo đồng hồ điện thoại`,
+    detail: `${i.clockReady === false ? "--:--:--" : hms(i.serverNow)} · giờ chấm tính theo máy chủ, không theo đồng hồ điện thoại`,
   });
   return rows;
 }

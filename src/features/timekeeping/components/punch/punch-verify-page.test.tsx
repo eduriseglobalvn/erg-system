@@ -3,7 +3,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ApiClientError } from "@/lib/api-client/errors";
-import { NEARBY_FIX, PUNCH_RESULT, TODAY } from "./punch-fixtures";
+import { NEARBY_FIX, PUNCH_RESULT, TODAY } from "@/test/fixtures/timekeeping-punch-fixtures";
 import { PunchVerifyPage } from "./punch-verify-page";
 
 const h = vi.hoisted(() => ({

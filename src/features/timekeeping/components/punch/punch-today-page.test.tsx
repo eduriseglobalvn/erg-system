@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { NEARBY_FIX, TODAY } from "./punch-fixtures";
+import { NEARBY_FIX, TODAY } from "@/test/fixtures/timekeeping-punch-fixtures";
 import { PunchTodayPage } from "./punch-today-page";
 
 const api = vi.hoisted(() => ({ today: vi.fn(), month: vi.fn() }));

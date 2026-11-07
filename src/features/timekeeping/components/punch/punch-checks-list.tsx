@@ -8,14 +8,14 @@ import { PunchCard } from "./punch-card";
 import type { CheckRow } from "./punch-checks";
 
 const ICON = {
-  ok: <CheckCircleIcon color="success" fontSize="small" />,
-  pending: <HourglassEmptyIcon color="warning" fontSize="small" />,
-  fail: <ErrorIcon color="error" fontSize="small" />,
+  ok: <CheckCircleIcon color="success" fontSize="small" titleAccess="Đạt" />,
+  pending: <HourglassEmptyIcon color="warning" fontSize="small" titleAccess="Đang chờ" />,
+  fail: <ErrorIcon color="error" fontSize="small" titleAccess="Lỗi" />,
 } as const;
 
 export function PunchChecksList({ rows }: { rows: CheckRow[] }) {
   return (
-    <PunchCard component="ul" sx={{ display: "grid", gap: 1.5, listStyle: "none", m: 0 }}>
+    <PunchCard aria-live="polite" component="ul" sx={{ display: "grid", gap: 1.5, listStyle: "none", m: 0 }}>
       {rows.map((row) => (
         <Box component="li" data-state={row.state} key={row.id} sx={{ alignItems: "flex-start", display: "flex", gap: 1.5 }}>
           {ICON[row.state]}

@@ -1,4 +1,4 @@
-import type { PunchResult, TodayView } from "../../api/timekeeping-types";
+import type { PunchResult, TodayView } from "@/features/timekeeping/api/timekeeping-types";
 
 export const SITE = { id: "s1", name: "Cơ sở Cầu Giấy", lat: 21.0285, lng: 105.8542, radiusM: 150 };
 

@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { PUNCH_RESULT } from "./punch-fixtures";
+import { PUNCH_RESULT } from "@/test/fixtures/timekeeping-punch-fixtures";
 import { PunchSuccessView } from "./punch-success-view";
 
 describe("PunchSuccessView (G03)", () => {

@@ -17,9 +17,11 @@ export function useCameraCapture(): {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const mounted = useRef(true);
+  const startId = useRef(0);
   const supported = typeof navigator !== "undefined" && typeof navigator.mediaDevices?.getUserMedia === "function";
 
   const stop = useCallback(() => {
+    startId.current += 1; // a pending start() must not attach its stream after this
     streamRef.current?.getTracks().forEach((track) => track.stop());
     streamRef.current = null;
     if (videoRef.current) videoRef.current.srcObject = null;
@@ -27,10 +29,11 @@ export function useCameraCapture(): {
 
   const start = useCallback(async (facingMode: CameraFacing = "user") => {
     stop();
+    const id = ++startId.current;
     const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode, width: { ideal: 1280 } }, audio: false });
     const video = videoRef.current;
-    // Unmounted (or no element) while the permission prompt was open: release the camera at once.
-    if (!mounted.current || !video) {
+    // Unmounted, superseded by a newer start() (camera switch), or no element while the prompt was open: release at once.
+    if (!mounted.current || !video || id !== startId.current) {
       stream.getTracks().forEach((track) => track.stop());
       return;
     }

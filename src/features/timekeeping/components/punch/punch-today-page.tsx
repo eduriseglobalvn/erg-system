@@ -38,6 +38,7 @@ function zoneLine(today: TodayView, geo: GeoReading | null, geoError: string | n
 function blockedReason(today: TodayView | undefined, online: boolean): string | null {
   if (!online) return "Cần có mạng để chấm công";
   if (!today) return "Đang tải…";
+  if (today.out) return "Hôm nay đã chấm ra";
   if (!today.shift) return "Hôm nay không có ca làm việc";
   if (today.periodLocked) return "Kỳ công đã chốt";
   return null;
@@ -79,7 +80,7 @@ export function PunchTodayPage() {
             sx={{ borderRadius: "50%", height: 144, typography: "h5", width: 144 }}
             variant="contained"
           >
-            {direction === "IN" ? "Chấm vào" : "Chấm ra"}
+            {today?.out ? "Đã chấm ra" : direction === "IN" ? "Chấm vào" : "Chấm ra"}
           </ErgButton>
           <Typography color={online ? "text.secondary" : "error"} role="status" variant="body2">
             {status}

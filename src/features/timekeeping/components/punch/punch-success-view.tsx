@@ -3,9 +3,9 @@ import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
+import { useEffect, useRef } from "react";
 
 import { ErgButton } from "@/components/erg-mui/erg-actions";
-import { todayInput } from "@/domain/formatters/format-date";
 import { teacherPath } from "@/platform/workspaces/workspace-paths";
 import type { PunchResult } from "../../api/timekeeping-types";
 import { PunchCard } from "./punch-card";
@@ -45,13 +45,15 @@ export function PunchSuccessView({ result, shiftName, reminderAt, onDone, onNavi
   const title = review ? "Đã ghi nhận, chờ xem xét" : `Đã chấm ${direction === "IN" ? "vào" : "ra"} lúc ${hhmm(punch.serverTime)}`;
   const timing = result.minutesVsShift === undefined ? "" : minutesVsShiftLabel(result.minutesVsShift, shiftName, direction);
   const next = result.nextPeriod;
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  useEffect(() => headingRef.current?.focus(), []);
   const hasPhoto = Boolean(punch.method?.includes("FACE"));
 
   return (
     <Box sx={{ display: "grid", gap: 2, maxWidth: 480, mx: "auto", px: { xs: 2, sm: 3 }, py: 2 }}>
       <Box sx={{ display: "grid", gap: 0.5, justifyItems: "center", textAlign: "center" }}>
         {review ? <HourglassEmptyIcon color="warning" /> : <CheckCircleIcon color="success" />}
-        <Typography component="h1" variant="h2">{title}</Typography>
+        <Typography component="h1" ref={headingRef} sx={{ outline: "none" }} tabIndex={-1} variant="h2">{title}</Typography>
         {review ? <Typography color="text.secondary" variant="body2">{punch.reason || result.messageVi}</Typography> : null}
         {timing ? <Typography variant="subtitle1">{timing}</Typography> : null}
         {result.alreadyPunched ? <Typography color="text.secondary" variant="body2">{result.messageVi || "Bạn đã chấm vào trước đó."}</Typography> : null}
@@ -68,8 +70,8 @@ export function PunchSuccessView({ result, shiftName, reminderAt, onDone, onNavi
           <Typography color="text.secondary" variant="body2">
             {[hhmm(next.start), next.className, next.subject, next.room].filter(Boolean).join(" · ")}
           </Typography>
-          <Button onClick={() => onNavigate(`${teacherPath("/attendance")}?date=${todayInput()}`)} variant="outlined">
-            {`Mở điểm danh lớp ${next.className ?? ""}`.trim()}
+          <Button onClick={() => onNavigate(teacherPath("/attendance"))} variant="outlined">
+            Mở điểm danh
           </Button>
         </PunchCard>
       ) : null}
