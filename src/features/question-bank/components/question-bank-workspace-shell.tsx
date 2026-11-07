@@ -48,7 +48,7 @@ export function QuestionBankWorkspace({
     createQuestionMutation, createQuizFromSelection, deleteQuestion, deleteQuestionMutation, deleteQuiz, deleteQuizMutation,
     duplicateQuestion, isQuestionBankFetching,
     levelTopics, openCreateQuestionForm, openEditQuestionForm, openUpdateQuizPackage, openingQuizId, pickLevel, pickSubject,
-    pickTopic, questionBankData, questionBankQuery, questionForm, quickViewQuestion, quickViewQuiz, quickViewQuizQuestions, quizCreateDraft, quizKind, quizPackageEdit,
+    pickTopic, questionBankData, questionBankQuery, questionForm, quickViewQuestion, quickViewQuiz, quickViewQuizQuestions, quizCreateDraft, quizKind, quizKindCounts, quizPackageEdit,
     quizPackageEditQuestions, savingQuizPackage, selectedIds, selectedQuestions, setAutoCount, setQuestionForm, setQuestionPage,
     setQuickViewQuestion, setQuickViewQuiz, setQuizCreateDraft, setQuizKind, setQuizPackageEdit, submitCreateQuizFromSelection, submitQuestionForm,
     submitUpdateQuizPackage, searchValue, subjects, toggleAutoTopic, toggleQuestion, toggleVisibleQuestions,
@@ -80,7 +80,7 @@ export function QuestionBankWorkspace({
           onAddQuestion={openCreateQuestionForm}
           onClearSelection={clearSelection}
           onCreateQuiz={createQuizFromSelection}
-          onEditQuestion={openEditQuestionForm}
+          onEditQuestion={setQuickViewQuestion}
           onLevelChange={pickLevel}
           onOpenAutoPick={() => setAutoPickOpen(true)}
           onOpenQuestion={setQuickViewQuestion}
@@ -100,8 +100,14 @@ export function QuestionBankWorkspace({
         />
       ) : (
         <QuizBankPanel
+          activeLevel={activeLevel}
+          activeSubject={activeSubject}
           contentScope={contentScope}
           copy={copy}
+          kindCounts={quizKindCounts}
+          onLevelChange={pickLevel}
+          onSubjectChange={pickSubject}
+          subjects={subjects}
           // B1 "Create quiz" starts in the question bank, where questions are picked.
           onCreateQuiz={() => void navigate({ href: adminContentPathForSection("questions") })}
           onKindChange={setQuizKind}

@@ -1,7 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { attemptDeadlineMs, firstUnansweredIndex, serverNowMs } from "@/components/quiz/player-shell-utils";
-import type { Question } from "@/domain/quiz/types";
+import { attemptDeadlineMs, serverNowMs } from "@/components/quiz/player-shell-utils";
 
 describe("quiz player server clock policy", () => {
   test("derives current server time from the persisted response offset", () => {
@@ -44,16 +43,5 @@ describe("portable/offline local timer", () => {
     expect(serverNowMs({}, 5_000)).toBeNull();
     expect(serverNowMs({}, 5_000, true)).toBe(5_000);
     expect(serverNowMs({ serverClockOffsetMs: 100 }, 5_000, true)).toBe(5_100);
-  });
-});
-
-describe("firstUnansweredIndex", () => {
-  const q = (id: string) => ({ id, kind: "single_choice", title: id, points: 1 }) as Question;
-
-  test("returns the first question without a complete answer, or -1", () => {
-    const questions = [q("a"), q("b"), q("c")];
-    expect(firstUnansweredIndex(questions, { a: { choiceId: "x" }, c: { choiceId: "y" } })).toBe(1);
-    expect(firstUnansweredIndex(questions, {})).toBe(0);
-    expect(firstUnansweredIndex(questions, { a: { choiceId: "x" }, b: { choiceId: "x" }, c: { choiceId: "y" } })).toBe(-1);
   });
 });

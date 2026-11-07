@@ -1,36 +1,52 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
-import { fetchNotificationFeed, fetchUnreadNotificationCount, notificationQueryKeys, resolveNotificationQueryScope } from "../api/notification-api";
+import { fetchNotificationFeed, markNotificationRead, notificationQueryKeys, resolveNotificationQueryScope } from "../api/notification-api";
 import type { NotificationFeedItem, NotificationPortal } from "../api/notification-types";
+import { priorityLabel, needsAck } from "../components/inbox-filters";
+import { useUnreadNotificationCount } from "./use-unread-notification-count";
 import { QUERY_POLICIES } from "@/lib/query-policy";
 
-import type { PortalNotification, PortalNotificationTab } from "@/components/portal/portal-header-notification-data";
+import type { PortalNotification, PortalNotificationsState } from "@/components/portal/use-portal-notifications";
 
-const FEED_SIZE = 20;
+/** The bell shows the newest few; the full list lives on the inbox page. */
+export const PORTAL_NOTIFICATION_LIMIT = 6;
 
 function toPortalNotification(item: NotificationFeedItem): PortalNotification {
-  const type = item.priority === "urgent" || item.priority === "high" ? "warning" : item.type === "system" ? "info" : "reminder";
-  return { id: item.id, type, title: item.title, message: item.bodyPreview || item.description, time: `${item.dateLabel} ${item.timeLabel}`.trim(), isRead: !item.unread };
+  return {
+    id: item.id,
+    title: item.title,
+    preview: item.bodyPreview || item.description,
+    createdAt: item.createdAt,
+    unread: item.unread,
+    priority: priorityLabel(item),
+    needsAck: needsAck(item),
+  };
 }
 
-/** Real implementation, injected into the portal chrome via PortalNotificationsSourceContext. Real unread count (undefined while unavailable) and, when `feedEnabled`, the inbox list. */
-export function usePortalNotifications(portal: NotificationPortal, tab: PortalNotificationTab, feedEnabled: boolean) {
+/** Real implementation, injected into the portal chrome via PortalNotificationsSourceContext. Real unread count (undefined while unavailable) and, when `feedEnabled`, the newest messages of the same inbox the pages read. */
+export function usePortalNotifications(portal: NotificationPortal, feedEnabled: boolean): PortalNotificationsState {
+  const queryClient = useQueryClient();
   const scope = resolveNotificationQueryScope(portal);
-  const unread = useQuery({
-    queryKey: notificationQueryKeys.unreadCount(portal, scope),
-    queryFn: ({ signal }) => fetchUnreadNotificationCount(portal, signal),
-    staleTime: QUERY_POLICIES.realtime.staleTime,
-    gcTime: QUERY_POLICIES.realtime.gcTime,
-  });
+  const unreadCount = useUnreadNotificationCount(portal);
   const feed = useQuery({
     enabled: feedEnabled,
-    queryKey: notificationQueryKeys.inbox(portal, tab, 0, FEED_SIZE, scope),
-    queryFn: ({ signal }) => fetchNotificationFeed({ portal, status: tab, page: 0, size: FEED_SIZE }, signal),
+    queryKey: notificationQueryKeys.inbox(portal, "all", 0, PORTAL_NOTIFICATION_LIMIT, scope),
+    queryFn: ({ signal }) => fetchNotificationFeed({ portal, status: "all", page: 0, size: PORTAL_NOTIFICATION_LIMIT }, signal),
     staleTime: QUERY_POLICIES.realtime.staleTime,
     gcTime: QUERY_POLICIES.realtime.gcTime,
   });
   return {
-    unreadCount: unread.data?.unread,
+    unreadCount,
     notifications: (feed.data?.items ?? []).map(toPortalNotification),
+    isPending: feedEnabled && feed.isPending,
+    isError: feed.isError,
+    refetch: () => void feed.refetch(),
+    // Only the messages on screen are marked (a read-all would also clear ones the user never saw).
+    markRead: async (ids) => {
+      const results = await Promise.allSettled(ids.map((id) => markNotificationRead(id, portal)));
+      if (results.some((result) => result.status === "rejected")) toast.error("Không thể đánh dấu một số thông báo đã đọc");
+      await queryClient.invalidateQueries({ queryKey: notificationQueryKeys.root(portal, scope) });
+    },
   };
 }

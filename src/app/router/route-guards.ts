@@ -108,13 +108,17 @@ export function authedBeforeLoad({ context, location }: { context: { auth: AuthR
     enforceWorkspaceRoute(auth, location, workspace);
     enforceCanonicalWorkspaceHost(location, workspace);
   };
-  // An expired access token with a stored refresh token is not a sign-out: refresh once before sending the user to login.
-  if (!context.auth.authenticated && !AUTH_BYPASS_ENABLED && readStoredRefreshSession()?.refreshToken) {
+  return withFreshAuth(context.auth, guard);
+}
+
+/** An expired access token with a stored refresh token is not a sign-out: refresh once before deciding with `run`. */
+export function withFreshAuth<T>(auth: AuthRouteState, run: (auth: AuthRouteState) => T): T | Promise<T> {
+  if (!auth.authenticated && !AUTH_BYPASS_ENABLED && readStoredRefreshSession()?.refreshToken) {
     return refreshStoredAuthSession()
       .catch(() => null)
-      .then((token) => guard(token ? storedAuthRouteState() : context.auth));
+      .then((token) => run(token ? storedAuthRouteState() : auth));
   }
-  guard(context.auth);
+  return run(auth);
 }
 
 function storedAuthRouteState() {

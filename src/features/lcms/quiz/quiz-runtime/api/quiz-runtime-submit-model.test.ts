@@ -71,6 +71,21 @@ describe("normalizeSubmitResponse", () => {
     expect(result).toMatchObject({ id: "att", quizId: "q", totalScore: 7, percent: 70, passed: true, submittedCount: 2, totalQuestions: 2 });
   });
 
+  it("re-grades per question locally when the package has keys, keeping the server totals", () => {
+    const result = normalizeSubmitResponse({ score: 7, maxScore: 10, percent: 70, passed: true }, input());
+    expect(result.answers.a.result).toMatchObject({ correct: true, awardedPoints: 4 });
+    expect(result.answers.b.result).toMatchObject({ correct: false, awardedPoints: 0 });
+    expect(result.answers.b.input).toEqual({ numericValue: "9" });
+    expect(result).toMatchObject({ totalScore: 7, maxScore: 10, percent: 70, passed: true });
+  });
+
+  it("keeps the placeholder results for a keyless (server-authoritative) package", () => {
+    const keyless = { ...quiz, sections: [{ id: "s", title: "S", questions: [{ ...questions[0], choices: questions[0].choices?.map((c) => ({ ...c, correct: false })) }] }] } as Quiz;
+    const result = normalizeSubmitResponse({ score: 4, maxScore: 4, percent: 100, passed: true }, { ...input(), quiz: keyless, quizPackage: createQuizPackage(keyless) });
+    expect(result.answers.a.result).toMatchObject({ correct: false, awardedPoints: 0, maxPoints: 0 });
+    expect(result.totalScore).toBe(4);
+  });
+
   it("throws on an unusable response", () => {
     expect(() => normalizeSubmitResponse({} as never, input())).toThrow(/missing a valid attempt/);
   });

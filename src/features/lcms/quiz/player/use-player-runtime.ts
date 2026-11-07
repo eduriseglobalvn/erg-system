@@ -24,6 +24,12 @@ import { getDefaultTenantId } from "@/lib/graphql-client";
 import { getCurrentElearningViewerSession } from "@/platform/auth/api/elearning-viewer-session";
 import type { PlayerShellProps } from "./player-shell-props";
 
+export type PlayerShortcuts = {
+  pickOption?: (index: number) => void;
+  toggleFlag?: () => void;
+  focusGoTo?: () => void;
+};
+
 export function usePlayerRuntime({
   assignmentId,
   quizId,
@@ -54,12 +60,13 @@ export function usePlayerRuntime({
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [draftSync, setDraftSync] = useState<DraftSyncState>({ status: "idle" });
-  const [sidebarQuery, setSidebarQuery] = useState("");
   const [submitDialogMode, setSubmitDialogMode] = useState<SubmitDialogMode | null>(null);
   const [reviewingSubmittedAttempt, setReviewingSubmittedAttempt] = useState(false);
   const [timeUp, setTimeUp] = useState(false);
-  const [recentTrainingSubmitQuestionId, setRecentTrainingSubmitQuestionId] = useState<string | null>(null);
+  const [localRetryIndices, setLocalRetryIndices] = useState<number[] | null>(null);
   const questionBodyRef = useRef<HTMLDivElement | null>(null);
+  // Filled by the ready view each render: option picking, flag and go-to need the current question and session.
+  const shortcutsRef = useRef<PlayerShortcuts>({});
   const paceStateUpdate = usePacedStateBatch();
   const { mutateAsync: saveAttemptAnswerAsync } = useSaveAttemptAnswerMutation();
   const { mutateAsync: saveAttemptDraftAsync } = useSaveAttemptDraftMutation();
@@ -80,11 +87,9 @@ export function usePlayerRuntime({
     setDrafts,
     setSubmitting,
     setSubmitError,
-    setSidebarQuery,
     setSubmitDialogMode,
     setReviewingSubmittedAttempt,
     setTimeUp,
-    setRecentTrainingSubmitQuestionId,
   });
 
   const {
@@ -93,11 +98,11 @@ export function usePlayerRuntime({
     isTrainingMode, lastResult, questions, reviewingAttempt, submitFailed, submitted,
   } = usePlayerDerivedState({ currentIndex, drafts, loadState, portableOffline, reviewingSubmittedAttempt, timeUp });
 
-  const { beginAttempt, finalizeAttempt, requestSubmit, submitCurrentTrainingQuestion, submitReadyAttempt } = usePlayerActions({
+  const { beginAttempt, finalizeAttempt, requestSubmit, startLocalRetry, submitCurrentTrainingQuestion, submitReadyAttempt } = usePlayerActions({
     activeAttempt, activePackage, activeQuestion, activeQuiz, activeSession, allQuestionsAnswered, attemptCompleted,
     attemptExpired, attemptScope, drafts, isTrainingMode, portableOffline, queryClient, questions, runtimePortal,
     saveAttemptAnswerAsync, submitFailed, submitting,
-    setCurrentIndex, setDrafts, setLoadState, setRecentTrainingSubmitQuestionId, setReviewingSubmittedAttempt,
+    setCurrentIndex, setDrafts, setLoadState, setLocalRetryIndices, setReviewingSubmittedAttempt,
     setStarted, setSubmitDialogMode, setSubmitError, setSubmitting, setTimeUp,
   });
 
@@ -108,29 +113,28 @@ export function usePlayerRuntime({
 
   const { phase: timeUpPhase, retry: retryTimeUpSubmit } = useTimeUpSubmit({
     activeAttempt, activePackage, activeSession, attemptCompleted, attemptScope, isTestingMode, started,
-    submitReadyAttempt, submitting, timeUp, setLoadState, setSubmitError, setSubmitting,
+    submitReadyAttempt, submitting, timeUp, setLoadState, setSubmitDialogMode, setSubmitError, setSubmitting,
   });
 
   usePlayerKeyboard({
     allQuestionsAnswered, attemptExpired, attemptCompleted, beginAttempt, finalizeAttempt, isTestingMode,
     isTrainingMode, loadStatus: loadState.status, questionsLength: questions.length, requestSubmit,
+    onPickOption: (index) => shortcutsRef.current.pickOption?.(index),
+    onToggleFlag: () => shortcutsRef.current.toggleFlag?.(),
+    focusGoTo: () => shortcutsRef.current.focusGoTo?.(),
     reviewingSubmittedAttempt, started, submitCurrentTrainingQuestion, submitDialogMode, submitFailed, submitting,
     setCurrentIndex,
   });
 
-  useTrainingAdvanceEffects({
-    activeQuestion, attemptCompleted, currentIndex, isLastQuestion, isTrainingMode, lastResult, paceStateUpdate,
-    questionBodyRef, questionsLength: questions.length, recentTrainingSubmitQuestionId, started,
-    setCurrentIndex, setRecentTrainingSubmitQuestionId,
-  });
+  useTrainingAdvanceEffects({ currentIndex, questionBodyRef, started });
 
   return {
     activeAttempt, activePackage, activeQuestion, activeQuiz, activeSession, allQuestionsAnswered, attemptCompleted,
     attemptScope, beginAttempt, currentAnswerComplete, currentIndex, deadlineAt, draftAnswer, draftSync, drafts, finalizeAttempt,
-    isFirstQuestion, isLastQuestion, isMobile, isTestingMode, isTrainingMode, lastResult, loadState, network, questionBodyRef,
+    isFirstQuestion, isLastQuestion, isMobile, localRetryIndices, setLocalRetryIndices, startLocalRetry, isTestingMode, isTrainingMode, lastResult, loadState, network, questionBodyRef,
     questions, quizPackageQuery, requestSubmit, retryTimeUpSubmit, reviewingAttempt, reviewingSubmittedAttempt,
-    setCurrentIndex, setDrafts, setLoadState, setStarted, setSubmitDialogMode, setSubmitError, setTimeUp, setSidebarQuery,
-    setReviewingSubmittedAttempt, sidebarQuery, started, submitCurrentTrainingQuestion, submitDialogMode, submitError, submitFailed,
+    shortcutsRef, setCurrentIndex, setDrafts, setLoadState, setStarted, setSubmitDialogMode, setSubmitError, setTimeUp,
+    setReviewingSubmittedAttempt, started, submitCurrentTrainingQuestion, submitDialogMode, submitError, submitFailed,
     submitted, submitting, timeUpPhase,
   };
 }

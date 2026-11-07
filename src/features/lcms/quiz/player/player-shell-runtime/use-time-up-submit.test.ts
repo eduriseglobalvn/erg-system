@@ -21,6 +21,7 @@ function args(overrides: Partial<UseTimeUpSubmitArgs> = {}): UseTimeUpSubmitArgs
     submitting: false,
     timeUp: true,
     setLoadState: vi.fn(),
+    setSubmitDialogMode: vi.fn(),
     setSubmitError: vi.fn(),
     setSubmitting: vi.fn(),
     ...overrides,
@@ -44,6 +45,25 @@ describe("useTimeUpSubmit", () => {
     const a = args(overrides);
     renderHook(() => useTimeUpSubmit(a));
     expect(a.submitReadyAttempt).not.toHaveBeenCalled();
+  });
+});
+
+describe("useTimeUpSubmit with the submit dialog open", () => {
+  it("closes the dialog and submits exactly once when time runs out", () => {
+    const a = args({ activeSession: { attemptId: "att-dlg" } as never });
+    const { rerender } = renderHook((p: UseTimeUpSubmitArgs) => useTimeUpSubmit(p), { initialProps: a });
+    expect(a.setSubmitDialogMode).toHaveBeenCalledWith(null);
+    // The dialog (or the confirm key) is gone, so nothing else can submit; re-renders must not fire again.
+    rerender({ ...a });
+    rerender({ ...a, submitting: false });
+    expect(a.submitReadyAttempt).toHaveBeenCalledOnce();
+    expect(a.setSubmitDialogMode).toHaveBeenCalledTimes(1);
+  });
+
+  it("leaves the dialog alone when no auto-submit happens", () => {
+    const a = args({ timeUp: false });
+    renderHook(() => useTimeUpSubmit(a));
+    expect(a.setSubmitDialogMode).not.toHaveBeenCalled();
   });
 });
 

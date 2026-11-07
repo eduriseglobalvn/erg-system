@@ -1,6 +1,6 @@
 import { apiRequest } from "@/lib/api-client";
 import { hasApiBase } from "@/lib/api-client";
-import { getDefaultTenantId, graphQlRequest } from "@/lib/graphql-client";
+import { getDefaultTenantId, type GraphQlPortal, graphQlRequest } from "@/lib/graphql-client";
 import { API_ENDPOINTS } from "@/lib/api/api-endpoints";
 import { isNonEmptyString, isObject, validateResponse } from "@/lib/validate-response";
 
@@ -177,6 +177,8 @@ export async function deleteLmsAssignment(assignmentId: string): Promise<void> {
 export async function loadLmsStudentGroups(input: {
   tenantId?: string;
   classId?: string | null;
+  /** Session the request runs on; admin screens pass "lcms". */
+  portal?: GraphQlPortal;
 } = {}, signal?: AbortSignal): Promise<LmsStudentGroupWorkspace> {
   const tenantId = input.tenantId ?? getDefaultTenantId();
   if (!hasApiBase()) {
@@ -191,7 +193,7 @@ export async function loadLmsStudentGroups(input: {
     { tenantId: string; classId?: string | null }
   >({
     operationName: "LmsStudentGroups",
-    portal: "lms",
+    portal: input.portal ?? "lms",
     query: StudentGroupsDocument,
     signal,
     tenantId,

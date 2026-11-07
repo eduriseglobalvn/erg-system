@@ -11,6 +11,10 @@ export type UsePlayerKeyboardArgs = {
   isTestingMode: boolean;
   isTrainingMode: boolean;
   loadStatus: PlayerLoadState["status"];
+  /** Web shortcuts: `1`-`9` (0-based index), `F` and `N`. Each is optional; the caller decides what a key may do right now. */
+  onPickOption?: (index: number) => void;
+  onToggleFlag?: () => void;
+  focusGoTo?: () => void;
   questionsLength: number;
   requestSubmit: () => void;
   reviewingSubmittedAttempt: boolean;
@@ -31,6 +35,9 @@ export function usePlayerKeyboard({
   isTestingMode,
   isTrainingMode,
   loadStatus,
+  onPickOption,
+  onToggleFlag,
+  focusGoTo,
   questionsLength,
   requestSubmit,
   reviewingSubmittedAttempt,
@@ -43,7 +50,13 @@ export function usePlayerKeyboard({
 }: UsePlayerKeyboardArgs) {
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
-      if (event.defaultPrevented || event.isComposing || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) {
+      if (event.defaultPrevented || event.isComposing || event.altKey || event.ctrlKey || event.metaKey) {
+        return;
+      }
+
+      // Shift only matters for non-letters: Shift+F / Shift+N still count; Enter, arrows and digits ignore Shift.
+      const letter = event.key.toLowerCase();
+      if (event.shiftKey && letter !== "f" && letter !== "n") {
         return;
       }
 
@@ -52,7 +65,9 @@ export function usePlayerKeyboard({
       }
 
       if (submitDialogMode) {
-        if (event.key === "Enter") {
+        // Enter on a focused dialog control (Làm tiếp, close, a question chip) activates that control, not the submit.
+        const onControl = event.target instanceof Element && event.target.closest("button, a, [role=button]") !== null;
+        if (event.key === "Enter" && !onControl) {
           event.preventDefault();
           void finalizeAttempt();
         }
@@ -77,7 +92,25 @@ export function usePlayerKeyboard({
         return;
       }
 
+      // The review screen has no flag control, so F is off there (it would silently rewrite the finished session);
+      // N is swallowed on review too: the panel shows a go-to field but gets no ref, so focusGoTo is a no-op there. Held keys must not re-fire.
+      if (letter === "f" && onToggleFlag && !reviewingSubmittedAttempt) {
+        event.preventDefault();
+        if (!event.repeat) onToggleFlag();
+        return;
+      }
+      if (letter === "n" && focusGoTo) {
+        event.preventDefault();
+        if (!event.repeat) focusGoTo();
+        return;
+      }
+
       if (attemptCompleted || reviewingSubmittedAttempt) {
+        return;
+      }
+
+      if (onPickOption && /^[1-9]$/.test(event.key)) {
+        if (!event.repeat) onPickOption(Number(event.key) - 1);
         return;
       }
 
@@ -107,6 +140,9 @@ export function usePlayerKeyboard({
     isTestingMode,
     isTrainingMode,
     loadStatus,
+    onPickOption,
+    onToggleFlag,
+    focusGoTo,
     questionsLength,
     requestSubmit,
     reviewingSubmittedAttempt,

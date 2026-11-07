@@ -6,6 +6,8 @@ import type {
   NotificationFeedItem,
   NotificationItemResponse,
   NotificationPortal,
+  NotificationPriority,
+  NotificationPriorityLevel,
   NotificationStatusFilter,
   PageResponse,
 } from "./notification-types";
@@ -25,8 +27,10 @@ export function mapNotificationItem(item: NotificationItemResponse): Notificatio
   const { dateLabel, timeLabel } = formatNotificationDateLabels(createdAt);
 
   return {
+    ackedAt: item.ackedAt ?? null,
     actionUrl: item.actionUrl,
     bodyPreview,
+    ...(item.campaignId ? { campaignId: item.campaignId } : {}),
     channel: item.channel ?? "inbox",
     createdAt,
     data: item.data ?? {},
@@ -35,8 +39,11 @@ export function mapNotificationItem(item: NotificationItemResponse): Notificatio
     eventType: item.eventType ?? "UNKNOWN",
     id: item.id,
     priority: item.priority ?? "normal",
+    priorityLevel: item.priorityLevel ?? toPriorityLevel(item.priority),
     readAt: item.readAt ?? null,
     recipientId: item.recipientId,
+    requireReadAck: item.requireReadAck ?? false,
+    ...(item.senderName ? { senderName: item.senderName } : {}),
     sourceId: item.sourceId,
     sourceType: item.sourceType ?? "general",
     starred: item.priority === "high" || item.priority === "urgent",
@@ -51,6 +58,13 @@ export function mapNotificationItem(item: NotificationItemResponse): Notificatio
     }),
     unread: status !== "read",
   };
+}
+
+/** Fallback for payloads without `priorityLevel` (old backend, mock store). */
+export function toPriorityLevel(priority: NotificationPriority | undefined): NotificationPriorityLevel {
+  if (priority === "urgent") return "URGENT";
+  if (priority === "high") return "IMPORTANT";
+  return "INFO";
 }
 
 export function mapNotificationDetail(item: NotificationDetailResponse, portal: string): NotificationDetailItem {

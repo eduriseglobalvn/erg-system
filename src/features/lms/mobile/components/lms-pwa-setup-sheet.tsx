@@ -206,7 +206,7 @@ function NotificationStatus({ notifications }: { notifications: NotificationSetu
   if (notifications.state === "enabled") return <StatusLine label="Đã bật thông báo trên thiết bị này." tone="success" />;
   if (notifications.state === "blocked") return <StatusLine label="Trình duyệt đang chặn thông báo. Hãy mở Cài đặt của trang để cấp quyền lại." tone="error" />;
   if (notifications.state === "unsupported") return <StatusLine label="Trình duyệt này chưa hỗ trợ Web Push cho PWA." tone="warning" />;
-  if (notifications.state === "unconfigured") return <StatusLine label="Cần cấu hình VITE_WEB_PUSH_PUBLIC_KEY và backend push subscription." tone="warning" />;
+  if (notifications.state === "unconfigured") return <StatusLine label="Máy chủ chưa bật Web Push." tone="warning" />;
   return (
     <Box sx={{ mt: 2 }}>
       <Button disabled={notifications.busy} fullWidth onClick={() => void notifications.enableNotifications()} startIcon={<NotificationsActiveRoundedIcon />} sx={{ minHeight: 48 }} variant="outlined">

@@ -23,7 +23,6 @@ import { logoutAccount } from "@/platform/auth/api/auth-storage";
 import { logoutStudentSession } from "@/platform/auth/api/student-auth-storage";
 import { adminPath, teacherPath } from "@/platform/workspaces/workspace-paths";
 import type { PortalInfo } from "./ErgPortalLayout";
-import type { PortalNotificationTab } from "./portal-header-notification-data";
 import { PortalHeaderNotifications } from "./portal-header-notifications";
 import { NavBadge } from "./portal-sidebar-parts";
 import {
@@ -61,8 +60,7 @@ export function SidebarBottom({
   portalInfo?: PortalInfo;
 }) {
   const pathname = useLocation()?.pathname ?? "";
-  const [notificationOpen, setNotificationOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<PortalNotificationTab>("all");
+  const [notificationAnchor, setNotificationAnchor] = useState<HTMLElement | null>(null);
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const { canInstall, installed, promptInstall } = useInstallPrompt();
 
@@ -71,12 +69,8 @@ export function SidebarBottom({
   const initial = userName.charAt(0).toUpperCase() || "E";
   const profile = profilePath(pathname);
 
-  const { notifications, unreadCount } = usePortalNotifications(
-    notificationPortalFromPath(pathname),
-    activeTab,
-    notificationOpen,
-  );
-  const notificationCount = unreadCount ?? notificationCountProp;
+  const notifications = usePortalNotifications(notificationPortalFromPath(pathname), Boolean(notificationAnchor));
+  const notificationCount = notifications.unreadCount ?? notificationCountProp;
 
   const closeMenu = () => setMenuAnchor(null);
   const openMenu = (event: { currentTarget: HTMLElement }) => setMenuAnchor(event.currentTarget);
@@ -169,7 +163,7 @@ export function SidebarBottom({
           <Typography noWrap sx={{ color: "text.secondary", fontSize: NAV_FS.caption }}>{userEmail}</Typography>
         </Box>
         <Divider sx={{ my: "4px" }} />
-        <MenuItem onClick={() => { closeMenu(); setNotificationOpen(true); }} sx={{ borderRadius: NAV_ITEM_RADIUS, gap: "12px" }}>
+        <MenuItem aria-haspopup="dialog" onClick={() => { setNotificationAnchor(menuAnchor); closeMenu(); }} sx={{ borderRadius: NAV_ITEM_RADIUS, gap: "12px" }}>
           <NotificationsNoneRoundedIcon fontSize="small" />
           Thông báo
           {notificationCount > 0 ? <NavBadge active={false}>{notificationCount > 99 ? "99+" : notificationCount}</NavBadge> : null}
@@ -194,11 +188,12 @@ export function SidebarBottom({
       </Menu>
 
       <PortalHeaderNotifications
-        activeTab={activeTab}
-        notifications={notifications}
-        onClose={() => setNotificationOpen(false)}
-        onTabChange={setActiveTab}
-        open={notificationOpen}
+        anchorEl={notificationAnchor}
+        onClose={() => setNotificationAnchor(null)}
+        onNavigate={onNavigate}
+        pathname={pathname}
+        placement="sidebar"
+        state={notifications}
       />
     </Box>
   );

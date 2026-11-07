@@ -1,11 +1,11 @@
 import Box from "@mui/material/Box";
+import { quizThemeToneSurface } from "@/components/quiz/player-template-surface";
 import Stack from "@mui/material/Stack";
 import { useTheme } from "@mui/material/styles";
 import Typography from "@mui/material/Typography";
 
 import type { QuizPlayerTemplate } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import type { QuizThemeCopy } from "@/features/lcms/quiz/quiz-theme/quiz-theme-copy";
-import { quizThemeToneSurface } from "@/features/lcms/quiz/quiz-theme/quiz-theme-presets";
 import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
 
 /** Colors and radii the preview derives from the draft template. */
@@ -27,7 +27,26 @@ export function usePreviewStyle(value: QuizPlayerTemplate) {
   };
 }
 
+export type PreviewState = keyof QuizThemeCopy["preview"]["states"];
+export type PreviewDevice = keyof QuizThemeCopy["preview"]["devices"];
+
 type PreviewProps = { copy: QuizThemeCopy; value: QuizPlayerTemplate };
+
+const RIGHT_OPTION = 1;
+const WRONG_OPTION = 0;
+
+/** Opaque light fills with their own dark text: readable on every theme, including the dark "contrast" tone. */
+const fixedLook = {
+  right: { tint: t.statusTint.success, border: t.color.success },
+  wrong: { tint: t.statusTint.error, border: t.color.danger },
+} as const;
+
+/** How an option reads in each state; right/wrong colors are fixed tokens, never theme colors. */
+function optionRole(state: PreviewState, index: number) {
+  if (state === "playing") return index === RIGHT_OPTION ? "selected" : null;
+  if (index === RIGHT_OPTION) return "right";
+  return state === "wrong" && index === WRONG_OPTION ? "wrong" : null;
+}
 
 export function PreviewBadge({ value }: { value: QuizPlayerTemplate }) {
   const style = usePreviewStyle(value);
@@ -60,22 +79,24 @@ export function PreviewButton({ label, value, primary }: { label: string; value:
   );
 }
 
-export function PreviewQuestionCard({ copy, value }: PreviewProps) {
+export function PreviewQuestionCard({ copy, value, state, phone }: PreviewProps & { state: PreviewState; phone: boolean }) {
   const style = usePreviewStyle(value);
   const options = (
     <Stack sx={{ gap: 0.75 }}>
       {copy.preview.options.map((option, index) => {
-        const selected = index === 1;
+        const role = optionRole(state, index);
+        const selected = role === "selected";
+        const fixed = role === "right" || role === "wrong" ? fixedLook[role] : null;
         return (
           <Stack
             key={option}
             direction="row"
             sx={{
               alignItems: "center",
-              bgcolor: selected ? value.highlightColor : style.tone.card,
-              border: `1.5px solid ${selected ? value.accentColor : style.tone.border}`,
+              bgcolor: fixed ? fixed.tint.bg : selected ? value.highlightColor : style.tone.card,
+              border: `1.5px solid ${fixed ? fixed.border : selected ? value.accentColor : style.tone.border}`,
               borderRadius: style.radius(12),
-              color: selected ? style.onHighlight : style.tone.text,
+              color: fixed ? fixed.tint.color : selected ? style.onHighlight : style.tone.text,
               gap: 1.25,
               px: 1.5,
               py: 0.75,
@@ -88,7 +109,7 @@ export function PreviewQuestionCard({ copy, value }: PreviewProps) {
                   bgcolor: selected ? value.accentColor : "transparent",
                   border: `1.5px solid ${selected ? value.accentColor : style.tone.border}`,
                   borderRadius: "50%",
-                  color: selected ? style.onAccent : style.tone.muted,
+                  color: fixed ? fixed.tint.color : selected ? style.onAccent : style.tone.muted,
                   display: "grid",
                   flex: "none",
                   height: 22,
@@ -99,7 +120,12 @@ export function PreviewQuestionCard({ copy, value }: PreviewProps) {
                 <Typography variant="caption">{String.fromCharCode(65 + index)}</Typography>
               </Box>
             ) : null}
-            <Typography variant="body2">{option}</Typography>
+            <Typography variant="body2" sx={{ flex: 1 }}>{option}</Typography>
+            {fixed ? (
+              <Typography variant="caption" sx={{ color: fixed.tint.color, fontWeight: "fontWeightBold" }}>
+                {role === "right" ? copy.preview.correctAnswer : copy.preview.yourChoice}
+              </Typography>
+            ) : null}
           </Stack>
         );
       })}
@@ -108,7 +134,7 @@ export function PreviewQuestionCard({ copy, value }: PreviewProps) {
 
   return (
     <Stack sx={{ bgcolor: style.tone.card, border: `1px solid ${style.tone.border}`, borderRadius: style.radius(16), flex: 1, gap: 1.25, minWidth: 0, p: 2.25 }}>
-      <Box sx={{ display: "grid", gap: 1.5, gridTemplateColumns: value.layout === "split" ? "repeat(2, minmax(0, 1fr))" : "minmax(0, 1fr)" }}>
+      <Box sx={{ display: "grid", gap: 1.5, gridTemplateColumns: value.layout === "split" && !phone ? "repeat(2, minmax(0, 1fr))" : "minmax(0, 1fr)" }}>
         <Stack sx={{ gap: 1 }}>
           <Typography variant="caption" sx={{ color: value.accentColor, fontWeight: "fontWeightBold" }}>
             {copy.preview.questionType}

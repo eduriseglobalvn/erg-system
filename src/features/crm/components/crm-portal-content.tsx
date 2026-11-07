@@ -22,7 +22,7 @@ export function CrmPortalContent() {
   const location = useLocation();
   const activeItem = resolveCrmItem(location.pathname);
   const activeLeaf = useMemo<DashboardLeaf>(() => toDashboardLeaf(activeItem), [activeItem]);
-  const { unreadCount } = usePortalNotifications('crm', 'all', false);
+  const { unreadCount } = usePortalNotifications('crm', false);
   const canAccessGlobalErg = evaluatePermission({
     permission: 'lms.admin',
     grantedPermissions: session?.permissions,

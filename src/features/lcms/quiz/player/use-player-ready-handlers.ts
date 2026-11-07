@@ -1,4 +1,4 @@
-import { areAnswerPayloadsEqual, firstUnansweredIndex } from "@/components/quiz/player-shell-utils";
+import { areAnswerPayloadsEqual } from "@/components/quiz/player-shell-utils";
 import { createRuntimeKey, localQuizAttemptStore } from "@/features/lcms/quiz/quiz-runtime";
 import type { LocalQuizAttemptSession } from "@/domain/quiz/quiz-runtime-types";
 import type { AnswerPayload, Attempt, Question, Quiz, QuizPackage } from "@/domain/quiz/types";
@@ -14,8 +14,8 @@ export type PlayerReady = {
 
 export function usePlayerReadyHandlers(rt: PlayerRuntime, ready: PlayerReady) {
   const {
-    attemptScope, beginAttempt, drafts, finalizeAttempt, isTrainingMode, questions, requestSubmit, started,
-    setCurrentIndex, setDrafts, setLoadState, setReviewingSubmittedAttempt, setSubmitDialogMode, setSubmitError,
+    attemptScope, beginAttempt, drafts, finalizeAttempt, isTrainingMode, requestSubmit, started,
+    setCurrentIndex, setDrafts, setLoadState, setReviewingSubmittedAttempt, setSubmitError,
     submitCurrentTrainingQuestion,
   } = rt;
   const readyQuestion = ready.question;
@@ -112,14 +112,8 @@ export function usePlayerReadyHandlers(rt: PlayerRuntime, ready: PlayerReady) {
     void beginAttempt();
   }
 
-  function handleGoToUnanswered() {
-    const index = firstUnansweredIndex(questions, drafts);
-    if (index >= 0) setCurrentIndex(index);
-    setSubmitDialogMode(null);
-  }
-
   return {
-    handleBackToList, handleDraftChange, handleFinalizeAttempt, handleGoToUnanswered, handleJumpToQuestion,
+    handleBackToList, handleDraftChange, handleFinalizeAttempt, handleJumpToQuestion,
     handleRequestSubmit, handleReviewQuestion, handleReviewQuiz, handleStartQuiz, handleToggleBookmark,
     retryHandler, submitCurrentTrainingQuestion,
   };

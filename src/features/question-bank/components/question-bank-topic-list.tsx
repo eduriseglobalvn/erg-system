@@ -15,12 +15,14 @@ export function QuestionBankTopicList({
   activeCount,
   activeTopicId,
   copy,
+  levelLabel,
   onPick,
   topics,
 }: {
   activeCount: number;
   activeTopicId: string;
   copy: QuestionBankCopy;
+  levelLabel: string;
   onPick: (topicId: string) => void;
   topics: QuestionBankCategory[];
 }) {
@@ -28,8 +30,12 @@ export function QuestionBankTopicList({
 
   return (
     <Box component="nav" aria-label={copy.topicsHeading} sx={{ minWidth: 0 }}>
-      <Typography variant="caption" component="h2" sx={{ color: t.color.textMuted, display: { xs: "none", md: "block" }, mb: 1, px: 1.5 }}>
-        {copy.topicsHeading}
+      <Typography
+        variant="caption"
+        component="h2"
+        sx={{ color: t.color.textMuted, display: { xs: "none", md: "block" }, letterSpacing: "0.04em", mb: 0.5, px: 1.25, py: 0.75, textTransform: "uppercase" }}
+      >
+        {copy.topicsHeading} · {levelLabel}
       </Typography>
       <Box
         component="ul"
@@ -58,8 +64,8 @@ export function QuestionBankTopicList({
                   display: "flex",
                   gap: 1,
                   justifyContent: "space-between",
-                  minHeight: t.size.controlMd,
-                  px: 1.5,
+                  minHeight: t.size.controlSm,
+                  px: 1.25,
                   textAlign: "left",
                   transition: `background-color ${t.motion.duration.fast}ms ${t.motion.easing.standard}`,
                   width: { xs: "auto", md: "100%" },
@@ -67,7 +73,7 @@ export function QuestionBankTopicList({
                   "&.Mui-focusVisible": { boxShadow: t.shadow.focus },
                 }}
               >
-                <Typography variant={active ? "subtitle1" : "body2"} component="span" noWrap>
+                <Typography variant={active ? "subtitle2" : "body2"} component="span" noWrap>
                   {topic.label}
                 </Typography>
                 {active ? (
@@ -80,7 +86,11 @@ export function QuestionBankTopicList({
           );
         })}
       </Box>
-      <Typography variant="caption" component="p" sx={{ color: t.color.textMuted, display: { xs: "none", md: "block" }, mt: 1.5, px: 1.5 }}>
+      <Typography
+        variant="caption"
+        component="p"
+        sx={{ borderTop: `1px solid ${t.color.divider}`, color: t.color.textMuted, display: { xs: "none", md: "block" }, mt: 1.5, p: 1.25 }}
+      >
         {copy.topicsSourceNote}
       </Typography>
     </Box>

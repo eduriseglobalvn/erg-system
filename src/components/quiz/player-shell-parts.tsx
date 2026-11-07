@@ -1,13 +1,13 @@
 import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogContent from "@mui/material/DialogContent";
+import Chip from "@mui/material/Chip";
+import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 
+import { ErgButton } from "@/components/erg-mui/erg-actions";
+import { ErgDialog } from "@/components/erg-mui/erg-overlays";
+import { submitLeadText, type SubmitSummary } from "@/components/quiz/submit-summary";
 import { getMatchingKey, getSequenceCorrectOrder } from "@/domain/quiz/quiz";
-import type { AnswerResult, Question, QuizResultDisplay } from "@/domain/quiz/types";
-
-type SubmitDialogMode = "all-answered" | "confirm";
+import type { AnswerResult, Question } from "@/domain/quiz/types";
 
 export function QuestionFeedbackPanel({ floating = false, result }: { floating?: boolean; result: AnswerResult }) {
   const title = result.pendingReview ? "Đã ghi nhận bài làm" : result.correct ? "Đáp án chính xác!" : "Đáp án chưa đúng!";
@@ -39,69 +39,64 @@ export function QuestionFeedbackPanel({ floating = false, result }: { floating?:
   );
 }
 
-export function SubmitConfirmDialog({
-  mode,
-  resultDisplay,
-  submitting,
-  unansweredCount = 0,
-  flaggedCount = 0,
-  onCancel,
-  onConfirm,
-  onGoToUnanswered,
-}: {
-  mode: SubmitDialogMode;
-  resultDisplay: QuizResultDisplay;
+type SubmitConfirmDialogProps = {
+  summary: SubmitSummary;
+  remainingSeconds: number | null;
+  attemptsLeft: number | null;
   submitting: boolean;
-  unansweredCount?: number;
-  flaggedCount?: number;
   onCancel: () => void;
   onConfirm: () => void;
-  onGoToUnanswered?: () => void;
-}) {
-  const isAllAnswered = mode === "all-answered";
+  /** 0-based question index; the dialog closes itself afterwards. */
+  onJump: (index: number) => void;
+};
 
+export function SubmitConfirmDialog({ summary, remainingSeconds, attemptsLeft, submitting, onCancel, onConfirm, onJump }: SubmitConfirmDialogProps) {
   return (
-    <Dialog
+    <ErgDialog
       open
+      title="Nộp bài?"
+      description={submitLeadText(remainingSeconds, attemptsLeft)}
       onClose={submitting ? undefined : onCancel}
-      slotProps={{
-        paper: { "aria-label": "Xác nhận nộp bài", sx: {
-          alignItems: "center",
-          border: "1px solid",
-          borderColor: "divider",
-          borderRadius: 0,
-          boxShadow: 1,
-          display: "flex",
-          maxWidth: 590,
-          width: "calc(100vw - 56px)",
-        } },
-      }}
+      actions={
+        <>
+          <ErgButton disabled={submitting} variant="outlined" onClick={onCancel}>Làm tiếp</ErgButton>
+          <ErgButton loading={submitting} variant="contained" onClick={onConfirm}>Nộp bài</ErgButton>
+        </>
+      }
     >
-      <DialogContent sx={{ alignItems: "center", display: "flex", gap: 2, px: 3.5, py: 4, width: "100%" }}>
-        <Box aria-hidden sx={{ alignItems: "center", border: "1px solid", borderColor: "divider", borderRadius: 0.75, color: "text.secondary", display: "grid", flex: "none", fontSize: 16, fontWeight: 600, height: 32, placeItems: "center", width: 32 }}>?</Box>
-        <Box sx={{ display: "grid", flex: 1, gap: 3 }}>
-          <Typography id="quiz-submit-confirm-title" sx={{ color: "text.primary", fontSize: 14, fontWeight: 500 }}>
-            {isAllAnswered ? resultDisplay.submitAllPrompt : resultDisplay.confirmSubmitPrompt}
-          </Typography>
-          <Typography color="text.secondary" data-testid="submit-summary" variant="body2">
-            {`Còn ${unansweredCount} câu chưa làm, ${flaggedCount} câu đánh dấu`}
-          </Typography>
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1.5, justifyContent: "center" }}>
-            {unansweredCount > 0 && onGoToUnanswered ? (
-              <Button disabled={submitting} variant="outlined" onClick={onGoToUnanswered} sx={{ minHeight: 36, px: 2.5 }}>
-                Đến câu chưa làm
-              </Button>
-            ) : null}
-            <Button disabled={submitting} variant="contained" onClick={onConfirm} sx={{ minHeight: 36, minWidth: 136, px: 2.5 }}>
-              {submitting ? "ĐANG NỘP..." : isAllAnswered ? resultDisplay.submitAllLabel : resultDisplay.confirmYesLabel}
-            </Button>
-            <Button disabled={submitting} variant="outlined" onClick={onCancel} sx={{ bgcolor: "grey.100", color: "text.secondary", minHeight: 36, minWidth: 136, px: 2.5 }}>
-              {isAllAnswered ? resultDisplay.returnToQuizLabel : resultDisplay.confirmNoLabel}
-            </Button>
-          </Box>
-        </Box>
-      </DialogContent>
-    </Dialog>
+      <Stack spacing={2.5}>
+        {summary.unanswered.length > 0 ? (
+          <SubmitQuestionGroup
+            title={`${summary.unanswered.length} câu chưa làm`}
+            note="Chưa làm tính 0 điểm"
+            numbers={summary.unanswered}
+            onPick={(number) => { onJump(number - 1); onCancel(); }}
+          />
+        ) : null}
+        {summary.flagged.length > 0 ? (
+          <SubmitQuestionGroup
+            title={`${summary.flagged.length} câu đánh dấu xem lại`}
+            numbers={summary.flagged}
+            onPick={(number) => { onJump(number - 1); onCancel(); }}
+          />
+        ) : null}
+        <Typography variant="subtitle2">{`${summary.answeredCount} câu đã làm`}</Typography>
+      </Stack>
+    </ErgDialog>
+  );
+}
+
+function SubmitQuestionGroup({ title, note, numbers, onPick }: { title: string; note?: string; numbers: number[]; onPick: (number: number) => void }) {
+  return (
+    <Stack spacing={1}>
+      <Box>
+        <Typography variant="subtitle2">{title}</Typography>
+        {note ? <Typography color="text.secondary" variant="caption">{note}</Typography> : null}
+      </Box>
+      <Box role="group" aria-label={title} sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+        {numbers.map((number) => <Chip key={number} aria-label={`Câu ${number}`} clickable label={number} onClick={() => onPick(number)} variant="outlined" />)}
+      </Box>
+    </Stack>
   );
 }
 

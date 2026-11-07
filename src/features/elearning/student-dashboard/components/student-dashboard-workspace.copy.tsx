@@ -12,7 +12,7 @@ export const viCopy: DashboardCopy = {
     { key: "overview", label: "Tổng quan", icon: <HomeOutlinedIcon sx={{ fontSize: 18 }} /> },
     { key: "assignments", label: "Bài tập", icon: <AssignmentTurnedInOutlinedIcon sx={{ fontSize: 18 }} /> },
     { key: "discussion", label: "Thảo luận", icon: <ForumOutlinedIcon sx={{ fontSize: 18 }} /> },
-    { key: "announcements", label: "Thông báo", icon: <NotificationsNoneOutlinedIcon sx={{ fontSize: 18 }} /> },
+    { key: "announcements", label: "Hộp thư", icon: <NotificationsNoneOutlinedIcon sx={{ fontSize: 18 }} /> },
   ],
   heroEyebrow: "Bảng học tập",
   learnerFallbackName: "bạn",

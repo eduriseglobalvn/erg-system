@@ -1,11 +1,8 @@
-import type { ReactNode } from "react";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import ExpandMoreRoundedIcon from "@mui/icons-material/ExpandMoreRounded";
-import NotificationsNoneRoundedIcon from "@mui/icons-material/NotificationsNoneRounded";
 import RefreshRoundedIcon from "@mui/icons-material/RefreshRounded";
 import WifiOffRoundedIcon from "@mui/icons-material/WifiOffRounded";
 import Avatar from "@mui/material/Avatar";
-import Badge from "@mui/material/Badge";
 import Box from "@mui/material/Box";
 import ButtonBase from "@mui/material/ButtonBase";
 import IconButton from "@mui/material/IconButton";
@@ -14,13 +11,13 @@ import Typography from "@mui/material/Typography";
 import { ERG_ASSETS } from "@/config/seo";
 
 export function LmsMobileTopBar({
-  canInstall, selectedClassName, installed, notificationCenter, online, schoolName, teacherName,
-  unreadNotificationCount = 0, updateAvailable, onAccountOpen, onInstall, onOpenNotifications, onScopeOpen, onUpdate,
+  canInstall, selectedClassName, installed, online, schoolName, teacherName,
+  updateAvailable, onAccountOpen, onInstall, onScopeOpen, onUpdate,
 }: {
   activeLabel: string; canInstall: boolean; selectedClassName: string; installed: boolean;
-  notificationCenter?: ReactNode; online: boolean; schoolName: string; teacherName: string;
-  unreadNotificationCount?: number; updateAvailable: boolean; onAccountOpen: () => void; onInstall: () => void;
-  onOpenNotifications?: () => void; onScopeOpen: () => void; onUpdate: () => void;
+  online: boolean; schoolName: string; teacherName: string;
+  updateAvailable: boolean; onAccountOpen: () => void; onInstall: () => void;
+  onScopeOpen: () => void; onUpdate: () => void;
 }) {
   const initial = teacherName.trim().slice(0, 1).toUpperCase() || "GV";
   const iconButtonSx = { bgcolor: "background.paper", border: "1px solid", borderColor: "divider", height: 44, width: 44 };
@@ -46,11 +43,6 @@ export function LmsMobileTopBar({
           {updateAvailable ? <IconButton aria-label="Cập nhật ứng dụng" onClick={onUpdate} sx={iconButtonSx}><RefreshRoundedIcon sx={{ fontSize: 19 }} /></IconButton> : null}
           {canInstall && !installed ? <IconButton aria-label="Cài LMS PWA" onClick={onInstall} sx={iconButtonSx}><DownloadRoundedIcon sx={{ fontSize: 19 }} /></IconButton> : null}
           {!online ? <Box aria-label="Đang offline" sx={{ alignItems: "center", bgcolor: "warning.light", borderRadius: "50%", color: "warning.dark", display: "flex", height: 40, justifyContent: "center", width: 40 }}><WifiOffRoundedIcon sx={{ fontSize: 19 }} /></Box> : null}
-          {notificationCenter ?? (
-            <IconButton aria-label="Thông báo" onClick={onOpenNotifications} sx={iconButtonSx}>
-              <Badge badgeContent={unreadNotificationCount > 9 ? "9+" : unreadNotificationCount} color="error"><NotificationsNoneRoundedIcon sx={{ fontSize: 19 }} /></Badge>
-            </IconButton>
-          )}
           <IconButton aria-label={`Tài khoản ${teacherName}`} onClick={onAccountOpen} sx={{ height: 44, p: 0.5, width: 44 }}>
             <Avatar sx={{ bgcolor: "warning.main", fontSize: 12, fontWeight: 600, height: 32, width: 32 }}>{initial}</Avatar>
           </IconButton>

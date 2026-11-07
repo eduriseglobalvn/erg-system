@@ -34,7 +34,6 @@ const migratedSources = [
   "exercise-bank/exercise-question-detail-dialog.tsx",
   "exercise-bank/mobile-exercise-bank-view.tsx",
   "homework-progress-page.tsx",
-  "lms-notification-detail-page.tsx",
   "lms-teacher-shell.tsx",
   "lms-ui.tsx",
   "score/mobile-score-sheet-panel.tsx",

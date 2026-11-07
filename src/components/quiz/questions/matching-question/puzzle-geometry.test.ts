@@ -1,6 +1,27 @@
 import { describe, expect, test } from "vitest";
 
-import { pathLeft, pathRight, rowAtPoint } from "./puzzle-geometry";
+import { PUZZLE, pathLeft, pathRight, pieceMaxWidthFor, rowAtPoint } from "./puzzle-geometry";
+
+describe("puzzle sizes", () => {
+  test("apart pieces sit 48 px from each other and a piece is at most 380 px wide", () => {
+    expect(PUZZLE.gap).toBe(48);
+    expect(PUZZLE.maxWidth).toBe(380);
+  });
+});
+
+describe("pieceMaxWidthFor", () => {
+  test("keeps the 380 px cap on the web", () => {
+    expect(pieceMaxWidthFor(1200)).toBe(380);
+  });
+
+  test("a phone splits what is left after the gap and the knob between two pieces", () => {
+    expect(pieceMaxWidthFor(343)).toBe(138); // floor((343 - 48 - 18) / 2)
+  });
+
+  test("never goes below 120 px", () => {
+    expect(pieceMaxWidthFor(200)).toBe(120);
+  });
+});
 
 describe("puzzle paths", () => {
   test("the left piece has its notch in the right edge", () => {

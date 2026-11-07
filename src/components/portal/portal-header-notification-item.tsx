@@ -1,39 +1,46 @@
+import type { MouseEvent } from "react";
 import Box from "@mui/material/Box";
-import Divider from "@mui/material/Divider";
+import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
 import Typography from "@mui/material/Typography";
 
-import type { PortalNotification } from "./portal-header-notification-data";
+import { ErgStatusChip } from "@/components/erg-mui";
+import { formatDateTimeVi } from "@/domain/formatters/format-date";
 
-type PortalHeaderNotificationItemProps = { notification: PortalNotification; isLast: boolean };
+import type { PortalNotification } from "./use-portal-notifications";
 
-function NotificationIcon({ type }: { type: PortalNotification["type"] }) {
-  if (type === "reminder") {
-    return <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2C6.13401 2 3 5.13401 3 9C3 12.866 6.13401 16 10 16C13.866 16 17 12.866 17 9C17 5.13401 13.866 2 10 2ZM10 14.5C7.51472 14.5 5.5 12.4853 5.5 10H8.5C8.5 11.3807 9.61929 12.5 11 12.5C12.3807 12.5 13.5 11.3807 13.5 10C13.5 8.61929 12.3807 7.5 11 7.5H9.5M10 6.5V5M8.5 8.5H11.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>;
-  }
-  if (type === "success") {
-    return <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 18C14.4183 18 18 14.4183 18 10C18 5.58172 14.4183 2 10 2C5.58172 2 2 5.58172 2 10C2 14.4183 5.58172 18 10 18ZM7.5 10L9 11.5L12.5 8" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>;
-  }
-  return <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2L18 16H2L10 2Z" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>;
-}
+type PortalHeaderNotificationItemProps = {
+  notification: PortalNotification;
+  /** Detail route of the message in this workspace; without it the row only closes the popover. */
+  href?: string;
+  onOpen: (event: MouseEvent<HTMLElement>, href?: string) => void;
+};
 
-export function PortalHeaderNotificationItem({ notification, isLast }: PortalHeaderNotificationItemProps) {
-  const iconColors: Record<PortalNotification["type"], string> = { reminder: "#00B8D9", success: "#22C55E", info: "#0071E3", warning: "#FFAB00" };
+const clamp2 = { display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" } as const;
+
+export function PortalHeaderNotificationItem({ notification, href, onOpen }: PortalHeaderNotificationItemProps) {
+  const { priority, needsAck, unread, title, preview, createdAt } = notification;
+  const time = formatDateTimeVi(createdAt);
+  // The name carries what the dot and chips show, so unread / priority / ack are not colour-only.
+  const label = [unread && "Chưa đọc", priority, needsAck && "Cần xác nhận", title, time].filter(Boolean).join(", ");
+  const link = href ? { component: "a", href } : {};
+
   return (
-    <Box>
-      <ListItemButton sx={{ alignItems: "flex-start", px: 3, py: 2, "&:hover": { bgcolor: "#F8F9FA" } }}>
-        {!notification.isRead ? <Box sx={{ bgcolor: "#0071E3", borderRadius: "50%", flexShrink: 0, height: 6, left: 12, position: "absolute", top: 20, width: 6 }} /> : null}
-        <ListItemIcon sx={{ minWidth: 48 }}>
-          <Box sx={{ alignItems: "center", bgcolor: iconColors[notification.type], borderRadius: "50%", display: "flex", height: 40, justifyContent: "center", width: 40 }}><NotificationIcon type={notification.type} /></Box>
-        </ListItemIcon>
-        <ListItemText
-          primary={<Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}><Typography sx={{ color: "#1C252E", fontSize: 14, fontWeight: notification.isRead ? 500 : 600 }}>{notification.title}</Typography></Box>}
-          secondary={<><Typography sx={{ color: notification.isRead ? "#637381" : "#1C252E", fontSize: 14, fontWeight: notification.isRead ? 400 : 500, lineHeight: "20px", mb: 0.5 }}>{notification.message}</Typography><Typography sx={{ color: "#919EAB", fontSize: 12, fontWeight: 400 }}>{notification.time}</Typography></>}
-        />
+    <ListItem disablePadding divider>
+      <ListItemButton {...link} aria-label={label} onClick={(event: MouseEvent<HTMLElement>) => onOpen(event, href)} sx={{ alignItems: "flex-start", gap: 1.5, minHeight: 56, px: 2, py: 1.25 }}>
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Typography variant="body2" sx={{ ...clamp2, fontWeight: unread ? "fontWeightBold" : "fontWeightMedium" }}>{title}</Typography>
+          {preview && preview !== title ? <Typography variant="body2" sx={{ ...clamp2, color: "text.secondary" }}>{preview}</Typography> : null}
+          {priority || needsAck ? (
+            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mt: 0.5 }}>
+              {priority ? <ErgStatusChip label={priority} tone={priority === "Khẩn" ? "error" : "warning"} /> : null}
+              {needsAck ? <ErgStatusChip label="Cần xác nhận" tone="info" /> : null}
+            </Box>
+          ) : null}
+          <Typography component="span" variant="caption" sx={{ color: "text.secondary", display: "block", mt: 0.25 }}>{time}</Typography>
+        </Box>
+        {unread ? <Box aria-hidden sx={{ bgcolor: "primary.main", borderRadius: "50%", flexShrink: 0, height: 8, mt: 0.75, width: 8 }} /> : null}
       </ListItemButton>
-      {!isLast ? <Divider sx={{ ml: 12, mr: 3, borderColor: "rgba(145,158,171,0.12)" }} /> : null}
-    </Box>
+    </ListItem>
   );
 }

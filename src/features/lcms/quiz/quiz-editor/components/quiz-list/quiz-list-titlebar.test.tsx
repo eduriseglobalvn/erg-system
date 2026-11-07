@@ -29,6 +29,7 @@ function renderBar(props: Partial<Parameters<typeof QuizListTitlebar>[0]> = {}) 
       syncChip={null}
       {...handlers}
       playerTemplate={playerTemplate}
+      questionCount={0}
       themeDisabled={false}
       {...props}
     />
@@ -112,5 +113,19 @@ describe("QuizListTitlebar theme", () => {
   it("cannot be opened while the draft is not ready, so no dialog pops up later", () => {
     renderBar({ themeDisabled: true });
     expect(screen.getByRole("button", { name: "Giao diện bài" })).toBeDisabled();
+  });
+
+  it("opens on load when the panel=theme link asks for it, then reports that request as handled on close", async () => {
+    const onThemeRequestHandled = vi.fn();
+    renderBar({ themeRequested: true, onThemeRequestHandled });
+    expect(await screen.findByRole("dialog")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Hủy" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    expect(onThemeRequestHandled).toHaveBeenCalledTimes(1);
+  });
+
+  it("waits for the draft before honouring the panel=theme request", () => {
+    renderBar({ themeRequested: true, themeDisabled: true });
+    expect(screen.queryByRole("dialog")).toBeNull();
   });
 });

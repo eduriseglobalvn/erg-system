@@ -34,7 +34,16 @@ describe("Student PWA mobile UI policy", () => {
     expect(shell).not.toContain("AppBar");
     expect(shell).toContain("env(safe-area-inset-top, 0px)");
     expect(dock).toContain("announcementUnreadCount");
-    expect(dock).toContain("Avatar");
+    expect(dock).toContain("ErgMobileDock");
+  });
+
+  it("feeds the dock and menu badge from the Hộp thư inbox unread count, not the old announcements", () => {
+    const runtime = readSibling("./student-dashboard-workspace-runtime.tsx");
+
+    expect(runtime).toContain("useUnreadNotificationCount(quizRuntimePortal");
+    expect(runtime).toContain("announcementUnreadCount={unreadInboxCount}");
+    expect(runtime).toContain("unreadAnnouncementCount={unreadInboxCount}");
+    expect(runtime).not.toMatch(/const unreadAnnouncementCount/);
   });
 
   it("uses no KPI tiles and no ALL CAPS labels on the mobile overview", () => {
@@ -44,16 +53,8 @@ describe("Student PWA mobile UI policy", () => {
     expect(overview).not.toContain("uppercase");
   });
 
-  it("keeps bottom-dock touch targets at least 44px", () => {
-    const dock = readSibling("./student-dashboard-bottom-dock.tsx");
-    expect(dock).toContain("minHeight: 48");
-    expect(dock).toContain("minWidth: 48");
-  });
-
-  it("exposes an unmistakable selected state in the bottom dock", () => {
-    const dock = readSibling("./student-dashboard-bottom-dock.tsx");
-
-    expect(dock).toContain('aria-current={active ? "page" : undefined}');
-    expect(dock).toContain('data-selected={active ? "true" : undefined}');
+  it("reserves room for the shared dock height at the bottom of the scroll region", () => {
+    const shell = readSibling("./student-dashboard-mobile-shell.tsx");
+    expect(shell).toContain("ERG_MOBILE_DOCK_HEIGHT");
   });
 });

@@ -1,6 +1,8 @@
 export type NotificationPortal = "lms" | "lcms" | "admin" | "crm" | "elearning" | (string & {});
 export type NotificationStatusFilter = "all" | "unread" | "read";
 export type NotificationPriority = "low" | "normal" | "high" | "urgent" | (string & {});
+/** Backend-normalised priority (INFO | IMPORTANT | URGENT); `NotificationPriority` keeps the legacy raw values. */
+export type NotificationPriorityLevel = "INFO" | "IMPORTANT" | "URGENT";
 export type NotificationChannel = "push" | "inbox" | "email" | (string & {});
 export type NotificationPermissionState = "granted" | "denied" | "default";
 export type NotificationDeliveryPlatform = "web_pwa" | "tauri" | "ios" | "android" | (string & {});
@@ -26,6 +28,11 @@ export type NotificationItemResponse = {
   bodyPreview?: string;
   actionUrl?: string;
   priority?: NotificationPriority;
+  priorityLevel?: NotificationPriorityLevel;
+  requireReadAck?: boolean;
+  ackedAt?: string | null;
+  campaignId?: string | null;
+  senderName?: string | null;
   channel?: NotificationChannel;
   status?: "unread" | "read" | string;
   readAt?: string | null;
@@ -62,6 +69,8 @@ export type NotificationDeviceRegistrationInput = {
   client?: NotificationDeviceClientInfo;
   endpoint?: string;
   firebaseInstallationId?: string;
+  /** PushSubscription.toJSON().keys; required by the server for WEB_PUSH. */
+  keys?: { auth?: string; p256dh?: string };
   locale?: string;
   permissionState: NotificationPermissionState;
   platform: NotificationDeliveryPlatform;
@@ -69,6 +78,8 @@ export type NotificationDeviceRegistrationInput = {
   registrationToken?: string;
   serviceWorkerScope?: string;
   timezone?: string;
+  /** Server default is FCM; browser subscriptions send WEB_PUSH. */
+  transport?: "FCM" | "WEB_PUSH";
 };
 
 export type NotificationDeviceRegistrationResponse = {
@@ -95,8 +106,10 @@ export type NotificationDeviceUnregisterInput = {
 };
 
 export type NotificationFeedItem = {
+  ackedAt: string | null;
   actionUrl?: string;
   bodyPreview: string;
+  campaignId?: string;
   channel: NotificationChannel;
   createdAt: string;
   data: Record<string, unknown>;
@@ -105,8 +118,11 @@ export type NotificationFeedItem = {
   eventType: string;
   id: string;
   priority: NotificationPriority;
+  priorityLevel: NotificationPriorityLevel;
   readAt: string | null;
   recipientId?: string;
+  requireReadAck: boolean;
+  senderName?: string;
   sourceId?: string;
   sourceType: string;
   starred?: boolean;

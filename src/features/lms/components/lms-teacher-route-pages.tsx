@@ -1,5 +1,4 @@
 import { Suspense } from "react";
-import { useParams } from "@tanstack/react-router";
 import Box from "@mui/material/Box";
 
 import { HomeworkPanel } from "@/features/lms/components/homework-panel";
@@ -13,8 +12,6 @@ import {
   LearningResourceLibraryPage,
   LmsAccountPage,
   LmsLoginLogsPage,
-  LmsNotificationDetailPage,
-  LmsNotificationListPage,
   ScoreSheetPanel,
   StudentGroupsPage,
   TeachingSchedulePanel,
@@ -22,6 +19,7 @@ import {
 } from "@/features/lms/components/lms-teacher-shell-pages";
 import { getClassStudents, TeacherWorkspaceFrame } from "@/features/lms/components/lms-teacher-shell-frame";
 import { useLmsTeacherShellModel } from "@/features/lms/components/lms-teacher-shell-context";
+import { TeacherLearningHub } from "@/features/lms/learning-hub/teacher-learning-hub";
 import { LmsHomeDashboard } from "@/features/lms/components/lms-home-dashboard";
 import { classroomStudents } from "@/features/lms/classroom/api/classroom-defaults";
 import { LearningResourceDashboardScopeProvider } from "@/features/lms/learning-resources/hooks/use-learning-resource-dashboard-scope";
@@ -50,6 +48,10 @@ export function TeacherHomeRoute() {
       onOpenSchedule={() => void m.navigate({ href: teacherPath("/calendar") })}
     />
   );
+}
+
+export function TeacherLearningHubRoute() {
+  return <TeacherLearningHub />;
 }
 
 export function TeacherHomeworkRoute() {
@@ -136,17 +138,6 @@ export function TeacherClassManagementRoute() {
       />
     </Suspense>
   );
-}
-
-export function TeacherNotificationsRoute() {
-  const { navigate } = useLmsTeacherShellModel();
-  return <LmsNotificationListPage onOpenDetail={(id) => void navigate({ href: `${teacherPath("/notifications")}/${id}` })} />;
-}
-
-export function TeacherNotificationDetailRoute() {
-  const { navigate } = useLmsTeacherShellModel();
-  const { notificationId } = useParams({ from: "/_authed/_teacherShell/teacher/notifications/$notificationId" });
-  return <LmsNotificationDetailPage notificationId={notificationId ?? ""} onBack={() => void navigate({ href: teacherPath("/notifications") })} />;
 }
 
 export function TeacherAccountRoute() {

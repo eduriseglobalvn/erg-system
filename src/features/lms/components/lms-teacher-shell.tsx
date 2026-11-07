@@ -9,7 +9,6 @@ import {
 import { LmsTeacherShellContext } from "@/features/lms/components/lms-teacher-shell-context";
 import { useLmsTeacherShellController } from "@/features/lms/components/use-lms-teacher-shell-controller";
 import { LmsMobileShell } from "@/features/lms/mobile";
-import { teacherPath } from "@/platform/workspaces/workspace-paths";
 
 /** Teacher workspace layout: owns school/class state and chrome; each page is a child route rendered in <Outlet />. */
 export function LmsTeacherShell() {
@@ -39,9 +38,7 @@ function LmsTeacherShellFrame({ model }: { model: ReturnType<typeof useLmsTeache
           selectedSchoolId={model.selectedSchoolId}
           teacherEmail={model.teacherEmail}
           teacherName={model.teacherName}
-          unreadNotificationCount={model.unreadNotificationCount}
           onClassChange={model.setSelectedClassId}
-          onOpenNotifications={() => void model.navigate({ href: teacherPath("/notifications") })}
           onNavigate={(path) => void model.navigate({ href: path })}
           onSchoolChange={model.selectSchool}
           onSignOut={model.signOut}

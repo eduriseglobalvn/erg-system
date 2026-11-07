@@ -11,6 +11,9 @@ export type PortalSmokeDefinition = {
   portal: SmokePortal;
 };
 
+// Mirrors portalHost in playwright.config.ts (the config sits outside the app tsconfig, so it cannot be imported here).
+export const portalHost = (portal: SmokePortal) => `https://${portal}.erg.edu.local:3001`;
+
 const DEV_COLD_START_TIMEOUT_MS = 20_000;
 
 export const portalSmokeDefinitions: Record<SmokePortal, PortalSmokeDefinition> = {

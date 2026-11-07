@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { normalizeQuizPackage, stripQuizAnswerKey } from "./quiz-runtime-package-normalizer";
 import { normalizeBackendQuestion } from "./quiz-runtime-question-normalizers";
 import type { BackendQuizPackage } from "./quiz-runtime-package-api";
+import { canGradeLocally, getAllQuestions } from "@/domain/quiz/quiz";
 import type { Quiz } from "@/domain/quiz/types";
 
 const feedback = { correct: "", incorrect: "", partial: "" };
@@ -80,6 +81,19 @@ describe("answer key stripping (4.4 #18)", () => {
     stripQuizAnswerKey(original);
     expect(original.sections[0].questions[0].choices?.[0].correct).toBe(true);
   });
+
+  it("a stripped package is not locally gradable, even when the stripped shape looks like a key", () => {
+    const only = (...questions: Quiz["sections"][0]["questions"]): Quiz => ({ ...quiz("testing"), sections: [{ id: "s", title: "S", questions }] });
+    const numericOnly = only({ id: "3", kind: "numeric", title: "", points: 1, feedback, numericAnswer: { correctValue: 42, tolerance: 1 } });
+    const essayOnly = only({ id: "8", kind: "essay", title: "", points: 1, feedback });
+    const oldMatching = only({ id: "9", kind: "matching", title: "", points: 1, feedback, matching: [{ id: "r", prompt: "p", response: "x" }] });
+    expect(canGradeLocally(getAllQuestions(numericOnly))).toBe(true);
+    for (const original of [numericOnly, essayOnly, oldMatching]) {
+      const stripped = normalizeQuizPackage({ ...backend("testing", "server-authoritative"), quiz: original }).quiz;
+      expect(canGradeLocally(getAllQuestions(stripped))).toBe(false);
+    }
+    expect(canGradeLocally(getAllQuestions(normalizeQuizPackage({ ...backend("testing", "client-first"), quiz: numericOnly }).quiz))).toBe(true);
+  });
 });
 
 describe("secured matching / sequence shapes", () => {
@@ -113,5 +127,21 @@ describe("secured matching / sequence shapes", () => {
     const old = normalizeBackendQuestion({ id: "o", kind: "matching", points: 1, matching: [{ id: "m1", prompt: "Cat", response: "Meow" }] }, 0, {}, "client-first");
     expect(old?.matchingResponses).toBeUndefined();
     expect(old?.matching?.[0].response).toBe("Meow");
+  });
+});
+
+describe("player template from the package", () => {
+  const detail = (settings: unknown): BackendQuizPackage =>
+    ({ id: "p", quizId: "q", quizVersion: "1", contentHash: "h", gradingMode: "server-authoritative", source: "server",
+      quiz: { quiz: { id: "q", title: "Q" }, slides: [], settings, result: {}, theme: {} } }) as never;
+
+  it("keeps settings.playerTemplate on the quiz", () => {
+    const { quiz: loaded } = normalizeQuizPackage(detail({ playerTemplate: { accentColor: "#0071E3" } }));
+    expect(loaded.playerTemplate).toEqual({ accentColor: "#0071E3" });
+  });
+
+  it("has no playerTemplate when the package carries none or junk", () => {
+    expect(normalizeQuizPackage(detail({})).quiz).not.toHaveProperty("playerTemplate");
+    expect(normalizeQuizPackage(detail({ playerTemplate: "red" })).quiz).not.toHaveProperty("playerTemplate");
   });
 });

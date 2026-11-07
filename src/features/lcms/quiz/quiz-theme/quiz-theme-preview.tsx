@@ -4,23 +4,31 @@ import VolumeUpRoundedIcon from "@mui/icons-material/VolumeUpRounded";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 
 import type { QuizPlayerTemplate } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import type { QuizThemeCopy } from "@/features/lcms/quiz/quiz-theme/quiz-theme-copy";
+import { ChoiceGroup } from "@/features/lcms/quiz/quiz-theme/quiz-theme-controls";
 import {
   PreviewBadge,
   PreviewButton,
+  type PreviewDevice,
+  type PreviewState,
   PreviewQuestionCard,
   PreviewQuestionList,
   usePreviewStyle,
 } from "@/features/lcms/quiz/quiz-theme/quiz-theme-preview-parts";
 import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
 
+const PHONE_WIDTH = 260;
+
 type PreviewProps = { copy: QuizThemeCopy; value: QuizPlayerTemplate };
 
 export function QuizThemePreview({ copy, value }: PreviewProps) {
   const style = usePreviewStyle(value);
+  const [state, setState] = useState<PreviewState>("playing");
+  const [device, setDevice] = useState<PreviewDevice>("desktop");
+  const phone = device === "phone";
   const SoundIcon = value.soundEffect === "off" ? VolumeOffRoundedIcon : VolumeUpRoundedIcon;
 
   return (
@@ -28,8 +36,25 @@ export function QuizThemePreview({ copy, value }: PreviewProps) {
       <Typography variant="subtitle2" color="text.secondary">
         {copy.previewLabel}
       </Typography>
-      <Box sx={{ background: style.tone.background, border: `1px solid ${t.color.border}`, borderRadius: `${t.radius.card}px`, minHeight: 360, p: 2 }}>
-        <Stack sx={{ gap: 1.5, height: "100%", mx: "auto", width: value.playerSize === "wide" ? "100%" : "86%" }}>
+      <Box sx={{ display: "grid", gap: 1.5, gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
+        <ChoiceGroup<PreviewState> label={copy.preview.stateLabel} value={state} options={copy.preview.states} onChange={setState} />
+        <ChoiceGroup<PreviewDevice> label={copy.preview.deviceLabel} value={device} options={copy.preview.devices} onChange={setDevice} />
+      </Box>
+      <Box
+        data-device={device}
+        sx={{
+          background: style.tone.background,
+          border: `1px solid ${t.color.border}`,
+          borderRadius: `${t.radius.card}px`,
+          // Phone is a narrow 260px mock with the question list hidden; desktop uses the full column width.
+          maxWidth: phone ? PHONE_WIDTH : "none",
+          minHeight: phone ? 440 : 360,
+          mx: "auto",
+          p: 2,
+          width: "100%",
+        }}
+      >
+        <Stack sx={{ gap: 1.5, height: "100%", mx: "auto", width: value.playerSize === "wide" || phone ? "100%" : "86%" }}>
           <Stack direction="row" sx={{ alignItems: "center", color: style.tone.text, gap: 1.25 }}>
             <PreviewBadge value={value} />
             <Typography variant="subtitle2" noWrap sx={{ flex: 1 }}>
@@ -44,8 +69,8 @@ export function QuizThemePreview({ copy, value }: PreviewProps) {
             </Box>
           </Stack>
           <Stack direction="row" sx={{ flex: 1, gap: 1.5, mx: "auto", width: value.layout === "focus" ? "80%" : "100%" }}>
-            <PreviewQuestionCard copy={copy} value={value} />
-            {value.layout === "classic" ? (
+            <PreviewQuestionCard copy={copy} value={value} state={state} phone={phone} />
+            {value.layout === "classic" && !phone ? (
               <Box sx={{ display: { xs: "none", sm: "flex" } }}>
                 <PreviewQuestionList copy={copy} value={value} />
               </Box>

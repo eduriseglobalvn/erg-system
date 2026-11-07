@@ -37,3 +37,11 @@ test("exposes portable package manifest, download, update, and revoke routes", (
   );
   expect(API_ENDPOINTS.lcms.quizPackageRevoke("pkg-1")).toBe("/api/v1/lcms/quiz-packages/pkg-1/revoke");
 });
+
+test("exposes notification campaign, ack and web push endpoints with encoded ids", () => {
+  expect(API_ENDPOINTS.notificationCampaigns.root).toBe("/api/v1/notification-campaigns");
+  expect(API_ENDPOINTS.notificationCampaigns.send("c/1")).toBe("/api/v1/notification-campaigns/c%2F1/send");
+  expect(API_ENDPOINTS.notificationCampaigns.resolvePeople).toBe("/api/v1/notification-campaigns/people/resolve");
+  expect(API_ENDPOINTS.notifications.ack("n 1")).toBe("/api/v1/notifications/n%201/ack");
+  expect(API_ENDPOINTS.notifications.webPushConfig).toBe("/api/v1/notification-devices/web-push-config");
+});

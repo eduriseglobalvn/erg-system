@@ -5,6 +5,7 @@ import Box from "@mui/material/Box";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import type { DashboardLeafVariant } from "@/layouts/dashboard/types/dashboard-types";
 import { useNavigate } from "@tanstack/react-router";
+import { ERG_MOBILE_DOCK_HEIGHT, ErgMobileDock, type ErgMobileDockItem } from "./erg-mobile-dock";
 import ErgPortalHeader from "./ErgPortalHeader";
 import ErgPortalSidebar from "./ErgPortalSidebar";
 import {
@@ -42,6 +43,15 @@ export interface PortalInfo {
   workspacePortals?: string[];
 }
 
+/** Phone navigation: a bottom dock replaces the hamburger + drawer below `md`. */
+export interface PortalMobileDock<TId extends string = string> {
+  ariaLabel: string;
+  items: ReadonlyArray<ErgMobileDockItem<TId>>;
+  activeId: TId | null;
+  /** Renders the sheet the dock item with `opensSheet` opens. */
+  renderSheet: (sheet: { open: boolean; onClose: () => void; onNavigate: (path: string) => void }) => ReactNode;
+}
+
 interface ErgPortalLayoutProps {
   menuGroups: MenuGroup[];
   children: ReactNode;
@@ -51,6 +61,7 @@ interface ErgPortalLayoutProps {
   headerTrailingControls?: ReactNode;
   portalInfo?: PortalInfo;
   notificationCount?: number;
+  mobileDock?: PortalMobileDock;
 }
 
 export default function ErgPortalLayout({
@@ -62,9 +73,15 @@ export default function ErgPortalLayout({
   headerTrailingControls,
   portalInfo,
   notificationCount,
+  mobileDock,
 }: ErgPortalLayoutProps) {
   const navigate = useNavigate();
   const isCompact = useMediaQuery("(max-width:1279px)");
+  const isPhone = useMediaQuery("(max-width:899px)");
+  const dock = mobileDock && isPhone ? mobileDock : undefined;
+  const [allOpen, setAllOpen] = useState(false);
+  // Leaving phone width closes the sheet (adjusting state while rendering, not in an effect).
+  if (!isPhone && allOpen) setAllOpen(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileNavigationOpen, setMobileNavigationOpen] = useState(false);
   const [headerScrolled, setHeaderScrolled] = useState(false);
@@ -115,20 +132,23 @@ export default function ErgPortalLayout({
       }}
     >
       {isCompact ? (
-        <ErgPortalSidebar
-          collapsed={false}
-          menuGroups={menuGroups}
-          mobile
-          onClose={() => setMobileNavigationOpen(false)}
-          onCollapsedChange={setSidebarCollapsed}
-          onNavigate={(path) => {
-            setMobileNavigationOpen(false);
-            void navigate({ href: path });
-          }}
-          open={mobileNavigationOpen}
-          portalInfo={portalInfo}
-          notificationCount={notificationCount}
-        />
+        // With a dock the phone has no sidebar at all: the sheet replaces the drawer.
+        dock ? null : (
+          <ErgPortalSidebar
+            collapsed={false}
+            menuGroups={menuGroups}
+            mobile
+            onClose={() => setMobileNavigationOpen(false)}
+            onCollapsedChange={setSidebarCollapsed}
+            onNavigate={(path) => {
+              setMobileNavigationOpen(false);
+              void navigate({ href: path });
+            }}
+            open={mobileNavigationOpen}
+            portalInfo={portalInfo}
+            notificationCount={notificationCount}
+          />
+        )
       ) : (
         <ErgPortalSidebar
           collapsed={sidebarCollapsed}
@@ -154,8 +174,9 @@ export default function ErgPortalLayout({
         <ErgPortalHeader
           centerName={portalInfo?.centerName}
           headerControls={headerControls}
-          onMenuOpen={() => setMobileNavigationOpen(true)}
+          onMenuOpen={dock ? undefined : () => setMobileNavigationOpen(true)}
           hideIdentity={hideHeaderIdentity}
+          hideNotifications={Boolean(dock?.items.some((item) => item.id === "inbox"))}
           headerTrailingControls={headerTrailingControls}
           portalPlan={portalInfo?.plan}
           portalName={portalInfo?.name}
@@ -176,6 +197,8 @@ export default function ErgPortalLayout({
             overflow: contentMode === "flush" ? "hidden" : "auto",
             overflowX: "hidden",
             p: contentMode === "flush" ? 0 : { xs: 1.5, sm: 2, md: 3 },
+            // Keep the last row clear of the floating dock.
+            ...(dock ? { pb: `calc(${ERG_MOBILE_DOCK_HEIGHT}px + 8px + env(safe-area-inset-bottom, 0px))` } : {}),
             width: "100%",
             bgcolor: '#FFFFFF',
           }}
@@ -183,6 +206,19 @@ export default function ErgPortalLayout({
           {children}
         </Box>
       </Box>
+      {dock ? (
+        <>
+          <ErgMobileDock
+            activeId={dock.activeId}
+            ariaLabel={dock.ariaLabel}
+            hideAt="md"
+            items={dock.items}
+            onNavigate={(path) => void navigate({ href: path })}
+            onOpenSheet={() => setAllOpen(true)}
+          />
+          {dock.renderSheet({ open: allOpen, onClose: () => setAllOpen(false), onNavigate: (path) => void navigate({ href: path }) })}
+        </>
+      ) : null}
     </Box>
   );
 }

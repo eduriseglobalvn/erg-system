@@ -179,6 +179,14 @@ describe("lms assignment command API", () => {
     }));
   });
 
+  test("loads student groups on the session the caller names (admin: lcms)", async () => {
+    graphQlRequestMock.mockResolvedValueOnce({ lms: { studentGroups: { groups: [], tenantId: "erg" } } });
+
+    await loadLmsStudentGroups({ tenantId: "erg", portal: "lcms" });
+
+    expect(graphQlRequestMock).toHaveBeenCalledWith(expect.objectContaining({ operationName: "LmsStudentGroups", portal: "lcms" }));
+  });
+
   test("returns empty student groups when no API base is configured", async () => {
     hasApiBaseMock.mockReturnValue(false);
 
