@@ -8,7 +8,8 @@ import { notificationPortalFromPath } from "@/components/portal/use-portal-notif
 import type { NotificationFeedItem } from "../api/notification-types";
 import { usePortalNotifications } from "./use-portal-notifications";
 
-const api = vi.hoisted(() => ({ feed: vi.fn(), unread: vi.fn(), read: vi.fn() }));
+const api = vi.hoisted(() => ({ feed: vi.fn(), unread: vi.fn(), read: vi.fn(), toastError: vi.fn() }));
+vi.mock("sonner", () => ({ toast: { error: (...args: unknown[]) => api.toastError(...args) } }));
 vi.mock("../api/notification-api", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../api/notification-api")>()),
   fetchNotificationFeed: (...args: unknown[]) => api.feed(...args),
@@ -26,6 +27,7 @@ beforeEach(() => {
   client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   api.feed.mockReset().mockResolvedValue({ items: [feedItem("1"), feedItem("2", { unread: false, priorityLevel: undefined, requireReadAck: false })] });
   api.unread.mockReset().mockResolvedValue({ unread: 42 });
+  api.toastError.mockReset();
   api.read.mockReset().mockResolvedValue({ read: true, updated: 1 });
 });
 
@@ -50,7 +52,20 @@ test("markRead marks only the given messages, then refreshes the badge", async (
   await act(() => result.current.markRead(["1", "3"]));
 
   expect(api.read.mock.calls).toEqual([["1", "lcms"], ["3", "lcms"]]);
+  expect(api.toastError).not.toHaveBeenCalled();
   await waitFor(() => expect(result.current.unreadCount).toBe(40));
+});
+
+test("markRead tells the user when some messages could not be marked, and still refreshes the badge", async () => {
+  const { result } = renderHook(() => usePortalNotifications("lcms", false), { wrapper });
+  await waitFor(() => expect(result.current.unreadCount).toBe(42));
+  api.read.mockImplementation((id: string) => (id === "3" ? Promise.reject(new Error("500")) : Promise.resolve({ read: true, updated: 1 })));
+  api.unread.mockResolvedValue({ unread: 41 });
+
+  await act(() => result.current.markRead(["1", "3"]));
+
+  expect(api.toastError).toHaveBeenCalledWith("Không thể đánh dấu một số thông báo đã đọc");
+  await waitFor(() => expect(result.current.unreadCount).toBe(41));
 });
 
 test("the admin bell shares the inbox's query root, so a read in the inbox refreshes the badge", async () => {

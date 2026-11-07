@@ -163,7 +163,7 @@ export function SidebarBottom({
           <Typography noWrap sx={{ color: "text.secondary", fontSize: NAV_FS.caption }}>{userEmail}</Typography>
         </Box>
         <Divider sx={{ my: "4px" }} />
-        <MenuItem onClick={() => { setNotificationAnchor(menuAnchor); closeMenu(); }} sx={{ borderRadius: NAV_ITEM_RADIUS, gap: "12px" }}>
+        <MenuItem aria-haspopup="dialog" onClick={() => { setNotificationAnchor(menuAnchor); closeMenu(); }} sx={{ borderRadius: NAV_ITEM_RADIUS, gap: "12px" }}>
           <NotificationsNoneRoundedIcon fontSize="small" />
           Thông báo
           {notificationCount > 0 ? <NavBadge active={false}>{notificationCount > 99 ? "99+" : notificationCount}</NavBadge> : null}

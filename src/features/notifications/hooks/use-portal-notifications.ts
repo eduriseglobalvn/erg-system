@@ -1,4 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 import { fetchNotificationFeed, markNotificationRead, notificationQueryKeys, resolveNotificationQueryScope } from "../api/notification-api";
 import type { NotificationFeedItem, NotificationPortal } from "../api/notification-types";
@@ -37,13 +38,14 @@ export function usePortalNotifications(portal: NotificationPortal, feedEnabled: 
   });
   return {
     unreadCount,
-    notifications: (feed.data?.items ?? []).slice(0, PORTAL_NOTIFICATION_LIMIT).map(toPortalNotification),
+    notifications: (feed.data?.items ?? []).map(toPortalNotification),
     isPending: feedEnabled && feed.isPending,
     isError: feed.isError,
     refetch: () => void feed.refetch(),
     // Only the messages on screen are marked (a read-all would also clear ones the user never saw).
     markRead: async (ids) => {
-      await Promise.allSettled(ids.map((id) => markNotificationRead(id, portal)));
+      const results = await Promise.allSettled(ids.map((id) => markNotificationRead(id, portal)));
+      if (results.some((result) => result.status === "rejected")) toast.error("Không thể đánh dấu một số thông báo đã đọc");
       await queryClient.invalidateQueries({ queryKey: notificationQueryKeys.root(portal, scope) });
     },
   };

@@ -7,6 +7,7 @@ import Typography from "@mui/material/Typography";
 import { ErgButton } from "@/components/erg-mui";
 import { inboxTabsFor } from "@/features/notifications/components/inbox-filters";
 import { InboxList } from "@/features/notifications/components/inbox-list";
+import { ADMIN_NOTIFICATION_PORTAL } from "@/platform/workspaces/workspace-notification-portal";
 import { adminPath } from "@/platform/workspaces/workspace-paths";
 
 import { canSendCampaigns } from "../model/can-send-campaigns";
@@ -17,7 +18,7 @@ import { LatestSentCard, SentCampaignList } from "./sent-campaign-list";
 export function AdminInboxScreen() {
   const navigate = useNavigate();
   const searchStr = useLocation({ select: (location) => location.searchStr });
-  const canSend = canSendCampaigns("lcms");
+  const canSend = canSendCampaigns(ADMIN_NOTIFICATION_PORTAL);
   const tabs = inboxTabsFor("ADMIN").filter((tab) => canSend || tab.id === "INBOX");
   const requested = new URLSearchParams(searchStr).get("tab");
   const tab = tabs.find((candidate) => candidate.id === requested)?.id ?? "INBOX";
@@ -41,7 +42,7 @@ export function AdminInboxScreen() {
       ) : null}
       {tab === "INBOX" ? (
         <>
-          <InboxList portal="lcms" workspace="ADMIN" onOpen={(item) => void navigate({ href: `${adminPath("/notifications")}/${encodeURIComponent(item.id)}` })} />
+          <InboxList portal={ADMIN_NOTIFICATION_PORTAL} workspace="ADMIN" onOpen={(item) => void navigate({ href: `${adminPath("/notifications")}/${encodeURIComponent(item.id)}` })} />
           {canSend ? <LatestSentCard /> : null}
         </>
       ) : (

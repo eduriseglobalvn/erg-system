@@ -120,14 +120,14 @@ it("hides the header bell on a phone only when the dock carries the inbox tab", 
       <div>Nội dung</div>
     </ErgPortalLayout>,
   );
-  expect(screen.queryByRole("button", { name: "Thông báo" })).toBeNull();
+  expect(screen.queryByRole("button", { name: /^Thông báo/ })).toBeNull();
 
   rerender(
     <ErgPortalLayout menuGroups={[]} mobileDock={dock} portalInfo={{ name: "Admin" }}>
       <div>Nội dung</div>
     </ErgPortalLayout>,
   );
-  expect(screen.getByRole("button", { name: "Thông báo" })).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: /^Thông báo/ })).toBeInTheDocument();
   unmount();
 
   render(
@@ -135,5 +135,5 @@ it("hides the header bell on a phone only when the dock carries the inbox tab", 
       <div>Nội dung</div>
     </ErgPortalLayout>,
   );
-  expect(screen.getByRole("button", { name: "Thông báo" })).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: /^Thông báo/ })).toBeInTheDocument();
 });

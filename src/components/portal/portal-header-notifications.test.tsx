@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import ErgPortalHeader from "@/components/portal/ErgPortalHeader";
 import { PortalHeaderNotifications } from "@/components/portal/portal-header-notifications";
@@ -9,6 +9,7 @@ import {
   type PortalNotification,
   type PortalNotificationsState,
 } from "@/components/portal/use-portal-notifications";
+import { ADMIN_NOTIFICATION_PORTAL, TEACHER_NOTIFICATION_PORTAL } from "@/platform/workspaces/workspace-notification-portal";
 import { adminPath, teacherPath } from "@/platform/workspaces/workspace-paths";
 
 let pathname = "/admin/notifications";
@@ -38,9 +39,15 @@ const state = (patch: Partial<PortalNotificationsState> = {}): PortalNotificatio
   ...patch,
 });
 
+const anchors: HTMLElement[] = [];
+afterEach(() => {
+  anchors.splice(0).forEach((anchor) => anchor.remove());
+});
+
 function renderPopover(patch: Partial<PortalNotificationsState> = {}, props: { pathname?: string; onNavigate?: (path: string) => void } = {}) {
   const anchor = document.createElement("button");
   document.body.appendChild(anchor);
+  anchors.push(anchor);
   const onClose = vi.fn();
   const value = state(patch);
   render(<PortalHeaderNotifications anchorEl={anchor} onClose={onClose} pathname={props.pathname ?? "/admin/notifications"} state={value} onNavigate={props.onNavigate} />);
@@ -100,10 +107,30 @@ describe("PortalHeaderNotifications popover", () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it("shows a skeleton while loading, an empty state, and a retry on error", () => {
-    const loading = renderPopover({ isPending: true });
+  it("shows a skeleton while loading", () => {
+    renderPopover({ isPending: true });
     expect(screen.getByRole("status", { name: "Đang tải thông báo" })).toBeInTheDocument();
-    loading.anchor.remove();
+  });
+
+  it("keeps the last list on screen when a refresh fails, with an inline retry", () => {
+    const { state: s } = renderPopover({ isError: true, notifications: [item(1)] });
+    expect(screen.getByRole("link", { name: /Tiêu đề 1/ })).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent("Không cập nhật được thông báo.");
+    fireEvent.click(screen.getByRole("button", { name: "Thử lại" }));
+    expect(s.refetch).toHaveBeenCalled();
+  });
+
+  it("sends one set of requests on a double click and stays disabled until they finish", async () => {
+    let finish!: () => void;
+    const markRead = vi.fn(() => new Promise<void>((resolve) => { finish = resolve; }));
+    renderPopover({ notifications: [item(1, { unread: true })], markRead });
+    const button = screen.getByRole("button", { name: "Đánh dấu đã đọc" });
+    fireEvent.click(button);
+    fireEvent.click(button);
+    expect(markRead).toHaveBeenCalledTimes(1);
+    expect(button).toBeDisabled();
+    finish();
+    await waitFor(() => expect(button).not.toBeDisabled());
   });
 
   it("shows 'Chưa có thông báo' when empty", () => {
@@ -111,7 +138,7 @@ describe("PortalHeaderNotifications popover", () => {
     expect(screen.getByText("Chưa có thông báo")).toBeInTheDocument();
   });
 
-  it("offers a retry when loading failed", () => {
+  it("offers a retry when loading failed with nothing cached", () => {
     const { state: s } = renderPopover({ isError: true });
     fireEvent.click(screen.getByRole("button", { name: "Thử lại" }));
     expect(s.refetch).toHaveBeenCalled();
@@ -121,6 +148,13 @@ describe("PortalHeaderNotifications popover", () => {
     const { onClose } = renderPopover({ notifications: [item(1)] });
     fireEvent.keyDown(screen.getByRole("dialog"), { key: "Escape" });
     expect(onClose).toHaveBeenCalled();
+  });
+});
+
+describe("inbox pages and the bell share one portal per workspace", () => {
+  it("pins the pages' portal constants to the bell's portal for the same route", () => {
+    expect(ADMIN_NOTIFICATION_PORTAL).toBe(notificationPortalFromPath("/admin/notifications"));
+    expect(TEACHER_NOTIFICATION_PORTAL).toBe(notificationPortalFromPath("/teacher/notifications"));
   });
 });
 

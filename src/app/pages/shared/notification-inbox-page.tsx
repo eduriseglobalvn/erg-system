@@ -6,6 +6,7 @@ import { canSendCampaigns } from "@/features/notification-campaigns/model/can-se
 import { notificationComposePath } from "@/features/notification-campaigns/model/campaign-paths";
 import { InboxList } from "@/features/notifications/components/inbox-list";
 import { NotificationDetail } from "@/features/notifications/components/notification-detail";
+import { ADMIN_NOTIFICATION_PORTAL, TEACHER_NOTIFICATION_PORTAL } from "@/platform/workspaces/workspace-notification-portal";
 import { adminPath, teacherPath } from "@/platform/workspaces/workspace-paths";
 
 const pageSx = { maxWidth: 860, mx: "auto", px: { xs: 2, sm: 3 }, py: 3, width: "100%" } as const;
@@ -21,7 +22,7 @@ export function AdminNotificationDetailPage() {
   const { notificationId = "" } = useParams({ strict: false });
   return (
     <Box sx={pageSx}>
-      <NotificationDetail portal="lcms" notificationId={notificationId} onBack={() => void navigate({ href: adminPath("/notifications") })} />
+      <NotificationDetail portal={ADMIN_NOTIFICATION_PORTAL} notificationId={notificationId} onBack={() => void navigate({ href: adminPath("/notifications") })} />
     </Box>
   );
 }
@@ -32,11 +33,11 @@ export function TeacherNotificationsPage() {
   return (
     <Box sx={pageSx}>
       <InboxList
-        portal="lms"
+        portal={TEACHER_NOTIFICATION_PORTAL}
         workspace="TEACHER"
         title="Hộp thư"
         onOpen={(item) => void navigate({ href: `${teacherPath("/notifications")}/${encodeURIComponent(item.id)}` })}
-        onCompose={canSendCampaigns("lms") ? () => void navigate({ href: notificationComposePath("teacher") }) : undefined}
+        onCompose={canSendCampaigns(TEACHER_NOTIFICATION_PORTAL) ? () => void navigate({ href: notificationComposePath("teacher") }) : undefined}
       />
     </Box>
   );
@@ -48,7 +49,7 @@ export function TeacherNotificationDetailPage() {
   const { notificationId = "" } = useParams({ strict: false });
   return (
     <Box sx={pageSx}>
-      <NotificationDetail portal="lms" notificationId={notificationId} onBack={() => void navigate({ href: teacherPath("/notifications") })} />
+      <NotificationDetail portal={TEACHER_NOTIFICATION_PORTAL} notificationId={notificationId} onBack={() => void navigate({ href: teacherPath("/notifications") })} />
     </Box>
   );
 }

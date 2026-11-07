@@ -42,7 +42,7 @@ it("renders the shared dock with an inbox badge, opens the account sheet and has
     </LmsMobileShell>,
   );
 
-  expect(screen.queryByRole("button", { name: "Thông báo" })).toBeNull();
+  expect(screen.queryByRole("button", { name: /^Thông báo/ })).toBeNull();
   fireEvent.click(screen.getByRole("button", { name: /^Hộp thư, 3 chưa đọc$/ }));
   expect(onNavigate).toHaveBeenCalledWith("/teacher/notifications");
   fireEvent.click(within(screen.getByRole("navigation", { name: "Điều hướng giáo viên" })).getByRole("button", { name: "Tài khoản" }));
