@@ -92,7 +92,11 @@ export function useAudienceDirectory(kind: ComposePortalKind, scope: AudienceSco
   const admin = kind === "admin";
   const adminData = useAdminDirectory(scope, admin);
   const teacher = useTeacherClasses(!admin && (scope === "CLASS" || scope === "GROUP"));
-  const groupsQuery = useLmsStudentGroupsQuery(undefined, null, { enabled: scope === "GROUP" });
+  const enabledGroups = scope === "GROUP";
+  // Admin screens run on the lcms session; the LMS read model defaults to lms.
+  const groupsQuery = useLmsStudentGroupsQuery(undefined, null, admin
+    ? { accountId: getCurrentAccountId("lcms"), enabled: enabledGroups, portal: "lcms" }
+    : { enabled: enabledGroups });
   const groups = useMemo(() => {
     const taught = admin ? null : new Set(teacher.classes.map((c) => c.id));
     return (groupsQuery.data?.groups ?? [])

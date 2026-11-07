@@ -38,7 +38,8 @@ vi.mock("../api/use-audience-directory", () => ({
   }),
 }));
 vi.mock("@tanstack/react-router", () => ({ useNavigate: () => navigate }));
-vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
+const toast = vi.hoisted(() => ({ success: vi.fn(), error: vi.fn() }));
+vi.mock("sonner", () => ({ toast }));
 
 beforeEach(() => {
   estimate.data = { total: 1336, teachers: 86, students: 1250 };
@@ -46,6 +47,7 @@ beforeEach(() => {
   estimate.isFetching = false;
   for (const m of [create, update, send, schedule]) m.mutateAsync.mockReset();
   navigate.mockReset();
+  toast.success.mockReset();
   detail.data = undefined;
 });
 
@@ -73,17 +75,57 @@ test("exactly one contained button; 'Lưu nháp' is outlined", () => {
   expect(screen.getByRole("button", { name: "Lưu nháp" })).toHaveClass("MuiButton-outlined");
 });
 
-test("primary is disabled while the form is invalid or the estimate failed", () => {
+test("a disabled primary shows why: no recipients", () => {
   render(<CampaignComposeForm portalKind="admin" />);
   expect(primary()).toBeDisabled();
+  expect(screen.getByText("Chọn ít nhất một người nhận")).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Lưu nháp" })).toBeDisabled();
+});
+
+test("a valid form is still blocked when the estimate fails (422)", () => {
   estimate.error = new Error("Tối đa 5.000 người nhận mỗi lần gửi");
-  render(<CampaignComposeForm portalKind="admin" />);
-  expect(screen.getByText("Tối đa 5.000 người nhận mỗi lần gửi")).toBeInTheDocument();
+  render(<CampaignComposeForm portalKind="admin" initial={{ audience: emptyAudienceWithPerson }} />);
+  fillContent();
+  expect(screen.getByRole("alert")).toHaveTextContent("Tối đa 5.000 người nhận mỗi lần gửi");
+  expect(primary()).toBeDisabled();
+  expect(screen.getByText("Sửa người nhận theo lỗi ở phần Gửi đến")).toBeInTheDocument();
+});
+
+test("retrying a failed send reuses the created campaign", async () => {
+  create.mutateAsync.mockResolvedValue({ id: "c5" });
+  update.mutateAsync.mockResolvedValue({ id: "c5" });
+  send.mutateAsync.mockRejectedValueOnce(new Error("Mất kết nối")).mockResolvedValueOnce({ id: "c5", status: "SENT" });
+  render(<CampaignComposeForm portalKind="admin" initial={{ audience: emptyAudienceWithPerson }} />);
+  fillContent();
+  fireEvent.click(primary());
+  expect(await screen.findByRole("alert")).toHaveTextContent("Mất kết nối");
+  fireEvent.click(primary());
+  await waitFor(() => expect(navigate).toHaveBeenCalledWith({ href: "/admin/notifications" }));
+  expect(create.mutateAsync).toHaveBeenCalledTimes(1);
+  expect(update.mutateAsync).toHaveBeenCalledWith(expect.objectContaining({ id: "c5" }));
+  expect(send.mutateAsync).toHaveBeenCalledTimes(2);
+});
+
+test("edit mode: 'Lưu nháp' updates in place and stays on the page", async () => {
+  update.mutateAsync.mockResolvedValue({ id: "c9" });
+  render(<CampaignComposeForm campaignId="c9" initial={{ audience: emptyAudienceWithPerson, title: "T", body: "B" }} portalKind="teacher" />);
+  fireEvent.click(screen.getByRole("button", { name: "Lưu nháp" }));
+  await waitFor(() => expect(update.mutateAsync).toHaveBeenCalledWith(expect.objectContaining({ id: "c9" })));
+  expect(create.mutateAsync).not.toHaveBeenCalled();
+  expect(navigate).not.toHaveBeenCalled();
+  expect(toast.success).toHaveBeenCalledWith("Đã lưu thay đổi");
+});
+
+test("a submit attempt shows title and body errors without blur", () => {
+  render(<CampaignComposeForm portalKind="admin" initial={{ audience: emptyAudienceWithPerson }} />);
+  fireEvent.submit(screen.getByLabelText("Tiêu đề").closest("form")!);
+  expect(screen.getByText("Nhập tiêu đề")).toBeInTheDocument();
+  expect(screen.getByText("Nhập nội dung")).toBeInTheDocument();
 });
 
 test("'Lưu nháp' creates the campaign and opens compose/$id", async () => {
   create.mutateAsync.mockResolvedValue({ id: "c42", status: "DRAFT" });
-  render(<CampaignComposeForm portalKind="admin" />);
+  render(<CampaignComposeForm portalKind="admin" initial={{ audience: emptyAudienceWithPerson }} />);
   fillContent();
   fireEvent.click(screen.getByRole("button", { name: "Lưu nháp" }));
   await waitFor(() => expect(navigate).toHaveBeenCalledWith({ href: "/admin/notifications/compose/c42", replace: true }));

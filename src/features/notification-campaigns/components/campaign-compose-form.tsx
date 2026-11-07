@@ -1,6 +1,7 @@
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 import { useForm, useStore } from "@tanstack/react-form";
 import { useNavigate } from "@tanstack/react-router";
 import { useRef, useState } from "react";
@@ -47,6 +48,9 @@ export function CampaignComposeForm({ campaignId, initial, portalKind }: Props) 
   const values = useStore(form.store, (state) => state.values);
   const [touched, setTouched] = useState<ReadonlySet<string>>(new Set());
   const [submitError, setSubmitError] = useState<string | null>(null);
+  // After a submit attempt every field error shows, not only the touched ones.
+  const [attempted, setAttempted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   // A campaign created by a failed "send" is reused on retry instead of creating a second one.
   const savedId = useRef(campaignId);
 
@@ -59,10 +63,16 @@ export function CampaignComposeForm({ campaignId, initial, portalKind }: Props) 
   const pending = create.isPending || update.isPending || send.isPending || schedule.isPending;
 
   const errors = validateCampaignForm(values, new Date());
-  const shown = (field: "title" | "body") => (touched.has(field) ? errors[field] : undefined);
+  const shown = (field: "title" | "body") => (attempted || touched.has(field) ? errors[field] : undefined);
   const total = estimate.data?.total;
   const canSend = !pending && !estimate.isFetching && !estimate.error && Boolean(total) && Object.keys(errors).length === 0;
-  const canSave = !pending && !errors.title && !errors.body;
+  // The backend rejects a draft without recipients too.
+  const canSave = !pending && !errors.title && !errors.body && !errors.audience;
+  // A disabled primary always says why.
+  const blockedReason = pending
+    ? null
+    : (errors.audience ?? errors.scheduledAt ?? (errors.title || errors.body ? "Nhập tiêu đề và nội dung (tối đa 2.000 ký tự)" : null)
+      ?? (estimate.error ? "Sửa người nhận theo lỗi ở phần Gửi đến" : !canSend ? (estimate.isFetching ? "Đang ước tính số người nhận…" : "Không có ai trong phạm vi đã chọn") : null));
 
   const set = (patch: Partial<CampaignFormValues>) => {
     for (const [key, value] of Object.entries(patch)) form.setFieldValue(key as keyof CampaignFormValues, value as never);
@@ -83,7 +93,7 @@ export function CampaignComposeForm({ campaignId, initial, portalKind }: Props) 
   async function saveDraft() {
     try {
       const id = await persist();
-      toast.success("Đã lưu nháp");
+      toast.success(campaignId ? "Đã lưu thay đổi" : "Đã lưu nháp");
       if (!campaignId) void navigate({ href: notificationComposePath(portalKind, id), replace: true });
     } catch (error) {
       setSubmitError(messageOf(error));
@@ -91,6 +101,7 @@ export function CampaignComposeForm({ campaignId, initial, portalKind }: Props) 
   }
 
   async function submit() {
+    setSubmitting(true);
     try {
       const id = await persist();
       if (values.sendMode === "schedule") {
@@ -103,6 +114,8 @@ export function CampaignComposeForm({ campaignId, initial, portalKind }: Props) 
       void navigate({ href: notificationsHomePath(portalKind) });
     } catch (error) {
       setSubmitError(messageOf(error));
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -110,7 +123,7 @@ export function CampaignComposeForm({ campaignId, initial, portalKind }: Props) 
   const primaryLabel = values.sendMode === "schedule" ? `Hẹn gửi${count}` : `Gửi${count}`;
 
   return (
-    <Box component="form" noValidate onSubmit={(event) => { event.preventDefault(); if (canSend) void submit(); }}>
+    <Box component="form" noValidate onSubmit={(event) => { event.preventDefault(); setAttempted(true); if (canSend) void submit(); }}>
       <Stack sx={{ gap: 3, pb: 2 }}>
         <CampaignAudienceSection
           draft={values.audience}
@@ -126,7 +139,7 @@ export function CampaignComposeForm({ campaignId, initial, portalKind }: Props) 
         />
         <CampaignChannelFields onChange={set} pushEnabled={values.pushEnabled} requireReadAck={values.requireReadAck} />
         <CampaignScheduleField
-          error={values.scheduledAt ? errors.scheduledAt : undefined}
+          error={errors.scheduledAt}
           mode={values.sendMode}
           onModeChange={(sendMode) => set({ sendMode, ...(sendMode === "schedule" && !values.scheduledAt ? { scheduledAt: defaultScheduleInput(new Date()) } : {}) })}
           onScheduledAtChange={(scheduledAt) => set({ scheduledAt })}
@@ -141,15 +154,22 @@ export function CampaignComposeForm({ campaignId, initial, portalKind }: Props) 
           borderTop: 1,
           bottom: 0,
           display: "flex",
+          flexWrap: "wrap",
           gap: 1,
           justifyContent: { sm: "flex-end" },
-          position: "sticky",
+          // Phones (< md) have a fixed dock over the bottom of the scroll area: the bar stays in the flow there.
+          position: { xs: "static", md: "sticky" },
           py: 1.5,
           zIndex: 1,
         }}
       >
+        {blockedReason ? (
+          <Typography color="text.secondary" id="campaign-blocked-reason" role="status" sx={{ flexBasis: "100%", textAlign: { sm: "right" } }} variant="caption">
+            {blockedReason}
+          </Typography>
+        ) : null}
         <ErgButton disabled={!canSave} onClick={() => void saveDraft()} variant="outlined">Lưu nháp</ErgButton>
-        <ErgButton disabled={!canSend} loading={pending} sx={{ flex: { xs: 1, sm: "none" } }} type="submit" variant="contained">
+        <ErgButton aria-describedby={blockedReason ? "campaign-blocked-reason" : undefined} disabled={!canSend} loading={submitting} sx={{ flex: { xs: 1, sm: "none" } }} type="submit" variant="contained">
           {primaryLabel}
         </ErgButton>
       </Box>

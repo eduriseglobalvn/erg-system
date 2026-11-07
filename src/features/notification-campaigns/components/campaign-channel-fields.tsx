@@ -3,6 +3,8 @@ import Stack from "@mui/material/Stack";
 import Switch from "@mui/material/Switch";
 import Typography from "@mui/material/Typography";
 
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
+
 type Props = {
   onChange: (patch: { pushEnabled?: boolean; requireReadAck?: boolean }) => void;
   pushEnabled: boolean;
@@ -31,7 +33,7 @@ export function CampaignChannelFields({ onChange, pushEnabled, requireReadAck }:
   return (
     <Stack component="section" aria-labelledby="campaign-channels" sx={{ gap: 1 }}>
       <Typography component="h2" id="campaign-channels" variant="subtitle2">Kênh gửi</Typography>
-      <Box sx={{ border: 1, borderColor: "divider", borderRadius: 1.75 }}>
+      <Box sx={{ border: 1, borderColor: "divider", borderRadius: `${ergEnterpriseTokens.radius.card}px` }}>
         <ChannelRow checked disabled hint="Luôn bật" label="Hộp thư trong ứng dụng" />
         <ChannelRow
           checked={pushEnabled}

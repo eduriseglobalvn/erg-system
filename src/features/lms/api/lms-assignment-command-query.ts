@@ -17,7 +17,7 @@ import {
   type UpdateLmsAssignmentRecipientsInput,
 } from "@/features/lms/api/lms-assignment-command-api";
 import { quizReportQueryKeys } from "@/features/quiz-reports";
-import { getDefaultTenantId } from "@/lib/graphql-client";
+import { getDefaultTenantId, type GraphQlPortal } from "@/lib/graphql-client";
 import { getAuthScope } from "@/platform/auth/api/auth-storage";
 import { persistedQueryMeta, QUERY_POLICIES } from "@/lib/query-policy";
 import {
@@ -99,14 +99,14 @@ export type LmsAssignmentOfflineOptions = {
 export function lmsStudentGroupsQueryOptions(
   tenantId: string = getDefaultTenantId(),
   classId?: string | null,
-  options: { accountId?: string | null; enabled?: boolean } = {},
+  options: { accountId?: string | null; enabled?: boolean; portal?: GraphQlPortal } = {},
 ) {
   const accountId = options.accountId?.trim() || resolveLmsAssignmentReadAccountId();
   return {
     enabled: options.enabled ?? true,
     gcTime: LMS_STUDENT_GROUPS_GC_TIME_MS,
     meta: lmsReadPersistMeta(tenantId, accountId),
-    queryFn: ({ signal }: { signal: AbortSignal }) => loadLmsStudentGroups({ classId, tenantId }, signal),
+    queryFn: ({ signal }: { signal: AbortSignal }) => loadLmsStudentGroups({ classId, tenantId, portal: options.portal }, signal),
     queryKey: lmsAssignmentReadQueryKeys.studentGroups(tenantId, accountId, classId),
     staleTime: LMS_STUDENT_GROUPS_STALE_TIME_MS,
   };
@@ -119,7 +119,7 @@ function normalizeLmsAssignmentReadAccountId(accountId?: string | null) {
 export function useLmsStudentGroupsQuery(
   tenantId: string = getDefaultTenantId(),
   classId?: string | null,
-  options: { accountId?: string | null; enabled?: boolean } = {},
+  options: { accountId?: string | null; enabled?: boolean; portal?: GraphQlPortal } = {},
 ) {
   return useQuery(lmsStudentGroupsQueryOptions(tenantId, classId, options));
 }
