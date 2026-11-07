@@ -4,6 +4,7 @@ import { useSearch } from "@tanstack/react-router";
 import { ErgPageHeader } from "@/components/erg-mui/erg-page-header";
 import { DayDetailPage } from "./my-timesheet/day-detail-page";
 import { MyTimesheetPage } from "./my-timesheet/my-timesheet-page";
+import { RequestsScreen } from "./requests/requests-screen";
 import { PunchTodayPage } from "./punch/punch-today-page";
 import { periodOf } from "./punch/punch-format";
 import { PunchVerifyPage } from "./punch/punch-verify-page";
@@ -34,8 +35,9 @@ export function TeacherTimekeepingTimesheetRoute() {
   return date ? <DayDetailPage date={date} /> : <MyTimesheetPage currentPeriod={currentPeriod} period={period} />;
 }
 
+/** G06 list; `?new=`, `?edit=` and `?id=` switch the same route to G07–G10 (see RequestsScreen). */
 export function TeacherTimekeepingRequestsRoute() {
-  return <TimekeepingPageShell description="Nghỉ phép, giải trình, làm việc tại nhà và công tác." title="Đơn từ" />;
+  return <RequestsScreen />;
 }
 
 export function AdminTimekeepingTodayRoute() {
