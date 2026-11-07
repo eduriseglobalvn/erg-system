@@ -7712,6 +7712,8 @@ export interface components {
             /** Format: int32 */
             readonly lateMinutes?: number;
             /** @enum {string} */
+            readonly leaveKind?: "ANNUAL" | "SICK" | "PAID_PERSONAL" | "UNPAID";
+            /** @enum {string} */
             readonly missing?: "IN" | "OUT";
             readonly missingReason?: string;
             readonly out?: components["schemas"]["DayPunchView"];
@@ -8328,6 +8330,8 @@ export interface components {
             /** Format: date */
             readonly date?: string;
             readonly flags?: readonly string[];
+            /** @enum {string} */
+            readonly leaveKind?: "ANNUAL" | "SICK" | "PAID_PERSONAL" | "UNPAID";
             /** @enum {string} */
             readonly status?: "FULL" | "LATE_EARLY" | "HALF" | "LEAVE" | "SICK" | "BUSINESS" | "MISSING_PUNCH" | "ABSENT_UNPAID" | "HOLIDAY" | "OFF";
             readonly units?: number;

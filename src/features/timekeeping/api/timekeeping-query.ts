@@ -68,6 +68,7 @@ export function usePunchMutation() {
   return useMutation({
     networkMode: "always",
     retry: false,
+    meta: { silent: true }, // the punch screens show the failure inline
     mutationFn: ({ input, idempotencyKey }: { input: PunchInput; idempotencyKey: string }) =>
       timekeepingApi.punch(input, idempotencyKey),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: timekeepingKeys.root }),

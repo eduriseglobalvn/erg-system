@@ -1,6 +1,8 @@
 import Box from "@mui/material/Box";
 
 import { ErgPageHeader } from "@/components/erg-mui/erg-page-header";
+import { PunchTodayPage } from "./punch/punch-today-page";
+import { PunchVerifyPage } from "./punch/punch-verify-page";
 
 /** Empty screens with a title; the G/A screens (later tasks) replace the bodies. */
 function TimekeepingPageShell({ title, description }: { title: string; description: string }) {
@@ -12,11 +14,11 @@ function TimekeepingPageShell({ title, description }: { title: string; descripti
 }
 
 export function TeacherTimekeepingHomeRoute() {
-  return <TimekeepingPageShell description="Chấm công hôm nay và lịch sử tháng của bạn." title="Chấm công" />;
+  return <PunchTodayPage />;
 }
 
 export function TeacherTimekeepingPunchRoute() {
-  return <TimekeepingPageShell description="Xác nhận vị trí và chấm vào hoặc ra ca." title="Chấm vào / ra" />;
+  return <PunchVerifyPage />;
 }
 
 export function TeacherTimekeepingTimesheetRoute() {

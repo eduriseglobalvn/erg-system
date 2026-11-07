@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useRef, type InputHTMLAttributes, type RefObject } from "react";
 
+export type CameraFacing = "user" | "environment";
+
 const MAX_EDGE_PX = 1024;
 const JPEG_QUALITY = 0.8;
 
 /** Front-camera selfie. Where getUserMedia is missing, render `<input {...fallbackInputProps} />` instead. */
 export function useCameraCapture(): {
   videoRef: RefObject<HTMLVideoElement | null>;
-  start(): Promise<void>;
+  start(facingMode?: CameraFacing): Promise<void>;
   stop(): void;
   capture(): Promise<Blob>;
   supported: boolean;
@@ -23,9 +25,9 @@ export function useCameraCapture(): {
     if (videoRef.current) videoRef.current.srcObject = null;
   }, []);
 
-  const start = useCallback(async () => {
+  const start = useCallback(async (facingMode: CameraFacing = "user") => {
     stop();
-    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user", width: { ideal: 1280 } }, audio: false });
+    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode, width: { ideal: 1280 } }, audio: false });
     const video = videoRef.current;
     // Unmounted (or no element) while the permission prompt was open: release the camera at once.
     if (!mounted.current || !video) {
