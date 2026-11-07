@@ -53,10 +53,20 @@ export function NotificationDetail({ portal, notificationId, onBack }: Notificat
 
   if (query.isPending && query.fetchStatus !== "idle") return <ContentPendingSkeleton />;
   if (!item) {
+    // Only a 404 (or no id) means the message is gone; anything else is worth a retry.
+    const failed = query.isError && (query.error as { status?: number }).status !== 404;
     return (
       <Box sx={{ display: "grid", gap: 1.5 }}>
         {back}
-        <ErgErrorState title="Không tìm thấy thông báo" description="Thông báo này có thể đã bị xóa hoặc đường dẫn không còn hợp lệ." />
+        {failed ? (
+          <ErgErrorState
+            title="Không tải được thông báo"
+            description="Kiểm tra kết nối rồi thử lại."
+            action={<ErgButton variant="outlined" onClick={() => void query.refetch()}>Thử lại</ErgButton>}
+          />
+        ) : (
+          <ErgErrorState title="Không tìm thấy thông báo" description="Thông báo này có thể đã bị xóa hoặc đường dẫn không còn hợp lệ." />
+        )}
       </Box>
     );
   }
@@ -71,7 +81,7 @@ export function NotificationDetail({ portal, notificationId, onBack }: Notificat
         {priority ? <ErgStatusChip label={priority} tone={priority === "Khẩn" ? "error" : "warning"} sx={{ mb: 1 }} /> : null}
         <Typography variant="h5" component="h1" sx={{ fontWeight: "fontWeightBold" }}>{item.title}</Typography>
         <Typography variant="body2" sx={{ mt: 0.5, color: "text.secondary" }}>
-          {inboxSourceLabel(item)} · {formatDateTimeVi(item.createdAt)}
+          {[inboxSourceLabel(item), formatDateTimeVi(item.createdAt)].filter(Boolean).join(" · ")}
         </Typography>
         <Typography variant="body1" sx={{ mt: 2, whiteSpace: "pre-line", overflowWrap: "anywhere" }}>{item.body || item.description}</Typography>
         {needsAck(item) && !ackedNow ? (
@@ -87,7 +97,7 @@ export function NotificationDetail({ portal, notificationId, onBack }: Notificat
         {ackedAt ? (
           <Typography role="status" variant="body2" sx={{ mt: 3, display: "flex", alignItems: "center", gap: 1, color: "success.main", fontWeight: "fontWeightMedium" }}>
             <CheckCircleRoundedIcon fontSize="small" aria-hidden />
-            {`Đã xác nhận lúc ${formatTimeVi(ackedAt)} ${formatDateVi(ackedAt)}`}
+            {formatTimeVi(ackedAt) ? `Đã xác nhận lúc ${formatTimeVi(ackedAt)} ${formatDateVi(ackedAt)}` : "Đã xác nhận"}
           </Typography>
         ) : null}
       </Box>

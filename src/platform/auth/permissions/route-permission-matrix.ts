@@ -79,7 +79,7 @@ const ADMIN_CONTENT_PERMISSIONS: Record<string, Pick<RoutePermissionEntry, "reso
   "/admin/content/quiz-editor": { resource: "quiz", action: "create", permission: "lms.quiz.create" },
 };
 
-const ADMIN_EXTRA_PERMISSIONS: Record<string, Pick<RoutePermissionEntry, "resource" | "action" | "permission" | "matchChildren">> = {
+const ADMIN_EXTRA_PERMISSIONS: Record<string, Pick<RoutePermissionEntry, "resource" | "action" | "permission" | "alternatePermissions" | "matchChildren">> = {
   "question-types": { resource: "quiz", action: "read", permission: "lms.quiz.read" },
   "settings/permissions": { resource: "permission", action: "read", permission: "rbac.permission.read" },
   "settings/roles": { resource: "role", action: "read", permission: "rbac.role.read" },
@@ -93,6 +93,8 @@ const ADMIN_EXTRA_PERMISSIONS: Record<string, Pick<RoutePermissionEntry, "resour
   "report/cash-flow-report": { resource: "report", action: "read", permission: "operations.manage" },
   "report/pnl-report": { resource: "report", action: "read", permission: "crm.analytics.read" },
   "learning-outcomes": { resource: "learning-outcomes", action: "manage", permission: "learning.outcomes.manage" },
+  // Own inbox (children: $notificationId). Senders without lms.admin land here after composing, so the send permission opens it too.
+  notifications: { resource: "notification", action: "read", permission: "lms.admin", alternatePermissions: ["notification.campaign.send"], matchChildren: true },
   // Children: /admin/notifications/compose/$campaignId.
   "notifications/compose": { resource: "notification.campaign", action: "send", permission: "notification.campaign.send", matchChildren: true },
 };

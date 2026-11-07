@@ -8,7 +8,7 @@ import TodayRoundedIcon from "@mui/icons-material/TodayRounded";
 import type { MenuGroup, MenuItem } from "@/components/portal/ErgPortalLayout";
 import type { ErgMobileDockItem } from "@/components/portal/erg-mobile-dock";
 import { evaluatePermission } from "@/platform/auth/permissions/permission-evaluator";
-import { ROUTE_PERMISSION_MATRIX } from "@/platform/auth/permissions/route-permission-matrix";
+import { ROUTE_PERMISSION_MATRIX, routeAcceptedPermissions } from "@/platform/auth/permissions/route-permission-matrix";
 import { adminPath } from "@/platform/workspaces/workspace-paths";
 
 export type AdminMobileSection = "home" | "calendar" | "schools" | "inbox" | "timekeeping" | "all";
@@ -27,7 +27,7 @@ export const ADMIN_MOBILE_DOCK_ITEMS: ReadonlyArray<ErgMobileDockItem<AdminMobil
 /** Reachable when the matrix has a row for exactly this path (a parent row must not vouch for a child route that is not built) and the session holds its permission. */
 export function canNavigateToAdminPath(path: string, grantedPermissions: readonly string[] = [], deniedPermissions: readonly string[] = []) {
   const entry = ROUTE_PERMISSION_MATRIX.find((candidate) => candidate.workspace === "ADMIN" && candidate.path === path);
-  return Boolean(entry) && evaluatePermission({ permission: entry!.permission, grantedPermissions, deniedPermissions });
+  return Boolean(entry) && routeAcceptedPermissions(entry!).some((permission) => evaluatePermission({ permission, grantedPermissions, deniedPermissions }));
 }
 
 export function visibleAdminDockItems(canAccess: (path: string) => boolean): Array<ErgMobileDockItem<AdminMobileSection>> {

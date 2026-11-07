@@ -38,6 +38,12 @@ describe("route/resource/action permission matrix", () => {
     expect(routePermissionForPath(path, workspace)).toMatchObject({ permission });
   });
 
+  it.each(["/admin/notifications", "/admin/notifications/n1"])("opens the admin inbox %s with lms.admin or the send permission", (path) => {
+    const entry = routePermissionForPath(path, "ADMIN");
+    expect(entry).toMatchObject({ path: "/admin/notifications", permission: "lms.admin", alternatePermissions: ["notification.campaign.send"] });
+    expect(routePermissionForPath("/admin/notifications/compose", "ADMIN")?.alternatePermissions).toBeUndefined();
+  });
+
   it("fails closed for an unknown protected route instead of inventing a permission", () => {
     expect(isProtectedWorkspacePath("/admin/unknown-sensitive-area")).toBe(true);
     expect(routePermissionForPath("/admin/unknown-sensitive-area", "ADMIN")).toBeUndefined();

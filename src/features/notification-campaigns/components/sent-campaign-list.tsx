@@ -55,7 +55,7 @@ function campaignStats(campaign: CampaignResponse) {
 }
 
 function campaignTime(campaign: CampaignResponse) {
-  if (campaign.status === "SCHEDULED") return `Hẹn ${formatDateTimeVi(campaign.scheduledAt)}`;
+  if (campaign.status === "SCHEDULED") return campaign.scheduledAt && formatDateTimeVi(campaign.scheduledAt) ? `Hẹn ${formatDateTimeVi(campaign.scheduledAt)}` : "";
   return formatDateTimeVi(campaign.sentAt ?? campaign.updatedAt ?? campaign.createdAt);
 }
 
@@ -121,7 +121,7 @@ export function LatestSentCard() {
         <CampaignRoundedIcon fontSize="small" />
       </Box>
       <Box sx={{ minWidth: 0 }}>
-        <Typography variant="caption" component="p" sx={{ color: "text.secondary" }}>Gửi gần nhất · {formatDateVi(latest.sentAt)}</Typography>
+        <Typography variant="caption" component="p" sx={{ color: "text.secondary" }}>{["Gửi gần nhất", formatDateVi(latest.sentAt)].filter(Boolean).join(" · ")}</Typography>
         <Typography variant="body2" noWrap sx={{ fontWeight: "fontWeightBold" }}>{latest.title}</Typography>
         <Typography variant="caption" component="p" sx={{ color: "text.secondary" }}>
           {[audienceScopeLabel(latest.audience), `${formatCountVi(latest.recipientCount ?? 0)} người`, `đã xem ${viewedPercent(latest)}%`].filter(Boolean).join(" · ")}

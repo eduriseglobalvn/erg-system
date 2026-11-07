@@ -40,6 +40,11 @@ describe("admin dock visibility", () => {
     expect(ids).toEqual(["schools", "all"]);
   });
 
+  it("shows Hộp thư to a sender without lms.admin", () => {
+    const ids = visibleAdminDockItems((path) => canNavigateToAdminPath(path, ["notification.campaign.send"])).map((item) => item.id);
+    expect(ids).toEqual(["inbox", "all"]);
+  });
+
   it("labels the first tab Trang chủ", () => {
     expect(ADMIN_MOBILE_DOCK_ITEMS[0]).toMatchObject({ id: "home", label: "Trang chủ" });
   });

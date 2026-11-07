@@ -17,8 +17,14 @@ import type { NotificationPortal } from "../api/notification-types";
 import { filterInbox, inboxFiltersFor, type InboxFilter, type InboxItem as InboxItemData, type InboxWorkspace } from "./inbox-filters";
 import { InboxItem } from "./inbox-item";
 
-// shortcut: filters run on the newest 50 messages only; add server-side filters/paging when inboxes grow past that.
 const INBOX_SIZE = 50;
+// shortcut: the API has no ack filter, so "Cần xử lý" scans the newest 100 (the server page cap); add a server filter when that is not enough.
+const ACTION_SCAN_SIZE = 100;
+
+const EMPTY_LABEL: Partial<Record<InboxFilter, string>> = {
+  UNREAD: "Không còn thông báo chưa đọc.",
+  ACTION: "Không có thông báo cần xử lý trong các tin gần đây.",
+};
 
 const COMPOSE_LABEL: Record<InboxWorkspace, string> = { ADMIN: "Gửi thông báo", TEACHER: "Gửi lớp", STUDENT: "" };
 
@@ -35,13 +41,16 @@ type InboxListProps = {
 export function InboxList({ portal, workspace, onOpen, title, onCompose }: InboxListProps) {
   const filters = inboxFiltersFor(workspace);
   const [filter, setFilter] = useState<InboxFilter>("ALL");
+  // Unread comes from the server (status=unread), so it is right past the first page; SCHOOL/SYSTEM split the newest page.
+  const status = filter === "UNREAD" ? "unread" : "all";
+  const size = filter === "ACTION" ? ACTION_SCAN_SIZE : INBOX_SIZE;
   const query = useQuery({
-    queryKey: notificationQueryKeys.inbox(portal, "all", 0, INBOX_SIZE, resolveNotificationQueryScope(portal)),
-    queryFn: ({ signal }) => fetchNotificationFeed({ portal, status: "all", page: 0, size: INBOX_SIZE }, signal),
+    queryKey: notificationQueryKeys.inbox(portal, status, 0, size, resolveNotificationQueryScope(portal)),
+    queryFn: ({ signal }) => fetchNotificationFeed({ portal, status, page: 0, size }, signal),
     staleTime: QUERY_POLICIES.realtime.staleTime,
     gcTime: QUERY_POLICIES.realtime.gcTime,
   });
-  const items = filterInbox(query.data?.items ?? [], filter);
+  const items = filterInbox(query.data?.items ?? [], filter === "UNREAD" ? "ALL" : filter);
   const composeLabel = COMPOSE_LABEL[workspace];
 
   return (
@@ -81,7 +90,7 @@ export function InboxList({ portal, workspace, onOpen, title, onCompose }: Inbox
           {items.map((item) => <InboxItem key={item.id} item={item} onOpen={onOpen} />)}
         </List>
       ) : (
-        <ErgEmptyState title={filter === "UNREAD" ? "Không còn thông báo chưa đọc." : "Chưa có thông báo."} />
+        <ErgEmptyState title={EMPTY_LABEL[filter] ?? "Chưa có thông báo."} />
       )}
     </Box>
   );
