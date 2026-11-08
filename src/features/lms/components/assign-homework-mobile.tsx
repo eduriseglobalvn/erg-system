@@ -4,7 +4,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 
 import { ErgButton, ErgIconButton } from "@/components/erg-mui/erg-actions";
-import { ergMobileDockClearance } from "@/components/portal/erg-mobile-dock";
+import { ergMobileDockAnchor } from "@/components/portal/erg-mobile-dock";
 import { countAssignRecipients } from "@/features/lms/components/assign-homework-mobile/count-assign-recipients";
 import { ResourceSection } from "@/features/lms/components/assign-homework-mobile/resource-section";
 import { OptionsSection, ScheduleSection } from "@/features/lms/components/assign-homework-mobile/schedule-options-sections";
@@ -38,7 +38,7 @@ export function AssignHomeworkMobile({ model }: { model: AssignHomeworkControlle
           bgcolor: "background.paper",
           borderColor: "divider",
           borderTop: 1,
-          bottom: ergMobileDockClearance(8),
+          bottom: ergMobileDockAnchor(8),
           left: 0,
           position: "fixed",
           pb: 1.5,

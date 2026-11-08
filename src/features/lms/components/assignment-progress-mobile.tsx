@@ -11,7 +11,7 @@ import Typography from "@mui/material/Typography";
 import { ErgButton, ErgIconButton } from "@/components/erg-mui/erg-actions";
 import { ErgEmptyState, ErgErrorState } from "@/components/erg-mui/erg-feedback";
 import { ergSegmentedTabsSx } from "@/components/erg-mui/erg-tabs";
-import { ergMobileDockClearance } from "@/components/portal/erg-mobile-dock";
+import { ergMobileDockAnchor } from "@/components/portal/erg-mobile-dock";
 import type { AssignmentRun } from "@/domain/school/classroom-types";
 import { ProgressRing } from "@/features/lms/components/assignment-progress-mobile/progress-ring";
 import { type ProgressMobileRow, ProgressStudentRow } from "@/features/lms/components/assignment-progress-mobile/progress-student-row";
@@ -106,7 +106,7 @@ export function AssignmentProgressMobile({ classLabel, counts, onBack, rows, run
             bgcolor: "background.paper",
             borderColor: "divider",
             borderTop: 1,
-            bottom: ergMobileDockClearance(8),
+            bottom: ergMobileDockAnchor(8),
             left: 0,
             position: "fixed",
             pb: 1.5,

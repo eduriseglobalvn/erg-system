@@ -1,5 +1,5 @@
 import HomeIcon from "@mui/icons-material/Home";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { ErgMobileDock, formatDockBadge, type ErgMobileDockItem } from "./erg-mobile-dock";
@@ -86,5 +86,41 @@ describe("ErgMobileDock", () => {
     fireEvent.click(more);
     expect(onOpenSheet).toHaveBeenCalledTimes(1);
     expect(onNavigate).not.toHaveBeenCalled();
+  });
+});
+
+describe("dock auto-hide", () => {
+  function scrollTo(scroller: HTMLElement, top: number) {
+    Object.defineProperty(scroller, "scrollTop", { configurable: true, value: top });
+    fireEvent.scroll(scroller);
+  }
+  const dockVisibility = () => getComputedStyle(document.querySelector("nav[aria-label=\"Điều hướng test\"]")!).visibility;
+
+  it("hides on scroll down, returns on scroll up and near the top", () => {
+    const scroller = document.body.appendChild(document.createElement("main"));
+    setup();
+    scrollTo(scroller, 100);
+    scrollTo(scroller, 160);
+    expect(dockVisibility()).toBe("hidden");
+    expect(document.documentElement.style.getPropertyValue("--erg-dock-lift")).not.toBe("");
+    scrollTo(scroller, 130);
+    scrollTo(scroller, 100);
+    expect(dockVisibility()).toBe("visible");
+    expect(document.documentElement.style.getPropertyValue("--erg-dock-lift")).toBe("");
+    scrollTo(scroller, 300);
+    scrollTo(scroller, 400);
+    scrollTo(scroller, 10);
+    expect(dockVisibility()).toBe("visible");
+    scroller.remove();
+  });
+
+  it("hides while a text field is focused (on-screen keyboard)", () => {
+    setup();
+    const field = document.body.appendChild(document.createElement("textarea"));
+    act(() => field.focus());
+    expect(dockVisibility()).toBe("hidden");
+    act(() => field.blur());
+    expect(dockVisibility()).toBe("visible");
+    field.remove();
   });
 });

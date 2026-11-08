@@ -1,10 +1,11 @@
-import type { ComponentType } from "react";
+import { useEffect, type ComponentType } from "react";
 import Box from "@mui/material/Box";
 import ButtonBase from "@mui/material/ButtonBase";
 import type { Breakpoint } from "@mui/material/styles";
 import type { SvgIconProps } from "@mui/material/SvgIcon";
 import Typography from "@mui/material/Typography";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
+import { useDockAutohide } from "./use-dock-autohide";
 
 const { color, motion, radius, shadow, size } = ergEnterpriseTokens;
 
@@ -17,6 +18,14 @@ const DOCK_BOTTOM = "max(8px, env(safe-area-inset-bottom, 0px) - 22px)";
 /** Distance from the viewport bottom to `gap` px above the dock: scroll regions pad by it, floating UI sits on it. */
 export function ergMobileDockClearance(gap = 24): string {
   return `calc(${ERG_MOBILE_DOCK_HEIGHT + gap}px + ${DOCK_BOTTOM})`;
+}
+
+/**
+ * Bottom offset for UI that floats or sticks above the dock. Unlike the static padding above it follows the dock:
+ * when the dock slides away (scrolling down, keyboard open) the variable collapses and the UI drops to the screen edge.
+ */
+export function ergMobileDockAnchor(gap = 24): string {
+  return `calc(var(--erg-dock-lift, ${ERG_MOBILE_DOCK_HEIGHT}px) + ${gap}px + ${DOCK_BOTTOM})`;
 }
 
 /** Safari 15.0–15.3 drop `100dvh` entirely; shells spread this next to their dvh heights. */
@@ -58,6 +67,16 @@ export function ErgMobileDock<TId extends string>({
   /** Breakpoint from which the dock is hidden. */
   hideAt: Breakpoint | "never";
 }) {
+  const hidden = useDockAutohide(activeId);
+  useEffect(() => {
+    const root = document.documentElement;
+    if (hidden) root.style.setProperty("--erg-dock-lift", `max(0px, env(safe-area-inset-bottom, 0px) - ${DOCK_BOTTOM})`);
+    else root.style.removeProperty("--erg-dock-lift");
+    return () => {
+      root.style.removeProperty("--erg-dock-lift");
+    };
+  }, [hidden]);
+  const slide = `transform ${motion.duration.base}ms ${motion.easing.emphasized}, opacity ${motion.duration.base}ms ${motion.easing.standard}, visibility 0s linear ${hidden ? motion.duration.base : 0}ms`;
   const shown = (value: string) => (hideAt === "never" ? value : { xs: value, [hideAt]: "none" });
   return (
     <>
@@ -71,9 +90,12 @@ export function ErgMobileDock<TId extends string>({
           display: shown("block"),
           height: ergMobileDockClearance(),
           left: 0,
+          opacity: hidden ? 0 : 1,
           pointerEvents: "none",
           position: "fixed",
           right: 0,
+          transition: slide,
+          visibility: hidden ? "hidden" : "visible",
           zIndex: (theme) => theme.zIndex.appBar,
         }}
       />
@@ -97,6 +119,9 @@ export function ErgMobileDock<TId extends string>({
           p: "5px",
           position: "fixed",
           right: DOCK_SIDE_GUTTER,
+          transform: hidden ? `translateY(calc(100% + ${DOCK_BOTTOM} + 16px))` : "none",
+          transition: slide,
+          visibility: hidden ? "hidden" : "visible",
           width: "fit-content",
           zIndex: (theme) => theme.zIndex.appBar,
         }}

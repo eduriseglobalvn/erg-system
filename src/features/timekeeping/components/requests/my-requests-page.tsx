@@ -7,7 +7,7 @@ import { useState } from "react";
 
 import { ErgButton, ErgIconButton } from "@/components/erg-mui/erg-actions";
 import { ErgEmptyState, ErgErrorState, ErgSkeleton } from "@/components/erg-mui/erg-feedback";
-import { ergMobileDockClearance } from "@/components/portal/erg-mobile-dock";
+import { ergMobileDockAnchor } from "@/components/portal/erg-mobile-dock";
 import { todayInput } from "@/domain/formatters/format-date";
 import { teacherPath } from "@/platform/workspaces/workspace-paths";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
@@ -89,7 +89,7 @@ export function MyRequestsPage() {
         onClick={() => nav.toPicker()}
         size="large"
         startIcon={<AddIcon />}
-        sx={{ borderRadius: `${ergEnterpriseTokens.radius.chip}px`, bottom: ergMobileDockClearance(16), boxShadow: ergEnterpriseTokens.shadow.float, justifySelf: "end", position: "sticky", zIndex: 4 }}
+        sx={{ borderRadius: `${ergEnterpriseTokens.radius.chip}px`, bottom: ergMobileDockAnchor(16), boxShadow: ergEnterpriseTokens.shadow.float, justifySelf: "end", position: "sticky", zIndex: 4 }}
         variant="contained"
       >
         Tạo đơn

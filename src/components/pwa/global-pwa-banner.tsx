@@ -4,7 +4,7 @@ import Box from "@mui/material/Box";
 import Snackbar from "@mui/material/Snackbar";
 import Typography from "@mui/material/Typography";
 import { ErgButton } from "@/components/erg-mui/erg-actions";
-import { ergMobileDockClearance } from "@/components/portal/erg-mobile-dock";
+import { ergMobileDockAnchor } from "@/components/portal/erg-mobile-dock";
 import { OutboxQuarantineNotice } from "@/components/pwa/outbox-quarantine-notice";
 import { useServiceWorkerUpdate } from "@/hooks/use-service-worker-update";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
@@ -49,7 +49,7 @@ export function GlobalPwaBanner() {
       anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       sx={{
         // Phones: sit above the floating dock; from sm up there is no dock.
-        bottom: { xs: ergMobileDockClearance(12), sm: "calc(env(safe-area-inset-bottom, 0px) + 24px)" },
+        bottom: { xs: ergMobileDockAnchor(12), sm: "calc(env(safe-area-inset-bottom, 0px) + 24px)" },
         left: "50%",
         right: "auto",
         transform: "translateX(-50%)",
