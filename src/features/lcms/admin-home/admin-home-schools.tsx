@@ -71,11 +71,16 @@ function SchoolRow({ divider, row, onOpen }: { divider: boolean; row: AdminHomeS
         "&:hover": { bgcolor: t.color.surfaceMuted },
       }}
     >
-      <Box sx={{ minWidth: 0 }}>
-        <Typography noWrap variant="subtitle2">{row.name}</Typography>
-        <Typography color="text.secondary" component="p" sx={{ display: { md: "none" } }} variant="caption">
-          {row.studentCount} người học · {row.classCount} lớp
-        </Typography>
+      <Box sx={{ alignItems: "center", display: "flex", gap: 1.5, minWidth: 0 }}>
+        <Box aria-hidden sx={{ alignItems: "center", bgcolor: t.color.primarySofter, borderRadius: `${t.radius.sm}px`, color: "primary.dark", display: { xs: "flex", md: "none" }, flexShrink: 0, height: 28, justifyContent: "center", typography: "caption", fontWeight: "fontWeightBold", width: 28 }}>
+          {schoolInitials(row.name)}
+        </Box>
+        <Box sx={{ minWidth: 0 }}>
+          <Typography noWrap variant="subtitle2">{row.name}</Typography>
+          <Typography color="text.secondary" component="p" sx={{ display: { md: "none" } }} variant="caption">
+            {row.classCount} lớp · {row.studentCount} HS
+          </Typography>
+        </Box>
       </Box>
       <Box component="span" sx={{ alignItems: "center", bgcolor: status.tint.bg, borderRadius: `${t.radius.chip}px`, color: status.tint.color, display: "inline-flex", gap: 0.75, justifySelf: "start", px: 1.25, py: 0.25, typography: "caption", whiteSpace: "nowrap" }}>
         <Box component="span" sx={{ bgcolor: status.tint.dot, borderRadius: "50%", height: 6, width: 6 }} />
@@ -96,4 +101,10 @@ function SchoolRow({ divider, row, onOpen }: { divider: boolean; row: AdminHomeS
       <ChevronRightRoundedIcon sx={{ ...desktopOnly, color: "text.disabled" }} />
     </ButtonBase>
   );
+}
+
+/** "THCS Cầu Giấy" -> "CG": initials of the last two words, skipping the school-level prefix. */
+export function schoolInitials(name: string) {
+  const words = name.trim().split(/\s+/).filter(Boolean);
+  return words.slice(-2).map((word) => word[0]).join("").toUpperCase() || "?";
 }

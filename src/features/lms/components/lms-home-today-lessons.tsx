@@ -95,9 +95,9 @@ export function TodayLessonsList({
   );
 }
 
-export function TodayLessonsPanel({ onOpenSchedule }: { onOpenSchedule: () => void }) {
+/** Today's published lessons for the signed-in teacher (shared by the desktop panel and the mobile home). */
+export function useTodayLessons() {
   const { session } = useAuthSession("lms");
-  const navigate = useNavigate();
   const tenantId = session?.tenantId ?? "";
   const date = todayInput();
   const input: MyTeachingCalendarInput = { from: date, statuses: ["PUBLISHED"], tenantId, to: date, viewMode: "ALL" };
@@ -110,15 +110,26 @@ export function TodayLessonsPanel({ onOpenSchedule }: { onOpenSchedule: () => vo
     retry: false,
     staleTime: TEACHING_CALENDAR_WORKSPACE_STALE_TIME_MS,
   });
-  const today = formatDateVi(date);
+  return {
+    date,
+    events: query.data?.events ?? [],
+    isError: query.isError,
+    isLoading: query.isLoading && Boolean(tenantId),
+  };
+}
+
+export function TodayLessonsPanel({ onOpenSchedule }: { onOpenSchedule: () => void }) {
+  const navigate = useNavigate();
+  const lessons = useTodayLessons();
+  const today = formatDateVi(lessons.date);
 
   return (
     <Box sx={{ bgcolor: "background.paper", border: 1, borderColor: "divider", borderRadius: 2, minWidth: 0, p: 2 }}>
       <Typography component="h2" sx={{ mb: 1.5 }} variant="subtitle1">Hôm nay{today ? ` · ${today}` : ""}</Typography>
       <TodayLessonsList
-        error={query.isError}
-        events={query.data?.events ?? []}
-        isLoading={query.isLoading && Boolean(tenantId)}
+        error={lessons.isError}
+        events={lessons.events}
+        isLoading={lessons.isLoading}
         onNavigate={(href) => void navigate({ href })}
         onOpenSchedule={onOpenSchedule}
       />

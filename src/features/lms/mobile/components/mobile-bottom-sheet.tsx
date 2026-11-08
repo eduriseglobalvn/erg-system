@@ -10,12 +10,15 @@ import Typography from "@mui/material/Typography";
 export function MobileBottomSheet({
   children,
   description,
+  header,
   open,
   title,
   onOpenChange,
 }: {
   children: ReactNode;
   description?: string;
+  /** Replaces the title block (the title still names the dialog for assistive tech). */
+  header?: ReactNode;
   open: boolean;
   title: string;
   onOpenChange: (open: boolean) => void;
@@ -31,8 +34,9 @@ export function MobileBottomSheet({
       slotProps={{
         backdrop: { sx: { backdropFilter: "blur(2px)", bgcolor: "rgba(15,23,42,0.45)" } },
         paper: {
-          "aria-describedby": description ? descriptionId : undefined,
-          "aria-labelledby": titleId,
+          "aria-describedby": description && !header ? descriptionId : undefined,
+          "aria-label": header ? title : undefined,
+          "aria-labelledby": header ? undefined : titleId,
           role: "dialog",
           sx: {
             border: "1px solid",
@@ -48,10 +52,12 @@ export function MobileBottomSheet({
     >
       <Box sx={{ bgcolor: "text.disabled", borderRadius: 4, height: 6, mt: 1.5, mx: "auto", opacity: 0.45, width: 48 }} />
       <Stack direction="row" spacing={1.5} sx={{ alignItems: "flex-start", justifyContent: "space-between", minHeight: 64, px: 2, py: 1.5 }}>
-        <Box sx={{ minWidth: 0 }}>
-          <Typography id={titleId} noWrap sx={{ fontSize: 15, fontWeight: 600 }}>{title}</Typography>
-          {description ? <Typography color="text.secondary" id={descriptionId} sx={{ fontSize: 12, fontWeight: 600, mt: 0.5 }}>{description}</Typography> : null}
-        </Box>
+        {header ?? (
+          <Box sx={{ minWidth: 0 }}>
+            <Typography id={titleId} noWrap variant="h4">{title}</Typography>
+            {description ? <Typography color="text.secondary" component="div" id={descriptionId} sx={{ mt: 0.25 }} variant="caption">{description}</Typography> : null}
+          </Box>
+        )}
         <IconButton aria-label="Đóng" onClick={() => onOpenChange(false)} sx={{ bgcolor: "background.default", border: "1px solid", borderColor: "divider", flexShrink: 0 }}>
           <CloseRoundedIcon />
         </IconButton>

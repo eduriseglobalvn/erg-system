@@ -2,7 +2,7 @@ import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { ADMIN_MENU_GROUPS } from "@/features/lcms/admin-content/admin-content-menu";
-import { AdminAllFunctionsSheet } from "@/features/lcms/admin-all-functions-sheet";
+import { AdminAllFunctionsSheet, toSections } from "@/features/lcms/admin-all-functions-sheet";
 import { canNavigateToAdminPath, filterAdminMenuGroups } from "@/features/lcms/admin-mobile-dock-config";
 
 function setup(canAccess: (path: string) => boolean = () => true) {
@@ -62,5 +62,17 @@ describe("AdminAllFunctionsSheet", () => {
     setup((path) => canNavigateToAdminPath(path, ["lms.admin"], ["users.manage"]));
     expect(screen.queryByText("Nhân sự")).toBeNull();
     expect(screen.getByRole("button", { name: "Trang chủ" })).toBeInTheDocument();
+  });
+});
+
+describe("toSections", () => {
+  it("groups top-level leaves, turns branches into sections and reads count badges apart from tags", () => {
+    const sections = toSections([
+      { label: "", items: [{ label: "Trang chủ", path: "/admin" }, { badge: "beta", label: "Lịch", path: "/admin/calendar" }] },
+      { label: "", items: [{ label: "Chấm công", children: [{ badge: "7", label: "Duyệt đơn", path: "/admin/a" }] }] },
+    ]);
+    expect(sections.map((section) => section.label)).toEqual(["Tổng quan", "Chấm công"]);
+    expect(sections[0].items[1]).toMatchObject({ badge: undefined, tag: "beta" });
+    expect(sections[1].items[0]).toMatchObject({ badge: "7", tag: undefined, tone: "success" });
   });
 });

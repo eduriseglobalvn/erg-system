@@ -993,19 +993,11 @@
   },
   "src/features/lms/mobile/components/lms-mobile-shell.tsx": {
     "hex": 0,
-    "font": 7
+    "font": 4
   },
   "src/features/lms/mobile/components/lms-pwa-setup-sheet.tsx": {
     "hex": 0,
     "font": 15
-  },
-  "src/features/lms/mobile/components/lms-scope-sheet.tsx": {
-    "hex": 0,
-    "font": 11
-  },
-  "src/features/lms/mobile/components/mobile-bottom-sheet.tsx": {
-    "hex": 0,
-    "font": 4
   },
   "src/features/lms/weekly-class-log/components/weekly-class-log-summary.tsx": {
     "hex": 0,

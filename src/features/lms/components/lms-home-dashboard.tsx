@@ -12,16 +12,12 @@ import { ErgEmptyState } from "@/components/erg-mui/erg-feedback";
 import type { AssignmentRun, ClassroomSnapshot } from "@/domain/school/classroom-types";
 import { TodayLessonsPanel } from "@/features/lms/components/lms-home-today-lessons";
 import { formatDateVi, todayInput } from "@/domain/formatters/format-date";
-
-export function greetingFor(hour: number) {
-  if (hour < 11) return "Chào buổi sáng";
-  if (hour < 14) return "Chào buổi trưa";
-  if (hour < 18) return "Chào buổi chiều";
-  return "Chào buổi tối";
-}
+import { greetingFor, LmsHomeMobile } from "@/features/lms/components/lms-home-mobile";
 
 export function LmsHomeDashboard({
+  canPunch = false,
   classes = [],
+  mobile = false,
   runs,
   selectedClass,
   selectedSchoolName,
@@ -29,12 +25,18 @@ export function LmsHomeDashboard({
   unreadNotificationCount,
   onAssign,
   onClassChange,
+  onNavigate,
+  onOpenClassLog,
   onOpenHomework,
   onOpenNotifications,
   onOpenProgress,
   onOpenSchedule,
+  onOpenTimekeeping,
 }: {
+  canPunch?: boolean;
   classes?: ClassroomSnapshot[];
+  /** Phone layout (design N1); the desktop grid below is unchanged. */
+  mobile?: boolean;
   runs: AssignmentRun[];
   selectedClass?: ClassroomSnapshot;
   selectedSchoolName: string;
@@ -42,10 +44,13 @@ export function LmsHomeDashboard({
   unreadNotificationCount: number;
   onAssign: () => void;
   onClassChange?: (classId: string) => void;
+  onNavigate?: (href: string) => void;
+  onOpenClassLog?: () => void;
   onOpenHomework: () => void;
   onOpenNotifications?: () => void;
   onOpenProgress?: () => void;
   onOpenSchedule: () => void;
+  onOpenTimekeeping?: () => void;
 }) {
   const [classMenuAnchor, setClassMenuAnchor] = useState<HTMLElement | null>(null);
   const activeRuns = runs.slice(0, 3);
@@ -54,6 +59,24 @@ export function LmsHomeDashboard({
     : null;
   const supportCount = selectedClass?.riskStudents ?? activeRuns.reduce((sum, run) => sum + run.needsReviewCount, 0);
   const today = formatDateVi(todayInput());
+
+  if (mobile && onNavigate) {
+    return (
+      <LmsHomeMobile
+        canPunch={canPunch}
+        runsOpen={runs.length}
+        supportCount={supportCount}
+        teacherName={teacherName}
+        onAssign={onAssign}
+        onNavigate={onNavigate}
+        onOpenClassLog={onOpenClassLog ?? onOpenSchedule}
+        onOpenHomework={onOpenHomework}
+        onOpenProgress={onOpenProgress ?? onOpenHomework}
+        onOpenSchedule={onOpenSchedule}
+        onOpenTimekeeping={onOpenTimekeeping ?? onOpenSchedule}
+      />
+    );
+  }
 
   return (
     <Box sx={{ bgcolor: "background.default", minHeight: "100%", px: { xs: 2, md: 4 }, py: { xs: 2, md: 3 } }}>

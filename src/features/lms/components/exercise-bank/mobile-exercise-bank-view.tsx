@@ -21,6 +21,7 @@ import {
 } from "./exercise-bank-model";
 import type { ExerciseBankController } from "./use-exercise-bank-controller";
 import { ergMobileDockClearance } from "@/components/portal/erg-mobile-dock";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 export function MobileExerciseBankView({
   controller,
@@ -40,15 +41,15 @@ export function MobileExerciseBankView({
 
   return (
     <Box sx={{ minHeight: "100%", bgcolor: "background.default", px: 1.5, pb: 2, pt: 1.5, color: "text.primary" }}>
-      <Paper component="section" variant="outlined" sx={{ ...cardSx, p: 2 }}>
-        <Typography variant="body2" sx={{ color: "primary.main", fontWeight: "fontWeightBold" }}>Kho bài tập</Typography>
-        <Typography variant="h3" component="h1" sx={{ mt: 0.5 }}>Chọn bài và giao nhanh</Typography>
-        <Typography variant="body2" sx={{ mt: 0.5, color: "text.secondary", fontWeight: "fontWeightMedium" }}>{controller.filteredExercises.length} kết quả phù hợp bộ lọc hiện tại</Typography>
+      {/* Design N9: plain title, search and one scrolling chip row; no hero card. */}
+      <Box component="section">
+        <Typography variant="h1">Kho luyện tập</Typography>
+        <Typography variant="caption" component="p" sx={{ mt: 0.25, color: "text.secondary" }}>{controller.filteredExercises.length} bài phù hợp bộ lọc</Typography>
         <ErgSearchField
           value={controller.searchTerm}
           onChange={(event) => controller.setSearchTerm(event.target.value)}
-          placeholder="Tìm bài, môn, tag"
-          sx={{ mt: 2, "& .MuiOutlinedInput-root": { height: 48 } }}
+          placeholder="Tìm theo bài, môn, tag"
+          sx={{ mt: 1.5, "& .MuiOutlinedInput-root": { bgcolor: "background.paper", height: 46 } }}
         />
         <Box sx={{ mt: 1.5, display: "flex", gap: 1, overflowX: "auto", pb: 0.5, scrollbarWidth: "none" }}>
           {statusTabs.map((tab) => {
@@ -59,7 +60,7 @@ export function MobileExerciseBankView({
                 variant="outlined"
                 onClick={() => controller.setStatusFilter(tab.id)}
                 sx={{
-                  height: 40,
+                  height: 36,
                   flexShrink: 0,
                   borderRadius: 999,
                   px: 2,
@@ -73,13 +74,13 @@ export function MobileExerciseBankView({
               </Button>
             );
           })}
+          {onOpenPortable ? (
+            <Button variant="outlined" onClick={onOpenPortable} sx={{ flexShrink: 0, height: 36, borderRadius: 999, px: 2, borderColor: "divider", color: "text.secondary", fontWeight: "fontWeightBold" }}>
+              Gói offline
+            </Button>
+          ) : null}
         </Box>
-        {onOpenPortable ? (
-          <Button variant="outlined" onClick={onOpenPortable} sx={{ mt: 1.5, height: 40, borderRadius: 999, px: 2, borderColor: "divider", color: "text.primary", fontWeight: "fontWeightBold" }}>
-            Gói offline
-          </Button>
-        ) : null}
-      </Paper>
+      </Box>
 
       <Box sx={{ mt: 1.5, display: "grid", gap: 1.5 }}>
         {controller.filteredExercises.map((exercise) => (
@@ -87,21 +88,21 @@ export function MobileExerciseBankView({
             <ButtonBase onClick={() => controller.setSelectedExerciseId(exercise.id)} sx={{ display: "block", width: "100%", textAlign: "left" }}>
               <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 1.5 }}>
                 <Box sx={{ minWidth: 0 }}>
-                  <Typography variant="h5" component="h2" sx={lineClamp2Sx}>{exercise.title}</Typography>
-                  <Typography variant="body2" sx={{ mt: 0.5, color: "text.secondary", fontWeight: "fontWeightBold" }}>{exercise.subject} · {exercise.level}</Typography>
+                  <Typography variant="subtitle1" component="h2" sx={lineClamp2Sx}>{exercise.title}</Typography>
+                  <Typography variant="caption" component="p" sx={{ mt: 0.25, color: "text.secondary" }}>{exercise.subject} · {exercise.level}</Typography>
                 </Box>
                 <Chip label={statusLabels[exercise.status]} size="small" {...chipPropsForTone(statusTones[exercise.status])} sx={{ flexShrink: 0, textTransform: "none", letterSpacing: "normal" }} />
               </Box>
-              <Typography variant="caption" component="p" sx={{ mt: 1.5, color: "text.secondary", fontWeight: "fontWeightBold" }}>
+              <Typography variant="caption" component="p" sx={{ mt: 1, color: "text.secondary" }}>
                 {[typeLabels[exercise.type], difficultyLabels[exercise.difficulty], `${exercise.durationMinutes} phút`, `${exercise.questionCount} câu`, formatDateVi(exercise.updatedAt) && `Cập nhật ${formatDateVi(exercise.updatedAt)}`].filter(Boolean).join(" · ")}
               </Typography>
             </ButtonBase>
-            <Box sx={{ mt: 2, display: "flex", gap: 1 }}>
-              <Button variant="outlined" startIcon={<VisibilityOutlinedIcon fontSize="small" />} onClick={() => controller.setSelectedExerciseId(exercise.id)} sx={{ ...cardActionSx, borderColor: "divider", color: "text.primary" }}>
-                Xem
+            <Box sx={{ mt: 1.5, display: "flex", gap: 0.5, justifyContent: "flex-end" }}>
+              <Button variant="text" size="small" startIcon={<VisibilityOutlinedIcon fontSize="small" />} onClick={() => controller.setSelectedExerciseId(exercise.id)} sx={{ color: "primary.main", minHeight: 36 }}>
+                Xem trước
               </Button>
-              <Button variant="outlined" color="primary" startIcon={<SendOutlinedIcon fontSize="small" />} onClick={() => onAssign(exercise.title)} sx={cardActionSx}>
-                Giao nhanh
+              <Button variant="outlined" size="small" startIcon={<SendOutlinedIcon fontSize="small" />} onClick={() => onAssign(exercise.title)} sx={{ minHeight: 36 }}>
+                Giao
               </Button>
             </Box>
           </Paper>
@@ -140,6 +141,6 @@ export function MobileExerciseBankView({
   );
 }
 
-const cardSx = { borderRadius: 3, bgcolor: "background.paper", boxShadow: 2 } as const;
-const cardActionSx = { height: 44, minWidth: 0, flex: 1, borderRadius: 2, px: 1, fontWeight: "fontWeightBold" } as const;
+// Cards are border-only (CLAUDE.md); radius.card = 14.
+const cardSx = { borderRadius: `${ergEnterpriseTokens.radius.card}px`, bgcolor: "background.paper", boxShadow: "none" } as const;
 const lineClamp2Sx = { display: "-webkit-box", overflow: "hidden", WebkitBoxOrient: "vertical", WebkitLineClamp: 2 } as const;

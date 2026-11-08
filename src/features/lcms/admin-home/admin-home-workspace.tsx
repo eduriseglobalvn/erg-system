@@ -1,4 +1,5 @@
 import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
+import UploadRoundedIcon from "@mui/icons-material/UploadRounded";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -30,8 +31,8 @@ export function AdminHomeWorkspace({ tenantId }: { tenantId: string }) {
   return (
     <Box sx={{ display: "grid", gap: 2.5, maxWidth: 1280, mx: "auto", width: "100%" }}>
       <ErgPageHeader
-        description={`${WEEKDAYS[today.getDay()]}, ${formatDateVi(today)} · Tổng quan các trường liên kết, người học và nhân sự`}
-        primaryAction={<ErgButton onClick={() => go("/schools/imports")}>Nhập dữ liệu</ErgButton>}
+        description={`${WEEKDAYS[today.getDay()]}, ${formatDateVi(today)}`}
+        primaryAction={<ErgButton leadingIcon={<UploadRoundedIcon />} onClick={() => go("/schools/imports")}>Nhập dữ liệu</ErgButton>}
         secondaryActions={[
           { label: "Thêm trường", onClick: () => go("/schools/list") },
           { label: "Tạo tài khoản nhân sự", onClick: () => go("/employees") },
@@ -51,6 +52,7 @@ export function AdminHomeWorkspace({ tenantId }: { tenantId: string }) {
           onOpenAll={() => go("/schools/list")}
           rows={summary.schools}
         />
+        {/* Phones put the queue first (design N4); desktop keeps it in the side column. */}
         <TaskQueue loading={loading || detailsLoading} onOpen={go} tasks={summary.tasks} />
       </Box>
     </Box>
@@ -62,12 +64,12 @@ function KpiStrip({ loading, summary }: { loading: boolean; summary: AdminHomeSu
   const items = [
     { label: "Trường liên kết", value: summary.schoolCount, note: `${summary.activeSchoolCount} đang vận hành` },
     { label: "Người học", value: summary.studentCount, note: `Trong ${summary.classCount} lớp` },
-    { label: "Đã xếp môn", value: `${placedPercent}%`, note: `${summary.placedStudents}/${summary.studentCount} học sinh` },
     {
       label: "Nhân sự",
       value: summary.staffCount ?? "—",
       note: summary.staffNeverSignedIn ? `${summary.staffNeverSignedIn} chưa đăng nhập` : "Tài khoản trong hệ thống",
     },
+    { label: "Đã xếp môn", value: `${placedPercent}%`, note: `${summary.placedStudents}/${summary.studentCount} học sinh` },
   ];
   return (
     <Box component="section" aria-label="Số liệu chính" sx={{ ...panelSx, display: "grid", gridTemplateColumns: { xs: "repeat(2,minmax(0,1fr))", md: "repeat(4,minmax(0,1fr))" }, overflow: "hidden" }}>
@@ -95,11 +97,11 @@ function KpiStrip({ loading, summary }: { loading: boolean; summary: AdminHomeSu
 
 function TaskQueue({ loading, tasks, onOpen }: { loading: boolean; tasks: AdminHomeTask[]; onOpen: (path: string) => void }) {
   return (
-    <Box component="section" aria-labelledby="admin-home-tasks" sx={{ ...panelSx, overflow: "hidden" }}>
+    <Box component="section" aria-labelledby="admin-home-tasks" sx={{ ...panelSx, order: { xs: -1, lg: 0 }, overflow: "hidden" }}>
       <Box sx={{ alignItems: "center", borderBottom: `1px solid ${t.color.divider}`, display: "flex", gap: 1, px: 2.5, py: 1.75 }}>
         <Typography component="h2" id="admin-home-tasks" variant="h5">Cần xử lý</Typography>
         {!loading && tasks.length ? (
-          <Box component="span" sx={{ bgcolor: t.statusTint.error.bg, borderRadius: `${t.radius.chip}px`, color: t.statusTint.error.color, px: 1, typography: "caption" }}>{tasks.length}</Box>
+          <Box component="span" sx={{ bgcolor: "error.main", borderRadius: `${t.radius.chip}px`, color: "error.contrastText", lineHeight: "20px", minWidth: 20, px: 0.75, textAlign: "center", typography: "caption", fontWeight: "fontWeightBold" }}>{tasks.length}</Box>
         ) : null}
       </Box>
       {loading ? (

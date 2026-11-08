@@ -6,6 +6,8 @@ import ErgPortalLayout from "@/components/portal/ErgPortalLayout";
 import { hasApiBase } from "@/lib/api-client";
 import { AUTH_BYPASS_ENABLED } from "@/platform/auth/config/auth-bypass";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
+import { logoutAccount } from "@/platform/auth/api/auth-storage";
+import { logoutStudentSession } from "@/platform/auth/api/student-auth-storage";
 import { Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import type { QuestionBankQuestion } from "@/features/question-bank/types/question-bank-types";
 import {
@@ -98,10 +100,25 @@ export default function AdminErgPortalShell() {
       activeId: resolveAdminMobileSection(pathname),
       items: visibleAdminDockItems(canAccess),
       renderSheet: (sheet: { open: boolean; onClose: () => void; onNavigate: (path: string) => void }) => (
-        <AdminAllFunctionsSheet canAccess={canAccess} menuGroups={menuGroups} {...sheet} />
+        <AdminAllFunctionsSheet
+          account={{ email: portalInfo.userEmail, name: portalInfo.userName }}
+          canAccess={canAccess}
+          menuGroups={menuGroups}
+          onSignOut={() => {
+            logoutStudentSession();
+            logoutAccount();
+            window.location.reload();
+          }}
+          workspaces={[
+            { active: true, label: "Admin", path: adminPath("/") },
+            ...(session?.workspaces?.includes("TEACHER") ? [{ label: "Giáo viên", path: "/teacher", shortLabel: "GV" }] : []),
+            ...(session?.workspaces?.includes("STUDENT") ? [{ label: "Học sinh", path: "/student", shortLabel: "HS" }] : []),
+          ]}
+          {...sheet}
+        />
       ),
     };
-  }, [canAccess, menuGroups, pathname]);
+  }, [canAccess, menuGroups, pathname, portalInfo.userEmail, portalInfo.userName, session?.workspaces]);
 
   function openLeaf(leafId: string) {
     if (leafId === "admin-learning-structure") {
