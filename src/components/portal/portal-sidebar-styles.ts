@@ -78,7 +78,8 @@ export function navRowSx(
     transition: NAV_TRANSITION,
     width: "100%",
     ...(open && !active ? { color: ergEnterpriseTokens.color.primaryHover } : {}),
-    "&:hover": active ? { background: ergEnterpriseTokens.color.primaryHover } : tinted,
+    // Touch browsers keep :hover after a tap, which would leave the tapped row stuck darker.
+    "@media (hover: hover)": { "&:hover": active ? { background: ergEnterpriseTokens.color.primaryHover } : tinted },
     "&.Mui-focusVisible": { outline: `2px solid ${alpha(NAV_PRIMARY, 0.5)}`, outlineOffset: 2 },
     "& .MuiSvgIcon-root": { color: "currentColor" },
     ...(active && bar !== undefined

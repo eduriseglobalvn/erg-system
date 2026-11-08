@@ -164,7 +164,7 @@ test("sanitizes OIDC return targets before sending them to the shared auth host"
   );
 });
 
-test("keeps snake_case access tokens in browser-session storage only", async () => {
+test("keeps snake_case access tokens in browser-session storage; remember me persists only the refresh token", async () => {
   const account = saveServerAuthSession(
     await normalizeLoginResponse({
       user: {
@@ -182,7 +182,9 @@ test("keeps snake_case access tokens in browser-session storage only", async () 
 
   expect(account.email).toBe("teacher@erg.edu.vn");
   expect(getStoredAccessToken("lms")).toBe("jwt-token");
-  expect(storage.has(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lms"))).toBe(false);
+  const persisted = JSON.parse(storage.get(TEACHER_LOCAL_SESSION_KEY) ?? "{}");
+  expect(persisted).toMatchObject({ refreshToken: "refresh-token" });
+  expect(persisted.accessToken).toBeUndefined();
   expect(JSON.parse(storage.get(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "lms")) ?? "{}")).toMatchObject({
     accessToken: "jwt-token",
     refreshToken: "refresh-token",
@@ -330,7 +332,7 @@ test("does not reuse an LMS-only entitlement for LCMS requests", async () => {
 
 test("rejects stored teacher sessions without an access token", () => {
   storage.set(
-    portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lms"),
+    TEACHER_LOCAL_SESSION_KEY,
     JSON.stringify({
       accountId: "teacher-without-token",
       loggedInAt: new Date().toISOString(),
@@ -348,7 +350,7 @@ test("rejects stale stored teacher sessions when backend did not provide an expi
   vi.useFakeTimers();
   vi.setSystemTime(new Date("2026-05-31T02:00:00.000Z"));
   storage.set(
-    portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lms"),
+    TEACHER_LOCAL_SESSION_KEY,
     JSON.stringify({
       accountId: "teacher-stale",
       accessToken: "opaque-token",
@@ -365,7 +367,7 @@ test("rejects stale stored teacher sessions when backend did not provide an expi
 
 test("rejects stored teacher sessions without any usable expiry anchor", () => {
   storage.set(
-    portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lms"),
+    TEACHER_LOCAL_SESSION_KEY,
     JSON.stringify({
       accountId: "teacher-orphan",
       accessToken: "opaque-token",
@@ -383,7 +385,7 @@ test("rejects stored teacher sessions with an expired JWT", () => {
   vi.useFakeTimers();
   vi.setSystemTime(new Date("2026-05-31T02:00:00.000Z"));
   storage.set(
-    portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lms"),
+    TEACHER_LOCAL_SESSION_KEY,
     JSON.stringify({
       accountId: "teacher-expired",
       accessToken: createJwt({ exp: Math.floor(new Date("2026-05-31T01:00:00.000Z").getTime() / 1000), portals: ["lms"] }),

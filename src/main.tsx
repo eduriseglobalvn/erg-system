@@ -5,6 +5,9 @@ import "./styles/globals.css";
 import "./index.css";
 
 import { clearStoredAuthSessions, purgeLegacyAuthStorage } from "./platform/auth/api/auth-token-storage";
+import { applyUpdateOnLaunch } from "./platform/pwa/apply-update-on-launch";
+import { reloadFresh } from "./platform/pwa/reload-fresh";
+import { restoreRememberedStudentSession } from "./platform/auth/api/student-auth-storage";
 import { initializeCrossTabAuthSync } from "./platform/auth/api/cross-tab-session";
 import { isBffAuthEnabled } from "./lib/api-client";
 import App from "./App";
@@ -43,7 +46,7 @@ window.addEventListener("vite:preloadError", (event) => {
     return;
   }
   event.preventDefault();
-  window.location.reload();
+  void reloadFresh();
 });
 
 // -- Phase 1: session hygiene (must happen before React mount) --
@@ -57,6 +60,8 @@ function bootstrapApplication() {
 
   // -- Phase 2: Font display swap (prevents FOIT on slow connections) --
   injectFontDisplaySwap();
+
+  applyUpdateOnLaunch();
 
   // -- Phase 3: React mount --
   createRoot(document.getElementById("root")!).render(
@@ -75,5 +80,6 @@ function bootstrapApplication() {
   }, 10_000);
 }
 
-bootstrapApplication();
+// A remembered student exchanges the refresh token before first render so route gates see the session.
+void restoreRememberedStudentSession().catch(() => undefined).finally(bootstrapApplication);
 

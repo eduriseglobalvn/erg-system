@@ -6,7 +6,7 @@ import {
   AUTH_SESSION_REPLACED_EVENT,
   apiRequest,
 } from "@/lib/api-client";
-import { portalSessionKey, TEACHER_LOCAL_SESSION_KEY } from "@/platform/auth/api/auth-token-storage";
+import { TEACHER_LOCAL_SESSION_KEY } from "@/platform/auth/api/auth-token-storage";
 
 afterEach(() => {
   window.localStorage.clear();
@@ -17,7 +17,7 @@ afterEach(() => {
 test("a replaced session dispatches the dedicated event without attempting token refresh", async () => {
   vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
   window.localStorage.setItem(
-    portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lcms"),
+    TEACHER_LOCAL_SESSION_KEY,
     JSON.stringify({
       accountId: "user-1",
       accessToken: "replaced-access-token",
@@ -50,7 +50,7 @@ test.each([
 ])("%s invalidates the local session through its dedicated central event", async (code, eventName) => {
   vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
   window.localStorage.setItem(
-    portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lcms"),
+    TEACHER_LOCAL_SESSION_KEY,
     JSON.stringify({
       accountId: "user-1",
       accessToken: "stale-access-token",
@@ -72,6 +72,6 @@ test.each([
 
   expect(fetchMock).toHaveBeenCalledTimes(1);
   expect(listener).toHaveBeenCalledTimes(1);
-  expect(window.localStorage.getItem(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lcms"))).toBeNull();
+  expect(window.localStorage.getItem(TEACHER_LOCAL_SESSION_KEY)).toBeNull();
   window.removeEventListener(eventName, listener);
 });

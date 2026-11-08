@@ -1,9 +1,10 @@
-import { lazy, Suspense, useEffect, useMemo } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef } from "react";
 import Box from "@mui/material/Box";
 import { ErgToaster } from "@/components/erg-mui/erg-toaster";
 import { AppSeo } from "@/components/seo/app-seo";
 import { logoutAccount } from "@/platform/auth/api/auth-storage";
 import { logoutStudentSession } from "@/platform/auth/api/student-auth-storage";
+import { useIdleSignOut } from "@/platform/auth/hooks/use-idle-sign-out";
 import {
   ACCOUNT_DISABLED_EVENT,
   AUTHORIZATION_CHANGED_EVENT,
@@ -42,6 +43,8 @@ export function RootLayout() {
     return 'default' as const;
   }, []);
 
+  const redirectToLoginRef = useRef<() => void>(() => undefined);
+
   useEffect(() => {
     function redirectToLogin() {
       logoutAccount();
@@ -54,6 +57,7 @@ export function RootLayout() {
       void navigate({ href: `/login${redirect}`, replace: true });
     }
 
+    redirectToLoginRef.current = redirectToLogin;
     window.addEventListener(AUTH_SESSION_INVALID_EVENT, redirectToLogin);
     window.addEventListener(AUTH_SESSION_REPLACED_EVENT, redirectToLogin);
     window.addEventListener(ACCOUNT_DISABLED_EVENT, redirectToLogin);
@@ -66,6 +70,9 @@ export function RootLayout() {
       window.removeEventListener(AUTHORIZATION_CHANGED_EVENT, redirectToLogin);
     };
   }, [navigate]);
+
+  const signOutIdle = useCallback(() => redirectToLoginRef.current(), []);
+  useIdleSignOut(signOutIdle);
 
   return (
     <ErgMuiProvider portal={portal}>
