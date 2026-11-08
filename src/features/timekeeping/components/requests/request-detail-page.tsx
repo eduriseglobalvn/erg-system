@@ -54,7 +54,7 @@ function RequestActions({ request }: { request: RequestView }) {
     <Box sx={{ display: "grid", gap: 1 }}>
       {error ? <Alert severity="error">{requestErrorText(error)}</Alert> : null}
       <Box sx={{ alignItems: "center", display: "flex", gap: 1 }}>
-        {untouched ? <ErgButton color="error" onClick={() => setConfirming(true)} variant="text">Huỷ đơn</ErgButton> : null}
+        {untouched ? <ErgButton color="error" onClick={() => setConfirming(true)} sx={{ color: "error.main" }} variant="text">Huỷ đơn</ErgButton> : null}
         {untouched ? <ErgButton onClick={() => nav.toEdit(id)} sx={{ flex: 1, whiteSpace: "nowrap" }} variant={pending ? "outlined" : "contained"}>Sửa</ErgButton> : null}
         {pending ? (
           <ErgButton

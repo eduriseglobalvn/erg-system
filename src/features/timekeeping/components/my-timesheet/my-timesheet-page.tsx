@@ -20,7 +20,7 @@ import { dayMonth, firstIssue, monthLabel, shiftPeriod, unitsVi } from "./timesh
 function Stat({ label, value, warn }: { label: string; value: string; warn?: boolean }) {
   return (
     <Box sx={{ minWidth: 0, px: 0.5, py: 1.5, textAlign: "center" }}>
-      <Typography color={warn ? "warning.main" : "text.primary"} component="div" sx={{ fontVariantNumeric: "tabular-nums" }} variant="h4">{value}</Typography>
+      <Typography component="div" sx={{ color: warn ? "warning.main" : "text.primary", fontVariantNumeric: "tabular-nums" }} variant="h4">{value}</Typography>
       <Typography color="text.secondary" component="div" variant="caption">{label}</Typography>
     </Box>
   );
