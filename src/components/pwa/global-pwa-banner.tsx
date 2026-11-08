@@ -1,14 +1,17 @@
 import { useEffect, useState } from "react";
-import RefreshRoundedIcon from "@mui/icons-material/RefreshRounded";
-import Alert from "@mui/material/Alert";
-import Button from "@mui/material/Button";
+import SystemUpdateAltRoundedIcon from "@mui/icons-material/SystemUpdateAltRounded";
+import Box from "@mui/material/Box";
 import Snackbar from "@mui/material/Snackbar";
-import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import { ErgButton } from "@/components/erg-mui/erg-actions";
+import { ergMobileDockClearance } from "@/components/portal/erg-mobile-dock";
 import { OutboxQuarantineNotice } from "@/components/pwa/outbox-quarantine-notice";
 import { useServiceWorkerUpdate } from "@/hooks/use-service-worker-update";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 export const PWA_LAUNCH_FILE_EVENT = "erg:pwa:launch-file";
+
+const { color, radius, shadow } = ergEnterpriseTokens;
 
 export function GlobalPwaBanner() {
   const { applyUpdate, updateAvailable } = useServiceWorkerUpdate();
@@ -45,51 +48,57 @@ export function GlobalPwaBanner() {
       open={updateAvailable}
       anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       sx={{
-        bottom: { xs: "calc(env(safe-area-inset-bottom, 0px) + 80px)", sm: "calc(env(safe-area-inset-bottom, 0px) + 24px)" },
+        // Phones: sit above the floating dock; from sm up there is no dock.
+        bottom: { xs: ergMobileDockClearance(12), sm: "calc(env(safe-area-inset-bottom, 0px) + 24px)" },
+        left: "50%",
+        right: "auto",
+        transform: "translateX(-50%)",
+        width: "min(calc(100vw - 24px), 420px)",
         zIndex: (theme) => theme.zIndex.snackbar,
       }}
     >
-      <Alert
-        severity="info"
-        variant="filled"
+      <Box
+        aria-live="polite"
+        role="status"
         sx={{
-          bgcolor: "primary.main",
-          color: "primary.contrastText",
-          borderRadius: 2,
-          boxShadow: "0 8px 32px rgba(15, 23, 42, 0.2)",
           alignItems: "center",
-          px: 2,
-          py: 0.75,
+          bgcolor: "background.paper",
+          border: "1px solid",
+          borderColor: "divider",
+          borderRadius: `${radius.card}px`,
+          boxShadow: shadow.float,
+          display: "flex",
+          gap: 1.5,
+          p: 1.5,
+          width: "100%",
         }}
-        action={
-          <Button
-            color="inherit"
-            size="small"
-            variant="outlined"
-            disabled={updating}
-            onClick={handleApplyUpdate}
-            startIcon={<RefreshRoundedIcon />}
-            sx={{
-              borderColor: "rgba(255, 255, 255, 0.6)",
-              color: "#fff",
-              fontWeight: 600,
-              ml: 1,
-              "&:hover": {
-                borderColor: "#fff",
-                bgcolor: "rgba(255, 255, 255, 0.1)",
-              },
-            }}
-          >
-            {updating ? "Đang tải…" : "Cập nhật"}
-          </Button>
-        }
       >
-        <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-          <Typography variant="body2" sx={{ fontWeight: 600 }}>
-            Đã có phiên bản mới của ERG
+        <Box
+          aria-hidden
+          sx={{
+            alignItems: "center",
+            bgcolor: color.primarySofter,
+            borderRadius: `${radius.control}px`,
+            color: "primary.main",
+            display: "flex",
+            flexShrink: 0,
+            height: 40,
+            justifyContent: "center",
+            width: 40,
+          }}
+        >
+          <SystemUpdateAltRoundedIcon fontSize="small" />
+        </Box>
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Typography variant="subtitle2">Có phiên bản mới</Typography>
+          <Typography color="text.secondary" variant="caption" component="p">
+            Cập nhật để dùng tính năng mới nhất.
           </Typography>
-        </Stack>
-      </Alert>
+        </Box>
+        <ErgButton loading={updating} onClick={handleApplyUpdate} size="small" sx={{ flexShrink: 0 }}>
+          {updating ? "Đang cập nhật…" : "Cập nhật"}
+        </ErgButton>
+      </Box>
     </Snackbar>
     </>
   );
