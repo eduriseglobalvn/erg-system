@@ -41,6 +41,14 @@ export function formatTimeVi(value: string | number | Date | null | undefined): 
   return Number.isNaN(d.getTime()) ? "" : `${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
+/** List timestamp: HH:mm today, "Hôm qua" yesterday, else dd/MM/yyyy (local days); "" when unparsable. */
+export function formatListTimeVi(value: string | number | Date | null | undefined, now: Date = new Date()): string {
+  const day = formatDateVi(value);
+  if (!day) return "";
+  if (day === formatDateVi(now)) return formatTimeVi(value);
+  return day === formatDateVi(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1)) ? "Hôm qua" : day;
+}
+
 /** True for a real calendar date written yyyy-MM-dd ("2026-13-45" and "2026-02-30" are not). */
 export function isIsoDate(value: string): boolean {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);

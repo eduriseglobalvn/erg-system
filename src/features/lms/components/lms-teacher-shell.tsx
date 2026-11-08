@@ -2,6 +2,7 @@ import Box from "@mui/material/Box";
 import { Outlet } from "@tanstack/react-router";
 
 import ErgPortalLayout from "@/components/portal/ErgPortalLayout";
+import { ERG_FULL_VIEWPORT_FALLBACK } from "@/components/portal/erg-mobile-dock";
 import {
   LmsHeaderClassControl,
   LmsHeaderSchoolControl,
@@ -23,13 +24,12 @@ export function LmsTeacherShell() {
 function LmsTeacherShellFrame({ model }: { model: ReturnType<typeof useLmsTeacherShellController> }) {
   if (model.isMobile) {
     return (
-      <Box sx={{ bgcolor: "background.default", display: "flex", height: "100dvh", minHeight: "100dvh", minWidth: 0, overflow: "hidden", width: "100%" }}>
+      <Box sx={{ bgcolor: "background.default", display: "flex", height: "100dvh", minHeight: "100dvh", ...ERG_FULL_VIEWPORT_FALLBACK, minWidth: 0, overflow: "hidden", width: "100%" }}>
         <LmsMobileShell
           activeLabel={model.activeMobileNav.label}
           activeSection={model.activeMobileSection}
           classes={model.classes}
           dockItems={model.mobileDockItems}
-          hideDock={model.pathname.endsWith("/homework/assign")}
           moreItems={model.mobileMoreItems}
           schoolName={model.selectedSchoolName}
           schools={model.schools}

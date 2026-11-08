@@ -3,7 +3,7 @@ import { useState, type ReactNode } from "react";
 
 import { OfflineShellStatus } from "@/components/erg-mui/offline";
 import { ERG_ASSETS } from "@/config/seo";
-import { ERG_MOBILE_DOCK_HEIGHT } from "@/components/portal/erg-mobile-dock";
+import { ERG_FULL_VIEWPORT_FALLBACK, ergMobileDockClearance } from "@/components/portal/erg-mobile-dock";
 import { StudentDashboardBottomDock } from "@/features/elearning/student-dashboard/components/student-dashboard-bottom-dock";
 import type { StudentDockPageKey, StudentPageKey } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
 import { LmsPwaSetupSheet } from "@/features/lms/mobile/components/lms-pwa-setup-sheet";
@@ -44,6 +44,7 @@ export function StudentDashboardMobileShell({
         height: "100dvh",
         maxHeight: "100dvh",
         minHeight: "100dvh",
+        ...ERG_FULL_VIEWPORT_FALLBACK,
         minWidth: 0,
         overflow: "hidden",
         position: "relative",
@@ -70,8 +71,7 @@ export function StudentDashboardMobileShell({
           minHeight: 0,
           overflowY: "auto",
           overscrollBehavior: "contain",
-          // Room for the shared dock (height + 8px gap + safe area) plus breathing space.
-          pb: `calc(${ERG_MOBILE_DOCK_HEIGHT}px + 8px + env(safe-area-inset-bottom, 0px) + 16px)`,
+          pb: ergMobileDockClearance(),
         }}
       >
         <Box sx={{ maxWidth: 448, mx: "auto" }}>

@@ -6,6 +6,7 @@ import Typography from "@mui/material/Typography";
 import type { InputHTMLAttributes, RefObject } from "react";
 
 import { ErgIconButton } from "@/components/erg-mui/erg-actions";
+import { ErgStatusChip } from "@/components/erg-mui/erg-feedback";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 type PunchCameraFrameProps = {
@@ -24,10 +25,13 @@ export function PunchCameraFrame({ videoRef, live, fallbackInputProps, hasPhoto,
   return (
     <Box sx={{ display: "grid", gap: 1 }}>
       {live ? (
-        <Box sx={{ aspectRatio: "4 / 3", bgcolor: "text.primary", borderRadius: `${ergEnterpriseTokens.radius.card}px`, overflow: "hidden", position: "relative" }}>
+        <Box sx={{ bgcolor: "text.primary", borderRadius: `${ergEnterpriseTokens.radius.shell}px`, height: 330, overflow: "hidden", position: "relative" }}>
           <video aria-label="Khung camera" muted playsInline ref={videoRef} style={{ height: "100%", objectFit: "cover", transform: "scaleX(-1)", width: "100%" }} />
-          <ErgIconButton label="Đổi camera" onClick={onSwitchCamera} sx={{ bgcolor: "background.paper", position: "absolute", right: 8, top: 8 }}>
-            <CameraswitchIcon fontSize="small" />
+          {/* Face guide: an oval cut out of a dimmed frame. */}
+          <Box aria-hidden sx={{ border: 3, borderColor: "common.white", borderRadius: "50%", boxShadow: "0 0 0 999px rgba(0, 0, 0, 0.35)", height: 240, left: "50%", position: "absolute", top: "50%", transform: "translate(-50%, -50%)", width: 190 }} />
+          <ErgStatusChip dot={false} label="Giữ mặt trong khung · đủ sáng" sx={{ bgcolor: "background.paper", color: "text.primary", left: "50%", position: "absolute", top: 14, transform: "translateX(-50%)" }} />
+          <ErgIconButton label="Đổi camera" onClick={onSwitchCamera} sx={{ bgcolor: "rgba(255, 255, 255, 0.15)", bottom: 14, color: "common.white", position: "absolute", right: 14 }}>
+            <CameraswitchIcon />
           </ErgIconButton>
         </Box>
       ) : (
@@ -48,9 +52,11 @@ export function PunchCameraFrame({ videoRef, live, fallbackInputProps, hasPhoto,
           {hasPhoto ? <Typography variant="caption">Đã chọn ảnh</Typography> : null}
         </Box>
       )}
-      <Typography color={error ? "error" : "text.secondary"} role={error ? "alert" : undefined} sx={{ textAlign: "center" }} variant="caption">
-        {error ?? "Giữ mặt trong khung · đủ sáng"}
-      </Typography>
+      {error || !live ? (
+        <Typography color={error ? "error" : "text.secondary"} role={error ? "alert" : undefined} sx={{ textAlign: "center" }} variant="caption">
+          {error ?? "Giữ mặt trong khung · đủ sáng"}
+        </Typography>
+      ) : null}
     </Box>
   );
 }

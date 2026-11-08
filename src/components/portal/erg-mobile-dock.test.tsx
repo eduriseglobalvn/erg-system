@@ -12,7 +12,7 @@ const items: Array<ErgMobileDockItem<Id>> = [
   { id: "a", label: "Mục A", icon: HomeIcon, path: "/a" },
   { id: "b", label: "Mục B", icon: HomeIcon, path: "/b" },
   { id: "c", label: "Mục C", icon: HomeIcon, path: "/c" },
-  { id: "more", label: "Thêm", icon: HomeIcon, path: "", opensSheet: true },
+  { id: "more", label: "Thêm", icon: HomeIcon, path: "", opensSheet: true, avatarInitials: "LT" },
 ];
 
 function setup() {
@@ -48,8 +48,29 @@ describe("ErgMobileDock", () => {
     expect(screen.getByRole("button", { name: /Hộp thư/ })).toHaveAttribute("aria-current", "page");
     expect(document.querySelectorAll("[aria-current]")).toHaveLength(1);
     screen.getAllByRole("button").filter((b) => !b.getAttribute("aria-label")?.startsWith("Hộp thư")).forEach((b) => expect(b).not.toHaveAttribute("aria-current"));
-    expect(screen.getByText("99+")).toBeVisible();
     expect(screen.getByRole("navigation")).toHaveAttribute("aria-label", "Điều hướng test");
+  });
+
+  it("shows the label text only on the active item; the others are named by aria-label", () => {
+    setup();
+    const nav = screen.getByRole("navigation");
+    expect(nav.textContent).toContain("Hộp thư");
+    for (const label of ["Trang chủ", "Mục A", "Mục B", "Mục C"]) {
+      expect(nav.textContent).not.toContain(label);
+      expect(screen.getByRole("button", { name: label })).toBeVisible();
+    }
+  });
+
+  it("marks unread items with a dot and keeps the count in the aria-label", () => {
+    setup();
+    expect(screen.getByRole("button", { name: "Hộp thư, 99+ chưa đọc" })).toBeVisible();
+    expect(screen.getAllByTestId("erg-mobile-dock-dot")).toHaveLength(1);
+    expect(screen.queryByText("99+")).toBeNull();
+  });
+
+  it("renders the account item as an initials avatar", () => {
+    setup();
+    expect(screen.getByRole("button", { name: "Thêm" }).textContent).toBe("LT");
   });
 
   it("navigates on a normal item", () => {

@@ -23,6 +23,7 @@ import { TeacherLearningHub } from "@/features/lms/learning-hub/teacher-learning
 import { LmsHomeDashboard } from "@/features/lms/components/lms-home-dashboard";
 import { classroomStudents } from "@/features/lms/classroom/api/classroom-defaults";
 import { LearningResourceDashboardScopeProvider } from "@/features/lms/learning-resources/hooks/use-learning-resource-dashboard-scope";
+import { canNavigateToLmsPath } from "@/features/lms/navigation/lms-navigation";
 import { teacherPath } from "@/platform/workspaces/workspace-paths";
 
 /**
@@ -34,7 +35,12 @@ export function TeacherHomeRoute() {
   const m = useLmsTeacherShellModel();
   return (
     <LmsHomeDashboard
+      canPunch={canNavigateToLmsPath(teacherPath("/timekeeping"), m.grantedPermissions, m.deniedPermissions)}
       classes={m.selectedClassOptions}
+      mobile={m.isMobile}
+      onNavigate={(href) => void m.navigate({ href })}
+      onOpenClassLog={() => void m.navigate({ href: teacherPath("/class-log") })}
+      onOpenTimekeeping={() => void m.navigate({ href: teacherPath("/timekeeping") })}
       onClassChange={(classId) => m.handleClassChange({ target: { value: classId } })}
       onOpenNotifications={() => void m.navigate({ href: teacherPath("/notifications") })}
       onOpenProgress={() => void m.navigate({ href: teacherPath("/homework/progress") })}

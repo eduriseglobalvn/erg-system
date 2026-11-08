@@ -1,6 +1,8 @@
 import Chip from "@mui/material/Chip";
 import Stack from "@mui/material/Stack";
 
+import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
+
 import type { RecipientCard } from "../api/campaign-types";
 
 export type RecipientFilter = "ALL" | "STUDENT" | "TEACHER" | "STAFF" | "ERRORS";
@@ -24,11 +26,13 @@ export function RecipientFilterChips({ active, errorCount, onChange, picked }: P
           <Chip
             aria-pressed={active === key}
             clickable
-            color={active === key ? "primary" : "default"}
+            color={key === "ERRORS" ? "error" : "default"}
             key={key}
             label={`${label} ${n}`}
             onClick={() => onChange(key)}
-            variant={active === key ? "filled" : "outlined"}
+            // Canvas `.chip.on`: soft primary fill with a primary border, not a solid blue pill.
+            sx={active === key ? { bgcolor: t.color.primarySofter, borderColor: "primary.main", color: t.statusTint.info.color } : undefined}
+            variant="outlined"
           />
         ) : null,
       )}

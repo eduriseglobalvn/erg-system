@@ -257,21 +257,23 @@ export function useAssignHomeworkController({
   }, [setSelectedStudentIds]);
 
 
+  const targetError =
+    targetType === "class" && selectedStudentIds.size === 0 ? "Vui lòng chọn ít nhất một học sinh."
+      : targetType === "grade" && selectedGradeClassIds.size === 0 ? "Vui lòng chọn ít nhất một lớp trong khối."
+        : targetType === "group" && selectedAssignmentGroupIds.size === 0 ? "Vui lòng chọn ít nhất một nhóm học tập."
+          : "";
+  // One-page (mobile) form: the first reason the assignment cannot be sent yet, "" when ready.
+  const formError = !title.trim()
+    ? "Vui lòng nhập tên bài tập."
+    : targetError || (selectedResourceIds.size === 0 ? "Vui lòng chọn ít nhất một bài tập." : "");
+
   const handleNext = () => {
     if (!title.trim()) {
       setValidationError("Vui lòng nhập tên bài tập trước khi tiếp tục.");
       return;
     }
-    if (targetType === "class" && selectedStudentIds.size === 0) {
-      setValidationError("Vui lòng chọn ít nhất một học sinh.");
-      return;
-    }
-    if (targetType === "grade" && selectedGradeClassIds.size === 0) {
-      setValidationError("Vui lòng chọn ít nhất một lớp trong khối.");
-      return;
-    }
-    if (targetType === "group" && selectedAssignmentGroupIds.size === 0) {
-      setValidationError("Vui lòng chọn ít nhất một nhóm học tập.");
+    if (targetError) {
+      setValidationError(targetError);
       return;
     }
     setValidationError("");
@@ -392,8 +394,6 @@ export function useAssignHomeworkController({
     setResourceSearch,
     validationError,
     setValidationError,
-    mobileValidationError: validationError,
-    setMobileValidationError: setValidationError,
     isSubmitting,
     availableSubjects,
     isClassLoading: classWorkspaceQuery.isLoading,
@@ -447,6 +447,7 @@ export function useAssignHomeworkController({
     toggleAllGroupPreviewStudents,
     resetGroupPreviewStudents,
     handleNext,
+    formError,
     selectedSubject,
     selectedLevel,
     resourceSearchTerm,

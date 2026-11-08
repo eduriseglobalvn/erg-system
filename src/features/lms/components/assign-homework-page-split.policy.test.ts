@@ -17,7 +17,7 @@ describe("AssignHomeworkPage ownership", () => {
 
   it.each([
     "use-assign-homework-controller.ts",
-    "assign-homework-mobile-view.tsx",
+    "assign-homework-mobile.tsx",
     "assign-homework-desktop-view.tsx",
   ])("has a dedicated %s owner", (fileName) => {
     expect(() => readFileSync(resolve(COMPONENT_ROOT, fileName), "utf8")).not.toThrow();

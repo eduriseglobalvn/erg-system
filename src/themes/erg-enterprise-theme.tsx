@@ -8,6 +8,7 @@ import "@fontsource/be-vietnam-pro/700.css";
 // Phones get 44px touch targets on every button and input; desktop keeps the dense 40/34px sizes.
 const phone = "@media (max-width: 599.95px)";
 const phoneTarget = { [phone]: { minHeight: 44 } };
+const touchScreen = "@media (hover: none) and (pointer: coarse)";
 const { duration, easing } = t.motion;
 const fast = (property: string) => `${property} ${duration.fast}ms ${easing.standard}`;
 type TintColor = "success" | "warning" | "error" | "info";
@@ -96,6 +97,13 @@ export const ergEnterpriseTheme = createTheme({
         },
         "strong, b": {
           fontWeight: 700,
+        },
+        // iOS Safari zooms into any focused field under 16px and never zooms back out;
+        // touch screens get 16px text in every field, desktop keeps the dense 14px.
+        [touchScreen]: {
+          "input, select, textarea, .MuiInputBase-input, .MuiNativeSelect-select": {
+            fontSize: "16px !important",
+          },
         },
         "@media (prefers-reduced-motion: reduce)": {
           "*, *::before, *::after": {

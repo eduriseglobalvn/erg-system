@@ -12,6 +12,13 @@ describe("ERG enterprise theme", () => {
     expect(ergEnterpriseTheme.typography.body2.fontSize).toBe(14);
   });
 
+  it("gives every field 16px text on touch screens so iOS does not zoom on focus", () => {
+    const baseline = ergEnterpriseTheme.components?.MuiCssBaseline?.styleOverrides as Record<string, Record<string, { fontSize?: string }>>;
+    const touch = baseline["@media (hover: none) and (pointer: coarse)"];
+
+    expect(touch["input, select, textarea, .MuiInputBase-input, .MuiNativeSelect-select"].fontSize).toBe("16px !important");
+  });
+
   it("keeps operational motion restrained and accessible", () => {
     const componentOverrides = JSON.stringify(ergEnterpriseTheme.components);
 

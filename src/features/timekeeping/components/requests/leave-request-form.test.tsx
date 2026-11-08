@@ -34,11 +34,14 @@ afterEach(() => vi.clearAllMocks());
 describe("LeaveRequestForm (G08)", () => {
   it("shows days and balance from preview-leave, the affected periods, and no attachment/invite/compensatory controls", async () => {
     const { container } = renderForm();
-    expect(await screen.findByText(/2 ngày làm việc · Phép năm còn 8,5 → 6,5 ngày sau khi duyệt/)).toBeInTheDocument();
-    expect(screen.getByText("Tiết dạy bị ảnh hưởng · 1 · Thiếu 1")).toBeInTheDocument();
+    expect(await screen.findByText("2 ngày làm việc")).toBeInTheDocument();
+    expect(screen.getByText("Phép năm còn 8,5 → 6,5 ngày sau khi duyệt")).toBeInTheDocument();
+    expect(screen.getByText("Tiết dạy bị ảnh hưởng")).toBeInTheDocument();
+    expect(screen.getByText("Thiếu 1")).toBeInTheDocument();
     expect(screen.getByText("Chưa có người dạy thay")).toBeInTheDocument();
     expect(screen.getByText("Lý do chỉ người duyệt nhìn thấy")).toBeInTheDocument();
-    expect(screen.getByText(/1 · Trần Minh/)).toBeInTheDocument();
+    expect(screen.getByLabelText("Bước 1")).toBeInTheDocument();
+    expect(screen.getByText("Trần Minh")).toBeInTheDocument();
     expect(screen.queryByText(/Mời|Đính kèm|Nghỉ bù|Trao đổi/)).not.toBeInTheDocument();
     expect(screen.getAllByRole("radio", { name: /Phép năm|Nghỉ ốm|Việc riêng có lương|Không lương/ })).toHaveLength(4);
     expect(screen.getByRole("button", { name: "Lưu nháp" })).toBeInTheDocument();

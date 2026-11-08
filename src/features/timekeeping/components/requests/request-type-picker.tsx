@@ -1,60 +1,90 @@
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import BusinessCenterOutlinedIcon from "@mui/icons-material/BusinessCenterOutlined";
-import EventBusyOutlinedIcon from "@mui/icons-material/EventBusyOutlined";
-import FactCheckOutlinedIcon from "@mui/icons-material/FactCheckOutlined";
-import HomeWorkOutlinedIcon from "@mui/icons-material/HomeWorkOutlined";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import Box from "@mui/material/Box";
 import ButtonBase from "@mui/material/ButtonBase";
 import Typography from "@mui/material/Typography";
-import type { ReactElement } from "react";
 
 import { ErgIconButton } from "@/components/erg-mui/erg-actions";
-import { ErgPageHeader } from "@/components/erg-mui/erg-page-header";
-import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
-import type { RequestFormType } from "./request-model";
+import { MobileBottomSheet } from "@/features/lms/mobile/components/mobile-bottom-sheet";
+import type { RequestType } from "../../api/timekeeping-types";
+import { IconTile, PunchCard, type TkTone } from "../punch/punch-card";
+import { REQUEST_ICON } from "./request-list-item";
+import { FORM_TYPE } from "./request-model";
 import { useRequestsNav } from "./use-requests-nav";
 
-const TYPES: Array<{ type: RequestFormType; title: string; description: string; icon: ReactElement }> = [
-  { type: "leave", title: "Nghỉ phép", description: "Phép năm, nghỉ ốm, việc riêng có lương, không lương", icon: <EventBusyOutlinedIcon /> },
-  { type: "explanation", title: "Giải trình chấm công", description: "Quên chấm hoặc chấm lỗi một ngày làm việc", icon: <FactCheckOutlinedIcon /> },
-  { type: "wfh", title: "Làm việc tại nhà", description: "Làm việc từ xa trong một hoặc nhiều ngày", icon: <HomeWorkOutlinedIcon /> },
-  { type: "business", title: "Công tác", description: "Đi công tác ngoài trường", icon: <BusinessCenterOutlinedIcon /> },
+type Choice = { type: RequestType; title: string; description: string; tone: TkTone };
+
+// D15/D16: no substitute-teacher, overtime or compensatory-leave types.
+const GROUPS: Array<{ name: string; items: Choice[] }> = [
+  { name: "Vắng mặt", items: [{ type: "LEAVE", title: "Nghỉ phép", description: "Phép năm, nghỉ ốm, việc riêng có lương, không lương", tone: "info" }] },
+  {
+    name: "Chấm công",
+    items: [
+      { type: "EXPLANATION", title: "Giải trình chấm công", description: "Quên chấm, lỗi thiết bị, ngoài vùng chấm", tone: "error" },
+      { type: "BUSINESS", title: "Công tác", description: "Tập huấn, dự giờ, coi thi — vẫn tính công", tone: "success" },
+      { type: "WFH", title: "Làm việc tại nhà", description: "Làm việc từ xa trong một hoặc nhiều ngày", tone: "success" },
+    ],
+  },
 ];
+
+const TITLE = "Tạo đơn mới";
+const SUBTITLE = "Người duyệt tự chọn theo quy trình của trường";
 
 /** G07: choose what to request. Choosing opens the matching form; nothing here is sent. */
 export function RequestTypePicker() {
   const nav = useRequestsNav();
   return (
-    <Box sx={{ display: "grid", gap: 2, maxWidth: 720, mx: "auto", px: { xs: 2, sm: 3 }, py: 2 }}>
-      <ErgIconButton label="Quay lại" onClick={() => nav.toList()} sx={{ justifySelf: "start" }}><ArrowBackIcon /></ErgIconButton>
-      <ErgPageHeader description="Người duyệt tự chọn theo quy trình của trường" title="Tạo đơn" />
-      <Box component="ul" sx={{ display: "grid", gap: 1.5, listStyle: "none", m: 0, p: 0 }}>
-        {TYPES.map((item) => (
-          <li key={item.type}>
-            <ButtonBase
-              onClick={() => nav.toForm(item.type)}
-              sx={{
-                alignItems: "center",
-                border: 1,
-                borderColor: "divider",
-                borderRadius: `${ergEnterpriseTokens.radius.card}px`,
-                display: "flex",
-                gap: 2,
-                p: 2,
-                textAlign: "left",
-                width: "100%",
-                "&:hover": { bgcolor: "action.hover" },
-              }}
-            >
-              <Box sx={{ color: "primary.main", display: "flex" }}>{item.icon}</Box>
-              <Box sx={{ minWidth: 0 }}>
-                <Typography component="div" variant="subtitle1">{item.title}</Typography>
-                <Typography color="text.secondary" component="div" variant="body2">{item.description}</Typography>
-              </Box>
-            </ButtonBase>
-          </li>
-        ))}
+    <Box sx={{ display: "grid", gap: 1.5, gridTemplateColumns: "minmax(0, 1fr)", maxWidth: 720, mx: "auto", px: { xs: 2, sm: 3 }, py: 2 }}>
+      <Box sx={{ alignItems: "center", display: "flex", gap: 1, mx: -1 }}>
+        <ErgIconButton label="Quay lại" onClick={() => nav.toList()}><ArrowBackIcon /></ErgIconButton>
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Typography component="h1" variant="h4">{TITLE}</Typography>
+          <Typography color="text.secondary" variant="caption">{SUBTITLE}</Typography>
+        </Box>
       </Box>
+      <RequestTypeList />
     </Box>
+  );
+}
+
+/** G07 on phones: the same list as a bottom sheet over G06; closing clears `?new=`. */
+export function RequestTypeSheet() {
+  const nav = useRequestsNav();
+  return (
+    <MobileBottomSheet description={SUBTITLE} onOpenChange={(open) => { if (!open) nav.toList(true); }} open title={TITLE}>
+      <Box sx={{ display: "grid", gap: 1.5, gridTemplateColumns: "minmax(0, 1fr)" }}>
+        <RequestTypeList />
+      </Box>
+    </MobileBottomSheet>
+  );
+}
+
+function RequestTypeList() {
+  const nav = useRequestsNav();
+  return (
+    <>
+      {GROUPS.map((group) => (
+        <Box key={group.name} sx={{ display: "grid", gap: 1 }}>
+          <Typography color="text.secondary" component="h2" variant="overline">{group.name}</Typography>
+          <PunchCard component="ul" sx={{ listStyle: "none", m: 0, p: 0 }}>
+            {group.items.map((item) => {
+              const Icon = REQUEST_ICON[item.type];
+              return (
+                <Box component="li" key={item.type} sx={{ "& + &": { borderTop: 1, borderColor: "divider" } }}>
+                  <ButtonBase onClick={() => nav.toForm(FORM_TYPE[item.type])} sx={{ alignItems: "center", display: "flex", gap: 1.5, minHeight: 62, px: 2, py: 1.25, textAlign: "left", width: "100%", "&:hover": { bgcolor: "action.hover" } }}>
+                    <IconTile small tone={item.tone}><Icon /></IconTile>
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Typography component="div" variant="subtitle2">{item.title}</Typography>
+                      <Typography color="text.secondary" component="div" variant="caption">{item.description}</Typography>
+                    </Box>
+                    <ChevronRightIcon aria-hidden sx={{ color: "text.secondary" }} />
+                  </ButtonBase>
+                </Box>
+              );
+            })}
+          </PunchCard>
+        </Box>
+      ))}
+    </>
   );
 }

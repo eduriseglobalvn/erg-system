@@ -9,3 +9,4 @@ export * from "./offline";
 export * from "./erg-page-header";
 export * from "./erg-metric-card";
 export * from "./erg-confirm-dialog";
+export * from "./erg-tabs";

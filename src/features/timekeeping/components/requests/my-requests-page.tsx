@@ -1,12 +1,16 @@
 import AddIcon from "@mui/icons-material/Add";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 
-import { ErgButton } from "@/components/erg-mui/erg-actions";
+import { ErgButton, ErgIconButton } from "@/components/erg-mui/erg-actions";
 import { ErgEmptyState, ErgErrorState, ErgSkeleton } from "@/components/erg-mui/erg-feedback";
-import { ErgPageHeader } from "@/components/erg-mui/erg-page-header";
+import { ergMobileDockClearance } from "@/components/portal/erg-mobile-dock";
 import { todayInput } from "@/domain/formatters/format-date";
+import { teacherPath } from "@/platform/workspaces/workspace-paths";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 import { useExplanationContext, useMyRequests } from "../../api/timekeeping-request-query";
 import { useTimekeepingMonth } from "../../api/timekeeping-query";
 import { unitsVi } from "../my-timesheet/timesheet-summary";
@@ -25,19 +29,20 @@ const FILTERS = [
 type Filter = (typeof FILTERS)[number]["value"];
 const MONTHLY_LIMIT = 3;
 
-function SummaryCard({ title, value, caption }: { title: string; value: string | null; caption: string }) {
+function Summary({ title, value, caption }: { title: string; value: string | null; caption: string }) {
   return (
-    <PunchCard>
-      <Typography color="text.secondary" variant="caption">{title}</Typography>
-      {value === null ? <ErgSkeleton height={28} /> : <Typography sx={{ fontVariantNumeric: "tabular-nums" }} variant="h6">{value}</Typography>}
-      <Typography color="text.secondary" variant="caption">{caption}</Typography>
-    </PunchCard>
+    <Box sx={{ minWidth: 0, px: 1.75, py: 1.5 }}>
+      <Typography color="text.secondary" component="div" variant="caption">{title}</Typography>
+      {value === null ? <ErgSkeleton height={28} /> : <Typography component="div" sx={{ fontVariantNumeric: "tabular-nums" }} variant="h4">{value}</Typography>}
+      <Typography color="text.secondary" component="div" variant="caption">{caption}</Typography>
+    </Box>
   );
 }
 
 /** G06: leave and explanation balances, status filter and the teacher's requests. */
 export function MyRequestsPage() {
   const nav = useRequestsNav();
+  const navigate = useNavigate();
   const [filter, setFilter] = useState<Filter>("ALL");
   const today = todayInput();
   const month = useTimekeepingMonth(periodOf(new Date()));
@@ -47,24 +52,23 @@ export function MyRequestsPage() {
   const remaining = explanation.data?.remaining;
 
   return (
-    <Box sx={{ display: "grid", gap: 2, maxWidth: 720, mx: "auto", px: { xs: 2, sm: 3 }, py: 2 }}>
-      <ErgPageHeader
-        description="Nghỉ phép, giải trình, làm việc tại nhà và công tác."
-        primaryAction={<ErgButton onClick={() => nav.toPicker()} startIcon={<AddIcon />} variant="contained">Tạo đơn</ErgButton>}
-        title="Đơn từ của tôi"
-      />
-      <Box sx={{ display: "grid", gap: 1.5, gridTemplateColumns: "1fr 1fr" }}>
-        <SummaryCard
+    <Box sx={{ display: "grid", gap: 1.5, gridTemplateColumns: "minmax(0, 1fr)", maxWidth: 720, mx: "auto", px: { xs: 2, sm: 3 }, py: 2 }}>
+      <Box sx={{ alignItems: "center", display: "flex", gap: 1, mx: -1 }}>
+        <ErgIconButton label="Quay lại" onClick={() => void navigate({ href: teacherPath("/timekeeping") })}><ArrowBackIcon /></ErgIconButton>
+        <Typography component="h1" sx={{ flex: 1, minWidth: 0 }} variant="h4">Đơn từ</Typography>
+      </Box>
+      <PunchCard sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", p: 0, "& > * + *": { borderLeft: 1, borderColor: "divider" } }}>
+        <Summary
           caption={`Còn trong năm ${today.slice(0, 4)}`}
           title="Phép năm"
           value={month.data ? `${unitsVi(month.data.annualLeaveRemaining)} ngày` : month.isError ? "—" : null}
         />
-        <SummaryCard
+        <Summary
           caption={`Còn trong T${today.slice(5, 7)}`}
           title="Giải trình"
           value={remaining !== undefined ? `${remaining} / ${MONTHLY_LIMIT} lượt` : explanation.isError ? "—" : null}
         />
-      </Box>
+      </PunchCard>
       <ChipChoice hideLabel label="Lọc đơn theo trạng thái" onChange={setFilter} options={FILTERS} value={filter} />
       {list.isError ? (
         <ErgErrorState action={<ErgButton onClick={() => void list.refetch()} variant="outlined">Tải lại</ErgButton>} description="Không tải được danh sách đơn." title="Có lỗi xảy ra" />
@@ -81,6 +85,15 @@ export function MyRequestsPage() {
           ))}
         </Box>
       )}
+      <ErgButton
+        onClick={() => nav.toPicker()}
+        size="large"
+        startIcon={<AddIcon />}
+        sx={{ borderRadius: `${ergEnterpriseTokens.radius.chip}px`, bottom: ergMobileDockClearance(16), boxShadow: ergEnterpriseTokens.shadow.float, justifySelf: "end", position: "sticky", zIndex: 4 }}
+        variant="contained"
+      >
+        Tạo đơn
+      </ErgButton>
     </Box>
   );
 }

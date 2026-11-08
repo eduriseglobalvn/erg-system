@@ -51,6 +51,7 @@ import {
 } from "@/features/elearning/student-dashboard/utils/discussion-overview";
 import {
   ANNOUNCEMENT_POPUP_SNOOZE_MS,
+  getInitials,
   writeAnnouncementPopupSnooze,
 } from "@/features/elearning/student-dashboard/utils/student-dashboard-workspace-utils";
 import {
@@ -256,8 +257,8 @@ export function StudentDashboardWorkspaceRuntime() {
 
   const mobileDockItems = useMemo(() => [
     ...copy.navItems.map((item) => ({ key: item.key as StudentDockPageKey, label: item.label })),
-    { key: "account" as const, label: locale === "vi" ? "Hồ sơ" : "Profile" },
-  ], [copy.navItems, locale]);
+    { key: "account" as const, label: locale === "vi" ? "Hồ sơ" : "Profile", avatarInitials: getInitials(dashboardProfile.name) || undefined },
+  ], [copy.navItems, dashboardProfile.name, locale]);
 
   const backToDashboard = () => setViewState({ type: "dashboard" });
 
@@ -344,13 +345,13 @@ export function StudentDashboardWorkspaceRuntime() {
   if (surface === "mobile-web") {
     return (
       <Box sx={{ bgcolor: MUI_BG, color: MUI_TEXT, fontFamily: "var(--font-app)", minHeight: "100vh" }}>
-        <StudentPreviewBanner preview={studentPreview} />
         {announcementToast}
         <StudentDashboardMobileShell
           activePage={activePage} announcementUnreadCount={unreadInboxCount}
           dockItems={mobileDockItems} onPageChange={handlePageChange}
         >
-          <Box sx={{ pb: 2.5, pt: 4, px: 2 }}>{dashboardViews}</Box>
+          {/* Inside the scroll area: above the 100dvh shell it pushed the page past the viewport. */}
+          <Box sx={{ pb: 2.5, pt: 4, px: 2 }}><StudentPreviewBanner inset preview={studentPreview} />{dashboardViews}</Box>
         </StudentDashboardMobileShell>
       </Box>
     );

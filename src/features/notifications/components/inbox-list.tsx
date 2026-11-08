@@ -7,7 +7,7 @@ import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
 import Typography from "@mui/material/Typography";
 
-import { ErgButton, ErgEmptyState, ErgErrorState } from "@/components/erg-mui";
+import { ErgButton, ErgEmptyState, ErgErrorState, ErgTabCount, ergChipTabsSx } from "@/components/erg-mui";
 import { QUERY_POLICIES } from "@/lib/query-policy";
 import { ContentPendingSkeleton } from "@/routes/route-feedback";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
@@ -15,7 +15,9 @@ import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 import { fetchNotificationFeed, notificationQueryKeys, resolveNotificationQueryScope } from "../api/notification-api";
 import type { NotificationPortal } from "../api/notification-types";
 import { filterInbox, inboxFiltersFor, type InboxFilter, type InboxItem as InboxItemData, type InboxWorkspace } from "./inbox-filters";
+import { useUnreadNotificationCount } from "../hooks/use-unread-notification-count";
 import { InboxItem } from "./inbox-item";
+import { MarkAllReadButton } from "./mark-all-read-button";
 
 const INBOX_SIZE = 50;
 // shortcut: the API has no ack filter, so "Cần xử lý" scans the newest 100 (the server page cap); add a server filter when that is not enough.
@@ -52,14 +54,16 @@ export function InboxList({ portal, workspace, onOpen, title, onCompose }: Inbox
   });
   const items = filterInbox(query.data?.items ?? [], filter === "UNREAD" ? "ALL" : filter);
   const composeLabel = COMPOSE_LABEL[workspace];
+  const unread = useUnreadNotificationCount(portal) ?? 0;
 
   return (
     <Box sx={{ display: "grid", gap: 1.5 }}>
       {title || (onCompose && composeLabel) ? (
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-          {title ? <Typography variant="h5" component="h1" sx={{ flex: 1, fontWeight: "fontWeightBold" }}>{title}</Typography> : <Box sx={{ flex: 1 }} />}
+          {title ? <Typography variant="h1" sx={{ flex: 1 }}>{title}</Typography> : <Box sx={{ flex: 1 }} />}
+          {title ? <MarkAllReadButton portal={portal} /> : null}
           {onCompose && composeLabel ? (
-            <ErgButton variant="contained" startIcon={<CampaignRoundedIcon />} onClick={onCompose}>{composeLabel}</ErgButton>
+            <ErgButton variant="contained" size="small" startIcon={<CampaignRoundedIcon />} onClick={onCompose}>{composeLabel}</ErgButton>
           ) : null}
         </Box>
       ) : null}
@@ -68,10 +72,12 @@ export function InboxList({ portal, workspace, onOpen, title, onCompose }: Inbox
         value={filter}
         onChange={(_, value: InboxFilter) => setFilter(value)}
         variant="scrollable"
-        allowScrollButtonsMobile
-        sx={{ minHeight: 44, "& .MuiTab-root": { minHeight: 44, minWidth: 0, px: 1.5 } }}
+        scrollButtons={false}
+        sx={ergChipTabsSx}
       >
-        {filters.map((tab) => <Tab key={tab.id} value={tab.id} label={tab.label} />)}
+        {filters.map((tab) => (
+          <Tab key={tab.id} value={tab.id} iconPosition="end" icon={tab.id === "ALL" ? <ErgTabCount count={unread} /> : undefined} label={tab.label} />
+        ))}
       </Tabs>
       {query.isPending ? (
         <ContentPendingSkeleton />

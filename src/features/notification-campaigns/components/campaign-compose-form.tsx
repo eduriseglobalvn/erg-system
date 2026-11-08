@@ -150,8 +150,9 @@ export function CampaignComposeForm({ campaignId, initial, portalKind }: Props) 
       <Box
         sx={{
           bgcolor: "background.paper",
-          borderColor: "divider",
+          // borderTop before borderColor: the shorthand would reset the colour to currentColor (a black line).
           borderTop: 1,
+          borderColor: "divider",
           bottom: 0,
           display: "flex",
           flexWrap: "wrap",

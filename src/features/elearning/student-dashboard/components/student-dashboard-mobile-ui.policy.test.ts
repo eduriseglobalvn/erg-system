@@ -53,8 +53,8 @@ describe("Student PWA mobile UI policy", () => {
     expect(overview).not.toContain("uppercase");
   });
 
-  it("reserves room for the shared dock height at the bottom of the scroll region", () => {
+  it("reserves the shared dock clearance at the bottom of the scroll region", () => {
     const shell = readSibling("./student-dashboard-mobile-shell.tsx");
-    expect(shell).toContain("ERG_MOBILE_DOCK_HEIGHT");
+    expect(shell).toContain("pb: ergMobileDockClearance()");
   });
 });

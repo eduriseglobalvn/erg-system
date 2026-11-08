@@ -63,11 +63,11 @@ export function LeaveRequestForm({ initial }: { initial?: RequestView }) {
       onSubmit={() => send(true)}
       pending={submit.pending}
       submitLabel="Gửi đơn"
-      title="Nghỉ phép"
+      title="Đơn xin nghỉ phép"
     >
       <Box sx={{ display: "grid", gap: 2 }}>
         <form.Field name="kind">
-          {(field) => <ChipChoice label="Loại nghỉ" onChange={field.handleChange} options={KIND_OPTIONS} value={field.state.value} />}
+          {(field) => <ChipChoice checkmark label="Loại nghỉ" onChange={field.handleChange} options={KIND_OPTIONS} value={field.state.value} />}
         </form.Field>
         <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: "1fr 1fr" }}>
           <form.Field name="from">
@@ -89,7 +89,7 @@ export function LeaveRequestForm({ initial }: { initial?: RequestView }) {
           </form.Field>
         </Box>
         <form.Field name="part">
-          {(field) => <ChipChoice label="Thời gian nghỉ" onChange={(part) => single(part, values.from)} options={PART_OPTIONS} value={field.state.value} />}
+          {(field) => <ChipChoice hideLabel label="Thời gian nghỉ" onChange={(part) => single(part, values.from)} options={PART_OPTIONS} segmented value={field.state.value} />}
         </form.Field>
         <LeaveBalanceLine
           annual={values.kind === "ANNUAL"}

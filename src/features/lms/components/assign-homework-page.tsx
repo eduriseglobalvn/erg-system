@@ -1,5 +1,5 @@
 import { AssignHomeworkDesktopView } from "@/features/lms/components/assign-homework-desktop-view";
-import { AssignHomeworkMobileView } from "@/features/lms/components/assign-homework-mobile-view";
+import { AssignHomeworkMobile } from "@/features/lms/components/assign-homework-mobile";
 import {
   type AssignHomeworkPageProps,
   useAssignHomeworkController,
@@ -9,6 +9,6 @@ export function AssignHomeworkPage(props: AssignHomeworkPageProps) {
   const model = useAssignHomeworkController(props);
 
   return model.isMobile
-    ? <AssignHomeworkMobileView model={model} />
+    ? <AssignHomeworkMobile model={model} />
     : <AssignHomeworkDesktopView model={model} />;
 }
