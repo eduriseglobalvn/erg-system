@@ -162,7 +162,6 @@ const LEGACY_SSO_COOKIE = "erg_sso";
 export function purgeLegacyAuthStorage() {
   if (!canUseStorage()) return;
 
-  removePersistedJsonValue(STUDENT_LOCAL_SESSION_KEY);
   // Per-portal slots from the previous build.
   for (const portal of ["admin", "crm", "lms", "lcms"] as const) {
     removePersistedJsonValue(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, portal));

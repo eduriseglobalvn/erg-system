@@ -50,7 +50,9 @@ test("student login sends elearning portal to backend and stores returned token"
     accessToken: "student-access-token",
     portal: "elearning",
   });
-  expect(window.localStorage.getItem(STUDENT_LOCAL_SESSION_KEY)).toBeNull();
+  const remembered = JSON.parse(window.localStorage.getItem(STUDENT_LOCAL_SESSION_KEY) ?? "{}");
+  expect(remembered).toMatchObject({ refreshToken: "student-refresh-token" });
+  expect(remembered.accessToken).toBeUndefined();
 });
 
 test("student session expires when stored expiry is in the past", () => {

@@ -3,9 +3,10 @@ import {
   STUDENT_LOCAL_SESSION_KEY,
   STUDENT_TEMP_SESSION_KEY,
 } from "@/platform/auth/api/auth-token-storage";
-import { apiRequest, hasApiBase, isBffAuthEnabled } from "@/lib/api-client";
+import { ApiClientError, apiRequest, hasApiBase, isBffAuthEnabled } from "@/lib/api-client";
 import { getApiBase } from "@/lib/platform";
-import { removePersistedJsonValue } from "@/stores/persisted-store";
+import { getPersistedJsonValue, removePersistedJsonValue, setPersistedJsonValue } from "@/stores/persisted-store";
+import { getOrCreateBrowserDeviceId } from "@/platform/auth/api/browser-device-id";
 import { API_ENDPOINTS } from "@/lib/api/api-endpoints";
 import { AUTH_BYPASS_ENABLED, DEFAULT_BYPASS_STUDENT_SESSION } from "@/platform/auth/config/auth-bypass";
 
@@ -50,7 +51,8 @@ function parseJson<T>(value: string | null, fallback: T) {
 export function getCurrentStudentSession() {
   if (!canUseStorage()) return null;
 
-  removePersistedJsonValue(STUDENT_LOCAL_SESSION_KEY);
+  // Older builds stored a full session (with access token) here; only the refresh-token-only "remember me" slot may stay.
+  if (getPersistedJsonValue<StudentSession | null>(STUDENT_LOCAL_SESSION_KEY, null)?.accessToken) removePersistedJsonValue(STUDENT_LOCAL_SESSION_KEY);
 
   const tempSession = parseJson<StudentSession | null>(window.sessionStorage.getItem(STUDENT_TEMP_SESSION_KEY), null);
   if (isValidStudentSession(tempSession)) return tempSession;
@@ -117,9 +119,43 @@ export async function loginStudentWithApi(input: StudentLoginInput) {
 
   if (!canUseStorage()) return session;
 
-  window.sessionStorage.setItem(STUDENT_TEMP_SESSION_KEY, JSON.stringify(session));
-  removePersistedJsonValue(STUDENT_LOCAL_SESSION_KEY);
+  persistStudentSession(session);
   return session;
+}
+
+/** Access token stays in sessionStorage; "remember me" keeps only the refresh token across restarts. */
+function persistStudentSession(session: StudentSession) {
+  window.sessionStorage.setItem(STUDENT_TEMP_SESSION_KEY, JSON.stringify(session));
+  if (session.rememberMe && session.refreshToken) setPersistedJsonValue(STUDENT_LOCAL_SESSION_KEY, { ...session, accessToken: undefined });
+  else removePersistedJsonValue(STUDENT_LOCAL_SESSION_KEY);
+}
+
+/** Startup: trade a remembered refresh token for a fresh student session. A rejected token signs out; a network error keeps it for the next start. */
+export async function restoreRememberedStudentSession() {
+  if (!canUseStorage() || !hasApiBase() || isBffAuthEnabled() || getCurrentStudentSession()) return;
+
+  const remembered = getPersistedJsonValue<StudentSession | null>(STUDENT_LOCAL_SESSION_KEY, null);
+  if (!remembered?.refreshToken) return;
+
+  try {
+    const response = await apiRequest<{ accessToken?: string; access_token?: string; refreshToken?: string; refresh_token?: string; expiresIn?: number; expires_in?: number }>(API_ENDPOINTS.auth.refresh, {
+      portal: "elearning",
+      method: "POST",
+      body: JSON.stringify({ refreshToken: remembered.refreshToken, deviceId: getOrCreateBrowserDeviceId() }),
+      skipAuthRefresh: true,
+    });
+    const accessToken = response.accessToken ?? response.access_token;
+    if (!accessToken) throw new ApiClientError("Refresh response did not include an access token.", "AUTH_REFRESH_MISSING_ACCESS_TOKEN", 401);
+    const expiresIn = response.expiresIn ?? response.expires_in;
+    persistStudentSession({
+      ...remembered,
+      accessToken,
+      refreshToken: response.refreshToken ?? response.refresh_token ?? remembered.refreshToken,
+      expiresAt: expiresIn ? new Date(Date.now() + expiresIn * 1000).toISOString() : undefined,
+    });
+  } catch (error) {
+    if (error instanceof ApiClientError && error.status >= 400 && error.status < 500) removePersistedJsonValue(STUDENT_LOCAL_SESSION_KEY);
+  }
 }
 
 export function logoutStudentSession() {

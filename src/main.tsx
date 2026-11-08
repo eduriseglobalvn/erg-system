@@ -5,6 +5,7 @@ import "./styles/globals.css";
 import "./index.css";
 
 import { clearStoredAuthSessions, purgeLegacyAuthStorage } from "./platform/auth/api/auth-token-storage";
+import { restoreRememberedStudentSession } from "./platform/auth/api/student-auth-storage";
 import { initializeCrossTabAuthSync } from "./platform/auth/api/cross-tab-session";
 import { isBffAuthEnabled } from "./lib/api-client";
 import App from "./App";
@@ -75,5 +76,6 @@ function bootstrapApplication() {
   }, 10_000);
 }
 
-bootstrapApplication();
+// A remembered student exchanges the refresh token before first render so route gates see the session.
+void restoreRememberedStudentSession().catch(() => undefined).finally(bootstrapApplication);
 

@@ -77,7 +77,7 @@ export function useInstallPrompt() {
   };
 }
 
-function isRunningStandalone() {
+export function isRunningStandalone() {
   if (typeof window === "undefined") return false;
   const isStandaloneMedia =
     window.matchMedia?.("(display-mode: standalone)").matches ||
