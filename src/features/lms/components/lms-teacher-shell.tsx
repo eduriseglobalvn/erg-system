@@ -30,7 +30,6 @@ function LmsTeacherShellFrame({ model }: { model: ReturnType<typeof useLmsTeache
           activeSection={model.activeMobileSection}
           classes={model.classes}
           dockItems={model.mobileDockItems}
-          hideDock={model.pathname.endsWith("/homework/assign")}
           moreItems={model.mobileMoreItems}
           schoolName={model.selectedSchoolName}
           schools={model.schools}
