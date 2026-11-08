@@ -31,7 +31,7 @@ const without = (permission: string) => ALL.filter((p) => p !== permission);
 describe("TeacherLearningHub", () => {
   beforeEach(() => navigate.mockReset());
 
-  it("links to every learning screen with a single contained button", () => {
+  it("links to every learning screen; the Giao bài tile is the only solid action", () => {
     const { container } = renderHub(ALL);
     const hrefs = screen.getAllByRole("link").map((link) => link.getAttribute("href"));
     expect(hrefs).toEqual(
@@ -44,7 +44,8 @@ describe("TeacherLearningHub", () => {
         "/teacher/reports",
       ]),
     );
-    expect(container.querySelectorAll(".MuiButton-contained")).toHaveLength(1);
+    expect(container.querySelectorAll(".MuiButton-contained")).toHaveLength(0);
+    expect(screen.getByText("Lớp chưa có hoạt động đang mở. Bấm “Giao bài” để bắt đầu.")).toBeInTheDocument();
   });
 
   it("follows the shell model's permissions (no auth session is provided at all)", () => {
@@ -62,7 +63,7 @@ describe("TeacherLearningHub", () => {
   it.each([
     ["lms.report.read", /Báo cáo/],
     ["lms.student_group.read", /Nhóm học sinh/],
-    ["lms.assignment.create", /Giao bài tập/],
+    ["lms.assignment.create", /^Giao bài$/],
     ["lms.exercise.read", /Kho luyện tập/],
   ])("hides the entry that needs %s", (permission, name) => {
     const full = renderHub(ALL);
@@ -77,17 +78,11 @@ describe("TeacherLearningHub", () => {
     expect(screen.queryByRole("link", { name: /Báo cáo/ })).toBeNull();
   });
 
-  it("filters by the text each entry renders", () => {
-    renderHub(ALL);
-    const search = screen.getByRole("textbox", { name: "Tìm nhanh" });
-    fireEvent.change(search, { target: { value: "báo cáo" } });
-    expect(screen.getByRole("link", { name: /Báo cáo/ })).toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: /Tiến độ học tập/ })).toBeNull();
-    // "theo dõi" is only in a row's hidden description, so it must not match.
-    fireEvent.change(search, { target: { value: "theo dõi" } });
-    expect(screen.queryByRole("link", { name: /Tiến độ học tập/ })).toBeNull();
-    // A card's description is rendered, so it matches.
-    fireEvent.change(search, { target: { value: "soạn" } });
-    expect(screen.getByRole("link", { name: /Giao bài tập/ })).toBeInTheDocument();
+  it("lists the open activities with progress and opens their progress page", () => {
+    const model = { deniedPermissions: [], grantedPermissions: ALL, navigate, runs: [{ id: "r1", title: "Luyện tập chương 2", subjectLabel: "Toán", targetLevel: "7A", activeClasses: 1, completionRate: 74, submittedCount: 28, inProgressCount: 0, needsReviewCount: 6, dueLabel: "Hạn 20:00" }] } as unknown as LmsTeacherShellController;
+    render(<LmsTeacherShellContext.Provider value={model}><TeacherLearningHub /></LmsTeacherShellContext.Provider>);
+    expect(screen.getByRole("progressbar", { name: "Hoàn thành 74%" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("link", { name: /Luyện tập chương 2/ }));
+    expect(navigate).toHaveBeenCalledWith({ href: "/teacher/homework/progress?assignmentId=r1" });
   });
 });
