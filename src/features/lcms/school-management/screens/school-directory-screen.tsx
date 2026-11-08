@@ -8,7 +8,6 @@ import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import Alert from "@mui/material/Alert";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
-import ButtonBase from "@mui/material/ButtonBase";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
@@ -22,17 +21,19 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import { type ReactNode, useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 
 import { SchoolFormDialog } from "@/features/lcms/school-management/components/school-form-dialog";
+import { SchoolDirectoryMobile } from "@/features/lcms/school-management/components/school-directory-mobile";
 import { useSchoolManagementContext } from "@/features/lcms/school-management/components/school-management-context";
 import { SchoolPageShell } from "@/features/lcms/school-management/components/school-page-shell";
-import type { PartnerSchool, SchoolDraft } from "@/features/lcms/school-management/types/school-management-types";
+import type { SchoolDraft } from "@/features/lcms/school-management/types/school-management-types";
 import { schoolTypeMeta } from "@/features/lcms/school-management/types/school-type-config";
 import { adminPath } from "@/platform/workspaces/workspace-paths";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
-import { alpha } from "@mui/material/styles";
+import { alpha, useTheme } from "@mui/material/styles";
 
 const AVATAR_GRADIENTS = [
   { bg: "linear-gradient(135deg, #E0E7FF 0%, #C7D2FE 100%)", color: "#3730A3" },
@@ -88,6 +89,7 @@ export default function SchoolDirectoryScreen() {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [adding, setAdding] = useState(false);
+  const isMobile = useMediaQuery(useTheme().breakpoints.down("md"), { noSsr: true });
 
   const filtered = useMemo(
     () =>
@@ -109,6 +111,27 @@ export default function SchoolDirectoryScreen() {
   async function createSchool(draft: SchoolDraft) {
     const id = await saveSchool(draft);
     if (id) void navigate({ href: `${adminPath("/schools/detail")}?schoolId=${encodeURIComponent(id)}` });
+  }
+
+  const formDialog = adding ? <SchoolFormDialog onClose={() => setAdding(false)} onSave={createSchool} /> : null;
+
+  if (isMobile) {
+    return (
+      <>
+        <SchoolDirectoryMobile
+          error={error}
+          isLoading={isLoading}
+          onAdd={() => setAdding(true)}
+          onOpen={openSchool}
+          onRetry={() => void refetch()}
+          onSearchChange={setSearch}
+          schools={filtered}
+          search={search}
+          totalCount={schools.length}
+        />
+        {formDialog}
+      </>
+    );
   }
 
   return (
@@ -263,9 +286,6 @@ export default function SchoolDirectoryScreen() {
             Không thể tải danh sách trường: {error instanceof Error ? error.message : "Lỗi không xác định"}
           </Alert>
         ) : null}
-
-        {/* Phones: one card per school; the table keeps md and up. */}
-        <SchoolCardList isLoading={isLoading} onOpen={openSchool} schools={filtered} />
 
         <TableContainer sx={{ display: { md: "block", xs: "none" } }}>
           <Table size="small" stickyHeader>
@@ -488,7 +508,7 @@ export default function SchoolDirectoryScreen() {
         </TableContainer>
       </Paper>
 
-      {adding ? <SchoolFormDialog onClose={() => setAdding(false)} onSave={createSchool} /> : null}
+      {formDialog}
     </SchoolPageShell>
   );
 }
@@ -566,58 +586,5 @@ function MetricCard({
         {subtext}
       </Typography>
     </Paper>
-  );
-}
-
-function SchoolCardList({ isLoading, onOpen, schools }: { isLoading: boolean; onOpen: (id: string) => void; schools: PartnerSchool[] }) {
-  const { color, radius } = ergEnterpriseTokens;
-  if (isLoading) {
-    return (
-      <Box sx={{ display: { md: "none", xs: "grid" }, gap: 1, p: 1.5 }}>
-        {[0, 1, 2].map((index) => <Skeleton height={72} key={index} sx={{ borderRadius: `${radius.card}px` }} variant="rounded" />)}
-      </Box>
-    );
-  }
-  if (schools.length === 0) {
-    return (
-      <Typography sx={{ color: color.textMuted, display: { md: "none", xs: "block" }, p: 3, textAlign: "center", typography: "body2" }}>
-        Không tìm thấy trường liên kết nào phù hợp với từ khóa.
-      </Typography>
-    );
-  }
-  return (
-    <Box aria-label="Danh sách trường" component="ul" role="list" sx={{ display: { md: "none", xs: "grid" }, gap: 1, listStyle: "none", m: 0, p: 1.5 }}>
-      {schools.map((school) => {
-        const status = statusMeta[school.status];
-        return (
-          <Box component="li" key={school.id} role="listitem">
-            <ButtonBase
-              onClick={() => onOpen(school.id)}
-              sx={{
-                alignItems: "flex-start",
-                border: `1px solid ${color.border}`,
-                borderRadius: `${radius.card}px`,
-                display: "flex",
-                flexDirection: "column",
-                gap: 0.75,
-                p: 1.5,
-                textAlign: "left",
-                width: "100%",
-                "&:focus-visible": { boxShadow: ergEnterpriseTokens.shadow.focus, outline: "none" },
-              }}
-            >
-              <Typography sx={{ color: color.text, typography: "subtitle2" }}>{school.name}</Typography>
-              {school.district ? <Typography sx={{ color: color.textMuted, typography: "caption" }}>{school.district}</Typography> : null}
-              <Box sx={{ alignItems: "center", display: "flex", gap: 1.5 }}>
-                <Typography sx={{ color: color.text, typography: "body2" }}>{school.classCount ?? school.classes.length} lớp</Typography>
-                <Box component="span" sx={{ bgcolor: status.bg, borderRadius: `${radius.chip}px`, color: status.color, px: 1.15, py: 0.4, typography: "caption", whiteSpace: "nowrap" }}>
-                  {status.label}
-                </Box>
-              </Box>
-            </ButtonBase>
-          </Box>
-        );
-      })}
-    </Box>
   );
 }

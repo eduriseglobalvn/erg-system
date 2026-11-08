@@ -9,6 +9,8 @@ import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
 export type AdminShellModel = {
   activeItem: MenuItem | undefined;
   activeLeaf: DashboardLeaf | null;
+  /** Same route-matrix check the menu and dock use. */
+  canAccess: (path: string) => boolean;
   isPreservedWorkspace: boolean;
   legacyPathname: string;
   pendingQuestionImports: QuestionBankQuestion[];
