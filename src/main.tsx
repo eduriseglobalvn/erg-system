@@ -5,6 +5,7 @@ import "./styles/globals.css";
 import "./index.css";
 
 import { clearStoredAuthSessions, purgeLegacyAuthStorage } from "./platform/auth/api/auth-token-storage";
+import { applyUpdateOnLaunch } from "./platform/pwa/apply-update-on-launch";
 import { reloadFresh } from "./platform/pwa/reload-fresh";
 import { restoreRememberedStudentSession } from "./platform/auth/api/student-auth-storage";
 import { initializeCrossTabAuthSync } from "./platform/auth/api/cross-tab-session";
@@ -59,6 +60,8 @@ function bootstrapApplication() {
 
   // -- Phase 2: Font display swap (prevents FOIT on slow connections) --
   injectFontDisplaySwap();
+
+  applyUpdateOnLaunch();
 
   // -- Phase 3: React mount --
   createRoot(document.getElementById("root")!).render(
