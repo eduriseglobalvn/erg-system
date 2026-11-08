@@ -39,6 +39,8 @@ import { ErgStatusChip } from "@/components/erg-mui/erg-feedback";
 import { ErgSearchField } from "@/components/erg-mui/erg-form";
 import { ErgTable } from "@/components/erg-mui/erg-table";
 import { formatShortDateTimeVi } from "@/features/lms/api/lms-date-label";
+import { AssignmentProgressMobile } from "@/features/lms/components/assignment-progress-mobile";
+import { useLmsMobileBreakpoint } from "@/features/lms/mobile/hooks/use-lms-mobile-breakpoint";
 import { AssignmentProgressExportControl } from "@/features/reporting/components/assignment-progress-export-control";
 
 type ProgressStatus = "completed" | "inprogress" | "notstarted";
@@ -46,6 +48,8 @@ type ProgressStatus = "completed" | "inprogress" | "notstarted";
 type StudentProgressRow = {
   id: string;
   name: string;
+  /** Account id for notifications; absent when the source has none. */
+  userId?: string;
   className: string;
   progress: number;
   score: number | null;
@@ -78,6 +82,7 @@ export function HomeworkProgressPage({
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<ProgressStatus | typeof allStatusValue>(allStatusValue);
   const apiBacked = hasApiBase();
+  const isMobile = useLmsMobileBreakpoint("(max-width: 767px)");
   const tenantId = getDefaultTenantId();
 
   useEffect(() => {
@@ -151,6 +156,21 @@ export function HomeworkProgressPage({
   const notStarted = assignmentReportQuery.data?.notStartedCount ?? progressRows.filter((row) => row.status === "notstarted").length;
   const completedPct = total ? Math.round((completed / total) * 100) : 0;
   const needsReviewCount = assignmentReportQuery.data?.needsReviewCount ?? progressQuery.data?.summary.needsReviewCount ?? selectedRun?.needsReviewCount ?? 0;
+
+  if (isMobile) {
+    const loading = apiBacked && (progressQuery.isLoading || assignmentReportQuery.isLoading) && !progressRows.length;
+    const failed = apiBacked && progressQuery.isError && assignmentReportQuery.isError;
+    return (
+      <AssignmentProgressMobile
+        classLabel={selectedClass?.className}
+        counts={{ completed, needsReview: needsReviewCount, total }}
+        onBack={onBack}
+        rows={progressRows}
+        run={selectedRun}
+        status={failed ? "error" : loading ? "loading" : "ready"}
+      />
+    );
+  }
 
   const exportDisabledReason = !selectedRunId
     ? "Chọn một bài đã giao để xuất danh sách nộp bài."
@@ -354,6 +374,7 @@ function mapAssignmentProgressRows(
     return {
       id: studentId || attempt?.studentId || `recipient-${index + 1}`,
       name: recipient.fullName || recipient.username || recipient.studentCode || studentId || "Học sinh",
+      userId: recipient.authUserId || undefined,
       className: selectedClass?.className || recipient.academicClassId || workspace.assignment.academicClassId || "Lớp học",
       progress: progressPercentFromAttempt(attempt, status),
       score,
@@ -391,6 +412,7 @@ export function mapAssignmentReportRows(
     return {
       id: student.studentUserId || `report-student-${index + 1}`,
       name: student.studentName || student.studentUserId || "Học sinh",
+      userId: student.studentUserId || undefined,
       className: selectedClass?.className || "Lớp học",
       progress,
       score: scoreFromReportStudent(student),
