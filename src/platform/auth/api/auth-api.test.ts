@@ -164,7 +164,7 @@ test("sanitizes OIDC return targets before sending them to the shared auth host"
   );
 });
 
-test("keeps snake_case access tokens in browser-session storage only", async () => {
+test("keeps snake_case access tokens in browser-session storage; remember me persists only the refresh token", async () => {
   const account = saveServerAuthSession(
     await normalizeLoginResponse({
       user: {
@@ -182,7 +182,9 @@ test("keeps snake_case access tokens in browser-session storage only", async () 
 
   expect(account.email).toBe("teacher@erg.edu.vn");
   expect(getStoredAccessToken("lms")).toBe("jwt-token");
-  expect(storage.has(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lms"))).toBe(false);
+  const persisted = JSON.parse(storage.get(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lms")) ?? "{}");
+  expect(persisted).toMatchObject({ refreshToken: "refresh-token" });
+  expect(persisted.accessToken).toBeUndefined();
   expect(JSON.parse(storage.get(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "lms")) ?? "{}")).toMatchObject({
     accessToken: "jwt-token",
     refreshToken: "refresh-token",

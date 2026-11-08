@@ -1,4 +1,4 @@
-import { getPersistedJsonValue, removePersistedJsonValue } from "@/stores/persisted-store";
+import { getPersistedJsonValue, removePersistedJsonValue, setPersistedJsonValue } from "@/stores/persisted-store";
 import type { Workspace } from "@/platform/workspaces/workspace-domain";
 import { AUTH_BYPASS_ENABLED, DEFAULT_BYPASS_SESSION } from "@/platform/auth/config/auth-bypass";
 
@@ -161,15 +161,12 @@ export function clearStoredAuthSessions() {
 
 const LEGACY_SSO_COOKIE = "erg_sso";
 
-/** One-time startup purge of bearer material that older builds left in localStorage and the parent-domain cookie. */
+/** Startup purge of legacy bearer material (unscoped/student localStorage sessions, parent-domain cookie). Per-portal teacher sessions stay: they hold only the "remember me" refresh token. */
 export function purgeLegacyAuthStorage() {
   if (!canUseStorage()) return;
 
   removePersistedJsonValue(TEACHER_LOCAL_SESSION_KEY);
   removePersistedJsonValue(STUDENT_LOCAL_SESSION_KEY);
-  for (const portal of ["admin", "crm", "lms", "lcms"] as const) {
-    removePersistedJsonValue(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, portal));
-  }
 
   const expired = `${LEGACY_SSO_COOKIE}=; path=/; max-age=0`;
   document.cookie = expired;
@@ -286,7 +283,9 @@ function writeRawStoredAuthSession(session: StoredAuthIdentity) {
   const tempKey = portalSessionKey(TEACHER_TEMP_SESSION_KEY, portal);
 
   window.sessionStorage.setItem(tempKey, JSON.stringify(session));
-  removePersistedJsonValue(localKey);
+  // "Remember me": only the refresh token outlives the tab/PWA (access token stays in sessionStorage) and is exchanged on next start.
+  if (session.rememberMe && session.refreshToken) setPersistedJsonValue(localKey, { ...session, accessToken: undefined });
+  else removePersistedJsonValue(localKey);
 }
 
 function legacyPersistentSession<T>(key: string): T | null {
