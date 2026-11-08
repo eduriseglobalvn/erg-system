@@ -28,6 +28,19 @@ describe("AuthFormPanel", () => {
     expect(screen.getByText("Email hoặc mã học sinh")).toBeTruthy();
   });
 
+  it("keeps the required-field error hidden while typing until the field is blurred", () => {
+    renderPanel();
+    const email = document.querySelector<HTMLInputElement>('input[autocomplete="username"]')!;
+
+    fireEvent.focus(email);
+    fireEvent.change(email, { target: { value: "a" } });
+    fireEvent.change(email, { target: { value: "" } });
+    expect(screen.queryByText("Email hoặc mã học sinh là bắt buộc.")).toBeNull();
+
+    fireEvent.blur(email);
+    expect(screen.getByText("Email hoặc mã học sinh là bắt buộc.")).toBeTruthy();
+  });
+
   it("warns when Caps Lock is on in the password field and clears on blur", () => {
     renderPanel();
     const password = document.querySelector<HTMLInputElement>('input[autocomplete="current-password"]')!;

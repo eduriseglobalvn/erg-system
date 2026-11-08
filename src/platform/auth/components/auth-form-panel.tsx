@@ -97,7 +97,7 @@ export function AuthFormPanel({
           {(field) => (
             <AuthField
               autoComplete="username"
-              error={field.state.meta.errors[0]}
+              error={shownError(field.state.meta, field.form.state.submissionAttempts)}
               icon={<EmailRoundedIcon fontSize="small" />}
               label={credentialLabel}
               onBlur={field.handleBlur}
@@ -122,7 +122,7 @@ export function AuthFormPanel({
             <AuthField
               ref={passwordInputRef}
               autoComplete="current-password"
-              error={field.state.meta.errors[0]}
+              error={shownError(field.state.meta, field.form.state.submissionAttempts)}
               icon={<LockRoundedIcon fontSize="small" />}
               label={t("auth.password")}
               onBlur={() => {
@@ -253,6 +253,12 @@ const AuthField = forwardRef<HTMLInputElement, {
       </Box>
     );
 });
+
+// Errors wait for blur or submit: iOS fires input events on focus/autofill, which made the
+// empty-field error show on first render while the keyboard was still opening.
+function shownError(meta: { errors: ReadonlyArray<string | undefined>; isBlurred: boolean }, submissionAttempts: number) {
+  return meta.isBlurred || submissionAttempts > 0 ? meta.errors[0] : undefined;
+}
 
 function createHandledSubmitEvent() {
   return {
