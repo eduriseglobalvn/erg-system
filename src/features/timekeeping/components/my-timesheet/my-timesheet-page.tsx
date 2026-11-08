@@ -1,3 +1,4 @@
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
@@ -7,7 +8,6 @@ import { useNavigate } from "@tanstack/react-router";
 
 import { ErgButton, ErgIconButton } from "@/components/erg-mui/erg-actions";
 import { ErgErrorState, ErgSkeleton } from "@/components/erg-mui/erg-feedback";
-import { ErgPageHeader } from "@/components/erg-mui/erg-page-header";
 import { teacherPath } from "@/platform/workspaces/workspace-paths";
 import { useTimekeepingMonth } from "../../api/timekeeping-query";
 import { PunchCard } from "../punch/punch-card";
@@ -16,14 +16,17 @@ import { MissingDayCard } from "./missing-day-card";
 import { MonthCalendarGrid } from "./month-calendar-grid";
 import { dayMonth, firstIssue, monthLabel, shiftPeriod, unitsVi } from "./timesheet-summary";
 
-function Stat({ label, value }: { label: string; value: string }) {
+/** One cell of the four-column stats strip: big number, caption under it. */
+function Stat({ label, value, warn }: { label: string; value: string; warn?: boolean }) {
   return (
-    <PunchCard>
-      <Typography color="text.secondary" variant="caption">{label}</Typography>
-      <Typography sx={{ fontVariantNumeric: "tabular-nums" }} variant="h6">{value}</Typography>
-    </PunchCard>
+    <Box sx={{ minWidth: 0, px: 0.5, py: 1.5, textAlign: "center" }}>
+      <Typography color={warn ? "warning.main" : "text.primary"} component="div" sx={{ fontVariantNumeric: "tabular-nums" }} variant="h4">{value}</Typography>
+      <Typography color="text.secondary" component="div" variant="caption">{label}</Typography>
+    </Box>
   );
 }
+
+const bordered = { border: 1, borderColor: "divider" } as const;
 
 type MyTimesheetPageProps = { period: string; currentPeriod: string };
 
@@ -37,39 +40,37 @@ export function MyTimesheetPage({ period, currentPeriod }: MyTimesheetPageProps)
   const days = data?.days ?? [];
   const issue = firstIssue(days);
   const review = data?.locked ? "Đã chốt" : data?.reviewUntil ? `Rà soát đến ${dayMonth(data.reviewUntil)}, sau đó chốt` : "";
-  const monthPicker = (
-    <Box sx={{ alignItems: "center", display: "flex", gap: 0.5 }}>
-      <ErgIconButton label="Tháng trước" onClick={() => setPeriod(shiftPeriod(period, -1))}><ChevronLeftIcon /></ErgIconButton>
-      <Typography component="span" sx={{ minWidth: 112, textAlign: "center" }} variant="subtitle1">{monthLabel(period)}</Typography>
-      <ErgIconButton disabled={period >= currentPeriod} label="Tháng sau" onClick={() => setPeriod(shiftPeriod(period, 1))}><ChevronRightIcon /></ErgIconButton>
-    </Box>
-  );
 
   return (
-    <Box sx={{ display: "grid", gap: 2, maxWidth: 720, mx: "auto", px: { xs: 2, sm: 3 }, py: 2 }}>
-      <ErgPageHeader
-        description={review}
-        primaryAction={
-          <ErgIconButton disabled={!data} label="Xuất Excel" onClick={() => data && void exportMyTimesheet(data, period)}>
-            <FileDownloadOutlinedIcon />
-          </ErgIconButton>
-        }
-        title="Bảng công của tôi"
-      />
-      {monthPicker}
+    <Box sx={{ display: "grid", gap: 1.5, gridTemplateColumns: "minmax(0, 1fr)", maxWidth: 720, mx: "auto", px: { xs: 2, sm: 3 }, py: 2 }}>
+      <Box sx={{ alignItems: "center", display: "flex", gap: 1, mx: -1 }}>
+        <ErgIconButton label="Quay lại" onClick={() => go("/timekeeping")}><ArrowBackIcon /></ErgIconButton>
+        <Typography component="h1" sx={{ flex: 1, minWidth: 0 }} variant="h4">Bảng công của tôi</Typography>
+        <ErgIconButton disabled={!data} label="Xuất Excel" onClick={() => data && void exportMyTimesheet(data, period)}>
+          <FileDownloadOutlinedIcon />
+        </ErgIconButton>
+      </Box>
+      <Box sx={{ alignItems: "center", display: "flex", gap: 1, justifyContent: "space-between" }}>
+        <ErgIconButton label="Tháng trước" onClick={() => setPeriod(shiftPeriod(period, -1))} sx={bordered}><ChevronLeftIcon /></ErgIconButton>
+        <Box sx={{ minWidth: 0, textAlign: "center" }}>
+          <Typography component="div" variant="subtitle1">{monthLabel(period)}</Typography>
+          {review ? <Typography color="text.secondary" component="div" variant="caption">{review}</Typography> : null}
+        </Box>
+        <ErgIconButton disabled={period >= currentPeriod} label="Tháng sau" onClick={() => setPeriod(shiftPeriod(period, 1))} sx={bordered}><ChevronRightIcon /></ErgIconButton>
+      </Box>
       {isError ? (
         <ErgErrorState action={<ErgButton onClick={() => void refetch()} variant="outlined">Tải lại</ErgButton>} description="Không tải được bảng công." title="Có lỗi xảy ra" />
       ) : isLoading || !data ? (
         <ErgSkeleton height={320} />
       ) : (
         <>
-          <Box sx={{ display: "grid", gap: 1.5, gridTemplateColumns: { xs: "1fr 1fr", sm: "repeat(4, 1fr)" } }}>
-            <Stat label="Công / chuẩn" value={`${unitsVi(data.actualUnits)} / ${unitsVi(data.standardUnits)}`} />
-            <Stat label="Tiết dạy" value={String(data.periods ?? 0)} />
-            <Stat label="Lần muộn" value={String(data.lateCount ?? 0)} />
-            <Stat label="Ngày phép còn" value={unitsVi(data.annualLeaveRemaining)} />
-          </Box>
-          <PunchCard>
+          <PunchCard sx={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", p: 0, "& > * + *": { borderLeft: 1, borderColor: "divider" } }}>
+            <Stat label={`/ ${unitsVi(data.standardUnits)} công`} value={unitsVi(data.actualUnits)} />
+            <Stat label="tiết dạy" value={String(data.periods ?? 0)} />
+            <Stat label="lần muộn" value={String(data.lateCount ?? 0)} warn={(data.lateCount ?? 0) > 0} />
+            <Stat label="phép còn" value={unitsVi(data.annualLeaveRemaining)} />
+          </PunchCard>
+          <PunchCard sx={{ p: 1.5 }}>
             <MonthCalendarGrid days={days} onSelect={(date) => go(`/timekeeping/timesheet?date=${date}`)} period={period} />
           </PunchCard>
           {issue ? <MissingDayCard issue={issue} locked={Boolean(data.locked)} onExplain={(date) => go(`/timekeeping/requests?new=explanation&date=${date}`)} onOpenRequest={(id) => go(`/timekeeping/requests?id=${encodeURIComponent(id)}`)} /> : null}

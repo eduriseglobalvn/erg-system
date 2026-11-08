@@ -49,7 +49,7 @@ describe("DayDetailPage (G05)", () => {
   it("renders a lazy signed image when the photo exists", async () => {
     const withPhoto = { ...DAY, in: { ...DAY.in, photoPurged: false, photoUrl: "https://files.example/p.jpg?sig=1" } };
     const { container } = renderPage(withPhoto);
-    await screen.findByText("Vào");
+    await screen.findByText("Vào 07:24");
     expect(container.querySelector("img")?.getAttribute("loading")).toBe("lazy");
   });
 

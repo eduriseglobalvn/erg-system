@@ -22,7 +22,7 @@ export function MonthCalendarGrid({ period, days, onSelect }: MonthCalendarGridP
   const byDate = new Map(days.map((day) => [day.date, day]));
   return (
     <Box>
-      <Box sx={{ display: "grid", gap: 0.5, gridTemplateColumns: "repeat(7, minmax(0, 1fr))" }}>
+      <Box sx={{ display: "grid", gap: 0.75, gridTemplateColumns: "repeat(7, minmax(0, 1fr))" }}>
         {HEADERS.map((header) => (
           <Typography color="text.secondary" key={header} sx={{ textAlign: "center" }} variant="caption">{header}</Typography>
         ))}
@@ -32,6 +32,9 @@ export function MonthCalendarGrid({ period, days, onSelect }: MonthCalendarGridP
           const code = cell.status ? dayCodeFor(cell.status, day?.leaveKind) : null;
           const tint = ergEnterpriseTokens.statusTint[code?.tone ?? "neutral"];
           const name = `${dayMonth(cell.date)}${code?.label ? `, ${code.label}` : ""}`;
+          // Canvas `.cd`: white cell with a status bar; red cells are tinted; days off fade into the ground.
+          const off = code?.tone === "neutral";
+          const error = code?.tone === "error";
           return (
             <ButtonBase
               aria-current={cell.today ? "date" : undefined}
@@ -40,26 +43,27 @@ export function MonthCalendarGrid({ period, days, onSelect }: MonthCalendarGridP
               onClick={() => onSelect(cell.date as string)}
               sx={{
                 alignItems: "center",
-                bgcolor: code ? tint.bg : "transparent",
+                bgcolor: off ? "transparent" : error ? tint.bg : "background.paper",
                 border: 1,
-                borderColor: cell.today ? "primary.main" : "divider",
+                borderColor: cell.today ? "primary.main" : off ? "transparent" : "divider",
                 borderRadius: `${ergEnterpriseTokens.radius.control}px`,
-                color: code ? tint.color : "text.primary",
+                color: cell.today ? "primary.main" : off ? "text.secondary" : error ? tint.color : "text.primary",
                 flexDirection: "column",
+                gap: 0.625,
                 justifyContent: "center",
-                minHeight: 52,
+                minHeight: 50,
               }}
             >
-              <Typography component="span" sx={{ fontVariantNumeric: "tabular-nums" }} variant="body2">{Number(cell.date.slice(8))}</Typography>
-              <Typography aria-hidden component="span" variant="caption">{code?.code ?? ""}</Typography>
+              <Typography component="span" sx={{ fontVariantNumeric: "tabular-nums" }} variant="subtitle2">{Number(cell.date.slice(8))}</Typography>
+              {code && !off ? <Box aria-hidden sx={{ bgcolor: tint.dot, borderRadius: 0.25, height: 4, width: 18 }} /> : null}
             </ButtonBase>
           );
         })}
       </Box>
-      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, mt: 1.5 }}>
+      <Box sx={{ display: "flex", flexWrap: "wrap", gap: "6px 14px", mt: 1.5 }}>
         {LEGEND.map(({ tone, label }) => (
-          <Box key={label} sx={{ alignItems: "center", display: "flex", gap: 0.75 }}>
-            <Box aria-hidden sx={{ bgcolor: ergEnterpriseTokens.statusTint[tone].dot, borderRadius: "50%", height: 8, width: 8 }} />
+          <Box key={label} sx={{ alignItems: "center", display: "flex", gap: 0.5 }}>
+            <Box aria-hidden sx={{ bgcolor: ergEnterpriseTokens.statusTint[tone].dot, borderRadius: 0.25, height: 4, width: 14 }} />
             <Typography color="text.secondary" variant="caption">{label}</Typography>
           </Box>
         ))}
