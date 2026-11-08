@@ -23,4 +23,24 @@ describe("MobileBottomSheet", () => {
     fireEvent.click(screen.getByRole("button", { name: "Đóng" }));
     expect(onOpenChange).toHaveBeenCalledWith(false);
   });
+
+  it("closes when the handle is dragged down far enough, and springs back for a short pull", () => {
+    const onOpenChange = vi.fn();
+    render(
+      <MobileBottomSheet open title="Phạm vi giảng dạy" onOpenChange={onOpenChange}>
+        Nội dung
+      </MobileBottomSheet>,
+    );
+    const heading = screen.getByText("Phạm vi giảng dạy");
+
+    fireEvent.pointerDown(heading, { clientY: 100, pointerId: 1 });
+    fireEvent.pointerMove(heading, { clientY: 115, pointerId: 1 });
+    fireEvent.pointerUp(heading, { clientY: 115, pointerId: 1 });
+    expect(onOpenChange).not.toHaveBeenCalled();
+
+    fireEvent.pointerDown(heading, { clientY: 100, pointerId: 1 });
+    fireEvent.pointerMove(heading, { clientY: 260, pointerId: 1 });
+    fireEvent.pointerUp(heading, { clientY: 260, pointerId: 1 });
+    expect(onOpenChange).toHaveBeenCalledWith(false);
+  });
 });
