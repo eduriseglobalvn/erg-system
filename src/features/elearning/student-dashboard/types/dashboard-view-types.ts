@@ -37,6 +37,7 @@ export type DashboardCopy = {
   greetingLead: (name: string) => string;
   greetingOpen: (count: number) => string;
   upcomingTitle: string;
+  upcomingAllAction: string;
   todayEmptyDescription: string;
   todayDoneDescription: string;
   primaryAction: string;

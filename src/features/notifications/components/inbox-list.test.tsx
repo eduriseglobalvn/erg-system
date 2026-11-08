@@ -7,7 +7,7 @@ import { mapNotificationItem, toPageResponse } from "../api/notification-mappers
 import type { NotificationFeedItem } from "../api/notification-types";
 import { InboxList } from "./inbox-list";
 
-const feed = vi.hoisted(() => ({ items: [] as NotificationFeedItem[], unread: [] as NotificationFeedItem[], calls: [] as Array<{ status?: string; size?: number }> }));
+const feed = vi.hoisted(() => ({ items: [] as NotificationFeedItem[], unread: [] as NotificationFeedItem[], unreadCount: 0, calls: [] as Array<{ status?: string; size?: number }> }));
 
 vi.mock("../api/notification-api", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../api/notification-api")>()),
@@ -15,6 +15,11 @@ vi.mock("../api/notification-api", async (importOriginal) => ({
     feed.calls.push(input);
     const items = input.status === "unread" ? feed.unread : feed.items;
     return toPageResponse(items, 0, input.size ?? 50, items.length);
+  },
+  fetchUnreadNotificationCount: async () => ({ unread: feed.unreadCount }),
+  markAllNotificationsRead: async () => {
+    feed.unreadCount = 0;
+    return { read: true, updated: 1 };
   },
 }));
 
@@ -26,6 +31,7 @@ function wrap(ui: ReactNode) {
 }
 
 beforeEach(() => {
+  feed.unreadCount = 0;
   feed.calls = [];
   feed.unread = [];
   feed.items = [
@@ -98,4 +104,15 @@ test("Cần xử lý with nothing to ack is honest about scanning recent message
   await screen.findByRole("list", { name: "Danh sách thông báo" });
   fireEvent.click(screen.getByRole("tab", { name: "Cần xử lý" }));
   expect(await screen.findByText("Không có thông báo cần xử lý trong các tin gần đây.")).toBeInTheDocument();
+});
+
+test("titled inbox: unread count on Tất cả and a mark-all-read action that clears it", async () => {
+  feed.unreadCount = 2;
+  wrap(<InboxList portal="elearning" workspace="STUDENT" title="Hộp thư" onOpen={vi.fn()} />);
+  expect(await screen.findByRole("tab", { name: "Tất cả 2" })).toBeInTheDocument();
+  const markAll = screen.getByRole("button", { name: "Đánh dấu tất cả đã đọc" });
+  await vi.waitFor(() => expect(markAll).toBeEnabled());
+  fireEvent.click(markAll);
+  await vi.waitFor(() => expect(markAll).toBeDisabled());
+  expect(screen.getByRole("tab", { name: "Tất cả" })).toBeInTheDocument();
 });

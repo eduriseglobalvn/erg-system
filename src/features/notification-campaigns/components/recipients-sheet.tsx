@@ -5,6 +5,7 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import { useMemo, useState } from "react";
 
 import { ErgButton, ErgDialog } from "@/components/erg-mui";
+import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
 
 import { type AudienceDraft, groupKeyOf, removePicked, removePickedGroup } from "../model/audience-draft";
 import { RecipientFilterChips, type RecipientFilter } from "./recipient-filter-chips";
@@ -40,11 +41,16 @@ export function RecipientsSheet({ draft, onChange, onClose, open }: Props) {
 
   return (
     <ErgDialog
-      actions={<ErgButton onClick={onClose} variant="contained">{`Xong · ${draft.picked.length} người`}</ErgButton>}
+      actions={
+        <>
+          <ErgButton color="error" disabled={!draft.picked.length && !errorCount} onClick={() => onChange({ ...draft, picked: [], errors: [] })} variant="text">Bỏ tất cả</ErgButton>
+          <ErgButton onClick={onClose} sx={{ flex: { xs: 1, sm: "none" } }} variant="contained">{`Xong · ${draft.picked.length} người`}</ErgButton>
+        </>
+      }
       fullScreen={phone}
       onClose={onClose}
       open={open}
-      title="Người nhận chọn riêng"
+      title={`${draft.picked.length} người chọn riêng`}
     >
       <Stack spacing={2}>
         <RecipientFilterChips active={active} errorCount={errorCount} onChange={setFilter} picked={draft.picked} />
@@ -69,7 +75,13 @@ export function RecipientsSheet({ draft, onChange, onClose, open }: Props) {
 function ErrorLines({ errors, onClear }: { errors: string[]; onClear: () => void }) {
   if (errors.length === 0) return null;
   return (
-    <Stack aria-label="Dòng không khớp" component="section" role="region" spacing={0.5}>
+    <Stack
+      aria-label="Dòng không khớp"
+      component="section"
+      role="region"
+      spacing={0.5}
+      sx={{ border: 1, borderColor: "error.main", borderRadius: `${t.radius.card}px`, bgcolor: t.statusTint.error.bg, px: 1.75, py: 1.5 }}
+    >
       <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between" }}>
         <Typography color="error" variant="subtitle2">{`${errors.length} dòng không khớp ai hoặc khớp nhiều người`}</Typography>
         <ErgButton color="error" onClick={onClear} size="small" variant="text">{`Bỏ ${errors.length} dòng`}</ErgButton>

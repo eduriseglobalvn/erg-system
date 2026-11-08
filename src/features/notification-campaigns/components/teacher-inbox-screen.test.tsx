@@ -58,10 +58,10 @@ test("without the send permission the page stays the plain inbox (fail closed)",
   expect(boxes.calls).toHaveLength(0);
 });
 
-test("senders get Hộp thư / Đã gửi / Lên lịch / Nháp with one Gửi lớp action", () => {
+test("senders get Nhận / Đã gửi / Lên lịch / Nháp with one Gửi lớp action", () => {
   wrap();
   expect(screen.getByRole("tablist", { name: "Hộp thư và thông báo của tôi" })).toBeInTheDocument();
-  expect(within(screen.getByRole("tablist", { name: "Hộp thư và thông báo của tôi" })).getAllByRole("tab").map((tab) => tab.textContent)).toEqual(["Hộp thư", "Đã gửi", "Lên lịch", "Nháp"]);
+  expect(within(screen.getByRole("tablist", { name: "Hộp thư và thông báo của tôi" })).getAllByRole("tab").map((tab) => tab.textContent)).toEqual(["Nhận", "Đã gửi", "Lên lịch", "Nháp"]);
   // The inbox's own filters stay as they were.
   expect(within(screen.getByRole("tablist", { name: "Lọc thông báo" })).getAllByRole("tab").map((tab) => tab.textContent)).toEqual(["Tất cả", "Trung tâm", "Hệ thống"]);
   fireEvent.click(screen.getByRole("button", { name: "Gửi lớp" }));
