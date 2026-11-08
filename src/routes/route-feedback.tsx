@@ -7,6 +7,7 @@ import Stack from "@mui/material/Stack";
 import { keyframes } from "@mui/material/styles";
 import Typography from "@mui/material/Typography";
 import { useRouter, type ErrorComponentProps } from "@tanstack/react-router";
+import { reloadFresh } from "@/platform/pwa/reload-fresh";
 import { Component, useEffect, useState, type ErrorInfo, type ReactNode } from "react";
 
 const topBarGrow = keyframes`from { width: 0; } to { width: 92%; }`;
@@ -72,7 +73,7 @@ export function isChunkLoadError(error: unknown) {
 }
 
 // Indirection so tests can observe the hard reload (jsdom's location.reload is not spy-able).
-export const pageReload = { run: () => window.location.reload() };
+export const pageReload = { run: () => void reloadFresh() };
 
 function readReloadGuard() {
   try {

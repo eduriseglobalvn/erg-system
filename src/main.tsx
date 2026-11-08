@@ -5,6 +5,7 @@ import "./styles/globals.css";
 import "./index.css";
 
 import { clearStoredAuthSessions, purgeLegacyAuthStorage } from "./platform/auth/api/auth-token-storage";
+import { reloadFresh } from "./platform/pwa/reload-fresh";
 import { restoreRememberedStudentSession } from "./platform/auth/api/student-auth-storage";
 import { initializeCrossTabAuthSync } from "./platform/auth/api/cross-tab-session";
 import { isBffAuthEnabled } from "./lib/api-client";
@@ -44,7 +45,7 @@ window.addEventListener("vite:preloadError", (event) => {
     return;
   }
   event.preventDefault();
-  window.location.reload();
+  void reloadFresh();
 });
 
 // -- Phase 1: session hygiene (must happen before React mount) --
