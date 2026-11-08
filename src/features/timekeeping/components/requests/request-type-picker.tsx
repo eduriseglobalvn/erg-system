@@ -5,6 +5,7 @@ import ButtonBase from "@mui/material/ButtonBase";
 import Typography from "@mui/material/Typography";
 
 import { ErgIconButton } from "@/components/erg-mui/erg-actions";
+import { MobileBottomSheet } from "@/features/lms/mobile/components/mobile-bottom-sheet";
 import type { RequestType } from "../../api/timekeeping-types";
 import { IconTile, PunchCard, type TkTone } from "../punch/punch-card";
 import { REQUEST_ICON } from "./request-list-item";
@@ -26,6 +27,9 @@ const GROUPS: Array<{ name: string; items: Choice[] }> = [
   },
 ];
 
+const TITLE = "Tạo đơn mới";
+const SUBTITLE = "Người duyệt tự chọn theo quy trình của trường";
+
 /** G07: choose what to request. Choosing opens the matching form; nothing here is sent. */
 export function RequestTypePicker() {
   const nav = useRequestsNav();
@@ -34,10 +38,31 @@ export function RequestTypePicker() {
       <Box sx={{ alignItems: "center", display: "flex", gap: 1, mx: -1 }}>
         <ErgIconButton label="Quay lại" onClick={() => nav.toList()}><ArrowBackIcon /></ErgIconButton>
         <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Typography component="h1" variant="h4">Tạo đơn mới</Typography>
-          <Typography color="text.secondary" variant="caption">Người duyệt tự chọn theo quy trình của trường</Typography>
+          <Typography component="h1" variant="h4">{TITLE}</Typography>
+          <Typography color="text.secondary" variant="caption">{SUBTITLE}</Typography>
         </Box>
       </Box>
+      <RequestTypeList />
+    </Box>
+  );
+}
+
+/** G07 on phones: the same list as a bottom sheet over G06; closing clears `?new=`. */
+export function RequestTypeSheet() {
+  const nav = useRequestsNav();
+  return (
+    <MobileBottomSheet description={SUBTITLE} onOpenChange={(open) => { if (!open) nav.toList(true); }} open title={TITLE}>
+      <Box sx={{ display: "grid", gap: 1.5, gridTemplateColumns: "minmax(0, 1fr)" }}>
+        <RequestTypeList />
+      </Box>
+    </MobileBottomSheet>
+  );
+}
+
+function RequestTypeList() {
+  const nav = useRequestsNav();
+  return (
+    <>
       {GROUPS.map((group) => (
         <Box key={group.name} sx={{ display: "grid", gap: 1 }}>
           <Typography color="text.secondary" component="h2" variant="overline">{group.name}</Typography>
@@ -60,6 +85,6 @@ export function RequestTypePicker() {
           </PunchCard>
         </Box>
       ))}
-    </Box>
+    </>
   );
 }

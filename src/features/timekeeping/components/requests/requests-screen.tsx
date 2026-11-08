@@ -1,4 +1,6 @@
 import Box from "@mui/material/Box";
+import { useTheme } from "@mui/material/styles";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import { useSearch } from "@tanstack/react-router";
 
 import { ErgButton } from "@/components/erg-mui/erg-actions";
@@ -11,7 +13,7 @@ import { LeaveRequestForm } from "./leave-request-form";
 import { MyRequestsPage } from "./my-requests-page";
 import { FORM_TYPE, parseRequestsSearch, type RequestFormType } from "./request-model";
 import { RequestDetailPage } from "./request-detail-page";
-import { RequestTypePicker } from "./request-type-picker";
+import { RequestTypePicker, RequestTypeSheet } from "./request-type-picker";
 import { WfhRequestForm } from "./wfh-request-form";
 import { useRequestsNav } from "./use-requests-nav";
 
@@ -47,11 +49,12 @@ function EditRequest({ id }: { id: string }) {
 /** G06–G10 on /timekeeping/requests: the view is chosen by the search params (`?new=`, `?edit=`, `?id=`, `?date=`). */
 export function RequestsScreen() {
   const view = parseRequestsSearch(useSearch({ strict: false }) as Record<string, unknown>);
+  const pickerSheet = useMediaQuery(useTheme().breakpoints.down("md"), { noSsr: true }) && view.view === "picker";
+  // Phones: G07 is a sheet over G06; same element position either way so the list (and the focused "Tạo đơn") stays mounted.
+  if (view.view === "list" || pickerSheet) return <><MyRequestsPage />{pickerSheet ? <RequestTypeSheet /> : null}</>;
   switch (view.view) {
     case "picker": return <RequestTypePicker />;
     case "form": return <RequestForm date={view.date} key={`${view.type}-${view.date ?? ""}`} type={view.type} />;
     case "edit": return <EditRequest id={view.id} />;
-    case "detail": return <RequestDetailPage id={view.id} key={view.id} />;
-    default: return <MyRequestsPage />;
-  }
+    case "detail": return <RequestDetailPage id={view.id} key={view.id} />;  }
 }
