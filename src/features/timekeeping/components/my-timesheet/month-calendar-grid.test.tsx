@@ -52,7 +52,8 @@ describe("MyTimesheetPage (G04)", () => {
     renderPage();
     expect(await screen.findByText("Rà soát đến 08/11, sau đó chốt")).toBeInTheDocument();
     expect(screen.getByText("Tháng 10/2026")).toBeInTheDocument();
-    expect(screen.getByText("12,5 / 22")).toBeInTheDocument();
+    expect(screen.getByText("12,5")).toBeInTheDocument();
+    expect(screen.getByText("/ 22 công")).toBeInTheDocument();
     expect(await screen.findByText("14/10 · Thiếu giờ ra")).toBeInTheDocument();
     expect(await screen.findByText("Đang tính 0,5 công · còn 2 lượt giải trình")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Giải trình" }));

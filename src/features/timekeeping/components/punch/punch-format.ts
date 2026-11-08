@@ -9,6 +9,9 @@ export const hms = (d: Date) => `${pad(d.getHours())}:${pad(d.getMinutes())}:${p
 /** "Thứ Sáu, 06/11/2026": the weekday name is the only part format-date.ts lacks. */
 export const weekdayDateVi = (d: Date) => `${WEEKDAYS[d.getDay()]}, ${formatDateVi(d)}`;
 
+/** "2026-10-14" → "Thứ Tư, 14/10/2026", read as a local date (no UTC shift). */
+export const longDate = (iso: string) => weekdayDateVi(new Date(Number(iso.slice(0, 4)), Number(iso.slice(5, 7)) - 1, Number(iso.slice(8, 10))));
+
 /** "yyyy-MM" period key of the month the server clock is in. */
 export const periodOf = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}`;
 

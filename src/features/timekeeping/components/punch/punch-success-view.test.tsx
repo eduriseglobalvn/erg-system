@@ -11,7 +11,7 @@ describe("PunchSuccessView (G03)", () => {
     expect(screen.getByText("Đã chấm vào lúc 07:24")).toBeInTheDocument();
     expect(screen.getByText("Sớm 6 phút so với ca sáng")).toBeInTheDocument();
     expect(screen.getByText("Khuôn mặt + GPS")).toBeInTheDocument();
-    expect(screen.getByText("Nhắc chấm ra · 11:20")).toBeInTheDocument();
+    expect(screen.getByText("11:20 · trước giờ ra ca 10 phút")).toBeInTheDocument();
     expect(container.querySelectorAll(".MuiButton-contained")).toHaveLength(1);
     fireEvent.click(screen.getByRole("button", { name: "Xong" }));
     expect(onDone).toHaveBeenCalled();

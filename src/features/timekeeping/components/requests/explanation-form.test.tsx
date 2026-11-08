@@ -29,7 +29,8 @@ describe("ExplanationForm (G09)", () => {
     const { container } = renderForm();
     expect(await screen.findByText("2/3 lượt")).toBeInTheDocument();
     expect(await screen.findByText("Thiếu giờ ra")).toBeInTheDocument();
-    expect(screen.getByText("Vào ca 07:30 · Ra ca 11:30")).toBeInTheDocument();
+    expect(screen.getByText("Ca sáng 07:30 – 11:30")).toBeInTheDocument();
+    expect(screen.getAllByText("Không có")).toHaveLength(2);
     await waitFor(() => expect(screen.getByLabelText("Giờ ra đề nghị")).toHaveValue("11:30"));
     expect(screen.getByText("Gợi ý")).toBeInTheDocument();
     expect(screen.getByText("Lịch dạy ca sáng · 2 tiết")).toBeInTheDocument();
