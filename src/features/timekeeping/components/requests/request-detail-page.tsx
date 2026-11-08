@@ -1,4 +1,5 @@
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -12,19 +13,20 @@ import { formatDateTimeVi } from "@/domain/formatters/format-date";
 import { useCancelRequest, useRemindRequest, useRequest } from "../../api/timekeeping-request-query";
 import type { RequestView } from "../../api/timekeeping-types";
 import { unitsVi } from "../my-timesheet/timesheet-summary";
-import { PunchCard } from "../punch/punch-card";
+import { IconTile, PunchCard } from "../punch/punch-card";
 import { ApprovalTimeline } from "./approval-timeline";
+import { REQUEST_ICON } from "./request-list-item";
 import { requestErrorText, requestTimeText, requestTitle, STATUS_CHIP, timelineSteps } from "./request-model";
 import { useRequestsNav } from "./use-requests-nav";
 
 const REMIND_EVERY_MS = 24 * 60 * 60 * 1000; // backend: one reminder per request per 24 h
 
-function Line({ label, value }: { label: string; value: string }) {
+function Line({ label, value, plain }: { label: string; value: string; plain?: boolean }) {
   return (
-    <Typography component="div" sx={{ display: "flex", gap: 2, justifyContent: "space-between", py: 0.5 }} variant="body2">
-      <span>{label}</span>
-      <Typography component="span" sx={{ textAlign: "right" }} variant="subtitle2">{value}</Typography>
-    </Typography>
+    <Box sx={{ minWidth: 0 }}>
+      <Typography color="text.secondary" component="div" variant="caption">{label}</Typography>
+      <Typography component="div" sx={{ fontVariantNumeric: "tabular-nums", overflowWrap: "anywhere" }} variant={plain ? "body2" : "subtitle2"}>{value}</Typography>
+    </Box>
   );
 }
 
@@ -51,14 +53,16 @@ function RequestActions({ request }: { request: RequestView }) {
   return (
     <Box sx={{ display: "grid", gap: 1 }}>
       {error ? <Alert severity="error">{requestErrorText(error)}</Alert> : null}
-      <Box sx={{ alignItems: "center", display: "flex", flexWrap: "wrap", gap: 1, justifyContent: "flex-end" }}>
+      <Box sx={{ alignItems: "center", display: "flex", gap: 1 }}>
         {untouched ? <ErgButton color="error" onClick={() => setConfirming(true)} variant="text">Huỷ đơn</ErgButton> : null}
-        {untouched ? <ErgButton onClick={() => nav.toEdit(id)} variant={pending ? "outlined" : "contained"}>Sửa</ErgButton> : null}
+        {untouched ? <ErgButton onClick={() => nav.toEdit(id)} sx={{ flex: 1, whiteSpace: "nowrap" }} variant={pending ? "outlined" : "contained"}>Sửa</ErgButton> : null}
         {pending ? (
           <ErgButton
             disabled={remindLocked}
             loading={remind.isPending}
             onClick={() => remind.mutate(id, { onSuccess: () => toast.success("Đã nhắc người duyệt") })}
+            startIcon={<NotificationsActiveIcon />}
+            sx={{ flex: 1, whiteSpace: "nowrap" }}
             variant="contained"
           >
             Nhắc duyệt
@@ -89,8 +93,13 @@ function RequestActions({ request }: { request: RequestView }) {
 export function RequestDetailPage({ id }: { id: string }) {
   const nav = useRequestsNav();
   const { data, isLoading, isError, refetch } = useRequest(id);
-  const back = <ErgIconButton label="Quay lại" onClick={() => nav.toList()} sx={{ justifySelf: "start" }}><ArrowBackIcon /></ErgIconButton>;
-  const frame = { display: "grid", gap: 2, maxWidth: 720, mx: "auto", px: { xs: 2, sm: 3 }, py: 2 } as const;
+  const back = (
+    <Box sx={{ alignItems: "center", display: "flex", gap: 1, mx: -1 }}>
+      <ErgIconButton label="Quay lại" onClick={() => nav.toList()}><ArrowBackIcon /></ErgIconButton>
+      <Typography component="h1" sx={{ flex: 1, minWidth: 0 }} variant="h4">Chi tiết đơn</Typography>
+    </Box>
+  );
+  const frame = { display: "grid", gap: 2, gridTemplateColumns: "minmax(0, 1fr)", maxWidth: 720, mx: "auto", px: { xs: 2, sm: 3 }, py: 2 } as const;
 
   if (isError) {
     return (
@@ -108,25 +117,29 @@ export function RequestDetailPage({ id }: { id: string }) {
   const chip = status === "PENDING" && stepNo > 0 ? `Chờ duyệt · bước ${stepNo}/${steps.length - 1}` : STATUS_CHIP[status].label;
   const sent = data.submittedAt ? `Gửi ${formatDateTimeVi(data.submittedAt)}` : "Chưa gửi";
   const deducts = deduction(data);
+  const Icon = REQUEST_ICON[data.type ?? "LEAVE"];
 
   return (
     <Box sx={frame}>
       {back}
-      <Box sx={{ alignItems: "flex-start", display: "flex", gap: 2, justifyContent: "space-between" }}>
-        <Box sx={{ minWidth: 0 }}>
-          <Typography component="h1" variant="h5">{requestTitle(data)}</Typography>
-          <Typography color="text.secondary" variant="body2">{[data.code, sent].filter(Boolean).join(" · ")}</Typography>
+      <PunchCard sx={{ display: "grid", gap: 1.5 }}>
+        <Box sx={{ alignItems: "center", display: "flex", gap: 1.5 }}>
+          <IconTile><Icon /></IconTile>
+          <Box sx={{ minWidth: 0 }}>
+            <Typography component="h2" variant="h6">{requestTitle(data)}</Typography>
+            <Typography color="text.secondary" sx={{ fontVariantNumeric: "tabular-nums" }} variant="caption">{[data.code ? `#${data.code}` : "", sent].filter(Boolean).join(" · ")}</Typography>
+          </Box>
         </Box>
-        <ErgStatusChip label={chip} tone={STATUS_CHIP[status].tone} />
-      </Box>
-      <PunchCard>
-        <Line label="Thời gian" value={requestTimeText(data)} />
-        {deducts ? <Line label="Trừ quỹ phép" value={deducts} /> : null}
-        {data.note ? <Line label="Lý do" value={data.note} /> : null}
+        <ErgStatusChip label={chip} sx={{ justifySelf: "start" }} tone={STATUS_CHIP[status].tone} />
+        <Box sx={{ borderTop: 1, borderColor: "divider", display: "grid", gap: 1.25, gridTemplateColumns: "1fr 1fr", pt: 1.5 }}>
+          <Line label="Thời gian" value={requestTimeText(data)} />
+          {deducts ? <Line label="Trừ quỹ phép" value={deducts} /> : null}
+          {data.note ? <Box sx={{ gridColumn: "1 / -1" }}><Line label="Lý do" plain value={data.note} /></Box> : null}
+        </Box>
       </PunchCard>
       {data.status !== "DRAFT" ? (
         <PunchCard>
-          <Typography component="h2" sx={{ mb: 1.5 }} variant="subtitle1">Luồng duyệt</Typography>
+          <Typography component="h2" sx={{ mb: 1.5 }} variant="h6">Luồng duyệt</Typography>
           <ApprovalTimeline request={data} />
         </PunchCard>
       ) : null}

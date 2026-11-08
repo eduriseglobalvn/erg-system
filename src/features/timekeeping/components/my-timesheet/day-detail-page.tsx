@@ -16,7 +16,7 @@ import { useTimekeepingDay, useTimekeepingMonth } from "../../api/timekeeping-qu
 import type { DayDetailView } from "../../api/timekeeping-types";
 import { dayCodeFor } from "../../model/day-codes";
 import { CardRow, PunchCard } from "../punch/punch-card";
-import { hhmm, weekdayDateVi } from "../punch/punch-format";
+import { hhmm, longDate } from "../punch/punch-format";
 import { PunchRow } from "./punch-row";
 import { PendingExplanationNote } from "./pending-explanation-note";
 import { MISSING_TITLE, unitsVi } from "./timesheet-summary";
@@ -45,9 +45,6 @@ function provisionalText(day: DayDetailView): string {
     ? `Công tạm tính ${unitsVi(day.units)} / ${full} công · đủ ${full} khi giải trình được duyệt`
     : `Công ${unitsVi(day.units)} / ${full} công`;
 }
-
-/** "2026-10-14" → "Thứ Tư, 14/10/2026" (local date, no UTC shift). */
-const longDate = (date: string) => weekdayDateVi(new Date(Number(date.slice(0, 4)), Number(date.slice(5, 7)) - 1, Number(date.slice(8, 10))));
 
 type DayDetailPageProps = { date: string };
 
