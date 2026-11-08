@@ -345,13 +345,13 @@ export function StudentDashboardWorkspaceRuntime() {
   if (surface === "mobile-web") {
     return (
       <Box sx={{ bgcolor: MUI_BG, color: MUI_TEXT, fontFamily: "var(--font-app)", minHeight: "100vh" }}>
-        <StudentPreviewBanner preview={studentPreview} />
         {announcementToast}
         <StudentDashboardMobileShell
           activePage={activePage} announcementUnreadCount={unreadInboxCount}
           dockItems={mobileDockItems} onPageChange={handlePageChange}
         >
-          <Box sx={{ pb: 2.5, pt: 4, px: 2 }}>{dashboardViews}</Box>
+          {/* Inside the scroll area: above the 100dvh shell it pushed the page past the viewport. */}
+          <Box sx={{ pb: 2.5, pt: 4, px: 2 }}><StudentPreviewBanner inset preview={studentPreview} />{dashboardViews}</Box>
         </StudentDashboardMobileShell>
       </Box>
     );

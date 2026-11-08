@@ -98,12 +98,11 @@ export function StudentDashboardMobileOverview({
 
   return (
     <Stack spacing={2.5}>
-      <Typography component="h1" sx={{ typography: "h2" }}>
-        {copy.greetingLead(name)}
-        <Box component="span" sx={{ color: "text.secondary", display: "block", fontWeight: "fontWeightMedium" }}>
-          {greetingLine}
-        </Box>
-      </Typography>
+      {/* Canvas H01: page title, then one plain line under it. */}
+      <Stack spacing={0.5}>
+        <Typography variant="h1">{copy.greetingLead(name)}</Typography>
+        <Typography color="text.secondary" variant="body1">{greetingLine}</Typography>
+      </Stack>
 
       <Stack component="section" aria-label={copy.heroEyebrow} spacing={1.75} sx={{ ...panelSx, p: 2 }}>
         {activeAssignment ? (
@@ -160,8 +159,8 @@ export function StudentDashboardMobileOverview({
       {assignmentsLoading || upcoming.length > 0 ? (
         <Stack component="section" aria-labelledby="student-upcoming" spacing={1.5}>
           <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between" }}>
-            <Typography component="h2" id="student-upcoming" variant="h5">{copy.upcomingTitle}</Typography>
-            <Button onClick={() => onPageChange("assignments")} size="small" variant="text">{copy.secondaryAction}</Button>
+            <Typography component="h2" id="student-upcoming" variant="h6">{copy.upcomingTitle}</Typography>
+            <Button onClick={() => onPageChange("assignments")} size="small" sx={{ color: "primary.main" }} variant="text">{copy.upcomingAllAction}</Button>
           </Stack>
           <Box sx={panelSx}>
             {assignmentsLoading
