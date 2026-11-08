@@ -15,6 +15,7 @@ import type { RequestView } from "../../api/timekeeping-types";
 import { unitsVi } from "../my-timesheet/timesheet-summary";
 import { IconTile, PunchCard } from "../punch/punch-card";
 import { ApprovalTimeline } from "./approval-timeline";
+import { stickyActionsSx } from "./request-form-frame";
 import { REQUEST_ICON } from "./request-list-item";
 import { requestErrorText, requestTimeText, requestTitle, STATUS_CHIP, timelineSteps } from "./request-model";
 import { useRequestsNav } from "./use-requests-nav";
@@ -51,7 +52,7 @@ function RequestActions({ request }: { request: RequestView }) {
   const pending = request.status === "PENDING";
   const closeAfterCancel = () => cancel.mutate(id, { onSuccess: () => { setConfirming(false); toast.success("Đã huỷ đơn"); } });
   return (
-    <Box sx={{ display: "grid", gap: 1 }}>
+    <Box sx={{ display: "grid", gap: 1, ...stickyActionsSx }}>
       {error ? <Alert severity="error">{requestErrorText(error)}</Alert> : null}
       <Box sx={{ alignItems: "center", display: "flex", gap: 1 }}>
         {untouched ? <ErgButton color="error" onClick={() => setConfirming(true)} sx={{ color: "error.main" }} variant="text">Huỷ đơn</ErgButton> : null}

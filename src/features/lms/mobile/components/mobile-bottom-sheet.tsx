@@ -16,7 +16,7 @@ export function MobileBottomSheet({
   onOpenChange,
 }: {
   children: ReactNode;
-  description?: string;
+  description?: ReactNode;
   /** Replaces the title block (the title still names the dialog for assistive tech). */
   header?: ReactNode;
   open: boolean;
@@ -43,7 +43,9 @@ export function MobileBottomSheet({
             borderColor: "divider",
             borderRadius: "24px 24px 0 0",
             display: { xs: "flex", xl: "none" },
-            maxHeight: "88dvh",
+            // vh first: Safari 15 (iPhone 7) has no dvh.
+            maxHeight: "88vh",
+            "@supports (height: 1dvh)": { maxHeight: "88dvh" },
             overflow: "hidden",
             pb: "calc(env(safe-area-inset-bottom, 0px) + 10px)",
           },
@@ -63,7 +65,7 @@ export function MobileBottomSheet({
         </IconButton>
       </Stack>
       <Divider />
-      <Box sx={{ bgcolor: "background.default", maxHeight: "calc(88dvh - 82px)", overflowY: "auto", px: 2, py: 1.5 }}>
+      <Box sx={{ bgcolor: "background.default", maxHeight: "calc(88vh - 82px)", overflowY: "auto", "@supports (height: 1dvh)": { maxHeight: "calc(88dvh - 82px)" }, px: 2, py: 1.5 }}>
         {children}
       </Box>
     </Drawer>

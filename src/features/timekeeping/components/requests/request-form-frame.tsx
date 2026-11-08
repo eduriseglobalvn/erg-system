@@ -5,6 +5,20 @@ import Typography from "@mui/material/Typography";
 import type { FormEvent, ReactNode } from "react";
 
 import { ErgButton, ErgIconButton } from "@/components/erg-mui/erg-actions";
+import { ergMobileDockClearance } from "@/components/portal/erg-mobile-dock";
+
+/** Below md the portal dock floats at the bottom: the primary action bar sticks just above it (G08–G10). */
+export const stickyActionsSx = {
+  bgcolor: "background.default",
+  borderColor: "divider",
+  borderTop: { xs: 1, md: 0 },
+  bottom: { xs: ergMobileDockClearance(8), md: "auto" },
+  mx: { xs: -2, sm: -3, md: 0 },
+  position: { xs: "sticky", md: "static" },
+  px: { xs: 2, sm: 3, md: 0 },
+  py: { xs: 1.5, md: 0 },
+  zIndex: 4,
+} as const;
 
 const EDIT_PENDING_NOTICE = "Sửa đơn đang chờ sẽ huỷ đơn hiện tại và gửi lại đơn mới; đơn mới có mã mới và người duyệt phải xem lại.";
 
@@ -45,7 +59,9 @@ export function RequestFormFrame({ title, description, badge, submitLabel, pendi
       {editingPending ? <Alert severity="info">{EDIT_PENDING_NOTICE}</Alert> : null}
       {children}
       {error ? <Alert severity="error">{error}</Alert> : null}
-      <ErgButton disabled={submitDisabled} fullWidth loading={pending} size="large" type="submit" variant="contained">{submitLabel}</ErgButton>
+      <Box sx={stickyActionsSx}>
+        <ErgButton disabled={submitDisabled} fullWidth loading={pending} size="large" type="submit" variant="contained">{submitLabel}</ErgButton>
+      </Box>
     </Box>
   );
 }
