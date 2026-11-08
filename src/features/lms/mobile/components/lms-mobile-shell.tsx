@@ -1,20 +1,19 @@
 import { useState, type ReactNode } from "react";
-import AdminPanelSettingsRoundedIcon from "@mui/icons-material/AdminPanelSettingsRounded";
+import BadgeRoundedIcon from "@mui/icons-material/BadgeRounded";
+import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
-import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
-import MenuBookRoundedIcon from "@mui/icons-material/MenuBookRounded";
-import PersonOutlineRoundedIcon from "@mui/icons-material/PersonOutlineRounded";
+import InstallMobileRoundedIcon from "@mui/icons-material/InstallMobileRounded";
 import PhoneAndroidRoundedIcon from "@mui/icons-material/PhoneAndroidRounded";
 import SecurityRoundedIcon from "@mui/icons-material/SecurityRounded";
 import Box from "@mui/material/Box";
 import ButtonBase from "@mui/material/ButtonBase";
-import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { LmsMobileTopBar } from "./lms-mobile-top-bar";
 import { LmsPwaSetupSheet } from "./lms-pwa-setup-sheet";
 import { LmsScopeSheet, type LmsMobileClassOption, type LmsMobileSchoolOption } from "./lms-scope-sheet";
 import { MobileBottomSheet } from "./mobile-bottom-sheet";
 import { OfflineShellStatus } from "@/components/erg-mui/offline";
+import { ErgSheetIdentity, ErgSheetOverline, ErgSheetSignOut, ErgSheetTileGroup, ErgWorkspaceSwitch, type ErgSheetTileItem } from "@/components/portal/erg-mobile-sheet-parts";
 import { ERG_FULL_VIEWPORT_FALLBACK, ErgMobileDock, ergMobileDockClearance, type ErgMobileDockItem } from "@/components/portal/erg-mobile-dock";
 import { useOfflineShellStatus } from "@/hooks/use-offline-shell-status";
 import { useInstallPrompt } from "@/hooks/use-install-prompt";
@@ -22,6 +21,9 @@ import { usePwaNotifications } from "../hooks/use-pwa-notifications";
 import { useServiceWorkerUpdate } from "@/hooks/use-service-worker-update";
 import { teacherPath } from "@/platform/workspaces/workspace-paths";
 import { getAuthScope } from "@/platform/auth/api/auth-storage";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
+
+const { radius, size } = ergEnterpriseTokens;
 
 export function LmsMobileShell<TSection extends string>({
   activeLabel, activeSection, children, classes, dockItems, hideDock = false, moreItems = [], schoolName, schools,
@@ -30,7 +32,7 @@ export function LmsMobileShell<TSection extends string>({
 }: {
   activeLabel: string; activeSection: TSection | null; children: ReactNode; classes: LmsMobileClassOption[];
   dockItems: Array<ErgMobileDockItem<TSection>>; hideDock?: boolean;
-  moreItems?: Array<{ icon: ErgMobileDockItem<string>["icon"]; label: string; path: string }>; schoolName: string;
+  moreItems?: Array<ErgSheetTileItem & { group: string }>; schoolName: string;
   schools: LmsMobileSchoolOption[]; selectedClassId: string; selectedClassName: string; selectedSchoolId: string;
   teacherEmail: string; teacherName: string;
   onClassChange: (classId: string) => void; onNavigate: (path: string) => void;
@@ -43,6 +45,7 @@ export function LmsMobileShell<TSection extends string>({
   const [pwaOpen, setPwaOpen] = useState(false);
   const [scopeOpen, setScopeOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
+  const studentCount = classes.find((classroom) => classroom.id === selectedClassId)?.studentCount;
   const shouldOfferInstall = !installPrompt.installed && (installPrompt.canInstall || installPrompt.isIos);
 
   const session = getAuthScope("lms").session ?? getAuthScope().session;
@@ -60,7 +63,7 @@ export function LmsMobileShell<TSection extends string>({
       <LmsMobileTopBar
         activeLabel={activeLabel} canInstall={installPrompt.canInstall} selectedClassName={selectedClassName}
         installed={installPrompt.installed} online={network.online}
-        schoolName={schoolName}
+        schoolName={[schoolName, studentCount === undefined ? "" : `${studentCount} học sinh`].filter(Boolean).join(" · ")}
         updateAvailable={serviceWorkerUpdate.updateAvailable}
         onInstall={() => setPwaOpen(true)}
         onScopeOpen={() => setScopeOpen(true)} onUpdate={serviceWorkerUpdate.applyUpdate}
@@ -91,29 +94,39 @@ export function LmsMobileShell<TSection extends string>({
       )}
       <LmsScopeSheet classes={classes} onClassChange={onClassChange} onOpenChange={setScopeOpen} onSchoolChange={onSchoolChange} open={scopeOpen} schools={schools} selectedClassId={selectedClassId} selectedSchoolId={selectedSchoolId} />
 
-      <MobileBottomSheet description={teacherEmail} onOpenChange={setAccountOpen} open={accountOpen} title={teacherName}>
-        <Stack spacing={1}>
-          {moreItems.map((item) => (
-            <AccountActionButton icon={<item.icon />} key={item.path} label={item.label} onClick={() => navigate(item.path)} />
+      <MobileBottomSheet
+        header={<ErgSheetIdentity badges={["Giáo viên", schoolName].filter(Boolean)} email={teacherEmail} initials={nameInitials(teacherName)} name={teacherName} />}
+        onOpenChange={setAccountOpen}
+        open={accountOpen}
+        title={teacherName}
+      >
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 1.75 }}>
+          {[...new Set(moreItems.map((item) => item.group))].map((group) => (
+            <ErgSheetTileGroup items={moreItems.filter((item) => item.group === group)} key={group} label={group} onNavigate={navigate} />
           ))}
-          {canSwitchAdmin ? (
-            <AccountActionButton
-              icon={<AdminPanelSettingsRoundedIcon sx={{ color: "primary.main" }} />}
-              label="Chuyển sang Admin LMS"
-              onClick={() => navigate("/admin")}
-            />
-          ) : null}
-          {canSwitchStudent ? (
-            <AccountActionButton
-              icon={<MenuBookRoundedIcon sx={{ color: "info.main" }} />}
-              label="Chuyển sang Học sinh"
-              onClick={() => navigate("/student")}
-            />
-          ) : null}
-          <AccountActionButton icon={<PersonOutlineRoundedIcon />} label="Quản lý tài khoản" onClick={() => navigate(teacherPath("/account"))} />
-          <AccountActionButton icon={<SecurityRoundedIcon />} label="Lịch sử đăng nhập" onClick={() => navigate(teacherPath("/account/login-logs"))} />
-          <AccountActionButton danger icon={<LogoutRoundedIcon />} label="Đăng xuất" onClick={onSignOut} />
-        </Stack>
+          <Box component="section" sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+            <ErgSheetOverline>Tài khoản giáo viên</ErgSheetOverline>
+            <Box sx={{ bgcolor: "background.paper", border: 1, borderColor: "divider", borderRadius: `${radius.card}px`, overflow: "hidden" }}>
+              <AccountRow icon={<BadgeRoundedIcon />} label="Hồ sơ giáo viên" onClick={() => navigate(teacherPath("/account"))} />
+              <AccountRow icon={<SecurityRoundedIcon />} label="Lịch sử đăng nhập" onClick={() => navigate(teacherPath("/account/login-logs"))} />
+              <AccountRow
+                hint={installPrompt.installed ? "Đã cài ứng dụng" : "Chưa cài ứng dụng"}
+                icon={<InstallMobileRoundedIcon />}
+                label="Ứng dụng & thông báo"
+                onClick={() => { setAccountOpen(false); setPwaOpen(true); }}
+              />
+            </Box>
+          </Box>
+          <ErgWorkspaceSwitch
+            onNavigate={navigate}
+            options={[
+              { active: true, label: "Giáo viên", path: teacherPath("/"), shortLabel: "GV" },
+              ...(canSwitchAdmin ? [{ label: "Admin", path: "/admin" }] : []),
+              ...(canSwitchStudent ? [{ label: "Học sinh", path: "/student", shortLabel: "HS" }] : []),
+            ]}
+          />
+          <ErgSheetSignOut onSignOut={onSignOut} />
+        </Box>
       </MobileBottomSheet>
 
       <LmsPwaSetupSheet installPrompt={installPrompt} notifications={notifications} onOpenChange={setPwaOpen} open={pwaOpen} />
@@ -128,10 +141,15 @@ function nameInitials(name: string) {
   return (words[0][0] + (words.length > 1 ? words[words.length - 1][0] : "")).toUpperCase();
 }
 
-function AccountActionButton({ danger = false, icon, label, onClick }: { danger?: boolean; icon: ReactNode; label: string; onClick: () => void }) {
+function AccountRow({ hint, icon, label, onClick }: { hint?: string; icon: ReactNode; label: string; onClick: () => void }) {
   return (
-    <ButtonBase onClick={onClick} sx={{ border: "1px solid", borderColor: danger ? "error.light" : "divider", borderRadius: 1.5, color: danger ? "error.main" : "text.primary", display: "flex", gap: 1.5, justifyContent: "flex-start", minHeight: 48, px: 1.5, textAlign: "left", width: "100%", "&:hover": { bgcolor: danger ? "error.light" : "action.hover" }, "& .MuiSvgIcon-root": { flexShrink: 0, fontSize: 20 } }}>
-      {icon}<Typography sx={{ fontSize: 14, fontWeight: 600 }}>{label}</Typography>
+    <ButtonBase onClick={onClick} sx={{ alignItems: "center", borderTop: 1, borderColor: "divider", display: "flex", gap: 1.5, justifyContent: "flex-start", minHeight: 60, px: 2, py: 1.5, textAlign: "left", width: "100%", "&:first-of-type": { borderTop: 0 }, "& > .MuiSvgIcon-root:first-of-type": { color: "text.secondary" } }}>
+      {icon}
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Typography variant="subtitle2">{label}</Typography>
+        {hint ? <Typography color="text.secondary" component="div" variant="caption">{hint}</Typography> : null}
+      </Box>
+      <ChevronRightRoundedIcon sx={{ color: "text.secondary", fontSize: size.iconMd }} />
     </ButtonBase>
   );
 }

@@ -9,7 +9,7 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
-const { color, radius, size } = ergEnterpriseTokens;
+const { radius, size } = ergEnterpriseTokens;
 
 /** "Lớp 7A" → "7A": the short class code shown in the scope avatar. */
 function classCode(className: string) {
@@ -32,7 +32,7 @@ export function LmsMobileTopBar({
     <Box component="header" data-testid="lms-mobile-header" sx={{ bgcolor: "background.default", display: { xs: "block", xl: "none" }, flexShrink: 0, pb: 1, pt: "calc(env(safe-area-inset-top, 0px) + 8px)", px: 2, position: "sticky", top: 0, zIndex: (theme) => theme.zIndex.appBar }}>
       <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
         <ButtonBase aria-label={`Chọn lớp, đang chọn ${selectedClassName || "Lớp học"}`} onClick={onScopeOpen} sx={{ bgcolor: "background.paper", border: "1px solid", borderColor: "divider", borderRadius: `${radius.chip}px`, flex: 1, gap: 1.25, height: 48, justifyContent: "flex-start", minWidth: 0, pl: 0.75, pr: 1.5, textAlign: "left" }}>
-          <Box sx={{ alignItems: "center", bgcolor: color.primarySofter, borderRadius: "50%", color: "primary.main", display: "flex", flexShrink: 0, height: 36, justifyContent: "center", typography: "caption", width: 36 }}>
+          <Box sx={{ alignItems: "center", bgcolor: "primary.main", borderRadius: "50%", color: "primary.contrastText", display: "flex", flexShrink: 0, height: 36, justifyContent: "center", typography: "caption", fontWeight: "fontWeightBold", width: 36 }}>
             {classCode(selectedClassName)}
           </Box>
           <Box sx={{ flex: 1, minWidth: 0 }}>
