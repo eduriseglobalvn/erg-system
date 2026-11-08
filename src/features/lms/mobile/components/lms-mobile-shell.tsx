@@ -26,12 +26,12 @@ import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 const { radius, size } = ergEnterpriseTokens;
 
 export function LmsMobileShell<TSection extends string>({
-  activeLabel, activeSection, children, classes, dockItems, hideDock = false, moreItems = [], schoolName, schools,
+  activeLabel, activeSection, children, classes, dockItems, moreItems = [], schoolName, schools,
   selectedClassId, selectedClassName, selectedSchoolId, teacherEmail, teacherName,
   onClassChange, onNavigate, onSchoolChange, onSignOut,
 }: {
   activeLabel: string; activeSection: TSection | null; children: ReactNode; classes: LmsMobileClassOption[];
-  dockItems: Array<ErgMobileDockItem<TSection>>; hideDock?: boolean;
+  dockItems: Array<ErgMobileDockItem<TSection>>;
   moreItems?: Array<ErgSheetTileItem & { group: string }>; schoolName: string;
   schools: LmsMobileSchoolOption[]; selectedClassId: string; selectedClassName: string; selectedSchoolId: string;
   teacherEmail: string; teacherName: string;
@@ -81,17 +81,15 @@ export function LmsMobileShell<TSection extends string>({
 
       <OfflineShellStatus network={network} />
 
-      <Box component="main" data-testid="lms-mobile-scroll-region" sx={{ flex: 1, minHeight: 0, overflowY: "auto", overscrollBehavior: "contain", pb: hideDock ? 0 : ergMobileDockClearance() }}>{children}</Box>
-      {hideDock ? null : (
-        <ErgMobileDock
-          activeId={activeSection}
-          ariaLabel="Điều hướng giáo viên"
-          hideAt="xl"
-          items={dockItems.map((item) => (item.opensSheet ? { ...item, avatarInitials: nameInitials(teacherName) } : item))}
-          onNavigate={navigate}
-          onOpenSheet={() => setAccountOpen(true)}
-        />
-      )}
+      <Box component="main" data-testid="lms-mobile-scroll-region" sx={{ flex: 1, minHeight: 0, overflowY: "auto", overscrollBehavior: "contain", pb: ergMobileDockClearance() }}>{children}</Box>
+      <ErgMobileDock
+        activeId={activeSection}
+        ariaLabel="Điều hướng giáo viên"
+        hideAt="xl"
+        items={dockItems.map((item) => (item.opensSheet ? { ...item, avatarInitials: nameInitials(teacherName) } : item))}
+        onNavigate={navigate}
+        onOpenSheet={() => setAccountOpen(true)}
+      />
       <LmsScopeSheet classes={classes} onClassChange={onClassChange} onOpenChange={setScopeOpen} onSchoolChange={onSchoolChange} open={scopeOpen} schools={schools} selectedClassId={selectedClassId} selectedSchoolId={selectedSchoolId} />
 
       <MobileBottomSheet
