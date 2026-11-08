@@ -1,5 +1,9 @@
 import { useState, type ReactNode } from "react";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import FingerprintIcon from "@mui/icons-material/Fingerprint";
 import Box from "@mui/material/Box";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
 import Typography from "@mui/material/Typography";
@@ -7,17 +11,18 @@ import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 
 import { ErgEmptyState, ErgErrorState, ErgSkeleton } from "@/components/erg-mui/erg-feedback";
-import { ErgButton } from "@/components/erg-mui/erg-actions";
+import { ErgButton, ErgIconButton } from "@/components/erg-mui/erg-actions";
 import { formatTimeVi, todayInput } from "@/domain/formatters/format-date";
 import { adminPath } from "@/platform/workspaces/workspace-paths";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 import { useAdminToday, usePunchReview, useRemind, useTimekeepingSchools } from "../api/timekeeping-admin-query";
 import { useApprovalDecision, useApprovals } from "../api/timekeeping-approval-query";
 import type { ActionItem } from "../api/timekeeping-types";
+import { PunchCard } from "../components/punch/punch-card";
 import { requestErrorText } from "../components/requests/request-model";
 import { ApprovalCard, MissingCard, OutOfZoneCard } from "./admin-mobile-cards";
 import { PunchReviewDialog } from "./punch-review-dialog";
 import { RejectReasonDialog } from "./reject-reason-dialog";
-import { SchoolFilter } from "./school-filter";
 import { useAdminSearch } from "./use-admin-search";
 
 const APPROVALS = "/employees/teacher-absence";
@@ -26,14 +31,27 @@ type Rejecting = { kind: "request" | "punch"; id: string; title: string };
 
 const onError = (error: unknown) => toast.error(requestErrorText(error));
 
-function Count({ label, value }: { label: string; value?: number }) {
+function Count({ label, value, tone }: { label: string; value?: number; tone?: "warning" | "error" }) {
   return (
-    <Box sx={{ flex: 1, minWidth: 0, textAlign: "center" }}>
+    <Box sx={{ flex: 1, minWidth: 0, px: 0.5, py: 1.5, textAlign: "center" }}>
+      <Typography component="div" sx={{ color: tone && value ? `${tone}.main` : "text.primary", fontVariantNumeric: "tabular-nums" }} variant="h4">{value ?? "—"}</Typography>
       <Typography color="text.secondary" variant="caption">{label}</Typography>
-      <Typography sx={{ fontVariantNumeric: "tabular-nums" }} variant="h6">{value ?? "—"}</Typography>
     </Box>
   );
 }
+
+const { color, radius, shadow, statusTint } = ergEnterpriseTokens;
+
+// Canvas `.seg`: the three queues as an equal-width segmented control (still MUI tabs underneath).
+const segmentedTabs = {
+  bgcolor: color.divider,
+  borderRadius: `${radius.control}px`,
+  minHeight: 0,
+  p: "3px",
+  "& .MuiTabs-indicator": { display: "none" },
+  "& .MuiTab-root": { borderRadius: `${radius.sm}px`, color: "text.secondary", minHeight: 36, minWidth: 0, px: 0.5, py: 0, typography: "subtitle2" },
+  "& .MuiTab-root.Mui-selected": { bgcolor: "background.paper", boxShadow: shadow.xs, color: "text.primary" },
+} as const;
 
 /** A05: admin phone view of A01 (counts, then the three queues that need a decision). Below `md` only. */
 export function AdminTimekeepingMobile() {
@@ -50,6 +68,7 @@ export function AdminTimekeepingMobile() {
   const [tab, setTab] = useState<Tab>("pending");
   const [rejecting, setRejecting] = useState<Rejecting | null>(null);
   const [reviewing, setReviewing] = useState<ActionItem | null>(null);
+  const [schoolMenu, setSchoolMenu] = useState<HTMLElement | null>(null);
   const go = (href: string) => void navigate({ href: adminPath(href) });
   const busy = decision.isPending || punchReview.isPending || remind.isPending;
 
@@ -100,25 +119,35 @@ export function AdminTimekeepingMobile() {
   }
 
   return (
-    <Box sx={{ display: "grid", gap: 2, minWidth: 0, px: 2, py: 2 }}>
-      <Box>
-        <Typography component="h1" variant="h5">Chấm công · {school}</Typography>
-        <Typography color="text.secondary" variant="body2">Hôm nay, {date.slice(8, 10)}/{date.slice(5, 7)}{updated ? ` · ${updated}` : ""}</Typography>
+    <Box sx={{ display: "grid", gap: 1.5, gridTemplateColumns: "minmax(0, 1fr)", minWidth: 0, px: 2, py: 2 }}>
+      <Box sx={{ alignItems: "center", bgcolor: "background.paper", border: 1, borderColor: "divider", borderRadius: `${radius.chip}px`, display: "flex", gap: 1.25, minHeight: 48, pl: 0.75, pr: 0.5 }}>
+        <Box aria-hidden sx={{ alignItems: "center", bgcolor: statusTint.success.bg, borderRadius: "50%", color: statusTint.success.dot, display: "flex", flexShrink: 0, height: 36, justifyContent: "center", width: 36 }}>
+          <FingerprintIcon fontSize="small" />
+        </Box>
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Typography component="h1" noWrap variant="subtitle2">Chấm công · {school}</Typography>
+          <Typography color="text.secondary" component="div" noWrap variant="caption">Hôm nay, {date.slice(8, 10)}/{date.slice(5, 7)}{updated ? ` · ${updated}` : ""}</Typography>
+        </Box>
+        <ErgIconButton aria-haspopup="menu" label="Chọn cơ sở" onClick={(event) => setSchoolMenu(event.currentTarget)}><ExpandMoreIcon /></ErgIconButton>
       </Box>
-      <SchoolFilter allowAll onChange={(next) => update({ schoolId: next })} schools={schools.data ?? []} value={schoolId} />
+      <Menu anchorEl={schoolMenu} onClose={() => setSchoolMenu(null)} open={Boolean(schoolMenu)}>
+        {[{ id: "", name: "Tất cả cơ sở" }, ...(schools.data ?? [])].map((option) => (
+          <MenuItem key={option.id || "all"} onClick={() => { update({ schoolId: option.id }); setSchoolMenu(null); }} selected={option.id === schoolId}>{option.name}</MenuItem>
+        ))}
+      </Menu>
       {today.isError ? (
         <ErgErrorState action={<ErgButton onClick={() => void today.refetch()} variant="outlined">Tải lại</ErgButton>} description="Không tải được dữ liệu chấm công." title="Có lỗi xảy ra" />
       ) : !data ? (
         <ErgSkeleton height={240} />
       ) : (
         <>
-          <Box sx={{ bgcolor: "background.paper", border: 1, borderColor: "divider", borderRadius: 2, display: "flex", gap: 0.5, py: 1 }}>
+          <PunchCard sx={{ display: "flex", p: 0, "& > * + *": { borderLeft: 1, borderColor: "divider" } }}>
             <Count label="Có mặt" value={data.present} />
-            <Count label="Muộn" value={data.late} />
-            <Count label="Chưa chấm" value={data.notPunched} />
+            <Count label="Muộn" tone="warning" value={data.late} />
+            <Count label="Chưa chấm" tone="error" value={data.notPunched} />
             <Count label="Nghỉ" value={data.leave} />
-          </Box>
-          <Tabs aria-label="Việc cần xử lý" onChange={(_, next: Tab) => setTab(next)} scrollButtons={false} value={tab} variant="scrollable">
+          </PunchCard>
+          <Tabs aria-label="Việc cần xử lý" onChange={(_, next: Tab) => setTab(next)} sx={segmentedTabs} value={tab} variant="fullWidth">
             <Tab label={`Chờ duyệt (${data.pendingRequests ?? 0})`} value="pending" />
             <Tab label={`Chưa chấm (${data.notPunched ?? 0})`} value="missing" />
             <Tab label={`Ngoài vùng (${outside.length})`} value="outside" />
