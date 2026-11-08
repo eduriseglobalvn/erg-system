@@ -1,4 +1,5 @@
 import { useState } from "react";
+import CampaignRoundedIcon from "@mui/icons-material/CampaignRounded";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
@@ -10,12 +11,15 @@ import Typography from "@mui/material/Typography";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import type { Theme } from "@mui/material/styles";
 
-import { ErgButton, ErgEmptyState, ErgErrorState, ErgTableToolbar } from "@/components/erg-mui";
+import { ErgButton, ErgEmptyState, ErgErrorState, ErgTableToolbar, ergSegmentedTabsSx } from "@/components/erg-mui";
+import { ergMobileDockClearance } from "@/components/portal/erg-mobile-dock";
 import { inboxTabsFor } from "@/features/notifications/components/inbox-filters";
 import { InboxList } from "@/features/notifications/components/inbox-list";
+import { MarkAllReadButton } from "@/features/notifications/components/mark-all-read-button";
 import { ADMIN_NOTIFICATION_PORTAL } from "@/platform/workspaces/workspace-notification-portal";
 import { adminPath } from "@/platform/workspaces/workspace-paths";
 import { ContentPendingSkeleton } from "@/routes/route-feedback";
+import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
 
 import { useCampaigns, useCampaignSummary } from "../api/campaign-query";
 import type { CampaignBox } from "../api/campaign-types";
@@ -114,19 +118,20 @@ export function AdminInboxScreen() {
   const table = tab === "SENT" && desktop;
 
   return (
-    <Box sx={{ display: "grid", gap: 1.5, maxWidth: table ? 1120 : 860, mx: "auto", px: { xs: 2, sm: 3 }, py: 3, width: "100%" }}>
+    // Phones: room under the last row for the floating "Gửi thông báo" button.
+    <Box sx={{ display: "grid", gap: 1.5, maxWidth: table ? 1120 : 860, mx: "auto", px: { xs: 2, sm: 3 }, pt: 3, pb: canSend && !desktop ? 10 : 3, width: "100%" }}>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-        <Typography variant="h5" component="h1" sx={{ flex: 1, fontWeight: "fontWeightBold" }}>Hộp thư</Typography>
-        {canSend ? <ErgButton variant="contained" onClick={compose}>Gửi thông báo</ErgButton> : null}
+        <Typography variant="h1" sx={{ flex: 1 }}>Hộp thư</Typography>
+        <MarkAllReadButton portal={ADMIN_NOTIFICATION_PORTAL} />
+        {canSend && desktop ? <ErgButton variant="contained" startIcon={<CampaignRoundedIcon />} onClick={compose}>Gửi thông báo</ErgButton> : null}
       </Box>
       {tabs.length > 1 ? (
         <Tabs
           aria-label="Hộp thư"
           value={tab}
-          variant="scrollable"
-          allowScrollButtonsMobile
+          variant="fullWidth"
           onChange={(_, value: string) => void navigate({ href: value === "INBOX" ? adminPath("/notifications") : `${adminPath("/notifications")}?tab=${value}`, replace: true })}
-          sx={{ minHeight: 44, "& .MuiTab-root": { minHeight: 44 } }}
+          sx={ergSegmentedTabsSx}
         >
           {tabs.map((item) => <Tab key={item.id} value={item.id} label={item.label} />)}
         </Tabs>
@@ -141,6 +146,17 @@ export function AdminInboxScreen() {
       ) : (
         <SentCampaignList box={tab as CampaignBox} onEdit={edit} onOpen={open} />
       )}
+      {canSend && !desktop ? (
+        // Canvas N15: the send action floats as a pill above the dock instead of crowding the header.
+        <ErgButton
+          variant="contained"
+          startIcon={<CampaignRoundedIcon />}
+          onClick={compose}
+          sx={{ position: "fixed", right: 16, bottom: ergMobileDockClearance(12), zIndex: "speedDial", height: 52, px: 2.5, borderRadius: `${t.radius.chip}px`, boxShadow: t.shadow.float }}
+        >
+          Gửi thông báo
+        </ErgButton>
+      ) : null}
     </Box>
   );
 }

@@ -6,7 +6,8 @@ import ListItemButton from "@mui/material/ListItemButton";
 import Typography from "@mui/material/Typography";
 
 import { ErgStatusChip } from "@/components/erg-mui";
-import { formatDateTimeVi } from "@/domain/formatters/format-date";
+import { formatDateTimeVi, formatListTimeVi } from "@/domain/formatters/format-date";
+import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
 
 import { inboxSourceLabel, isSchoolMessage, needsAck, priorityLabel, type InboxItem as InboxItemData } from "./inbox-filters";
 
@@ -15,18 +16,21 @@ const clamp2 = { display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "v
 export function InboxItem({ item, onOpen }: { item: InboxItemData; onOpen: (item: InboxItemData) => void }) {
   const priority = priorityLabel(item);
   const ack = needsAck(item);
-  const time = formatDateTimeVi(item.createdAt);
+  const time = formatListTimeVi(item.createdAt);
+  const school = isSchoolMessage(item);
   const source = inboxSourceLabel(item);
-  const Icon = isSchoolMessage(item) ? CampaignRoundedIcon : DnsRoundedIcon;
+  const Icon = school ? CampaignRoundedIcon : DnsRoundedIcon;
+  // Canvas `.ico.sm`: soft tile tinted by urgency, else primary for people-sent and grey for automated messages.
+  const tint = t.statusTint[priority === "Khẩn" ? "error" : priority ? "warning" : school ? "info" : "neutral"];
   // The name carries what the dot and colours show, so screen readers get unread / priority / ack state too.
-  const label = [item.unread && "Chưa đọc", priority, ack && "Cần xác nhận", source, item.title, time].filter(Boolean).join(", ");
+  const label = [item.unread && "Chưa đọc", priority, ack && "Cần xác nhận", source, item.title, formatDateTimeVi(item.createdAt)].filter(Boolean).join(", ");
 
   return (
     <ListItem disablePadding divider>
       <ListItemButton aria-label={label} onClick={() => onOpen(item)} sx={{ alignItems: "flex-start", gap: 1.5, px: 2, py: 1.5, minHeight: 64 }}>
         <Box
           aria-hidden
-          sx={{ display: "grid", placeItems: "center", width: 36, height: 36, flexShrink: 0, borderRadius: "50%", bgcolor: priority === "Khẩn" ? "error.main" : "primary.main", color: "common.white" }}
+          sx={{ display: "grid", placeItems: "center", width: 32, height: 32, flexShrink: 0, borderRadius: `${t.radius.sm}px`, bgcolor: tint.bg, color: tint.dot }}
         >
           <Icon fontSize="small" />
         </Box>
@@ -35,7 +39,7 @@ export function InboxItem({ item, onOpen }: { item: InboxItemData; onOpen: (item
             <Typography variant="caption" noWrap sx={{ flex: 1, minWidth: 0, color: "text.secondary", fontWeight: "fontWeightMedium" }}>{source}</Typography>
             <Typography variant="caption" sx={{ flexShrink: 0, color: "text.secondary" }}>{time}</Typography>
           </Box>
-          <Typography variant="body2" sx={{ ...clamp2, mt: 0.25, fontWeight: item.unread ? "fontWeightBold" : "fontWeightMedium" }}>{item.title}</Typography>
+          <Typography variant="subtitle2" sx={{ ...clamp2, mt: 0.25 }}>{item.title}</Typography>
           {item.bodyPreview && item.bodyPreview !== item.title ? (
             <Typography variant="body2" sx={{ ...clamp2, color: "text.secondary" }}>{item.bodyPreview}</Typography>
           ) : null}

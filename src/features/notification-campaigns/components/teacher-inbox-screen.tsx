@@ -5,8 +5,9 @@ import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
 import Typography from "@mui/material/Typography";
 
-import { ErgButton } from "@/components/erg-mui";
+import { ErgButton, ergSegmentedTabsSx } from "@/components/erg-mui";
 import { InboxList } from "@/features/notifications/components/inbox-list";
+import { MarkAllReadButton } from "@/features/notifications/components/mark-all-read-button";
 import { TEACHER_NOTIFICATION_PORTAL } from "@/platform/workspaces/workspace-notification-portal";
 import { teacherPath } from "@/platform/workspaces/workspace-paths";
 
@@ -16,7 +17,7 @@ import { campaignDetailPath, notificationComposePath } from "../model/campaign-p
 import { SentCampaignList } from "./sent-campaign-list";
 
 const VIEWS = [
-  { id: "INBOX", label: "Hộp thư" },
+  { id: "INBOX", label: "Nhận" },
   { id: "SENT", label: "Đã gửi" },
   { id: "SCHEDULED", label: "Lên lịch" },
   { id: "DRAFT", label: "Nháp" },
@@ -40,16 +41,16 @@ export function TeacherInboxScreen() {
   return (
     <Box sx={{ display: "grid", gap: 1.5 }}>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-        <Typography variant="h5" component="h1" sx={{ flex: 1, fontWeight: "fontWeightBold" }}>Hộp thư</Typography>
-        <ErgButton variant="contained" startIcon={<CampaignRoundedIcon />} onClick={() => void navigate({ href: notificationComposePath("teacher") })}>Gửi lớp</ErgButton>
+        <Typography variant="h1" sx={{ flex: 1 }}>Hộp thư</Typography>
+        <MarkAllReadButton portal={TEACHER_NOTIFICATION_PORTAL} />
+        <ErgButton variant="contained" size="small" startIcon={<CampaignRoundedIcon />} onClick={() => void navigate({ href: notificationComposePath("teacher") })}>Gửi lớp</ErgButton>
       </Box>
       <Tabs
         aria-label="Hộp thư và thông báo của tôi"
         value={view}
-        variant="scrollable"
-        allowScrollButtonsMobile
+        variant="fullWidth"
         onChange={(_, value: string) => void navigate({ href: value === "INBOX" ? inboxHref : `${inboxHref}?tab=${value}`, replace: true })}
-        sx={{ minHeight: 44, "& .MuiTab-root": { minHeight: 44 } }}
+        sx={ergSegmentedTabsSx}
       >
         {VIEWS.map((item) => <Tab key={item.id} value={item.id} label={item.label} />)}
       </Tabs>
