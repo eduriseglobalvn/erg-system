@@ -37,6 +37,8 @@ import {
   type StudentGroup,
 } from "@/features/lms/components/student-groups-parts";
 import { CreateStudentGroupDialog } from "@/features/lms/components/student-group-create-dialog";
+import { StudentGroupsMobile } from "@/features/lms/components/student-groups-mobile";
+import { useLmsMobileBreakpoint } from "@/features/lms/mobile/hooks/use-lms-mobile-breakpoint";
 
 const allClassesFilterValue = "all-classes";
 const initialStudentGroups = (): StudentGroup[] => [
@@ -68,6 +70,7 @@ export function StudentGroupsPage({
   onBack: () => void;
 }) {
   const apiBacked = hasApiBase();
+  const isMobile = useLmsMobileBreakpoint("(max-width: 767px)");
   const [groups, setGroups] = useState<StudentGroup[]>(() => (apiBacked ? [] : initialStudentGroups()));
   const [selectedGroupId, setSelectedGroupId] = useState("g-1");
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -294,6 +297,34 @@ export function StudentGroupsPage({
     void commitGroup((group) => ({ ...group, studentIds: [] }));
   }
 
+  const createDialog = (
+    <CreateStudentGroupDialog
+      onClose={() => setCreateDialogOpen(false)}
+      onSubmit={createGroup}
+      open={createDialogOpen}
+      pending={groupMutationPending}
+    />
+  );
+
+  if (isMobile) {
+    return (
+      <>
+        <StudentGroupsMobile
+          classes={classes}
+          createPending={groupMutationPending}
+          errorMessage={groupsErrorMessage}
+          groups={groups}
+          onBack={onBack}
+          onCreate={() => setCreateDialogOpen(true)}
+          status={apiBacked && studentGroupsQuery.isPending ? "loading" : "ready"}
+          studentNames={new Map(studentRoster.map((student) => [student.id, student.name]))}
+          subtitle={selectedSchoolName}
+        />
+        {createDialog}
+      </>
+    );
+  }
+
   return (
     <Box sx={{ display: "flex", minHeight: "100%", flexDirection: "column", gap: 1.5, px: { xs: 1.5, lg: 3 }, py: { xs: 1.5, lg: 2 }, height: { lg: "100%" }, overflow: { lg: "hidden" } }}>
       <Paper variant="outlined" sx={{ ...panelSx, flexShrink: 0, px: 1.5, py: 1.25 }}>
@@ -501,12 +532,7 @@ export function StudentGroupsPage({
           </Paper>
         )}
       </Box>
-      <CreateStudentGroupDialog
-        onClose={() => setCreateDialogOpen(false)}
-        onSubmit={createGroup}
-        open={createDialogOpen}
-        pending={groupMutationPending}
-      />
+      {createDialog}
     </Box>
   );
 }
