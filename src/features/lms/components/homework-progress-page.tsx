@@ -159,7 +159,7 @@ export function HomeworkProgressPage({
 
   if (isMobile) {
     const loading = apiBacked && (progressQuery.isLoading || assignmentReportQuery.isLoading) && !progressRows.length;
-    const failed = apiBacked && progressQuery.isError && assignmentReportQuery.isError;
+    const failed = apiBacked && progressQuery.isError && assignmentReportQuery.isError && !progressRows.length;
     return (
       <AssignmentProgressMobile
         classLabel={selectedClass?.className}
