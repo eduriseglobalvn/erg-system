@@ -1,4 +1,4 @@
-import type { ElementType, ReactNode } from "react";
+import type { ReactNode } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import ButtonBase from "@mui/material/ButtonBase";
@@ -18,7 +18,7 @@ const TILE_TONE: Record<ErgSheetTileTone, { bg: string; fg: string }> = {
   neutral: { bg: statusTint.neutral.bg, fg: statusTint.neutral.color },
 };
 
-export type ErgSheetTileItem = { badge?: number; icon: ElementType; label: string; path: string; tag?: string; tone?: ErgSheetTileTone };
+export type ErgSheetTileItem = { badge?: number | string; icon: ReactNode; label: string; path: string; tag?: string; tone?: ErgSheetTileTone };
 
 /** Overline group label + 4-column tile grid (design N2/N5 "Tài khoản và chức năng"). */
 export function ErgSheetTileGroup({ items, label, onNavigate }: { items: ErgSheetTileItem[]; label: string; onNavigate: (path: string) => void }) {
@@ -39,7 +39,6 @@ export function ErgSheetOverline({ children }: { children: ReactNode }) {
 
 function ErgSheetTile({ item, onClick }: { item: ErgSheetTileItem; onClick: () => void }) {
   const tone = TILE_TONE[item.tone ?? "primary"];
-  const Icon = item.icon;
   return (
     <ButtonBase
       aria-label={item.badge ? `${item.label}, ${item.badge} mới` : item.label}
@@ -49,7 +48,7 @@ function ErgSheetTile({ item, onClick }: { item: ErgSheetTileItem; onClick: () =
       {item.badge ? (
         <Box aria-hidden sx={{ bgcolor: "error.main", borderRadius: `${radius.chip}px`, color: "error.contrastText", minWidth: 20, position: "absolute", px: 0.75, right: 6, top: 6, typography: "caption", fontWeight: "fontWeightBold", lineHeight: "20px" }}>{item.badge}</Box>
       ) : null}
-      <Box sx={{ alignItems: "center", bgcolor: tone.bg, borderRadius: `${radius.control}px`, color: tone.fg, display: "flex", height: 40, justifyContent: "center", width: 40 }}><Icon /></Box>
+      <Box sx={{ alignItems: "center", bgcolor: tone.bg, borderRadius: `${radius.control}px`, color: tone.fg, display: "flex", height: 40, justifyContent: "center", width: 40 }}>{item.icon}</Box>
       <Typography component="span" sx={{ lineHeight: 1.25 }} variant="caption">{item.label}</Typography>
       {item.tag ? <Typography color="text.secondary" component="span" sx={{ bgcolor: statusTint.neutral.bg, borderRadius: `${radius.xs}px`, px: 0.625, typography: "caption" }}>{item.tag}</Typography> : null}
     </ButtonBase>

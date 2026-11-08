@@ -158,14 +158,14 @@ export type LmsMobileMoreItem = ErgSheetTileItem & { group: "Giảng dạy" | "C
 
 /** Account-sheet tiles (design N2), grouped; keeps screens off the dock reachable on mobile. */
 export const lmsMobileMoreItems: LmsMobileMoreItem[] = [
-  { group: "Giảng dạy", icon: CalendarMonthRoundedIcon, label: "Lịch làm việc", path: teacherPath("/calendar") },
-  { group: "Giảng dạy", icon: EventAvailableRoundedIcon, label: "Điểm danh", path: teacherPath("/attendance") },
-  { group: "Giảng dạy", icon: MenuBookRoundedIcon, label: "Sổ đầu bài", path: teacherPath("/class-log") },
-  { group: "Giảng dạy", icon: BarChartRoundedIcon, label: "Báo cáo lớp học", path: teacherPath("/reports") },
-  { group: "Giảng dạy", icon: FactCheckRoundedIcon, label: "Bảng điểm", path: teacherPath("/score") },
-  { group: "Chấm công", icon: FileText, label: "Đơn từ", path: teacherPath("/timekeeping/requests"), tone: "success" },
-  { group: "Chấm công", icon: CalendarViewMonthRoundedIcon, label: "Bảng công", path: teacherPath("/timekeeping/timesheet"), tone: "success" },
-  { group: "Chấm công", icon: PendingActionsRoundedIcon, label: "Duyệt đơn", path: teacherPath("/timekeeping/approvals"), tone: "success" },
+  { group: "Giảng dạy", icon: <CalendarMonthRoundedIcon />, label: "Lịch làm việc", path: teacherPath("/calendar") },
+  { group: "Giảng dạy", icon: <EventAvailableRoundedIcon />, label: "Điểm danh", path: teacherPath("/attendance") },
+  { group: "Giảng dạy", icon: <MenuBookRoundedIcon />, label: "Sổ đầu bài", path: teacherPath("/class-log") },
+  { group: "Giảng dạy", icon: <BarChartRoundedIcon />, label: "Báo cáo lớp học", path: teacherPath("/reports") },
+  { group: "Giảng dạy", icon: <FactCheckRoundedIcon />, label: "Bảng điểm", path: teacherPath("/score") },
+  { group: "Chấm công", icon: <FileText />, label: "Đơn từ", path: teacherPath("/timekeeping/requests"), tone: "success" },
+  { group: "Chấm công", icon: <CalendarViewMonthRoundedIcon />, label: "Bảng công", path: teacherPath("/timekeeping/timesheet"), tone: "success" },
+  { group: "Chấm công", icon: <PendingActionsRoundedIcon />, label: "Duyệt đơn", path: teacherPath("/timekeeping/approvals"), tone: "success" },
 ];
 
 function matchesWorkspacePath(pathname: string, canonicalPath: string) {
