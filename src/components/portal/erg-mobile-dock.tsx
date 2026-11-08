@@ -10,11 +10,13 @@ const { color, motion, radius, shadow, size } = ergEnterpriseTokens;
 
 /** Capsule height: 44px buttons + 5px padding + 1px border on each side. */
 export const ERG_MOBILE_DOCK_HEIGHT: number = size.mobileDock;
-const DOCK_OFFSET = 12;
+const DOCK_SIDE_GUTTER = 12;
+/** Gap under the capsule: tucked just above the iOS home indicator instead of a full safe-area (~46px) away. */
+const DOCK_BOTTOM = "max(8px, env(safe-area-inset-bottom, 0px) - 22px)";
 
 /** Distance from the viewport bottom to `gap` px above the dock: scroll regions pad by it, floating UI sits on it. */
 export function ergMobileDockClearance(gap = 24): string {
-  return `calc(${ERG_MOBILE_DOCK_HEIGHT + DOCK_OFFSET + gap}px + env(safe-area-inset-bottom, 0px))`;
+  return `calc(${ERG_MOBILE_DOCK_HEIGHT + gap}px + ${DOCK_BOTTOM})`;
 }
 
 /** Safari 15.0–15.3 drop `100dvh` entirely; shells spread this next to their dvh heights. */
@@ -83,18 +85,18 @@ export function ErgMobileDock<TId extends string>({
           border: "1px solid",
           borderColor: "divider",
           borderRadius: `${radius.chip}px`,
-          bottom: `calc(env(safe-area-inset-bottom, 0px) + ${DOCK_OFFSET}px)`,
+          bottom: DOCK_BOTTOM,
           boxShadow: shadow.float,
           boxSizing: "border-box",
           display: shown("flex"),
           gap: "2px",
           height: ERG_MOBILE_DOCK_HEIGHT,
           // left/right + auto margins + fit-content centre the capsule with the full width available to shrink into.
-          left: DOCK_OFFSET,
+          left: DOCK_SIDE_GUTTER,
           mx: "auto",
           p: "5px",
           position: "fixed",
-          right: DOCK_OFFSET,
+          right: DOCK_SIDE_GUTTER,
           width: "fit-content",
           zIndex: (theme) => theme.zIndex.appBar,
         }}
@@ -144,7 +146,7 @@ function DockButton<TId extends string>({
         transition: `background-color ${motion.duration.fast}ms ${motion.easing.standard}`,
         "&:active": { transform: "scale(0.97)" },
         "&:focus-visible": { boxShadow: shadow.focus, outline: "none" },
-        "&:hover": { bgcolor: active ? "primary.dark" : "action.hover" },
+        "@media (hover: hover)": { "&:hover": { bgcolor: active ? "primary.main" : "action.hover" } },
       }}
     >
       <Box sx={{ display: "flex", flexShrink: 0, position: "relative" }}>
@@ -185,7 +187,7 @@ function DockButton<TId extends string>({
         ) : null}
       </Box>
       {active ? (
-        <Typography color="inherit" noWrap sx={{ minWidth: 0 }} variant="subtitle2">
+        <Typography noWrap sx={{ color: "primary.contrastText", minWidth: 0 }} variant="subtitle2">
           {label}
         </Typography>
       ) : null}
