@@ -151,6 +151,7 @@ export default function AdminErgPortalShell() {
   const model: AdminShellModel = {
     activeItem,
     activeLeaf,
+    canAccess,
     isPreservedWorkspace,
     legacyPathname,
     pendingQuestionImports,
