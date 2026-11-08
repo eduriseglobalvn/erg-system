@@ -1,12 +1,14 @@
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 
-import { ErgButton } from "@/components/erg-mui/erg-actions";
+import { ErgButton, ErgIconButton } from "@/components/erg-mui/erg-actions";
 import { ErgTextField } from "@/components/erg-mui/erg-form";
-import { ErgPageHeader } from "@/components/erg-mui/erg-page-header";
 import { teacherPath } from "@/platform/workspaces/workspace-paths";
 import { useFaceConsentMutation, useTimekeepingToday } from "../../api/timekeeping-query";
 import type { PunchInput, PunchResult } from "../../api/timekeeping-types";
@@ -19,13 +21,10 @@ import { FaceConsentDialog } from "./face-consent-dialog";
 import { PunchCameraFrame } from "./punch-camera-frame";
 import { buildPunchChecks, isOutsideZone } from "./punch-checks";
 import { PunchChecksList } from "./punch-checks-list";
-import { hhmm, minusMinutes } from "./punch-format";
+import { hhmm, hms, minusMinutes } from "./punch-format";
 import { resizePhotoFile } from "./punch-photo";
-import { PunchSuccessView } from "./punch-success-view";
+import { PunchSuccessView, REMIND_BEFORE_END_MIN } from "./punch-success-view";
 import { usePunchAttempt } from "./use-punch-attempt";
-
-/** Minutes before the shift end at which the check-out reminder is sent. */
-const REMIND_BEFORE_END_MIN = 10;
 
 /** G02: camera + checks, then the punch. G03 replaces the page body once it succeeds. */
 export function PunchVerifyPage() {
@@ -126,8 +125,12 @@ export function PunchVerifyPage() {
   };
 
   return (
-    <Box sx={{ display: "grid", gap: 2, maxWidth: 480, mx: "auto", px: { xs: 2, sm: 3 }, py: 2 }}>
-      <ErgPageHeader description="Kiểm tra trước khi chấm" title={`Chấm ${verb}`} />
+    <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: "minmax(0, 1fr)", maxWidth: 480, mx: "auto", px: { xs: 2, sm: 3 }, py: 2 }}>
+      <Box sx={{ alignItems: "center", display: "flex", gap: 1, ml: -1 }}>
+        <ErgIconButton label="Quay lại" onClick={goHome}><ArrowBackIcon /></ErgIconButton>
+        <Typography component="h1" sx={{ flex: 1, minWidth: 0 }} variant="h4">{`Xác thực chấm ${verb}`}</Typography>
+        <Typography color="text.secondary" sx={{ fontVariantNumeric: "tabular-nums" }} variant="caption">{clock.ready ? hms(serverNow).slice(0, 5) : ""}</Typography>
+      </Box>
       {needsFace ? (
         <PunchCameraFrame
           error={photoMessage}
@@ -150,7 +153,7 @@ export function PunchVerifyPage() {
       ) : null}
       {attempt.error ? <Alert severity="error">{attempt.error}</Alert> : null}
       {!online ? <Alert severity="warning">Cần có mạng để chấm công</Alert> : null}
-      <ErgButton disabled={blocked} fullWidth loading={attempt.pending || submitting} onClick={() => void onPunch()} variant="contained">
+      <ErgButton disabled={blocked} fullWidth loading={attempt.pending || submitting} onClick={() => void onPunch()} size="large" startIcon={liveCamera ? <PhotoCameraIcon /> : undefined} variant="contained">
         {liveCamera ? `Chụp & chấm ${verb}` : `Chấm ${verb}`}
       </ErgButton>
       <Button onClick={() => go(`${teacherPath("/timekeeping/requests")}?new=explanation`)} variant="text">
