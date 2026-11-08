@@ -27,7 +27,7 @@ export function StudentDashboardBottomDock({
 }: {
   activePage: string;
   announcementUnreadCount?: number;
-  items: Array<{ key: StudentDockPageKey; label: string }>;
+  items: Array<{ key: StudentDockPageKey; label: string; avatarInitials?: string }>;
   onPageChange: (page: StudentDockPageKey) => void;
 }) {
   return (
@@ -37,6 +37,7 @@ export function StudentDashboardBottomDock({
       // The shell is only mounted on phone-width surfaces (useIsMobile, 768px), which no MUI breakpoint matches.
       hideAt="never"
       items={items.map((item) => ({
+        avatarInitials: item.avatarInitials,
         badgeCount: item.key === "announcements" ? announcementUnreadCount : undefined,
         icon: DOCK_ICONS[item.key],
         id: item.key as string,

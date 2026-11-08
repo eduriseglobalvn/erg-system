@@ -20,6 +20,7 @@ import {
   typeLabels,
 } from "./exercise-bank-model";
 import type { ExerciseBankController } from "./use-exercise-bank-controller";
+import { ergMobileDockClearance } from "@/components/portal/erg-mobile-dock";
 
 export function MobileExerciseBankView({
   controller,
@@ -116,7 +117,7 @@ export function MobileExerciseBankView({
       </Box>
 
       {controller.selectedExerciseId && controller.selectedExercise ? (
-        <Box sx={{ position: "fixed", insetInline: 0, bottom: "calc(92px + env(safe-area-inset-bottom, 0px) + 8px)", zIndex: 50, px: 1.5 }}>
+        <Box sx={{ position: "fixed", insetInline: 0, bottom: ergMobileDockClearance(), zIndex: 50, px: 1.5 }}>
           <Paper variant="outlined" sx={{ ...cardSx, p: 2, boxShadow: 8 }}>
             <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 1.5 }}>
               <Box sx={{ minWidth: 0 }}>

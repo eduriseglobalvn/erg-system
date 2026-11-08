@@ -29,6 +29,7 @@ import {
 import { ErgStatusChip } from "@/components/erg-mui/erg-feedback";
 import { formatDateTimeVi } from "@/domain/formatters/format-date";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
+import { ergMobileDockClearance } from "@/components/portal/erg-mobile-dock";
 
 export function PageHeader({ description, icon, title }: { description: string; icon: ReactNode; title: string }) {
   return (
@@ -151,7 +152,7 @@ export function AnnouncementCard({ announcement, selected }: { announcement: Stu
 export function AnnouncementToast({ announcement, copy, open, onClose, onOpenDetail, onSnooze }: { announcement: StudentTeacherAnnouncement; copy: DashboardCopy; open: boolean; onClose: () => void; onOpenDetail: (announcementId: string) => void; onSnooze: (announcementId: string) => void }) {
   if (!open) return null;
   return (
-    <Card sx={{ bottom: { xs: 14, sm: 18 }, border: `1px solid ${MUI_BORDER}`, borderRadius: { xs: 2.75, sm: 3 }, boxShadow: "0 18px 54px rgba(15,23,42,0.16)", left: { xs: 14, sm: "auto" }, maxWidth: "calc(100vw - 32px)", position: "fixed", right: { xs: 14, sm: 18 }, width: { xs: "auto", sm: 368 }, zIndex: 1400 }}>
+    <Card sx={{ bottom: { xs: ergMobileDockClearance(8), md: 18 }, border: `1px solid ${MUI_BORDER}`, borderRadius: { xs: 2.75, sm: 3 }, boxShadow: "0 18px 54px rgba(15,23,42,0.16)", left: { xs: 14, sm: "auto" }, maxWidth: "calc(100vw - 32px)", position: "fixed", right: { xs: 14, sm: 18 }, width: { xs: "auto", sm: 368 }, zIndex: 1400 }}>
       <CardContent sx={{ p: { xs: 1.55, sm: 2.25 } }}>
         <Stack spacing={{ xs: 0.9, sm: 1.15 }}>
           <Stack direction="row" spacing={1} alignItems="center">

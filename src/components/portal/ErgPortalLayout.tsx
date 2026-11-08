@@ -5,7 +5,7 @@ import Box from "@mui/material/Box";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import type { DashboardLeafVariant } from "@/layouts/dashboard/types/dashboard-types";
 import { useNavigate } from "@tanstack/react-router";
-import { ERG_MOBILE_DOCK_HEIGHT, ErgMobileDock, type ErgMobileDockItem } from "./erg-mobile-dock";
+import { ERG_FULL_VIEWPORT_FALLBACK, ErgMobileDock, ergMobileDockClearance, type ErgMobileDockItem } from "./erg-mobile-dock";
 import ErgPortalHeader from "./ErgPortalHeader";
 import ErgPortalSidebar from "./ErgPortalSidebar";
 import {
@@ -122,6 +122,7 @@ export default function ErgPortalLayout({
         height: "100dvh",
         maxWidth: "100vw",
         minHeight: "100dvh",
+        ...ERG_FULL_VIEWPORT_FALLBACK,
         minWidth: 0,
         overflow: "hidden",
         transition: `grid-template-columns ${PORTAL_SIDEBAR_TRANSITION}`,
@@ -198,7 +199,7 @@ export default function ErgPortalLayout({
             overflowX: "hidden",
             p: contentMode === "flush" ? 0 : { xs: 1.5, sm: 2, md: 3 },
             // Keep the last row clear of the floating dock.
-            ...(dock ? { pb: `calc(${ERG_MOBILE_DOCK_HEIGHT}px + 8px + env(safe-area-inset-bottom, 0px))` } : {}),
+            ...(dock ? { pb: ergMobileDockClearance() } : {}),
             width: "100%",
             bgcolor: '#FFFFFF',
           }}

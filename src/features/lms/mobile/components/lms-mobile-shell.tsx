@@ -15,7 +15,7 @@ import { LmsPwaSetupSheet } from "./lms-pwa-setup-sheet";
 import { LmsScopeSheet, type LmsMobileClassOption, type LmsMobileSchoolOption } from "./lms-scope-sheet";
 import { MobileBottomSheet } from "./mobile-bottom-sheet";
 import { OfflineShellStatus } from "@/components/erg-mui/offline";
-import { ERG_MOBILE_DOCK_HEIGHT, ErgMobileDock, type ErgMobileDockItem } from "@/components/portal/erg-mobile-dock";
+import { ERG_FULL_VIEWPORT_FALLBACK, ErgMobileDock, ergMobileDockClearance, type ErgMobileDockItem } from "@/components/portal/erg-mobile-dock";
 import { useOfflineShellStatus } from "@/hooks/use-offline-shell-status";
 import { useInstallPrompt } from "@/hooks/use-install-prompt";
 import { usePwaNotifications } from "../hooks/use-pwa-notifications";
@@ -56,12 +56,12 @@ export function LmsMobileShell<TSection extends string>({
   }
 
   return (
-    <Box sx={{ bgcolor: "background.default", color: "text.primary", display: { xs: "flex", xl: "none" }, flex: 1, flexDirection: "column", height: "100dvh", maxHeight: "100dvh", minHeight: "100dvh", minWidth: 0, overflow: "hidden", width: "100%" }}>
+    <Box sx={{ bgcolor: "background.default", color: "text.primary", display: { xs: "flex", xl: "none" }, flex: 1, flexDirection: "column", height: "100dvh", maxHeight: "100dvh", minHeight: "100dvh", ...ERG_FULL_VIEWPORT_FALLBACK, minWidth: 0, overflow: "hidden", width: "100%" }}>
       <LmsMobileTopBar
         activeLabel={activeLabel} canInstall={installPrompt.canInstall} selectedClassName={selectedClassName}
         installed={installPrompt.installed} online={network.online}
-        schoolName={schoolName} teacherName={teacherName}
-        updateAvailable={serviceWorkerUpdate.updateAvailable} onAccountOpen={() => setAccountOpen(true)}
+        schoolName={schoolName}
+        updateAvailable={serviceWorkerUpdate.updateAvailable}
         onInstall={() => setPwaOpen(true)}
         onScopeOpen={() => setScopeOpen(true)} onUpdate={serviceWorkerUpdate.applyUpdate}
       />
@@ -78,13 +78,13 @@ export function LmsMobileShell<TSection extends string>({
 
       <OfflineShellStatus network={network} />
 
-      <Box component="main" data-testid="lms-mobile-scroll-region" sx={{ flex: 1, minHeight: 0, overflowY: "auto", overscrollBehavior: "contain", pb: hideDock ? 0 : `calc(${ERG_MOBILE_DOCK_HEIGHT}px + 8px + env(safe-area-inset-bottom, 0px) + 16px)` }}>{children}</Box>
+      <Box component="main" data-testid="lms-mobile-scroll-region" sx={{ flex: 1, minHeight: 0, overflowY: "auto", overscrollBehavior: "contain", pb: hideDock ? 0 : ergMobileDockClearance() }}>{children}</Box>
       {hideDock ? null : (
         <ErgMobileDock
           activeId={activeSection}
           ariaLabel="Điều hướng giáo viên"
           hideAt="xl"
-          items={dockItems}
+          items={dockItems.map((item) => (item.opensSheet ? { ...item, avatarInitials: nameInitials(teacherName) } : item))}
           onNavigate={navigate}
           onOpenSheet={() => setAccountOpen(true)}
         />
@@ -119,6 +119,13 @@ export function LmsMobileShell<TSection extends string>({
       <LmsPwaSetupSheet installPrompt={installPrompt} notifications={notifications} onOpenChange={setPwaOpen} open={pwaOpen} />
     </Box>
   );
+}
+
+/** First + last word initials ("Lê Thị Thùy" → "LT") for the dock account avatar. */
+function nameInitials(name: string) {
+  const words = name.trim().split(/\s+/).filter(Boolean);
+  if (!words.length) return "GV";
+  return (words[0][0] + (words.length > 1 ? words[words.length - 1][0] : "")).toUpperCase();
 }
 
 function AccountActionButton({ danger = false, icon, label, onClick }: { danger?: boolean; icon: ReactNode; label: string; onClick: () => void }) {

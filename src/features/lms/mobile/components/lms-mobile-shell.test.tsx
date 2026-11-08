@@ -45,6 +45,11 @@ it("renders the shared dock with an inbox badge, opens the account sheet and has
   expect(screen.queryByRole("button", { name: /^Thông báo/ })).toBeNull();
   fireEvent.click(screen.getByRole("button", { name: /^Hộp thư, 3 chưa đọc$/ }));
   expect(onNavigate).toHaveBeenCalledWith("/teacher/notifications");
-  fireEvent.click(within(screen.getByRole("navigation", { name: "Điều hướng giáo viên" })).getByRole("button", { name: "Tài khoản" }));
+  // Account moved from the top bar to the dock as an initials avatar (design N1).
+  expect(screen.queryByRole("button", { name: /^Tài khoản Lê/ })).toBeNull();
+  expect(screen.getByRole("button", { name: "Chọn lớp, đang chọn 9A1" })).toBeVisible();
+  const account = within(screen.getByRole("navigation", { name: "Điều hướng giáo viên" })).getByRole("button", { name: "Tài khoản" });
+  expect(account.textContent).toBe("LT");
+  fireEvent.click(account);
   expect(screen.getByText("gv@erg.edu.vn")).toBeInTheDocument();
 });

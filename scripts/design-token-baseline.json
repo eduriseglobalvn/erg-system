@@ -999,10 +999,6 @@
     "hex": 0,
     "font": 7
   },
-  "src/features/lms/mobile/components/lms-mobile-top-bar.tsx": {
-    "hex": 0,
-    "font": 10
-  },
   "src/features/lms/mobile/components/lms-pwa-setup-sheet.tsx": {
     "hex": 0,
     "font": 15

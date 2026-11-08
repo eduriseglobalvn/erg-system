@@ -51,6 +51,7 @@ import {
 } from "@/features/elearning/student-dashboard/utils/discussion-overview";
 import {
   ANNOUNCEMENT_POPUP_SNOOZE_MS,
+  getInitials,
   writeAnnouncementPopupSnooze,
 } from "@/features/elearning/student-dashboard/utils/student-dashboard-workspace-utils";
 import {
@@ -256,8 +257,8 @@ export function StudentDashboardWorkspaceRuntime() {
 
   const mobileDockItems = useMemo(() => [
     ...copy.navItems.map((item) => ({ key: item.key as StudentDockPageKey, label: item.label })),
-    { key: "account" as const, label: locale === "vi" ? "Hồ sơ" : "Profile" },
-  ], [copy.navItems, locale]);
+    { key: "account" as const, label: locale === "vi" ? "Hồ sơ" : "Profile", avatarInitials: getInitials(dashboardProfile.name) || undefined },
+  ], [copy.navItems, dashboardProfile.name, locale]);
 
   const backToDashboard = () => setViewState({ type: "dashboard" });
 
