@@ -1,6 +1,14 @@
 import { expect, test, vi } from "vitest";
 
-import { formatDateTimeVi, formatDateVi, formatTimeVi, inputDateToVi, todayInput, viDateToInput } from "@/domain/formatters/format-date";
+import { formatDateTimeVi, formatDateVi, formatListTimeVi, formatTimeVi, inputDateToVi, todayInput, viDateToInput } from "@/domain/formatters/format-date";
+
+test("formatListTimeVi: HH:mm today, Hôm qua yesterday, dd/MM/yyyy before", () => {
+  const now = new Date(2026, 10, 1, 9, 0);
+  expect(formatListTimeVi(new Date(2026, 10, 1, 7, 42), now)).toBe("07:42");
+  expect(formatListTimeVi(new Date(2026, 9, 31, 23, 59), now)).toBe("Hôm qua");
+  expect(formatListTimeVi(new Date(2026, 9, 30, 8, 0), now)).toBe("30/10/2026");
+  expect(formatListTimeVi("not a date", now)).toBe("");
+});
 
 test("formats dd/MM/yyyy and never returns Invalid Date", () => {
   expect(formatDateVi("2026-11-03")).toBe("03/11/2026");

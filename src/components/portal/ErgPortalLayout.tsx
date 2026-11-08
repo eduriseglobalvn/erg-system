@@ -198,8 +198,8 @@ export default function ErgPortalLayout({
             overflow: contentMode === "flush" ? "hidden" : "auto",
             overflowX: "hidden",
             p: contentMode === "flush" ? 0 : { xs: 1.5, sm: 2, md: 3 },
-            // Keep the last row clear of the floating dock.
-            ...(dock ? { pb: ergMobileDockClearance() } : {}),
+            // Keep the last row clear of the floating dock (hidden from md). Responsive like `p`, or p's xs media rule wins.
+            ...(dock ? { pb: { xs: ergMobileDockClearance(), md: contentMode === "flush" ? 0 : 3 } } : {}),
             width: "100%",
             bgcolor: '#FFFFFF',
           }}
