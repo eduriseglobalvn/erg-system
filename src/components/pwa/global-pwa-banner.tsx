@@ -16,6 +16,12 @@ const { color, radius, shadow } = ergEnterpriseTokens;
 export function GlobalPwaBanner() {
   const { applyUpdate, updateAvailable } = useServiceWorkerUpdate();
   const [updating, setUpdating] = useState(false);
+  // Render-time reset: a banner that came back after a failed attempt must not stay stuck on "updating".
+  const [seenAvailable, setSeenAvailable] = useState(updateAvailable);
+  if (seenAvailable !== updateAvailable) {
+    setSeenAvailable(updateAvailable);
+    if (!updateAvailable) setUpdating(false);
+  }
 
   useEffect(() => {
     // Window Controls Overlay & File Handling API listener
