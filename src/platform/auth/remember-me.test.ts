@@ -2,14 +2,13 @@ import { afterEach, expect, test } from "vitest";
 
 import {
   clearStoredAuthSessions,
-  portalSessionKey,
   readStoredRefreshSession,
   TEACHER_LOCAL_SESSION_KEY,
   writeStoredAuthIdentity,
 } from "@/platform/auth/api/auth-token-storage";
 
 const session = { accountId: "u1", accessToken: "access", refreshToken: "refresh", loggedInAt: new Date().toISOString(), portal: "lms" as const, portals: ["lms" as const] };
-const localKey = portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lms");
+const localKey = TEACHER_LOCAL_SESSION_KEY;
 
 afterEach(() => {
   clearStoredAuthSessions();

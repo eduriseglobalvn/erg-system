@@ -132,7 +132,7 @@ function DockButton<TId extends string>({
       data-selected={active ? "true" : undefined}
       onClick={onClick}
       sx={{
-        bgcolor: active ? "primary.main" : "transparent",
+        bgcolor: active ? color.primary : "transparent",
         borderRadius: `${radius.chip}px`,
         color: active ? "primary.contrastText" : "text.secondary",
         // Inactive tabs keep a fixed 44px square (40px under 375px so 6 tabs fit at 360px); only the active label shrinks.

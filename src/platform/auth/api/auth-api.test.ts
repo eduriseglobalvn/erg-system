@@ -182,7 +182,7 @@ test("keeps snake_case access tokens in browser-session storage; remember me per
 
   expect(account.email).toBe("teacher@erg.edu.vn");
   expect(getStoredAccessToken("lms")).toBe("jwt-token");
-  const persisted = JSON.parse(storage.get(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lms")) ?? "{}");
+  const persisted = JSON.parse(storage.get(TEACHER_LOCAL_SESSION_KEY) ?? "{}");
   expect(persisted).toMatchObject({ refreshToken: "refresh-token" });
   expect(persisted.accessToken).toBeUndefined();
   expect(JSON.parse(storage.get(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "lms")) ?? "{}")).toMatchObject({
@@ -332,7 +332,7 @@ test("does not reuse an LMS-only entitlement for LCMS requests", async () => {
 
 test("rejects stored teacher sessions without an access token", () => {
   storage.set(
-    portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lms"),
+    TEACHER_LOCAL_SESSION_KEY,
     JSON.stringify({
       accountId: "teacher-without-token",
       loggedInAt: new Date().toISOString(),
@@ -350,7 +350,7 @@ test("rejects stale stored teacher sessions when backend did not provide an expi
   vi.useFakeTimers();
   vi.setSystemTime(new Date("2026-05-31T02:00:00.000Z"));
   storage.set(
-    portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lms"),
+    TEACHER_LOCAL_SESSION_KEY,
     JSON.stringify({
       accountId: "teacher-stale",
       accessToken: "opaque-token",
@@ -367,7 +367,7 @@ test("rejects stale stored teacher sessions when backend did not provide an expi
 
 test("rejects stored teacher sessions without any usable expiry anchor", () => {
   storage.set(
-    portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lms"),
+    TEACHER_LOCAL_SESSION_KEY,
     JSON.stringify({
       accountId: "teacher-orphan",
       accessToken: "opaque-token",
@@ -385,7 +385,7 @@ test("rejects stored teacher sessions with an expired JWT", () => {
   vi.useFakeTimers();
   vi.setSystemTime(new Date("2026-05-31T02:00:00.000Z"));
   storage.set(
-    portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lms"),
+    TEACHER_LOCAL_SESSION_KEY,
     JSON.stringify({
       accountId: "teacher-expired",
       accessToken: createJwt({ exp: Math.floor(new Date("2026-05-31T01:00:00.000Z").getTime() / 1000), portals: ["lms"] }),

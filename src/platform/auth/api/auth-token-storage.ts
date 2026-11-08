@@ -85,13 +85,10 @@ export function readStoredAuthSession(portal?: StoredAuthSession["portal"]): Sto
 
   const teacherSessions = [
     teacherSessionSnapshot,
-    legacyPersistentSession<StoredAuthSession>(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "crm")),
+    legacyPersistentSession<StoredAuthSession>(TEACHER_LOCAL_SESSION_KEY),
     parseJson<StoredAuthSession | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "crm")), null),
-    legacyPersistentSession<StoredAuthSession>(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "admin")),
     parseJson<StoredAuthSession | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "admin")), null),
-    legacyPersistentSession<StoredAuthSession>(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lms")),
     parseJson<StoredAuthSession | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "lms")), null),
-    legacyPersistentSession<StoredAuthSession>(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lcms")),
     parseJson<StoredAuthSession | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "lcms")), null),
   ].filter(hasStoredAuthCredential);
 
@@ -161,12 +158,15 @@ export function clearStoredAuthSessions() {
 
 const LEGACY_SSO_COOKIE = "erg_sso";
 
-/** Startup purge of legacy bearer material (unscoped/student localStorage sessions, parent-domain cookie). Per-portal teacher sessions stay: they hold only the "remember me" refresh token. */
+/** Startup purge of legacy bearer material (unscoped/student localStorage sessions, parent-domain cookie). The shared "remember me" session (refresh token only) stays. */
 export function purgeLegacyAuthStorage() {
   if (!canUseStorage()) return;
 
-  removePersistedJsonValue(TEACHER_LOCAL_SESSION_KEY);
   removePersistedJsonValue(STUDENT_LOCAL_SESSION_KEY);
+  // Per-portal slots from the previous build.
+  for (const portal of ["admin", "crm", "lms", "lcms"] as const) {
+    removePersistedJsonValue(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, portal));
+  }
 
   const expired = `${LEGACY_SSO_COOKIE}=; path=/; max-age=0`;
   document.cookie = expired;
@@ -249,13 +249,10 @@ function readRawStoredAuthSession(portal?: StoredAuthSession["portal"]): StoredA
   const targetPortal = portal ?? resolveCurrentPortal();
   const candidates = [
     teacherSessionSnapshot,
-    legacyPersistentSession<StoredAuthIdentity>(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "crm")),
+    legacyPersistentSession<StoredAuthIdentity>(TEACHER_LOCAL_SESSION_KEY),
     parseJson<StoredAuthIdentity | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "crm")), null),
-    legacyPersistentSession<StoredAuthIdentity>(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "admin")),
     parseJson<StoredAuthIdentity | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "admin")), null),
-    legacyPersistentSession<StoredAuthIdentity>(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lms")),
     parseJson<StoredAuthIdentity | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "lms")), null),
-    legacyPersistentSession<StoredAuthIdentity>(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lcms")),
     parseJson<StoredAuthIdentity | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "lcms")), null),
   ].filter((session): session is StoredAuthIdentity => Boolean(session?.accountId));
 
@@ -279,13 +276,12 @@ function writeRawStoredAuthSession(session: StoredAuthIdentity) {
   if (!canUseStorage()) return;
 
   const portal = session.portal && session.portal !== "elearning" ? session.portal : "lms";
-  const localKey = portalSessionKey(TEACHER_LOCAL_SESSION_KEY, portal);
   const tempKey = portalSessionKey(TEACHER_TEMP_SESSION_KEY, portal);
 
   window.sessionStorage.setItem(tempKey, JSON.stringify(session));
   // "Remember me": only the refresh token outlives the tab/PWA (access token stays in sessionStorage) and is exchanged on next start.
-  if (session.rememberMe && session.refreshToken) setPersistedJsonValue(localKey, { ...session, accessToken: undefined });
-  else removePersistedJsonValue(localKey);
+  if (session.rememberMe && session.refreshToken) setPersistedJsonValue(TEACHER_LOCAL_SESSION_KEY, { ...session, accessToken: undefined });
+  else removePersistedJsonValue(TEACHER_LOCAL_SESSION_KEY);
 }
 
 function legacyPersistentSession<T>(key: string): T | null {
