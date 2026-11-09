@@ -5,6 +5,20 @@ import { describe, expect, it, vi } from "vitest";
 import { classroomSnapshots } from "@/test/fixtures/mock-classroom-data";
 import { AssignHomeworkPage } from "@/features/lms/components/assign-homework-page";
 
+vi.mock("@/features/question-bank/api/question-bank-query", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/features/question-bank/api/question-bank-query")>()),
+  // The assign wizard offers only published bank quizzes; give it one.
+  useQuestionBankWorkspaceQuery: () => ({
+    data: {
+      quizzes: [{
+        id: "quiz-published", title: "Thiết bị và hệ điều hành", status: "ready", kind: "train",
+        subjectId: "subject-ic3", subjectLabel: "IC3 GS6", levelId: "level-1", levelLabel: "Level 1",
+        topicLabels: ["Căn bản về công nghệ"], questionIds: ["q1", "q2"], questionCount: 2, durationLabel: "15 phút",
+      }],
+    },
+  }),
+}));
+
 vi.mock("@/features/lms/api/lms-assignment-command-api", () => ({
   createLmsAssignment: vi.fn().mockResolvedValue({
     assignmentId: "mock-assign-1",
