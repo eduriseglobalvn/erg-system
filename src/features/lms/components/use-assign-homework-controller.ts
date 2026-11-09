@@ -199,10 +199,18 @@ export function useAssignHomeworkController({
 
   const [selectedSubjectId, setSelectedSubjectId] = useState(() => availableSubjects[0]?.id ?? "");
   const [selectedLevelId, setSelectedLevelId] = useState(() => availableSubjects[0]?.levels[0]?.id ?? "");
-  const [selectedResourceIds, setSelectedResourceIds] = useState<Set<string>>(() => {
+  const [pickedResourceIds, setSelectedResourceIds] = useState<Set<string>>(() => {
     const firstItem = availableSubjects[0]?.levels[0]?.topics[0]?.items[0];
     return firstItem ? new Set([firstItem.id]) : new Set();
   });
+
+  // The first render seeds a pick from the static demo catalog, before real quizzes load; ignore ids the list no longer has.
+  const selectedResourceIds = useMemo(() => {
+    const known = new Set(
+      availableSubjects.flatMap((s) => s.levels.flatMap((l) => l.topics.flatMap((t) => t.items.map((i) => i.id)))),
+    );
+    return new Set([...pickedResourceIds].filter((id) => known.has(id)));
+  }, [availableSubjects, pickedResourceIds]);
 
   useEffect(() => {
     if (!selectedSubjectId && availableSubjects.length > 0) {
