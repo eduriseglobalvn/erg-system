@@ -51,9 +51,10 @@ export type SchoolStudentInput = {
   enrollmentDate?: string | null;
   note?: string | null;
   status?: string | null;
-  /** With a username, makes the backend create the student's login account in the same call. */
-  password?: string | null;
 };
+
+/** Import row that also asks for a login account. Sent over REST only: GraphQL variables must not carry passwords. */
+export type SchoolStudentAccountInput = SchoolStudentInput & { password: string };
 
 export type SchoolSubjectInput = {
   name: string;

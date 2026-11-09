@@ -12,6 +12,7 @@ import {
   createSchoolStudent,
   createSchoolSubject,
   importSchoolStudents,
+  importSchoolStudentsWithAccounts,
   updateSchoolClass,
   getSchoolDirectory,
   getSchoolOperations,
@@ -21,7 +22,7 @@ import {
   updateSchool,
 } from "@/features/lcms/school-management/api/school-management-api";
 import type { SchoolClass, SchoolDraft, SchoolStudent, SchoolSubject } from "@/features/lcms/school-management/types/school-management-types";
-import type { OperationalClassRecord, SchoolClassInput, SchoolStudentInput, SchoolSubjectInput } from "@/features/lcms/school-management/api/school-management-api";
+import type { OperationalClassRecord, SchoolClassInput, SchoolStudentAccountInput, SchoolStudentInput, SchoolSubjectInput } from "@/features/lcms/school-management/api/school-management-api";
 import { getDefaultTenantId } from "@/lib/graphql-client";
 import { QUERY_POLICIES } from "@/lib/query-policy";
 import { getCurrentAccountId } from "@/platform/auth/api/auth-storage";
@@ -171,8 +172,12 @@ export function useSchoolManagement(initialSchoolId?: string | null) {
     if (!selectedSchoolId) return [];
     const items = rows.map((row) => toStudentInput(row, selectedSchool));
     let saved: Array<{ studentCode: string; username?: string | null; authUserId?: string | null }> = [];
-    if (items.length > 1) saved = (await studentImportMutation.mutateAsync({ schoolId: selectedSchoolId, items })).items;
-    else if (items[0]) saved = [await studentCreateMutation.mutateAsync({ schoolId: selectedSchoolId, input: items[0] })];
+    // Rows that ask for a login go over REST (GraphQL variables must not carry passwords); the rest keep the old path.
+    const withAccount = items.filter((item): item is SchoolStudentAccountInput => "password" in item);
+    const plain = items.filter((item) => !("password" in item));
+    if (withAccount.length) saved = (await importSchoolStudentsWithAccounts(selectedSchoolId, withAccount)).items;
+    if (plain.length > 1) saved = [...saved, ...(await studentImportMutation.mutateAsync({ schoolId: selectedSchoolId, items: plain })).items];
+    else if (plain[0]) saved = [...saved, await studentCreateMutation.mutateAsync({ schoolId: selectedSchoolId, input: plain[0] })];
     await refreshSchoolData(selectedSchoolId);
     return saved;
   }, [refreshSchoolData, selectedSchool, selectedSchoolId, studentCreateMutation, studentImportMutation]);
@@ -232,7 +237,7 @@ export function useSchoolManagement(initialSchoolId?: string | null) {
   };
 }
 
-function toStudentInput(row: Omit<SchoolStudent, "id">, school: ReturnType<typeof useSchoolManagement>["selectedSchool"]): SchoolStudentInput {
+function toStudentInput(row: Omit<SchoolStudent, "id">, school: ReturnType<typeof useSchoolManagement>["selectedSchool"]): SchoolStudentInput | SchoolStudentAccountInput {
   const classroom = school?.classes.find((item) => item.name.trim().toLocaleLowerCase() === row.className.trim().toLocaleLowerCase());
   return {
     studentCode: row.code.trim(),

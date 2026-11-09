@@ -1,3 +1,5 @@
+import { apiRequest } from "@/lib/api-client";
+import { API_ENDPOINTS } from "@/lib/api/api-endpoints";
 import { graphQlRequest } from "@/lib/graphql-client";
 
 import {
@@ -12,6 +14,7 @@ import {
 import type {
   BulkStudentImportResult,
   OperationalStudentRecord,
+  SchoolStudentAccountInput,
   SchoolStudentInput,
 } from "@/features/lcms/school-management/api/school-api/types";
 
@@ -74,6 +77,27 @@ export async function archiveSchoolStudent(schoolId: string, studentId: string, 
   return readMutationRecord(data, "archiveSchoolStudent", isOperationalStudentRecord, "lcms.archive-school-student");
 }
 
+
+/**
+ * Imports students and creates their login accounts (REST, because the password must not travel in GraphQL
+ * variables). Students already on the roster get the account attached; ones that already have a login are left alone.
+ */
+export async function importSchoolStudentsWithAccounts(schoolId: string, items: SchoolStudentAccountInput[]): Promise<BulkStudentImportResult> {
+  const results: BulkStudentImportResult[] = [];
+  for (let i = 0; i < items.length; i += GRAPHQL_MAX_BATCH_SIZE) {
+    const chunk = items.slice(i, i + GRAPHQL_MAX_BATCH_SIZE);
+    results.push(await apiRequest<BulkStudentImportResult>(API_ENDPOINTS.lcms.schoolStudentsImport(schoolId), {
+      method: "POST",
+      body: JSON.stringify({ items: chunk.map((item) => mapStudentInput(item, "studentCode", "fullName")) }),
+    }));
+  }
+  return {
+    requested: items.length,
+    created: results.reduce((acc, r) => acc + (r.created || 0), 0),
+    replayed: results.reduce((acc, r) => acc + (r.replayed || 0), 0),
+    items: results.flatMap((r) => r.items || []),
+  };
+}
 
 export async function importSchoolStudents(schoolId: string, items: SchoolStudentInput[], idempotencyKey = createIdempotencyKey(), signal?: AbortSignal): Promise<BulkStudentImportResult> {
   if (items.length <= GRAPHQL_MAX_BATCH_SIZE) {
