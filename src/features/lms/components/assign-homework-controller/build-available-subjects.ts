@@ -1,9 +1,10 @@
 import type { useQuestionBankWorkspaceQuery } from "@/features/question-bank/api/question-bank-query";
-import { assignmentSubjects } from "@/features/lms/classroom/components/class-students-workspace.constants";
 
 type QuestionBankQuizzes = NonNullable<ReturnType<typeof useQuestionBankWorkspaceQuery>["data"]>["quizzes"];
 
-export function buildAvailableSubjects(qbQuizzes: QuestionBankQuizzes | undefined) {
+export function buildAvailableSubjects(allQuizzes: QuestionBankQuizzes | undefined) {
+  // Only a published quiz has a version to assign; drafts are refused by the server.
+  const qbQuizzes = allQuizzes?.filter((quiz) => quiz.status === "ready");
   if (qbQuizzes && qbQuizzes.length > 0) {
     const bySubject = new Map<string, typeof qbQuizzes>();
     for (const q of qbQuizzes) {
@@ -65,5 +66,5 @@ export function buildAvailableSubjects(qbQuizzes: QuestionBankQuizzes | undefine
       };
     });
   }
-  return assignmentSubjects;
+  return [];
 }
