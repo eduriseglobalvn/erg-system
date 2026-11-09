@@ -7,9 +7,8 @@ import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
 import type { QuestionBankCopy } from "./question-bank-copy";
 
 /**
- * Topic column of A1. The API only reports the total of the current filter,
- * so the count shows on the active topic alone.
- * shortcut: no per-topic counts; add `questionCount` to the category DTO when the backend exposes it.
+ * Topic column of A1. Every topic shows its own `questionCount`; the active one shows the total of the
+ * current filter (search/status) so it matches the list beside it. "Tất cả" sums the level's topics.
  */
 export function QuestionBankTopicList({
   activeCount,
@@ -26,7 +25,13 @@ export function QuestionBankTopicList({
   onPick: (topicId: string) => void;
   topics: QuestionBankCategory[];
 }) {
-  const items = [{ id: "all", label: copy.allTopics }, ...topics];
+  const levelTotal = topics.every((topic) => topic.questionCount != null)
+    ? topics.reduce((sum, topic) => sum + (topic.questionCount ?? 0), 0)
+    : undefined;
+  const items: Array<{ id: string; label: string; questionCount?: number }> = [
+    { id: "all", label: copy.allTopics, ...(levelTotal == null ? {} : { questionCount: levelTotal }) },
+    ...topics,
+  ];
 
   return (
     <Box component="nav" aria-label={copy.topicsHeading} sx={{ minWidth: 0 }}>
@@ -51,6 +56,7 @@ export function QuestionBankTopicList({
       >
         {items.map((topic) => {
           const active = topic.id === activeTopicId;
+          const count = active ? activeCount : topic.questionCount;
           return (
             <Box component="li" key={topic.id} sx={{ flex: "none" }}>
               <ButtonBase
@@ -76,11 +82,11 @@ export function QuestionBankTopicList({
                 <Typography variant={active ? "subtitle2" : "body2"} component="span" noWrap>
                   {topic.label}
                 </Typography>
-                {active ? (
-                  <Typography variant="caption" component="span" sx={{ color: t.color.primary }}>
-                    {activeCount}
+                {count == null ? null : (
+                  <Typography variant="caption" component="span" sx={{ color: active ? t.color.primary : t.color.textMuted }}>
+                    {count}
                   </Typography>
-                ) : null}
+                )}
               </ButtonBase>
             </Box>
           );

@@ -148,6 +148,7 @@ query LcmsQuestionBankWorkspace($input: QuestionBankWorkspaceInput) {
         description
         scopeLabel
         categoryIds
+        questionCount
       }
       quizzes {
         id

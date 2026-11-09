@@ -92,6 +92,7 @@ export type QuestionBankOptionDTO = {
   description?: string | null;
   scopeLabel?: string | null;
   categoryIds?: string[] | null;
+  questionCount?: number | null;
 };
 
 export type QuestionBankQuestionDTO = {
@@ -189,6 +190,7 @@ function buildWorkspaceSubjects(workspace: QuestionBankWorkspaceDTO, questions: 
         id: topic.id,
         label: topic.label,
         levelId: topic.levelId ?? levels[0]?.id ?? "level",
+        ...(topic.questionCount == null ? {} : { questionCount: topic.questionCount }),
       }))
     : fallbackSubject.categories;
 
@@ -217,7 +219,7 @@ function collectOptions(
   fallbackLabels: Map<string, string>,
 ) {
   const seen = new Set<string>();
-  const options: Array<{ id: string; label: string; levelId?: string | null; subjectId?: string | null; description?: string | null; scopeLabel?: string | null; categoryIds?: string[] | null }> = [];
+  const options: Array<{ id: string; label: string; levelId?: string | null; subjectId?: string | null; description?: string | null; scopeLabel?: string | null; categoryIds?: string[] | null; questionCount?: number | null }> = [];
 
   [...(graphQlOptions ?? []), ...fallbackIds.map((id) => (id ? { id, label: fallbackLabels.get(id) } : undefined))].forEach((option) => {
     if (!option?.id || seen.has(option.id)) return;
@@ -230,6 +232,7 @@ function collectOptions(
       description: "description" in option ? option.description : null,
       scopeLabel: "scopeLabel" in option ? option.scopeLabel : null,
       categoryIds: "categoryIds" in option && Array.isArray(option.categoryIds) ? option.categoryIds : null,
+      questionCount: "questionCount" in option && typeof option.questionCount === "number" ? option.questionCount : null,
     });
   });
 

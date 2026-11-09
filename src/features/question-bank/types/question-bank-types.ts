@@ -21,6 +21,8 @@ export type QuestionBankCategory = {
   id: string;
   label: string;
   levelId: string;
+  /** Số câu hỏi đang dùng của chủ đề (không tính đã lưu trữ); API cũ không trả thì để trống. */
+  questionCount?: number;
 };
 
 export type QuestionBankLevel = {
