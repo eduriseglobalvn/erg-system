@@ -1,4 +1,5 @@
 import type { QuestionType } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
+import type { Question } from "@/domain/quiz/types";
 import type { ContentScope } from "@/types/scope-types";
 
 export type QuestionBankSubjectId = string;
@@ -63,6 +64,8 @@ export type QuestionBankQuestion = {
   lastUsedAt: string;
   recommendedCluster: string;
   rationale?: string;
+  /** The question exactly as the quiz editor authored it; every kind carries its own fields here. */
+  runtimeQuestion?: Question;
   answer?: string;
   choices?: QuestionBankChoice[];
   settings?: Record<string, unknown>;

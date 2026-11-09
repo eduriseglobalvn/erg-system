@@ -72,7 +72,7 @@ describe("createQuizFromBankQuestions", () => {
         title: "Subject A - Level A",
       }),
     );
-    expect(deps.createQuiz.mock.calls[0]![0]).not.toHaveProperty("categoryId");
+    expect(vi.mocked(deps.createQuiz).mock.calls[0]![0]).not.toHaveProperty("categoryId");
     expect(deps.saveDraft).toHaveBeenCalledWith(expect.objectContaining({ quizId: "quiz-a", docVersion: 0 }));
     expect(deps.saveDraft).toHaveBeenCalledWith(
       expect.objectContaining({

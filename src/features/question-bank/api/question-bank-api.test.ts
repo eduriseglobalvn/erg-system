@@ -342,3 +342,31 @@ describe("loadQuestionBankData", () => {
     });
   });
 });
+
+describe("bank questions authored in the quiz editor", () => {
+  test("keep their kind and content when a quiz is built from the bank", async () => {
+    const authored = { id: "q-1", kind: "matching", title: "Ghép cặp", matching: [{ id: "p1", prompt: "CPU", response: "Xử lý" }] };
+    graphQlRequestMock.mockResolvedValueOnce(
+      workspace({
+        questions: {
+          items: [{ id: "bank-1", subjectId: "s", title: "Ghép cặp", type: "matching", runtimeQuestion: JSON.stringify(authored) }],
+          page: 0, size: 50, totalItems: 1, totalPages: 1, hasNext: false, hasPrevious: false,
+        },
+        subjects: [{ id: "s", label: "IC3" }],
+      }) as never,
+    );
+    const { createQuizSlideFromBankQuestion } = await import("@/features/question-bank/api/question-bank-to-quiz");
+
+    const [question] = (await loadQuestionBankData("tenant-a")).questions;
+    let n = 0;
+    const slide = createQuizSlideFromBankQuestion(question, (prefix) => `${prefix}-${++n}`, {
+      questionFont: "x", answerFont: "x", positivePoints: 1, negativePoints: 0,
+      shuffleAnswers: false, acceptPartial: false, correctFeedback: "", incorrectFeedback: "",
+    });
+
+    expect(question.type).toBe("matching");
+    expect(slide.kind).toBe("matching");
+    expect(slide.runtimeQuestion).toMatchObject({ matching: authored.matching });
+    expect(slide.bankQuestionId).toBe("bank-1");
+  });
+});

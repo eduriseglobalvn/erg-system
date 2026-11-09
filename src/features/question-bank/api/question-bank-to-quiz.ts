@@ -13,6 +13,7 @@ import type {
 } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import { applyQuizThemePreset, defaultQuizThemePreset } from "@/features/lcms/quiz/quiz-theme/quiz-theme-presets";
 import type { QuestionBankQuestion } from "@/features/question-bank/types/question-bank-types";
+import { syncQuizEditorSlideFromRuntimeQuestion } from "@/features/lcms/quiz/quiz-editor/api/elearning-quiz-to-editor";
 
 type QuizImportDefaults = {
   questionFont: string;
@@ -214,7 +215,7 @@ export function createQuizSlideFromBankQuestion(
     },
   ];
 
-  return {
+  const slide: QuizEditorSlide = {
     id: createId("slide"),
     questionId: question.id,
     bankQuestionId: question.id,
@@ -246,6 +247,8 @@ export function createQuizSlideFromBankQuestion(
     },
     layers: [question.subjectLabel, question.categoryLabel, question.gradeLabel],
   };
+  // Matching, hotspot, drag-drop… only survive the trip through the bank as the authored question.
+  return question.runtimeQuestion ? syncQuizEditorSlideFromRuntimeQuestion(slide, question.runtimeQuestion) : slide;
 }
 
 function resolveQuestionChoices(
