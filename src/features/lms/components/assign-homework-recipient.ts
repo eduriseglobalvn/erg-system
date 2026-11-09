@@ -98,7 +98,23 @@ export function createAssignmentIdempotencyKey({
   startAt: string;
   title: string;
 }) {
-  return `assign:${slugPart(title)}:${quizIds.slice().sort().join(",")}:${startAt}:${dueAt}`;
+  // The server stores this key as the sync operationId (max 128 chars), so the raw quiz ids cannot go in.
+  const fingerprint = cyrb53Hex(`${quizIds.slice().sort().join(",")}|${startAt}|${dueAt}|${title}`);
+  return `assign:${slugPart(title).slice(0, 40)}:${fingerprint}`;
+}
+
+/** cyrb53: a 53-bit string hash; the same assignment always gives the same key, so a retry stays idempotent. */
+function cyrb53Hex(text: string): string {
+  let h1 = 3735928559;
+  let h2 = 1103547991;
+  for (let index = 0; index < text.length; index += 1) {
+    const code = text.charCodeAt(index);
+    h1 = Math.imul(h1 ^ code, 2654435761);
+    h2 = Math.imul(h2 ^ code, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(16);
 }
 
 function slugPart(value: string) {
