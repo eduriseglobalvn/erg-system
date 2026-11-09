@@ -113,6 +113,7 @@ query LcmsQuestionBankWorkspace($input: QuestionBankWorkspaceInput) {
           lastUsedAt
           recommendedCluster
           rationale
+          runtimeQuestion
           updatedAt
         }
         page

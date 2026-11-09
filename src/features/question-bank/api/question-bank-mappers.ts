@@ -1,3 +1,4 @@
+import type { Question } from "@/domain/quiz/types";
 import type {
   QuestionBankQuestion,
   QuestionBankStatus,
@@ -125,6 +126,7 @@ export type QuestionBankQuestionDTO = {
   lastUsedAt?: string | null;
   recommendedCluster?: string | null;
   rationale?: string | null;
+  runtimeQuestion?: string | null;
   updatedAt?: string | null;
 };
 
@@ -274,6 +276,7 @@ function mapQuestion(question: QuestionBankQuestionDTO, subjects: QuestionBankSu
     recommendedCluster: question.recommendedCluster?.trim() || template.recommendedCluster || "ERG",
     rationale: question.rationale?.trim() || template.rationale,
     answer: question.answer ?? template.answer,
+    runtimeQuestion: parseRuntimeQuestion(question.runtimeQuestion),
     settings: template.settings,
     choices: question.choices?.length
       ? question.choices.map((choice, choiceIndex) => ({
@@ -372,13 +375,39 @@ function mapQuestionType(value?: string | null): QuestionType {
     case "short_answer":
       return "short-answer";
     case "ordering":
+    case "sequence":
       return "sequence";
+    case "numeric":
+      return "numeric";
+    case "fill_blank":
+      return "fill-in-the-blanks";
+    case "inline_choice":
+    case "select_from_lists":
+      return "select-from-lists";
+    case "drag_words":
+      return "drag-the-words";
+    case "hotspot":
+      return "hotspot";
+    case "drag_drop":
+      return "drag-and-drop";
+    case "likert_scale":
+      return "likert-scale";
     case "matching":
       return "matching";
     case "essay":
       return "essay";
     default:
       return "multiple-choice";
+  }
+}
+
+function parseRuntimeQuestion(value?: string | null): Question | undefined {
+  if (!value) return undefined;
+  try {
+    const parsed: unknown = JSON.parse(value);
+    return parsed && typeof parsed === "object" ? (parsed as Question) : undefined;
+  } catch {
+    return undefined;
   }
 }
 
