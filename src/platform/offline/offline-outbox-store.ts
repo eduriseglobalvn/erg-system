@@ -1,4 +1,5 @@
-import { createStore, del, get, keys, set } from "idb-keyval";
+import { del, get, keys, set } from "idb-keyval";
+import { createErgStore } from "./erg-idb-store";
 
 import {
   migrateEntries,
@@ -33,9 +34,9 @@ export function createOfflineOutboxStore(): OfflineOutboxStore {
 }
 
 export class EncryptedIndexedDbOutboxStore implements OfflineOutboxStore {
-  private readonly dataStore = createStore("erg-system", "offline-outbox");
-  private readonly keyStore = createStore("erg-system", "offline-outbox-keys");
-  private readonly quarantineStore = createStore("erg-system", "offline-outbox-quarantine");
+  private readonly dataStore = createErgStore("offline-outbox");
+  private readonly keyStore = createErgStore("offline-outbox-keys");
+  private readonly quarantineStore = createErgStore("offline-outbox-quarantine");
 
   async load(scopeKey: string) {
     const record = await get<PersistedEnvelope>(dataKey(scopeKey), this.dataStore);
