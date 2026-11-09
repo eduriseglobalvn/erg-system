@@ -10,7 +10,8 @@ import { useState, type ReactNode } from "react";
 import type { AnswerResult } from "@/domain/quiz/types";
 import { ergEnterpriseTokens as tk } from "@/themes/erg-enterprise-tokens";
 
-const LIST_MARKER = /^\s*(?:[-*•]|\d+[.)])\s+/;
+const DEFAULT_MESSAGES = new Set(["Chính xác!", "Chưa đúng, hãy thử lại."]);
+const LIST_MARKER =/^\s*(?:[-*•]|\d+[.)])\s+/;
 
 /** Feedback is plain text; every non-empty line (list markers stripped) counts as one step. */
 export function splitFeedbackSteps(text: string): string[] {
@@ -30,7 +31,8 @@ function toneFor(result: AnswerResult): Tone {
 export function PracticeFeedbackPanel({ result }: { result: AnswerResult }) {
   const [expanded, setExpanded] = useState(false);
   const tone = toneFor(result);
-  const steps = splitFeedbackSteps(result.message ?? "");
+  // The stock "Chính xác!" / "Chưa đúng, hãy thử lại." messages only repeat the title, so show the body only when the teacher wrote something.
+  const steps = splitFeedbackSteps(result.message ?? "").filter((step) => !DEFAULT_MESSAGES.has(step));
   const multiStep = steps.length > 1;
 
   return (

@@ -59,9 +59,10 @@ test("passes TanStack cancellation and tenant scope to the API", async () => {
   await options.queryFn({ signal });
 
   expect(loadStudentDashboardDataMock).toHaveBeenCalledWith({ signal, tenantId: "tenant-a" });
-  expect(options.staleTime).toBe(QUERY_POLICIES.offlineCore.staleTime);
+  // A teacher can assign while the student's tab is open, so the dashboard is stale after 30s and refetches on focus.
+  expect(options.staleTime).toBe(30_000);
   expect(options.gcTime).toBe(QUERY_POLICIES.offlineCore.gcTime);
-  expect(options.refetchOnWindowFocus).toBe(false);
+  expect(options.refetchOnWindowFocus).toBe(true);
 });
 
 test("builds an API loading profile only from the active viewer session", () => {

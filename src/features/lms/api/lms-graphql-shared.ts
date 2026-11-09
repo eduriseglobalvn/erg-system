@@ -28,6 +28,7 @@ export type LmsAssignment = {
   quizId?: string | null;
   resources?: LmsAssignmentResource[] | null;
   subjectId?: string | null;
+  title?: string | null;
   dueAt?: string | null;
   status?: string | null;
   assignedBy?: string | null;
