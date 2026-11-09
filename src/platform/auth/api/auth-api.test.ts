@@ -484,6 +484,17 @@ test("accepts a login response that carries a usable account and access token", 
   ).toBe(true);
 });
 
+test("accepts a school-issued student login that has a username but no email", () => {
+  const response = {
+    user: { id: "student-1", email: null, fullName: "Nguyễn Minh Trâm Anh" },
+    accessToken: "valid-token",
+    portals: ["lms"],
+  } as unknown as Parameters<typeof normalizeAuthSession>[0];
+
+  expect(isBackendAuthSessionResponse(response)).toBe(true);
+  expect(normalizeAuthSession(response).account).toMatchObject({ id: "student-1", email: "", fullName: "Nguyễn Minh Trâm Anh" });
+});
+
 test("login rejects a malformed backend response with a clear typed error", async () => {
   vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
   const fetchMock = vi.fn(async (_url?: string | URL | Request, _init?: RequestInit) =>

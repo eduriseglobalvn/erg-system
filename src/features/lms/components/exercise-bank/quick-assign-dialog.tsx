@@ -9,6 +9,7 @@ import { useCreateLmsAssignmentMutation } from "@/features/lms/api/lms-assignmen
 import { createAssignmentIdempotencyKey } from "@/features/lms/components/assign-homework-recipient";
 import { loadLmsDashboardBootstrap } from "@/features/lms/infrastructure/lms-dashboard-api";
 import { hasApiBase } from "@/lib/api-client";
+import { getDefaultTenantId } from "@/lib/graphql-client";
 import { queryKeys } from "@/lib/query-keys";
 import { QUERY_POLICIES } from "@/lib/query-policy";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
@@ -31,7 +32,7 @@ export function QuickAssignDialog({
   const apiBacked = hasApiBase();
   const { account, session } = useAuthSession("lms");
   const bootstrap = useQuery({
-    queryKey: queryKeys.lmsTeacherShell.bootstrap(session?.tenantId ?? "", account?.id),
+    queryKey: queryKeys.lmsTeacherShell.bootstrap(session?.tenantId?.trim() || getDefaultTenantId(), account?.id),
     queryFn: ({ signal }) => loadLmsDashboardBootstrap(signal),
     enabled: apiBacked,
     staleTime: QUERY_POLICIES.reference.staleTime,

@@ -93,10 +93,11 @@ export function usePlayerActions({
     readyPackage: QuizPackage,
     readySession: LocalQuizAttemptSession,
     currentAttempt: Attempt | null,
+    answerDrafts: Record<string, AnswerPayload> = drafts,
   ) => {
     if (portableOffline) {
       const submittedAt = new Date().toISOString();
-      const answers = buildNormalizedAnswers(questions, drafts);
+      const answers = buildNormalizedAnswers(questions, answerDrafts);
       const submittingSession = await localQuizAttemptStore.markSubmitting({
         ...readySession,
         answers,
@@ -122,7 +123,7 @@ export function usePlayerActions({
 
     const serverSession = await ensureServerAttempt(readySession, readyPackage, runtimePortal);
     const submittedAt = new Date(serverNowMs(serverSession) ?? Date.now()).toISOString();
-    const answers = buildNormalizedAnswers(questions, drafts);
+    const answers = buildNormalizedAnswers(questions, answerDrafts);
     const submittingSession = await localQuizAttemptStore.markSubmitting({
       ...serverSession,
       answers,
@@ -311,7 +312,17 @@ export function usePlayerActions({
       })();
       setSubmitError(error instanceof Error ? error.message : "Không thể đồng bộ câu trả lời lên máy chủ.");
     }
+    // Practice has no "Nộp bài" button: the last checked answer finishes the attempt, and only a server submit
+    // makes it count for the teacher (the draft/answer endpoints keep nothing).
+    if (nextAttempt.submittedCount >= questions.length) {
+      try {
+        await submitReadyAttempt(activePackage, nextSession, nextAttempt, nextSession.answers);
+      } catch (error) {
+        setSubmitError(error instanceof Error ? error.message : "Không thể nộp kết quả lên máy chủ.");
+      }
+    }
   }, [
+    submitReadyAttempt,
     setDrafts,
     setLoadState,
     setSubmitError,

@@ -51,7 +51,8 @@ export type AuthSessionResponseDTO = {
 
 type BackendProfileResponseDTO = {
   id: string;
-  email: string;
+  /** Null for school-issued student logins, which have a username but no email. */
+  email?: string | null;
   fullName: string;
   full_name?: string;
   phone?: string;
@@ -250,7 +251,7 @@ async function loginAtPath(path: string, input: LoginRequestDTO) {
 
 /**
  * A login response is only usable if it carries an account identity (an
- * `account`, or a `user` with id + email) and some access token. Anything else
+ * `account`, or a `user` with an id) and some access token. Anything else
  * would blow up in `normalizeAuthSession`/`mapProfileToAccount` with a vague
  * error, so we reject it here at the boundary with a clear typed error.
  */
@@ -258,7 +259,7 @@ export function isBackendAuthSessionResponse(value: unknown): value is BackendAu
   if (!isObject(value)) return false;
   const hasAccount = isObject(value.account) && isNonEmptyString((value.account as { id?: unknown }).id);
   const user = value.user;
-  const hasUser = isObject(user) && isNonEmptyString(user.id) && isNonEmptyString(user.email);
+  const hasUser = isObject(user) && isNonEmptyString(user.id);
   if (!hasAccount && !hasUser) return false;
 
   const tokenContainers = [value, value.session, value.tokens, value.auth];
@@ -326,14 +327,15 @@ function readTokenValue(result: BackendAuthSessionResponseDTO, ...keys: Array<ke
 }
 
 function mapProfileToAccount(profile?: BackendProfileResponseDTO): AuthAccountResponseDTO {
-  if (!profile?.id || !profile.email) {
+  if (!profile?.id) {
     throw new Error("Backend auth response is missing account profile data.");
   }
+  const email = profile.email ?? "";
 
   return {
     id: profile.id,
-    fullName: profile.fullName ?? profile.full_name ?? profile.email,
-    email: profile.email,
+    fullName: profile.fullName ?? profile.full_name ?? email,
+    email,
     phone: profile?.phone ?? "",
     avatarUrl: profile?.avatarUrl ?? profile?.avatar_url ?? "",
     bio: profile?.bio ?? "",
