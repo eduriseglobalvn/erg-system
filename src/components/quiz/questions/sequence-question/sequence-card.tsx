@@ -23,14 +23,14 @@ export function SequenceRow({ itemId, position, review, children }: { itemId: st
       ref={setNodeRef}
       sx={{
         display: "grid",
-        gridTemplateColumns: "30px 1fr",
+        gridTemplateColumns: "18px 1fr",
         gap: 1,
         alignItems: "center",
         borderRadius: `${tokens.radius.card}px`,
         ...(isOver ? { bgcolor: tokens.color.primarySofter, outline: `2px dashed ${tokens.color.primarySoft}`, outlineOffset: 2 } : null),
       }}
     >
-      <Box aria-hidden sx={{ textAlign: "right", typography: "h6", fontWeight: "fontWeightBold", color: reviewColor(review) ?? "primary.main" }}>{position}</Box>
+      <Box aria-hidden sx={{ typography: "subtitle2", textAlign: "center", fontWeight: "fontWeightBold", fontVariantNumeric: "tabular-nums", color: reviewColor(review) ?? "text.secondary" }}>{position}</Box>
       {children}
     </Box>
   );
@@ -88,26 +88,26 @@ export function SequenceCard({
         gap: 1.25,
         width: "100%",
         minWidth: 0,
-        minHeight: 46,
-        p: compact ? "6px 8px 6px 12px" : "8px 10px 8px 14px",
-        border: "1.5px solid",
+        minHeight: 52,
+        p: compact ? "8px 12px 8px 8px" : "10px 14px 10px 10px",
+        border: review || overlay ? "1.5px solid" : "1px solid",
         borderColor: reviewColor(review) ?? (overlay ? "primary.main" : tokens.color.border),
         borderRadius: `${tokens.radius.card}px`,
-        bgcolor: review ? tokens.statusTint[review.right ? "success" : "error"].bg : "background.paper",
+        bgcolor: review ? tokens.statusTint[review.right ? "success" : "error"].bg : overlay ? tokens.color.primarySofter : "background.paper",
         color: "text.primary",
-        typography: "body2",
-        fontWeight: "fontWeightMedium",
+        typography: "subtitle2",
         textAlign: "left",
         cursor: locked ? "default" : "grab",
         touchAction: "manipulation",
         opacity: dragging ? 0.3 : 1,
-        ...(overlay ? { transform: "rotate(-1.5deg) scale(1.02)", boxShadow: tokens.shadow.float, cursor: "grabbing" } : null),
+        ...(overlay ? { transform: "rotate(-1deg) translateY(-2px)", boxShadow: tokens.shadow.float, cursor: "grabbing" } : null),
         "&.Mui-focusVisible": { outline: (theme) => `2px solid ${theme.palette.primary.main}`, outlineOffset: 2 },
         "@media (prefers-reduced-motion: no-preference)": {
           transition: `border-color ${tokens.motion.duration.fast}ms ${tokens.motion.easing.standard}, background-color ${tokens.motion.duration.fast}ms ${tokens.motion.easing.standard}`,
         },
       }}
     >
+      <DragIndicatorIcon aria-hidden fontSize="small" sx={{ flex: "none", color: "text.secondary" }} />
       <SequenceInlineImage image={item.image} label={item.label} />
       <Box component="span" sx={{ flex: 1, minWidth: 0, overflowWrap: "anywhere" }}>
         {item.label}
@@ -117,7 +117,6 @@ export function SequenceCard({
           {`đúng: ${review.correctAt}`}
         </Box>
       ) : null}
-      <DragIndicatorIcon aria-hidden fontSize="small" sx={{ flex: "none", color: "text.secondary" }} />
     </ButtonBase>
   );
 }

@@ -121,7 +121,8 @@ describe("QuestionEditorShell", () => {
     expect(screen.getByRole("button", { name: "+ Khi sai" })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Học viên làm" }));
-    fireEvent.click(screen.getByText("2"));
+    // The "2" also appears as the keyboard-shortcut hint on the second card, so take the first match (the answer text).
+    fireEvent.click(screen.getAllByText("2")[0]!);
     fireEvent.click(screen.getByRole("button", { name: "Xem kết quả" }));
     expect(screen.getByRole("status").textContent).toBe("Chính xác!");
   });

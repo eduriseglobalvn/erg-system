@@ -72,7 +72,7 @@ describe("FinalResultScreen", () => {
     const aside = screen.getByTestId("review-aside");
     expect(within(aside).getByRole("button", { name: "Sai · 9" })).toBeTruthy();
     expect(within(aside).getByRole("button", { name: "Bỏ trống · 3" })).toBeTruthy();
-    expect(screen.getByText("78/90 câu đúng")).toBeTruthy();
+    expect(within(aside).getByText("78/90")).toBeTruthy();
   });
 
   it("without answer keys shows only the submit result and the answered count", () => {

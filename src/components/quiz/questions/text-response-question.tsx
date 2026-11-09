@@ -1,6 +1,34 @@
-import { QuestionBodyWithImage } from "@/components/quiz/questions/shared";
+import Box from "@mui/material/Box";
+import InputBase from "@mui/material/InputBase";
+import { Fragment, useId } from "react";
+
+import { blankSx, QuestionBodyWithImage } from "@/components/quiz/questions/shared";
 import type { QuestionComponentProps } from "@/components/quiz/questions/types";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { ergEnterpriseTokens as tokens } from "@/themes/erg-enterprise-tokens";
+
+type ReviewState = "idle" | "correct" | "wrong";
+
+/** Big answer box (design T03/T12): strong border, primary ring on focus, green/red once reviewed. */
+const fieldSx = (state: ReviewState) => ({
+  bgcolor: "background.paper",
+  border: "1px solid",
+  borderColor: state === "correct" ? "success.main" : state === "wrong" ? "error.main" : tokens.color.borderStrong,
+  borderRadius: `${tokens.radius.control}px`,
+  color: "text.primary",
+  px: 1.75,
+  transition: `border-color ${tokens.motion.duration.fast}ms ${tokens.motion.easing.standard}, box-shadow ${tokens.motion.duration.fast}ms ${tokens.motion.easing.standard}`,
+  width: "100%",
+  "&.Mui-focused": { borderColor: "primary.main", boxShadow: `0 0 0 3px ${tokens.color.primarySoft}` },
+  "&.Mui-disabled": { color: "text.primary" },
+  "& .MuiInputBase-input.Mui-disabled": { WebkitTextFillColor: "currentColor" },
+});
+
+const adornmentSx = { color: "text.secondary", flex: "none", fontWeight: "fontWeightMedium", whiteSpace: "nowrap" } as const;
+const hintSx = { typography: "caption", color: "text.secondary", m: 0 } as const;
+
+function CorrectAnswer({ value }: { value: string }) {
+  return <Box component="span" sx={{ typography: "subtitle2", color: "success.dark" }}>Đáp án đúng: {value}</Box>;
+}
 
 export function ShortAnswerQuestion(props: QuestionComponentProps) {
   return <TextBlankQuestion {...props} variant="short" />;
@@ -18,67 +46,28 @@ export function NumericQuestion({
   reviewMode = false,
   result,
 }: QuestionComponentProps) {
-  const isMobile = useIsMobile();
-  const isCorrect = reviewMode && result?.correct;
-  const successColor = "#118D57";
-  const dangerColor = "#e82828";
-
-  if (isMobile) {
-    const currentValue = value.numericValue ?? "";
-    const inputWidth = `${Math.max(currentValue.length + 2, 5)}ch`;
-
-    return (
-      <QuestionBodyWithImage question={question}>
-        <div className="flex flex-wrap items-end gap-2">
-          <input
-            type="number"
-            value={currentValue}
-            disabled={submitted}
-            onChange={(event) => onChange({ numericValue: event.target.value })}
-            className="min-h-9 max-w-full border-0 border-b-2 border-slate-300 bg-transparent px-1 pb-1 text-[var(--quiz-control-text-size)] font-semibold outline-none disabled:cursor-default"
-            style={{
-              width: inputWidth,
-              borderColor: isCorrect ? successColor : reviewMode ? dangerColor : "#cbd5e1",
-              color: "var(--quiz-option-text)",
-            }}
-            placeholder="....."
-          />
-          <span className="pb-1 text-[18px] font-semibold text-slate-700">
-            {question.numericAnswer?.unit ?? ""}
-          </span>
-        </div>
-        {reviewMode && result?.correctNumericValue ? (
-          <div className="text-sm font-semibold" style={{ color: successColor }}>Đáp án đúng: {result.correctNumericValue}</div>
-        ) : null}
-      </QuestionBodyWithImage>
-    );
-  }
+  const unit = question.numericAnswer?.unit;
+  const state: ReviewState = !reviewMode ? "idle" : result?.correct ? "correct" : "wrong";
 
   return (
     <QuestionBodyWithImage question={question}>
-      <div className="quiz-answer-region grid gap-4 sm:grid-cols-[minmax(0,1fr)_180px]">
-        <input
+      <Box className="quiz-answer-region" sx={{ display: "flex", flexDirection: "column", gap: 0.75 }}>
+        <InputBase
           type="number"
           value={value.numericValue ?? ""}
           disabled={submitted}
           onChange={(event) => onChange({ numericValue: event.target.value })}
-          className="min-h-16 rounded-lg border bg-white px-5 text-[var(--quiz-readable-size-lg)] font-semibold outline-none transition focus:ring-2 disabled:cursor-default"
-          style={{
-            borderColor: isCorrect ? successColor : reviewMode ? dangerColor : "var(--quiz-canvas-border)",
-            color: "var(--quiz-option-text)",
-            ["--tw-ring-color" as string]: "rgba(0,0,139,0.14)",
-          }}
           placeholder="Nhập số"
+          inputProps={{ "aria-label": "Đáp án", inputMode: "decimal" }}
+          endAdornment={unit ? <Box component="span" sx={adornmentSx}>{unit}</Box> : undefined}
+          sx={{ typography: "h3", ...fieldSx(state), fontWeight: "fontWeightBold", fontVariantNumeric: "tabular-nums", height: 56 }}
         />
-        <div className="grid min-h-16 place-items-center rounded-lg border border-slate-200 bg-slate-50 px-5 text-[var(--quiz-readable-size)] font-semibold text-slate-600">
-          {question.numericAnswer?.unit ?? "đơn vị"}
-        </div>
         {reviewMode && result?.correctNumericValue ? (
-          <div className="sm:col-span-2 rounded-lg border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">
-            Đáp án đúng: {result.correctNumericValue}
-          </div>
-        ) : null}
-      </div>
+          <CorrectAnswer value={result.correctNumericValue} />
+        ) : (
+          <Box component="p" sx={hintSx}>Chỉ nhập số.</Box>
+        )}
+      </Box>
     </QuestionBodyWithImage>
   );
 }
@@ -90,23 +79,25 @@ export function EssayQuestion({
   submitted = false,
   reviewMode = false,
 }: QuestionComponentProps) {
+  const text = value.essayText ?? "";
 
   return (
     <QuestionBodyWithImage question={question}>
-      <div className="quiz-answer-region grid gap-4">
-        <textarea
-          value={value.essayText ?? ""}
+      <Box className="quiz-answer-region" sx={{ display: "flex", flexDirection: "column", gap: 0.75 }}>
+        <InputBase
+          multiline
+          minRows={6}
+          value={text}
           disabled={submitted}
           onChange={(event) => onChange({ essayText: event.target.value })}
-          className="min-h-52 w-full resize-y rounded-lg border bg-white p-5 text-[var(--quiz-readable-size-lg)] font-medium leading-8 outline-none transition focus:ring-2 disabled:cursor-default"
-          style={{
-            borderColor: reviewMode ? "#118D57" : "var(--quiz-canvas-border)",
-            color: "var(--quiz-option-text)",
-            ["--tw-ring-color" as string]: "rgba(0,0,139,0.14)",
-          }}
           placeholder="Viết câu trả lời của em..."
+          inputProps={{ "aria-label": "Câu trả lời" }}
+          sx={{ typography: "h6", ...fieldSx(reviewMode ? "correct" : "idle"), alignItems: "flex-start", fontWeight: "fontWeightRegular", lineHeight: 1.5, py: 1.5 }}
         />
-      </div>
+        <Box sx={{ ...hintSx, display: "flex", justifyContent: "flex-end", fontVariantNumeric: "tabular-nums" }}>
+          {`${text.length.toLocaleString("vi-VN")} ký tự`}
+        </Box>
+      </Box>
     </QuestionBodyWithImage>
   );
 }
@@ -120,81 +111,85 @@ function TextBlankQuestion({
   result,
   variant,
 }: QuestionComponentProps & { variant: "short" | "blank" }) {
-  const isMobile = useIsMobile();
+  const idBase = useId();
   const blanks = question.textBlanks ?? [];
-  const successColor = "#118D57";
-  const dangerColor = "#e82828";
+  const review = (blankId: string, answer: string) => {
+    const correctValue = result?.correctTextResponses?.[blankId] ?? blanks.find((blank) => blank.id === blankId)?.correctAnswers[0] ?? "";
+    const right = normalizeText(answer) === normalizeText(correctValue);
+    return { correctValue, state: (!reviewMode ? "idle" : right ? "correct" : "wrong") as ReviewState };
+  };
+  const setText = (blankId: string, text: string) => onChange({ textResponses: { ...(value.textResponses ?? {}), [blankId]: text } });
+
+  if (variant === "blank") {
+    const filled = blanks.filter((blank) => (value.textResponses?.[blank.id] ?? "").trim()).length;
+    return (
+      <QuestionBodyWithImage question={question}>
+        <Box className="quiz-answer-region" sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+          {/* The blanks sit inside the running text, each with its own prefix and suffix. */}
+          <Box component="p" sx={{ typography: "h5", fontWeight: "fontWeightRegular", lineHeight: 2.1, m: 0 }}>
+            {blanks.map((blank, index) => {
+              const currentValue = value.textResponses?.[blank.id] ?? "";
+              const { correctValue, state } = review(blank.id, currentValue);
+              return (
+                <Fragment key={blank.id}>
+                  {index > 0 ? " " : null}
+                  {blank.prefix ? <>{blank.prefix} </> : null}
+                  <InputBase
+                    value={currentValue}
+                    disabled={submitted}
+                    onChange={(event) => setText(blank.id, event.target.value)}
+                    placeholder={String(index + 1)}
+                    inputProps={{ "aria-label": `Ô trống ${index + 1}` }}
+                    sx={{
+                      ...blankSx(state === "correct" ? "correct" : state === "wrong" ? "wrong" : currentValue ? "filled" : "empty"),
+                      width: `${Math.max(currentValue.length + 3, 7)}ch`,
+                      maxWidth: "100%",
+                      ...(state === "wrong" ? { textDecoration: "line-through" } : null),
+                      "&.Mui-focused": { ...blankSx("active"), borderStyle: "solid", m: 0.25 },
+                      "& input": { p: 0, textAlign: "center" },
+                      "& input::placeholder": { color: tokens.color.textMuted, opacity: 1 },
+                      "& .MuiInputBase-input.Mui-disabled": { WebkitTextFillColor: "currentColor" },
+                    }}
+                  />
+                  {state === "wrong" ? <Box component="span" sx={{ color: "success.dark", fontWeight: "fontWeightBold", ml: 0.5 }}>{correctValue}</Box> : null}
+                  {blank.suffix ? <> {blank.suffix}</> : null}
+                </Fragment>
+              );
+            })}
+          </Box>
+          {reviewMode ? null : <Box component="p" sx={hintSx}>{`Đã điền ${filled}/${blanks.length} chỗ trống.`}</Box>}
+        </Box>
+      </QuestionBodyWithImage>
+    );
+  }
 
   return (
     <QuestionBodyWithImage question={question}>
-      <div className={`quiz-answer-region grid ${isMobile ? "gap-3" : "gap-4"}`}>
-        {variant === "blank" && !isMobile ? (
-          <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-4 text-base font-medium leading-8 text-slate-600">
-            Điền từng ô còn trống bên dưới. Hệ thống mock sẽ chấm theo đáp án mẫu đã khai báo.
-          </div>
-        ) : null}
-
-        {blanks.map((blank, index) => {
+      <Box className="quiz-answer-region" sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        {blanks.map((blank) => {
           const currentValue = value.textResponses?.[blank.id] ?? "";
-          const correctValue = result?.correctTextResponses?.[blank.id] ?? blank.correctAnswers[0] ?? "";
-          const isCorrect = reviewMode && normalizeText(currentValue) === normalizeText(correctValue);
-          const mobileWidth = `${Math.max((currentValue || ".....").length + 1, 5)}ch`;
-
+          const { correctValue, state } = review(blank.id, currentValue);
+          const inputId = `${idBase}-${blank.id}`;
           return (
-            <label key={blank.id} className={`grid ${isMobile ? "gap-1.5" : "gap-2"}`}>
-              <span className="text-sm font-semibold text-slate-500">
-                {variant === "blank" ? `Ô trống ${index + 1}` : blank.label}
-              </span>
-              <div className={`flex flex-wrap ${isMobile ? "items-end gap-x-2 gap-y-1" : "items-center gap-3"}`}>
-                {blank.prefix ? (
-                  <span className={`${isMobile ? "text-[18px] font-semibold text-slate-700" : "inline-flex min-h-14 items-center text-[var(--quiz-readable-size)] font-medium text-slate-700"}`}>
-                    {blank.prefix}
-                  </span>
-                ) : null}
-                <input
-                  value={currentValue}
-                  disabled={submitted}
-                  onChange={(event) =>
-                    onChange({
-                      textResponses: {
-                        ...(value.textResponses ?? {}),
-                        [blank.id]: event.target.value,
-                      },
-                    })
-                  }
-                  className={
-                    isMobile
-                      ? "min-h-8 max-w-full border-0 border-b-2 bg-transparent px-1 pb-1 text-[18px] font-semibold outline-none disabled:cursor-default"
-                      : "h-14 min-w-[220px] flex-1 rounded-lg border bg-white px-4 py-0 text-[var(--quiz-readable-size)] font-semibold leading-none outline-none transition focus:ring-2 disabled:cursor-default"
-                  }
-                  style={
-                    isMobile
-                      ? {
-                          width: mobileWidth,
-                          borderColor: isCorrect ? successColor : reviewMode ? dangerColor : "#cbd5e1",
-                          color: "var(--quiz-option-text)",
-                        }
-                      : {
-                          borderColor: isCorrect ? successColor : reviewMode ? dangerColor : "var(--quiz-canvas-border)",
-                          color: "var(--quiz-option-text)",
-                          ["--tw-ring-color" as string]: "rgba(0,0,139,0.14)",
-                        }
-                  }
-                  placeholder={isMobile ? "....." : blank.placeholder ?? "Nhập câu trả lời"}
-                />
-                {blank.suffix ? (
-                  <span className={`${isMobile ? "text-[18px] font-semibold text-slate-700" : "inline-flex min-h-14 items-center text-[var(--quiz-readable-size)] font-medium text-slate-700"}`}>
-                    {blank.suffix}
-                  </span>
-                ) : null}
-              </div>
-              {reviewMode ? (
-                <span className="text-sm font-semibold" style={{ color: successColor }}>Đáp án đúng: {correctValue}</span>
-              ) : null}
-            </label>
+            <Box key={blank.id} sx={{ display: "flex", flexDirection: "column", gap: 0.75 }}>
+              <Box component="label" htmlFor={inputId} sx={{ typography: "subtitle2", color: "text.secondary" }}>
+                {blank.label || "Đáp án"}
+              </Box>
+              <InputBase
+                id={inputId}
+                value={currentValue}
+                disabled={submitted}
+                onChange={(event) => setText(blank.id, event.target.value)}
+                placeholder={blank.placeholder ?? "Nhập câu trả lời"}
+                startAdornment={blank.prefix ? <Box component="span" sx={{ ...adornmentSx, mr: 1 }}>{blank.prefix}</Box> : undefined}
+                endAdornment={blank.suffix ? <Box component="span" sx={{ ...adornmentSx, ml: 1 }}>{blank.suffix}</Box> : undefined}
+                sx={{ typography: "h3", ...fieldSx(state), fontWeight: "fontWeightBold", height: 56 }}
+              />
+              {reviewMode ? <CorrectAnswer value={correctValue} /> : null}
+            </Box>
           );
         })}
-      </div>
+      </Box>
     </QuestionBodyWithImage>
   );
 }
@@ -204,6 +199,6 @@ function normalizeText(value: string) {
     .trim()
     .toLocaleLowerCase("vi-VN")
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[̀-ͯ]/g, "")
     .replace(/\s+/g, " ");
 }

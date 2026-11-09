@@ -131,7 +131,7 @@ describe("result screen", () => {
     render(mobile({ attemptCompleted: true }));
     expect(screen.getByTestId("mobile-player-footer")).toBeTruthy();
     const footerReview = screen.getAllByRole("button", { name: "Xem lại bài làm" }).at(-1) as HTMLElement;
-    expect(footerReview.className).not.toContain("bg-[var(--erg-blue)]");
+    expect(footerReview.className).toContain("MuiButton-outlined");
   });
 });
 
@@ -143,9 +143,16 @@ describe("submit is always available", () => {
     expect(screen.getByText("Đã lưu 10:42")).toBeInTheDocument();
   });
 
-  it("mobile testing mode shows Nộp bài before every question is answered", () => {
+  it("mobile testing mode offers Nộp bài from the question list before every question is answered", () => {
     render(mobile());
+    fireEvent.click(screen.getByRole("button", { name: "Mở danh sách câu, 0/20 đã làm" }));
     expect(screen.getByRole("button", { name: "Nộp bài" })).toBeEnabled();
+  });
+
+  it("mobile testing mode puts Nộp bài in the dock on the last question", () => {
+    render(mobile({ isFirstQuestion: false, isLastQuestion: true }));
+    expect(within(screen.getByTestId("mobile-player-footer")).getByRole("button", { name: "Nộp bài" })).toBeEnabled();
+    expect(screen.queryByRole("button", { name: "Câu tiếp" })).toBeNull();
   });
 
   it("practice mode shows only Kết quả before the answer is checked, and Câu tiếp after", () => {
@@ -179,7 +186,9 @@ describe("submit is always available", () => {
 
   it("mobile bookmark target is at least 44px", () => {
     render(mobile());
-    expect(screen.getByRole("button", { name: "Đánh dấu câu hỏi" }).className).toContain("h-11 w-11");
+    const flag = screen.getByRole("button", { name: "Đánh dấu câu hỏi" });
+    expect(getComputedStyle(flag).minHeight).toBe("44px");
+    expect(flag.getAttribute("aria-pressed")).toBe("false");
   });
 
   it("mobile intro shows the time limit", () => {
@@ -205,14 +214,23 @@ describe("balanced two-column web layout", () => {
     const card = screen.getByRole("article");
     expect(within(card).getByRole("button", { name: "Câu tiếp" })).toBeEnabled();
     expect(within(card).getByRole("button", { name: "Câu trước" })).toBeDisabled();
-    expect(within(card).getByText("1–4 chọn · ← → đổi câu · F đánh dấu")).toBeInTheDocument();
+    expect(within(card).getByRole("note", { name: "1–4 chọn · ← → đổi câu · F đánh dấu" })).toBeInTheDocument();
     expect(within(card).queryByRole("button", { name: "Nộp bài" })).toBeNull();
+  });
+
+  it("on the last question the card's forward button submits (WL4)", () => {
+    const handleRequestSubmit = vi.fn();
+    render(desktop({ isFirstQuestion: false, isLastQuestion: true, handleRequestSubmit }));
+    const card = screen.getByRole("article");
+    expect(within(card).queryByRole("button", { name: "Câu tiếp" })).toBeNull();
+    fireEvent.click(within(card).getByRole("button", { name: "Nộp bài" }));
+    expect(handleRequestSubmit).toHaveBeenCalledOnce();
   });
 
   it("only hints the keys that work: N appears with more than 20 questions, 1–n follows the choices", () => {
     const many = Array.from({ length: 25 }, (_, i) => ({ ...question, id: `q${i + 1}` }));
     render(desktop({ questions: many, cells: buildTakingCells(25, new Set(), new Set(), 0), readyQuestion: { ...question, choices: choices.slice(0, 3) } }));
-    expect(screen.getByText("1–3 chọn · ← → đổi câu · F đánh dấu · N đi tới câu")).toBeInTheDocument();
+    expect(screen.getByRole("note", { name: "1–3 chọn · ← → đổi câu · F đánh dấu · N đi tới câu" })).toBeInTheDocument();
   });
 
   it("jumps from the list and moves with Câu tiếp", () => {

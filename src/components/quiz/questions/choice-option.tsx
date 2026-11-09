@@ -1,7 +1,6 @@
 import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
 import Box from "@mui/material/Box";
 import ButtonBase from "@mui/material/ButtonBase";
-import { alpha } from "@mui/material/styles";
 import type { QuestionImage } from "@/domain/quiz/types";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 import type { ReactNode } from "react";
@@ -20,6 +19,8 @@ type ChoiceOptionProps = {
   reviewTag?: ChoiceReviewTag;
   reviewMode?: boolean;
   selected: boolean;
+  /** Number key that picks this option in the player; shown as a key hint on wide screens. */
+  shortcutKey?: string;
   showCorrect?: boolean;
   showWrong?: boolean;
 };
@@ -44,14 +45,45 @@ function legacyTag({ reviewMode, selected, showCorrect, showWrong }: ChoiceOptio
   return undefined;
 }
 
+/** Keyboard key cap, e.g. the number that picks an option. */
+export function KeyHint({ children }: { children: ReactNode }) {
+  return (
+    <Box
+      component="kbd"
+      aria-hidden
+      sx={{
+        typography: "caption",
+        alignItems: "center",
+        bgcolor: "background.paper",
+        border: `1px solid ${ergEnterpriseTokens.color.borderStrong}`,
+        borderBottomWidth: 2,
+        borderRadius: `${ergEnterpriseTokens.radius.xs}px`,
+        color: "text.secondary",
+        display: "inline-flex",
+        flex: "none",
+        fontFamily: "inherit",
+        fontVariantNumeric: "tabular-nums",
+        fontWeight: "fontWeightBold",
+        height: 22,
+        justifyContent: "center",
+        minWidth: 22,
+        px: 0.75,
+        }}
+    >
+      {children}
+    </Box>
+  );
+}
+
 export function ChoiceOption(props: ChoiceOptionProps) {
-  const { children, disabled = false, image, letter, mode, onClick, selected } = props;
+  const { children, disabled = false, image, letter, mode, onClick, selected, shortcutKey } = props;
   const reviewTag = props.reviewTag ?? legacyTag(props);
   const tag = reviewTag ? REVIEW_TAGS[reviewTag] : null;
   const tone = tag?.tone ?? "primary";
   const keyFilled = selected || reviewTag === "correct";
   // The teacher's template colours the plain (not review) selection; the vars are unset otherwise and the fallbacks apply.
   const themed = tone === "primary";
+  const showCheck = mode === "multiple" && selected;
 
   return (
     <ButtonBase
@@ -61,58 +93,55 @@ export function ChoiceOption(props: ChoiceOptionProps) {
       onClick={() => { if (!disabled) onClick(); }}
       sx={(theme) => ({
         alignItems: "center",
-        // A checked (review) option takes the status tint: the teacher highlight may be dark, and the tag/label text is dark.
-        bgcolor: !selected ? "transparent" : tag ? ergEnterpriseTokens.statusTint[tag.tone].bg : `var(--quiz-highlight, ${alpha(theme.palette.primary.main, 0.06)})`,
-        border: "1px solid",
-        borderColor: selected ? `var(--quiz-accent, ${theme.palette.primary.main})` : "transparent",
-        borderRadius: `var(--quiz-radius, ${ergEnterpriseTokens.radius.control}px)`,
-        display: "grid",
-        gap: { xs: 1.5, sm: 2 },
-        gridTemplateColumns: { xs: "30px minmax(0,1fr)", sm: "34px minmax(0,1fr)" },
-        justifyContent: "stretch",
-        minHeight: "calc(var(--quiz-control-height) + 18px)",
-        px: { xs: 1.5, sm: 2 },
+        // A review option takes the status tint: the teacher highlight may be dark, and the tag/label text is dark.
+        bgcolor: tag ? ergEnterpriseTokens.statusTint[tag.tone].bg : !selected ? "background.paper" : `var(--quiz-highlight, ${ergEnterpriseTokens.color.primarySofter})`,
+        border: "1.5px solid",
+        borderColor: tag ? theme.palette[tone].main : selected ? `var(--quiz-accent, ${theme.palette.primary.main})` : ergEnterpriseTokens.color.border,
+        borderRadius: `var(--quiz-radius, ${ergEnterpriseTokens.radius.card}px)`,
+        display: "flex",
+        gap: 1.5,
+        justifyContent: "flex-start",
+        minHeight: 56,
+        px: 1.75,
         py: 1.5,
         textAlign: "left",
         transition: theme.transitions.create(["background-color", "border-color"], { duration: ergEnterpriseTokens.motion.duration.fast }),
         width: "100%",
         // A selected option keeps its (possibly dark) highlight on hover; the label colour is chosen for that fill.
-        ...(selected ? {} : { "&:hover": { bgcolor: alpha(theme.palette.primary.main, 0.06), borderColor: "divider" } }),
+        ...(selected || tag ? {} : { "&:hover": { bgcolor: ergEnterpriseTokens.color.surfaceMuted, borderColor: ergEnterpriseTokens.color.borderStrong } }),
         "&:focus-visible": { borderColor: "primary.main", boxShadow: ergEnterpriseTokens.shadow.focus, outline: "none" },
+        "&.Mui-focusVisible": { borderColor: "primary.main", boxShadow: ergEnterpriseTokens.shadow.focus },
         "&:disabled": { cursor: "default", pointerEvents: "none" },
       })}
     >
       <Box
         component="span"
         sx={(theme) => ({
+          typography: "caption",
           alignItems: "center",
           bgcolor: keyFilled ? (themed ? `var(--quiz-accent, ${theme.palette.primary.main})` : theme.palette[tone].main) : "background.paper",
           border: "1.5px solid",
-          borderColor: selected || tag ? (themed ? `var(--quiz-accent, ${theme.palette.primary.main})` : theme.palette[tone].main) : "divider",
-          borderRadius: `${ergEnterpriseTokens.radius.chip}px`,
-          color: keyFilled ? (themed ? `var(--quiz-accent-contrast, ${theme.palette.getContrastText(theme.palette.primary.main)})` : theme.palette.getContrastText(theme.palette[tone].main)) : "text.primary",
-          position: "relative",
+          borderColor: keyFilled ? (themed ? `var(--quiz-accent, ${theme.palette.primary.main})` : theme.palette[tone].main) : ergEnterpriseTokens.color.borderStrong,
+          borderRadius: `${mode === "multiple" ? ergEnterpriseTokens.radius.xs : ergEnterpriseTokens.radius.chip}px`,
+          color: keyFilled ? (themed ? `var(--quiz-accent-contrast, ${theme.palette.getContrastText(theme.palette.primary.main)})` : theme.palette.getContrastText(theme.palette[tone].main)) : "text.secondary",
           display: "inline-flex",
-          typography: "subtitle2",
-          height: { xs: 28, sm: 32 },
+          flex: "none",
+          fontVariantNumeric: "tabular-nums",
+          fontWeight: "fontWeightBold",
+          height: 30,
           justifyContent: "center",
-          justifySelf: "center",
-          width: { xs: 28, sm: 32 },
+          width: 30,
         })}
       >
-        {letter}
-        {mode === "multiple" && selected ? (
-          <Box component="span" data-testid="choice-check-badge" sx={(theme) => ({ alignItems: "center", bgcolor: "background.paper", border: "1px solid", borderColor: theme.palette[tone].main, borderRadius: `${ergEnterpriseTokens.radius.chip}px`, color: theme.palette[tone].main, display: "inline-flex", height: 14, justifyContent: "center", position: "absolute", right: -4, top: -4, width: 14 })}>
-            <CheckRoundedIcon sx={{ height: 10, width: 10 }} />
-          </Box>
-        ) : null}
+        {showCheck ? <CheckRoundedIcon data-testid="choice-check-badge" aria-hidden sx={{ fontSize: ergEnterpriseTokens.size.iconMd }} /> : letter}
       </Box>
 
-      <Box component="span" sx={{ color: selected && themed ? "var(--quiz-highlight-contrast, inherit)" : "text.primary", fontSize: "var(--quiz-readable-size-lg)", fontWeight: 600, lineHeight: 1.38, minWidth: 0 }}>
-        {image ? <Box component="img" src={image.url} alt={image.alt ?? ""} sx={{ display: "block", maxHeight: 160, maxWidth: "100%", mb: 1, objectFit: "contain" }} /> : null}
+      <Box component="span" sx={{ typography: "h6", color: selected && themed ? "var(--quiz-highlight-contrast, inherit)" : "text.primary", flex: 1, fontWeight: "fontWeightMedium", lineHeight: 1.45, minWidth: 0, overflowWrap: "anywhere" }}>
+        {image ? <Box component="img" src={image.url} alt={image.alt ?? ""} sx={{ borderRadius: `${ergEnterpriseTokens.radius.xs}px`, display: "block", maxHeight: 160, maxWidth: "100%", mb: 1, objectFit: "contain" }} /> : null}
         {children}
-        {tag ? <Box component="span" sx={{ color: tag.color, display: "block", mt: 0.5, typography: "subtitle2" }}>{tag.label}</Box> : null}
       </Box>
+      {tag ? <Box component="span" sx={{ typography: "caption", color: tag.color, flex: "none", fontWeight: "fontWeightBold", ml: "auto" }}>{tag.label}</Box> : null}
+      {shortcutKey && !tag && !disabled ? <Box component="span" sx={{ display: { xs: "none", md: "inline-flex" }, flex: "none" }}><KeyHint>{shortcutKey}</KeyHint></Box> : null}
     </ButtonBase>
   );
 }

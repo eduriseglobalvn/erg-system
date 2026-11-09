@@ -1,21 +1,25 @@
+import FlagRounded from "@mui/icons-material/FlagRounded";
+import OutlinedFlagRounded from "@mui/icons-material/OutlinedFlagRounded";
+import SendRounded from "@mui/icons-material/SendRounded";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
 import type { ComponentProps, CSSProperties, ReactNode, Ref, RefObject } from "react";
-import { Flag } from "lucide-react";
 
 import { ErgButton } from "@/components/erg-mui/erg-actions";
 import { PlayerCountdown } from "@/components/quiz/player-countdown";
 import { FinalResultScreen } from "@/components/quiz/final-result-screen";
 import { QuestionFeedbackPanel } from "@/components/quiz/player-shell-parts";
 import { PlayerTimerText } from "@/components/quiz/player-status";
-import { playerGridClass } from "@/components/quiz/player-shell-runtime/player-shell-styles";
+import { Kbd, MetaTag, PlayerWebPage, pointsLabel, questionKindLabel, webCardSx, webColumnSx } from "@/components/quiz/player-web-frame";
 import { PlayerQuestionAside } from "@/components/quiz/player-shell-runtime/player-question-aside";
 import type { QuestionCell } from "@/components/quiz/question-navigator";
 import { buildKeyHint } from "@/components/quiz/player-shell-runtime/player-shell-runtime-helpers";
 import { PlayerDesktopFooter } from "@/components/quiz/player-shell-runtime/player-desktop-footer";
 import type { AnswerRecord, Attempt, Question, QuizResultDisplay } from "@/domain/quiz/types";
+import { ergEnterpriseTokens as tk } from "@/themes/erg-enterprise-tokens";
 
 export type PlayerDesktopLayoutProps = {
-  allQuestionsAnswered: boolean;
-  answeredCount: number;
   attemptCompleted: boolean;
   canvasStyle: CSSProperties;
   cells: QuestionCell[];
@@ -30,11 +34,11 @@ export type PlayerDesktopLayoutProps = {
   isTestingMode: boolean;
   isTrainingMode: boolean;
   lastResult: AnswerRecord["result"] | null;
-  modeBadgeStyle: CSSProperties;
-  playerCardStyle: CSSProperties;
   questionBody: ReactNode;
   questionBodyRef: RefObject<HTMLDivElement | null>;
   questions: Question[];
+  quizTitle?: string;
+  quizMeta?: string;
   readyAttempt: Attempt;
   readyQuestion: Question;
   resultDisplay: QuizResultDisplay;
@@ -46,6 +50,7 @@ export type PlayerDesktopLayoutProps = {
   handleRequestSubmit: () => void;
   handleReviewQuiz: () => void;
   onBackToList: () => void;
+  onExit?: () => void;
   onJumpToQuestion: (index: number) => void;
   onRetry?: () => void;
   handleToggleBookmark: () => Promise<void>;
@@ -53,132 +58,93 @@ export type PlayerDesktopLayoutProps = {
   submitCurrentTrainingQuestion: () => Promise<void>;
 };
 
-export function PlayerDesktopLayout({
-  allQuestionsAnswered,
-  answeredCount,
-  attemptCompleted,
-  canvasStyle,
-  cells,
-  countdownProps,
-  currentAnswerComplete,
-  currentIndex,
-  footerMessage,
-  goToInputRef,
-  isCurrentQuestionBookmarked,
-  isFirstQuestion,
-  isLastQuestion,
-  isTestingMode,
-  isTrainingMode,
-  lastResult,
-  modeBadgeStyle,
-  playerCardStyle,
-  questionBody,
-  questionBodyRef,
-  questions,
-  readyAttempt,
-  readyQuestion,
-  resultDisplay,
-  reviewingSubmittedAttempt,
-  saveIndicator,
-  submitFailed,
-  submitted,
-  submitting,
-  handleRequestSubmit,
-  handleReviewQuiz,
-  onBackToList,
-  onJumpToQuestion,
-  onRetry,
-  handleToggleBookmark,
-  setCurrentIndex,
-  submitCurrentTrainingQuestion,
-}: PlayerDesktopLayoutProps) {
+/** WL2: top bar (Thoát · title · autosave · timer), position line, question card left, question list right. */
+export function PlayerDesktopLayout(props: PlayerDesktopLayoutProps) {
+  const {
+    attemptCompleted, canvasStyle, cells, countdownProps, currentIndex, footerMessage, goToInputRef, isCurrentQuestionBookmarked,
+    isTestingMode, isTrainingMode, lastResult, questionBody, questionBodyRef, questions, quizTitle, quizMeta, readyAttempt, readyQuestion,
+    resultDisplay, reviewingSubmittedAttempt, saveIndicator, submitFailed, submitting, handleRequestSubmit, handleReviewQuiz,
+    onBackToList, onExit, onJumpToQuestion, onRetry, handleToggleBookmark, setCurrentIndex,
+  } = props;
+  const showResult = attemptCompleted && !reviewingSubmittedAttempt;
+  const timer = isTestingMode && !attemptCompleted ? (
+    <PlayerCountdown {...countdownProps}>{(seconds) => <PlayerTimerText seconds={seconds} />}</PlayerCountdown>
+  ) : null;
+
   return (
-    <div className={playerGridClass}>
-        <article
-          className="flex min-h-0 min-w-0 flex-col rounded-lg border border-slate-200 bg-white p-1.5 sm:p-2"
-          style={playerCardStyle}
-        >
-          <div className="flex min-h-8 items-center justify-between gap-2 px-1 pb-1.5 text-xs text-slate-500 sm:px-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <span>{`Câu ${currentIndex + 1} / ${questions.length}`}</span>
-              <span className="hidden text-slate-300 sm:inline">|</span>
-              <span className="text-xs font-semibold text-slate-400">
-                {allQuestionsAnswered ? "Đã hoàn tất" : `${answeredCount}/${questions.length} đã trả lời`}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                aria-label={isCurrentQuestionBookmarked ? "Bỏ đánh dấu câu hỏi" : "Đánh dấu câu hỏi"}
-                className={`grid h-8 w-8 place-items-center rounded-lg border transition ${
-                  isCurrentQuestionBookmarked ? "border-[rgba(255,86,48,0.2)] bg-[rgba(255,86,48,0.12)] text-[#FF5630]" : "border-slate-200 bg-white text-slate-400"
-                }`}
-                onClick={() => void handleToggleBookmark()}
-              >
-                <Flag className={`h-4 w-4 ${isCurrentQuestionBookmarked ? "fill-current" : ""}`} />
-              </button>
-              {saveIndicator}
-              <span className="rounded-lg px-2.5 py-1 text-xs font-semibold" style={modeBadgeStyle}>
-                {isTrainingMode ? "Luyện tập" : "Kiểm tra"}
-              </span>
-              {isTestingMode ? (
-                <PlayerCountdown {...countdownProps}>{(seconds) => <PlayerTimerText seconds={seconds} />}</PlayerCountdown>
-              ) : null}
-            </div>
-          </div>
-
-          <div
-            className="relative min-h-[560px] min-w-0 flex-1 overflow-hidden rounded-lg border bg-white p-3 sm:p-4 lg:flex lg:min-h-0 lg:flex-col"
-            style={canvasStyle}
-          >
-            <div className="relative z-10 border-b border-slate-200 pb-3">
-              <h2 className="quiz-player-question-title leading-snug text-slate-900" style={{ fontSize: "var(--quiz-question-title-size)" }}>
-                {attemptCompleted && !reviewingSubmittedAttempt ? resultDisplay[readyAttempt.passed ? "passMessage" : "failMessage"] : readyQuestion.title}
-              </h2>
-            </div>
-
-            <div ref={questionBodyRef} className="quiz-player-question-body relative z-10 min-h-[460px] overflow-auto px-4 pb-36 pt-5 sm:px-7 sm:pr-32 sm:pt-6 lg:min-h-0 lg:flex-1">
-              {attemptCompleted && !reviewingSubmittedAttempt ? (
-                <FinalResultScreen
-                  attempt={readyAttempt}
-                  questions={questions}
-                  resultDisplay={resultDisplay}
-                  onReview={handleReviewQuiz}
-                  onReviewQuestion={(index) => { handleReviewQuiz(); setCurrentIndex(() => index); }}
-                  onRetry={onRetry}
-                  onBackToList={onBackToList}
-                />
-              ) : null}
-
-              {attemptCompleted && !reviewingSubmittedAttempt ? null : (
-                <>{questionBody}</>
-              )}
-            </div>
-
-            {lastResult && !isTrainingMode && !(attemptCompleted && !reviewingSubmittedAttempt) ? (
-              <div className="pointer-events-none absolute inset-x-4 bottom-5 z-30 flex justify-center px-3 sm:inset-x-8">
-                <QuestionFeedbackPanel result={lastResult} floating />
-              </div>
-            ) : null}
-          </div>
-
-          <PlayerDesktopFooter
-            attemptCompleted={attemptCompleted} currentAnswerComplete={currentAnswerComplete}
-            footerMessage={footerMessage} isFirstQuestion={isFirstQuestion} isLastQuestion={isLastQuestion}
-            isTrainingMode={isTrainingMode} keyHint={buildKeyHint(readyQuestion, questions.length)} modeBadgeStyle={modeBadgeStyle} questions={questions} resultDisplay={resultDisplay}
-            reviewingSubmittedAttempt={reviewingSubmittedAttempt} submitted={submitted} submitting={submitting}
-            handleReviewQuiz={handleReviewQuiz} setCurrentIndex={setCurrentIndex}
-            submitCurrentTrainingQuestion={submitCurrentTrainingQuestion}
-          />
-        </article>
-
-        <PlayerQuestionAside cells={cells} goToInputRef={goToInputRef} onSelect={onJumpToQuestion}>
-          {isTrainingMode || attemptCompleted ? null : (
-            <ErgButton fullWidth disabled={submitting} variant="contained" onClick={handleRequestSubmit}>
-              {submitting ? "Đang nộp…" : submitFailed ? "Thử nộp lại" : "Nộp bài"}
-            </ErgButton>
+    <PlayerWebPage
+      backLabel="Thoát" onBack={onExit ?? onBackToList} title={quizTitle ?? ""} meta={quizMeta}
+      actions={<>{saveIndicator}{timer}</>}
+      progress={showResult ? undefined : (currentIndex + 1) / Math.max(questions.length, 1)}
+    >
+      <Box component="section" sx={webColumnSx}>
+        <Box component="article" sx={{ ...webCardSx, ...canvasStyle, display: "flex", flex: 1, flexDirection: "column", gap: 2, minHeight: 0, p: 3.5, position: "relative" }}>
+          {showResult ? null : (
+            <>
+              <Box sx={{ alignItems: "center", color: tk.color.textMuted, display: "flex", flexWrap: "wrap", gap: 1, typography: "caption" }}>
+                <Typography component="span" sx={{ color: tk.color.text, fontVariantNumeric: "tabular-nums", fontWeight: "fontWeightBold" }} variant="body2">
+                  {`Câu ${currentIndex + 1}/${questions.length}`}
+                </Typography>
+                <MetaTag>{questionKindLabel(readyQuestion.kind)}</MetaTag>
+                {readyQuestion.points > 0 ? <span>{pointsLabel(readyQuestion.points)}</span> : null}
+                <Box sx={{ flex: 1 }} />
+                <Button
+                  aria-label={isCurrentQuestionBookmarked ? "Bỏ đánh dấu câu hỏi" : "Đánh dấu câu hỏi"}
+                  aria-pressed={isCurrentQuestionBookmarked}
+                  size="small"
+                  startIcon={isCurrentQuestionBookmarked ? <FlagRounded /> : <OutlinedFlagRounded />}
+                  sx={{ color: isCurrentQuestionBookmarked ? tk.color.warning : `var(--quiz-accent, ${tk.color.primary})`, gap: 0.25 }}
+                  type="button"
+                  variant="text"
+                  onClick={() => void handleToggleBookmark()}
+                >
+                  {isCurrentQuestionBookmarked ? "Đã đánh dấu" : "Đánh dấu"}
+                  <Box component="span" sx={{ ml: 0.75 }}><Kbd>F</Kbd></Box>
+                </Button>
+              </Box>
+              <Typography component="h2" sx={{ color: tk.color.text }} variant="h2">
+                {readyQuestion.title}
+              </Typography>
+            </>
           )}
-        </PlayerQuestionAside>
-    </div>
+
+          <Box ref={questionBodyRef} className="quiz-player-question-body" sx={{ display: "flex", flex: 1, flexDirection: "column", gap: 2, minHeight: 0, overflowY: "auto", pb: lastResult && !isTrainingMode ? 16 : 0 }}>
+            {showResult ? (
+              <FinalResultScreen
+                attempt={readyAttempt} questions={questions} resultDisplay={resultDisplay}
+                onReview={handleReviewQuiz}
+                onReviewQuestion={(index) => { handleReviewQuiz(); setCurrentIndex(() => index); }}
+                onRetry={onRetry} onBackToList={onBackToList}
+              />
+            ) : questionBody}
+          </Box>
+
+          {lastResult && !isTrainingMode && !showResult ? (
+            <Box sx={{ bottom: 96, display: "flex", justifyContent: "center", left: 28, pointerEvents: "none", position: "absolute", right: 28, zIndex: 3 }}>
+              <QuestionFeedbackPanel result={lastResult} floating />
+            </Box>
+          ) : null}
+
+          {submitFailed ? <Typography role="alert" sx={{ color: tk.statusTint.error.color }} variant="caption">{footerMessage}</Typography> : null}
+
+          {/* The result screen carries its own actions (one contained "Xem lại bài làm"). */}
+          {showResult ? null : (
+            <PlayerDesktopFooter
+              {...props}
+              keyHint={buildKeyHint(readyQuestion, questions.length)}
+              handleRequestSubmit={isTestingMode ? handleRequestSubmit : undefined}
+            />
+          )}
+        </Box>
+      </Box>
+
+      <PlayerQuestionAside cells={cells} goToInputRef={goToInputRef} onSelect={onJumpToQuestion}>
+        {isTrainingMode || attemptCompleted ? null : (
+          <ErgButton fullWidth disabled={submitting} startIcon={<SendRounded />} variant="outlined" onClick={handleRequestSubmit}>
+            {submitting ? "Đang nộp…" : submitFailed ? "Thử nộp lại" : "Nộp bài"}
+          </ErgButton>
+        )}
+      </PlayerQuestionAside>
+    </PlayerWebPage>
   );
 }

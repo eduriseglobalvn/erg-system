@@ -1,10 +1,10 @@
+import ChecklistRoundedIcon from "@mui/icons-material/ChecklistRounded";
 import Box from "@mui/material/Box";
-import type { ReactNode } from "react";
 
 import { ChoiceOption, choiceReviewTag } from "@/components/quiz/questions/choice-option";
-import { QuestionContentImage } from "@/components/quiz/questions/shared";
+import { choiceGridSx, QuestionChoiceLayout } from "@/components/quiz/questions/single-choice-question";
 import type { QuestionComponentProps } from "@/components/quiz/questions/types";
-import type { Question } from "@/domain/quiz/types";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 export function MultipleResponseQuestion({
   question,
@@ -18,45 +18,39 @@ export function MultipleResponseQuestion({
 
   return (
     <QuestionChoiceLayout question={question}>
-      <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 2, sm: 2.5 } }}>
-        {choices.map((choice, index) => {
-          const selected = selectedIds.has(choice.id);
-          return (
-            <ChoiceOption
-              key={choice.id}
-              disabled={submitted}
-              image={choice.image}
-              letter={String.fromCharCode(65 + index)}
-              mode="multiple"
-              onClick={() => {
-                const next = new Set(value.choiceIds ?? []);
-                if (next.has(choice.id)) next.delete(choice.id);
-                else next.add(choice.id);
-                onChange({ choiceIds: [...next] });
-              }}
-              reviewTag={choiceReviewTag(reviewMode, selected, choice.correct)}
-              selected={selected}
-            >
-              {choice.label}
-            </ChoiceOption>
-          );
-        })}
+      <Box sx={{ display: "grid", gap: 1.5 }}>
+        {reviewMode ? null : (
+          <Box sx={{ typography: "caption", alignItems: "center", color: "text.secondary", display: "flex", gap: 0.5 }}>
+            <ChecklistRoundedIcon aria-hidden sx={{ fontSize: ergEnterpriseTokens.size.iconSm }} />
+            {`Có thể chọn nhiều đáp án · đã chọn ${selectedIds.size}`}
+          </Box>
+        )}
+        <Box role="group" aria-label="Các đáp án" sx={choiceGridSx(question)}>
+          {choices.map((choice, index) => {
+            const selected = selectedIds.has(choice.id);
+            return (
+              <ChoiceOption
+                key={choice.id}
+                disabled={submitted}
+                image={choice.image}
+                letter={String.fromCharCode(65 + index)}
+                mode="multiple"
+                onClick={() => {
+                  const next = new Set(value.choiceIds ?? []);
+                  if (next.has(choice.id)) next.delete(choice.id);
+                  else next.add(choice.id);
+                  onChange({ choiceIds: [...next] });
+                }}
+                reviewTag={choiceReviewTag(reviewMode, selected, choice.correct)}
+                selected={selected}
+                shortcutKey={index < 9 ? String(index + 1) : undefined}
+              >
+                {choice.label}
+              </ChoiceOption>
+            );
+          })}
+        </Box>
       </Box>
     </QuestionChoiceLayout>
-  );
-}
-
-function QuestionChoiceLayout({
-  children,
-  question,
-}: {
-  children: ReactNode;
-  question: Question;
-}) {
-  return (
-    <Box className="quiz-answer-region quiz-choice-region" sx={{ alignItems: { lg: question.contentImage ? "flex-start" : undefined }, display: "grid", gap: 2.5, gridTemplateColumns: { lg: question.contentImage ? "minmax(0,0.95fr) minmax(360px,0.75fr)" : "1fr" } }}>
-      {children}
-      {question.contentImage ? <Box sx={{ position: { lg: "sticky" }, top: { lg: 0 } }}><QuestionContentImage question={question} /></Box> : null}
-    </Box>
   );
 }

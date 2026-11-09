@@ -6,16 +6,13 @@ import { FinalResultScreen } from "@/components/quiz/final-result-screen";
 import { PlayerSaveIndicator, PlayerTimerText } from "@/components/quiz/player-status";
 import { QuizThemeSurface } from "@/components/quiz/quiz-theme-surface";
 import { QuizWelcomeScreen } from "@/components/quiz/quiz-welcome-screen";
+import { PlayerWebPage } from "@/components/quiz/player-web-frame";
 import { buildSubmitSummary } from "@/components/quiz/submit-summary";
 import { LiveSubmitDialog, PlayerQuestionBody, PlayerReviewView } from "./player-ready-parts";
 import { defaultResultDisplay } from "@/components/quiz/player-shell-runtime-model";
 import { PlayerDesktopLayout } from "@/components/quiz/player-shell-runtime/player-desktop-layout";
-import { PlayerQuestionAside } from "@/components/quiz/player-shell-runtime/player-question-aside";
 import { buildFooterMessage, buildTakingCells, pickChoiceAnswer } from "@/components/quiz/player-shell-runtime/player-shell-runtime-helpers";
-import {
-  buildPlayerStyles,
-  playerGridClass,
-} from "@/components/quiz/player-shell-runtime/player-shell-styles";
+import { buildPlayerStyles } from "@/components/quiz/player-shell-runtime/player-shell-styles";
 import { TimeUpOverlay } from "@/components/quiz/time-up-overlay";
 import { canGradeLocally, isAnswerComplete } from "@/domain/quiz/quiz";
 import type { QuizResultDisplay } from "@/domain/quiz/types";
@@ -29,7 +26,8 @@ export function PlayerReadyView({
   portableOffline = false,
   welcomeMeta,
   renderResultActions,
-}: Pick<PlayerShellProps, "portableOffline" | "welcomeMeta" | "renderResultActions"> & {
+  onExit,
+}: Pick<PlayerShellProps, "portableOffline" | "welcomeMeta" | "renderResultActions" | "onExit"> & {
   rt: PlayerRuntime;
   ready: PlayerReady;
 }) {
@@ -78,8 +76,11 @@ export function PlayerReadyView({
   // -1 before the quiz starts: no question is current on the welcome page.
   const cells = buildTakingCells(questions.length, answeredIndexes, flaggedIndexes, started ? currentIndex : -1);
 
-  const { playerCardStyle, canvasStyle, headerStyle, accentButtonStyle, modeBadgeStyle } =
+  const { playerCardStyle, canvasStyle, headerStyle, accentButtonStyle } =
     buildPlayerStyles(isTrainingMode);
+  // Web top bar: subject and mode only (attempt x/y is not in the runtime yet).
+  const quizMeta = [welcomeMeta?.subjectLabel?.trim(), isTrainingMode ? "Luyện tập" : "Kiểm tra"].filter(Boolean).join(" · ");
+  const exit = onExit ?? handleBackToList;
 
   const countdownProps = {
     active: started && isTestingMode && !attemptCompleted,
@@ -137,7 +138,7 @@ export function PlayerReadyView({
   };
 
   if (localRetryIndices || (attemptCompleted && reviewingSubmittedAttempt)) {
-    return <PlayerReviewView rt={rt} ready={ready} flagged={flaggedIndexes} />;
+    return <PlayerReviewView rt={rt} ready={ready} flagged={flaggedIndexes} meta={welcomeMeta?.subjectLabel?.trim()} />;
   }
 
   if (!started) {
@@ -150,14 +151,14 @@ export function PlayerReadyView({
     }
 
     return (
-      <QuizThemeSurface quiz={readyQuiz} className={`quiz-player-shell ${playerGridClass}`}>
-        <QuizWelcomeScreen
-          answeredCount={answeredCount} canvasStyle={canvasStyle} isTrainingMode={isTrainingMode}
-          onStart={handleStartQuiz} playerCardStyle={playerCardStyle}
-          questions={questions} quiz={readyQuiz} restoredDraft={restoredDraft} welcomeMeta={welcomeMeta}
-        />
-
-        <PlayerQuestionAside cells={cells} onSelect={handleJumpToQuestion} />
+      <QuizThemeSurface quiz={readyQuiz} className="quiz-player-shell" style={{ height: "100%" }}>
+        <PlayerWebPage alignTop hero backLabel="Bài tập" meta={quizMeta} title={readyQuiz.title} onBack={exit}>
+          <QuizWelcomeScreen
+            answeredCount={answeredCount} canvasStyle={canvasStyle} isTrainingMode={isTrainingMode}
+            onStart={handleStartQuiz} playerCardStyle={playerCardStyle}
+            questions={questions} quiz={readyQuiz} restoredDraft={restoredDraft} welcomeMeta={welcomeMeta}
+          />
+        </PlayerWebPage>
       </QuizThemeSurface>
     );
   }
@@ -173,15 +174,15 @@ export function PlayerReadyView({
   }
 
   return (
-    <QuizThemeSurface quiz={readyQuiz} className="quiz-player-shell">
+    <QuizThemeSurface quiz={readyQuiz} className="quiz-player-shell" style={{ height: "100%" }}>
       <PlayerDesktopLayout
-        allQuestionsAnswered={allQuestionsAnswered}
-        answeredCount={answeredCount} attemptCompleted={attemptCompleted} canvasStyle={canvasStyle}
+        quizTitle={readyQuiz.title} quizMeta={quizMeta} onExit={exit}
+        attemptCompleted={attemptCompleted} canvasStyle={canvasStyle}
         cells={cells} countdownProps={countdownProps} currentAnswerComplete={currentAnswerComplete} currentIndex={currentIndex}
         footerMessage={footerMessage} goToInputRef={goToInputRef} isCurrentQuestionBookmarked={isCurrentQuestionBookmarked}
         isFirstQuestion={isFirstQuestion} isLastQuestion={isLastQuestion} isTestingMode={isTestingMode}
-        isTrainingMode={isTrainingMode} lastResult={lastResult} modeBadgeStyle={modeBadgeStyle}
-        playerCardStyle={playerCardStyle} questionBody={questionBody} questionBodyRef={questionBodyRef}
+        isTrainingMode={isTrainingMode} lastResult={lastResult}
+        questionBody={questionBody} questionBodyRef={questionBodyRef}
         questions={questions} readyAttempt={readyAttempt} readyQuestion={readyQuestion} resultDisplay={resultDisplay}
         reviewingSubmittedAttempt={reviewingSubmittedAttempt} saveIndicator={saveIndicator}
         submitFailed={submitFailed} submitted={submitted}

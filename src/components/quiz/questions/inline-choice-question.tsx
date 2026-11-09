@@ -1,10 +1,12 @@
-import { useEffect, useState } from "react";
+import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
+import Box from "@mui/material/Box";
+import { Fragment, useEffect, useState } from "react";
 
-import { InlineChoiceSelect, QuestionBodyWithImage } from "@/components/quiz/questions/shared";
+import { InlineChoiceSegment, InlineChoiceSelect, QuestionBodyWithImage } from "@/components/quiz/questions/shared";
 import type { QuestionComponentProps } from "@/components/quiz/questions/types";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { usePacedStateBatch } from "@/hooks/use-paced-state-batch";
 import type { AnswerPayload } from "@/domain/quiz/types";
+import { ergEnterpriseTokens as tokens } from "@/themes/erg-enterprise-tokens";
 
 export function InlineChoiceQuestion({
   question,
@@ -14,7 +16,6 @@ export function InlineChoiceQuestion({
   reviewMode = false,
   result,
 }: QuestionComponentProps) {
-  const isMobile = useIsMobile();
   const [revealedBlankId, setRevealedBlankId] = useState<string | null>(null);
   const paceStateUpdate = usePacedStateBatch();
   const blanks = question.inlineBlanks ?? [];
@@ -54,66 +55,84 @@ export function InlineChoiceQuestion({
     onChange(nextValue);
   }
 
-  const statementClass = isMobile ? "text-[15px] leading-7 text-slate-600" : "min-w-[260px] flex-1 text-[var(--quiz-readable-size-lg)] font-medium leading-[1.45] text-[#174f91]";
+  const correctOf = (blankId: string, fallback?: string) => result?.correctInlineSelections?.[blankId] ?? fallback;
+  // Two-option blanks (Có / Không, Đúng / Sai) read as a list of statements, each with a segmented control.
+  const segmented = blanks.length > 0 && blanks.every((blank) => blank.options.length === 2);
+
+  if (segmented) {
+    return (
+      <QuestionBodyWithImage question={question}>
+        <Box className="quiz-answer-region" sx={{ bgcolor: "background.paper", border: `1px solid ${tokens.color.border}`, borderRadius: `${tokens.radius.card}px`, overflow: "hidden" }}>
+          {blanks.map((blank, index) => (
+            <Box key={blank.id} sx={{ alignItems: "flex-start", borderTop: index ? `1px solid ${tokens.color.divider}` : 0, display: "flex", gap: 1.25, minHeight: 60, px: 2, py: 1.5 }}>
+              <Box component="span" aria-hidden sx={{ color: "text.secondary", flex: "none", fontWeight: "fontWeightBold", pt: 0.75, width: 18 }}>{`${String.fromCharCode(97 + index)})`}</Box>
+              <Box component="span" sx={{ typography: "h6", flex: 1, lineHeight: 1.45, minWidth: 0, pt: 0.5, fontWeight: "fontWeightRegular" }}>
+                {blank.statement}
+                {blank.suffix ? <> {blank.suffix}</> : null}
+              </Box>
+              <InlineChoiceSegment
+                blank={blank}
+                correctValue={correctOf(blank.id, blank.correctOptionId)}
+                reviewMode={reviewMode}
+                submitted={submitted}
+                value={value}
+                onChange={handleChange}
+              />
+            </Box>
+          ))}
+        </Box>
+        {reviewMode ? null : (
+          <Box component="p" sx={{ typography: "caption", color: "text.secondary", m: 0 }}>
+            {`Đã trả lời ${blanks.filter((blank) => value.inlineSelections?.[blank.id]).length}/${blanks.length} ý.`}
+          </Box>
+        )}
+      </QuestionBodyWithImage>
+    );
+  }
 
   return (
     <QuestionBodyWithImage question={question}>
-      <div className={`quiz-answer-region relative flex flex-col ${isMobile ? "gap-2.5" : "gap-5"}`}>
-        {blanks.map((blank) => (
-          <div
-            key={blank.id}
-            className={`rounded-xl border bg-white shadow-sm ${isMobile ? "space-y-2 px-4 py-3" : "space-y-3 px-6 py-4"}`}
-            style={{ borderColor: "var(--quiz-canvas-border)" }}
-          >
-            <div className={`${isMobile ? "flex items-start gap-2" : "flex flex-wrap items-center gap-3"}`}>
-              {blank.selectPosition !== "after" ? (
-                <InlineChoiceSelect
-                  blank={blank}
-                  correctValue={result?.correctInlineSelections?.[blank.id] ?? blank.correctOptionId}
-                  reviewMode={reviewMode}
-                  submitted={submitted}
-                  value={value}
-                  onChange={handleChange}
-                  onRevealCorrectAnswer={() => setRevealedBlankId(blank.id)}
-                />
-              ) : null}
-              <span className={statementClass}>
+      <Box className="quiz-answer-region" sx={{ display: "flex", flexDirection: "column", gap: 1.5, position: "relative" }}>
+        <Box component="p" sx={{ typography: "h5", fontWeight: "fontWeightRegular", lineHeight: 2.1, m: 0 }}>
+          {blanks.map((blank, index) => {
+            const select = (
+              <InlineChoiceSelect
+                blank={blank}
+                correctValue={correctOf(blank.id, blank.correctOptionId)}
+                reviewMode={reviewMode}
+                submitted={submitted}
+                value={value}
+                onChange={handleChange}
+                onRevealCorrectAnswer={() => setRevealedBlankId(blank.id)}
+              />
+            );
+            return (
+              <Fragment key={blank.id}>
+                {index > 0 ? " " : null}
+                {blank.selectPosition !== "after" ? <>{select} </> : null}
                 {blank.statement}
-              </span>
-              {blank.selectPosition === "after" ? (
-                <InlineChoiceSelect
-                  blank={blank}
-                  correctValue={result?.correctInlineSelections?.[blank.id] ?? blank.correctOptionId}
-                  reviewMode={reviewMode}
-                  submitted={submitted}
-                  value={value}
-                  onChange={handleChange}
-                  onRevealCorrectAnswer={() => setRevealedBlankId(blank.id)}
-                />
-              ) : null}
-              {blank.suffix ? (
-                <span className={statementClass}>
-                  {blank.suffix}
-                </span>
-              ) : null}
-            </div>
-          </div>
-        ))}
+                {blank.selectPosition === "after" ? <> {select}</> : null}
+                {blank.suffix ? <> {blank.suffix}</> : null}
+              </Fragment>
+            );
+          })}
+        </Box>
         {revealedWrongBlank && revealedWrongCorrectValue ? (
-          <div className={`${isMobile ? "rounded-md border border-slate-200 bg-white px-4 py-3 shadow-sm" : "ml-[min(44vw,520px)] mt-1 w-[244px] rounded-lg border border-slate-200 bg-white px-7 py-6 shadow-sm"}`}>
-            <div className={`${isMobile ? "text-sm font-semibold text-slate-900" : "text-xl font-semibold text-slate-950"}`}>Đáp án đúng</div>
-            <div className={`${isMobile ? "mt-2 flex items-center gap-2 text-sm font-medium text-slate-700" : "mt-5 flex items-center gap-3 text-base font-semibold text-slate-800"}`}>
-              <span className={`${isMobile ? "grid h-5 w-5 place-items-center rounded-full bg-[#78b816] text-xs font-semibold text-white" : "grid h-7 w-7 place-items-center rounded-full bg-[#78b816] text-sm font-semibold text-white"}`}>
-                ✓
-              </span>
+          <Box sx={{ bgcolor: "background.paper", border: `1px solid ${tokens.color.border}`, borderRadius: `${tokens.radius.card}px`, maxWidth: 320, px: 2, py: 1.5 }}>
+            <Box sx={{ typography: "subtitle2" }}>Đáp án đúng</Box>
+            <Box sx={{ typography: "body2", alignItems: "center", display: "flex", gap: 1, mt: 1 }}>
+              <Box component="span" sx={{ alignItems: "center", bgcolor: "success.main", borderRadius: `${tokens.radius.chip}px`, color: "common.white", display: "inline-flex", height: 22, justifyContent: "center", width: 22 }}>
+                <CheckRoundedIcon aria-hidden sx={{ fontSize: tokens.size.iconSm }} />
+              </Box>
               <span>{formatInlineValue(revealedWrongCorrectValue)}</span>
-            </div>
-          </div>
+            </Box>
+          </Box>
         ) : null}
-      </div>
+      </Box>
     </QuestionBodyWithImage>
   );
 }
+
 
 function formatInlineValue(value: string) {
   if (value === "yes") {

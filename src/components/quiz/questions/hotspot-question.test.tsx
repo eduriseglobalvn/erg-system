@@ -19,7 +19,7 @@ const question: Question = {
 };
 const area = (id: string, correct: boolean) => ({ id, shape: "rect" as const, x: 0.1, y: 0.1, width: 0.2, height: 0.2, correct });
 const withAreas: Question = { ...question, hotspotAreas: [area("right", true), area("decoy", false)] };
-const drawnAreas = () => document.querySelectorAll(".border-dashed").length;
+const drawnAreas = () => document.querySelectorAll("[data-testid=hotspot-review-area]").length;
 
 describe("HotspotQuestion desktop", () => {
   test("measures a click against the image box, not its frame", () => {

@@ -1,12 +1,18 @@
-import { Flag } from "lucide-react";
-import type { CSSProperties, ReactNode } from "react";
+import FlagRoundedIcon from "@mui/icons-material/FlagRounded";
+import OutlinedFlagRoundedIcon from "@mui/icons-material/OutlinedFlagRounded";
+import TimerOutlinedIcon from "@mui/icons-material/TimerOutlined";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
+import { useState, type CSSProperties, type ReactNode } from "react";
 
 import { MobilePlayerFooter } from "@/components/quiz/mobile-player-footer";
 import { MobilePlayerIntro } from "@/components/quiz/mobile-player-intro";
 import { MobileQuestionSheet } from "@/components/quiz/mobile-player-question-sheet";
 import type { QuizWelcomeMeta } from "@/components/quiz/quiz-welcome-screen";
 import type { QuestionCell } from "@/components/quiz/question-navigator";
-import type { Question, Quiz } from "@/domain/quiz/types";
+import type { Question, QuestionKind, Quiz } from "@/domain/quiz/types";
+import { ergEnterpriseTokens as tk } from "@/themes/erg-enterprise-tokens";
 
 type MobilePlayerShellProps = {
   allQuestionsAnswered: boolean;
@@ -48,108 +54,120 @@ type MobilePlayerShellProps = {
   welcomeMeta?: QuizWelcomeMeta;
 };
 
-export function MobilePlayerShell({
-  answeredCount,
-  attemptCompleted,
-  cells,
-  isBookmarked,
-  isFirstQuestion,
-  isLastQuestion,
-  isTestingMode,
-  isTrainingMode,
-  currentAnswerComplete,
-  currentQuestionSubmitted,
-  playerCardStyle,
-  question,
-  questions,
-  quiz,
-  reviewingSubmittedAttempt,
-  started,
-  submitting,
-  submitFailed,
-  timer,
-  saveIndicator,
-  onJumpToQuestion,
-  onNext,
-  onPrev,
-  onRequestSubmit,
-  onReview,
-  onStart,
-  onSubmitCurrentQuestion,
-  onToggleBookmark,
-  body,
-  resultBody,
-  restoredDraft,
-  welcomeMeta,
-}: MobilePlayerShellProps) {
+const KIND_LABEL: Record<QuestionKind, string> = {
+  single_choice: "Một đáp án",
+  multiple_response: "Nhiều đáp án",
+  true_false: "Đúng / Sai",
+  short_answer: "Trả lời ngắn",
+  numeric: "Đáp số",
+  matching: "Ghép nối",
+  sequence: "Sắp xếp",
+  fill_blank: "Điền chỗ trống",
+  inline_choice: "Chọn trong câu",
+  select_from_lists: "Chọn từ danh sách",
+  drag_words: "Kéo thả từ",
+  hotspot: "Điểm nóng",
+  drag_drop: "Kéo thả nhóm",
+  likert_scale: "Thang đo",
+  essay: "Trả lời mở",
+};
+
+// The warning caption stays for screen readers; the pill has room for the clock only.
+const visuallyHidden = { clip: "rect(0 0 0 0)", height: 1, overflow: "hidden", position: "absolute", whiteSpace: "nowrap", width: 1 } as const;
+
+export function MobilePlayerShell(props: MobilePlayerShellProps) {
+  const {
+    answeredCount, attemptCompleted, cells, isBookmarked, isTestingMode, isTrainingMode, playerCardStyle, question, questions, quiz,
+    reviewingSubmittedAttempt, started, timer, saveIndicator, onJumpToQuestion, onRequestSubmit, onToggleBookmark, body, resultBody,
+  } = props;
+  const [listOpen, setListOpen] = useState(false);
   if (!started) {
     return (
-      <MobilePlayerIntro playerCardStyle={playerCardStyle} questions={questions} quiz={quiz} answeredCount={answeredCount} restoredDraft={restoredDraft} welcomeMeta={welcomeMeta} onStart={onStart} />
+      <MobilePlayerIntro playerCardStyle={playerCardStyle} questions={questions} quiz={quiz} answeredCount={answeredCount} restoredDraft={props.restoredDraft} welcomeMeta={props.welcomeMeta} onStart={props.onStart} />
     );
   }
 
-
+  const showResult = attemptCompleted && !reviewingSubmittedAttempt;
+  const current = cells.find((cell) => cell.state === "current")?.index ?? 0;
+  const showTimer = isTestingMode && !attemptCompleted && timer;
   return (
-    <div className="md:hidden">
-      <section
-        className="min-h-[100svh] bg-[#f4f5f7] pb-24"
-        style={{ ...playerCardStyle, borderColor: "transparent" }}
-      >
-        <div className="sticky top-0 z-30 border-b border-slate-200 bg-white">
-          <div className="mx-auto grid min-h-12 max-w-md grid-cols-[1fr_auto_1fr] items-center gap-2 px-4 py-1">
-            <div className="flex items-center justify-start text-slate-400">
-              <button
-                type="button"
-                aria-label={isBookmarked ? "Bỏ đánh dấu câu hỏi" : "Đánh dấu câu hỏi"}
-                className="grid h-11 w-11 place-items-center"
-                onClick={onToggleBookmark}
-              >
-                <Flag className={`h-4 w-4 ${isBookmarked ? "fill-current text-[#FF5630]" : ""}`} />
-              </button>
-            </div>
-            <div className="flex min-w-0 flex-col items-center text-center">
-              {attemptCompleted && !reviewingSubmittedAttempt ? null : (
+    <Box sx={{ display: { md: "none" } }}>
+      <Box component="section" sx={{ ...playerCardStyle, borderColor: "transparent", minHeight: "100svh", pb: 14 }}>
+        <Box sx={{ bgcolor: tk.color.surface, position: "sticky", top: 0, zIndex: 30 }}>
+          <Box sx={{ alignItems: "center", display: "grid", gap: 1, gridTemplateColumns: "1fr auto 1fr", minHeight: 56, pb: 1, pt: 1.5, px: 1.5 }}>
+            <span />
+            <Box sx={{ alignItems: "center", display: "flex", flexDirection: "column", gap: 0.25, minWidth: 0 }}>
+              {showResult ? null : (
                 <MobileQuestionSheet
                   cells={cells}
+                  open={listOpen}
+                  onOpenChange={setListOpen}
                   onJumpToQuestion={onJumpToQuestion}
                   onRequestSubmit={isTrainingMode || attemptCompleted ? undefined : onRequestSubmit}
                 />
               )}
-              <span className="max-w-full truncate text-xs text-slate-500">{quiz.title}</span>
-              {saveIndicator ? <div>{saveIndicator}</div> : null}
-            </div>
-            <div className="flex min-w-0 items-center justify-end">{isTestingMode && !attemptCompleted ? timer : null}</div>
-          </div>
-        </div>
-
-        <div className="mx-auto max-w-md px-4 pt-5">
-          {attemptCompleted && !reviewingSubmittedAttempt ? (
-            <div className="rounded-lg border border-slate-200 bg-white px-4 py-5 shadow-sm">{resultBody}</div>
-          ) : (
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <p className="quiz-player-question-title text-[22px] leading-8 text-slate-800">{question.title}</p>
-                {question.instructions ? (
-                  <p className="text-sm leading-6 text-slate-500">{question.instructions}</p>
-                ) : null}
-                <div className="flex items-center justify-between gap-3 text-[11px] font-semibold text-slate-400">
-                  <span>{answeredCount}/{questions.length} đã trả lời</span>
-                </div>
-              </div>
-              <div className="space-y-3">{body}</div>
-            </div>
+              <Typography noWrap sx={{ color: tk.color.textMuted, maxWidth: "100%" }} variant="caption">{quiz.title}</Typography>
+            </Box>
+            <Box sx={{ display: "flex", justifyContent: "flex-end", minWidth: 0 }}>
+              {showTimer ? (
+                // The countdown renders nothing until the server clock is known; `:empty` then drops the pill and its icon.
+                <Box sx={{ alignItems: "center", display: "inline-flex", flexShrink: 0, position: "relative", "& [role=status]": visuallyHidden, "& > div:empty, & > div:empty + svg": { display: "none" } }}>
+                  <Box sx={{ alignItems: "center", bgcolor: tk.statusTint.neutral.bg, borderRadius: `${tk.radius.chip}px`, display: "inline-flex", height: 36, pl: 4.25, pr: 1.5 }}>{timer}</Box>
+                  <TimerOutlinedIcon aria-hidden sx={{ color: tk.color.textSecondary, fontSize: tk.size.iconSm, left: 12, position: "absolute" }} />
+                </Box>
+              ) : null}
+            </Box>
+          </Box>
+          {showResult ? null : (
+            <Box aria-hidden sx={{ bgcolor: tk.color.divider, height: 4 }}>
+              <Box sx={{ bgcolor: `var(--quiz-accent, ${tk.color.primary})`, borderRadius: "0 2px 2px 0", height: "100%", width: `${((current + 1) / Math.max(cells.length, 1)) * 100}%` }} />
+            </Box>
           )}
-        </div>
+        </Box>
+
+        <Box sx={{ mx: "auto", maxWidth: 448, pt: 2, px: 2 }}>
+          {showResult ? (
+            <Box sx={{ bgcolor: tk.color.surface, border: `1px solid ${tk.color.border}`, borderRadius: `${tk.radius.card}px`, px: 2, py: 2.5 }}>{resultBody}</Box>
+          ) : (
+            <Box sx={{ display: "grid", gap: 1.75 }}>
+              <Box sx={{ alignItems: "center", color: tk.color.textMuted, display: "flex", gap: 1, minHeight: 44 }}>
+                <Box component="span" sx={{ bgcolor: tk.statusTint.info.bg, borderRadius: `${tk.radius.xs}px`, color: tk.statusTint.info.color, flexShrink: 0, fontWeight: "fontWeightBold", px: 0.875, py: 0.25, typography: "caption" }}>
+                  {KIND_LABEL[question.kind] ?? question.kind}
+                </Box>
+                {question.points ? <Typography sx={{ flexShrink: 0, fontWeight: "fontWeightBold" }} variant="caption">{`${String(question.points).replace(".", ",")} điểm`}</Typography> : null}
+                <Box sx={{ flex: 1 }} />
+                {saveIndicator ? <Box sx={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{saveIndicator}</Box> : null}
+                <Button
+                  aria-label={isBookmarked ? "Bỏ đánh dấu câu hỏi" : "Đánh dấu câu hỏi"}
+                  aria-pressed={isBookmarked}
+                  size="small"
+                  startIcon={isBookmarked ? <FlagRoundedIcon /> : <OutlinedFlagRoundedIcon />}
+                  sx={{ color: isBookmarked ? tk.color.warning : `var(--quiz-accent, ${tk.color.primary})`, flexShrink: 0, minHeight: 44, px: 1.25 }}
+                  type="button"
+                  variant="text"
+                  onClick={onToggleBookmark}
+                >
+                  {isBookmarked ? "Đã đánh dấu" : "Đánh dấu"}
+                </Button>
+              </Box>
+              <Box>
+                <Typography className="quiz-player-question-title" component="p" sx={{ color: tk.color.text, lineHeight: 1.5 }} variant="h3">{question.title}</Typography>
+                {question.instructions ? <Typography sx={{ color: tk.color.textMuted, mt: 0.5 }} variant="body2">{question.instructions}</Typography> : null}
+              </Box>
+              <Box sx={{ display: "grid", gap: 1.5 }}>{body}</Box>
+            </Box>
+          )}
+        </Box>
 
         <MobilePlayerFooter
-          attemptCompleted={attemptCompleted} currentAnswerComplete={currentAnswerComplete}
-          currentQuestionSubmitted={currentQuestionSubmitted} isFirstQuestion={isFirstQuestion}
-          isLastQuestion={isLastQuestion} isTrainingMode={isTrainingMode}
-          reviewingSubmittedAttempt={reviewingSubmittedAttempt} submitFailed={submitFailed} submitting={submitting}
-          onNext={onNext} onPrev={onPrev} onRequestSubmit={onRequestSubmit} onReview={onReview}
-          onSubmitCurrentQuestion={onSubmitCurrentQuestion}
+          answeredCount={answeredCount} attemptCompleted={attemptCompleted} currentAnswerComplete={props.currentAnswerComplete}
+          currentQuestionSubmitted={props.currentQuestionSubmitted} isFirstQuestion={props.isFirstQuestion}
+          isLastQuestion={props.isLastQuestion} isTrainingMode={isTrainingMode} total={questions.length}
+          reviewingSubmittedAttempt={reviewingSubmittedAttempt} submitFailed={props.submitFailed} submitting={props.submitting}
+          onNext={props.onNext} onOpenList={() => setListOpen(true)} onPrev={props.onPrev} onRequestSubmit={onRequestSubmit} onReview={props.onReview}
+          onSubmitCurrentQuestion={props.onSubmitCurrentQuestion}
         />
-      </section>
-    </div>
+      </Box>
+    </Box>
   );
 }

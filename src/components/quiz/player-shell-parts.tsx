@@ -1,13 +1,19 @@
+import CheckCircleRounded from "@mui/icons-material/CheckCircleRounded";
+import FlagRounded from "@mui/icons-material/FlagRounded";
+import RadioButtonUncheckedRounded from "@mui/icons-material/RadioButtonUncheckedRounded";
+import SendRounded from "@mui/icons-material/SendRounded";
 import Box from "@mui/material/Box";
-import Chip from "@mui/material/Chip";
-import Stack from "@mui/material/Stack";
+import ButtonBase from "@mui/material/ButtonBase";
 import Typography from "@mui/material/Typography";
+import type { ReactNode } from "react";
 
 import { ErgButton } from "@/components/erg-mui/erg-actions";
 import { ErgDialog } from "@/components/erg-mui/erg-overlays";
+import { Kbd } from "@/components/quiz/player-web-frame";
 import { submitLeadText, type SubmitSummary } from "@/components/quiz/submit-summary";
 import { getMatchingKey, getSequenceCorrectOrder } from "@/domain/quiz/quiz";
 import type { AnswerResult, Question } from "@/domain/quiz/types";
+import { ergEnterpriseTokens as tk } from "@/themes/erg-enterprise-tokens";
 
 export function QuestionFeedbackPanel({ floating = false, result }: { floating?: boolean; result: AnswerResult }) {
   const title = result.pendingReview ? "Đã ghi nhận bài làm" : result.correct ? "Đáp án chính xác!" : "Đáp án chưa đúng!";
@@ -50,53 +56,59 @@ type SubmitConfirmDialogProps = {
   onJump: (index: number) => void;
 };
 
+/** WL4 / L07: lead text, one row per group (chưa làm · đánh dấu · đã làm), Làm tiếp + Nộp bài. */
 export function SubmitConfirmDialog({ summary, remainingSeconds, attemptsLeft, submitting, onCancel, onConfirm, onJump }: SubmitConfirmDialogProps) {
+  const pick = (number: number) => { onJump(number - 1); onCancel(); };
   return (
     <ErgDialog
       open
       title="Nộp bài?"
       description={submitLeadText(remainingSeconds, attemptsLeft)}
       onClose={submitting ? undefined : onCancel}
+      maxWidth="xs"
       actions={
         <>
-          <ErgButton disabled={submitting} variant="outlined" onClick={onCancel}>Làm tiếp</ErgButton>
-          <ErgButton loading={submitting} variant="contained" onClick={onConfirm}>Nộp bài</ErgButton>
+          <ErgButton disabled={submitting} endIcon={<Box aria-hidden component="span" sx={{ display: "inline-flex" }}><Kbd>Esc</Kbd></Box>} variant="outlined" onClick={onCancel}>Làm tiếp</ErgButton>
+          <ErgButton loading={submitting} startIcon={<SendRounded />} variant="contained" onClick={onConfirm}>Nộp bài</ErgButton>
         </>
       }
     >
-      <Stack spacing={2.5}>
+      <Box sx={{ border: "1px solid", borderColor: tk.color.border, borderRadius: `${tk.radius.card}px`, overflow: "hidden" }}>
         {summary.unanswered.length > 0 ? (
-          <SubmitQuestionGroup
-            title={`${summary.unanswered.length} câu chưa làm`}
-            note="Chưa làm tính 0 điểm"
-            numbers={summary.unanswered}
-            onPick={(number) => { onJump(number - 1); onCancel(); }}
-          />
+          <SubmitRow icon={<RadioButtonUncheckedRounded sx={{ color: tk.color.danger }} />} title={`${summary.unanswered.length} câu chưa làm`} note="Chưa làm tính 0 điểm" numbers={summary.unanswered} onPick={pick} />
         ) : null}
         {summary.flagged.length > 0 ? (
-          <SubmitQuestionGroup
-            title={`${summary.flagged.length} câu đánh dấu xem lại`}
-            numbers={summary.flagged}
-            onPick={(number) => { onJump(number - 1); onCancel(); }}
-          />
+          <SubmitRow icon={<FlagRounded sx={{ color: tk.color.warning }} />} title={`${summary.flagged.length} câu đánh dấu xem lại`} numbers={summary.flagged} onPick={pick} />
         ) : null}
-        <Typography variant="subtitle2">{`${summary.answeredCount} câu đã làm`}</Typography>
-      </Stack>
+        <SubmitRow icon={<CheckCircleRounded sx={{ color: tk.color.success }} />} title={`${summary.answeredCount} câu đã làm`} />
+      </Box>
     </ErgDialog>
   );
 }
 
-function SubmitQuestionGroup({ title, note, numbers, onPick }: { title: string; note?: string; numbers: number[]; onPick: (number: number) => void }) {
+function SubmitRow({ icon, title, note, numbers = [], onPick }: { icon: ReactNode; title: string; note?: string; numbers?: number[]; onPick?: (number: number) => void }) {
   return (
-    <Stack spacing={1}>
-      <Box>
-        <Typography variant="subtitle2">{title}</Typography>
-        {note ? <Typography color="text.secondary" variant="caption">{note}</Typography> : null}
+    <Box sx={{ alignItems: "center", borderTop: "1px solid", borderColor: tk.color.divider, display: "flex", flexWrap: "wrap", gap: 1.5, minHeight: 60, px: 2, py: 1.5, "&:first-of-type": { borderTop: 0 } }}>
+      <Box aria-hidden sx={{ display: "inline-flex" }}>{icon}</Box>
+      <Box sx={{ flex: "1 1 120px", minWidth: 0 }}>
+        <Typography sx={{ color: tk.color.text }} variant="subtitle2">{title}</Typography>
+        {note ? <Typography component="div" sx={{ color: tk.color.textMuted }} variant="caption">{note}</Typography> : null}
       </Box>
-      <Box role="group" aria-label={title} sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-        {numbers.map((number) => <Chip key={number} aria-label={`Câu ${number}`} clickable label={number} onClick={() => onPick(number)} variant="outlined" />)}
-      </Box>
-    </Stack>
+      {numbers.length > 0 ? (
+        <Box role="group" aria-label={title} sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+          {numbers.map((number) => (
+            <ButtonBase
+              key={number}
+              aria-label={`Câu ${number}`}
+              onClick={() => onPick?.(number)}
+              sx={{ border: "1.5px solid", borderColor: tk.color.border, borderRadius: `${tk.radius.control}px`, color: tk.color.textSecondary, fontVariantNumeric: "tabular-nums", fontWeight: "fontWeightBold", height: 40, minWidth: 44, px: 1, typography: "body2", "&:hover": { borderColor: `var(--quiz-accent, ${tk.color.primary})` }, "&:focus-visible": { outline: `2px solid ${tk.color.primary}`, outlineOffset: 2 } }}
+            >
+              {number}
+            </ButtonBase>
+          ))}
+        </Box>
+      ) : null}
+    </Box>
   );
 }
 

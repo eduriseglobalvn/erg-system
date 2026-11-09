@@ -1,7 +1,11 @@
+import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
+import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
+import InfoRoundedIcon from "@mui/icons-material/InfoRounded";
+import LightbulbRoundedIcon from "@mui/icons-material/LightbulbRounded";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 
 import type { AnswerResult } from "@/domain/quiz/types";
 import { ergEnterpriseTokens as tk } from "@/themes/erg-enterprise-tokens";
@@ -13,14 +17,16 @@ export function splitFeedbackSteps(text: string): string[] {
   return text.split(/\r?\n/).map((line) => line.replace(LIST_MARKER, "").trim()).filter(Boolean);
 }
 
-type Tone = { accent: "success.dark" | "error.dark" | "info.dark"; bg: string; border: string; title: string };
+type Tint = { bg: string; color: string; dot: string };
+type Tone = { tint: Tint; icon: ReactNode; title: string };
 
 function toneFor(result: AnswerResult): Tone {
-  if (result.pendingReview) return { accent: "info.dark", bg: tk.color.infoSoft, border: tk.color.info, title: "Đã ghi nhận bài làm" };
-  if (result.correct) return { accent: "success.dark", bg: tk.color.successSoft, border: tk.color.success, title: "Chính xác!" };
-  return { accent: "error.dark", bg: tk.color.dangerSoft, border: tk.color.danger, title: "Chưa đúng, gần rồi!" };
+  if (result.pendingReview) return { tint: tk.statusTint.info, icon: <InfoRoundedIcon />, title: "Đã ghi nhận bài làm" };
+  if (result.correct) return { tint: tk.statusTint.success, icon: <CheckCircleRoundedIcon />, title: "Chính xác!" };
+  return { tint: tk.statusTint.error, icon: <LightbulbRoundedIcon />, title: "Chưa đúng, gần rồi!" };
 }
 
+/** L03: tinted card without a border, icon on the left, the first step and a link to the rest. */
 export function PracticeFeedbackPanel({ result }: { result: AnswerResult }) {
   const [expanded, setExpanded] = useState(false);
   const tone = toneFor(result);
@@ -30,25 +36,34 @@ export function PracticeFeedbackPanel({ result }: { result: AnswerResult }) {
   return (
     <Box
       role="status"
-      sx={{ bgcolor: tone.bg, border: "1px solid", borderColor: tone.border, borderRadius: `${tk.radius.card}px`, display: "grid", gap: 1, mt: 3, p: 2 }}
+      sx={{ alignItems: "flex-start", bgcolor: tone.tint.bg, borderRadius: `${tk.radius.card}px`, color: tone.tint.color, display: "flex", gap: 1.5, mt: 2, px: 2, py: 1.75 }}
     >
-      <Typography sx={{ color: tone.accent }} variant="subtitle1">{tone.title}</Typography>
-      {steps.length > 0 ? (
-        <Box data-testid="practice-feedback-body" sx={{ color: "text.primary", typography: "body2" }}>
-          {multiStep && expanded ? (
-            <Box component="ol" sx={{ m: 0, pl: 2.5 }}>
-              {steps.map((step, index) => <li key={index}>{step}</li>)}
-            </Box>
-          ) : (
-            <Typography variant="body2">{steps[0]}</Typography>
-          )}
-        </Box>
-      ) : null}
-      {multiStep && !expanded ? (
-        <Button size="small" sx={{ justifySelf: "start" }} variant="text" onClick={() => setExpanded(true)}>
-          Xem lời giải từng bước
-        </Button>
-      ) : null}
+      <Box aria-hidden component="span" sx={{ color: tone.tint.dot, display: "flex", flexShrink: 0 }}>{tone.icon}</Box>
+      <Box sx={{ display: "grid", gap: 0.5, minWidth: 0 }}>
+        <Typography sx={{ color: "inherit", fontWeight: "fontWeightBold" }} variant="subtitle1">{tone.title}</Typography>
+        {steps.length > 0 ? (
+          <Box data-testid="practice-feedback-body" sx={{ color: "inherit", typography: "body2" }}>
+            {multiStep && expanded ? (
+              <Box component="ol" sx={{ m: 0, pl: 2.5 }}>
+                {steps.map((step, index) => <li key={index}>{step}</li>)}
+              </Box>
+            ) : (
+              <Typography variant="body2">{steps[0]}</Typography>
+            )}
+          </Box>
+        ) : null}
+        {multiStep && !expanded ? (
+          <Button
+            endIcon={<ChevronRightRoundedIcon />}
+            size="small"
+            sx={{ color: "inherit", justifySelf: "start", minHeight: 0, p: 0, "& .MuiButton-endIcon": { ml: 0.25 }, "&:hover": { bgcolor: "transparent", textDecoration: "underline" } }}
+            variant="text"
+            onClick={() => setExpanded(true)}
+          >
+            Xem lời giải từng bước
+          </Button>
+        ) : null}
+      </Box>
     </Box>
   );
 }

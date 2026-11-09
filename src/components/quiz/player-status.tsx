@@ -1,7 +1,13 @@
+import CloudDoneRounded from "@mui/icons-material/CloudDoneRounded";
+import CloudOffRounded from "@mui/icons-material/CloudOffRounded";
+import CloudSyncRounded from "@mui/icons-material/CloudSyncRounded";
+import TimerRounded from "@mui/icons-material/TimerRounded";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import visuallyHidden from "@mui/utils/visuallyHidden";
 
 import { formatTimer } from "@/components/quiz/player-shell-utils";
+import { ergEnterpriseTokens as tk } from "@/themes/erg-enterprise-tokens";
 
 export type TimerWarningLevel = "none" | "five-minutes" | "one-minute";
 
@@ -18,18 +24,24 @@ const WARNING_TEXT: Record<TimerWarningLevel, string> = {
   "one-minute": "Còn dưới 1 phút",
 };
 
-/** Time is plain text (not live: it would be read every second); only the threshold message is announced. */
+const TIMER_TONE: Record<TimerWarningLevel, { bgcolor: string; color: string }> = {
+  none: { bgcolor: tk.statusTint.neutral.bg, color: tk.color.text },
+  "five-minutes": { bgcolor: tk.statusTint.warning.bg, color: tk.statusTint.warning.color },
+  "one-minute": { bgcolor: tk.color.danger, color: tk.color.surface },
+};
+
+/** Timer pill (qtimer). Time is plain text (not live: it would be read every second); only the threshold message is announced. */
 export function PlayerTimerText({ seconds }: { seconds: number }) {
   const level = timerWarningLevel(seconds);
-  const color = level === "one-minute" ? "error.main" : level === "five-minutes" ? "warning.dark" : "text.primary";
   return (
-    <Box sx={{ alignItems: "flex-start", display: "flex", flexDirection: "column", lineHeight: 1.2 }}>
-      <Typography component="span" sx={{ color, fontVariantNumeric: "tabular-nums" }} variant="subtitle1">
+    <Box sx={{ alignItems: "center", borderRadius: `${tk.radius.chip}px`, display: "inline-flex", flexShrink: 0, gap: 0.75, height: 36, px: 1.5, ...TIMER_TONE[level] }}>
+      <TimerRounded aria-hidden sx={{ fontSize: tk.size.iconSm }} />
+      <Typography component="span" sx={{ color: "inherit", fontVariantNumeric: "tabular-nums", fontWeight: "fontWeightBold" }} variant="body2">
         {formatTimer(seconds)}
       </Typography>
-      <Typography aria-live="polite" component="span" role="status" sx={{ color }} variant="caption">
+      <Box aria-live="polite" component="span" role="status" sx={visuallyHidden}>
         {WARNING_TEXT[level]}
-      </Typography>
+      </Box>
     </Box>
   );
 }
@@ -53,8 +65,10 @@ export function saveIndicatorText(sync: DraftSyncState, online: boolean): string
 
 export function PlayerSaveIndicator({ online, sync }: { online: boolean; sync: DraftSyncState }) {
   const text = saveIndicatorText(sync, online);
+  const Icon = !online || sync.status === "local" ? CloudOffRounded : sync.status === "saving" ? CloudSyncRounded : CloudDoneRounded;
   return (
-    <Typography aria-live="polite" color="text.secondary" component="span" role="status" variant="caption">
+    <Typography aria-live="polite" component="span" role="status" sx={{ alignItems: "center", color: tk.color.textMuted, display: "inline-flex", gap: 0.5, whiteSpace: "nowrap" }} variant="caption">
+      {text ? <Icon aria-hidden sx={{ fontSize: tk.size.iconSm }} /> : null}
       {text}
     </Typography>
   );

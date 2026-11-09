@@ -33,8 +33,17 @@ describe("ReviewLayout", () => {
     expect(within(aside).getByRole("button", { name: "Bỏ trống · 3" })).toBeTruthy();
   });
 
-  it("header shows score out of 10, correct/total and time spent", () => {
+  it("web score strip shows score out of 10, correct/total and time spent", () => {
     setup("web");
+    const aside = within(screen.getByTestId("review-aside"));
+    expect(aside.getByText("8,67")).toBeTruthy();
+    expect(aside.getByText("78/90")).toBeTruthy();
+    expect(aside.getByText("42:15")).toBeTruthy();
+    expect(aside.getByText("9 sai · 3 bỏ trống")).toBeTruthy();
+  });
+
+  it("phone header shows score out of 10, correct/total and time spent", () => {
+    setup("phone", 0);
     expect(screen.getByText("8,67/10")).toBeTruthy();
     expect(screen.getByText("78/90 câu đúng")).toBeTruthy();
     expect(screen.getByText("Thời gian làm 42:15")).toBeTruthy();
@@ -54,7 +63,7 @@ describe("ReviewLayout", () => {
     const { onSelect, onBack } = setup("web");
     fireEvent.click(screen.getByRole("button", { name: "Câu 12, sai" }));
     expect(onSelect).toHaveBeenCalledWith(11);
-    fireEvent.click(screen.getByRole("button", { name: "Về kết quả" }));
+    fireEvent.click(screen.getByRole("button", { name: "Kết quả" }));
     expect(onBack).toHaveBeenCalled();
   });
 

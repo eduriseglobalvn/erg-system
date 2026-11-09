@@ -81,6 +81,8 @@ export function StudentQuizSession({
         color="default"
         elevation={0}
         sx={{
+          // The web player (from 768px, the useIsMobile cut) draws its own top bar (WL1–WL5).
+          "@media (min-width: 768px)": { display: "none" },
           bgcolor: "rgba(255,255,255,0.72)",
           borderBottom: "1px solid rgba(0,0,136,0.08)",
           backdropFilter: "blur(18px)",
@@ -120,13 +122,14 @@ export function StudentQuizSession({
           </Box>
         </Toolbar>
       </AppBar>
-      <Box sx={{ height: { md: "calc(100vh - 46px)" }, overflow: "hidden", px: { xs: 0.75, md: 1 }, py: { xs: 0.75, md: 0.75 } }}>
+      <Box sx={{ overflow: "hidden", px: 0.75, py: 0.75, "@media (min-width: 768px)": { height: "100vh", p: 0 } }}>
         <PlayerShell
           assignmentId={assignment.id}
           quizId={assignment.quizId}
           portableOffline={preview}
           runtimePortal={runtimePortal}
           welcomeMeta={{ dueAt: assignment.dueAt, subjectLabel: assignment.subjectLabel }}
+          onExit={onBack}
         />
       </Box>
     </Box>
