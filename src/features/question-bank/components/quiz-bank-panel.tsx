@@ -51,7 +51,9 @@ export function QuizBankPanel({
   onExportPortable,
   onLevelChange,
   onPreviewQuiz,
+  onPublishQuiz,
   onSearchChange,
+  publishingQuizId,
   onSubjectChange,
   quizKind,
   quizzes,
@@ -73,6 +75,8 @@ export function QuizBankPanel({
   onKindChange: (value: QuizKindFilter) => void;
   onLevelChange: (levelId: string) => void;
   onPreviewQuiz: (quiz: QuizBankItem) => void;
+  onPublishQuiz: (quiz: QuizBankItem) => void;
+  publishingQuizId?: string;
   onSearchChange: (value: string) => void;
   onSubjectChange: (subjectId: string) => void;
   quizKind: QuizKindFilter;
@@ -211,9 +215,9 @@ export function QuizBankPanel({
                       label={copy.moreActions(quiz.title)}
                       items={[
                         { key: "open", label: copy.openQuiz, onClick: () => onPreviewQuiz(quiz) },
-                        ...(quiz.status === "ready"
-                          ? [{ key: "export", label: copy.exportPortableAction, onClick: () => onExportPortable(quiz) }]
-                          : []),
+                        quiz.status === "ready"
+                          ? { key: "export", label: copy.exportPortableAction, onClick: () => onExportPortable(quiz) }
+                          : { key: "publish", label: copy.publishQuiz, disabled: publishingQuizId === quiz.id, onClick: () => onPublishQuiz(quiz) },
                         { key: "delete", label: copy.deleteQuiz, danger: true, disabled: deletingQuizId === quiz.id, onClick: () => onDeleteQuiz(quiz) },
                       ]}
                     />
