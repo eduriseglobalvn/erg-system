@@ -47,7 +47,7 @@ export function QuestionBankWorkspace({
     activeLevel, activeSubject, autoCount, autoPickAvailableCount, autoTopicIds, changeSearch, clearSelection,
     createQuestionMutation, createQuizFromSelection, deleteQuestion, deleteQuestionMutation, deleteQuiz, deleteQuizMutation,
     duplicateQuestion, isQuestionBankFetching,
-    levelTopics, openCreateQuestionForm, openEditQuestionForm, openUpdateQuizPackage, openingQuizId, pickLevel, pickSubject,
+    levelTopics, openCreateQuestionForm, openEditQuestionForm, openUpdateQuizPackage, openingQuizId, pickLevel, pickSubject, publishQuiz, publishQuizMutation,
     pickTopic, questionBankData, questionBankQuery, questionForm, quickViewQuestion, quickViewQuiz, quickViewQuizQuestions, quizCreateDraft, quizKind, quizKindCounts, quizPackageEdit,
     quizPackageEditQuestions, savingQuizPackage, selectedIds, selectedQuestions, setAutoCount, setQuestionForm, setQuestionPage,
     setQuickViewQuestion, setQuickViewQuiz, setQuizCreateDraft, setQuizKind, setQuizPackageEdit, submitCreateQuizFromSelection, submitQuestionForm,
@@ -114,6 +114,8 @@ export function QuestionBankWorkspace({
           onDeleteQuiz={deleteQuiz}
           onExportPortable={setPortableQuiz}
           onPreviewQuiz={setQuickViewQuiz}
+          onPublishQuiz={(quiz) => void publishQuiz(quiz)}
+          publishingQuizId={publishQuizMutation.isPending ? publishQuizMutation.variables?.quizId : undefined}
           onSearchChange={changeSearch}
           isLoading={isQuestionBankFetching}
           quizKind={quizKind}

@@ -8,7 +8,8 @@ import {
   useQuestionBankWorkspaceQuery,
   useUpdateQuestionBankQuestionMutation,
 } from "@/features/question-bank/api/question-bank-query";
-import { useDeleteQuizEditorQuizMutation } from "@/features/lcms/quiz/quiz-editor";
+import { loadQuizEditorDraft, useDeleteQuizEditorQuizMutation, usePublishQuizEditorDraftMutation } from "@/features/lcms/quiz/quiz-editor";
+import { ApiClientError } from "@/lib/api-client/errors";
 import type { QuizEditorSlide } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import type { QuestionBankApiData, QuestionBankSaveQuestionInput } from "@/features/question-bank/api/question-bank-api";
@@ -46,6 +47,7 @@ export function useQuestionBankWorkspaceController({ activeLeaf, contentScope, c
   const [autoTopicIds, setAutoTopicIds] = useState<string[]>([]);
   const [autoCount, setAutoCount] = useState(10);
   const deleteQuizMutation = useDeleteQuizEditorQuizMutation();
+  const publishQuizMutation = usePublishQuizEditorDraftMutation();
   const { openUpdateQuizPackage, openingQuizId, quizPackageEdit, savingQuizPackage, setQuizPackageEdit, submitUpdateQuizPackage } = useQuizPackageEdit(copy);
   const createQuestionMutation = useCreateQuestionBankQuestionMutation();
   const updateQuestionMutation = useUpdateQuestionBankQuestionMutation();
@@ -147,6 +149,17 @@ export function useQuestionBankWorkspaceController({ activeLeaf, contentScope, c
   // The quick view asks with its own dialog (confirmed = true); the row icon still uses window.confirm.
   const deleteQuiz = async (quiz: QuizBankItem, confirmed = false) => { if (!confirmed && !window.confirm(copy.confirmDeleteQuiz(quiz.title))) return; try { await deleteQuizMutation.mutateAsync(quiz.id); toast.success(copy.deleteQuizSuccess); setQuickViewQuiz((current) => (current?.id === quiz.id ? null : current)); } catch (error) { toast.error(error instanceof Error ? error.message : copy.deleteQuizError); } };
 
+  // Publishes the server draft as it stands; the server checks every question and refuses with the reasons.
+  const publishQuiz = async (quiz: QuizBankItem) => {
+    try {
+      const { docVersion } = await loadQuizEditorDraft(quiz.id);
+      await publishQuizMutation.mutateAsync({ quizId: quiz.id, docVersion, idempotencyKey: `quiz-bank-publish:${quiz.id}:${docVersion}` });
+      toast.success(copy.publishQuizSuccess);
+    } catch (error) {
+      toast.error(copy.publishQuizError, { description: publishErrorLines(error) });
+    }
+  };
+
   // Errors reach the global mutation toast (MutationCache.onError); the drawer stays open.
   const deleteQuestion = async (question: QuestionBankQuestion) => {
     try { await deleteQuestionMutation.mutateAsync(question.id); } catch { return; }
@@ -154,9 +167,18 @@ export function useQuestionBankWorkspaceController({ activeLeaf, contentScope, c
   };
   const duplicateQuestion = async (question: QuestionBankQuestion) => { try { await createQuestionMutation.mutateAsync(buildDuplicateQuestionInput(question)); } catch { return; } toast.success(copy.duplicateQuestionSuccess); };
 
-  return { activeLevel, activeSubject, autoCount, autoPickAvailableCount: autoPickCandidates.length, autoPickedQuestions, clearSelection, openCreateQuestionForm, autoTopicIds, changeSearch, createQuestionMutation, createQuizFromSelection, deleteQuestion, deleteQuestionMutation, deleteQuiz, deleteQuizMutation, duplicateQuestion, getTopicQuestionCount, isQuestionBankFetching, levelTopics, openEditQuestionForm, openUpdateQuizPackage, openingQuizId, pickLevel, pickSubject, pickTopic, questionBankData, questionBankQuery, questionForm, quickViewQuestion, quickViewQuiz, quickViewQuizQuestions, quizCreateDraft, quizKind, quizKindCounts, quizPackageEdit, quizPackageEditQuestions, savingQuizPackage, selectedIds, selectedQuestions, setAutoCount, setQuestionForm, setQuestionPage, setQuickViewQuestion, setQuickViewQuiz, setQuizCreateDraft, setQuizKind, setQuizPackageEdit, submitCreateQuizFromSelection, submitQuestionForm, submitUpdateQuizPackage, searchValue, subjectId, subjects, toggleAutoTopic, toggleQuestion, toggleVisibleQuestions, topicId, updateQuestionMutation, applyAutoPick, view, visibleQuestions, visibleQuizzes };
+  return { activeLevel, activeSubject, autoCount, autoPickAvailableCount: autoPickCandidates.length, autoPickedQuestions, clearSelection, openCreateQuestionForm, autoTopicIds, changeSearch, createQuestionMutation, createQuizFromSelection, deleteQuestion, deleteQuestionMutation, deleteQuiz, deleteQuizMutation, duplicateQuestion, getTopicQuestionCount, isQuestionBankFetching, levelTopics, openEditQuestionForm, openUpdateQuizPackage, openingQuizId, pickLevel, publishQuiz, publishQuizMutation, pickSubject, pickTopic, questionBankData, questionBankQuery, questionForm, quickViewQuestion, quickViewQuiz, quickViewQuizQuestions, quizCreateDraft, quizKind, quizKindCounts, quizPackageEdit, quizPackageEditQuestions, savingQuizPackage, selectedIds, selectedQuestions, setAutoCount, setQuestionForm, setQuestionPage, setQuickViewQuestion, setQuickViewQuiz, setQuizCreateDraft, setQuizKind, setQuizPackageEdit, submitCreateQuizFromSelection, submitQuestionForm, submitUpdateQuizPackage, searchValue, subjectId, subjects, toggleAutoTopic, toggleQuestion, toggleVisibleQuestions, topicId, updateQuestionMutation, applyAutoPick, view, visibleQuestions, visibleQuizzes };
 }
 
+/** The server's per-question reasons (up to 3), else its message. */
+function publishErrorLines(error: unknown) {
+  const details = error instanceof ApiClientError && Array.isArray(error.details) ? error.details : [];
+  const lines = details.flatMap((item: unknown) => {
+    const message = typeof item === "string" ? item : (item as { message?: unknown } | null)?.message;
+    return typeof message === "string" ? [message] : [];
+  });
+  return lines.length ? lines.slice(0, 3).join(" · ") : error instanceof Error ? error.message : undefined;
+}
 function canUseInScope(itemScope: ContentScope, activeScope: ContentScope) { if (activeScope.type === "global") return itemScope.type === "global"; return itemScope.type === "global" || itemScope.centerId === activeScope.centerId; }
 function arraysEqual(left: string[], right: string[]) { return left.length === right.length && left.every((value, index) => value === right[index]); }
 function pseudoRandomScore(value: string) { return value.split("").reduce((sum, char) => sum + char.charCodeAt(0), 0) % 97; }
