@@ -12,7 +12,7 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import type { Theme } from "@mui/material/styles";
 
 import { ErgButton, ErgEmptyState, ErgErrorState, ErgTableToolbar, ergSegmentedTabsSx } from "@/components/erg-mui";
-import { ergMobileDockClearance } from "@/components/portal/erg-mobile-dock";
+import { ergMobileDockAnchor } from "@/components/portal/erg-mobile-dock";
 import { inboxTabsFor } from "@/features/notifications/components/inbox-filters";
 import { InboxList } from "@/features/notifications/components/inbox-list";
 import { MarkAllReadButton } from "@/features/notifications/components/mark-all-read-button";
@@ -152,7 +152,7 @@ export function AdminInboxScreen() {
           variant="contained"
           startIcon={<CampaignRoundedIcon />}
           onClick={compose}
-          sx={{ position: "fixed", right: 16, bottom: ergMobileDockClearance(12), zIndex: "speedDial", height: 52, px: 2.5, borderRadius: `${t.radius.chip}px`, boxShadow: t.shadow.float }}
+          sx={{ position: "fixed", right: 16, bottom: ergMobileDockAnchor(12), zIndex: "speedDial", height: 52, px: 2.5, borderRadius: `${t.radius.chip}px`, boxShadow: t.shadow.float }}
         >
           Gửi thông báo
         </ErgButton>

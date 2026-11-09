@@ -1,9 +1,13 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 
+import { reloadFresh } from "@/platform/pwa/reload-fresh";
 import { useServiceWorkerUpdate } from "./use-service-worker-update";
 
+vi.mock("@/platform/pwa/reload-fresh", () => ({ reloadFresh: vi.fn() }));
+
 afterEach(() => {
+  vi.mocked(reloadFresh).mockClear();
   vi.restoreAllMocks();
   vi.useRealTimers();
 });
@@ -70,4 +74,36 @@ it("checks for updates again after a later focus or online resume", async () => 
     await Promise.resolve();
   });
   expect(update).toHaveBeenCalledTimes(3);
+});
+
+function stubServiceWorker(registration: Partial<ServiceWorkerRegistration>) {
+  const full = { installing: null, update: vi.fn().mockResolvedValue(undefined), addEventListener: vi.fn(), removeEventListener: vi.fn(), ...registration } as unknown as ServiceWorkerRegistration;
+  const serviceWorker = { controller: {}, getRegistration: vi.fn().mockResolvedValue(full), addEventListener: vi.fn(), removeEventListener: vi.fn() } as unknown as ServiceWorkerContainer;
+  Object.defineProperty(navigator, "serviceWorker", { configurable: true, value: serviceWorker });
+  return full;
+}
+
+it("reloads clean instead of hanging when there is no waiting worker left to apply", async () => {
+  stubServiceWorker({ waiting: null });
+  const { result } = renderHook(() => useServiceWorkerUpdate());
+  await act(async () => Promise.resolve());
+
+  await act(async () => result.current.applyUpdate());
+
+  await waitFor(() => expect(reloadFresh).toHaveBeenCalledTimes(1));
+});
+
+it("reloads clean when the waiting worker never takes control", async () => {
+  vi.useFakeTimers();
+  const waitingWorker = { postMessage: vi.fn() };
+  stubServiceWorker({ waiting: waitingWorker as unknown as ServiceWorker });
+  const { result } = renderHook(() => useServiceWorkerUpdate());
+  await act(async () => Promise.resolve());
+
+  await act(async () => result.current.applyUpdate());
+  expect(waitingWorker.postMessage).toHaveBeenCalledWith({ type: "SKIP_WAITING" });
+  expect(reloadFresh).not.toHaveBeenCalled();
+
+  await act(async () => { await vi.advanceTimersByTimeAsync(5_000); });
+  expect(reloadFresh).toHaveBeenCalledTimes(1);
 });

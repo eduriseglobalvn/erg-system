@@ -1,9 +1,7 @@
 import { useState, type ReactNode } from "react";
 import BadgeRoundedIcon from "@mui/icons-material/BadgeRounded";
 import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
-import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import InstallMobileRoundedIcon from "@mui/icons-material/InstallMobileRounded";
-import PhoneAndroidRoundedIcon from "@mui/icons-material/PhoneAndroidRounded";
 import SecurityRoundedIcon from "@mui/icons-material/SecurityRounded";
 import Box from "@mui/material/Box";
 import ButtonBase from "@mui/material/ButtonBase";
@@ -12,6 +10,7 @@ import { LmsMobileTopBar } from "./lms-mobile-top-bar";
 import { LmsPwaSetupSheet } from "./lms-pwa-setup-sheet";
 import { LmsScopeSheet, type LmsMobileClassOption, type LmsMobileSchoolOption } from "./lms-scope-sheet";
 import { MobileBottomSheet } from "./mobile-bottom-sheet";
+import { PwaInstallBanner } from "@/components/pwa/pwa-install-banner";
 import { OfflineShellStatus } from "@/components/erg-mui/offline";
 import { ErgSheetIdentity, ErgSheetOverline, ErgSheetSignOut, ErgSheetTileGroup, ErgWorkspaceSwitch, type ErgSheetTileItem } from "@/components/portal/erg-mobile-sheet-parts";
 import { ERG_FULL_VIEWPORT_FALLBACK, ErgMobileDock, ergMobileDockClearance, type ErgMobileDockItem } from "@/components/portal/erg-mobile-dock";
@@ -46,7 +45,6 @@ export function LmsMobileShell<TSection extends string>({
   const [scopeOpen, setScopeOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const studentCount = classes.find((classroom) => classroom.id === selectedClassId)?.studentCount;
-  const shouldOfferInstall = !installPrompt.installed && (installPrompt.canInstall || installPrompt.isIos);
 
   const session = getAuthScope("lms").session ?? getAuthScope().session;
   const grantedWorkspaces = session?.workspaces ?? [];
@@ -69,15 +67,7 @@ export function LmsMobileShell<TSection extends string>({
         onScopeOpen={() => setScopeOpen(true)} onUpdate={serviceWorkerUpdate.applyUpdate}
       />
 
-      {shouldOfferInstall ? (
-        <Box sx={{ bgcolor: "info.light", px: 1.5, py: 1 }}>
-          <ButtonBase onClick={() => setPwaOpen(true)} sx={{ bgcolor: "background.paper", border: "1px solid", borderColor: "divider", borderRadius: 2, display: "flex", gap: 1.5, minHeight: 56, px: 1.5, py: 1, textAlign: "left", width: "100%" }}>
-            <Box sx={{ alignItems: "center", bgcolor: "primary.main", borderRadius: 1.5, color: "primary.contrastText", display: "flex", flexShrink: 0, height: 40, justifyContent: "center", width: 40 }}><PhoneAndroidRoundedIcon /></Box>
-            <Box sx={{ flex: 1, minWidth: 0 }}><Typography noWrap sx={{ fontSize: 14, fontWeight: 600 }}>Thêm LMS vào màn hình chính</Typography><Typography color="text.secondary" noWrap sx={{ fontSize: 12, fontWeight: 600 }}>Mở nhanh như ứng dụng với biểu tượng riêng.</Typography></Box>
-            <DownloadRoundedIcon color="primary" />
-          </ButtonBase>
-        </Box>
-      ) : null}
+      <PwaInstallBanner />
 
       <OfflineShellStatus network={network} />
 

@@ -5,18 +5,19 @@ import Typography from "@mui/material/Typography";
 import type { FormEvent, ReactNode } from "react";
 
 import { ErgButton, ErgIconButton } from "@/components/erg-mui/erg-actions";
-import { ergMobileDockClearance } from "@/components/portal/erg-mobile-dock";
+import { ergMobileDockAnchor } from "@/components/portal/erg-mobile-dock";
 
 /** Below md the portal dock floats at the bottom: the primary action bar sticks just above it (G08–G10). */
 export const stickyActionsSx = {
   bgcolor: "background.default",
   borderColor: "divider",
   borderTop: { xs: 1, md: 0 },
-  bottom: { xs: ergMobileDockClearance(8), md: "auto" },
+  bottom: { xs: ergMobileDockAnchor(8), md: "auto" },
   mx: { xs: -2, sm: -3, md: 0 },
   position: { xs: "sticky", md: "static" },
   px: { xs: 2, sm: 3, md: 0 },
   py: { xs: 1.5, md: 0 },
+  transition: "bottom 220ms cubic-bezier(0.16, 1, 0.3, 1)",
   zIndex: 4,
 } as const;
 

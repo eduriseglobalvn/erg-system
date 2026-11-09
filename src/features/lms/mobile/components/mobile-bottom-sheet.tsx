@@ -1,4 +1,4 @@
-import { type ReactNode, useId } from "react";
+import { type PointerEvent as ReactPointerEvent, type ReactNode, useId, useRef } from "react";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
@@ -6,6 +6,10 @@ import Drawer from "@mui/material/Drawer";
 import IconButton from "@mui/material/IconButton";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+
+/** Pulled this far (px), or flicked this fast (px/ms), the sheet closes; otherwise it springs back. */
+const DISMISS_DISTANCE = 96;
+const DISMISS_VELOCITY = 0.6;
 
 export function MobileBottomSheet({
   children,
@@ -25,6 +29,36 @@ export function MobileBottomSheet({
 }) {
   const titleId = useId();
   const descriptionId = useId();
+  const paperRef = useRef<HTMLDivElement | null>(null);
+  const drag = useRef<{ startY: number; startAt: number; offset: number } | null>(null);
+
+  function onDragStart(event: ReactPointerEvent<HTMLElement>) {
+    if ((event.target as Element).closest("button")) return;
+    drag.current = { startY: event.clientY, startAt: event.timeStamp, offset: 0 };
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+    if (paperRef.current) paperRef.current.style.transition = "none";
+  }
+  function onDragMove(event: ReactPointerEvent<HTMLElement>) {
+    const current = drag.current;
+    if (!current || !paperRef.current) return;
+    current.offset = Math.max(0, event.clientY - current.startY);
+    paperRef.current.style.transform = `translateY(${current.offset}px)`;
+  }
+  function onDragEnd(event: ReactPointerEvent<HTMLElement>) {
+    const current = drag.current;
+    drag.current = null;
+    const paper = paperRef.current;
+    if (!current || !paper) return;
+    const velocity = current.offset / Math.max(1, event.timeStamp - current.startAt);
+    if (current.offset > DISMISS_DISTANCE || (current.offset > 24 && velocity > DISMISS_VELOCITY)) {
+      paper.style.transition = "";
+      onOpenChange(false);
+      return;
+    }
+    paper.style.transition = "transform 200ms cubic-bezier(0.16, 1, 0.3, 1)";
+    paper.style.transform = "";
+  }
+  const dragZone = { onPointerCancel: onDragEnd, onPointerDown: onDragStart, onPointerMove: onDragMove, onPointerUp: onDragEnd };
 
   return (
     <Drawer
@@ -34,6 +68,7 @@ export function MobileBottomSheet({
       slotProps={{
         backdrop: { sx: { backdropFilter: "blur(2px)", bgcolor: "rgba(15,23,42,0.45)" } },
         paper: {
+          ref: paperRef,
           "aria-describedby": description && !header ? descriptionId : undefined,
           "aria-label": header ? title : undefined,
           "aria-labelledby": header ? undefined : titleId,
@@ -52,8 +87,11 @@ export function MobileBottomSheet({
         },
       }}
     >
-      <Box sx={{ bgcolor: "text.disabled", borderRadius: 4, height: 6, mt: 1.5, mx: "auto", opacity: 0.45, width: 48 }} />
-      <Stack direction="row" spacing={1.5} sx={{ alignItems: "flex-start", justifyContent: "space-between", minHeight: 64, px: 2, py: 1.5 }}>
+      {/* Handle + title row are the drag zone; touch-action none stops the browser scrolling instead. */}
+      <Box {...dragZone} sx={{ cursor: "grab", pb: 0.5, pt: 1.5, touchAction: "none" }}>
+        <Box sx={{ bgcolor: "text.disabled", borderRadius: 4, height: 6, mx: "auto", opacity: 0.45, width: 48 }} />
+      </Box>
+      <Stack {...dragZone} direction="row" spacing={1.5} sx={{ alignItems: "flex-start", justifyContent: "space-between", minHeight: 64, px: 2, py: 1.5, touchAction: "none" }}>
         {header ?? (
           <Box sx={{ minWidth: 0 }}>
             <Typography id={titleId} noWrap variant="h4">{title}</Typography>

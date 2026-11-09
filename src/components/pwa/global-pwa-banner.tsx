@@ -4,7 +4,7 @@ import Box from "@mui/material/Box";
 import Snackbar from "@mui/material/Snackbar";
 import Typography from "@mui/material/Typography";
 import { ErgButton } from "@/components/erg-mui/erg-actions";
-import { ergMobileDockClearance } from "@/components/portal/erg-mobile-dock";
+import { ergMobileDockAnchor } from "@/components/portal/erg-mobile-dock";
 import { OutboxQuarantineNotice } from "@/components/pwa/outbox-quarantine-notice";
 import { useServiceWorkerUpdate } from "@/hooks/use-service-worker-update";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
@@ -16,6 +16,12 @@ const { color, radius, shadow } = ergEnterpriseTokens;
 export function GlobalPwaBanner() {
   const { applyUpdate, updateAvailable } = useServiceWorkerUpdate();
   const [updating, setUpdating] = useState(false);
+  // Render-time reset: a banner that came back after a failed attempt must not stay stuck on "updating".
+  const [seenAvailable, setSeenAvailable] = useState(updateAvailable);
+  if (seenAvailable !== updateAvailable) {
+    setSeenAvailable(updateAvailable);
+    if (!updateAvailable) setUpdating(false);
+  }
 
   useEffect(() => {
     // Window Controls Overlay & File Handling API listener
@@ -49,7 +55,7 @@ export function GlobalPwaBanner() {
       anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       sx={{
         // Phones: sit above the floating dock; from sm up there is no dock.
-        bottom: { xs: ergMobileDockClearance(12), sm: "calc(env(safe-area-inset-bottom, 0px) + 24px)" },
+        bottom: { xs: ergMobileDockAnchor(12), sm: "calc(env(safe-area-inset-bottom, 0px) + 24px)" },
         left: "50%",
         right: "auto",
         transform: "translateX(-50%)",

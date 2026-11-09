@@ -991,10 +991,6 @@
     "hex": 0,
     "font": 6
   },
-  "src/features/lms/mobile/components/lms-mobile-shell.tsx": {
-    "hex": 0,
-    "font": 4
-  },
   "src/features/lms/mobile/components/lms-pwa-setup-sheet.tsx": {
     "hex": 0,
     "font": 15

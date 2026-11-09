@@ -6,6 +6,7 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import type { DashboardLeafVariant } from "@/layouts/dashboard/types/dashboard-types";
 import { useNavigate } from "@tanstack/react-router";
 import { ERG_FULL_VIEWPORT_FALLBACK, ErgMobileDock, ergMobileDockClearance, type ErgMobileDockItem } from "./erg-mobile-dock";
+import { PwaInstallBanner } from "@/components/pwa/pwa-install-banner";
 import ErgPortalHeader from "./ErgPortalHeader";
 import ErgPortalSidebar from "./ErgPortalSidebar";
 import {
@@ -217,6 +218,7 @@ export default function ErgPortalLayout({
             onNavigate={(path) => void navigate({ href: path })}
             onOpenSheet={() => setAllOpen(true)}
           />
+          <PwaInstallBanner />
           {dock.renderSheet({ open: allOpen, onClose: () => setAllOpen(false), onNavigate: (path) => void navigate({ href: path }) })}
         </>
       ) : null}

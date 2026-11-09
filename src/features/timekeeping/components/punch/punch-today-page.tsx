@@ -10,7 +10,7 @@ import { useEffect } from "react";
 
 import { ErgButton, ErgIconButton } from "@/components/erg-mui/erg-actions";
 import { ErgStatusChip } from "@/components/erg-mui/erg-feedback";
-import { ergMobileDockClearance } from "@/components/portal/erg-mobile-dock";
+import { ergMobileDockAnchor } from "@/components/portal/erg-mobile-dock";
 import { teacherPath } from "@/platform/workspaces/workspace-paths";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 import { useTimekeepingToday } from "../../api/timekeeping-query";
@@ -124,7 +124,7 @@ export function PunchTodayPage() {
       <ErgButton
         onClick={() => go("/timekeeping/requests?new=")}
         startIcon={<EditDocumentIcon />}
-        sx={{ bgcolor: "background.paper", borderRadius: `${radius.chip}px`, bottom: ergMobileDockClearance(16), boxShadow: ergEnterpriseTokens.shadow.float, justifySelf: "end", position: "sticky", zIndex: 4 }}
+        sx={{ bgcolor: "background.paper", borderRadius: `${radius.chip}px`, bottom: ergMobileDockAnchor(16), boxShadow: ergEnterpriseTokens.shadow.float, justifySelf: "end", position: "sticky", zIndex: 4 }}
         variant="outlined"
       >
         Tạo đơn

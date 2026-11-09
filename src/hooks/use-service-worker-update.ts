@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from "react";
+import { reloadFresh } from "@/platform/pwa/reload-fresh";
 
 const UPDATE_CHECK_INTERVAL_MS = 60_000;
+/** SKIP_WAITING normally flips the controller within a second; past this the page stops waiting and reloads clean. */
+const ACTIVATE_TIMEOUT_MS = 5_000;
 
 export function useServiceWorkerUpdate() {
   const [updateAvailable, setUpdateAvailable] = useState(false);
@@ -17,7 +20,8 @@ export function useServiceWorkerUpdate() {
     let observedWorker: ServiceWorker | null = null;
 
     const syncWaitingState = (registration: ServiceWorkerRegistration) => {
-      if (!disposed && registration.waiting) setUpdateAvailable(true);
+      // Also clears the banner when the waiting worker is gone (another tab already applied it).
+      if (!disposed) setUpdateAvailable(Boolean(registration.waiting));
     };
     const handleWorkerStateChange = () => {
       if (!disposed && observedWorker?.state === "installed" && navigator.serviceWorker.controller) {
@@ -85,7 +89,12 @@ export function useServiceWorkerUpdate() {
     if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) return;
     void navigator.serviceWorker.getRegistration().then((registration) => {
       const waitingWorker = registration?.waiting;
-      if (!waitingWorker || reloadPendingRef.current) return;
+      if (reloadPendingRef.current) return;
+      if (!waitingWorker) {
+        // The update already took over (or the registration changed): a clean reload lands on the newest release.
+        void reloadFresh();
+        return;
+      }
 
       const reloadAfterControllerChange = () => {
         reloadPendingRef.current = false;
@@ -96,6 +105,12 @@ export function useServiceWorkerUpdate() {
       reloadPendingRef.current = true;
       navigator.serviceWorker.addEventListener("controllerchange", reloadAfterControllerChange);
       waitingWorker.postMessage({ type: "SKIP_WAITING" });
+      window.setTimeout(() => {
+        if (!reloadPendingRef.current) return;
+        reloadPendingRef.current = false;
+        navigator.serviceWorker.removeEventListener("controllerchange", reloadAfterControllerChange);
+        void reloadFresh();
+      }, ACTIVATE_TIMEOUT_MS);
     });
   }
 
