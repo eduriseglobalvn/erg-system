@@ -15,4 +15,10 @@ describe("buildAvailableSubjects", () => {
     expect(buildAvailableSubjects([quiz("draft", "draft")])).toEqual([]);
     expect(buildAvailableSubjects(undefined)).toEqual([]);
   });
+
+  test("shows the real question count, never a made-up one", () => {
+    const counted = { ...(quiz("pub", "ready") as object), questionCount: 3 } as never;
+    expect(buildAvailableSubjects([counted])[0].levels[0].topics[0].items[0].questionCount).toBe(3);
+    expect(buildAvailableSubjects([quiz("empty", "ready")])[0].levels[0].topics[0].items[0].questionCount).toBe(0);
+  });
 });

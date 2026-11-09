@@ -55,7 +55,7 @@ export function buildAvailableSubjects(allQuizzes: QuestionBankQuizzes | undefin
                 levelId: lvlId,
                 levelLabel: lvlLabel,
                 programLabel: subLabel,
-                questionCount: q.questionCount || q.questionIds?.length || 10,
+                questionCount: q.questionCount || q.questionIds?.length || 0,
                 subjectId: subId,
                 topicId: `${lvlId}-topic-${topIdx}`,
                 topicLabel: topLabel,
