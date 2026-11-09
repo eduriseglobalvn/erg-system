@@ -51,6 +51,8 @@ export type SchoolStudentInput = {
   enrollmentDate?: string | null;
   note?: string | null;
   status?: string | null;
+  /** With a username, makes the backend create the student's login account in the same call. */
+  password?: string | null;
 };
 
 export type SchoolSubjectInput = {

@@ -168,11 +168,13 @@ export function useSchoolManagement(initialSchoolId?: string | null) {
   }, [classCreateMutation, refreshSchoolData, selectedSchool, selectedSchoolId]);
 
   const addStudents = useCallback(async (rows: Array<Omit<SchoolStudent, "id">>) => {
-    if (!selectedSchoolId) return;
+    if (!selectedSchoolId) return [];
     const items = rows.map((row) => toStudentInput(row, selectedSchool));
-    if (items.length > 1) await studentImportMutation.mutateAsync({ schoolId: selectedSchoolId, items });
-    else if (items[0]) await studentCreateMutation.mutateAsync({ schoolId: selectedSchoolId, input: items[0] });
+    let saved: Array<{ studentCode: string; username?: string | null; authUserId?: string | null }> = [];
+    if (items.length > 1) saved = (await studentImportMutation.mutateAsync({ schoolId: selectedSchoolId, items })).items;
+    else if (items[0]) saved = [await studentCreateMutation.mutateAsync({ schoolId: selectedSchoolId, input: items[0] })];
     await refreshSchoolData(selectedSchoolId);
+    return saved;
   }, [refreshSchoolData, selectedSchool, selectedSchoolId, studentCreateMutation, studentImportMutation]);
 
   const addSubject = useCallback(async (row: Omit<SchoolSubject, "id" | "studentCount">) => {
@@ -239,5 +241,6 @@ function toStudentInput(row: Omit<SchoolStudent, "id">, school: ReturnType<typeo
     birthday: row.birthDate || undefined,
     parentPhone: row.guardianPhone || undefined,
     status: row.status === "studying" ? "ACTIVE" : row.status === "at-risk" ? "AT_RISK" : "INACTIVE",
+    ...(row.account ? { username: row.account.username, password: row.account.password } : {}),
   };
 }

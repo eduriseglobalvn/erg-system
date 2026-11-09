@@ -15,6 +15,8 @@ export type SchoolStudent = {
   averageScore?: number | null;
   version?: number;
   academicClassId?: string | null;
+  /** Login to create together with the student (import only; never read back from the API). */
+  account?: { username: string; password: string } | null;
 };
 
 export type SchoolClass = {

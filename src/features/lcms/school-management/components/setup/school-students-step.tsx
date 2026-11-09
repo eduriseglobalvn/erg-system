@@ -16,6 +16,8 @@ import Typography from "@mui/material/Typography";
 import { useMemo, useState } from "react";
 import { useSchoolManagementContext } from "@/features/lcms/school-management/components/school-management-context";
 import { SchoolStepSurface } from "@/features/lcms/school-management/components/setup/school-step-surface";
+import { StudentCredentialsDialog, type StudentCredentialsResult } from "@/features/lcms/school-management/components/setup/student-credentials-dialog";
+import { buildStudentLogins } from "@/features/lcms/school-management/utils/student-account-credentials";
 import { StudentImportDialog } from "@/features/lcms/school-management/components/student-import-dialog";
 import { schoolTypeMeta, schoolTypeUsesGrades } from "@/features/lcms/school-management/types/school-type-config";
 import type { StudentImportRow } from "@/features/lcms/school-management/types/school-management-types";
@@ -25,6 +27,7 @@ const NONE: never[] = [];
 export function SchoolStudentsStep() {
   const { addStudents, selectedSchool } = useSchoolManagementContext();
   const [importOpen, setImportOpen] = useState(false);
+  const [credentials, setCredentials] = useState<StudentCredentialsResult | null>(null);
   const [selectedClass, setSelectedClass] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -65,18 +68,29 @@ export function SchoolStudentsStep() {
   const usesGrades = schoolTypeUsesGrades(selectedSchool.schoolType);
 
   async function importStudents(rows: StudentImportRow[]) {
-    await addStudents(
-      rows.map((row) => ({
-        code: row.code || `${selectedSchool!.id}-${Date.now()}`,
+    // Every imported student also gets a login (active, learner role, no onboarding) created by the backend.
+    const logins = buildStudentLogins(rows);
+    const saved = await addStudents(
+      rows.map((row, index) => ({
+        code: row.code || `${selectedSchool!.id}-${Date.now()}-${index}`,
         fullName: row.fullName,
         birthDate: row.birthDate,
         grade: row.grade,
         className: row.className,
         guardianPhone: row.guardianPhone,
         subjectIds: [],
-        status: "studying",
+        status: "studying" as const,
+        account: logins[index],
       }))
     );
+    // Only logins the backend confirms (same username, linked account) were created now; the rest already had one.
+    const created = new Map(saved.filter((item) => item.authUserId && item.username).map((item) => [item.username!.toLowerCase(), item]));
+    const sheetOrder = logins.map((login) => (login && created.has(login.username) ? login : null));
+    const issued = rows.flatMap((row, index) => {
+      const login = sheetOrder[index];
+      return login ? [{ code: row.code, fullName: row.fullName, className: row.className, ...login }] : [];
+    });
+    if (issued.length) setCredentials({ rows: issued, sheetOrder, skipped: rows.length - issued.length });
   }
 
   return (
@@ -308,6 +322,7 @@ export function SchoolStudentsStep() {
         ) : null}
       </SchoolStepSurface>
 
+      {credentials ? <StudentCredentialsDialog onClose={() => setCredentials(null)} result={credentials} /> : null}
       {importOpen ? (
         <StudentImportDialog
           onClose={() => setImportOpen(false)}
