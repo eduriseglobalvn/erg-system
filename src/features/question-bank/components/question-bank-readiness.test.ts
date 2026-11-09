@@ -12,4 +12,8 @@ describe("questionBankReadiness", () => {
     expect(questionBankReadiness({ answer: "42", choices: [] })).toBe("ready");
     expect(questionBankReadiness({ answer: "  ", choices: [] })).toBe("missingAnswer");
   });
+
+  test("questions authored in the quiz editor carry their key in the authored question", () => {
+    expect(questionBankReadiness({ answer: "", choices: [], runtimeQuestion: { id: "q", kind: "matching", title: "Ghép" } as never })).toBe("ready");
+  });
 });
