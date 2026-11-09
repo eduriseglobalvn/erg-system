@@ -1,5 +1,6 @@
 import { StudentDashboardMobileOverview } from "@/features/elearning/student-dashboard/components/student-dashboard-mobile-overview";
 import { OverviewView } from "@/features/elearning/student-dashboard/components/student-dashboard-content-views";
+import type { AssignmentFilter } from "@/features/elearning/student-dashboard/components/student-dashboard-assignments-view";
 import type { DashboardSurface } from "@/features/elearning/student-dashboard/hooks/use-dashboard-surface";
 import type { DashboardCopy, StudentPageKey } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
 import type {
@@ -36,7 +37,7 @@ export function StudentDashboardOverviewSurface({
   profile: StudentDashboardProfile;
   surface: DashboardSurface;
   onOpenAssignment: (assignmentId: string) => void;
-  onPageChange: (page: StudentPageKey) => void;
+  onPageChange: (page: StudentPageKey, assignmentFilter?: AssignmentFilter) => void;
 }) {
   if (surface === "mobile-web") {
     return (

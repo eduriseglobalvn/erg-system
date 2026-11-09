@@ -1,8 +1,8 @@
 import { expect, it, vi } from "vitest";
 
 const db = new Map<string, unknown>();
+vi.mock("@/platform/offline/erg-idb-store", () => ({ createErgStore: (name: string) => name }));
 vi.mock("idb-keyval", () => ({
-  createStore: (_db: string, name: string) => name,
   get: async (key: string, store: string) => db.get(`${store}|${key}`),
   set: async (key: string, value: unknown, store: string) => void db.set(`${store}|${key}`, value),
   del: async (key: string, store: string) => void db.delete(`${store}|${key}`),

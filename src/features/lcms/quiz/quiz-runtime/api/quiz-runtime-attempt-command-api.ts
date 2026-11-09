@@ -150,8 +150,9 @@ export async function saveAttemptAnswer(input: SaveAttemptAnswerInput): Promise<
     },
   );
 
-  if (!response?.saved) {
-    throw new Error("Save answer response did not confirm persistence.");
+  // The server only acknowledges the call (`saved: false`: answers are stored with the draft and at submit), so only a missing body is a failure.
+  if (!response) {
+    throw new Error("Không nhận được phản hồi từ máy chủ khi lưu câu trả lời.");
   }
 
   return response;

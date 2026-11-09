@@ -98,6 +98,7 @@ query LmsTeacherHomeworkWorkspace($input: TeacherHomeworkWorkspaceInput) {
           academicClassId
           quizId
           subjectId
+          title
           dueAt
           status
           assignedBy
@@ -220,7 +221,7 @@ export function mapAssignmentsToRuns(
       quizId: primaryResource?.quizId ?? assignment.quizId ?? null,
       quizVersionId: primaryResource?.quizVersionId ?? null,
       quizVersionLabel: primaryResource?.quizVersionLabel ?? null,
-      title: assignment.quizId ? `Bài tập ${assignment.quizId}` : assignment.id,
+      title: assignment.title?.trim() || (assignment.quizId ? `Bài tập ${assignment.quizId}` : assignment.id),
       subjectLabel: subjectLabel(assignment.subjectId),
       targetLevel: classOption?.name || assignment.academicClassId || "Lớp đã giao",
       activeClasses: assignment.academicClassId ? 1 : 0,

@@ -1,4 +1,13 @@
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import ChevronLeftRoundedIcon from "@mui/icons-material/ChevronLeftRounded";
+import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
+import FactCheckRoundedIcon from "@mui/icons-material/FactCheckRounded";
+import GridViewRoundedIcon from "@mui/icons-material/GridViewRounded";
+import SendRoundedIcon from "@mui/icons-material/SendRounded";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import IconButton from "@mui/material/IconButton";
+
+import { ergEnterpriseTokens as tk } from "@/themes/erg-enterprise-tokens";
 
 type Props = {
   attemptCompleted: boolean;
@@ -10,6 +19,10 @@ type Props = {
   reviewingSubmittedAttempt: boolean;
   submitFailed: boolean;
   submitting: boolean;
+  /** Middle "n/N đã làm" button; without onOpenList the dock keeps only the arrows. */
+  answeredCount?: number;
+  total?: number;
+  onOpenList?: () => void;
   onNext: () => void;
   onPrev: () => void;
   onRequestSubmit: () => void;
@@ -18,6 +31,13 @@ type Props = {
   onSubmitCurrentQuestion: () => void;
 };
 
+const accentSx = {
+  bgcolor: `var(--quiz-accent, ${tk.color.primary})`,
+  color: `var(--quiz-accent-contrast, ${tk.color.surface})`,
+  "&:hover": { bgcolor: `var(--quiz-accent, ${tk.color.primaryHover})`, filter: "brightness(0.92)" },
+} as const;
+
+/** L02/L03 dock: ‹ · n/N đã làm (opens the list) · Câu tiếp, or one Kết quả / Câu tiếp button in practice. */
 export function MobilePlayerFooter({
   attemptCompleted,
   currentAnswerComplete,
@@ -28,71 +48,88 @@ export function MobilePlayerFooter({
   reviewingSubmittedAttempt,
   submitFailed,
   submitting,
+  answeredCount,
+  total,
+  onOpenList,
   onNext,
   onPrev,
   onRequestSubmit,
   onReview,
   onSubmitCurrentQuestion,
 }: Props) {
-  const showSubmitAction = !attemptCompleted;
   const showResultOnly = attemptCompleted && !reviewingSubmittedAttempt;
   // Result screen without review (keyless package): no button, so no empty fixed bar either.
   if (showResultOnly && !onReview) return null;
+  // The last question, a running submit and a failed submit put Nộp bài in the primary slot.
+  const submitInPrimary = !attemptCompleted && (isLastQuestion || submitting || submitFailed);
   return (
-    <div data-testid="mobile-player-footer" className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white px-3 pb-[calc(env(safe-area-inset-bottom,0px)+0.35rem)] pt-1.5">
-      <div className="mx-auto max-w-md">
-        {showResultOnly ? (
-          <button
-            type="button"
-            className="inline-flex min-h-10 w-full items-center justify-center rounded-md border border-[var(--erg-blue)] bg-white px-4 text-sm font-semibold text-[var(--erg-blue)]"
-            onClick={onReview}
+    <Box
+      data-testid="mobile-player-footer"
+      sx={{ alignItems: "center", bgcolor: tk.color.surface, borderTop: `1px solid ${tk.color.border}`, bottom: 0, display: "flex", gap: 1, left: 0, pb: "calc(env(safe-area-inset-bottom, 0px) + 12px)", position: "fixed", pt: 1.25, px: 1.5, right: 0, zIndex: 40 }}
+    >
+      {showResultOnly ? (
+        <Button fullWidth size="large" type="button" variant="outlined" onClick={onReview}>Xem lại bài làm</Button>
+      ) : isTrainingMode ? (
+        <Button
+          disabled={currentQuestionSubmitted ? isLastQuestion : submitting || !currentAnswerComplete}
+          fullWidth
+          size="large"
+          startIcon={currentQuestionSubmitted ? undefined : <FactCheckRoundedIcon />}
+          endIcon={currentQuestionSubmitted ? <ChevronRightRoundedIcon /> : undefined}
+          sx={{ ...accentSx, minHeight: 52 }}
+          type="button"
+          variant="contained"
+          onClick={currentQuestionSubmitted ? onNext : onSubmitCurrentQuestion}
+        >
+          {currentQuestionSubmitted ? "Câu tiếp" : submitting ? "Đang chấm…" : "Kết quả"}
+        </Button>
+      ) : (
+        <>
+          <IconButton
+            aria-label="Câu trước"
+            disabled={isFirstQuestion || submitting}
+            sx={{ border: `1px solid ${tk.color.border}`, color: tk.color.textSecondary, flexShrink: 0, height: 44, width: 44 }}
+            onClick={onPrev}
           >
-            Xem lại bài làm
-          </button>
-        ) : (
-          isTrainingMode ? (
-            <button
+            <ChevronLeftRoundedIcon />
+          </IconButton>
+          {onOpenList && total ? (
+            <Button
+              aria-label={`Mở danh sách câu, ${answeredCount ?? 0}/${total} đã làm`}
+              startIcon={<GridViewRoundedIcon />}
+              sx={{ borderColor: tk.color.borderStrong, color: tk.color.text, flex: 1, minHeight: 44, minWidth: 0 }}
               type="button"
-              className="inline-flex min-h-10 w-full items-center justify-center rounded-md border border-[#b8d6fa] bg-[var(--erg-blue)] px-4 text-sm font-semibold text-white shadow-sm disabled:cursor-not-allowed disabled:opacity-40"
-              disabled={currentQuestionSubmitted ? isLastQuestion : submitting || !currentAnswerComplete}
-              onClick={currentQuestionSubmitted ? onNext : onSubmitCurrentQuestion}
+              variant="outlined"
+              onClick={onOpenList}
             >
-              {currentQuestionSubmitted ? "Câu tiếp" : submitting ? "Đang chấm…" : "Kết quả"}
-            </button>
+              {`${answeredCount ?? 0}/${total} đã làm`}
+            </Button>
+          ) : null}
+          {submitInPrimary ? (
+            <Button
+              disabled={submitting}
+              startIcon={<SendRoundedIcon />}
+              sx={{ ...accentSx, flex: 1, minHeight: 44 }}
+              type="button"
+              variant="contained"
+              onClick={onRequestSubmit}
+            >
+              {submitting ? "Đang nộp" : submitFailed ? "Thử lại" : "Nộp bài"}
+            </Button>
           ) : (
-          <div className={`grid gap-2 ${showSubmitAction ? "grid-cols-3" : "grid-cols-2"}`}>
-            <button
-              type="button"
-              className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-md border border-[var(--erg-blue)] bg-white px-3 text-sm font-medium text-[var(--erg-blue)] disabled:cursor-not-allowed disabled:opacity-40"
-              disabled={isFirstQuestion || submitting}
-              onClick={onPrev}
-            >
-              <ChevronLeft className="h-4 w-4" />
-              Trước
-            </button>
-            <button
-              type="button"
-              className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-md border border-[var(--erg-blue)] bg-[var(--erg-blue)] px-3 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-40"
+            <Button
               disabled={isLastQuestion || submitting}
+              endIcon={<ChevronRightRoundedIcon />}
+              sx={{ ...accentSx, flex: 1, minHeight: 44 }}
+              type="button"
+              variant="contained"
               onClick={onNext}
             >
-              Sau
-              <ChevronRight className="h-4 w-4" />
-            </button>
-            {showSubmitAction ? (
-              <button
-                type="button"
-                className={isLastQuestion ? "inline-flex min-h-11 items-center justify-center gap-1.5 rounded-md border border-[var(--erg-blue)] bg-[var(--erg-blue)] px-3 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-40" : "inline-flex min-h-11 items-center justify-center gap-1.5 rounded-md border border-[var(--erg-blue)] bg-white px-3 text-sm font-medium text-[var(--erg-blue)] disabled:cursor-not-allowed disabled:opacity-40"}
-                disabled={submitting}
-                onClick={onRequestSubmit}
-              >
-                {submitting ? "Đang nộp" : submitFailed ? "Thử lại" : "Nộp bài"}
-              </button>
-            ) : null}
-          </div>
-          )
-        )}
-      </div>
-    </div>
+              Câu tiếp
+            </Button>
+          )}
+        </>
+      )}
+    </Box>
   );
 }

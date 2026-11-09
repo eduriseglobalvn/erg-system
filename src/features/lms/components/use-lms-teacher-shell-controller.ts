@@ -31,6 +31,7 @@ import {
 import { teachingCalendarQueryKeys } from "@/features/teaching-calendar/api/teaching-calendar-api";
 import { canNavigateToLmsPath, filterLmsNavigation } from "@/features/lms/navigation/lms-navigation";
 import { hasApiBase } from "@/lib/api-client";
+import { getDefaultTenantId } from "@/lib/graphql-client";
 import { queryKeys } from "@/lib/query-keys";
 import { QUERY_POLICIES } from "@/lib/query-policy";
 import { getPersistedJsonValue, setPersistedJsonValue } from "@/stores/persisted-store";
@@ -49,7 +50,7 @@ export function useLmsTeacherShellController() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const apiBacked = hasApiBase();
-  const tenantId = session?.tenantId ?? "";
+  const tenantId = session?.tenantId?.trim() || getDefaultTenantId();
   const notificationScope = useMemo(() => ({ accountId: account?.id, tenantId }), [account?.id, tenantId]);
   const pathname = location.pathname;
   const progressAssignmentId = new URLSearchParams(location.searchStr).get("assignmentId");

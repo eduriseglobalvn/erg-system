@@ -11,6 +11,7 @@ export type {
   SchoolEnrollmentItem,
   SchoolGradeRecord,
   SchoolPermissions,
+  SchoolStudentAccountInput,
   SchoolStudentInput,
   SchoolSubjectInput,
 } from "@/features/lcms/school-management/api/school-api/types";
@@ -18,7 +19,7 @@ export { GRAPHQL_MAX_BATCH_SIZE } from "@/features/lcms/school-management/api/sc
 export { fromApiSchoolType, fromApiStatus, toApiSchoolType } from "@/features/lcms/school-management/api/school-api/mappers";
 export { getSchoolDirectory, getSchoolOperations } from "@/features/lcms/school-management/api/school-api/directory-api";
 export { archiveSchoolClass, createSchoolClass, updateSchoolClass } from "@/features/lcms/school-management/api/school-api/class-api";
-export { archiveSchoolStudent, createSchoolStudent, importSchoolStudents, updateSchoolStudent } from "@/features/lcms/school-management/api/school-api/student-api";
+export { archiveSchoolStudent, createSchoolStudent, importSchoolStudents, importSchoolStudentsWithAccounts, updateSchoolStudent } from "@/features/lcms/school-management/api/school-api/student-api";
 export { archiveSchoolSubject, createSchoolSubject, updateSchoolSubject } from "@/features/lcms/school-management/api/school-api/subject-api";
 export { bulkEnrollSchoolStudents, enrollSchoolStudent } from "@/features/lcms/school-management/api/school-api/enrollment-api";
 export {

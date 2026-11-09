@@ -1,11 +1,14 @@
+import Box from "@mui/material/Box";
 import { useRef } from "react";
 
 import { useI18n } from "@/platform/i18n";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { ergEnterpriseTokens as tokens } from "@/themes/erg-enterprise-tokens";
 import type { QuestionComponentProps } from "@/components/quiz/questions/types";
 
 import { clamp } from "./hotspot-question/hotspot-helpers";
 import { HotspotMobileAnswer } from "./hotspot-question/hotspot-mobile-answer";
+import { flushAnswerRegionSx } from "@/components/quiz/questions/shared";
 import { HotspotMarker, HotspotReviewArea } from "./hotspot-question/hotspot-marks";
 
 export function HotspotQuestion({
@@ -22,6 +25,8 @@ export function HotspotQuestion({
   if (!question.hotspotImage) {
     return null;
   }
+
+  const ratio = question.hotspotImage.width > 0 && question.hotspotImage.height > 0 ? question.hotspotImage.width / question.hotspotImage.height : 16 / 9;
 
   function handlePickPoint(clientX: number, clientY: number, target: HTMLDivElement | null) {
     if (submitted || !target) return;
@@ -45,19 +50,26 @@ export function HotspotQuestion({
   }
 
   return (
-    <div className="quiz-answer-region-wide grid gap-3">
-      <div
-        className="grid min-h-[420px] place-items-center overflow-hidden rounded-2xl border bg-white shadow-[0_14px_30px_rgba(0,0,136,0.05)]"
-        style={{
-          borderColor: "var(--quiz-canvas-border)",
+    <Box className="quiz-answer-region-wide" sx={{ ...flushAnswerRegionSx, display: "grid", gap: 1.5 }}>
+      <Box
+        sx={{
+          bgcolor: tokens.color.surfaceMuted,
+          border: `1px solid ${tokens.color.border}`,
+          borderRadius: `${tokens.radius.card}px`,
+          alignItems: "center",
+          display: "flex",
           height: "min(64vh, 720px)",
+          justifyContent: "center",
+          minHeight: 420,
+          overflow: "hidden",
         }}
       >
         {/* Sized by the image itself, so clicks and areas are fractions of the image, not of its frame. */}
-        <div
+        <Box
           ref={imageRef}
           data-testid="hotspot-image-box"
-          className="relative inline-block"
+          // The box takes the image ratio from its data: an SVG with only a viewBox has no width of its own and would shrink to 0.
+          sx={{ aspectRatio: `${ratio}`, cursor: submitted ? "default" : "crosshair", maxWidth: `calc(max(420px, min(64vh, 720px)) * ${ratio})`, position: "relative", width: "100%" }}
           onClick={(event) => {
             handlePickPoint(event.clientX, event.clientY, imageRef.current);
           }}
@@ -65,7 +77,7 @@ export function HotspotQuestion({
           <img
             src={question.hotspotImage.url}
             alt={question.title}
-            style={{ display: "block", maxWidth: "100%", maxHeight: "min(64vh, 720px)", width: "auto", height: "auto" }}
+            style={{ display: "block", width: "100%", height: "100%" }}
           />
           {reviewMode
             ? question.hotspotAreas?.filter((area) => area.correct).map((area) => (
@@ -75,9 +87,9 @@ export function HotspotQuestion({
           {value.hotspotPoint ? (
             <HotspotMarker x={value.hotspotPoint.x} y={value.hotspotPoint.y} />
           ) : null}
-        </div>
-      </div>
-      <p className="text-sm text-slate-500">{t("player.clickImagePrompt")}</p>
-    </div>
+        </Box>
+      </Box>
+      <Box component="p" sx={{ typography: "caption", color: "text.secondary", m: 0 }}>{t("player.clickImagePrompt")}</Box>
+    </Box>
   );
 }

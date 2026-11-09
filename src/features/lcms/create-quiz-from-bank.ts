@@ -54,11 +54,11 @@ export async function createQuizFromBankQuestions(
   const created = await dependencies
     .createQuiz({
       title,
-      subtitle: firstQuestion.categoryLabel,
       kind: options.kind ?? "train",
       subjectId: firstQuestion.subjectId,
       levelId: firstQuestion.levelId,
-      categoryId: firstQuestion.categoryId,
+      // No categoryId/subtitle: a package mixes topics, and a topic would let it take that topic's slot in the
+      // quiz editor and hide the quiz authored there.
       questionIds: questions.map((question) => question.id),
       idempotencyKey: dependencies.createIdempotencyKey("quiz-editor-create"),
     })

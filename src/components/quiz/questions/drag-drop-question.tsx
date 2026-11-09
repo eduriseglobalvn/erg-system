@@ -1,11 +1,12 @@
 import Box from "@mui/material/Box";
+import ButtonBase from "@mui/material/ButtonBase";
 
+import { overlineSx, wordChipSx } from "@/components/quiz/questions/drag-words-question";
 import { pieceName } from "@/components/quiz/questions/matching-question/matching-helpers";
 import { QuestionBodyWithImage } from "@/components/quiz/questions/shared";
 import type { QuestionComponentProps } from "@/components/quiz/questions/types";
 import type { DragDropItem } from "@/domain/quiz/types";
 import { ergEnterpriseTokens as tokens } from "@/themes/erg-enterprise-tokens";
-import { cn } from "@/utils/cn";
 
 /** The item's image before its label, sized like the matching pieces. Next to text it is decorative; alone it names the item. */
 function ItemFace({ item }: { item: DragDropItem }) {
@@ -16,13 +17,15 @@ function ItemFace({ item }: { item: DragDropItem }) {
           alt={item.image.alt || (item.label ? "" : pieceName(item.label, item.image))}
           component="img"
           src={item.image.url}
-          sx={{ borderRadius: `${tokens.radius.xs}px`, display: "block", maxHeight: 84, maxWidth: 150, objectFit: "cover" }}
+          sx={{ borderRadius: `${tokens.radius.xs}px`, display: "block", maxHeight: 84, maxWidth: 150, objectFit: "cover", my: 0.5 }}
         />
       ) : null}
       {item.label}
     </>
   );
 }
+
+const cardSx = { bgcolor: "background.paper", border: `1px solid ${tokens.color.border}`, borderRadius: `${tokens.radius.card}px`, p: 1.5 } as const;
 
 export function DragDropQuestion({
   question,
@@ -35,6 +38,7 @@ export function DragDropQuestion({
   const targets = question.dropTargets ?? [];
   const items = question.dragDropItems ?? [];
   const placements = value.dragDropPlacements ?? {};
+  const unplaced = items.filter((item) => !placements[item.id]).length;
 
   function placeItem(itemId: string, targetId: string) {
     if (submitted) return;
@@ -49,38 +53,35 @@ export function DragDropQuestion({
 
   return (
     <QuestionBodyWithImage question={question}>
-      <div className="quiz-answer-region-wide grid gap-7 xl:gap-8">
-        <div className="grid gap-5 lg:grid-cols-2">
+      <Box className="quiz-answer-region-wide" sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        <Box sx={{ display: "grid", gap: 1.5, gridTemplateColumns: { xs: "1fr", md: "repeat(2, minmax(0, 1fr))" } }}>
           {targets.map((target) => {
             const assignedItems = items.filter((item) => placements[item.id] === target.id);
 
             return (
-              <div key={target.id} className="min-h-48 rounded-[20px] border border-dashed border-[rgba(0,0,136,0.20)] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(247,248,255,0.84))] p-6 shadow-[0_14px_30px_rgba(0,0,136,0.06)] sm:p-7">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="text-sm font-extrabold uppercase tracking-[0.02em] text-[#000088]">
-                    {target.label}
-                  </div>
-                  <span className="rounded-full border border-[rgba(0,0,136,0.12)] bg-white px-3 py-1 text-xs font-extrabold text-[#637381]">
-                    {assignedItems.length}
-                  </span>
-                </div>
-                <div className="mt-5 flex flex-wrap gap-3.5">
+              <Box key={target.id} role="group" aria-label={target.label} sx={{ ...cardSx, display: "flex", flexDirection: "column", gap: 1 }}>
+                <Box sx={{ alignItems: "center", display: "flex", gap: 1, justifyContent: "space-between" }}>
+                  <Box component="span" sx={{ typography: "subtitle2" }}>{target.label}</Box>
+                  <Box component="span" sx={{ typography: "caption", color: "text.secondary", fontVariantNumeric: "tabular-nums" }}>{assignedItems.length}</Box>
+                </Box>
+                <Box sx={{ alignItems: "center", display: "flex", flexWrap: "wrap", gap: 1, minHeight: 40 }}>
                   {assignedItems.length ? (
                     assignedItems.map((item) => (
-                      <span key={item.id} className="inline-flex items-center gap-2 rounded-xl border border-[rgba(0,0,136,0.12)] bg-white px-5 py-3 text-[var(--quiz-readable-size)] font-bold text-[#000088] shadow-sm">
+                      <Box component="span" key={item.id} sx={{ ...wordChipSx(), minHeight: 36, py: 0.25 }}>
                         <ItemFace item={item} />
-                      </span>
+                      </Box>
                     ))
                   ) : (
-                    <span className="rounded-xl border border-dashed border-[rgba(0,0,136,0.14)] bg-white/72 px-4 py-3 text-[var(--quiz-readable-size)] font-semibold text-slate-400">Chưa có thẻ nào</span>
+                    <Box component="span" sx={{ typography: "caption", color: "text.secondary" }}>Chưa có thẻ nào</Box>
                   )}
-                </div>
-              </div>
+                </Box>
+              </Box>
             );
           })}
-        </div>
+        </Box>
 
-        <div className="grid gap-5 rounded-[20px] border border-[rgba(0,0,136,0.12)] bg-[linear-gradient(135deg,rgba(0,0,136,0.055),rgba(255,255,255,0.94)_48%,rgba(232,40,40,0.045))] p-5 shadow-[0_18px_40px_rgba(0,0,136,0.07)] sm:p-6">
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+          <Box component="span" sx={overlineSx}>{`Thẻ cần xếp · ${unplaced} chưa xếp`}</Box>
           {items.map((item) => {
             const selectedTargetId = placements[item.id] ?? "";
             const correctTargetId = result?.correctDragDropPlacements?.[item.id] ?? item.correctTargetId;
@@ -88,49 +89,59 @@ export function DragDropQuestion({
             const correctTarget = targets.find((target) => target.id === correctTargetId);
 
             return (
-              <div
+              <Box
                 key={item.id}
-                className={cn(
-                  "rounded-2xl border bg-white p-6 transition shadow-[0_12px_28px_rgba(0,0,136,0.06)] sm:p-7",
-                  reviewMode
-                    ? isCorrect
-                      ? "border-emerald-300"
-                      : "border-red-300"
-                    : "border-[rgba(0,0,136,0.12)]",
-                )}
+                sx={{
+                  ...cardSx,
+                  alignItems: "center",
+                  borderColor: reviewMode ? (isCorrect ? "success.main" : "error.main") : tokens.color.border,
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: 1,
+                  justifyContent: "space-between",
+                }}
               >
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <span className="inline-flex items-center gap-3 text-[var(--quiz-readable-size-lg)] font-bold text-[#1D1D1F]"><ItemFace item={item} /></span>
+                <Box component="span" sx={{ typography: "subtitle2", alignItems: "center", display: "inline-flex", gap: 1, minWidth: 0 }}><ItemFace item={item} /></Box>
+                <Box sx={{ alignItems: "center", display: "flex", flexWrap: "wrap", gap: 0.75 }}>
                   {reviewMode && !isCorrect ? (
-                    <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+                    <Box component="span" sx={{ typography: "caption", bgcolor: tokens.statusTint.success.bg, borderRadius: `${tokens.radius.chip}px`, color: tokens.statusTint.success.color, px: 1.25, py: 0.25, fontWeight: "fontWeightBold" }}>
                       Đúng: {correctTarget?.label}
-                    </span>
+                    </Box>
                   ) : null}
-                </div>
-                <div className="mt-6 flex flex-wrap gap-4">
-                  {targets.map((target) => (
-                    <button
-                      key={target.id}
-                      type="button"
-                      disabled={submitted}
-                      className={cn(
-                        "inline-flex min-h-[var(--quiz-control-height)] min-w-32 items-center justify-center rounded-xl border px-8 text-center text-[var(--quiz-control-text-size)] font-extrabold shadow-sm transition hover:-translate-y-0.5 disabled:cursor-default disabled:hover:translate-y-0 sm:min-w-40 sm:px-10",
-                        selectedTargetId === target.id
-                          ? "border-[#000088] bg-[rgba(0,0,136,0.07)]"
-                          : "border-[rgba(0,0,136,0.14)] bg-white",
-                      )}
-                      style={{ color: selectedTargetId === target.id ? "#000088" : "#174f91" }}
-                      onClick={() => placeItem(item.id, target.id)}
-                    >
-                      {target.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
+                  {targets.map((target) => {
+                    const on = selectedTargetId === target.id;
+                    return (
+                      <ButtonBase
+                        key={target.id}
+                        type="button"
+                        disabled={submitted}
+                        aria-pressed={on}
+                        sx={{
+                          typography: "body2",
+                          bgcolor: on ? tokens.color.primarySofter : "background.paper",
+                          border: "1px solid",
+                          borderColor: on ? "primary.main" : tokens.color.border,
+                          borderRadius: `${tokens.radius.chip}px`,
+                          color: on ? tokens.statusTint.info.color : "text.secondary",
+                          fontWeight: on ? "fontWeightBold" : "fontWeightMedium",
+                          height: 36,
+                          px: 1.75,
+                          whiteSpace: "nowrap",
+                          "&.Mui-focusVisible": { boxShadow: tokens.shadow.focus },
+                          "&.Mui-disabled": { cursor: "default" },
+                        }}
+                        onClick={() => placeItem(item.id, target.id)}
+                      >
+                        {target.label}
+                      </ButtonBase>
+                    );
+                  })}
+                </Box>
+              </Box>
             );
           })}
-        </div>
-      </div>
+        </Box>
+      </Box>
     </QuestionBodyWithImage>
   );
 }

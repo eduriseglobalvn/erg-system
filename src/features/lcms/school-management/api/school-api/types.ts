@@ -53,6 +53,9 @@ export type SchoolStudentInput = {
   status?: string | null;
 };
 
+/** Import row that also asks for a login account. Sent over REST only: GraphQL variables must not carry passwords. */
+export type SchoolStudentAccountInput = SchoolStudentInput & { password: string };
+
 export type SchoolSubjectInput = {
   name: string;
   code: string;

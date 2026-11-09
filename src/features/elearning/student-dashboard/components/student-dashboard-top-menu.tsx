@@ -14,6 +14,8 @@ import Typography from "@mui/material/Typography";
 import { type ElearningViewerSession } from "@/platform/auth/api/elearning-viewer-session";
 import { getAuthScope } from "@/platform/auth/api/auth-storage";
 import { SidebarLeafItem } from "@/components/portal/portal-sidebar-leaf-item";
+import { EXPANDED_SIDEBAR_WIDTH, SIDEBAR_GUTTER } from "@/components/portal/portal-sidebar-motion";
+import { NAV_BORDER, NAV_CARD_RADIUS, NAV_CARD_SHADOW, NAV_PADDING } from "@/components/portal/portal-sidebar-styles";
 import { PortalSidebarWorkspaceHeader } from "@/components/portal/portal-sidebar-workspace-header";
 import type { DashboardCopy, StudentDiscussionNotification, StudentPageKey } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
 import type { StudentDashboardProfile } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
@@ -68,12 +70,12 @@ export function TopMenuShell({
       bgcolor: ergEnterpriseTokens.color.surfaceMuted,
       color: MUI_TEXT, display: "flex", flexDirection: { xs: "column", md: "row" }, minHeight: "100vh", position: "relative",
     }}>
-      {/* Slim & compact left sidebar matching Image 1 */}
+      {/* Same floating card as the admin/teacher sidebar: shell radius, float shadow, token width. */}
       <Box component="aside" sx={{
-        bgcolor: "background.paper", border: `1px solid ${MUI_BORDER}`, borderRadius: `${ergEnterpriseTokens.radius.lg}px`,
-        display: "flex", flexDirection: "column", flexShrink: 0, height: { md: "calc(100vh - 32px)" },
-        m: { xs: 1.5, md: 2 }, mr: { md: 0 }, p: { xs: 1.25, md: 1.4 }, position: { md: "sticky" },
-        top: { md: 16 }, width: { xs: "calc(100% - 24px)", md: 196, lg: 204 }, zIndex: 12,
+        bgcolor: "background.paper", border: `1px solid ${NAV_BORDER}`, borderRadius: NAV_CARD_RADIUS, boxShadow: NAV_CARD_SHADOW,
+        display: "flex", flexDirection: "column", flexShrink: 0, height: { md: `calc(100vh - ${SIDEBAR_GUTTER * 2}px)` },
+        m: { xs: 1.5, md: `${SIDEBAR_GUTTER}px` }, mr: { md: 0 }, p: { xs: 1.25, md: `${NAV_PADDING}px` }, position: { md: "sticky" },
+        top: { md: SIDEBAR_GUTTER }, width: { xs: "calc(100% - 24px)", md: EXPANDED_SIDEBAR_WIDTH }, zIndex: 12,
       }}>
         <Box sx={{ mb: 1.5 }}>
           <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ px: 0.5, py: 0.5, mb: 1.25 }}>

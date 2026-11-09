@@ -15,11 +15,12 @@ import type { DashboardCopy, StudentPageKey } from "@/features/elearning/student
 import type { StudentDashboardAssignment, StudentDashboardProfile, StudentTeacherAnnouncement } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
 import { getDiscussionOverviewPreview } from "@/features/elearning/student-dashboard/utils/discussion-overview";
 import { MUI_PRIMARY, MUI_TEXT, MUI_MUTED, MUI_DIVIDER, elevatedCardSx, primaryButtonSx, Stack } from "@/features/elearning/student-dashboard/components/student-dashboard-workspace-styles";
+import type { AssignmentFilter } from "@/features/elearning/student-dashboard/components/student-dashboard-assignments-view";
 import { OverviewHeroActions, OverviewMetrics } from "@/features/elearning/student-dashboard/components/student-dashboard-overview-shared";
 import { PageHeader, SectionCard, PriorityPanel, AssignmentListItem, AnnouncementCard, EmptyPanel, SkeletonRow } from "@/features/elearning/student-dashboard/components/student-dashboard-view-primitives";
 import { formatAverageScore, resolveOverviewHero } from "@/features/elearning/student-dashboard/utils/student-overview-hero";
 
-export function OverviewView({ announcement, assignmentsFailed, assignmentsLoading, completedAssignments, copy, discussionPreview, openAssignments, overdueAssignments, priorityAssignment, profile, onOpenAssignment, onPageChange }: { announcement: StudentTeacherAnnouncement | undefined; assignmentsFailed: boolean; assignmentsLoading: boolean; completedAssignments: StudentDashboardAssignment[]; copy: DashboardCopy; discussionPreview: ReturnType<typeof getDiscussionOverviewPreview>; openAssignments: StudentDashboardAssignment[]; overdueAssignments: StudentDashboardAssignment[]; priorityAssignment?: StudentDashboardAssignment; profile: StudentDashboardProfile; onOpenAssignment: (assignmentId: string) => void; onPageChange: (page: StudentPageKey) => void; }) {
+export function OverviewView({ announcement, assignmentsFailed, assignmentsLoading, completedAssignments, copy, discussionPreview, openAssignments, overdueAssignments, priorityAssignment, profile, onOpenAssignment, onPageChange }: { announcement: StudentTeacherAnnouncement | undefined; assignmentsFailed: boolean; assignmentsLoading: boolean; completedAssignments: StudentDashboardAssignment[]; copy: DashboardCopy; discussionPreview: ReturnType<typeof getDiscussionOverviewPreview>; openAssignments: StudentDashboardAssignment[]; overdueAssignments: StudentDashboardAssignment[]; priorityAssignment?: StudentDashboardAssignment; profile: StudentDashboardProfile; onOpenAssignment: (assignmentId: string) => void; onPageChange: (page: StudentPageKey, assignmentFilter?: AssignmentFilter) => void; }) {
   const hero = resolveOverviewHero(priorityAssignment, copy);
   return (
     <Stack spacing={2.5}>
@@ -43,6 +44,7 @@ export function OverviewView({ announcement, assignmentsFailed, assignmentsLoadi
         columns={{ xs: "1fr", sm: "repeat(2, minmax(0, 1fr))", lg: "repeat(4, minmax(0, 1fr))" }}
         completedAssignments={completedAssignments}
         copy={copy}
+        onOpenFilter={(filter) => onPageChange("assignments", filter)}
         openAssignments={openAssignments}
         overdueAssignments={overdueAssignments}
         profile={profile}
@@ -50,7 +52,7 @@ export function OverviewView({ announcement, assignmentsFailed, assignmentsLoadi
       <Box sx={{ display: "grid", gap: 2.5, gridTemplateColumns: { xs: "1fr", lg: "1.7fr 1fr" }, alignItems: "start" }}>
         <SectionCard action={<Button variant="text" onClick={() => onPageChange("assignments")} size="small">Xem tất cả</Button>} title={copy.todayTitle}>
           <Stack spacing={1.25}>
-            {assignmentsLoading ? Array.from({ length: 3 }).map((_, i) => <SkeletonRow key={i} />) : openAssignments.slice(0, 3).map((assignment) => <AssignmentListItem key={assignment.id} assignment={assignment} copy={copy} onOpenAssignment={onOpenAssignment} />)}
+            {assignmentsLoading ? Array.from({ length: 3 }).map((_, i) => <SkeletonRow key={i} />) : [...openAssignments].sort((a, b) => Number(b.status === "overdue") - Number(a.status === "overdue")).slice(0, 3).map((assignment) => <AssignmentListItem key={assignment.id} assignment={assignment} copy={copy} onOpenAssignment={onOpenAssignment} />)}
             {!assignmentsLoading && !assignmentsFailed && openAssignments.length === 0 ? (completedAssignments.length > 0
               ? <EmptyPanel description={copy.todayDoneDescription} title={copy.heroAllDone} />
               : <EmptyPanel description={copy.todayEmptyDescription} title={copy.heroEmpty} />) : null}

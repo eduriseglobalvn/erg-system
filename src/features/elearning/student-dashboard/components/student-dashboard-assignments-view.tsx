@@ -33,8 +33,8 @@ export function filterAssignments(assignments: StudentDashboardAssignment[], fil
 }
 
 /** Bài tập (canvas H02): segmented status, subject chips when there is more than one subject, tappable cards. */
-export function AssignmentsView({ assignments, copy, onOpenAssignment }: { assignments: StudentDashboardAssignment[]; copy: DashboardCopy; onOpenAssignment: (assignmentId: string) => void }) {
-  const [filter, setFilter] = useState<AssignmentFilter>("todo");
+export function AssignmentsView({ assignments, copy, initialFilter = "todo", onOpenAssignment }: { assignments: StudentDashboardAssignment[]; copy: DashboardCopy; initialFilter?: AssignmentFilter; onOpenAssignment: (assignmentId: string) => void }) {
+  const [filter, setFilter] = useState<AssignmentFilter>(initialFilter);
   const [subject, setSubject] = useState(ALL_SUBJECTS);
   const lists = useMemo(() => ({ todo: filterAssignments(assignments, "todo"), submitted: filterAssignments(assignments, "submitted"), overdue: filterAssignments(assignments, "overdue") }), [assignments]);
   const subjects = useMemo(() => [...new Set(assignments.map((a) => a.subjectLabel).filter((s): s is string => Boolean(s)))], [assignments]);

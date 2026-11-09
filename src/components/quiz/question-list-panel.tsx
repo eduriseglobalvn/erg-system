@@ -7,6 +7,29 @@ import { ErgTextField } from "@/components/erg-mui/erg-form";
 import { questionGridLayout, type GridSurface } from "@/components/quiz/question-grid-layout";
 import { applyFilter, filterOptions, parseGoTo, type QuestionListFilter, type QuestionListMode } from "@/components/quiz/question-list-filters";
 import { QuestionNavigator, type QuestionCell } from "@/components/quiz/question-navigator";
+import { ergEnterpriseTokens as tk } from "@/themes/erg-enterprise-tokens";
+
+// Segmented filter (".seg"): grey track, the chosen tab is a white raised pill.
+const segSx = {
+  bgcolor: tk.color.divider,
+  borderRadius: `${tk.radius.control}px`,
+  gap: "2px",
+  p: "3px",
+  "& .MuiToggleButtonGroup-grouped": {
+    border: 0,
+    borderRadius: `${tk.radius.sm}px !important`,
+    color: tk.color.textSecondary,
+    flex: "1 1 auto",
+    fontWeight: "fontWeightMedium",
+    height: 36,
+    m: 0,
+    px: 0.75,
+    textTransform: "none",
+    typography: "caption",
+    whiteSpace: "nowrap",
+    "&.Mui-selected, &.Mui-selected:hover": { bgcolor: tk.color.surface, boxShadow: tk.shadow.xs, color: tk.color.text },
+  },
+} as const;
 
 type QuestionListPanelProps = {
   mode: QuestionListMode;
@@ -43,11 +66,12 @@ export function QuestionListPanel({ mode, cells, surface, onSelect, goToInputRef
         fullWidth
         onChange={(_, next: QuestionListFilter | null) => next && setFilter(next)}
         size="small"
+        sx={segSx}
         value={active}
       >
         {options.map((o) => (
           // One line even with 4 chips in the 340px column: content-sized, tight padding, caption type.
-          <ToggleButton key={o.id} value={o.id} sx={{ flex: "1 1 auto", px: 0.5, textTransform: "none", typography: "caption", whiteSpace: "nowrap" }}>
+          <ToggleButton key={o.id} value={o.id}>
             {`${o.label} · ${o.count}`}
           </ToggleButton>
         ))}

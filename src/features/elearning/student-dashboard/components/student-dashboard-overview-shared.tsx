@@ -6,6 +6,7 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 
+import type { AssignmentFilter } from "@/features/elearning/student-dashboard/components/student-dashboard-assignments-view";
 import { MetricCard } from "@/features/elearning/student-dashboard/components/student-dashboard-view-primitives";
 import type { DashboardCopy, StudentPageKey } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
 import type { StudentDashboardAssignment, StudentDashboardProfile } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
@@ -17,6 +18,7 @@ export function OverviewMetrics({
   completedAssignments,
   copy,
   gap = 2,
+  onOpenFilter,
   openAssignments,
   overdueAssignments,
   profile,
@@ -26,6 +28,8 @@ export function OverviewMetrics({
   completedAssignments: StudentDashboardAssignment[];
   copy: DashboardCopy;
   gap?: number;
+  /** Makes the open / overdue / completed cards open the assignments page on that tab. */
+  onOpenFilter?: (filter: AssignmentFilter) => void;
   openAssignments: StudentDashboardAssignment[];
   overdueAssignments: StudentDashboardAssignment[];
   profile: StudentDashboardProfile;
@@ -35,10 +39,10 @@ export function OverviewMetrics({
   const total = openAssignments.length + completedAssignments.length;
   return (
     <Box sx={{ display: "grid", gap, gridTemplateColumns: columns }}>
-      <MetricCard icon={<AssignmentRoundedIcon fontSize="small" />} label={copy.stats.open} value={unavailable ? "—" : openAssignments.length} />
-      <MetricCard icon={<ScheduleRoundedIcon fontSize="small" />} label={copy.stats.overdue} tone="error" value={unavailable ? "—" : overdueAssignments.length} />
+      <MetricCard icon={<AssignmentRoundedIcon fontSize="small" />} label={copy.stats.open} onClick={onOpenFilter && (() => onOpenFilter("todo"))} value={unavailable ? "—" : openAssignments.length} />
+      <MetricCard icon={<ScheduleRoundedIcon fontSize="small" />} label={copy.stats.overdue} onClick={onOpenFilter && (() => onOpenFilter("overdue"))} tone="error" value={unavailable ? "—" : overdueAssignments.length} />
       <MetricCard icon={<SchoolRoundedIcon fontSize="small" />} label={copy.stats.average} tone="info" value={unavailable ? "—" : formatAverageScore(profile.averageScore, completedAssignments.length)} />
-      <MetricCard icon={<CheckCircleRoundedIcon fontSize="small" />} label={copy.stats.completed} tone="success" value={unavailable ? "—" : `${completedAssignments.length}/${total}`} />
+      <MetricCard icon={<CheckCircleRoundedIcon fontSize="small" />} label={copy.stats.completed} onClick={onOpenFilter && (() => onOpenFilter("submitted"))} tone="success" value={unavailable ? "—" : `${completedAssignments.length}/${total}`} />
     </Box>
   );
 }

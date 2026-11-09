@@ -44,6 +44,14 @@ describe("MobileQuestionSheet", () => {
     expect(onJumpToQuestion).toHaveBeenCalledWith(9);
   });
 
+  it("can be opened by the shell and says how many are done", () => {
+    const onOpenChange = vi.fn();
+    render(<MobileQuestionSheet cells={cells} open onOpenChange={onOpenChange} onJumpToQuestion={vi.fn()} />);
+    expect(screen.getByText("3/90 đã làm · 1 câu đã đánh dấu")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Đóng" }));
+    expect(onOpenChange).toHaveBeenCalledWith(false);
+  });
+
   it("Nộp bài asks to submit", () => {
     const { onRequestSubmit } = setup();
     fireEvent.click(screen.getByRole("button", { name: "Câu 61/90" }));

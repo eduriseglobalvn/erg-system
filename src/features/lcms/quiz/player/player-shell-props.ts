@@ -15,6 +15,8 @@ export type PlayerShellProps = {
   startImmediately?: boolean;
   runtimePortal?: QuizRuntimePortal;
   welcomeMeta?: QuizWelcomeMeta;
+  /** Web top bar back button ("Bài tập" / "Thoát"); without it the player goes back in history. */
+  onExit?: () => void;
   /** Portable exams: opaque account id (class + student code) used as the attempt scope. */
   identityAccountId?: string;
   /** Portable exams: extra result-screen actions (export). Receives the finished attempt. */

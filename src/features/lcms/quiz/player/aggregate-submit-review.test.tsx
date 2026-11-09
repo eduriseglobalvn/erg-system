@@ -31,8 +31,8 @@ describe("online submit of a keyed (client-first) package", () => {
     const aside = screen.getByTestId("review-aside");
     expect(within(aside).getByRole("button", { name: "Sai · 9" })).toBeTruthy();
     expect(within(aside).getByRole("button", { name: "Bỏ trống · 3" })).toBeTruthy();
-    expect(screen.getByText("78/90 câu đúng")).toBeTruthy();
-    expect(screen.getByText("7/10")).toBeTruthy();
+    expect(within(aside).getByText("78/90")).toBeTruthy();
+    expect(within(aside).getAllByRole("definition")[0].textContent).toBe("7");
     expect(screen.getByText("Sai · 0 điểm")).toBeTruthy();
   });
 });

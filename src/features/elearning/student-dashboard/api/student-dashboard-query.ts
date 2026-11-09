@@ -3,6 +3,8 @@ import type { StudentDashboardProfile } from "@/features/elearning/student-dashb
 import { getDefaultTenantId } from "@/lib/graphql-client";
 import { persistedQueryMeta, QUERY_POLICIES } from "@/lib/query-policy";
 
+const STUDENT_DASHBOARD_STALE_MS = 30_000;
+
 export type StudentDashboardQueryScope = {
   accountId?: string | null;
   tenantId: string;
@@ -59,7 +61,8 @@ export function studentDashboardQueryOptions(scope: StudentDashboardQueryScope) 
     queryFn: ({ signal }: { signal: AbortSignal }) => loadStudentDashboardData({ signal, tenantId }),
     meta: persistedQueryMeta(tenantId, normalizeAccountId(scope.accountId)),
     queryKey: studentDashboardQueryKeys.workspace(scope),
-    refetchOnWindowFocus: false,
-    staleTime: QUERY_POLICIES.offlineCore.staleTime,
+    // A teacher can assign while this tab is open: refetch when the student comes back to it, and treat data as fresh for 30s only.
+    refetchOnWindowFocus: true,
+    staleTime: STUDENT_DASHBOARD_STALE_MS,
   };
 }

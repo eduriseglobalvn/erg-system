@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
+import CardActionArea from "@mui/material/CardActionArea";
 import CardContent from "@mui/material/CardContent";
 import Chip from "@mui/material/Chip";
 import LinearProgress from "@mui/material/LinearProgress";
@@ -16,7 +17,6 @@ import type {
 } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
 import {
   MUI_PRIMARY,
-  MUI_NAVY,
   MUI_TEXT,
   MUI_MUTED,
   MUI_BORDER,
@@ -63,34 +63,37 @@ export function SectionCard({ action, children, title }: { action?: ReactNode; c
 
 export function PriorityPanel({ assignment, copy, onOpenAssignment }: { assignment: StudentDashboardAssignment; copy: DashboardCopy; onOpenAssignment: (assignmentId: string) => void }) {
   return (
-    <Paper sx={{ alignSelf: "stretch", bgcolor: MUI_NAVY, border: "1px solid rgba(255,255,255,0.08)", borderRadius: 3, boxShadow: "0 18px 38px rgba(16,24,40,0.16)", color: "#fff", minWidth: { md: 360 }, overflow: "hidden", p: 2.2, position: "relative" }}>
-      <Chip label={copy.priority.title} size="small" sx={{ bgcolor: "rgba(255,255,255,0.14)", color: "#fff", fontWeight: 600 }} />
-      <Typography variant="subtitle1" sx={{ mt: 1.5, color: "#fff", fontWeight: 600 }}>{assignment.title}</Typography>
-      <Typography variant="body2" sx={{ mt: 0.75, color: "rgba(255,255,255,0.72)", lineHeight: 1.55 }}>{copy.priority.detail(assignment.dueLabel)}</Typography>
+    <Paper sx={{ alignSelf: "stretch", bgcolor: "primary.main", border: "1px solid", borderColor: "primary.dark", borderRadius: 3, boxShadow: "none", color: "common.white", minWidth: { md: 360 }, overflow: "hidden", p: 2.2, position: "relative" }}>
+      <Chip label={copy.priority.title} size="small" sx={{ bgcolor: (theme) => alpha(theme.palette.common.white, 0.2), color: "common.white", fontWeight: 600 }} />
+      <Typography variant="subtitle1" sx={{ mt: 1.5, color: "common.white", fontWeight: 600 }}>{assignment.title}</Typography>
+      <Typography variant="body2" sx={{ mt: 0.75, color: (theme) => alpha(theme.palette.common.white, 0.82), lineHeight: 1.55 }}>{copy.priority.detail(assignment.dueLabel)}</Typography>
       {assignment.progressRate === null ? (
-        <Typography variant="caption" sx={{ color: "rgba(255,255,255,0.72)", display: "block", mt: 2 }}>Chưa có dữ liệu tiến độ</Typography>
+        <Typography variant="caption" sx={{ color: (theme) => alpha(theme.palette.common.white, 0.82), display: "block", mt: 2 }}>Chưa có dữ liệu tiến độ</Typography>
       ) : (
-        <LinearProgress value={assignment.progressRate} variant="determinate" sx={{ height: 10, mt: 2, bgcolor: "rgba(255,255,255,0.16)", borderRadius: 99, "& .MuiLinearProgress-bar": { bgcolor: "#8FD0FF", borderRadius: 99 } }} />
+        <LinearProgress value={assignment.progressRate} variant="determinate" sx={{ height: 10, mt: 2, bgcolor: (theme) => alpha(theme.palette.common.white, 0.25), borderRadius: 99, "& .MuiLinearProgress-bar": { bgcolor: "common.white", borderRadius: 99 } }} />
       )}
-      <Button fullWidth variant="outlined" disabled={!assignment.quizId} onClick={() => { if (assignment.quizId) onOpenAssignment(assignment.id); }} sx={{ borderColor: "common.white", color: "common.white", mt: 2, "&:hover": { borderColor: "common.white", bgcolor: "action.hover" }, "&.Mui-disabled": { borderColor: "grey.600", color: "grey.500" } }}>{copy.priority.action}</Button>
+      <Button fullWidth variant="outlined" disabled={!assignment.quizId} onClick={() => { if (assignment.quizId) onOpenAssignment(assignment.id); }} sx={{ bgcolor: "common.white", borderColor: "common.white", color: "primary.main", mt: 2, "&:hover": { bgcolor: "primary.light", borderColor: "primary.light", color: "primary.dark" }, "&.Mui-disabled": { bgcolor: (theme) => alpha(theme.palette.common.white, 0.4), borderColor: "transparent", color: (theme) => alpha(theme.palette.common.white, 0.8) } }}>{copy.priority.action}</Button>
     </Paper>
   );
 }
 
 /** The one metric card for desktop and mobile: sentence-case label, border only, token colours. */
-export function MetricCard({ icon, label, tone = "primary", value }: { icon?: ReactNode; label: string; tone?: "primary" | "error" | "success" | "info"; value: string | number }) {
+export function MetricCard({ icon, label, onClick, tone = "primary", value }: { icon?: ReactNode; label: string; onClick?: () => void; tone?: "primary" | "error" | "success" | "info"; value: string | number }) {
   const pad = { xs: 1.5, md: 2.2 };
+  const content = (
+    <CardContent sx={{ p: pad, "&:last-child": { pb: pad } }}>
+      <Stack direction="row" spacing={1.5} alignItems="center" justifyContent="space-between">
+        <Box sx={{ minWidth: 0 }}>
+          <Typography variant="caption" color="text.secondary" noWrap sx={{ display: "block" }}>{label}</Typography>
+          <Typography variant="h5" sx={{ mt: 0.5, color: "text.primary" }}>{value}</Typography>
+        </Box>
+        {icon ? <Box sx={{ bgcolor: (theme) => alpha(theme.palette[tone].main, 0.1), borderRadius: 2, color: `${tone}.main`, display: "grid", flexShrink: 0, height: 40, placeItems: "center", width: 40 }}>{icon}</Box> : null}
+      </Stack>
+    </CardContent>
+  );
   return (
     <Card sx={{ ...elevatedCardSx, boxShadow: "none", minWidth: 0 }}>
-      <CardContent sx={{ p: pad, "&:last-child": { pb: pad } }}>
-        <Stack direction="row" spacing={1.5} alignItems="center" justifyContent="space-between">
-          <Box sx={{ minWidth: 0 }}>
-            <Typography variant="caption" color="text.secondary" noWrap sx={{ display: "block" }}>{label}</Typography>
-            <Typography variant="h5" sx={{ mt: 0.5, color: "text.primary" }}>{value}</Typography>
-          </Box>
-          {icon ? <Box sx={{ bgcolor: (theme) => alpha(theme.palette[tone].main, 0.1), borderRadius: 2, color: `${tone}.main`, display: "grid", flexShrink: 0, height: 40, placeItems: "center", width: 40 }}>{icon}</Box> : null}
-        </Stack>
-      </CardContent>
+      {onClick ? <CardActionArea onClick={onClick}>{content}</CardActionArea> : content}
     </Card>
   );
 }

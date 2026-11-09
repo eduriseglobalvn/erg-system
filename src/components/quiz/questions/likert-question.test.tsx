@@ -22,7 +22,9 @@ describe("LikertQuestion", () => {
     const onChange = vi.fn();
     render(<LikertQuestion question={question} value={{}} onChange={onChange} />);
 
-    for (const label of [...labels, "Bài giảng dễ hiểu"]) expect(screen.getByText(label)).toBeTruthy();
+    // The scale ends are written under the row; every point keeps its label as the button name.
+    for (const label of [labels[0], labels[4], "Bài giảng dễ hiểu"]) expect(screen.getByText(label)).toBeTruthy();
+    for (const label of labels) expect(screen.getByRole("radio", { name: `Bài giảng dễ hiểu: ${label}` })).toBeTruthy();
     expect(screen.queryByText(/Criteria|Level \d/)).toBeNull();
 
     fireEvent.click(screen.getByLabelText("Bài giảng dễ hiểu: Đồng ý"));

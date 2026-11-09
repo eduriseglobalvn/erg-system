@@ -1,3 +1,5 @@
+import Typography from "@mui/material/Typography";
+
 import { useRemainingSeconds } from "@/components/quiz/player-countdown";
 import { AnswerKeyCard, SubmitConfirmDialog } from "@/components/quiz/player-shell-parts";
 import { PracticeFeedbackPanel } from "@/components/quiz/practice-feedback-panel";
@@ -9,6 +11,7 @@ import { ReviewLayout } from "@/components/quiz/review/review-layout";
 import { attemptElapsedSeconds } from "@/components/quiz/review/review-model";
 import type { Question } from "@/domain/quiz/types";
 import type { ComponentProps } from "react";
+import { ergEnterpriseTokens as tk } from "@/themes/erg-enterprise-tokens";
 import type { PlayerReady } from "./use-player-ready-handlers";
 import type { PlayerRuntime } from "./use-player-runtime";
 
@@ -45,9 +48,9 @@ export function PlayerQuestionBody({ online, question: readyQuestion, value, onC
       {isTrainingMode && submitted && result ? <PracticeFeedbackPanel key={`${readyQuestion.id}-feedback`} result={result} /> : null}
 
       {submitError ? (
-        <div className="mt-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700 shadow-sm">
+        <Typography role="alert" sx={{ bgcolor: tk.statusTint.error.bg, borderRadius: `${tk.radius.control}px`, color: tk.statusTint.error.color, mt: 2, px: 2, py: 1.5 }} variant="body2">
           {submitError}
-        </div>
+        </Typography>
       ) : null}
 
     </>
@@ -65,18 +68,18 @@ export function LiveSubmitDialog({ countdown, ...dialogProps }: LiveSubmitDialog
 }
 
 /** After submit: the review screen (L08/L09/WL5) or, from its last button, the local retry (D12). */
-export function PlayerReviewView({ rt, ready, flagged }: { rt: PlayerRuntime; ready: PlayerReady; flagged: ReadonlySet<number> }) {
+export function PlayerReviewView({ rt, ready, flagged, meta }: { rt: PlayerRuntime; ready: PlayerReady; flagged: ReadonlySet<number>; meta?: string }) {
   const { currentIndex, isMobile, localRetryIndices, questions, setCurrentIndex, setLocalRetryIndices, setReviewingSubmittedAttempt, startLocalRetry } = rt;
   const { session } = ready;
   return (
-    <QuizThemeSurface quiz={ready.quiz} className="quiz-player-shell">
+    <QuizThemeSurface quiz={ready.quiz} className="quiz-player-shell" style={isMobile || localRetryIndices ? undefined : { height: "100%" }}>
       {localRetryIndices ? (
         <LocalRetryPlayer questions={questions} indices={localRetryIndices} onExit={() => setLocalRetryIndices(null)} />
       ) : (
         <ReviewLayout
           attempt={ready.attempt} questions={questions} flagged={flagged} current={currentIndex}
           elapsedSeconds={attemptElapsedSeconds(session.serverStartedAt ?? session.startedAt, session.submittedAt)}
-          surface={isMobile ? "phone" : "web"} onSelect={setCurrentIndex} onBack={() => setReviewingSubmittedAttempt(false)}
+          surface={isMobile ? "phone" : "web"} title={ready.quiz.title} meta={meta} onSelect={setCurrentIndex} onBack={() => setReviewingSubmittedAttempt(false)}
           startLocalRetry={startLocalRetry}
         />
       )}

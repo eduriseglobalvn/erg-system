@@ -73,7 +73,7 @@ import {
 } from "@/features/elearning/student-dashboard/components/student-dashboard-workspace-styles";
 import { AnnouncementToast } from "@/features/elearning/student-dashboard/components/student-dashboard-view-primitives";
 import { AccountView, AnnouncementsView } from "@/features/elearning/student-dashboard/components/student-dashboard-content-views";
-import { AssignmentsView } from "@/features/elearning/student-dashboard/components/student-dashboard-assignments-view";
+import { AssignmentsView, type AssignmentFilter } from "@/features/elearning/student-dashboard/components/student-dashboard-assignments-view";
 import {
   StudentQuizAssignmentMissing,
   StudentQuizNotReady,
@@ -100,6 +100,7 @@ export function StudentDashboardWorkspaceRuntime() {
     if (typeof window === "undefined") return "overview";
     return initialStudentPage(window.location.search);
   });
+  const [assignmentsFilter, setAssignmentsFilter] = useState<AssignmentFilter>("todo");
   const [viewState, setViewState] = useState<StudentViewState>({ type: "dashboard" });
   const [account, setAccount] = useElearningViewerAccount();
   const fixtureMode = runtimeFixturesEnabled();
@@ -295,11 +296,14 @@ export function StudentDashboardWorkspaceRuntime() {
           announcement={pinnedAnnouncement} assignmentsFailed={studentDashboardQuery.isError && openAssignments.length === 0} assignmentsLoading={studentDashboardQuery.isLoading && openAssignments.length === 0}
           completedAssignments={completedAssignments} copy={copy} discussionPreview={discussionPreview}
           openAssignments={openAssignments} overdueAssignments={overdueAssignments} priorityAssignment={priorityAssignment}
-          profile={dashboardProfile} surface={surface} onOpenAssignment={openAssignment} onPageChange={setActivePage}
+          profile={dashboardProfile} surface={surface} onOpenAssignment={openAssignment}
+          onPageChange={(page, filter) => { setAssignmentsFilter(filter ?? "todo"); setActivePage(page); }}
         />
       ) : null}
       {activePage === "assignments" ? (
         <AssignmentsView
+          key={assignmentsFilter}
+          initialFilter={assignmentsFilter}
           assignments={assignments}
           copy={copy}
           onOpenAssignment={openAssignment}

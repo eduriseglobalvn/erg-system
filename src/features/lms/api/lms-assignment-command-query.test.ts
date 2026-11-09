@@ -1,5 +1,6 @@
 import { describe, expect, test, vi } from "vitest";
 
+import { getDefaultTenantId } from "@/lib/graphql-client";
 import { loadLmsStudentGroups } from "@/features/lms/api/lms-assignment-command-api";
 
 vi.mock("@/features/lms/api/lms-assignment-command-api", () => ({
@@ -129,5 +130,12 @@ describe("lms assignment command query keys", () => {
       ["lms-teacher-shell", "teacher-homework-workspace", "tenant-a", "teacher-a"],
       ["lms", "class-workspace", "tenant-a", "teacher-a"],
     ]);
+  });
+
+  test("the homework list the teacher shell reads sits under the key an assignment mutation invalidates", () => {
+    // The shell falls back to the default tenant when the stored session has none; if it used "" the list never refreshed.
+    const tenantId = getDefaultTenantId();
+    const [homeworkRoot] = assignmentMutationInvalidationKeys(tenantId, "assignment-a", "teacher-a");
+    expect(lmsAssignmentReadQueryKeys.homeworkWorkspace(tenantId, "teacher-a").slice(0, homeworkRoot.length)).toEqual([...homeworkRoot]);
   });
 });

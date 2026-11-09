@@ -1,6 +1,7 @@
 import type { Query } from "@tanstack/react-query";
 import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
-import { createStore, del, get, set } from "idb-keyval";
+import { del, get, set } from "idb-keyval";
+import { createErgStore } from "@/platform/offline/erg-idb-store";
 
 // Bump whenever persisted query eligibility or serialized shapes change.
 export const QUERY_CACHE_BUSTER = "erg-query-cache-v6";
@@ -41,7 +42,7 @@ function memoryStorage(): AsyncStorage {
 }
 
 function indexedDbStorage(scopeKey: string): AsyncStorage {
-  const store = createStore("erg-system", "query-cache");
+  const store = createErgStore("query-cache");
   const key = `ERG_QUERY_CACHE:${scopeKey}`;
   const fallback = memoryStorage();
   return {
@@ -70,7 +71,7 @@ export function createQueryPersister(scopeKey = "anonymous") {
 export async function clearPersistedQueryScope(scopeKey: string) {
   if (typeof indexedDB === "undefined") return;
   try {
-    await del(`ERG_QUERY_CACHE:${scopeKey}`, createStore("erg-system", "query-cache"));
+    await del(`ERG_QUERY_CACHE:${scopeKey}`, createErgStore("query-cache"));
   } catch {
     // Cache is best effort; a storage failure must not block logout.
   }

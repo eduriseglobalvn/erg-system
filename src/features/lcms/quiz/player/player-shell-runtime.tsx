@@ -32,6 +32,7 @@ export function PlayerShellRuntime(props: PlayerShellProps) {
       ready={{ quiz: activeQuiz, attempt: activeAttempt, quizPackage: activePackage, question: activeQuestion, session: activeSession }}
       portableOffline={props.portableOffline}
       welcomeMeta={props.welcomeMeta}
+      onExit={props.onExit}
       renderResultActions={props.renderResultActions}
     />
   );

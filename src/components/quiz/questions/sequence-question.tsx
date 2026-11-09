@@ -70,7 +70,7 @@ export function SequenceQuestion({ question, value, submitted = false, reviewMod
         onDragEnd={handleDragEnd}
         onDragCancel={() => setActiveId(null)}
       >
-        <Box ref={listRef} className="quiz-answer-region" sx={{ display: "grid", rowGap: 1.25 }}>
+        <Box ref={listRef} className="quiz-answer-region" sx={{ display: "grid", rowGap: 1 }}>
           {order.map((itemId, index) => {
             const item = itemMap.get(itemId);
             if (!item) return null;
@@ -89,6 +89,11 @@ export function SequenceQuestion({ question, value, submitted = false, reviewMod
             );
           })}
         </Box>
+        {submitted ? null : (
+          <Box component="p" sx={{ typography: "caption", color: "text.secondary", m: 0, mt: 1.5 }}>
+            Giữ và kéo thẻ để đổi chỗ, hoặc chọn thẻ rồi dùng phím mũi tên lên/xuống.
+          </Box>
+        )}
         <DragOverlay dropAnimation={null}>{activeItem ? <SequenceCard item={activeItem} compact={isMobile} overlay /> : null}</DragOverlay>
       </DndContext>
     </QuestionBodyWithImage>

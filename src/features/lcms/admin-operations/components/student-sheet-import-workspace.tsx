@@ -239,6 +239,7 @@ export function StudentSheetImportWorkspace({
       const response = await bulkCreateStudentAccounts({
         centerId,
         classId,
+        classIdsByName: Object.fromEntries(targetClasses.map((classroom) => [classroom.className.trim().toLowerCase(), classroom.id])),
         rows: visibleStudents.map((student) => ({
           rowId: student.id,
           rowNumber: Number.parseInt(student.rowNumber, 10) || student.sourceIndex,
@@ -258,7 +259,7 @@ export function StudentSheetImportWorkspace({
     } finally {
       setIsSubmitting(false);
     }
-  }, [centerId, classId, visibleStudents]);
+  }, [centerId, classId, targetClasses, visibleStudents]);
 
   return (
     <Box sx={{ display: "grid", gridTemplateColumns: compact ? "1fr" : { xs: "1fr", xl: "minmax(0, 1fr) 340px" }, gap: 2 }}>

@@ -1,4 +1,5 @@
-import { clear as clearObjectStore, createStore, del, get, set } from "idb-keyval";
+import { clear as clearObjectStore, del, get, set } from "idb-keyval";
+import { createErgStore } from "./erg-idb-store";
 
 export type OfflineScopedJsonStore = {
   get: <T>(scopeKey: string, recordKey: string) => Promise<T | null>;
@@ -68,8 +69,8 @@ export class EncryptedIndexedDbScopedJsonStore implements OfflineScopedJsonStore
   private readonly keyStore;
 
   constructor(collection = "offline-scoped-json-v1") {
-    this.dataStore = createStore("erg-system", collection);
-    this.keyStore = createStore("erg-system", `${collection}-keys`);
+    this.dataStore = createErgStore(collection);
+    this.keyStore = createErgStore(`${collection}-keys`);
   }
 
   async get<T>(scopeKey: string, recordKey: string) {

@@ -1,8 +1,16 @@
-import { Minus, Plus, Pointer } from "lucide-react";
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
+import RemoveRoundedIcon from "@mui/icons-material/RemoveRounded";
+import TouchAppRoundedIcon from "@mui/icons-material/TouchAppRounded";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import ButtonBase from "@mui/material/ButtonBase";
+import IconButton from "@mui/material/IconButton";
+import { alpha, type Theme } from "@mui/material/styles";
 import { useEffect, useRef, useState, type TouchEvent as ReactTouchEvent } from "react";
 
 import { useI18n } from "@/platform/i18n";
 import { usePacedStateBatch } from "@/hooks/use-paced-state-batch";
+import { ergEnterpriseTokens as tokens } from "@/themes/erg-enterprise-tokens";
 import type { QuestionComponentProps } from "@/components/quiz/questions/types";
 
 import { clamp, getTouchDistance } from "./hotspot-helpers";
@@ -106,61 +114,52 @@ export function HotspotMobileAnswer({
     }
   }
 
-    return (
+  const zoomButtonSx = (theme: Theme) => ({ bgcolor: alpha(theme.palette.common.white, 0.12), color: "common.white", height: 44, width: 44, "&:hover": { bgcolor: alpha(theme.palette.common.white, 0.2) } });
+
+  return (
     <>
-      <div className="grid gap-3">
-        <button
+      <Box sx={{ display: "grid", gap: 1.5 }}>
+        <ButtonBase
           type="button"
-          className="relative overflow-hidden rounded-md border bg-white text-left shadow-sm"
-          style={{ borderColor: "var(--quiz-canvas-border)" }}
+          sx={{ bgcolor: tokens.color.surfaceMuted, border: `1px solid ${tokens.color.border}`, borderRadius: `${tokens.radius.card}px`, display: "block", overflow: "hidden", position: "relative", textAlign: "left", width: "100%" }}
           onClick={() => {
             if (submitted) return;
             setEditorOpen(true);
           }}
         >
-          <img
-            src={question.hotspotImage.url}
-            alt={question.title}
-            className="block h-auto max-h-[260px] w-full object-contain"
-          />
+          <Box component="img" src={question.hotspotImage.url} alt={question.title} sx={{ display: "block", height: "auto", maxHeight: 360, objectFit: "contain", width: "100%" }} />
           {value.hotspotPoint ? (
             <HotspotMarker x={value.hotspotPoint.x} y={value.hotspotPoint.y} />
           ) : null}
-          {!submitted ? (
-            <div className="absolute inset-0 grid place-items-center bg-slate-950/35">
-              <div className="grid place-items-center gap-2 rounded-md bg-slate-900/75 px-5 py-4 text-center text-white shadow-sm">
-                <Pointer className="h-9 w-9" />
-                <span className="text-sm font-semibold leading-5">Tap to answer this question</span>
-              </div>
-            </div>
+          {!submitted && !value.hotspotPoint ? (
+            <Box sx={{ alignItems: "center", bottom: 10, display: "flex", justifyContent: "center", left: 0, position: "absolute", right: 0 }}>
+              <Box component="span" sx={{ typography: "subtitle2", alignItems: "center", bgcolor: "background.paper", border: `1px solid ${tokens.color.border}`, borderRadius: `${tokens.radius.chip}px`, boxShadow: tokens.shadow.float, color: "text.primary", display: "inline-flex", gap: 0.75, px: 1.75, py: 1 }}>
+                <TouchAppRoundedIcon aria-hidden fontSize="small" sx={{ color: "primary.main" }} />
+                Chạm để chọn trên ảnh
+              </Box>
+            </Box>
           ) : null}
-        </button>
-        <p className="text-sm text-slate-500">{t("player.clickImagePrompt")}</p>
-      </div>
+        </ButtonBase>
+        <Box component="p" sx={{ typography: "caption", color: "text.secondary", m: 0 }}>{t("player.clickImagePrompt")}</Box>
+      </Box>
 
       {editorOpen ? (
-        <div className="fixed inset-0 z-[320] bg-[#2f2f2f]">
-          <div className="flex items-center justify-between px-4 py-3 text-sm font-semibold text-[var(--erg-blue-light)]">
-            <button
-              type="button"
-              onClick={() => resetEditorState(true)}
-            >
-              Reset
-            </button>
-            <button
-              type="button"
-              onClick={() => setEditorOpen(false)}
-            >
-              Done
-            </button>
-          </div>
+        <Box sx={{ bgcolor: tokens.color.text, inset: 0, position: "fixed", zIndex: 320 }}>
+          <Box sx={{ alignItems: "center", display: "flex", justifyContent: "space-between", px: 1, py: 1 }}>
+            <Button type="button" variant="text" sx={{ color: tokens.color.primarySoft }} onClick={() => resetEditorState(true)}>
+              Đặt lại
+            </Button>
+            <Button type="button" variant="text" sx={{ color: tokens.color.primarySoft }} onClick={() => setEditorOpen(false)}>
+              Xong
+            </Button>
+          </Box>
 
-          <div className="flex h-[calc(100svh-56px)] flex-col">
-            <div className="flex-1 overflow-hidden px-1 pb-4">
-              <div className="flex h-full items-center justify-center overflow-hidden">
-                <div
+          <Box sx={{ display: "flex", flexDirection: "column", height: "calc(100svh - 56px)" }}>
+            <Box sx={{ flex: 1, overflow: "hidden", pb: 2, px: 0.5 }}>
+              <Box sx={{ alignItems: "center", display: "flex", height: "100%", justifyContent: "center", overflow: "hidden" }}>
+                <Box
                   ref={editorImageRef}
-                  className="relative max-h-full w-full touch-none overflow-hidden"
+                  sx={{ maxHeight: "100%", overflow: "hidden", position: "relative", touchAction: "none", width: "100%" }}
                   style={{
                     transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`,
                     transformOrigin: "center center",
@@ -172,11 +171,7 @@ export function HotspotMobileAnswer({
                   onTouchMove={handleTouchMove}
                   onTouchEnd={handleTouchEnd}
                 >
-                  <img
-                    src={question.hotspotImage.url}
-                    alt={question.title}
-                    className="block h-auto w-full object-contain"
-                  />
+                  <Box component="img" src={question.hotspotImage.url} alt={question.title} sx={{ display: "block", height: "auto", objectFit: "contain", width: "100%" }} />
                   {reviewMode
                     ? question.hotspotAreas?.filter((area) => area.correct).map((area) => (
                         <HotspotReviewArea key={area.id} area={area} />
@@ -185,29 +180,21 @@ export function HotspotMobileAnswer({
                   {value.hotspotPoint ? (
                     <HotspotMarker x={value.hotspotPoint.x} y={value.hotspotPoint.y} />
                   ) : null}
-                </div>
-              </div>
-            </div>
+                </Box>
+              </Box>
+            </Box>
 
-            <div className="flex items-center justify-center gap-3 px-4 pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
-              <button
-                type="button"
-                className="grid h-10 w-10 place-items-center rounded-full bg-white/12 text-white"
-                onClick={() => changeZoom(zoom - 0.3)}
-              >
-                <Minus className="h-4 w-4" />
-              </button>
-              <div className="min-w-16 text-center text-sm font-semibold text-white">{Math.round(zoom * 100)}%</div>
-              <button
-                type="button"
-                className="grid h-10 w-10 place-items-center rounded-full bg-white/12 text-white"
-                onClick={() => changeZoom(zoom + 0.3)}
-              >
-                <Plus className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-        </div>
+            <Box sx={{ alignItems: "center", display: "flex", gap: 1.5, justifyContent: "center", pb: "calc(env(safe-area-inset-bottom, 0px) + 16px)", px: 2 }}>
+              <IconButton type="button" aria-label="Thu nhỏ" sx={zoomButtonSx} onClick={() => changeZoom(zoom - 0.3)}>
+                <RemoveRoundedIcon />
+              </IconButton>
+              <Box sx={{ typography: "subtitle2", color: "common.white", fontVariantNumeric: "tabular-nums", minWidth: 64, textAlign: "center" }}>{Math.round(zoom * 100)}%</Box>
+              <IconButton type="button" aria-label="Phóng to" sx={zoomButtonSx} onClick={() => changeZoom(zoom + 0.3)}>
+                <AddRoundedIcon />
+              </IconButton>
+            </Box>
+          </Box>
+        </Box>
       ) : null}
     </>
   );

@@ -1,5 +1,6 @@
 import Box from "@mui/material/Box";
 import ButtonBase from "@mui/material/ButtonBase";
+import { alpha } from "@mui/material/styles";
 import { useEffect, useRef } from "react";
 
 import { questionGridLayout, type GridSurface } from "@/components/quiz/question-grid-layout";
@@ -24,8 +25,8 @@ const BORDER = "1.5px solid";
 const stateSx: Record<QuestionCellState, object> = {
   done: { bgcolor: `var(--quiz-accent, ${tk.color.primary})`, borderColor: `var(--quiz-accent, ${tk.color.primary})`, color: `var(--quiz-accent-contrast, ${tk.color.surface})` },
   current: { bgcolor: tk.color.surface, borderColor: `var(--quiz-accent, ${tk.color.primary})`, color: tk.color.text },
-  todo: { bgcolor: tk.color.surface, borderColor: tk.color.borderStrong, color: tk.color.textSecondary },
-  correct: { bgcolor: tk.color.success, borderColor: tk.color.success, color: "common.white" },
+  todo: { bgcolor: tk.color.surface, borderColor: tk.color.border, color: tk.color.textSecondary },
+  correct: { bgcolor: tk.statusTint.success.bg, borderColor: alpha(tk.color.success, 0.3), color: tk.statusTint.success.color },
   wrong: { bgcolor: tk.color.danger, borderColor: tk.color.danger, color: "common.white" },
   skipped: { bgcolor: tk.color.surface, borderColor: tk.color.borderStrong, borderStyle: "dashed", color: tk.color.textSecondary },
 };
@@ -69,7 +70,7 @@ export function QuestionNavigator({ cells, surface, onSelect, legend, ariaLabel 
         aria-label={ariaLabel}
         sx={{ maxHeight: layout.scroll ? gridMaxHeight : undefined, minHeight: 0, overflowY: layout.scroll ? "auto" : "visible", p: 0.5, position: "relative" }}
       >
-        <Box sx={{ display: "grid", gap: `${layout.gap}px`, gridTemplateColumns: `repeat(${layout.columns}, minmax(0, ${layout.cell}px))`, justifyContent: "center" }}>
+        <Box sx={{ display: "grid", gap: `${layout.gap}px`, gridTemplateColumns: `repeat(${layout.columns}, minmax(0, 1fr))` }}>
           {visible.map((cell) => (
             <ButtonBase
               key={cell.index}
@@ -80,10 +81,14 @@ export function QuestionNavigator({ cells, surface, onSelect, legend, ariaLabel 
               sx={{
                 border: BORDER,
                 ...stateSx[cell.state],
-                borderRadius: `${tk.radius.control}px`,
-                aspectRatio: "1 / 1",
+                // Dense 10-column grid (21+ questions): thinner border and smaller radius, as in WL5.
+                borderRadius: `${layout.fontSize === "caption" ? tk.radius.sm : tk.radius.control}px`,
+                borderWidth: layout.fontSize === "caption" ? 1 : undefined,
+                fontVariantNumeric: "tabular-nums",
+                height: layout.cell,
                 position: "relative",
                 typography: layout.fontSize === "caption" ? "caption" : "body2",
+                fontWeight: "fontWeightBold",
                 width: "100%",
                 boxShadow: cell.current ? `0 0 0 2px ${tk.color.surface}, 0 0 0 4px ${tk.color.primary}` : undefined,
                 "&::after": cell.flagged ? flagDotSx : undefined,
@@ -96,16 +101,16 @@ export function QuestionNavigator({ cells, surface, onSelect, legend, ariaLabel 
         </Box>
       </Box>
 
-      <Box component="ul" aria-label="Chú thích" sx={{ color: tk.color.textMuted, display: "flex", flexWrap: "wrap", gap: 1.5, listStyle: "none", m: 0, p: 0, typography: "caption" }}>
+      <Box component="ul" aria-label="Chú thích" sx={{ color: tk.color.textMuted, display: "flex", flexWrap: "wrap", gap: "6px 14px", listStyle: "none", m: 0, p: 0, typography: "caption" }}>
         {legendStates.map((state) => (
-          <Box component="li" key={state} sx={{ alignItems: "center", display: "inline-flex", gap: 0.75 }}>
-            <Box component="span" aria-hidden sx={{ border: BORDER, ...stateSx[state], borderRadius: "4px", height: 12, width: 12 }} />
+          <Box component="li" key={state} sx={{ alignItems: "center", display: "inline-flex", gap: 0.5 }}>
+            <Box component="span" aria-hidden sx={{ border: BORDER, ...stateSx[state], borderRadius: "3px", boxSizing: "border-box", height: 12, width: 12 }} />
             {sentence(STATE_LABEL[state])}
           </Box>
         ))}
         {showFlagLegend ? (
-          <Box component="li" sx={{ alignItems: "center", display: "inline-flex", gap: 0.75 }}>
-            <Box component="span" aria-hidden sx={{ bgcolor: tk.color.warning, borderRadius: "50%", height: 10, width: 10 }} />
+          <Box component="li" sx={{ alignItems: "center", display: "inline-flex", gap: 0.5 }}>
+            <Box component="span" aria-hidden sx={{ bgcolor: tk.color.warning, borderRadius: "50%", height: 12, width: 12 }} />
             Đánh dấu
           </Box>
         ) : null}
@@ -122,7 +127,7 @@ const flagDotSx = {
   content: '""',
   height: 10,
   position: "absolute",
-  right: -5,
-  top: -5,
+  right: -4,
+  top: -4,
   width: 10,
 } as const;
