@@ -1,7 +1,8 @@
-import { DndContext, DragOverlay, PointerSensor, TouchSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
+import { DndContext, DragOverlay, TouchSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import Box from "@mui/material/Box";
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 
+import { NonTouchPointerSensor } from "@/components/quiz/questions/matching-question/non-touch-pointer-sensor";
 import { QuestionBodyWithImage } from "@/components/quiz/questions/shared";
 import type { QuestionComponentProps } from "@/components/quiz/questions/types";
 import { createInitialAnswer, getSequenceCorrectOrder } from "@/domain/quiz/quiz";
@@ -16,7 +17,8 @@ export function SequenceQuestion({ question, value, submitted = false, reviewMod
   const focusAfterMove = useRef<{ id: string; from: string[] } | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    // A plain PointerSensor claims a finger on iPad and then loses it to the scroll, so touch drags from the grip or a long press.
+    useSensor(NonTouchPointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 120, tolerance: 6 } }),
   );
 

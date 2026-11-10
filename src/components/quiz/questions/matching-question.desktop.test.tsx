@@ -58,6 +58,16 @@ describe("MatchingQuestion desktop puzzle", () => {
     expect(verdicts()).toEqual(["✓ Đúng", "✕ Sai", "Chưa ghép"]);
   });
 
+  test("review numbers each piece with the row it belongs to, so a wrong row shows where its piece goes", () => {
+    setup({ matchingOrder: ["m1", "m3", "m2"], matchingConnectedRows: ["m1", "m2", "m3"] }, { reviewMode: true });
+    expect(pieces().map((piece) => /thuộc hàng (\d)/.exec(piece.getAttribute("aria-label") ?? "")?.[1])).toEqual(["1", "3", "2"]);
+  });
+
+  test("no row numbers on the pieces while answering", () => {
+    setup({ matchingOrder: ["m1", "m3", "m2"], matchingConnectedRows: ["m1"] });
+    for (const piece of pieces()) expect(piece.getAttribute("aria-label")).not.toMatch(/thuộc hàng/);
+  });
+
   test("review reads a Focus 1 answer that only has assignments", () => {
     setup({ matchingAssignments: { m1: "m1", m2: "m2", m3: "m3" } }, { reviewMode: true });
     expect(verdicts()).toEqual(["✓ Đúng", "✓ Đúng", "✓ Đúng"]);

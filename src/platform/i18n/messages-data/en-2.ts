@@ -232,7 +232,7 @@ export const enMessages2 = {
   "player.questionType.hotspot": "Hotspot",
   "player.answerLineCorrect": "Correct answer: {{value}}",
   "player.hotspotAnswerShown": "The correct answer area is highlighted on the image.",
-  "player.clickImagePrompt": "Click the image to place your answer point.",
+  "player.clickImagePrompt": "Click the image to place your answer point; drag the pin to move it.",
   "player.selectPlaceholder": "- Select -",
   "player.noAnswer": "No",
   "player.lectureLabel": "Lecture",

@@ -7,6 +7,7 @@ import { useId, type KeyboardEvent, type ReactNode } from "react";
 import type { SequenceItem } from "@/domain/quiz/types";
 import { ergEnterpriseTokens as tokens } from "@/themes/erg-enterprise-tokens";
 
+import { GripHandle } from "../matching-question/puzzle-piece";
 import { SequenceInlineImage } from "./sequence-media";
 import { SEQUENCE_ROW } from "./sequence-order";
 
@@ -107,7 +108,11 @@ export function SequenceCard({
         },
       }}
     >
-      <DragIndicatorIcon aria-hidden fontSize="small" sx={{ flex: "none", color: "text.secondary" }} />
+      {locked || overlay ? (
+        <DragIndicatorIcon aria-hidden fontSize="small" sx={{ flex: "none", color: "text.secondary" }} />
+      ) : (
+        <GripHandle><DragIndicatorIcon aria-hidden fontSize="small" sx={{ color: "text.secondary" }} /></GripHandle>
+      )}
       <SequenceInlineImage image={item.image} label={item.label} />
       <Box component="span" sx={{ flex: 1, minWidth: 0, overflowWrap: "anywhere" }}>
         {item.label}

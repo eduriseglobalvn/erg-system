@@ -5,6 +5,7 @@ import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 
 import { ergEnterpriseTokens as tokens } from "@/themes/erg-enterprise-tokens";
 
+import { DRAG_HANDLE_ATTR } from "./non-touch-pointer-sensor";
 import { pathLeft, pathRight, PUZZLE } from "./puzzle-geometry";
 
 export type PieceTone = "idle" | "over" | "correct" | "wrong" | "missing";
@@ -101,5 +102,16 @@ export function PuzzlePiece({
 export const GripDots = () => (
   <Box component="svg" aria-hidden viewBox="0 0 10 16" sx={{ width: 10, height: 16, flex: "none", color: "text.secondary" }}>
     {[3, 8, 13].flatMap((cy) => [2, 8].map((cx) => <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r={1.5} fill="currentColor" />))}
+  </Box>
+);
+
+/** The grip as a touch drag handle: a finger on it drags at once and never scrolls the page; the box widens the hit area. */
+export const GripHandle = ({ children = <GripDots /> }: { children?: ReactNode }) => (
+  <Box
+    aria-hidden
+    {...{ [DRAG_HANDLE_ATTR]: "" }}
+    sx={{ alignSelf: "stretch", display: "flex", alignItems: "center", justifyContent: "center", flex: "none", minWidth: 32, mx: -1, my: -1.25, cursor: "grab", touchAction: "none" }}
+  >
+    {children}
   </Box>
 );

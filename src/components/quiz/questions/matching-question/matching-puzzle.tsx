@@ -18,7 +18,7 @@ import { ergEnterpriseTokens as tokens } from "@/themes/erg-enterprise-tokens";
 import { puzzleAnnouncements } from "./matching-board";
 import { PUZZLE, pieceMaxWidthFor, rowAtPoint } from "./puzzle-geometry";
 import { NonTouchPointerSensor } from "./non-touch-pointer-sensor";
-import { GripDots, PuzzlePiece } from "./puzzle-piece";
+import { GripDots, GripHandle, PuzzlePiece } from "./puzzle-piece";
 
 export type PuzzleRow = {
   id: string;
@@ -28,8 +28,42 @@ export type PuzzleRow = {
   rightName: string;
   connected: boolean;
   state?: "correct" | "wrong" | "missing";
+  /** Review: the 1-based left row this right piece belongs to, shown as a number matching the row numbers. */
+  answerNo?: number;
   trailing?: ReactNode;
 };
+
+// Below this board width the verdict column would push the pieces off a phone screen; colour and numbers carry the verdict there.
+const TRAILING_MIN_BOARD = 560;
+
+/** A row number in a circle: plain for the left rows, coloured by verdict on a reviewed right piece. */
+function RowNumber({ n, tone }: { n: number; tone?: PuzzleRow["state"] }) {
+  const color = tone === "correct" ? "success.main" : tone === "wrong" ? "error.main" : tone === "missing" ? "warning.main" : undefined;
+  return (
+    <Box
+      component="span"
+      aria-hidden
+      sx={{
+        typography: "caption",
+        alignItems: "center",
+        bgcolor: color ?? "background.paper",
+        border: "1.5px solid",
+        borderColor: color ?? tokens.color.borderStrong,
+        borderRadius: `${tokens.radius.chip}px`,
+        color: color ? "common.white" : "text.secondary",
+        display: "inline-flex",
+        flex: "none",
+        fontVariantNumeric: "tabular-nums",
+        fontWeight: "fontWeightBold",
+        height: 22,
+        justifyContent: "center",
+        minWidth: 22,
+      }}
+    >
+      {n}
+    </Box>
+  );
+}
 
 type Props = { rows: PuzzleRow[]; mode: "learner" | "author"; locked?: boolean; onDrop: (from: number, to: number | null) => void };
 type MoveKey = (event: KeyboardEvent, index: number) => void;
@@ -55,13 +89,14 @@ function RightCell({ row, index, mode, locked, maxWidth, onMoveKey }: { row: Puz
         ? {
             ...activator,
             role: "button", tabIndex: 0,
-            "aria-label": `Mảnh ${row.rightName}, hàng ${index + 1}, ${row.connected ? "đã ghép" : "chưa ghép"}`,
+            "aria-label": `Mảnh ${row.rightName}, hàng ${index + 1}, ${row.connected ? "đã ghép" : "chưa ghép"}${row.answerNo ? `, thuộc hàng ${row.answerNo}` : ""}`,
             "aria-disabled": locked,
             "data-piece-id": row.pieceId, "data-focus-row": row.id,
           }
         : {})}
       sx={{
         display: "grid",
+        position: "relative",
         ml: `${PUZZLE.gap}px`,
         transform: row.connected ? `translateX(-${PUZZLE.gap + PUZZLE.knob}px)` : "none",
         opacity: isDragging ? 0.3 : 1,
@@ -77,7 +112,7 @@ function RightCell({ row, index, mode, locked, maxWidth, onMoveKey }: { row: Puz
       <PuzzlePiece side="right" tone={row.state ?? "idle"} maxWidth={maxWidth}>
         <Box sx={{ flex: 1, minWidth: 0 }}>{row.right}</Box>
         {learner ? (
-          <GripDots />
+          locked ? <GripDots /> : <GripHandle />
         ) : (
           <IconButton
             ref={setActivatorNodeRef}
@@ -92,6 +127,12 @@ function RightCell({ row, index, mode, locked, maxWidth, onMoveKey }: { row: Puz
           </IconButton>
         )}
       </PuzzlePiece>
+      {/* A corner badge, so the verdict number takes no width from the text on a phone. */}
+      {row.answerNo ? (
+        <Box aria-hidden sx={{ position: "absolute", top: -9, right: -7, lineHeight: 0, borderRadius: `${tokens.radius.chip}px`, boxShadow: (theme) => `0 0 0 2px ${theme.palette.background.paper}` }}>
+          <RowNumber n={row.answerNo} tone={row.state} />
+        </Box>
+      ) : null}
     </Box>
   );
 }
@@ -120,8 +161,8 @@ export function MatchingPuzzle({ rows, mode, locked = false, onDrop }: Props) {
     return () => observer.disconnect();
   }, []);
   // The verdict column only exists once some row has a verdict, so a plain learner board gets the width back.
-  const hasTrailing = rows.some((row) => row.trailing);
-  const maxWidth = boxWidth > 0 ? pieceMaxWidthFor(boxWidth - PUZZLE.numberColumn) : PUZZLE.maxWidth;
+  const hasTrailing = rows.some((row) => row.trailing) && (boxWidth === 0 || boxWidth >= TRAILING_MIN_BOARD);
+  const maxWidth = boxWidth > 0 ? pieceMaxWidthFor(boxWidth - PUZZLE.numberColumn - (hasTrailing ? 72 : 0)) : PUZZLE.maxWidth;
 
   // A move swaps content under fixed rows, so focus follows the piece once the next rows render; a rejected move matches nothing.
   useEffect(() => {
@@ -188,7 +229,7 @@ export function MatchingPuzzle({ rows, mode, locked = false, onDrop }: Props) {
         >
           {rows.map((row, index) => (
             <Fragment key={row.id}>
-              <Box aria-hidden sx={{ typography: "caption", fontFamily: tokens.font.mono, color: "text.secondary", alignSelf: "center" }}>{index + 1}</Box>
+              <Box sx={{ alignSelf: "center" }}><RowNumber n={index + 1} /></Box>
               <LeftCell row={row} maxWidth={maxWidth} />
               {row.pieceId ? (
                 <RightCell key={row.id} row={{ ...row, pieceId: row.pieceId }} index={index} mode={mode} locked={locked} maxWidth={maxWidth} onMoveKey={handleMoveKey} />
