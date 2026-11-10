@@ -65,6 +65,8 @@ export function TopMenuShell({
     path: item.key,
   }));
 
+  const workspaces = getAuthScope().session?.workspaces ?? [];
+
   return (
     <Box sx={{
       bgcolor: ergEnterpriseTokens.color.surfaceMuted,
@@ -83,12 +85,10 @@ export function TopMenuShell({
               <Box component="img" alt="ERG" src={LOGO_URL} onError={(e) => { e.currentTarget.style.display = "none"; }} sx={{ display: "block", height: "100%", objectFit: "contain", width: "100%" }} />
             </Box>
           </Stack>
-          <PortalSidebarWorkspaceHeader
-            active
-            collapsed={false}
-            fluid
-            portalInfo={{ name: "Học sinh", workspaceCapabilities: getAuthScope().session?.workspaces }}
-          />
+          {/* A plain student has nowhere to switch to, so the switcher only shows for accounts with another workspace (e.g. teacher). */}
+          {workspaces.some((workspace) => workspace !== "STUDENT") ? (
+            <PortalSidebarWorkspaceHeader active collapsed={false} fluid portalInfo={{ name: "Học sinh", workspaceCapabilities: workspaces }} />
+          ) : null}
         </Box>
 
         <Box component="nav" aria-label="Điều hướng học sinh" sx={{ flex: 1, minHeight: 0, mt: 0.5 }}>

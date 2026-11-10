@@ -86,7 +86,6 @@ export function DragDropQuestion({
             const selectedTargetId = placements[item.id] ?? "";
             const correctTargetId = result?.correctDragDropPlacements?.[item.id] ?? item.correctTargetId;
             const isCorrect = reviewMode && selectedTargetId === correctTargetId;
-            const correctTarget = targets.find((target) => target.id === correctTargetId);
 
             return (
               <Box
@@ -103,27 +102,25 @@ export function DragDropQuestion({
               >
                 <Box component="span" sx={{ typography: "subtitle2", alignItems: "center", display: "inline-flex", gap: 1, minWidth: 0 }}><ItemFace item={item} /></Box>
                 <Box sx={{ alignItems: "center", display: "flex", flexWrap: "wrap", gap: 0.75 }}>
-                  {reviewMode && !isCorrect ? (
-                    <Box component="span" sx={{ typography: "caption", bgcolor: tokens.statusTint.success.bg, borderRadius: `${tokens.radius.chip}px`, color: tokens.statusTint.success.color, px: 1.25, py: 0.25, fontWeight: "fontWeightBold" }}>
-                      Đúng: {correctTarget?.label}
-                    </Box>
-                  ) : null}
                   {targets.map((target) => {
                     const on = selectedTargetId === target.id;
+                    // Review colours the chips like choice options: the right group green, a wrong pick red.
+                    const tone = !reviewMode ? null : target.id === correctTargetId ? "success" : on ? "error" : null;
                     return (
                       <ButtonBase
                         key={target.id}
                         type="button"
                         disabled={submitted}
                         aria-pressed={on}
+                        aria-label={tone === "success" ? `${target.label}, đáp án đúng` : tone === "error" ? `${target.label}, bạn chọn sai` : undefined}
                         sx={{
                           typography: "body2",
-                          bgcolor: on ? tokens.color.primarySofter : "background.paper",
+                          bgcolor: tone ? tokens.statusTint[tone].bg : on ? tokens.color.primarySofter : "background.paper",
                           border: "1px solid",
-                          borderColor: on ? "primary.main" : tokens.color.border,
+                          borderColor: tone ? `${tone}.main` : on ? "primary.main" : tokens.color.border,
                           borderRadius: `${tokens.radius.chip}px`,
-                          color: on ? tokens.statusTint.info.color : "text.secondary",
-                          fontWeight: on ? "fontWeightBold" : "fontWeightMedium",
+                          color: tone ? tokens.statusTint[tone].color : on ? tokens.statusTint.info.color : "text.secondary",
+                          fontWeight: on || tone ? "fontWeightBold" : "fontWeightMedium",
                           height: 36,
                           px: 1.75,
                           whiteSpace: "nowrap",

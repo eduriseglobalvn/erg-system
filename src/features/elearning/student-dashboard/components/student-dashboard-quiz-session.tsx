@@ -65,8 +65,9 @@ export function StudentQuizSession({
   return (
     <Box
       sx={{
-        height: "100vh",
-        overflow: "hidden",
+        // Only the web player (from 768px) owns a fixed-height frame; on a phone the page itself scrolls, or the
+        // question below the fold is clipped and a focused piece scrolls the hidden frame instead.
+        "@media (min-width: 768px)": { height: "100vh", overflow: "hidden" },
         bgcolor: "#f3f6ff",
         backgroundImage:
           "linear-gradient(180deg, rgba(255,255,255,0.82), rgba(246,248,255,0.88)), url('https://media.erg.edu.vn/logo/bg.jpg')",
@@ -122,7 +123,7 @@ export function StudentQuizSession({
           </Box>
         </Toolbar>
       </AppBar>
-      <Box sx={{ overflow: "hidden", px: 0.75, py: 0.75, "@media (min-width: 768px)": { height: "100vh", p: 0 } }}>
+      <Box sx={{ px: 0.75, py: 0.75, "@media (min-width: 768px)": { height: "100vh", overflow: "hidden", p: 0 } }}>
         <PlayerShell
           assignmentId={assignment.id}
           quizId={assignment.quizId}

@@ -232,7 +232,7 @@ export const viMessages2 = {
   "player.questionType.hotspot": "Chọn vị trí trên ảnh",
   "player.answerLineCorrect": "Đáp án đúng: {{value}}",
   "player.hotspotAnswerShown": "Vùng đáp án đúng đã được hiển thị trên hình.",
-  "player.clickImagePrompt": "Nhấp vào hình để đặt điểm trả lời.",
+  "player.clickImagePrompt": "Nhấp vào hình để đặt điểm trả lời; kéo ghim để đổi chỗ.",
   "player.selectPlaceholder": "- Chọn -",
   "player.noAnswer": "Không",
   "player.lectureLabel": "Giảng viên",

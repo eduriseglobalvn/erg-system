@@ -178,7 +178,11 @@ export function HotspotMobileAnswer({
                       ))
                     : null}
                   {value.hotspotPoint ? (
-                    <HotspotMarker x={value.hotspotPoint.x} y={value.hotspotPoint.y} />
+                    <HotspotMarker
+                      x={value.hotspotPoint.x}
+                      y={value.hotspotPoint.y}
+                      onMove={submitted ? undefined : (clientX, clientY) => onPickPoint(clientX, clientY, editorImageRef.current)}
+                    />
                   ) : null}
                 </Box>
               </Box>

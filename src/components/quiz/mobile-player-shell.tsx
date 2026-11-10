@@ -129,7 +129,8 @@ export function MobilePlayerShell(props: MobilePlayerShellProps) {
           {showResult ? (
             <Box sx={{ bgcolor: tk.color.surface, border: `1px solid ${tk.color.border}`, borderRadius: `${tk.radius.card}px`, px: 2, py: 2.5 }}>{resultBody}</Box>
           ) : (
-            <Box sx={{ display: "grid", gap: 1.75 }}>
+            // minmax(0, …): an auto track keeps the widest first-paint width (the matching board before it measures) and pushes the page sideways.
+            <Box sx={{ display: "grid", gap: 1.75, gridTemplateColumns: "minmax(0, 1fr)" }}>
               <Box sx={{ alignItems: "center", color: tk.color.textMuted, display: "flex", gap: 1, minHeight: 44 }}>
                 <Box component="span" sx={{ bgcolor: tk.statusTint.info.bg, borderRadius: `${tk.radius.xs}px`, color: tk.statusTint.info.color, flexShrink: 0, fontWeight: "fontWeightBold", px: 0.875, py: 0.25, typography: "caption" }}>
                   {KIND_LABEL[question.kind] ?? question.kind}

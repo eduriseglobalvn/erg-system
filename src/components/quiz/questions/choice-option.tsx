@@ -5,7 +5,7 @@ import type { QuestionImage } from "@/domain/quiz/types";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 import type { ReactNode } from "react";
 
-export type ChoiceReviewTag = "correct" | "picked" | "pickedWrong";
+export type ChoiceReviewTag = "correct" | "missed" | "picked" | "pickedWrong";
 
 type ChoiceOptionProps = {
   children: ReactNode;
@@ -25,16 +25,18 @@ type ChoiceOptionProps = {
   showWrong?: boolean;
 };
 
-const REVIEW_TAGS: Record<ChoiceReviewTag, { color: "success.dark" | "error.dark"; label: string; tone: "success" | "error" }> = {
+const REVIEW_TAGS: Record<ChoiceReviewTag, { color: "success.dark" | "error.dark" | "warning.dark"; label: string; tone: "success" | "error" | "warning" }> = {
   correct: { color: "success.dark", label: "Đáp án đúng", tone: "success" },
+  // Multiple response: a right answer the learner did not tick; it must not look picked.
+  missed: { color: "warning.dark", label: "Đáp án đúng · Bạn bỏ sót", tone: "warning" },
   picked: { color: "success.dark", label: "Đáp án đúng · Bạn chọn", tone: "success" },
   pickedWrong: { color: "error.dark", label: "Bạn chọn", tone: "error" },
 };
 
-/** Review label for a checked choice: right answer unpicked, right pick, or wrong pick; none while still answering. */
-export function choiceReviewTag(reviewMode: boolean, selected: boolean, correct: boolean): ChoiceReviewTag | undefined {
+/** Review label for a checked choice: right answer unpicked (missed when several could be ticked), right pick, or wrong pick; none while still answering. */
+export function choiceReviewTag(reviewMode: boolean, selected: boolean, correct: boolean, multiple = false): ChoiceReviewTag | undefined {
   if (!reviewMode) return undefined;
-  if (correct) return selected ? "picked" : "correct";
+  if (correct) return selected ? "picked" : multiple ? "missed" : "correct";
   return selected ? "pickedWrong" : undefined;
 }
 
@@ -81,6 +83,7 @@ export function ChoiceOption(props: ChoiceOptionProps) {
   const tag = reviewTag ? REVIEW_TAGS[reviewTag] : null;
   const tone = tag?.tone ?? "primary";
   const keyFilled = selected || reviewTag === "correct";
+  const missed = reviewTag === "missed";
   // The teacher's template colours the plain (not review) selection; the vars are unset otherwise and the fallbacks apply.
   const themed = tone === "primary";
   const showCheck = mode === "multiple" && selected;
@@ -95,7 +98,7 @@ export function ChoiceOption(props: ChoiceOptionProps) {
         alignItems: "center",
         // A review option takes the status tint: the teacher highlight may be dark, and the tag/label text is dark.
         bgcolor: tag ? ergEnterpriseTokens.statusTint[tag.tone].bg : !selected ? "background.paper" : `var(--quiz-highlight, ${ergEnterpriseTokens.color.primarySofter})`,
-        border: "1.5px solid",
+        border: `1.5px ${missed ? "dashed" : "solid"}`,
         borderColor: tag ? theme.palette[tone].main : selected ? `var(--quiz-accent, ${theme.palette.primary.main})` : ergEnterpriseTokens.color.border,
         borderRadius: `var(--quiz-radius, ${ergEnterpriseTokens.radius.card}px)`,
         display: "flex",

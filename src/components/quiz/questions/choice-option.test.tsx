@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { describe, expect, it } from "vitest";
 
-import { ChoiceOption } from "@/components/quiz/questions/choice-option";
+import { ChoiceOption, choiceReviewTag } from "@/components/quiz/questions/choice-option";
 import ergEnterpriseTheme from "@/themes/erg-enterprise-theme";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
@@ -122,5 +122,20 @@ describe("ChoiceOption under a dark teacher highlight", () => {
     darkTheme(<ChoiceOption mode="single" onClick={noop} selected>Phương án</ChoiceOption>);
     expect(getComputedStyle(screen.getByRole("button")).backgroundColor).toContain("var(--quiz-highlight");
     expect(getComputedStyle(screen.getByText("Phương án")).color).toContain("var(--quiz-highlight-contrast");
+  });
+});
+
+describe("choiceReviewTag", () => {
+  it("a right answer the learner did not tick reads as missed on a multiple-response question, plain right on a single one", () => {
+    expect(choiceReviewTag(true, false, true, true)).toBe("missed");
+    expect(choiceReviewTag(true, false, true)).toBe("correct");
+    expect(choiceReviewTag(true, true, true, true)).toBe("picked");
+    expect(choiceReviewTag(false, false, true, true)).toBeUndefined();
+  });
+
+  it("a missed option says so and gets a dashed border", () => {
+    renderThemed(<ChoiceOption letter="A" mode="multiple" onClick={noop} reviewTag="missed" selected={false}>Phương án</ChoiceOption>);
+    expect(screen.getByText("Đáp án đúng · Bạn bỏ sót")).toBeTruthy();
+    expect(getComputedStyle(screen.getByRole("button")).borderStyle).toBe("dashed");
   });
 });

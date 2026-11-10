@@ -34,12 +34,16 @@ export function MatchingQuestion({ question, value, submitted = false, reviewMod
   // Old shape: each pair is also the response with the same id.
   const responses = question.matchingResponses ?? pairs.map((pair) => ({ id: pair.id, response: pair.response ?? "", responseIcon: pair.responseIcon, responseImage: pair.responseImage }));
 
+  const correctFor = (index: number) => (reviewMode ? key?.[pairs[index].id] || result?.correctMatchingOrder?.[index] || "" : "");
+
   const rows: PuzzleRow[] = pairs.map((pair, index) => {
     const pieceId = board.order[index] || null;
     const response = responses.find((item) => item.id === pieceId);
     const connected = board.connected.includes(pair.id);
-    const correctId = reviewMode ? key?.[pair.id] || result?.correctMatchingOrder?.[index] || "" : "";
+    const correctId = correctFor(index);
     const state = !correctId ? undefined : !connected ? "missing" : board.order[index] === correctId ? "correct" : "wrong";
+    // The left row this piece belongs to (1-based, like the row numbers), so a wrong row shows where its piece goes.
+    const home = state && pieceId ? pairs.findIndex((_, row) => correctFor(row) === pieceId) : -1;
     return {
       id: pair.id,
       pieceId,
@@ -48,6 +52,7 @@ export function MatchingQuestion({ question, value, submitted = false, reviewMod
       right: response ? side(response.response, response.responseImage, response.responseIcon) : null,
       rightName: pieceName(response?.response, response?.responseImage, response?.responseIcon),
       state,
+      answerNo: home >= 0 ? home + 1 : undefined,
       trailing: state ? <Box sx={{ typography: "caption", fontWeight: "fontWeightBold", color: VERDICT[state].color }}>{VERDICT[state].text}</Box> : undefined,
     };
   });

@@ -1,3 +1,4 @@
+import KeyIcon from "@mui/icons-material/KeyRounded";
 import Bell from "@mui/icons-material/NotificationsNoneRounded";
 import LogIn from "@mui/icons-material/LoginRounded";
 import LogOut from "@mui/icons-material/LogoutRounded";
@@ -10,6 +11,9 @@ import CardContent from "@mui/material/CardContent";
 import Chip from "@mui/material/Chip";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
+import { useState } from "react";
+import { StudentPasswordDialog } from "@/features/elearning/student-dashboard/components/student-password-dialog";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 import { type ElearningViewerSession } from "@/platform/auth/api/elearning-viewer-session";
 import type { DashboardCopy, StudentPageKey } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
 import type { StudentDashboardAssignment, StudentDashboardProfile, StudentTeacherAnnouncement } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
@@ -106,6 +110,7 @@ export function AnnouncementsView({ announcements, copy, selectedAnnouncementId 
 
 export function AccountView({ account, averageAssignmentScore, copy, openAssignments, profile, onSignIn, onSignOut }: { account: ElearningViewerSession | null; averageAssignmentScore: number | null; copy: DashboardCopy; openAssignments: StudentDashboardAssignment[]; profile: StudentDashboardProfile; onSignIn: () => void; onSignOut: () => void; }) {
   const isGuest = !account;
+  const [passwordOpen, setPasswordOpen] = useState(false);
   return (
     <Stack spacing={2.5}>
       <PageHeader description={copy.accountDescription} icon={<User sx={{ fontSize: 20 }} />} title={copy.accountTitle} />
@@ -140,12 +145,16 @@ export function AccountView({ account, averageAssignmentScore, copy, openAssignm
               {isGuest ? (
                 <Button fullWidth variant="contained" startIcon={<LogIn />} onClick={onSignIn} sx={{ ...primaryButtonSx, borderRadius: 2 }}>{copy.signIn}</Button>
               ) : (
-                <Button fullWidth variant="outlined" color="error" startIcon={<LogOut />} onClick={onSignOut} sx={{ borderRadius: 2, fontWeight: 600 }}>{copy.signOut}</Button>
+                <>
+                  <Button fullWidth variant="outlined" startIcon={<KeyIcon />} onClick={() => setPasswordOpen(true)} sx={{ borderRadius: `${ergEnterpriseTokens.radius.control}px`, fontWeight: "fontWeightBold" }}>Đổi mật khẩu</Button>
+                  <Button fullWidth variant="outlined" color="error" startIcon={<LogOut />} onClick={onSignOut} sx={{ borderRadius: `${ergEnterpriseTokens.radius.control}px`, fontWeight: "fontWeightBold" }}>{copy.signOut}</Button>
+                </>
               )}
             </Stack>
           </CardContent>
         </Card>
       </Box>
+      {isGuest ? null : <StudentPasswordDialog open={passwordOpen} onClose={() => setPasswordOpen(false)} />}
     </Stack>
   );
 }

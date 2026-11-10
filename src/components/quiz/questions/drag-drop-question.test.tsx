@@ -24,4 +24,12 @@ describe("DragDropQuestion (learner)", () => {
     // Next to its label the image is decorative.
     expect(within(lua).getByRole("presentation")).toHaveAttribute("src", "https://cdn.example/lua.png");
   });
+
+  it("review colours the group chips like choices: the right group green, a wrong pick red, no extra label", () => {
+    render(<DragDropQuestion onChange={vi.fn()} question={question} reviewMode submitted value={{ dragDropPlacements: { i1: "t1", i2: "t1" } }} />);
+    expect(screen.getAllByRole("button", { name: "Động vật, đáp án đúng" })).toHaveLength(1);
+    expect(screen.getByRole("button", { name: "Động vật, bạn chọn sai" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Thực vật, đáp án đúng" })).toBeInTheDocument();
+    expect(screen.queryByText(/^Đúng:/)).toBeNull();
+  });
 });

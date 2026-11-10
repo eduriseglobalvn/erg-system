@@ -85,7 +85,11 @@ export function HotspotQuestion({
               ))
             : null}
           {value.hotspotPoint ? (
-            <HotspotMarker x={value.hotspotPoint.x} y={value.hotspotPoint.y} />
+            <HotspotMarker
+              x={value.hotspotPoint.x}
+              y={value.hotspotPoint.y}
+              onMove={submitted ? undefined : (clientX, clientY) => handlePickPoint(clientX, clientY, imageRef.current)}
+            />
           ) : null}
         </Box>
       </Box>

@@ -41,7 +41,7 @@ export function MultipleResponseQuestion({
                   else next.add(choice.id);
                   onChange({ choiceIds: [...next] });
                 }}
-                reviewTag={choiceReviewTag(reviewMode, selected, choice.correct)}
+                reviewTag={choiceReviewTag(reviewMode, selected, choice.correct, true)}
                 selected={selected}
                 shortcutKey={index < 9 ? String(index + 1) : undefined}
               >
