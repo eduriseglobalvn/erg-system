@@ -45,6 +45,8 @@ query ElearningStudentDashboard($input: StudentDashboardInput) {
         title
         status
         dueAt
+        scorePercent
+        submittedAt
       }
       nextActions {
         id

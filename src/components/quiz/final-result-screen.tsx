@@ -56,8 +56,8 @@ export function FinalResultScreen({ attempt, questions, resultDisplay, onReview,
         </Typography>
         <Typography color="text.secondary" variant="body2">
           {gradable
-            ? `${attempt.percent}% · Đúng ${correctCount} · Sai ${wrongCount}${pendingCount ? ` · Chờ chấm ${pendingCount}` : ""} · Chưa làm ${rows.length - correctCount - wrongCount - pendingCount}`
-            : `${attempt.percent}% · Đã làm ${answeredCount}/${rows.length} câu`}
+            ? `${Math.round(attempt.percent)}% · Đúng ${correctCount} · Sai ${wrongCount}${pendingCount ? ` · Chờ chấm ${pendingCount}` : ""} · Chưa làm ${rows.length - correctCount - wrongCount - pendingCount}`
+            : `${Math.round(attempt.percent)}% · Đã làm ${answeredCount}/${rows.length} câu`}
         </Typography>
       </Box>
 

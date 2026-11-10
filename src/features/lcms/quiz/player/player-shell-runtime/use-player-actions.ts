@@ -189,11 +189,12 @@ export function usePlayerActions({
       const startedSession = portableOffline
         ? activeSession
         : await ensureServerAttempt(activeSession, activePackage, runtimePortal);
+      setDrafts(startedSession.answers);
       setLoadState({
         status: "ready",
         attempt: { ...activeAttempt, id: startedSession.attemptId },
         quizPackage: activePackage,
-        restored: false,
+        restored: Object.keys(startedSession.answers).length > Object.keys(activeSession.answers).length,
         session: startedSession,
       });
       setStarted(true);
@@ -206,7 +207,7 @@ export function usePlayerActions({
     } finally {
       setSubmitting(false);
     }
-  }, [activeAttempt, activePackage, activeSession, portableOffline, runtimePortal, setCurrentIndex, setLoadState, setStarted, setSubmitError, setSubmitting, setTimeUp]);
+  }, [activeAttempt, activePackage, activeSession, portableOffline, runtimePortal, setCurrentIndex, setDrafts, setLoadState, setStarted, setSubmitError, setSubmitting, setTimeUp]);
 
   const submitCurrentTrainingQuestion = useCallback(async () => {
     if (
