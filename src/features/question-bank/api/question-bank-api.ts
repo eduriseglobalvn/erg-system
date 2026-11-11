@@ -78,7 +78,7 @@ export type QuestionBankDeleteQuestionResult = {
 };
 
 const QuestionBankWorkspaceDocument = `
-query LcmsQuestionBankWorkspace($input: QuestionBankWorkspaceInput) {
+query QuestionBankWorkspace($input: QuestionBankWorkspaceInput) {
   lcms {
     questionBankWorkspace(input: $input) {
       tenantId
@@ -251,7 +251,7 @@ async function loadQuestionBankWorkspace(input: QuestionBankWorkspaceInput, sign
 
 async function requestQuestionBankWorkspacePage(input: QuestionBankWorkspaceInput, signal?: AbortSignal) {
   const response = await graphQlRequest<QuestionBankWorkspaceResponse, { input: QuestionBankWorkspaceInput }>({
-    operationName: "LcmsQuestionBankWorkspace",
+    operationName: "QuestionBankWorkspace",
     portal: "lcms",
     query: QuestionBankWorkspaceDocument,
     signal,

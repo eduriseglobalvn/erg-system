@@ -4,7 +4,7 @@ import { createElement, type ReactNode } from "react";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 
 import { notificationQueryKeys, resolveNotificationQueryScope } from "@/features/notifications/api/notification-api";
-import { TEACHER_LOCAL_SESSION_KEY, portalSessionKey } from "@/platform/auth/api/auth-token-storage";
+import { TEACHER_LOCAL_SESSION_KEY } from "@/platform/auth/api/auth-token-storage";
 
 import {
   campaignKeys,
@@ -40,7 +40,7 @@ function calls() {
 beforeEach(() => {
   vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
   window.localStorage.setItem(
-    portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lms"),
+    TEACHER_LOCAL_SESSION_KEY,
     JSON.stringify({ accountId: "lms-user", accessToken: "lms-token", loggedInAt: new Date().toISOString(), portal: "lms", portals: ["lms"], rememberMe: true }),
   );
   client = new QueryClient({ defaultOptions: { queries: { retry: false } } });

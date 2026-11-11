@@ -18,7 +18,8 @@ permissions:
 jobs:
   portal-smoke:
     name: Smoke ${{ matrix.portal }}
-    runs-on: ubuntu-latest
+    # Playwright 1.60 has no Chromium build or deps list for ubuntu-latest (26.04); 24.04 is still a supported runner.
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     strategy:
       fail-fast: false

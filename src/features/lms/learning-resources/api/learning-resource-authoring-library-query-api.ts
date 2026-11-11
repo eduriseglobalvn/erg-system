@@ -15,7 +15,7 @@ import type {
 } from "@/features/lms/learning-resources/api/learning-resource-authoring-transport-types";
 
 const LearningResourceLibraryDocument = `
-query LcmsLearningResourceLibrary($input: LearningResourceLibraryInput) {
+query LmsLearningResourceAuthoringLibrary($input: LearningResourceLibraryInput) {
   lms {
     learningResourceLibrary(input: $input) {
       tenantId
@@ -86,7 +86,7 @@ export async function loadLearningResourceLibraryGraphQl(
     }),
   };
   const data = await graphQlRequest<LearningResourceLibraryGraphQlData, typeof variables>({
-    operationName: "LcmsLearningResourceLibrary",
+    operationName: "LmsLearningResourceAuthoringLibrary",
     portal: "lcms",
     query: LearningResourceLibraryDocument,
     signal,

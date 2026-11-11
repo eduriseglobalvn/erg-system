@@ -54,7 +54,7 @@ type AssignmentReportResponse = {
 };
 
 const QuizQuestionAnalyticsDocument = `
-query LcmsQuizQuestionAnalytics($quizVersionId: String!) {
+query QuizReportsQuestionAnalytics($quizVersionId: String!) {
   lcms {
     quizQuestionAnalytics(quizVersionId: $quizVersionId) {
       quizVersionId
@@ -74,7 +74,7 @@ query LcmsQuizQuestionAnalytics($quizVersionId: String!) {
 `;
 
 const AssignmentReportDocument = `
-query LcmsAssignmentReport($assignmentId: String!) {
+query QuizReportsAssignmentReport($assignmentId: String!) {
   lcms {
     assignmentReport(assignmentId: $assignmentId) {
       assignmentId
@@ -113,7 +113,7 @@ export async function loadQuizQuestionAnalytics(input: {
   }
 
   const response = await graphQlRequest<QuizQuestionAnalyticsResponse, { quizVersionId: string }>({
-    operationName: "LcmsQuizQuestionAnalytics",
+    operationName: "QuizReportsQuestionAnalytics",
     portal: "lcms",
     query: QuizQuestionAnalyticsDocument,
     signal,
@@ -144,7 +144,7 @@ export async function loadAssignmentReport(input: {
   }
 
   const response = await graphQlRequest<AssignmentReportResponse, { assignmentId: string }>({
-    operationName: "LcmsAssignmentReport",
+    operationName: "QuizReportsAssignmentReport",
     portal: "lcms",
     query: AssignmentReportDocument,
     signal,
