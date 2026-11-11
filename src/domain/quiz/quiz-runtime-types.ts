@@ -43,6 +43,8 @@ export type StartAttemptInput = {
 export type StartAttemptResult = {
   attemptId: string;
   startedAt?: string;
+  /** Answers the server holds for a resumed attempt (saved drafts), by question id. */
+  answers?: Record<string, AnswerPayload>;
   policySnapshot?: {
     assignmentId?: string;
     quizId?: string;

@@ -77,8 +77,9 @@ export function PlayerDesktopLayout(props: PlayerDesktopLayoutProps) {
       actions={<>{saveIndicator}{timer}</>}
       progress={showResult ? undefined : (currentIndex + 1) / Math.max(questions.length, 1)}
     >
-      <Box component="section" sx={webColumnSx}>
-        <Box component="article" sx={{ ...webCardSx, ...canvasStyle, display: "flex", flex: 1, flexDirection: "column", gap: 2, minHeight: 0, p: 3.5, position: "relative" }}>
+      {/* The answering card gets the extra room and a slightly larger scale; the question list keeps its size. */}
+      <Box component="section" sx={{ ...webColumnSx, flexBasis: 640, maxWidth: 980 }}>
+        <Box component="article" sx={{ ...webCardSx, ...canvasStyle, display: "flex", flex: 1, flexDirection: "column", gap: 2, minHeight: 0, p: 3.5, position: "relative", zoom: 1.1 }}>
           {showResult ? null : (
             <>
               <Box sx={{ alignItems: "center", color: tk.color.textMuted, display: "flex", flexWrap: "wrap", gap: 1, typography: "caption" }}>
@@ -132,7 +133,7 @@ export function PlayerDesktopLayout(props: PlayerDesktopLayoutProps) {
             <PlayerDesktopFooter
               {...props}
               keyHint={buildKeyHint(readyQuestion, questions.length)}
-              handleRequestSubmit={isTestingMode ? handleRequestSubmit : undefined}
+              handleRequestSubmit={handleRequestSubmit}
             />
           )}
         </Box>

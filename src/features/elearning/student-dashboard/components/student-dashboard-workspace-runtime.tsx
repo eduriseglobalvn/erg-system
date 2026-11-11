@@ -21,6 +21,10 @@ import {
   useNavigate,
 } from "@tanstack/react-router";
 import { studentPath } from "@/platform/workspaces/workspace-paths";
+import { ContentPendingSkeleton } from "@/routes/route-feedback";
+import { StudentTabReplaced } from "@/features/elearning/student-dashboard/components/student-tab-replaced";
+import { useSingleStudentTab } from "@/features/elearning/student-dashboard/hooks/use-single-student-tab";
+import { useStudentViewState } from "@/features/elearning/student-dashboard/hooks/use-student-view-state";
 import {
   createStudentDashboardLoadingProfile,
   studentDashboardQueryOptions,
@@ -44,7 +48,6 @@ import type {
   DashboardCopy,
   StudentDockPageKey,
   StudentPageKey,
-  StudentViewState,
 } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
 import {
   getDiscussionOverviewPreview,
@@ -101,8 +104,10 @@ export function StudentDashboardWorkspaceRuntime() {
     return initialStudentPage(window.location.search);
   });
   const [assignmentsFilter, setAssignmentsFilter] = useState<AssignmentFilter>("todo");
-  const [viewState, setViewState] = useState<StudentViewState>({ type: "dashboard" });
+  const [viewState, setViewState] = useStudentViewState();
   const [account, setAccount] = useElearningViewerAccount();
+  // A teacher previewing the student portal is not a student session.
+  const studentTab = useSingleStudentTab(studentPreview ? null : account?.id);
   const fixtureMode = runtimeFixturesEnabled();
   const apiEnabled = hasApiBase() && !fixtureMode;
   const tenantId = getDefaultTenantId();
@@ -263,8 +268,11 @@ export function StudentDashboardWorkspaceRuntime() {
 
   const backToDashboard = () => setViewState({ type: "dashboard" });
 
+  if (studentTab.replaced) return <StudentTabReplaced onUseHere={studentTab.claim} />;
+
   if (viewState.type === "quiz" && !currentAssignment) {
-    return <StudentQuizAssignmentMissing onBack={backToDashboard} />;
+    // After a reload the list is still loading: wait for it instead of reporting the assignment missing.
+    return studentDashboardQuery.isLoading ? <ContentPendingSkeleton /> : <StudentQuizAssignmentMissing onBack={backToDashboard} />;
   }
 
   if (viewState.type === "quiz" && currentAssignment && !currentAssignment.quizId) {

@@ -3,7 +3,7 @@ import { shouldUseLocalQuizRuntimeFallback } from "@/features/lcms/quiz/quiz-run
 import { DEFAULT_QUIZ_RUNTIME_PORTAL } from "@/features/lcms/quiz/quiz-runtime/api/quiz-runtime-normalization-utils";
 import { gradeFinalAttemptLocally, isServerAttemptSnapshot, normalizeSubmitResponse } from "@/features/lcms/quiz/quiz-runtime/api/quiz-runtime-submit-model";
 import { API_ENDPOINTS } from "@/lib/api/api-endpoints";
-import type { Attempt } from "@/domain/quiz/types";
+import type { AnswerPayload, Attempt } from "@/domain/quiz/types";
 import type {
   RuntimeServerAttemptSnapshot,
   SaveAttemptAnswerInput,
@@ -25,6 +25,7 @@ type BackendStartAttemptResponse = {
   attemptId?: string;
   id?: string;
   startedAt?: string;
+  answers?: Record<string, { answer?: unknown } | null>;
   policySnapshot?: {
     assignmentId?: string;
     quizId?: string;
@@ -73,10 +74,12 @@ export async function startAttempt(input: StartAttemptInput): Promise<StartAttem
 
     const attempt = response.attempt;
     const policySnapshot = response.policySnapshot ?? attempt?.policySnapshot;
+    const answers = savedAnswers(response.answers);
     return {
       attemptId,
       startedAt: response.startedAt ?? attempt?.startedAt ?? policySnapshot?.startedAt,
       ...(policySnapshot ? { policySnapshot } : {}),
+      ...(answers ? { answers } : {}),
     };
   } catch (error) {
     if (shouldUseLocalQuizRuntimeFallback(input.quizId, error)) {
@@ -85,6 +88,13 @@ export async function startAttempt(input: StartAttemptInput): Promise<StartAttem
 
     throw error;
   }
+}
+
+/** A resumed attempt carries the drafts the player saved to the server: { questionId: { answer } }. */
+function savedAnswers(raw: BackendStartAttemptResponse["answers"]): Record<string, AnswerPayload> | undefined {
+  if (!raw) return undefined;
+  const entries = Object.entries(raw).filter(([, value]) => value?.answer !== undefined && value?.answer !== null);
+  return entries.length ? Object.fromEntries(entries.map(([questionId, value]) => [questionId, value!.answer as AnswerPayload])) : undefined;
 }
 
 export async function submitFinalAttempt(input: SubmitAttemptInput): Promise<Attempt> {

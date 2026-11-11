@@ -169,6 +169,18 @@ describe("submit is always available", () => {
     expect(setCurrentIndex).toHaveBeenCalledTimes(1);
   });
 
+  it("desktop practice mode hands in from the last question once it is checked", () => {
+    const handleRequestSubmit = vi.fn();
+    const practice = { isTestingMode: false, isTrainingMode: true, isFirstQuestion: false, isLastQuestion: true, handleRequestSubmit };
+    const { rerender } = render(desktop(practice));
+    expect(screen.queryByRole("button", { name: "Nộp bài" })).toBeNull();
+
+    rerender(desktop({ ...practice, submitted: true }));
+    fireEvent.click(screen.getByRole("button", { name: "Nộp bài" }));
+    expect(handleRequestSubmit).toHaveBeenCalledTimes(1);
+    expect(document.querySelectorAll(".MuiButton-contained")).toHaveLength(1);
+  });
+
   it("mobile practice mode swaps the single button from Kết quả to Câu tiếp", () => {
     const onNext = vi.fn();
     const onSubmitCurrentQuestion = vi.fn();

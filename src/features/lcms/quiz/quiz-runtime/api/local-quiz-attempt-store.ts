@@ -208,6 +208,8 @@ export const localQuizAttemptStore = {
     const serverClockOffsetMs = Number.isFinite(serverTimeMs) ? serverTimeMs - Date.now() : undefined;
     const nextSession: LocalQuizAttemptSession = {
       ...session,
+      // The server's saved drafts fill in what this browser lost (reload elsewhere, cleared storage); local answers are newer.
+      answers: { ...result.answers, ...session.answers },
       attemptId: result.attemptId,
       serverStarted: true,
       startedAt: serverStartedAt ?? session.startedAt,

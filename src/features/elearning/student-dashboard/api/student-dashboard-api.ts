@@ -156,6 +156,9 @@ function mapAssignment(
 ): StudentDashboardAssignment {
   const status = normalizeStatus(assignment.status, assignment.dueAt, dashboard.summary?.generatedAt);
   const focusNote = dashboard.nextActions?.find((action) => action.targetId === assignment.id)?.label;
+  // Latest handed-in attempt, 0-100: the same score the dashboard average is built from.
+  const scorePercent = typeof assignment.scorePercent === "number" ? Math.round(assignment.scorePercent) : null;
+  const submittedLabel = assignment.submittedAt ? formatDateTimeVi(assignment.submittedAt) : "";
 
   return {
     id: assignment.id,
@@ -165,12 +168,12 @@ function mapAssignment(
     progressRate: null,
     answeredCount: null,
     totalQuestions: null,
-    score: null,
-    maxScore: null,
+    score: scorePercent,
+    maxScore: scorePercent === null ? null : 100,
     ...(assignment.dueAt ? { dueAt: assignment.dueAt } : {}),
     dueLabel: assignment.dueAt ? formatDueLabel(assignment.dueAt) : "Chưa có hạn nộp",
     statusLabel: statusLabelFor(status),
-    lastActivityLabel: "Chưa có hoạt động",
+    lastActivityLabel: submittedLabel ? `Nộp lúc ${submittedLabel}` : "Chưa có hoạt động",
     ...(focusNote ? { focusNote } : {}),
     attempts: [],
   };
@@ -194,9 +197,12 @@ function hasId<TValue extends { id?: string | null }>(value: TValue): value is T
   return Boolean(value.id);
 }
 
+const HANDED_IN_STATES = new Set(["submitted", "completed", "done", "graded", "needs_review", "review_required"]);
+
 function normalizeStatus(status: string | null | undefined, dueAt?: string | null, nowValue?: string | null): StudentAssignmentStatus {
   const normalized = status?.toLowerCase() ?? "";
-  if (normalized === "submitted" || normalized === "completed" || normalized === "done") return "submitted";
+  // The server keeps the attempt state: a handed-in attempt is "graded" (auto-graded) or "needs_review" (manual grading).
+  if (HANDED_IN_STATES.has(normalized)) return "submitted";
   const nowMs = nowValue ? Date.parse(nowValue) : Number.NaN;
   const dueMs = dueAt ? Date.parse(dueAt) : Number.NaN;
   if (Number.isFinite(dueMs) && Number.isFinite(nowMs) && dueMs < nowMs && normalized !== "submitted") return "overdue";

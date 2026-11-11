@@ -20,7 +20,7 @@ export type PlayerDesktopFooterProps = {
   questions: Question[];
   submitted: boolean;
   submitting: boolean;
-  /** Testing mode, last question: the forward button becomes "Nộp bài" (WL4). */
+  /** Last question (testing, or practice once checked): the forward button becomes "Nộp bài" (WL4). */
   handleRequestSubmit?: () => void;
   setCurrentIndex: (update: (value: number) => number) => void;
   submitCurrentTrainingQuestion: () => Promise<void>;
@@ -44,7 +44,10 @@ export function PlayerDesktopFooter({
         // Practice never advances by itself: "Kết quả" reveals the answer, then "Câu tiếp" moves on.
         <>
           {middle}
-          {submitted ? (
+          {submitted && isLastQuestion && handleRequestSubmit && !attemptCompleted ? (
+            // Practice is handed in too, so it lands under Đã nộp and counts toward the average.
+            <Button type="button" variant="contained" endIcon={<SendRounded />} onClick={handleRequestSubmit}>Nộp bài</Button>
+          ) : submitted ? (
             <Button type="button" variant="contained" disabled={isLastQuestion} endIcon={<ChevronRightRounded />} onClick={next}>Câu tiếp</Button>
           ) : (
             <Button type="button" variant="contained" disabled={submitting || !currentAnswerComplete} onClick={() => void submitCurrentTrainingQuestion()}>
