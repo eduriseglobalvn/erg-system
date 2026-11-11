@@ -262,7 +262,7 @@ describe("loadQuestionBankData", () => {
 
     expect(graphQlRequestMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        operationName: "LcmsQuestionBankWorkspace",
+        operationName: "QuestionBankWorkspace",
         variables: {
           input: {
             includeQuestions: false,

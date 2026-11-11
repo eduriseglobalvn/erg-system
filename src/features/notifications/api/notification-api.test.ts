@@ -7,7 +7,7 @@ import {
   resolveNotificationQueryScope,
   registerNotificationDevice,
 } from "@/features/notifications/api/notification-api";
-import { TEACHER_LOCAL_SESSION_KEY, portalSessionKey } from "@/platform/auth/api/auth-token-storage";
+import { TEACHER_LOCAL_SESSION_KEY } from "@/platform/auth/api/auth-token-storage";
 
 afterEach(() => {
   window.localStorage.clear();
@@ -17,7 +17,7 @@ afterEach(() => {
 
 function storePortalSession(portal: "admin" | "lms", token = `${portal}-token`) {
   window.localStorage.setItem(
-    portalSessionKey(TEACHER_LOCAL_SESSION_KEY, portal),
+    TEACHER_LOCAL_SESSION_KEY,
     JSON.stringify({
       accountId: `${portal}-user`,
       accessToken: token,

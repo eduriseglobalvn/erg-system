@@ -186,7 +186,7 @@ test("lists learning resources through LCMS GraphQL reads", async () => {
   const resources = await listLearningResourceResources({ limit: 20, subjectId: "subject-1", categoryId: "level-1" });
 
   expect(graphQlRequestMock).toHaveBeenCalledWith(expect.objectContaining({
-    operationName: "LcmsLearningResourceLibrary",
+    operationName: "LmsLearningResourceAuthoringLibrary",
     portal: "lcms",
     variables: {
       input: expect.objectContaining({

@@ -56,7 +56,7 @@ describe("quiz report API", () => {
     });
     expect(graphQlRequestMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        operationName: "LcmsQuizQuestionAnalytics",
+        operationName: "QuizReportsQuestionAnalytics",
         portal: "lcms",
         tenantId: "tenant-a",
         variables: { quizVersionId: "version-a" },
@@ -105,7 +105,7 @@ describe("quiz report API", () => {
     });
     expect(graphQlRequestMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        operationName: "LcmsAssignmentReport",
+        operationName: "QuizReportsAssignmentReport",
         portal: "lcms",
         tenantId: "tenant-a",
         variables: { assignmentId: "assignment-a" },

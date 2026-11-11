@@ -16,15 +16,15 @@ const lockPath = path.join(contractDir, "erg-openapi.lock.json");
 const generatedPath = path.join(root, "src/lib/api/generated/erg-openapi.ts");
 const check = args.includes("--check");
 
-if (!fs.existsSync(source)) throw new Error(`OpenAPI source not found: ${source}`);
-fs.mkdirSync(contractDir, { recursive: true });
-fs.mkdirSync(path.dirname(generatedPath), { recursive: true });
-
 if (check) {
+  // --check verifies the vendored copy against its own lock; the backend source is not read.
   const content = fs.readFileSync(contractPath, "utf8");
   const lock = JSON.parse(fs.readFileSync(lockPath, "utf8"));
   verifyContractLock(content, lock);
 } else {
+  if (!fs.existsSync(source)) throw new Error(`OpenAPI source not found: ${source}`);
+  fs.mkdirSync(contractDir, { recursive: true });
+  fs.mkdirSync(path.dirname(generatedPath), { recursive: true });
   const content = fs.readFileSync(source, "utf8");
   fs.writeFileSync(contractPath, content);
   fs.writeFileSync(lockPath, `${JSON.stringify(createContractLock(content, "erg-spring"), null, 2)}\n`);

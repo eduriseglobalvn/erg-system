@@ -15,6 +15,9 @@ export default defineConfig(({ command, mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
   const backendUrl = env.BACKEND_URL?.trim();
 
+  // Times render in the device's zone; pin the users' zone (process-wide, before test workers start) so a UTC CI runner sees what dev machines see.
+  if (mode === "test") process.env.TZ = "Asia/Ho_Chi_Minh";
+
   if (!backendUrl && command === "serve" && mode !== "test") {
     throw new Error("BACKEND_URL is required. Copy .env.example to .env and configure the backend URL.");
   }

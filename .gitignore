@@ -30,6 +30,8 @@ docs/**
 !docs/architecture/frontend-repository-ownership.md
 !docs/architecture/crm-api-query-cache-audit.md
 !docs/architecture/elearning-api-query-offline-audit.md
+!docs/deployment/
+!docs/deployment/dedicated-server.md
 
 # Env (bổ sung tường minh ngoài *.local)
 .env

@@ -4,7 +4,6 @@ import { apiRequest, ApiClientError, AUTH_SESSION_INVALID_EVENT, getApiResponseR
 import {
   clearTeacherSessionSnapshot,
   TEACHER_LOCAL_SESSION_KEY,
-  portalSessionKey,
   readStoredAuthSession,
 } from "@/platform/auth/api/auth-token-storage";
 
@@ -24,7 +23,7 @@ function setTestPath(path: string) {
 test("uses LMS portal auth for versioned LMS API requests without client portal headers", async () => {
   vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
   window.localStorage.setItem(
-    portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lms"),
+    TEACHER_LOCAL_SESSION_KEY,
     JSON.stringify({
       accountId: "author-1",
       accessToken: "lms-token",
@@ -48,7 +47,7 @@ test("uses LMS portal auth for versioned LMS API requests without client portal 
 test("uses LCMS portal auth for canonical curriculum commands while omitting client portal headers", async () => {
   vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
   window.localStorage.setItem(
-    portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lcms"),
+    TEACHER_LOCAL_SESSION_KEY,
     JSON.stringify({
       accountId: "teacher-1",
       accessToken: "lcms-token",
@@ -75,7 +74,7 @@ test("uses LCMS portal auth for canonical curriculum commands while omitting cli
 test("uses LCMS portal auth for canonical curriculum and content APIs", async () => {
   vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
   window.localStorage.setItem(
-    portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lcms"),
+    TEACHER_LOCAL_SESSION_KEY,
     JSON.stringify({
       accountId: "author-1",
       accessToken: "lcms-token",
@@ -103,7 +102,7 @@ test("uses current back-office auth for shared admin endpoints on LCMS host with
   vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
   setTestPath("/lcms");
   window.localStorage.setItem(
-    portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lcms"),
+    TEACHER_LOCAL_SESSION_KEY,
     JSON.stringify({
       accountId: "teacher-1",
       accessToken: "lcms-token",
@@ -127,7 +126,7 @@ test("uses current back-office auth for shared admin endpoints on LCMS host with
 test("returns authenticated binary downloads without passing responseType to fetch", async () => {
   vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
   window.localStorage.setItem(
-    portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lms"),
+    TEACHER_LOCAL_SESSION_KEY,
     JSON.stringify({ accountId: "teacher-1", accessToken: "lms-token", loggedInAt: new Date().toISOString(), portal: "lms", portals: ["lms"], rememberMe: true }),
   );
   const fetchMock = vi.fn(async (_url?: string | URL | Request, _init?: RequestInit) => new Response("action,actor\nUPDATE,ac…56\n", { status: 200, headers: { "Content-Type": "text/csv" } }));
@@ -144,7 +143,7 @@ test("uses CRM auth for shared admin endpoints on CRM host without client portal
   vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
   setTestPath("/crm");
   window.localStorage.setItem(
-    portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "crm"),
+    TEACHER_LOCAL_SESSION_KEY,
     JSON.stringify({
       accountId: "crm-1",
       accessToken: "crm-token",
@@ -168,7 +167,7 @@ test("uses CRM auth for shared admin endpoints on CRM host without client portal
 test("refreshes an expired access token before calling a protected Spring API", async () => {
   vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
   window.localStorage.setItem(
-    portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lms"),
+    TEACHER_LOCAL_SESSION_KEY,
     JSON.stringify({
       accountId: "teacher-1",
       accessToken: "expired-token",
@@ -221,7 +220,7 @@ test("refreshes an expired access token before calling a protected Spring API", 
 test("refreshes and retries once when a protected API returns 401", async () => {
   vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
   window.localStorage.setItem(
-    portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lms"),
+    TEACHER_LOCAL_SESSION_KEY,
     JSON.stringify({
       accountId: "teacher-1",
       accessToken: "stale-token",
@@ -256,7 +255,7 @@ test("refreshes and retries once when a protected API returns 401", async () => 
 test("clears the stored session when refresh fails after a 401", async () => {
   vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
   window.localStorage.setItem(
-    portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lms"),
+    TEACHER_LOCAL_SESSION_KEY,
     JSON.stringify({
       accountId: "teacher-1",
       accessToken: "stale-token",
@@ -282,7 +281,7 @@ test("clears the stored session when refresh fails after a 401", async () => {
 test("does not clear the session or dispatch invalid event when a data query 401s without a refresh token", async () => {
   vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
   window.localStorage.setItem(
-    portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lms"),
+    TEACHER_LOCAL_SESSION_KEY,
     JSON.stringify({
       accountId: "teacher-1",
       accessToken: "lms-token",
@@ -324,7 +323,7 @@ test("does not dispatch invalid event when a protected request has no token at a
 test("treats HTTP 304 as a successful empty revalidation response", async () => {
   vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
   window.localStorage.setItem(
-    portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lms"),
+    TEACHER_LOCAL_SESSION_KEY,
     JSON.stringify({
       accountId: "student-1",
       accessToken: "lms-token",
@@ -356,7 +355,7 @@ test("does not dedupe concurrent GET requests across explicit portals even when 
     portals: ["lms", "lcms"],
     rememberMe: true,
   };
-  window.localStorage.setItem(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lms"), JSON.stringify(session));
+  window.localStorage.setItem(TEACHER_LOCAL_SESSION_KEY, JSON.stringify(session));
 
   const fetchMock = vi
     .fn()
@@ -377,7 +376,7 @@ test("does not dedupe concurrent GET requests across explicit portals even when 
 test("does not dedupe concurrent GET requests with different browser cache modes", async () => {
   vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
   window.localStorage.setItem(
-    portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lms"),
+    TEACHER_LOCAL_SESSION_KEY,
     JSON.stringify({
       accountId: "teacher-1",
       accessToken: "lms-token",

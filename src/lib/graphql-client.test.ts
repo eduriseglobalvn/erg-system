@@ -1,7 +1,7 @@
 import { afterEach, expect, test, vi } from "vitest";
 
 import { graphQlRequest } from "@/lib/graphql-client";
-import { clearTeacherSessionSnapshot, TEACHER_LOCAL_SESSION_KEY, portalSessionKey } from "@/platform/auth/api/auth-token-storage";
+import { clearTeacherSessionSnapshot, TEACHER_LOCAL_SESSION_KEY } from "@/platform/auth/api/auth-token-storage";
 
 afterEach(() => {
   clearTeacherSessionSnapshot();
@@ -14,7 +14,7 @@ afterEach(() => {
 test("returns partial GraphQL data only when allow-partial is explicit", async () => {
   vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
   window.localStorage.setItem(
-    portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lms"),
+    TEACHER_LOCAL_SESSION_KEY,
     JSON.stringify({
       accountId: "teacher-1",
       accessToken: "lms-token",
@@ -50,7 +50,7 @@ test("returns partial GraphQL data only when allow-partial is explicit", async (
 test("rejects partial GraphQL data by default", async () => {
   vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
   window.localStorage.setItem(
-    portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lms"),
+    TEACHER_LOCAL_SESSION_KEY,
     JSON.stringify({
       accountId: "teacher-1",
       accessToken: "lms-token",
@@ -80,7 +80,7 @@ test("rejects partial GraphQL data by default", async () => {
 test("propagates caller abort signal to the GraphQL fetch", async () => {
   vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
   window.localStorage.setItem(
-    portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lms"),
+    TEACHER_LOCAL_SESSION_KEY,
     JSON.stringify({
       accountId: "teacher-1",
       accessToken: "lms-token",
@@ -114,7 +114,7 @@ test("propagates caller abort signal to the GraphQL fetch", async () => {
 test("rejects an explicit tenant that differs from the authenticated session", async () => {
   vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
   window.localStorage.setItem(
-    portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lms"),
+    TEACHER_LOCAL_SESSION_KEY,
     JSON.stringify({
       accountId: "teacher-1",
       accessToken: "lms-token",
@@ -141,7 +141,7 @@ test("rejects an explicit tenant that differs from the authenticated session", a
 test("rejects GraphQL variables containing sensitive keys", async () => {
   vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
   window.localStorage.setItem(
-    portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lms"),
+    TEACHER_LOCAL_SESSION_KEY,
     JSON.stringify({
       accountId: "teacher-1",
       accessToken: "lms-token",
