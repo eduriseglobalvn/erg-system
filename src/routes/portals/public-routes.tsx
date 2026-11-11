@@ -50,7 +50,8 @@ function PortalIndexPage() {
       </Suspense>
     );
   }
-  if (studentSession) return <Navigate to="/student" replace />;
+  // The student host serves the dashboard at "/" and its guard sends "/student" back here, so navigating would loop.
+  if (studentSession && activePortal !== "elearning") return <Navigate to="/student" replace />;
   if (activePortal === "lcms") return <Navigate to="/admin" replace />;
   if (activePortal === "crm") return withPortalAuth("crm", <CrmPage />, "seo.manage");
   if (activePortal === "lms" || activePortal === null) {
