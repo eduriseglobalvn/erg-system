@@ -40,6 +40,16 @@ jobs:
       - name: Install Playwright Chromium
         run: bunx playwright install --with-deps chromium
 
+      # vite.config.ts serves HTTPS only when certs/erg-dev.pfx exists (certs/ is gitignored) and Playwright waits on https://.
+      - name: Create throwaway dev certificate
+        run: |
+          mkdir -p certs
+          openssl req -x509 -newkey rsa:2048 -nodes -days 1 -subj "/CN=erg.edu.local" \
+            -addext "subjectAltName=DNS:*.erg.edu.local,IP:127.0.0.1" \
+            -keyout "$RUNNER_TEMP/erg-dev.key" -out "$RUNNER_TEMP/erg-dev.crt"
+          openssl pkcs12 -export -passout pass:erg-local-dev \
+            -inkey "$RUNNER_TEMP/erg-dev.key" -in "$RUNNER_TEMP/erg-dev.crt" -out certs/erg-dev.pfx
+
       - name: Run portal smoke
         run: bun run e2e:${{ matrix.portal }}
 
