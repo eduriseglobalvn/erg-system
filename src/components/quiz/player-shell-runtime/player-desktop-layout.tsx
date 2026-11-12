@@ -74,12 +74,12 @@ export function PlayerDesktopLayout(props: PlayerDesktopLayoutProps) {
   return (
     <PlayerWebPage
       backLabel="Thoát" onBack={onExit ?? onBackToList} title={quizTitle ?? ""} meta={quizMeta}
-      actions={<>{saveIndicator}{timer}</>}
+      actions={<>{saveIndicator}{timer}</>} fill
       progress={showResult ? undefined : (currentIndex + 1) / Math.max(questions.length, 1)}
     >
-      {/* The answering card gets the extra room and a slightly larger scale; the question list keeps its size. */}
-      <Box component="section" sx={{ ...webColumnSx, flexBasis: 640, maxWidth: 980 }}>
-        <Box component="article" sx={{ ...webCardSx, ...canvasStyle, display: "flex", flex: 1, flexDirection: "column", gap: 2, minHeight: 0, p: 3.5, position: "relative", zoom: 1.1 }}>
+      {/* The answering card takes all the width the question list leaves and the full height; long bodies scroll inside it. */}
+      <Box component="section" sx={{ ...webColumnSx, flex: "1 1 0", maxWidth: "none" }}>
+        <Box component="article" sx={{ ...webCardSx, ...canvasStyle, display: "flex", flex: 1, flexDirection: "column", gap: 2, minHeight: 0, p: 3, position: "relative" }}>
           {showResult ? null : (
             <>
               <Box sx={{ alignItems: "center", color: tk.color.textMuted, display: "flex", flexWrap: "wrap", gap: 1, typography: "caption" }}>

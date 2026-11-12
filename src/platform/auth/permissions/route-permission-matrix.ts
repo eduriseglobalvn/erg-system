@@ -3,7 +3,7 @@ import { LMS_ROUTE_PERMISSIONS, type LmsRoutePermission } from "@/platform/auth/
 import type { Workspace } from "@/platform/workspaces/workspace-domain";
 import { adminPath, studentPath, teacherPath } from "@/platform/workspaces/workspace-paths";
 
-export type PermissionAction = "read" | "create" | "update" | "delete" | "manage" | "assign" | "publish" | "submit" | "launch" | "send" | "self" | "approve";
+export type PermissionAction = "read" | "create" | "update" | "delete" | "manage" | "assign" | "publish" | "submit" | "launch" | "send" | "self" | "approve" | "moderate";
 
 /** Permission names published by the BE permission catalog/runtime bindings. */
 export type RoutePermission =
@@ -101,6 +101,9 @@ const ADMIN_EXTRA_PERMISSIONS: Record<string, Pick<RoutePermissionEntry, "resour
   "employees/timesheet": { resource: "timekeeping", action: "manage", permission: "timekeeping.manage" },
   "employees/timekeeping-settings": { resource: "timekeeping", action: "manage", permission: "timekeeping.manage" },
   "employees/teacher-absence": { resource: "timekeeping", action: "approve", permission: "timekeeping.approve" },
+  // Student discussions: tenant admins moderate every class (scope is enforced by the backend).
+  discussion: { resource: "discussion", action: "moderate", permission: "elearning.discussion.moderate" },
+  leaderboard: { resource: "leaderboard", action: "manage", permission: "elearning.leaderboard.manage" },
 };
 
 function adminEntry(path: string): RoutePermissionEntry {

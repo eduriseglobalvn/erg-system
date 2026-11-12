@@ -1,5 +1,5 @@
 import Box from "@mui/material/Box";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { useI18n } from "@/platform/i18n";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -21,12 +21,14 @@ export function HotspotQuestion({
   const { t } = useI18n();
   const isMobile = useIsMobile();
   const imageRef = useRef<HTMLDivElement | null>(null);
+  const image = question.hotspotImage;
+  const ratio = image && image.width > 0 && image.height > 0 ? image.width / image.height : 16 / 9;
+  const [frame, setFrame] = useState<HTMLDivElement | null>(null);
+  const fit = useFitInFrame(frame, ratio);
 
   if (!question.hotspotImage) {
     return null;
   }
-
-  const ratio = question.hotspotImage.width > 0 && question.hotspotImage.height > 0 ? question.hotspotImage.width / question.hotspotImage.height : 16 / 9;
 
   function handlePickPoint(clientX: number, clientY: number, target: HTMLDivElement | null) {
     if (submitted || !target) return;
@@ -50,17 +52,20 @@ export function HotspotQuestion({
   }
 
   return (
-    <Box className="quiz-answer-region-wide" sx={{ ...flushAnswerRegionSx, display: "grid", gap: 1.5 }}>
+    // A column that may shrink: inside the player's fixed-height card the image fits what is left, no scrolling.
+    <Box className="quiz-answer-region-wide" sx={{ ...flushAnswerRegionSx, display: "flex", flex: "1 1 auto", flexDirection: "column", gap: 1.5, minHeight: 0 }}>
       <Box
+        ref={setFrame}
         sx={{
           bgcolor: tokens.color.surfaceMuted,
           border: `1px solid ${tokens.color.border}`,
           borderRadius: `${tokens.radius.card}px`,
           alignItems: "center",
           display: "flex",
+          flex: "1 1 auto",
           height: "min(64vh, 720px)",
           justifyContent: "center",
-          minHeight: 420,
+          minHeight: 240,
           overflow: "hidden",
         }}
       >
@@ -69,7 +74,11 @@ export function HotspotQuestion({
           ref={imageRef}
           data-testid="hotspot-image-box"
           // The box takes the image ratio from its data: an SVG with only a viewBox has no width of its own and would shrink to 0.
-          sx={{ aspectRatio: `${ratio}`, cursor: submitted ? "default" : "crosshair", maxWidth: `calc(max(420px, min(64vh, 720px)) * ${ratio})`, position: "relative", width: "100%" }}
+          sx={{
+            cursor: submitted ? "default" : "crosshair",
+            position: "relative",
+            ...(fit ? { height: fit.height, width: fit.width } : { aspectRatio: `${ratio}`, maxWidth: `calc(max(240px, min(64vh, 720px)) * ${ratio})`, width: "100%" }),
+          }}
           onClick={(event) => {
             handlePickPoint(event.clientX, event.clientY, imageRef.current);
           }}
@@ -96,4 +105,21 @@ export function HotspotQuestion({
       <Box component="p" sx={{ typography: "caption", color: "text.secondary", m: 0 }}>{t("player.clickImagePrompt")}</Box>
     </Box>
   );
+}
+
+/** Largest box with the image's ratio that fits the frame; null until measured (or where ResizeObserver is missing). */
+function useFitInFrame(frame: HTMLElement | null, ratio: number) {
+  const [fit, setFit] = useState<{ width: number; height: number } | null>(null);
+  useEffect(() => {
+    if (!frame || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(([entry]) => {
+      const { width, height } = entry.contentRect;
+      if (width <= 0 || height <= 0) return;
+      const fitWidth = Math.min(width, height * ratio);
+      setFit({ height: fitWidth / ratio, width: fitWidth });
+    });
+    observer.observe(frame);
+    return () => observer.disconnect();
+  }, [frame, ratio]);
+  return fit;
 }

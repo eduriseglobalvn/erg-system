@@ -1,0 +1,43 @@
+query ElearningStudentClassLeaderboard($input: StudentClassLeaderboardInput) {
+  elearning {
+    studentClassLeaderboard(input: $input) {
+      classId
+      className
+      enabled
+      period
+      scope
+      periodEndsAt
+      viewerHidden
+      entries { rank studentId studentName xp streakDays rankChange isViewer }
+    }
+  }
+}
+
+query ElearningLeaderboardClasses {
+  elearning {
+    leaderboardClasses { id name leaderboardEnabled }
+  }
+}
+
+query ElearningClassLeaderboard($input: ClassLeaderboardInput!) {
+  elearning {
+    classLeaderboard(input: $input) {
+      classId
+      className
+      enabled
+      period
+      scope
+      periodEndsAt
+      viewerHidden
+      entries { rank studentId studentName xp streakDays rankChange isViewer }
+    }
+  }
+}
+
+mutation ElearningSetClassLeaderboardEnabled($input: SetClassLeaderboardEnabledInput!) {
+  setClassLeaderboardEnabled(input: $input) { id name leaderboardEnabled }
+}
+
+mutation ElearningSetMyLeaderboardHidden($input: SetMyLeaderboardHiddenInput!) {
+  setMyLeaderboardHidden(input: $input)
+}

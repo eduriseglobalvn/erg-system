@@ -33,10 +33,12 @@ type PlayerWebPageProps = {
   /** WL1 only: soft accent wash behind the intro. */
   hero?: boolean;
   alignTop?: boolean;
+  /** Playing: one row that fills the screen; cards stretch to the bottom and scroll inside. */
+  fill?: boolean;
   children: ReactNode;
 };
 
-export function PlayerWebPage({ backLabel, onBack, title, meta, actions, progress, hero = false, alignTop = false, children }: PlayerWebPageProps) {
+export function PlayerWebPage({ backLabel, onBack, title, meta, actions, progress, hero = false, alignTop = false, fill = false, children }: PlayerWebPageProps) {
   return (
     <Box
       sx={{
@@ -63,7 +65,9 @@ export function PlayerWebPage({ backLabel, onBack, title, meta, actions, progres
       )}
       <Box
         component="main"
-        sx={{ alignContent: "flex-start", alignItems: alignTop ? "flex-start" : "stretch", display: "flex", flex: 1, flexWrap: "wrap", gap: 3, justifyContent: "center", minHeight: 0, overflowY: "auto", p: 3 }}
+        sx={fill
+          ? { alignItems: "stretch", display: "flex", flex: 1, gap: 2, minHeight: 0, overflow: "hidden", p: 2 }
+          : { alignContent: "flex-start", alignItems: alignTop ? "flex-start" : "stretch", display: "flex", flex: 1, flexWrap: "wrap", gap: 3, justifyContent: "center", minHeight: 0, overflowY: "auto", p: 3 }}
       >
         {children}
       </Box>

@@ -6,6 +6,8 @@ import { loginStudent } from "@/platform/auth/api/student-auth-storage";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
 import { isAuthOnlyRedirect, sanitizeLocalRedirect } from "@/platform/auth/utils/auth-redirects";
 import { hasAdminLikeClaims } from "@/platform/auth/permissions/admin-like";
+import { evaluatePermission } from "@/platform/auth/permissions/permission-evaluator";
+import { routeAcceptedPermissions, routePermissionForPath } from "@/platform/auth/permissions/route-permission-matrix";
 import { PLATFORM_ROOT_ADMIN_EMAIL, projectVerifiedWorkspaces } from "@/platform/auth/permissions/workspace-capability-projection";
 import { resolveWorkspaceLandingTarget } from "@/platform/auth/utils/access-denied";
 import { canAccessPortal } from "@/platform/auth/utils/portal-access";
@@ -86,7 +88,8 @@ export function redirectAfterAuth(
   options: LoginRedirectOptions = {},
 ) {
   const session = options.session ?? getAuthScope(portal).session;
-  const destination = options.hasExplicitRedirect === false
+  // A redirect the account may not open (e.g. a student sent to /teacher by an old link) falls back to its own landing.
+  const destination = options.hasExplicitRedirect === false || !sessionCanOpen(redirect, session)
     ? resolveDefaultPostLoginRedirect(account, portal, session)
     : redirect;
   const targetPortal = portalForRedirect(destination, portal);
@@ -95,6 +98,15 @@ export function redirectAfterAuth(
   navigateTo(canAccessTarget || isAuthOnlyRedirect(targetPortal, destination)
     ? destination
     : accessDeniedPath(targetPortal, account?.email ?? "", destination));
+}
+
+/** False only for a workspace route (/admin, /teacher, /student) whose matrix permission the session lacks. */
+export function sessionCanOpen(path: string, session: StoredAuthSession | null | undefined) {
+  const workspace = canonicalWorkspaceForPath(path.split(/[?#]/)[0] ?? path);
+  if (!workspace || !session) return true;
+  const entry = routePermissionForPath(path.split(/[?#]/)[0] ?? path, workspace);
+  return Boolean(entry) && routeAcceptedPermissions(entry!).some((permission) =>
+    evaluatePermission({ permission, grantedPermissions: session.permissions, deniedPermissions: session.deniedPermissions }));
 }
 
 const LOCKED_CODES = new Set(["ACCOUNT_LOCKED", "AUTH_ACCOUNT_LOCKED"]);

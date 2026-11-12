@@ -161,7 +161,6 @@ export function DiscussionPostCard({
                 <FacebookComment
                   key={comment.id}
                   comment={comment}
-                  depth={0}
                   postId={post.id}
                   onAddComment={onAddComment}
                   onCommentReaction={onCommentReaction}
@@ -222,16 +221,17 @@ export function DiscussionPostCard({
   );
 }
 
+/** Two levels: a root comment and its replies. A reply passes `rootCommentId`, so answering it targets the root. */
 export function FacebookComment({
   comment,
-  depth,
+  rootCommentId,
   postId,
   onAddComment,
   onCommentReaction,
   onToast,
 }: {
   comment: StudentDiscussionComment;
-  depth: number;
+  rootCommentId?: string;
   postId: string;
   onAddComment: (postId: string, parentCommentId: string | undefined, content: string, attachments: StudentDiscussionImageAttachment[]) => void;
   onCommentReaction: (postId: string, commentId: string, reaction: StudentDiscussionReactionKey) => void;
@@ -242,11 +242,12 @@ export function FacebookComment({
   const [replyAttachments, setReplyAttachments] = useState<StudentDiscussionImageAttachment[]>([]);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const reactionTotal = getReactionTotal(comment.reactions);
+  const isReply = Boolean(rootCommentId);
 
   function submitReply() {
     const content = replyDraft.trim();
     if (!content && replyAttachments.length === 0) return;
-    onAddComment(postId, comment.id, content, replyAttachments);
+    onAddComment(postId, rootCommentId ?? comment.id, content, replyAttachments);
     setReplyDraft("");
     setReplyAttachments([]);
     setIsReplying(false);
@@ -259,8 +260,8 @@ export function FacebookComment({
   }
 
   return (
-    <Box sx={{ pl: depth ? { xs: 2.8, sm: 4.5 } : 0, position: "relative" }}>
-      {depth ? (
+    <Box sx={{ pl: isReply ? { xs: 2.8, sm: 4.5 } : 0, position: "relative" }}>
+      {isReply ? (
         <Box sx={{ borderBottom: "2px solid #DADDE1", borderLeft: "2px solid #DADDE1", borderBottomLeftRadius: 10, height: 24, left: { xs: 0.9, sm: 1.5 }, position: "absolute", top: -1, width: { xs: 1.8, sm: 2.5 } }} />
       ) : null}
       <Stack direction="row" spacing={0.85} alignItems="flex-start">
@@ -321,13 +322,13 @@ export function FacebookComment({
               />
             </Box>
           ) : null}
-          {comment.replies.length ? (
+          {!isReply && comment.replies.length ? (
             <Stack spacing={1} sx={{ mt: 0.65 }}>
               {comment.replies.map((reply) => (
                 <FacebookComment
                   key={reply.id}
                   comment={reply}
-                  depth={Math.min(depth + 1, 3)}
+                  rootCommentId={comment.id}
                   postId={postId}
                   onAddComment={onAddComment}
                   onCommentReaction={onCommentReaction}

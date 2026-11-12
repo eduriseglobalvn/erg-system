@@ -2,17 +2,21 @@ import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurned
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
 import ForumOutlinedIcon from "@mui/icons-material/ForumOutlined";
+import LeaderboardOutlinedIcon from "@mui/icons-material/LeaderboardOutlined";
 
 
 import type { StudentAssignmentStatus } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
 import type { DashboardCopy } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
 
+const NAV_ICON_SX = { fontSize: 18 } as const;
+
 export const viCopy: DashboardCopy = {
   navItems: [
-    { key: "overview", label: "Tổng quan", icon: <HomeOutlinedIcon sx={{ fontSize: 18 }} /> },
-    { key: "assignments", label: "Bài tập", icon: <AssignmentTurnedInOutlinedIcon sx={{ fontSize: 18 }} /> },
-    { key: "discussion", label: "Thảo luận", icon: <ForumOutlinedIcon sx={{ fontSize: 18 }} /> },
-    { key: "announcements", label: "Hộp thư", icon: <NotificationsNoneOutlinedIcon sx={{ fontSize: 18 }} /> },
+    { key: "overview", label: "Tổng quan", icon: <HomeOutlinedIcon sx={NAV_ICON_SX} /> },
+    { key: "assignments", label: "Bài tập", icon: <AssignmentTurnedInOutlinedIcon sx={NAV_ICON_SX} /> },
+    { key: "discussion", label: "Thảo luận", icon: <ForumOutlinedIcon sx={NAV_ICON_SX} /> },
+    { key: "ranking", label: "Thi đua", icon: <LeaderboardOutlinedIcon sx={NAV_ICON_SX} /> },
+    { key: "announcements", label: "Hộp thư", icon: <NotificationsNoneOutlinedIcon sx={NAV_ICON_SX} /> },
   ],
   heroEyebrow: "Bảng học tập",
   learnerFallbackName: "bạn",
@@ -32,6 +36,8 @@ export const viCopy: DashboardCopy = {
     open: "Bài đang mở",
     overdue: "Bài quá hạn",
     average: "Điểm trung bình",
+    dueDone: "Bài đến hạn đã nộp",
+    nextDue: "Hạn nộp gần nhất",
     completed: "Bài đã hoàn thành",
   },
   priority: {
@@ -107,14 +113,23 @@ export const viCopy: DashboardCopy = {
   sessionDescription: (subject: string, teacher: string, dueLabel: string) =>
     `${subject} • ${teacher} • ${dueLabel}. Hoàn thành trọn phiên để hệ thống cập nhật tiến độ và điểm số.`,
   backToDashboard: "Quay lại",
+  ranking: {
+    title: "Thi đua",
+    description: "Làm bài để nhận XP và leo hạng cùng các bạn. Bảng chốt theo tuần, tháng và học kỳ.",
+    emptyTitle: "Chưa ai có XP",
+    emptyDescription: "Nộp bài để nhận XP, bảng thi đua sẽ hiện ở đây.",
+    errorTitle: "Không tải được xếp hạng",
+    errorDescription: "Vui lòng thử lại sau.",
+  },
 };
 
 export const enCopy: DashboardCopy = {
   navItems: [
-    { key: "overview", label: "Overview", icon: <HomeOutlinedIcon sx={{ fontSize: 18 }} /> },
-    { key: "assignments", label: "Assignments", icon: <AssignmentTurnedInOutlinedIcon sx={{ fontSize: 18 }} /> },
-    { key: "discussion", label: "Discussion", icon: <ForumOutlinedIcon sx={{ fontSize: 18 }} /> },
-    { key: "announcements", label: "Notices", icon: <NotificationsNoneOutlinedIcon sx={{ fontSize: 18 }} /> },
+    { key: "overview", label: "Overview", icon: <HomeOutlinedIcon sx={NAV_ICON_SX} /> },
+    { key: "assignments", label: "Assignments", icon: <AssignmentTurnedInOutlinedIcon sx={NAV_ICON_SX} /> },
+    { key: "discussion", label: "Discussion", icon: <ForumOutlinedIcon sx={NAV_ICON_SX} /> },
+    { key: "ranking", label: "Leaderboard", icon: <LeaderboardOutlinedIcon sx={NAV_ICON_SX} /> },
+    { key: "announcements", label: "Notices", icon: <NotificationsNoneOutlinedIcon sx={NAV_ICON_SX} /> },
   ],
   heroEyebrow: "Learning board",
   learnerFallbackName: "there",
@@ -134,6 +149,8 @@ export const enCopy: DashboardCopy = {
     open: "Open tasks",
     overdue: "Overdue",
     average: "Average score",
+    dueDone: "Due work handed in",
+    nextDue: "Next deadline",
     completed: "Completed tasks",
   },
   priority: {
@@ -209,4 +226,12 @@ export const enCopy: DashboardCopy = {
   sessionDescription: (subject: string, teacher: string, dueLabel: string) =>
     `${subject} • ${teacher} • ${dueLabel}. Finish the full session to refresh progress and score.`,
   backToDashboard: "Back",
+  ranking: {
+    title: "Leaderboard",
+    description: "Hand in work to earn XP and climb with your classmates. The board closes each week, month and term.",
+    emptyTitle: "No XP yet",
+    emptyDescription: "Hand in work to earn XP; the board appears here.",
+    errorTitle: "Could not load the ranking",
+    errorDescription: "Please try again later.",
+  },
 };

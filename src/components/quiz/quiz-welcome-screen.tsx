@@ -147,7 +147,7 @@ export function QuizWelcomeScreen({
 
   return (
     <>
-      <Box component="section" sx={{ display: "flex", flex: "1 1 640px", flexDirection: "column", gap: 2, maxWidth: 820, minWidth: 0 }}>
+      <Box component="section" sx={{ display: "flex", flex: "1 1 640px", flexDirection: "column", gap: 2, maxWidth: 1200, minWidth: 0 }}>
         <Box sx={{ bgcolor: tk.color.surface, border: `1px solid ${tk.color.border}`, ...playerCardStyle, ...canvasStyle, borderRadius: radius, display: "flex", flexDirection: "column", gap: 2.5, overflow: "hidden", p: 4, position: "relative" }}>
           <Box aria-hidden component="svg" viewBox="0 0 260 200" sx={{ color: quizAccent, height: 300, pointerEvents: "none", position: "absolute", right: -15, top: -21, width: 390 }}>
             <circle cx="200" cy="56" r="58" fill="currentColor" opacity=".10" />

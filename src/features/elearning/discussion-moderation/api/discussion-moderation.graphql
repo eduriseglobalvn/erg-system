@@ -1,0 +1,42 @@
+query ElearningDiscussionModerationClasses {
+  elearning {
+    discussionModerationClasses { id name }
+  }
+}
+
+query ElearningDiscussionModerationFeed($input: StudentDiscussionModerationFeedInput!) {
+  elearning {
+    discussionModerationFeed(input: $input) {
+      page
+      size
+      totalItems
+      hasNext
+      items {
+        id
+        authorName
+        authorInitials
+        title
+        content
+        createdAt
+        hidden
+        comments {
+          id
+          authorName
+          authorInitials
+          content
+          createdAt
+          hidden
+          replies { id authorName authorInitials content createdAt hidden }
+        }
+      }
+    }
+  }
+}
+
+mutation ElearningSetStudentDiscussionHidden($input: SetStudentDiscussionHiddenInput!) {
+  setStudentDiscussionHidden(input: $input) { targetType targetId hidden deleted }
+}
+
+mutation ElearningDeleteStudentDiscussionItem($input: DeleteStudentDiscussionItemInput!) {
+  deleteStudentDiscussionItem(input: $input) { targetType targetId hidden deleted }
+}

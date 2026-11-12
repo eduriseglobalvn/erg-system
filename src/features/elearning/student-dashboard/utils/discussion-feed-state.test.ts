@@ -76,30 +76,31 @@ test("toggleFeedPostReaction switches one viewer reaction without double countin
   expect(removed.reactions.haha.count).toBe(0);
 });
 
-test("addFeedComment creates Facebook-style replies with a maximum depth of three levels", () => {
+test("addFeedComment keeps two levels: a reply to a reply joins the root comment", () => {
   const post = {
     ...createPost(),
-    comments: [createComment("level-1", [createComment("level-2", [createComment("level-3")])])],
+    comments: [createComment("root", [createComment("reply")])],
   };
 
-  const replyToSecondLevel = addFeedComment({
+  const replyToRoot = addFeedComment({
     attachments: [],
-    content: "Tra loi cap 3",
-    parentCommentId: "level-2",
+    content: "Tra loi binh luan",
+    parentCommentId: "root",
     post,
     viewer,
   });
-  expect(replyToSecondLevel.comments[0]?.replies[0]?.replies).toHaveLength(2);
+  expect(replyToRoot.comments[0]?.replies).toHaveLength(2);
 
-  const replyToThirdLevel = addFeedComment({
+  const replyToReply = addFeedComment({
     attachments: [],
-    content: "Tra loi van nam cap 3",
-    parentCommentId: "level-3",
-    post: replyToSecondLevel,
+    content: "Tra loi cau tra loi",
+    parentCommentId: "reply",
+    post: replyToRoot,
     viewer,
   });
-  expect(replyToThirdLevel.comments[0]?.replies[0]?.replies).toHaveLength(3);
-  expect(replyToThirdLevel.comments[0]?.replies[0]?.replies[2]?.content).toBe("Tra loi van nam cap 3");
+  expect(replyToReply.comments[0]?.replies).toHaveLength(3);
+  expect(replyToReply.comments[0]?.replies[2]?.content).toBe("Tra loi cau tra loi");
+  expect(replyToReply.comments[0]?.replies.every((reply) => reply.replies.length === 0)).toBe(true);
 });
 
 test("toggleFeedCommentReaction updates deeply nested comment reactions", () => {

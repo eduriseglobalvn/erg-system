@@ -15,6 +15,7 @@ import { formatDateTimeVi } from "@/domain/formatters/format-date";
 import { subjectMark } from "@/features/elearning/student-dashboard/components/student-dashboard-mobile-overview";
 import type { DashboardCopy } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
 import type { StudentDashboardAssignment } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
+import { averageOfScored } from "@/features/elearning/student-dashboard/utils/student-overview-hero";
 import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
 
 export type AssignmentFilter = "todo" | "submitted" | "overdue";
@@ -42,6 +43,7 @@ export function AssignmentsView({ assignments, copy, initialFilter = "todo", onO
   const list = lists[filter].filter((a) => !activeSubject || a.subjectLabel === activeSubject);
   // The one contained button on the page: the first open assignment that can actually be started.
   const urgentId = lists.todo.find((a) => a.quizId)?.id;
+  const average = averageOfScored(list);
   return (
     <Stack spacing={1.5} sx={{ width: "100%" }}>
       <Typography variant="h1" sx={{ pb: 0.5 }}>{copy.assignmentsTitle}</Typography>
@@ -62,6 +64,11 @@ export function AssignmentsView({ assignments, copy, initialFilter = "todo", onO
           {subjects.map((label) => <Tab key={label} value={label} label={label} />)}
         </Tabs>
       ) : null}
+      {filter === "submitted" && average ? (
+        <Typography color="text.secondary" variant="body2">
+          {`Điểm trung bình ${average.percent}%: trung bình phần trăm của ${average.count} bài có điểm bên dưới (mỗi bài lấy lần nộp gần nhất). Bấm vào một bài để xem từng câu đúng, sai.`}
+        </Typography>
+      ) : null}
       {list.map((assignment) => (
         <AssignmentCard key={assignment.id} assignment={assignment} copy={copy} primary={filter === "todo" && assignment.id === urgentId} onOpenAssignment={onOpenAssignment} />
       ))}
@@ -71,6 +78,7 @@ export function AssignmentsView({ assignments, copy, initialFilter = "todo", onO
 }
 
 function stateLabel(a: StudentDashboardAssignment) {
+  if (a.score !== null && a.maxScore) return `Điểm: ${a.score}/${a.maxScore} (${Math.round((a.score / a.maxScore) * 100)}%)${a.status === "submitted" ? " · Xem bài làm" : ""}`;
   if (a.score !== null && a.maxScore !== null) return `Điểm: ${a.score}/${a.maxScore}`;
   if (a.status === "in_progress" && a.answeredCount !== null && a.totalQuestions) return `Đang làm ${a.answeredCount}/${a.totalQuestions}`;
   return a.statusLabel;
