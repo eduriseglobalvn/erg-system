@@ -14,9 +14,12 @@ import { isObject, validateResponse } from "@/lib/validate-response";
 import ClassLeaderboardDocument from "./class-leaderboard.graphql?raw";
 
 export type ClassLeaderboard = ElearningClassLeaderboardQuery["elearning"]["classLeaderboard"];
-export type ClassLeaderboardEntry = ClassLeaderboard["entries"][number];
+type StudentBoardEntry = ElearningStudentClassLeaderboardQuery["elearning"]["studentClassLeaderboard"]["entries"][number];
+type TeacherBoardEntry = ClassLeaderboard["entries"][number];
+/** Teacher and admin boards carry the base fields; the student board adds tier, frame and period details (optional here). */
+export type ClassLeaderboardEntry = TeacherBoardEntry & Partial<Omit<StudentBoardEntry, keyof TeacherBoardEntry>>;
 export type LeaderboardClass = ElearningLeaderboardClassesQuery["elearning"]["leaderboardClasses"][number];
-export type LeaderboardPeriod = "WEEK" | "MONTH" | "TERM";
+export type LeaderboardPeriod = "WEEK" | "MONTH" | "TERM" | "COURSE";
 export type LeaderboardScope = "CLASS" | "GRADE";
 
 /** Teacher pages talk to the backend as "lms", Admin pages as "lcms"; the backend scopes classes by role. */

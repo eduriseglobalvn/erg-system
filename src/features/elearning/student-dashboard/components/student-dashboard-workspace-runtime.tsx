@@ -57,7 +57,7 @@ import {
 } from "@/features/elearning/student-dashboard/components/student-dashboard-workspace-styles";
 import { AnnouncementToast } from "@/features/elearning/student-dashboard/components/student-dashboard-view-primitives";
 import { AccountView, AnnouncementsView } from "@/features/elearning/student-dashboard/components/student-dashboard-content-views";
-import { AssignmentsView, type AssignmentFilter } from "@/features/elearning/student-dashboard/components/student-dashboard-assignments-view";
+import { AssignmentsView, filterAssignments, type AssignmentFilter } from "@/features/elearning/student-dashboard/components/student-dashboard-assignments-view";
 import {
   StudentQuizAssignmentMissing,
   StudentQuizNotReady,
@@ -71,6 +71,7 @@ import { StudentDashboardOverviewSurface } from "@/features/elearning/student-da
 import { useAnnouncementPopup } from "@/features/elearning/student-dashboard/hooks/use-announcement-popup";
 import { useDashboardSurface } from "@/features/elearning/student-dashboard/hooks/use-dashboard-surface";
 import { useElearningViewerAccount } from "@/features/elearning/student-dashboard/hooks/use-elearning-viewer-account";
+import { useStudentSidebarData } from "@/features/elearning/student-dashboard/hooks/use-student-sidebar-data";
 import { useStudentDiscussion } from "@/features/elearning/student-dashboard/hooks/use-student-discussion";
 
 export function StudentDashboardWorkspaceRuntime() {
@@ -121,6 +122,7 @@ export function StudentDashboardWorkspaceRuntime() {
   const copy = useMemo<DashboardCopy>(() => (leaderboardEnabled
     ? localeCopy
     : { ...localeCopy, navItems: localeCopy.navItems.filter((item) => item.key !== "ranking") }), [leaderboardEnabled, localeCopy]);
+  const sidebarData = useStudentSidebarData({ accountId: account?.id, classId: dashboardProfile.classId ?? "", leaderboardEnabled });
   const assignments = useMemo(
     () => studentDashboardQuery.data?.assignments ?? [],
     [studentDashboardQuery.data?.assignments],
@@ -302,6 +304,8 @@ export function StudentDashboardWorkspaceRuntime() {
           initialFilter={assignmentsFilter}
           assignments={assignments}
           copy={copy}
+          mobile={surface === "mobile-web"}
+          onAskTeacher={() => handlePageChange("announcements")}
           onOpenAssignment={openAssignment}
         />
       ) : null}
@@ -350,7 +354,7 @@ export function StudentDashboardWorkspaceRuntime() {
       <Box sx={{ bgcolor: MUI_BG, color: MUI_TEXT, fontFamily: "var(--font-app)", minHeight: "100vh" }}>
         {announcementToast}
         <StudentDashboardMobileShell
-          activePage={shownPage} announcementUnreadCount={unreadInboxCount}
+          activePage={shownPage} announcementUnreadCount={unreadInboxCount} avatarTier={sidebarData.tier}
           dockItems={mobileDockItems} onPageChange={handlePageChange}
         >
           {/* Inside the scroll area: above the 100dvh shell it pushed the page past the viewport. */}
@@ -369,6 +373,8 @@ export function StudentDashboardWorkspaceRuntime() {
         activePage={shownPage}
         copy={copy}
         dashboardProfile={dashboardProfile}
+        sidebarData={sidebarData}
+        todoCount={filterAssignments(assignments, "todo").length}
         notificationAnchor={notificationAnchor}
         notifications={discussion.discussionNotifications}
         unreadAnnouncementCount={unreadInboxCount}

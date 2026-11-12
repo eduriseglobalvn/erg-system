@@ -182,6 +182,7 @@ function mapAssignment(
     xpReward: assignment.xpReward,
     closed: assignment.closed,
     ...(assignment.dueAt ? { dueAt: assignment.dueAt } : {}),
+    ...(assignment.submittedAt ? { submittedAt: assignment.submittedAt } : {}),
     dueLabel: assignment.dueAt ? formatDueLabel(assignment.dueAt) : "Chưa có hạn nộp",
     statusLabel: statusLabelFor(status),
     lastActivityLabel: submittedLabel ? `Nộp lúc ${submittedLabel}` : "Chưa có hoạt động",

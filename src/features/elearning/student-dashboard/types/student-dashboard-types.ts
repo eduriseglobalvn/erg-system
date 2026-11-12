@@ -66,6 +66,10 @@ export type StudentDashboardAssignment = {
   closed?: boolean;
   /** Submitted but the teacher has not released the correct-answer count. */
   correctCount?: number | null;
+  /** When the latest attempt was handed in (ISO). */
+  submittedAt?: string;
+  /** Last moment a late hand-in is still accepted; null/absent hides the "đến ..." line. */
+  lateSubmitUntil?: string | null;
 };
 
 export type StudentDiscussionReply = {
