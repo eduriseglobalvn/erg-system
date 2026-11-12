@@ -35,13 +35,11 @@ export type DueMetric = { kind: "due"; done: number; total: number } | { kind: "
  * before any deadline has come, the time left to the nearest one; null without deadlines.
  */
 export function resolveDueMetric(assignments: StudentDashboardAssignment[], now = Date.now()): DueMetric {
-  const dated = assignments.flatMap((a) => {
-    const due = a.dueAt ? Date.parse(a.dueAt) : NaN;
-    return Number.isFinite(due) ? [{ a, due }] : [];
-  });
-  const reached = dated.filter(({ due }) => due <= now);
+  const dated = assignments.map((a) => ({ a, due: a.dueAt ? Date.parse(a.dueAt) : NaN }));
+  // "overdue" counts as reached even when the deadline itself did not come with the card.
+  const reached = dated.filter(({ a, due }) => a.status === "overdue" || due <= now);
   if (reached.length) return { kind: "due", done: reached.filter(({ a }) => a.status === "submitted").length, total: reached.length };
-  const next = Math.min(...dated.filter(({ a }) => a.status !== "submitted").map(({ due }) => due));
+  const next = Math.min(...dated.filter(({ a, due }) => a.status !== "submitted" && Number.isFinite(due)).map(({ due }) => due));
   return Number.isFinite(next) ? { kind: "next", msLeft: next - now } : null;
 }
 

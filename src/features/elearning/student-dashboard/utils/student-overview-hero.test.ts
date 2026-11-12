@@ -78,6 +78,7 @@ describe("due metric and the explained average", () => {
       assignment({ id: "b", dueAt: "2026-11-13T13:00:00+07:00", status: "submitted" }),
     ], now)).toEqual({ kind: "next", msLeft: 2 * 86_400_000 });
     expect(resolveDueMetric([assignment()], now)).toBeNull();
+    expect(resolveDueMetric([assignment({ status: "overdue" })], now)).toEqual({ kind: "due", done: 0, total: 1 });
     expect(formatTimeLeft(2 * 86_400_000 + 3 * 3_600_000)).toBe("Còn 2 ngày 3 giờ");
     expect(formatTimeLeft(20 * 60_000)).toBe("Còn 20 phút");
   });
