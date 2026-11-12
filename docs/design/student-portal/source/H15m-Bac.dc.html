@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Học sinh · Bậc của bạn (mobile)</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./erg.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400..600,0..1,0&amp;display=block">
+<style>
+body{margin:0}
+.fr{position:relative;display:inline-grid;place-items:center;border-radius:50%;padding:3px;flex-shrink:0}
+.fr>.av{border:2px solid #fff;margin:0}
+.fr.t-go{background:repeating-linear-gradient(115deg,#8B5A2B 0 4px,#A9743F 4px 7px,#6E4520 7px 9px)}
+.fr.t-sat{background:conic-gradient(from 200deg,#5B636E,#A3ABB5,#4A515B,#8E96A0,#5B636E)}
+.fr.t-dong{background:conic-gradient(from 200deg,#9A4E1F,#E3A06B,#8A431A,#D08850,#9A4E1F)}
+.fr.t-bac{background:conic-gradient(from 200deg,#8A94A6,#F4F6F9,#7C8698,#DCE1E8,#8A94A6)}
+.fr.t-vang{background:conic-gradient(from 200deg,#B07A00,#FFE08A,#A86F00,#F2C94C,#B07A00);box-shadow:0 0 0 2px #FFF3CC}
+.fr.t-bk{background:conic-gradient(from 200deg,#2E8F86,#B9F3EA,#227A72,#7FD9CD,#2E8F86);box-shadow:0 0 0 2px #DDF7F3}
+.fr.t-kc{background:conic-gradient(from 200deg,#2D5BD8,#A8C8FF,#6C3FD1,#7FB2FF,#3B6CF0,#C9B6FF,#2D5BD8);box-shadow:0 0 0 2px #E3ECFF,0 0 14px rgba(59,108,240,.35)}
+.fr.t-ct{background:conic-gradient(from 200deg,#7A1FA2,#F2C94C,#B0266B,#FFE08A,#7A1FA2);box-shadow:0 0 0 2px #FBE7FF,0 0 16px rgba(176,38,107,.35)}
+.fr .gem{position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);height:16px;min-width:16px;padding:0 5px;border-radius:999px;display:inline-grid;place-items:center;font-size:9px;font-weight:700;color:#fff;border:1.5px solid #fff;white-space:nowrap}
+.fr .crn{position:absolute;top:-13px;left:50%;transform:translateX(-50%);font-size:18px;color:#E2A400;filter:drop-shadow(0 1px 0 #8F6200)}
+.g-go{background:#8B5A2B}.g-sat{background:#5B636E}.g-dong{background:#B4632B}.g-bac{background:#8A94A6}.g-vang{background:#C98A04}.g-bk{background:#2E8F86}.g-kc{background:linear-gradient(90deg,#2D5BD8,#6C3FD1)}.g-ct{background:linear-gradient(90deg,#7A1FA2,#B0266B)}
+.emb{position:relative;display:inline-grid;place-items:center;clip-path:polygon(50% 0,100% 16%,100% 60%,50% 100%,0 60%,0 16%);color:#fff;font-weight:700}
+.emb::after{content:"";position:absolute;inset:0;background:linear-gradient(160deg,rgba(255,255,255,.55),rgba(255,255,255,0) 50%);pointer-events:none}
+.emb .ms{position:relative;z-index:1;filter:drop-shadow(0 1px 0 rgba(0,0,0,.25))}
+.emb.t-go{background:linear-gradient(#B07A45,#6E4520)}.emb.t-sat{background:linear-gradient(#A3ABB5,#4A515B)}.emb.t-dong{background:linear-gradient(#E3A06B,#8A431A)}.emb.t-bac{background:linear-gradient(#F4F6F9,#7C8698);color:#3D4553}
+.emb.t-vang{background:linear-gradient(#FFE08A,#A86F00)}.emb.t-bk{background:linear-gradient(#B9F3EA,#227A72)}.emb.t-kc{background:linear-gradient(#A8C8FF,#3B6CF0 55%,#6C3FD1)}.emb.t-ct{background:linear-gradient(#FFE08A,#B0266B 45%,#7A1FA2)}
+.tchip{display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 8px 0 6px;border-radius:999px;font-size:11px;font-weight:700;color:#fff;white-space:nowrap}
+.tchip.t-bac{color:#3D4553;background:linear-gradient(90deg,#DCE1E8,#AEB6C3)}
+
+.hero2{position:relative;overflow:hidden;background:linear-gradient(120deg,#FBF1E9 0,#fff 55%)}
+.hero2::before{content:"";position:absolute;right:-80px;top:-80px;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(227,160,107,.25),rgba(227,160,107,0) 70%)}
+.prg{position:relative;height:12px;border-radius:999px;background:var(--dv);overflow:hidden}
+.prg>i{position:absolute;left:0;top:0;bottom:0;border-radius:999px;background:linear-gradient(90deg,#D08850,#9A4E1F)}
+.div3{display:flex;gap:4px}.div3 span{flex:1;height:6px;border-radius:999px;background:var(--dv)}.div3 span.on{background:#B4632B}
+.lad{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:8px;position:relative}
+.lad::before{content:"";position:absolute;left:6%;right:6%;top:34px;height:4px;border-radius:999px;background:linear-gradient(90deg,#B4632B 0 31%,var(--dv) 31%)}
+.st{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;padding:0 2px}
+.st.lock .emb,.st.lock .fr{filter:grayscale(.85);opacity:.5}
+.st .nm{font-size:14px;font-weight:700}
+.st.cur .nm{color:#9A4E1F}
+.here{display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:999px;background:var(--p);color:#fff;font-size:11px;font-weight:700}
+.rule{display:flex;gap:12px;align-items:flex-start}
+.rule .ico{flex-shrink:0}
+.frm{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 6px;border-radius:14px;border:1px solid var(--bd);background:#fff;text-align:center}
+.frm.on{border-color:var(--p);box-shadow:0 0 0 2px var(--pss)}
+.frm.lock .fr{filter:grayscale(.85);opacity:.45}
+.pbody>*{flex-shrink:0}
+.st2.lock .emb,.st2.lock .fr{filter:grayscale(.85);opacity:.5}
+</style>
+</helmet>
+<div class="phone" style="height:1380px">
+  <div class="ptop" style="gap:8px">
+    <button type="button" class="ib ghost" aria-label="Quay lại Thi đua"><span class="ms" aria-hidden="true">arrow_back</span></button>
+    <div class="f1"><h1 class="t-h1" style="font-size:20px">Bậc của bạn</h1><div class="t-m">Mùa 1 · khóa 2026–2027</div></div>
+    <button type="button" class="ib" aria-label="Luật lên bậc"><span class="ms" aria-hidden="true">help</span></button>
+  </div>
+  <div class="pbody" style="gap:12px">
+    <section class="card col g12 hero2" style="padding:18px;align-items:center;text-align:center">
+      <div style="position:relative"><span class="emb t-dong" style="width:84px;height:94px" aria-label="Đồng"><span class="ms f" style="font-size:39px" aria-hidden="true">shield</span></span></div>
+      <div style="position:relative"><div style="font-size:28px;font-weight:700;color:#8A431A;line-height:1.1">Đồng 2</div><div class="t-s"><b class="tn">1.240 XP</b> cả khóa · #92 / 128 khối</div></div>
+      <div class="div3" style="width:180px;position:relative"><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span></span></div>
+      <div class="col g6" style="width:100%;position:relative;gap:6px;text-align:left">
+        <div class="row sp"><span class="b6">Vượt 3 bạn trong khối lên Đồng 1</span><span class="t-m tn">mốc tuần này 1.325 XP</span></div>
+        <div class="prg"><i style="width:88%"></i></div>
+        <div class="row sp" style="margin-top:6px"><span class="t-s">Vượt 8 bạn lên <b>Bạc</b></span><span class="t-m tn">mốc 1.480 XP</span></div>
+        <div class="prg" style="height:8px"><i style="width:63%;background:linear-gradient(90deg,#DCE1E8,#8A94A6)"></i></div>
+      </div>
+      <button type="button" class="btn c" style="width:100%;position:relative">Làm bài lấy XP<span class="ms s" aria-hidden="true">arrow_forward</span></button>
+    </section>
+    <div class="t-ov" style="padding:4px 2px 0">8 bậc trong mùa</div>
+    <div class="card p0">
+      <div class="li st2 lock" style="min-height:60px;"><span class="emb t-ct" style="width:34px;height:38px" aria-label="Cao thủ"><span class="ms f" style="font-size:16px" aria-hidden="true">crown</span></span><div class="f1"><div class="b6">Cao thủ</div><div class="t-m tn">Top 3% · 4 bạn</div></div><span class="fr t-ct"><span class="ms f crn" aria-hidden="true">crown</span><span class="av" style="width:26px;height:26px;font-size:9px;background:var(--p);color:#fff">MA</span></span><span class="ms s c3" aria-label="Chưa mở">lock</span></div>
+      <div class="li st2 lock" style="min-height:60px;"><span class="emb t-kc" style="width:34px;height:38px" aria-label="Kim cương"><span class="ms f" style="font-size:16px" aria-hidden="true">diamond</span></span><div class="f1"><div class="b6">Kim cương</div><div class="t-m tn">Top 3–12% · 12 bạn</div></div><span class="fr t-kc"><span class="av" style="width:26px;height:26px;font-size:9px;background:var(--p);color:#fff">MA</span></span><span class="ms s c3" aria-label="Chưa mở">lock</span></div>
+      <div class="li st2 lock" style="min-height:60px;"><span class="emb t-bk" style="width:34px;height:38px" aria-label="Bạch kim"><span class="ms f" style="font-size:16px" aria-hidden="true">auto_awesome</span></span><div class="f1"><div class="b6">Bạch kim</div><div class="t-m tn">Top 12–25% · 17 bạn</div></div><span class="fr t-bk"><span class="av" style="width:26px;height:26px;font-size:9px;background:var(--p);color:#fff">MA</span></span><span class="ms s c3" aria-label="Chưa mở">lock</span></div>
+      <div class="li st2 lock" style="min-height:60px;"><span class="emb t-vang" style="width:34px;height:38px" aria-label="Vàng"><span class="ms f" style="font-size:16px" aria-hidden="true">star</span></span><div class="f1"><div class="b6">Vàng</div><div class="t-m tn">Top 25–45% · 25 bạn</div></div><span class="fr t-vang"><span class="av" style="width:26px;height:26px;font-size:9px;background:var(--p);color:#fff">MA</span></span><span class="ms s c3" aria-label="Chưa mở">lock</span></div>
+      <div class="li st2 lock" style="min-height:60px;"><span class="emb t-bac" style="width:34px;height:38px" aria-label="Bạc"><span class="ms f" style="font-size:16px" aria-hidden="true">shield</span></span><div class="f1"><div class="b6">Bạc</div><div class="t-m tn">Top 45–65% · 26 bạn</div></div><span class="fr t-bac"><span class="av" style="width:26px;height:26px;font-size:9px;background:var(--p);color:#fff">MA</span></span><span class="ms s c3" aria-label="Chưa mở">lock</span></div>
+      <div class="li st2 cur" style="min-height:60px;background:#FBF1E9"><span class="emb t-dong" style="width:34px;height:38px" aria-label="Đồng"><span class="ms f" style="font-size:16px" aria-hidden="true">shield</span></span><div class="f1"><div class="b6">Đồng</div><div class="t-m tn">Top 65–82% · 22 bạn</div></div><span class="fr t-dong"><span class="av" style="width:26px;height:26px;font-size:9px;background:var(--p);color:#fff">MA</span></span><span class="here">Bạn ở đây</span></div>
+      <div class="li st2 done" style="min-height:60px;"><span class="emb t-sat" style="width:34px;height:38px" aria-label="Sắt"><span class="ms f" style="font-size:16px" aria-hidden="true">hardware</span></span><div class="f1"><div class="b6">Sắt</div><div class="t-m tn">Top 82–94% · 15 bạn</div></div><span class="fr t-sat"><span class="av" style="width:26px;height:26px;font-size:9px;background:var(--p);color:#fff">MA</span></span><span class="ms f s cok" aria-label="Đã qua">check_circle</span></div>
+      <div class="li st2 done" style="min-height:60px;"><span class="emb t-go" style="width:34px;height:38px" aria-label="Gỗ"><span class="ms f" style="font-size:16px" aria-hidden="true">forest</span></span><div class="f1"><div class="b6">Gỗ</div><div class="t-m tn">6% cuối · 7 bạn</div></div><span class="fr t-go"><span class="av" style="width:26px;height:26px;font-size:9px;background:var(--p);color:#fff">MA</span></span><span class="ms f s cok" aria-label="Đã qua">check_circle</span></div>
+    </div>
+    <div class="card col g12" style="padding:16px">
+          <div class="rule"><span class="ico sm"><span class="ms f s" aria-hidden="true">groups</span></span><div><div class="b6">Bậc theo vị trí của bạn trong khối 7</div><div class="t-s">Xếp 128 bạn trong khối theo tổng XP cả khóa rồi chia theo tỉ lệ: top 3% Cao thủ, 3–12% Kim cương, 12–25% Bạch kim, 25–45% Vàng… Cập nhật 0 giờ thứ Hai hằng tuần.</div></div></div>
+          <div class="rule"><span class="ico sm wn"><span class="ms f s" aria-hidden="true">stairs</span></span><div><div class="b6">Mỗi bậc có 5 cấp: 5 → 4 → 3 → 2 → 1</div><div class="t-s">Chia đều theo vị trí trong bậc. Mốc XP để lên bậc thay đổi theo cả khối, nên luôn hiện "mốc tuần này" để bạn biết cần bao nhiêu XP.</div></div></div>
+          <div class="rule"><span class="ico sm ok"><span class="ms f s" aria-hidden="true">verified_user</span></span><div><div class="b6">Có thể tụt bậc, nhưng có 1 tuần bảo vệ</div><div class="t-s">Chỉ tụt khi ở dưới mốc 2 lần cập nhật liên tiếp. Khung viền đã mở giữ mãi. Chỉ xét bạn đã nộp ít nhất 3 bài trong khóa.</div></div></div>
+    </div>
+  </div>
+  <nav class="dock" aria-label="Điều hướng học sinh">
+    <button type="button" class="dk" aria-label="Trang chủ"><span class="ms" aria-hidden="true">home</span></button>
+    <button type="button" class="dk" aria-label="Bài tập"><span class="ms" aria-hidden="true">assignment</span></button>
+    <button type="button" class="dk on" aria-current="page"><span class="ms f" aria-hidden="true">emoji_events</span>Thi đua</button>
+    <button type="button" class="dk" aria-label="Hộp thư, 2 chưa đọc"><span class="ms" aria-hidden="true">inbox</span><span class="dot"></span></button>
+    <button type="button" class="dk" aria-label="Hồ sơ và huy hiệu"><span class="fr t-dong"><span class="av" style="width:26px;height:26px;font-size:9px;background:var(--p);color:#fff">MA</span></span></button>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1380}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

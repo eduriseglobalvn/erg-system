@@ -32,6 +32,12 @@ docs/**
 !docs/architecture/elearning-api-query-offline-audit.md
 !docs/deployment/
 !docs/deployment/dedicated-server.md
+!docs/superpowers/
+!docs/superpowers/specs/
+!docs/superpowers/specs/2026-11-12-student-portal-gamification-design.md
+!docs/design/
+!docs/design/student-portal/
+!docs/design/student-portal/**
 
 # Env (bổ sung tường minh ngoài *.local)
 .env

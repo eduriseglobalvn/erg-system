@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Học sinh · Thi đua (mobile mới)</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./erg.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400..600,0..1,0&amp;display=block">
+<style>
+body{margin:0}
+.fr{position:relative;display:inline-grid;place-items:center;border-radius:50%;padding:3px;flex-shrink:0}
+.fr>.av{border:2px solid #fff;margin:0}
+.fr.t-go{background:repeating-linear-gradient(115deg,#8B5A2B 0 4px,#A9743F 4px 7px,#6E4520 7px 9px)}
+.fr.t-sat{background:conic-gradient(from 200deg,#5B636E,#A3ABB5,#4A515B,#8E96A0,#5B636E)}
+.fr.t-dong{background:conic-gradient(from 200deg,#9A4E1F,#E3A06B,#8A431A,#D08850,#9A4E1F)}
+.fr.t-bac{background:conic-gradient(from 200deg,#8A94A6,#F4F6F9,#7C8698,#DCE1E8,#8A94A6)}
+.fr.t-vang{background:conic-gradient(from 200deg,#B07A00,#FFE08A,#A86F00,#F2C94C,#B07A00);box-shadow:0 0 0 2px #FFF3CC}
+.fr.t-bk{background:conic-gradient(from 200deg,#2E8F86,#B9F3EA,#227A72,#7FD9CD,#2E8F86);box-shadow:0 0 0 2px #DDF7F3}
+.fr.t-kc{background:conic-gradient(from 200deg,#2D5BD8,#A8C8FF,#6C3FD1,#7FB2FF,#3B6CF0,#C9B6FF,#2D5BD8);box-shadow:0 0 0 2px #E3ECFF,0 0 14px rgba(59,108,240,.35)}
+.fr.t-ct{background:conic-gradient(from 200deg,#7A1FA2,#F2C94C,#B0266B,#FFE08A,#7A1FA2);box-shadow:0 0 0 2px #FBE7FF,0 0 16px rgba(176,38,107,.35)}
+.fr .gem{position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);height:16px;min-width:16px;padding:0 5px;border-radius:999px;display:inline-grid;place-items:center;font-size:9px;font-weight:700;color:#fff;border:1.5px solid #fff;white-space:nowrap}
+.fr .crn{position:absolute;top:-13px;left:50%;transform:translateX(-50%);font-size:18px;color:#E2A400;filter:drop-shadow(0 1px 0 #8F6200)}
+.g-go{background:#8B5A2B}.g-sat{background:#5B636E}.g-dong{background:#B4632B}.g-bac{background:#8A94A6}.g-vang{background:#C98A04}.g-bk{background:#2E8F86}.g-kc{background:linear-gradient(90deg,#2D5BD8,#6C3FD1)}.g-ct{background:linear-gradient(90deg,#7A1FA2,#B0266B)}
+.emb{position:relative;display:inline-grid;place-items:center;clip-path:polygon(50% 0,100% 16%,100% 60%,50% 100%,0 60%,0 16%);color:#fff;font-weight:700}
+.emb::after{content:"";position:absolute;inset:0;background:linear-gradient(160deg,rgba(255,255,255,.55),rgba(255,255,255,0) 50%);pointer-events:none}
+.emb .ms{position:relative;z-index:1;filter:drop-shadow(0 1px 0 rgba(0,0,0,.25))}
+.emb.t-go{background:linear-gradient(#B07A45,#6E4520)}.emb.t-sat{background:linear-gradient(#A3ABB5,#4A515B)}.emb.t-dong{background:linear-gradient(#E3A06B,#8A431A)}.emb.t-bac{background:linear-gradient(#F4F6F9,#7C8698);color:#3D4553}
+.emb.t-vang{background:linear-gradient(#FFE08A,#A86F00)}.emb.t-bk{background:linear-gradient(#B9F3EA,#227A72)}.emb.t-kc{background:linear-gradient(#A8C8FF,#3B6CF0 55%,#6C3FD1)}.emb.t-ct{background:linear-gradient(#FFE08A,#B0266B 45%,#7A1FA2)}
+.tchip{display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 8px 0 6px;border-radius:999px;font-size:11px;font-weight:700;color:#fff;white-space:nowrap}
+.tchip.t-bac{color:#3D4553;background:linear-gradient(90deg,#DCE1E8,#AEB6C3)}
+
+.pbody>*{flex-shrink:0}
+.due{display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 9px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}
+.due.wn{background:var(--wnt);color:var(--wnx)}.due.n{background:var(--nt);color:var(--tx2)}.due.er{background:var(--ert);color:var(--erx)}
+.bub{max-width:80%;padding:10px 13px;border-radius:16px;font-size:14px;line-height:1.5}
+.bub.them{background:var(--bg2);border:1px solid var(--dv);border-top-left-radius:6px}
+.bub.me{background:var(--p);color:#fff;border-top-right-radius:6px;margin-left:auto}
+.day{align-self:center;font-size:12px;font-weight:600;color:var(--tx3);padding:2px 10px;border-radius:999px;background:var(--bg2)}
+.tag{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:999px;font-size:11px;font-weight:700;background:var(--int);color:var(--inx)}
+.rx{display:flex;gap:14px;align-items:center;font-size:12px;font-weight:600;color:var(--tx3)}
+.rx span{display:inline-flex;align-items:center;gap:4px}
+.comp{display:flex;gap:8px;align-items:center;padding:10px 12px;border-top:1px solid var(--dv);background:#fff}
+.comp .box{flex:1;min-height:44px;border:1px solid var(--bd);border-radius:22px;padding:11px 14px;color:var(--tx3);font-size:14px}
+.me-strip{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;border:1px solid #CFE3FB;background:linear-gradient(90deg,var(--pss),#fff 80%)}
+.cdn{display:inline-flex;white-space:nowrap;flex-shrink:0;gap:4px;align-items:center}
+.cdn b{min-width:28px;height:28px;padding:0 5px;border-radius:8px;background:#fff;border:1px solid var(--bd);display:inline-grid;place-items:center;font-size:14px;font-variant-numeric:tabular-nums}
+.cdn span{font-size:11px;color:var(--tx3);font-weight:600;margin-right:6px}
+.cdn span:last-child{margin-right:0}
+.arena{position:relative;overflow:hidden;background:linear-gradient(180deg,#F7FAFF 0,#fff 60%);padding:14px 12px 4px}
+.rays{position:absolute;left:50%;top:150px;width:560px;height:560px;transform:translate(-50%,-50%);background:repeating-conic-gradient(rgba(201,138,4,.10) 0 6deg,rgba(201,138,4,0) 6deg 18deg);-webkit-mask:radial-gradient(circle,#000 0,transparent 60%);mask:radial-gradient(circle,#000 0,transparent 60%);pointer-events:none}
+.cf{position:absolute;width:6px;height:11px;border-radius:2px;opacity:.75}
+.p3{display:flex;align-items:flex-end;gap:6px;position:relative}
+.p3 .c{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;text-align:center;gap:1px}
+.coin{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:13px;font-weight:700;text-shadow:0 1px 0 rgba(0,0,0,.25);margin-bottom:6px}
+.coin.s{background:radial-gradient(circle at 32% 28%,#fff 0,#C9D0DA 38%,#8A94A6 100%);box-shadow:0 3px 0 #626B7A}
+.coin.b{background:radial-gradient(circle at 32% 28%,#FFE3CC 0,#DB8E58 38%,#B4632B 100%);box-shadow:0 3px 0 #7F421A}
+.hero{position:relative;border-radius:50%;display:grid;place-items:center;font-weight:700;box-shadow:0 8px 14px rgba(29,29,31,.16)}
+.hero::after{content:"";position:absolute;inset:3px;border-radius:50%;background:linear-gradient(160deg,rgba(255,255,255,.55),rgba(255,255,255,0) 45%)}
+.crown{font-size:30px;color:#E2A400;filter:drop-shadow(0 2px 0 #8F6200);margin-bottom:-4px;position:relative;z-index:1}
+.p3 .nm{font-size:13px;font-weight:600;margin-top:6px;max-width:100%}
+.p3 .xp{font-size:16px;font-weight:700;font-variant-numeric:tabular-nums}
+.cube{width:100%;margin-top:8px}
+.cube .lid{height:20px;border-radius:5px 5px 0 0;transform:perspective(260px) rotateX(52deg);transform-origin:bottom;margin:0 4px -1px}
+.cube .face{border-radius:0 0 4px 4px;display:grid;place-items:start center;padding-top:8px;font-size:24px;font-weight:700;line-height:1;box-shadow:inset 0 -8px 14px rgba(0,0,0,.06)}
+.sh3{height:10px;width:96%;margin:-1px auto 0;border-radius:50%;background:radial-gradient(ellipse,rgba(29,29,31,.14),rgba(29,29,31,0) 70%)}
+.trk{position:relative;height:8px;border-radius:999px;background:#fff;border:1px solid #CFE3FB}
+.trk>i{position:absolute;left:0;top:0;bottom:0;width:90%;border-radius:999px;background:var(--p)}
+.note3{display:flex;align-items:flex-start;justify-content:center;gap:6px;padding:10px 8px 12px;position:relative;font-size:12px;line-height:1.4;color:var(--tx2);text-align:center}
+</style>
+</helmet>
+<div class="phone" style="height:1380px">
+  <div class="ptop">
+    <h1 class="t-h1 f1">Thi đua</h1>
+    <button type="button" class="ib" aria-label="Cách tính XP"><span class="ms" aria-hidden="true">help</span></button>
+  </div>
+  <div class="pbody" style="gap:12px">
+    <div class="me-strip" aria-label="Thứ hạng hiện tại của bạn">
+      <span class="fr t-dong"><span class="av" style="width:40px;height:40px;font-size:14px;background:var(--p);color:#fff">MA</span></span>
+      <div class="f1 col g2">
+        <span class="row g4"><span class="t-m b6">Thứ hạng tuần</span><span class="tchip g-dong t-dong">Đồng 2</span></span>
+        <span class="row g8"><span class="b7 tn" style="font-size:24px;line-height:1;color:var(--p)">#4</span><span class="t-m">/ 32 · Khối #12</span></span>
+      </div>
+      <span class="bd ok nd"><span class="ms xs" aria-hidden="true">arrow_upward</span>2</span>
+    </div>
+
+    <div class="seg"><button type="button" class="on">Tuần này</button><button type="button">Tháng 11</button><button type="button">Cả khóa</button></div>
+    <div class="chips"><button type="button" class="chip on">Lớp 7A</button><button type="button" class="chip">Khối 7</button></div>
+
+    <section class="card p0 arena" aria-label="Top 3 tuần này">
+      <div class="row sp" style="position:relative;padding:0 4px 14px;margin-bottom:6px;border-bottom:1px dashed var(--bd)">
+        <span class="t-h3">Top 3 tuần này</span>
+        <span class="row g8"><span class="t-m">Chốt sau</span><span class="cdn" aria-label="2 ngày 14 giờ"><b>2</b><span>ngày</span><b>14</b><span>giờ</span></span></span>
+      </div>
+      <div class="rays" aria-hidden="true"></div>
+      <span class="cf" style="left:8%;top:100px;background:var(--p);transform:rotate(25deg)" aria-hidden="true"></span>
+      <span class="cf" style="right:9%;top:96px;background:var(--fire);transform:rotate(40deg)" aria-hidden="true"></span>
+      <span class="cf" style="left:22%;top:170px;background:var(--gold);transform:rotate(-30deg)" aria-hidden="true"></span>
+      <span class="cf" style="right:20%;top:180px;background:var(--ok);transform:rotate(-15deg)" aria-hidden="true"></span>
+      <div class="p3">
+        <div class="c">
+          <span class="coin s">2</span>
+          <span class="hero" style="width:54px;height:54px;font-size:17px;background:var(--nt);color:var(--nx);border:2px solid #fff;outline:2px solid var(--silver)">ĐH</span>
+          <span class="nm ell">Đức Huy</span><span class="xp">486</span>
+          <div class="cube"><div class="lid" style="background:linear-gradient(#F7F8FA,#E6E9EE)"></div><div class="face" style="height:64px;background:linear-gradient(#E3E7ED,#CDD3DC);color:#5B6474">2</div></div>
+          <div class="sh3"></div>
+        </div>
+        <div class="c" style="flex:1.15">
+          <span class="ms f crown" aria-hidden="true">crown</span>
+          <span class="hero" style="width:70px;height:70px;font-size:21px;background:#FDF3D7;color:#7A5A00;border:3px solid #fff;outline:3px solid var(--gold);box-shadow:0 0 0 8px rgba(242,201,76,.22),0 10px 18px rgba(143,98,0,.22)">KT</span>
+          <span class="nm ell" style="font-size:14px">Khánh Thy</span><span class="xp" style="font-size:19px">512</span>
+          <div class="cube"><div class="lid" style="background:linear-gradient(#FFF8E1,#FBE7A8)"></div><div class="face" style="height:90px;background:linear-gradient(#F9E3A0,#EFC85E);color:#7A5A00">1</div></div>
+          <div class="sh3"></div>
+        </div>
+        <div class="c">
+          <span class="coin b">3</span>
+          <span class="hero" style="width:54px;height:54px;font-size:17px;background:#F8E6DA;color:#7C3A12;border:2px solid #fff;outline:2px solid var(--bronze)">GB</span>
+          <span class="nm ell">Gia Bảo</span><span class="xp">420</span>
+          <div class="cube"><div class="lid" style="background:linear-gradient(#FDF1E8,#F4D9C5)"></div><div class="face" style="height:48px;background:linear-gradient(#F3D6C1,#E5B593);color:#7C3A12">3</div></div>
+          <div class="sh3"></div>
+        </div>
+      </div>
+      <div class="note3"><span class="ms f xs" style="color:var(--gold)" aria-hidden="true">military_tech</span><span>Top 3 lúc chốt bảng nhận huy hiệu Vàng · Bạc · Đồng</span></div>
+    </section>
+
+    <div class="card col g8" style="padding:14px;border-color:#CFE3FB;background:var(--pss)">
+      <div class="row sp"><span class="b6">Còn 40 XP là lên bục</span><span class="t-m tn">380 / 420</span></div>
+      <div class="trk" role="img" aria-label="380 trên 420 XP"><i></i></div>
+      <button type="button" class="btn c" style="width:100%">Làm 1 bài để lên bục<span class="ms s" aria-hidden="true">arrow_forward</span></button>
+    </div>
+
+    <div class="card p0">
+      <sc-for list="{{rows}}" as="r" hint-placeholder-count="6">
+        <div class="li" style="min-height:58px;{{r.bg}}">
+          <span class="b7 tn" style="width:24px;text-align:center">{{r.rank}}</span>
+          <span class="fr t-{{r.tier}}"><span class="av">{{r.ini}}</span></span>
+          <div class="f1" style="min-width:0"><div class="b6 ell">{{r.name}}</div><div class="row g4 t-m"><span class="ms f xs" style="color:var(--fire)" aria-hidden="true">local_fire_department</span>{{r.streak}} ngày</div></div>
+          <span class="b7 tn">{{r.xp}}</span>
+          <span class="ms s {{r.trendCls}}" aria-label="{{r.trendLabel}}">{{r.trend}}</span>
+        </div>
+      </sc-for>
+      <button type="button" class="link" style="padding:12px 16px">Xem cả lớp<span class="ms xs" aria-hidden="true">chevron_right</span></button>
+    </div>
+    <p class="hint">XP: hoàn thành bài +10–40 · nộp trước hạn +10 · chuỗi ≥ 7 ngày ×1,2. Không hiện điểm số của ai.</p>
+  </div>
+  <nav class="dock" aria-label="Điều hướng học sinh">
+    <button type="button" class="dk" aria-label="Trang chủ"><span class="ms" aria-hidden="true">home</span></button>
+    <button type="button" class="dk" aria-label="Bài tập"><span class="ms" aria-hidden="true">assignment</span></button>
+    <button type="button" class="dk on" aria-current="page"><span class="ms f" aria-hidden="true">emoji_events</span>Thi đua</button>
+    <button type="button" class="dk" aria-label="Hộp thư, 2 chưa đọc"><span class="ms" aria-hidden="true">inbox</span><span class="dot"></span></button>
+    <button type="button" class="dk" aria-label="Hồ sơ, bậc Đồng 2"><span class="fr t-dong"><span class="av" style="width:26px;height:26px;font-size:9px;background:var(--p);color:#fff">MA</span></span></button>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1380}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const up = { trend: 'arrow_upward', trendCls: 'cok', trendLabel: 'Tăng hạng' };
+    const down = { trend: 'arrow_downward', trendCls: 'cer', trendLabel: 'Giảm hạng' };
+    const same = { trend: 'remove', trendCls: 'c3', trendLabel: 'Giữ hạng' };
+    const row = function (rank, ini, name, streak, xp, t, me, tier) {
+      return Object.assign({ tier: tier, rank: rank, ini: ini, name: name, streak: streak, xp: xp, bg: me ? 'background:var(--pss);box-shadow:inset 3px 0 0 var(--p)' : '' }, t);
+    };
+    return {
+      rows: [
+        row(4, 'MA', 'Minh Anh (bạn)', 12, 380, up, true, 'dong'),
+        row(5, 'TL', 'Thảo Linh', 9, 362, down, false, 'vang'),
+        row(6, 'QH', 'Quang Hải', 4, 318, up, false, 'vang'),
+        row(7, 'NV', 'Ngọc Vy', 15, 296, same, false, 'bac'),
+        row(8, 'TK', 'Tuấn Kiệt', 2, 241, down, false, 'dong')
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

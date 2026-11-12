@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Học sinh · Lên bậc (mobile)</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./erg.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400..600,0..1,0&amp;display=block">
+<style>
+body{margin:0}
+.fr{position:relative;display:inline-grid;place-items:center;border-radius:50%;padding:3px;flex-shrink:0}
+.fr>.av{border:2px solid #fff;margin:0}
+.fr.t-go{background:repeating-linear-gradient(115deg,#8B5A2B 0 4px,#A9743F 4px 7px,#6E4520 7px 9px)}
+.fr.t-sat{background:conic-gradient(from 200deg,#5B636E,#A3ABB5,#4A515B,#8E96A0,#5B636E)}
+.fr.t-dong{background:conic-gradient(from 200deg,#9A4E1F,#E3A06B,#8A431A,#D08850,#9A4E1F)}
+.fr.t-bac{background:conic-gradient(from 200deg,#8A94A6,#F4F6F9,#7C8698,#DCE1E8,#8A94A6)}
+.fr.t-vang{background:conic-gradient(from 200deg,#B07A00,#FFE08A,#A86F00,#F2C94C,#B07A00);box-shadow:0 0 0 2px #FFF3CC}
+.fr.t-bk{background:conic-gradient(from 200deg,#2E8F86,#B9F3EA,#227A72,#7FD9CD,#2E8F86);box-shadow:0 0 0 2px #DDF7F3}
+.fr.t-kc{background:conic-gradient(from 200deg,#2D5BD8,#A8C8FF,#6C3FD1,#7FB2FF,#3B6CF0,#C9B6FF,#2D5BD8);box-shadow:0 0 0 2px #E3ECFF,0 0 14px rgba(59,108,240,.35)}
+.fr.t-ct{background:conic-gradient(from 200deg,#7A1FA2,#F2C94C,#B0266B,#FFE08A,#7A1FA2);box-shadow:0 0 0 2px #FBE7FF,0 0 16px rgba(176,38,107,.35)}
+.fr .gem{position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);height:16px;min-width:16px;padding:0 5px;border-radius:999px;display:inline-grid;place-items:center;font-size:9px;font-weight:700;color:#fff;border:1.5px solid #fff;white-space:nowrap}
+.fr .crn{position:absolute;top:-13px;left:50%;transform:translateX(-50%);font-size:18px;color:#E2A400;filter:drop-shadow(0 1px 0 #8F6200)}
+.g-go{background:#8B5A2B}.g-sat{background:#5B636E}.g-dong{background:#B4632B}.g-bac{background:#8A94A6}.g-vang{background:#C98A04}.g-bk{background:#2E8F86}.g-kc{background:linear-gradient(90deg,#2D5BD8,#6C3FD1)}.g-ct{background:linear-gradient(90deg,#7A1FA2,#B0266B)}
+.emb{position:relative;display:inline-grid;place-items:center;clip-path:polygon(50% 0,100% 16%,100% 60%,50% 100%,0 60%,0 16%);color:#fff;font-weight:700}
+.emb::after{content:"";position:absolute;inset:0;background:linear-gradient(160deg,rgba(255,255,255,.55),rgba(255,255,255,0) 50%);pointer-events:none}
+.emb .ms{position:relative;z-index:1;filter:drop-shadow(0 1px 0 rgba(0,0,0,.25))}
+.emb.t-go{background:linear-gradient(#B07A45,#6E4520)}.emb.t-sat{background:linear-gradient(#A3ABB5,#4A515B)}.emb.t-dong{background:linear-gradient(#E3A06B,#8A431A)}.emb.t-bac{background:linear-gradient(#F4F6F9,#7C8698);color:#3D4553}
+.emb.t-vang{background:linear-gradient(#FFE08A,#A86F00)}.emb.t-bk{background:linear-gradient(#B9F3EA,#227A72)}.emb.t-kc{background:linear-gradient(#A8C8FF,#3B6CF0 55%,#6C3FD1)}.emb.t-ct{background:linear-gradient(#FFE08A,#B0266B 45%,#7A1FA2)}
+.tchip{display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 8px 0 6px;border-radius:999px;font-size:11px;font-weight:700;color:#fff;white-space:nowrap}
+.tchip.t-bac{color:#3D4553;background:linear-gradient(90deg,#DCE1E8,#AEB6C3)}
+
+.lv{position:relative;overflow:hidden;background:linear-gradient(180deg,#F3F5F8 0,#fff 60%);display:flex;flex-direction:column;align-items:center;text-align:center}
+.lv .rays{position:absolute;left:50%;top:190px;width:760px;height:760px;transform:translate(-50%,-50%);background:repeating-conic-gradient(rgba(138,148,166,.16) 0 7deg,rgba(138,148,166,0) 7deg 20deg);-webkit-mask:radial-gradient(circle,#000 0,transparent 62%);mask:radial-gradient(circle,#000 0,transparent 62%);pointer-events:none}
+.lv .glow{position:absolute;left:50%;top:190px;width:260px;height:260px;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.95),rgba(255,255,255,0) 70%)}
+.cf{position:absolute;width:8px;height:14px;border-radius:2px;opacity:.85}
+.cf.r{width:7px;height:7px;border-radius:50%}
+.lv>*{position:relative}
+.kick{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 12px;border-radius:999px;background:#fff;border:1px solid var(--bd);font-size:12px;font-weight:700;color:var(--tx2)}
+.big{font-size:34px;font-weight:700;letter-spacing:-.01em;line-height:1.15;margin:0}
+.swap{display:flex;align-items:center;justify-content:center;gap:14px;padding:14px 16px;border-radius:16px;background:#fff;border:1px solid var(--bd);width:100%}
+.swap .col{align-items:center;gap:4px}
+.newfr{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:16px;background:#fff;border:1px solid #D5DBE4;width:100%;text-align:left;box-shadow:0 0 0 4px #F1F3F6}
+.nxt{display:flex;align-items:center;gap:10px;width:100%;text-align:left;font-size:13px;color:var(--tx2)}
+.prg{position:relative;flex:1;height:8px;border-radius:999px;background:var(--dv);overflow:hidden}
+.prg>i{position:absolute;left:0;top:0;bottom:0;width:12%;border-radius:999px;background:linear-gradient(90deg,#DCE1E8,#8A94A6)}
+</style>
+</helmet>
+<div class="phone lv" style="padding:0 20px">
+
+    <div class="rays" aria-hidden="true"></div>
+    <div class="glow" aria-hidden="true"></div>
+    <span class="cf" style="left:10%;top:70px;background:var(--p);transform:rotate(25deg)" aria-hidden="true"></span>
+    <span class="cf" style="left:20%;top:180px;background:var(--gold);transform:rotate(-35deg)" aria-hidden="true"></span>
+    <span class="cf r" style="left:28%;top:110px;background:var(--ok)" aria-hidden="true"></span>
+    <span class="cf" style="right:12%;top:80px;background:var(--fire);transform:rotate(40deg)" aria-hidden="true"></span>
+    <span class="cf" style="right:22%;top:200px;background:#8A94A6;transform:rotate(-15deg)" aria-hidden="true"></span>
+    <span class="cf r" style="right:30%;top:60px;background:var(--p)" aria-hidden="true"></span>
+    <span class="cf" style="left:6%;top:260px;background:#6C3FD1;transform:rotate(60deg)" aria-hidden="true"></span>
+    <span class="cf r" style="right:7%;top:270px;background:var(--gold)" aria-hidden="true"></span>
+    <span class="kick" style="margin-top:40px"><span class="ms f xs" style="color:var(--gold)" aria-hidden="true">celebration</span>Cập nhật bậc · thứ Hai 16/11</span>
+    <div style="margin:22px 0 14px"><span class="emb t-bac" style="width:128px;height:143px" aria-label="Bạc"><span class="ms f" style="font-size:59px" aria-hidden="true">shield</span></span></div>
+    <h1 class="big">Lên bậc Bạc!</h1>
+    <p class="t-s" style="font-size:15px;margin:6px 0 18px">Tuần qua bạn vượt <b>11 bạn</b> trong khối 7 · giờ ở top 63%</p>
+    <div class="col g12" style="width:100%;gap:12px">
+      <div class="swap" aria-label="Từ Đồng 1 lên Bạc 5">
+        <div class="col"><span class="emb t-dong" style="width:40px;height:45px" aria-label="Đồng"><span class="ms f" style="font-size:18px" aria-hidden="true">shield</span></span><span class="t-m b6">Đồng 1</span></div>
+        <span class="ms" style="color:var(--tx3);font-size:28px" aria-hidden="true">arrow_forward</span>
+        <div class="col"><span class="emb t-bac" style="width:48px;height:54px" aria-label="Bạc"><span class="ms f" style="font-size:22px" aria-hidden="true">shield</span></span><span class="b6" style="font-size:13px">Bạc 5</span></div>
+      </div>
+      <div class="newfr">
+        <span class="fr t-bac"><span class="av" style="width:56px;height:56px;font-size:20px;background:var(--p);color:#fff">MA</span></span>
+        <div class="f1"><div class="b6">Khung viền Bạc đã mở</div><div class="t-m">Hiện quanh ảnh của bạn trên bảng xếp hạng và trong menu</div></div>
+      </div>
+      <div class="nxt"><span class="t-m b6" style="white-space:nowrap">Tiếp: Bạc 4</span><div class="prg" aria-label="Vừa vào Bạc 5"><i></i></div><span class="t-m" style="white-space:nowrap">vượt 2 bạn</span></div>
+    </div>
+    <div class="col g8" style="width:100%;margin-top:auto;padding-bottom:28px;gap:8px">
+      <button type="button" class="btn c lg" style="width:100%">Dùng khung Bạc</button>
+      <button type="button" class="btn t" style="width:100%">Để sau</button>
+      <span class="t-m">Đổi khung bất cứ lúc nào ở Hồ sơ › Khung viền</span>
+    </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

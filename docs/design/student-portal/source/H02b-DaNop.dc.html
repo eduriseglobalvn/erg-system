@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Học sinh · Bài đã nộp</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./erg.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400..600,0..1,0&amp;display=block">
+<style>
+body{margin:0}
+.scb{width:64px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;height:56px;border-radius:12px;font-variant-numeric:tabular-nums}
+.scb b{font-size:20px;line-height:1.1}
+.scb span{font-size:11px;font-weight:600;opacity:.8}
+.scb.ok{background:var(--okt);color:var(--okx)}.scb.in{background:var(--int);color:var(--inx)}.scb.er{background:var(--ert);color:var(--erx)}
+</style>
+</helmet>
+<div class="phone" style="height:1000px">
+  <div class="ptop">
+    <h1 class="t-h1 f1">Bài tập</h1>
+    <button type="button" class="ib" aria-label="Tìm bài"><span class="ms" aria-hidden="true">search</span></button>
+  </div>
+  <div class="pbody" style="gap:12px">
+    <div class="seg"><button type="button">Cần làm <span class="cnt">4</span></button><button type="button" class="on">Đã nộp <span class="cnt">5</span></button><button type="button">Quá hạn <span class="cnt er">1</span></button></div>
+
+    <div class="card row g12" style="padding:14px 16px">
+      <div class="ring" style="width:60px;height:60px;background:conic-gradient(var(--p) 0 245deg, var(--dv) 0)"><div style="width:46px;height:46px"><span class="b7 tn" style="font-size:14px">6,8</span></div></div>
+      <div class="f1 col g2">
+        <div class="t-m">Điểm trung bình · 5 bài</div>
+        <div class="row g8"><span class="b7 tn" style="font-size:20px">6,8<span class="c3" style="font-size:13px">/10</span></span><span class="bd ok nd">Đúng 74/112 câu</span></div>
+        <div class="t-m">Mỗi bài lấy lần nộp gần nhất</div>
+      </div>
+    </div>
+
+    <sc-for list="{{rows}}" as="a" hint-placeholder-count="5">
+      <button type="button" class="card col g8" style="text-align:left;padding:14px 16px">
+        <div class="row top g12">
+          <div class="f1 col g2">
+            <div class="b6">{{a.title}}</div>
+            <div class="t-m">{{a.meta}}</div>
+            <div class="row g8" style="margin-top:6px"><span class="ms f xs cok" aria-hidden="true">check_circle</span><span class="t-s tn"><b>Đúng {{a.correct}} câu</b> · {{a.pct}}</span></div>
+            <div class="bar sm {{a.barCls}}"><i style="width:{{a.pct}}"></i></div>
+          </div>
+          <div class="scb {{a.band}}" aria-label="Điểm {{a.score10}} trên 10"><b>{{a.score10}}</b><span>/10</span></div>
+        </div>
+        <div class="row sp">
+          <span class="row g4 t-m"><span class="ms xs" aria-hidden="true">schedule</span>Nộp {{a.at}} · {{a.raw}}</span>
+          <span class="link">Xem bài làm<span class="ms xs" aria-hidden="true">chevron_right</span></span>
+        </div>
+      </button>
+    </sc-for>
+  </div>
+  <nav class="dock" aria-label="Điều hướng học sinh">
+    <button type="button" class="dk" aria-label="Trang chủ"><span class="ms" aria-hidden="true">home</span></button>
+    <button type="button" class="dk on" aria-current="page"><span class="ms f" aria-hidden="true">assignment</span>Bài tập</button>
+    <button type="button" class="dk" aria-label="Thi đua"><span class="ms" aria-hidden="true">emoji_events</span></button>
+    <button type="button" class="dk" aria-label="Hộp thư, 3 chưa đọc"><span class="ms" aria-hidden="true">inbox</span><span class="dot"></span></button>
+    <button type="button" class="dk" aria-label="Hồ sơ và huy hiệu"><span class="av">MA</span></button>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1000}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const r = function (title, meta, at, correct, pct, score10, raw, band) {
+      return { title: title, meta: meta, at: at, correct: correct, pct: pct, score10: score10, raw: raw, band: band, barCls: band === 'ok' ? 'ok' : (band === 'er' ? 'wn' : '') };
+    };
+    return {
+      rows: [
+        r('Unit 4 · Vocabulary quiz', 'Tiếng Anh · 20 câu · 1 lần làm', '11/11 20:14', '19/20', '95%', '9,5', '95/100 điểm', 'ok'),
+        r('Luyện tập: Phương trình bậc nhất', 'Toán · 22 câu · 2 lần làm', '10/11 19:02', '16/22', '73%', '7,25', '72,5/100 điểm', 'in'),
+        r('Trắc nghiệm: Từ loại tiếng Việt', 'Ngữ văn · 25 câu · 1 lần làm', '09/11 21:40', '17/25', '68%', '6,8', '6,8/10 điểm', 'in'),
+        r('Kiểm tra 15 phút: Đơn thức', 'Toán · 20 câu · 1 lần làm', '07/11 08:15', '9/20', '45%', '4,5', '45/100 điểm', 'er')
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>
