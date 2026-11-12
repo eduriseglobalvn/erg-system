@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { viCopy } from "@/features/elearning/student-dashboard/components/student-dashboard-workspace.copy";
 import type { StudentDashboardAssignment } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
-import { formatAverageScore, resolveOverviewHero } from "@/features/elearning/student-dashboard/utils/student-overview-hero";
+import { averageOfScored, formatAverageScore, formatTimeLeft, resolveDueMetric, resolveOverviewHero } from "@/features/elearning/student-dashboard/utils/student-overview-hero";
 
 function assignment(overrides: Partial<StudentDashboardAssignment> = {}): StudentDashboardAssignment {
   return {
@@ -58,5 +58,36 @@ describe("formatAverageScore", () => {
   it("formats real scores as percentages", () => {
     expect(formatAverageScore(85, 2)).toBe("85%");
     expect(formatAverageScore(0, 2)).toBe("0%");
+  });
+});
+
+describe("due metric and the explained average", () => {
+  const now = Date.parse("2026-11-12T10:00:00+07:00");
+
+  it("counts handed-in work among assignments whose deadline has come", () => {
+    expect(resolveDueMetric([
+      assignment({ id: "a", dueAt: "2026-11-10T23:59:00+07:00", status: "submitted" }),
+      assignment({ id: "b", dueAt: "2026-11-11T23:59:00+07:00", status: "overdue" }),
+      assignment({ id: "c", dueAt: "2026-11-20T23:59:00+07:00" }),
+    ], now)).toEqual({ kind: "due", done: 1, total: 2 });
+  });
+
+  it("before any deadline, gives the time left to the nearest open one; null without deadlines", () => {
+    expect(resolveDueMetric([
+      assignment({ id: "a", dueAt: "2026-11-14T10:00:00+07:00" }),
+      assignment({ id: "b", dueAt: "2026-11-13T13:00:00+07:00", status: "submitted" }),
+    ], now)).toEqual({ kind: "next", msLeft: 2 * 86_400_000 });
+    expect(resolveDueMetric([assignment()], now)).toBeNull();
+    expect(formatTimeLeft(2 * 86_400_000 + 3 * 3_600_000)).toBe("Còn 2 ngày 3 giờ");
+    expect(formatTimeLeft(20 * 60_000)).toBe("Còn 20 phút");
+  });
+
+  it("averages each scored assignment's own percent", () => {
+    expect(averageOfScored([
+      assignment({ id: "a", score: 8, maxScore: 10 }),
+      assignment({ id: "b", score: 1, maxScore: 4 }),
+      assignment({ id: "c" }),
+    ])).toEqual({ count: 2, percent: 53 });
+    expect(averageOfScored([assignment()])).toBeNull();
   });
 });

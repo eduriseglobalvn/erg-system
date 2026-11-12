@@ -1,7 +1,7 @@
 import AssignmentRoundedIcon from "@mui/icons-material/AssignmentRounded";
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 import ScheduleRoundedIcon from "@mui/icons-material/ScheduleRounded";
-import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
+import EventAvailableRoundedIcon from "@mui/icons-material/EventAvailableRounded";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
@@ -9,8 +9,8 @@ import Stack from "@mui/material/Stack";
 import type { AssignmentFilter } from "@/features/elearning/student-dashboard/components/student-dashboard-assignments-view";
 import { MetricCard } from "@/features/elearning/student-dashboard/components/student-dashboard-view-primitives";
 import type { DashboardCopy, StudentPageKey } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
-import type { StudentDashboardAssignment, StudentDashboardProfile } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
-import { formatAverageScore, type OverviewHero } from "@/features/elearning/student-dashboard/utils/student-overview-hero";
+import type { StudentDashboardAssignment } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
+import { formatTimeLeft, resolveDueMetric, type OverviewHero } from "@/features/elearning/student-dashboard/utils/student-overview-hero";
 
 /** The four overview metrics, shared by the desktop and mobile overview so labels and values never drift apart. */
 export function OverviewMetrics({
@@ -21,7 +21,6 @@ export function OverviewMetrics({
   onOpenFilter,
   openAssignments,
   overdueAssignments,
-  profile,
   unavailable = false,
 }: {
   columns: Record<string, string>;
@@ -32,16 +31,22 @@ export function OverviewMetrics({
   onOpenFilter?: (filter: AssignmentFilter) => void;
   openAssignments: StudentDashboardAssignment[];
   overdueAssignments: StudentDashboardAssignment[];
-  profile: StudentDashboardProfile;
   /** The load failed: show "—" instead of zeros that look like real numbers. */
   unavailable?: boolean;
 }) {
   const total = openAssignments.length + completedAssignments.length;
+  const due = resolveDueMetric([...openAssignments, ...completedAssignments]);
   return (
     <Box sx={{ display: "grid", gap, gridTemplateColumns: columns }}>
       <MetricCard icon={<AssignmentRoundedIcon fontSize="small" />} label={copy.stats.open} onClick={onOpenFilter && (() => onOpenFilter("todo"))} value={unavailable ? "—" : openAssignments.length} />
       <MetricCard icon={<ScheduleRoundedIcon fontSize="small" />} label={copy.stats.overdue} onClick={onOpenFilter && (() => onOpenFilter("overdue"))} tone="error" value={unavailable ? "—" : overdueAssignments.length} />
-      <MetricCard icon={<SchoolRoundedIcon fontSize="small" />} label={copy.stats.average} tone="info" value={unavailable ? "—" : formatAverageScore(profile.averageScore, completedAssignments.length)} />
+      <MetricCard
+        icon={<EventAvailableRoundedIcon fontSize="small" />}
+        label={due?.kind === "next" ? copy.stats.nextDue : copy.stats.dueDone}
+        onClick={onOpenFilter && (() => onOpenFilter(due?.kind === "due" && due.done < due.total ? "overdue" : "todo"))}
+        tone="info"
+        value={unavailable || !due ? "—" : due.kind === "next" ? formatTimeLeft(due.msLeft) : `${due.done}/${due.total} · ${Math.round((due.done / due.total) * 100)}%`}
+      />
       <MetricCard icon={<CheckCircleRoundedIcon fontSize="small" />} label={copy.stats.completed} onClick={onOpenFilter && (() => onOpenFilter("submitted"))} tone="success" value={unavailable ? "—" : `${completedAssignments.length}/${total}`} />
     </Box>
   );

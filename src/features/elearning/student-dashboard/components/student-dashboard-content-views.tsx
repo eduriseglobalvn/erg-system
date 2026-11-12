@@ -51,7 +51,6 @@ export function OverviewView({ announcement, assignmentsFailed, assignmentsLoadi
         onOpenFilter={(filter) => onPageChange("assignments", filter)}
         openAssignments={openAssignments}
         overdueAssignments={overdueAssignments}
-        profile={profile}
       />
       <Box sx={{ display: "grid", gap: 2.5, gridTemplateColumns: { xs: "1fr", lg: "1.7fr 1fr" }, alignItems: "start" }}>
         <SectionCard action={<Button variant="text" onClick={() => onPageChange("assignments")} size="small">Xem tất cả</Button>} title={copy.todayTitle}>

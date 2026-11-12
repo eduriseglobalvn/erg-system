@@ -32,6 +32,8 @@ export const viCopy: DashboardCopy = {
     open: "Bài đang mở",
     overdue: "Bài quá hạn",
     average: "Điểm trung bình",
+    dueDone: "Bài đến hạn đã nộp",
+    nextDue: "Hạn nộp gần nhất",
     completed: "Bài đã hoàn thành",
   },
   priority: {
@@ -134,6 +136,8 @@ export const enCopy: DashboardCopy = {
     open: "Open tasks",
     overdue: "Overdue",
     average: "Average score",
+    dueDone: "Due work handed in",
+    nextDue: "Next deadline",
     completed: "Completed tasks",
   },
   priority: {
