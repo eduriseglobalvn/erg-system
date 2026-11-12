@@ -20,6 +20,12 @@ export type CreateStudentDiscussionInput = {
   readonly title: string;
 };
 
+export type DeleteStudentDiscussionItemInput = {
+  readonly targetId: string;
+  readonly targetType: string;
+  readonly tenantId?: string | null | undefined;
+};
+
 export type GradebookWorkspaceInput = {
   readonly classId: string;
   readonly schoolId?: string | null | undefined;
@@ -41,6 +47,13 @@ export type ReplyStudentDiscussionInput = {
   readonly tenantId?: string | null | undefined;
 };
 
+export type SetStudentDiscussionHiddenInput = {
+  readonly hidden: boolean;
+  readonly targetId: string;
+  readonly targetType: string;
+  readonly tenantId?: string | null | undefined;
+};
+
 export type SetStudentDiscussionReactionInput = {
   readonly reaction: string;
   readonly targetId: string;
@@ -55,6 +68,13 @@ export type StudentDashboardInput = {
 };
 
 export type StudentDiscussionFeedInput = {
+  readonly page?: number | null | undefined;
+  readonly size?: number | null | undefined;
+  readonly tenantId?: string | null | undefined;
+};
+
+export type StudentDiscussionModerationFeedInput = {
+  readonly classId: string;
   readonly page?: number | null | undefined;
   readonly size?: number | null | undefined;
   readonly tenantId?: string | null | undefined;
@@ -90,6 +110,32 @@ export type UpsertGradebookScoreInput = {
   readonly subjectId: string;
   readonly tenantId?: string | null | undefined;
 };
+
+export type ElearningDiscussionModerationClassesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ElearningDiscussionModerationClassesQuery = { readonly elearning: { readonly discussionModerationClasses: ReadonlyArray<{ readonly id: string, readonly name: string | null }> } };
+
+export type ElearningDiscussionModerationFeedQueryVariables = Exact<{
+  input: StudentDiscussionModerationFeedInput;
+}>;
+
+
+export type ElearningDiscussionModerationFeedQuery = { readonly elearning: { readonly discussionModerationFeed: { readonly page: number, readonly size: number, readonly totalItems: number, readonly hasNext: boolean, readonly items: ReadonlyArray<{ readonly id: string, readonly authorName: string | null, readonly authorInitials: string | null, readonly title: string | null, readonly content: string | null, readonly createdAt: string | null, readonly hidden: boolean, readonly comments: ReadonlyArray<{ readonly id: string, readonly authorName: string | null, readonly authorInitials: string | null, readonly content: string | null, readonly createdAt: string | null, readonly hidden: boolean, readonly replies: ReadonlyArray<{ readonly id: string, readonly authorName: string | null, readonly authorInitials: string | null, readonly content: string | null, readonly createdAt: string | null, readonly hidden: boolean }> }> }> } } };
+
+export type ElearningSetStudentDiscussionHiddenMutationVariables = Exact<{
+  input: SetStudentDiscussionHiddenInput;
+}>;
+
+
+export type ElearningSetStudentDiscussionHiddenMutation = { readonly setStudentDiscussionHidden: { readonly targetType: string, readonly targetId: string, readonly hidden: boolean, readonly deleted: boolean } };
+
+export type ElearningDeleteStudentDiscussionItemMutationVariables = Exact<{
+  input: DeleteStudentDiscussionItemInput;
+}>;
+
+
+export type ElearningDeleteStudentDiscussionItemMutation = { readonly deleteStudentDiscussionItem: { readonly targetType: string, readonly targetId: string, readonly hidden: boolean, readonly deleted: boolean } };
 
 export type ElearningStudentDashboardQueryVariables = Exact<{
   input?: StudentDashboardInput | null | undefined;

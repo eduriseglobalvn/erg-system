@@ -8,6 +8,7 @@ import DashboardRoundedIcon from "@mui/icons-material/DashboardRounded";
 import EventAvailableRoundedIcon from "@mui/icons-material/EventAvailableRounded";
 import FingerprintRoundedIcon from "@mui/icons-material/FingerprintRounded";
 import FolderRoundedIcon from "@mui/icons-material/FolderRounded";
+import ForumRoundedIcon from "@mui/icons-material/ForumRounded";
 import GroupsRoundedIcon from "@mui/icons-material/GroupsRounded";
 import InboxRoundedIcon from "@mui/icons-material/InboxRounded";
 import MenuBookRoundedIcon from "@mui/icons-material/MenuBookRounded";
@@ -23,7 +24,7 @@ import type { ErgSheetTileItem } from "@/components/portal/erg-mobile-sheet-part
 import { LEARNING_RESOURCE_WORKSPACE_LABEL } from "@/components/learning-resources/learning-resource-workspace-labels";
 import { teacherPath } from "@/platform/workspaces/workspace-paths";
 
-export type LmsSection = "home" | "homework" | "score" | "attendance" | "schedule" | "classLog" | "resources" | "reports" | "timekeeping";
+export type LmsSection = "home" | "homework" | "score" | "attendance" | "schedule" | "classLog" | "discussion" | "resources" | "reports" | "timekeeping";
 export type LmsMobileSection = "home" | "calendar" | "learning" | "inbox" | "timekeeping" | "account";
 
 
@@ -41,6 +42,7 @@ export const lmsNavItems: NavItem[] = [
   { id: "attendance", label: "Điểm danh & KCT", path: teacherPath("/attendance"), icon: EventAvailableRoundedIcon },
   { id: "schedule", label: "Lịch làm việc", path: teacherPath("/calendar"), icon: CalendarMonthRoundedIcon },
   { id: "classLog", label: "Sổ đầu bài", path: teacherPath("/class-log"), icon: MenuBookRoundedIcon },
+  { id: "discussion", label: "Thảo luận", path: teacherPath("/discussion"), icon: ForumRoundedIcon },
   { id: "resources", label: LEARNING_RESOURCE_WORKSPACE_LABEL, path: teacherPath("/resources"), icon: FolderRoundedIcon },
   { id: "reports", label: "Báo cáo", path: teacherPath("/reports"), icon: FileText },
   { id: "timekeeping", label: "Chấm công", path: teacherPath("/timekeeping"), icon: FingerprintRoundedIcon },
@@ -97,6 +99,12 @@ export const LMS_MENU_GROUPS: MenuGroup[] = [
         label: "Sổ đầu bài",
         icon: <MenuBookRoundedIcon sx={{ fontSize: 24 }} />,
         path: teacherPath("/class-log"),
+      },
+      {
+        id: "discussion",
+        label: "Thảo luận",
+        icon: <ForumRoundedIcon />,
+        path: teacherPath("/discussion"),
       },
     ],
   },
@@ -163,6 +171,7 @@ export const lmsMobileMoreItems: LmsMobileMoreItem[] = [
   { group: "Giảng dạy", icon: <MenuBookRoundedIcon />, label: "Sổ đầu bài", path: teacherPath("/class-log") },
   { group: "Giảng dạy", icon: <BarChartRoundedIcon />, label: "Báo cáo lớp học", path: teacherPath("/reports") },
   { group: "Giảng dạy", icon: <FactCheckRoundedIcon />, label: "Bảng điểm", path: teacherPath("/score") },
+  { group: "Giảng dạy", icon: <ForumRoundedIcon />, label: "Thảo luận", path: teacherPath("/discussion") },
   { group: "Chấm công", icon: <FileText />, label: "Đơn từ", path: teacherPath("/timekeeping/requests"), tone: "success" },
   { group: "Chấm công", icon: <CalendarViewMonthRoundedIcon />, label: "Bảng công", path: teacherPath("/timekeeping/timesheet"), tone: "success" },
   { group: "Chấm công", icon: <PendingActionsRoundedIcon />, label: "Duyệt đơn", path: teacherPath("/timekeeping/approvals"), tone: "success" },

@@ -59,6 +59,7 @@ export const lcmsWorkspacePaths = [
   "calendar",
   "notifications",
   "notifications/compose",
+  "discussion",
   "ui-kit",
 ] as const;
 
@@ -106,6 +107,7 @@ export const lmsPaths = [
   "class-log",
   "resources",
   "reports",
+  "discussion",
   "timekeeping",
   "timekeeping/punch",
   "timekeeping/timesheet",

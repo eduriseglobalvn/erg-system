@@ -58,7 +58,7 @@ export const LMS_PERMISSION_CATALOG = [
 export type LmsPermission = (typeof LMS_PERMISSION_CATALOG)[number];
 
 /** Permissions of other BE modules that guard a Teacher route (not part of the lms.* role templates). */
-export const LMS_CROSS_MODULE_ROUTE_PERMISSIONS = ["notification.campaign.send"] as const;
+export const LMS_CROSS_MODULE_ROUTE_PERMISSIONS = ["notification.campaign.send", "elearning.discussion.moderate"] as const;
 
 export type LmsRoutePermission = LmsPermission | (typeof LMS_CROSS_MODULE_ROUTE_PERMISSIONS)[number];
 
@@ -86,6 +86,7 @@ export const LMS_ROUTE_PERMISSIONS = {
   "class-log": "lms.class_log.read",
   reports: "lms.report.read",
   resources: "lms.resource.read",
+  discussion: "elearning.discussion.moderate",
   timekeeping: "timekeeping.self",
   "timekeeping/punch": "timekeeping.self",
   "timekeeping/timesheet": "timekeeping.self",

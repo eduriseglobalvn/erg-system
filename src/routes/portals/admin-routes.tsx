@@ -27,6 +27,10 @@ const composePage = (name: "AdminNotificationComposePage" | "TeacherNotification
   lazyRouteComponent(() => import("@/app/pages/shared/notification-compose-page"), name);
 const inboxPage = (name: "AdminNotificationsPage" | "AdminNotificationDetailPage" | "AdminCampaignDetailPage") =>
   lazyRouteComponent(() => import("@/app/pages/shared/notification-inbox-page"), name);
+const discussionPage = lazyRouteComponent(
+  () => import("@/features/elearning/discussion-moderation/components/discussion-moderation-page"),
+  "AdminDiscussionModerationRoute",
+);
 const timekeepingPages = () => import("@/features/timekeeping/components/timekeeping-route-pages");
 const timekeepingPage = (name: keyof Awaited<ReturnType<typeof timekeepingPages>>) => lazyRouteComponent(timekeepingPages, name);
 
@@ -47,6 +51,7 @@ function adminPageFor(wPath: string) {
   if (wPath === "ui-kit") return page("AdminUiKitRoute");
   if (wPath === "notifications") return inboxPage("AdminNotificationsPage");
   if (wPath === "notifications/compose") return composePage("AdminNotificationComposePage");
+  if (wPath === "discussion") return discussionPage;
   if (wPath === "schools" || wPath.startsWith("schools/")) return page("AdminSchoolsRoute");
   return page("AdminGenericRoute");
 }

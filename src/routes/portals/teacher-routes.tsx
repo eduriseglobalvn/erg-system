@@ -37,6 +37,10 @@ const TeacherAssignHomeworkWithTheme = () => (
     <TeacherAssignHomeworkRoute />
   </AssignQuizThemeSlotProvider>
 );
+const discussionPage = lazyRouteComponent(
+  () => import("@/features/elearning/discussion-moderation/components/discussion-moderation-page"),
+  "TeacherDiscussionModerationRoute",
+);
 const timekeepingPages = () => import("@/features/timekeeping/components/timekeeping-route-pages");
 const timekeepingPage = (name: keyof Awaited<ReturnType<typeof timekeepingPages>>) => lazyRouteComponent(timekeepingPages, name);
 
@@ -61,6 +65,7 @@ const TEACHER_PAGES: Record<LmsPath, ReturnType<typeof page>> = {
   "class-log": page("TeacherClassLogRoute"),
   resources: page("TeacherResourcesRoute"),
   reports: page("TeacherReportsRoute"),
+  discussion: discussionPage,
   timekeeping: timekeepingPage("TeacherTimekeepingHomeRoute"),
   "timekeeping/punch": timekeepingPage("TeacherTimekeepingPunchRoute"),
   "timekeeping/timesheet": timekeepingPage("TeacherTimekeepingTimesheetRoute"),

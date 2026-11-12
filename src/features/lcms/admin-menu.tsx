@@ -6,6 +6,7 @@ import EventAvailableRoundedIcon from "@mui/icons-material/EventAvailableRounded
 import ExtensionRoundedIcon from "@mui/icons-material/ExtensionRounded";
 import FingerprintRoundedIcon from "@mui/icons-material/FingerprintRounded";
 import FolderRoundedIcon from "@mui/icons-material/FolderRounded";
+import ForumRoundedIcon from "@mui/icons-material/ForumRounded";
 import HowToRegRoundedIcon from "@mui/icons-material/HowToRegRounded";
 import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
 import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
@@ -119,6 +120,13 @@ export const ADMIN_BASE_MENU_GROUPS: MenuGroup[] = [
         icon: <FlagRoundedIcon sx={{ fontSize: 24 }} />,
         path: "/learning-outcomes",
         section: "Giảng dạy",
+      }),
+      item({
+        id: "admin-discussion",
+        label: "Thảo luận",
+        icon: <ForumRoundedIcon />,
+        path: "/discussion",
+        description: "Xem bài viết và bình luận của học viên theo lớp; ẩn hoặc xoá nội dung không phù hợp.",
       }),
     ],
   },

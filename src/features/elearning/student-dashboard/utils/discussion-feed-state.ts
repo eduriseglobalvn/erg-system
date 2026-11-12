@@ -92,7 +92,11 @@ export function addFeedComment({
 
   return {
     ...post,
-    comments: insertReplyAtMaxDepth(post.comments, parentCommentId, nextComment, 1).comments,
+    // Two levels only: a reply to a reply joins the replies of its root comment.
+    comments: post.comments.map((comment) =>
+      comment.id === parentCommentId || comment.replies.some((reply) => reply.id === parentCommentId)
+        ? { ...comment, replies: [...comment.replies, nextComment] }
+        : comment),
   };
 }
 
@@ -177,51 +181,6 @@ function toggleCommentReaction(
     ...comment,
     replies: comment.replies.map((reply) => toggleCommentReaction(reply, commentId, nextReaction)),
   };
-}
-
-function insertReplyAtMaxDepth(
-  comments: StudentDiscussionComment[],
-  parentCommentId: string,
-  reply: StudentDiscussionComment,
-  depth: number,
-): { comments: StudentDiscussionComment[]; inserted: boolean } {
-  let inserted = false;
-
-  const nextComments = comments.map((comment) => {
-    if (comment.id === parentCommentId) {
-      inserted = true;
-      return {
-        ...comment,
-        replies: [...comment.replies, reply],
-      };
-    }
-
-    const canNestFurther = depth < 2;
-    const nextReplies = canNestFurther
-      ? insertReplyAtMaxDepth(comment.replies, parentCommentId, reply, depth + 1)
-      : { comments: comment.replies, inserted: false };
-
-    if (nextReplies.inserted) {
-      inserted = true;
-      return {
-        ...comment,
-        replies: nextReplies.comments,
-      };
-    }
-
-    const flattenedParent = comment.replies.some((child) => child.id === parentCommentId);
-    if (depth === 2 && flattenedParent) {
-      inserted = true;
-      return {
-        ...comment,
-        replies: [...comment.replies, reply],
-      };
-    }
-
-    return comment;
-  });
-
-  return { comments: nextComments, inserted };
 }
 
 function getLatestCommentMs(comments: StudentDiscussionComment[]): number {
