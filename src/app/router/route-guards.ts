@@ -62,6 +62,10 @@ export function enforceWorkspaceRoute(
   }
   const decisions = routeAcceptedPermissions(entry).map((permission) => resolveAuthRouteAccess(auth, { workspace, permission }));
   if (decisions.includes("allow")) return;
+  // A student who opens a teacher/admin page goes to the student portal instead of an access-denied page.
+  if (workspace !== "STUDENT" && decisions[0] === "access-denied" && auth.hasPermission("elearning.assignment.read_self")) {
+    throw redirect({ to: "/student", replace: true });
+  }
   throwAuthRedirect(decisions[0], workspace, safeRedirect);
 }
 

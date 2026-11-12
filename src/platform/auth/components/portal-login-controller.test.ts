@@ -67,7 +67,7 @@ describe("post-login workspace redirect", () => {
         hasExplicitRedirect: true,
         session: session({
           accountEmail: "admin@erg.edu.vn",
-          permissions: ["lms.admin", "lms.dashboard.read"],
+          permissions: ["lms.admin", "lms.dashboard.read", "lms.schedule.read"],
           roles: ["admin"],
           workspaces: ["ADMIN", "TEACHER"],
         }),
@@ -75,5 +75,26 @@ describe("post-login workspace redirect", () => {
     );
 
     expect(navigateTo).toHaveBeenCalledWith("/teacher/calendar");
+  });
+
+  it("sends a student with a stale /teacher redirect to the student portal, not access denied", () => {
+    const navigateTo = vi.fn();
+    redirectAfterAuth(
+      { id: "student", email: "student@erg.edu.vn", role: "teacher" } as never,
+      "lms",
+      "/teacher/home",
+      navigateTo,
+      {
+        hasExplicitRedirect: true,
+        session: session({
+          accountEmail: "student@erg.edu.vn",
+          permissions: ["elearning.assignment.read_self", "lms.assignment.read_self"],
+          portals: ["elearning", "lms"],
+          workspaces: ["TEACHER", "STUDENT"],
+        }),
+      },
+    );
+
+    expect(navigateTo).toHaveBeenCalledWith("/student");
   });
 });

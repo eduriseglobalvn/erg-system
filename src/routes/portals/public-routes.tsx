@@ -79,6 +79,8 @@ function PortalIndexPage() {
     if (landingTarget?.workspace === "CRM") {
       return <PortalHostRedirect targetHost={canonicalCrmWorkspaceHostForRuntime()} targetPath="/" />;
     }
+    // Signed out: plain /login, so the landing is chosen from the account's own grants after sign-in (no stale redirect).
+    if (!auth.account) return <Navigate to="/login" replace />;
     const fallbackPath = preferredWorkspace === "ADMIN" || isPlatformAdmin ? "/admin" : "/teacher/home";
     return <Navigate to={landingTarget?.path ?? fallbackPath} replace />;
   }
