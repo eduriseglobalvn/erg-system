@@ -22,6 +22,7 @@ export type CreateStudentDiscussionInput = {
   readonly attachmentIds?: ReadonlyArray<string> | null | undefined;
   readonly content: string;
   readonly idempotencyKey: string;
+  readonly subject?: string | null | undefined;
   readonly tenantId?: string | null | undefined;
   readonly title: string;
 };
@@ -92,9 +93,12 @@ export type StudentDashboardInput = {
   readonly tenantId?: string | null | undefined;
 };
 
+/** filter: ALL (default), UNANSWERED (no reply yet) or MINE. subject narrows by the subject chip. */
 export type StudentDiscussionFeedInput = {
+  readonly filter?: string | null | undefined;
   readonly page?: number | null | undefined;
   readonly size?: number | null | undefined;
+  readonly subject?: string | null | undefined;
   readonly tenantId?: string | null | undefined;
 };
 

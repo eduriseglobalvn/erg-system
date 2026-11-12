@@ -31,7 +31,7 @@ function getInitials(name: string): string {
 export function TopMenuShell({
   account, activePage, children, copy, dashboardProfile,
   notificationAnchor, notifications, sidebarData, todoCount, unreadAnnouncementCount,
-  onAccountOpen, onNotificationClose, onNotificationClick,
+  onAccountOpen, onTierOpen, onNotificationClose, onNotificationClick,
   onNotificationOpen, onPageChange, onSignOut,
 }: {
   account: ElearningViewerSession | null;
@@ -45,6 +45,7 @@ export function TopMenuShell({
   todoCount: number;
   unreadAnnouncementCount: number;
   onAccountOpen: () => void;
+  onTierOpen?: () => void;
   onNotificationClose: () => void;
   onNotificationClick: (threadId: string, replyId?: string) => void;
   onNotificationOpen: (element: HTMLElement) => void;
@@ -79,7 +80,7 @@ export function TopMenuShell({
           activePage={activePage} data={sidebarData} initials={getInitials(studentName)} name={studentName}
           rankingEnabled={copy.navItems.some((item) => item.key === "ranking")} signedIn={Boolean(account)}
           todoCount={todoCount} unreadCount={unreadAnnouncementCount}
-          onAccountOpen={onAccountOpen} onPageChange={onPageChange} onSignOut={onSignOut}
+          onAccountOpen={onAccountOpen} onTierOpen={onTierOpen} onPageChange={onPageChange} onSignOut={onSignOut}
         />
       </Box>
 

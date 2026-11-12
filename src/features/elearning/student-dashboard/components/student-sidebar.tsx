@@ -64,7 +64,7 @@ function StatChip({ tone, icon, children }: { tone: "info" | "warning"; icon: Re
 }
 
 /** Student sidebar body (spec 7.0): brand, tier profile card, grouped nav, streak reminder, account row. */
-export function StudentSidebar({ activePage, data, initials, name, rankingEnabled, todoCount, unreadCount, onAccountOpen, onPageChange, onSignOut, signedIn }: {
+export function StudentSidebar({ activePage, data, initials, name, rankingEnabled, todoCount, unreadCount, onAccountOpen, onTierOpen, onPageChange, onSignOut, signedIn }: {
   activePage: StudentPageKey;
   data: StudentSidebarData;
   initials: string;
@@ -73,6 +73,8 @@ export function StudentSidebar({ activePage, data, initials, name, rankingEnable
   todoCount: number;
   unreadCount: number;
   onAccountOpen: () => void;
+  /** Opens the tier page (H15) from the profile card when the student has a tier. */
+  onTierOpen?: () => void;
   onPageChange: (page: StudentPageKey) => void;
   onSignOut: () => void;
   signedIn: boolean;
@@ -96,7 +98,7 @@ export function StudentSidebar({ activePage, data, initials, name, rankingEnable
           <Typography color="text.secondary" component="p" variant="caption">Cổng học sinh</Typography>
         </Box>
       </Box>
-      <ButtonBase aria-label="Mở hồ sơ" data-design="sidebar-profile" onClick={onAccountOpen} sx={{ alignItems: "stretch", bgcolor: t.color.surfaceMuted, border: 1, borderColor: "divider", borderRadius: `${t.radius.card}px`, display: "grid", gap: 1, mt: 1.5, p: 1.5, textAlign: "left", width: "100%" }}>
+      <ButtonBase aria-label="Mở hồ sơ" data-design="sidebar-profile" onClick={data.tier && onTierOpen ? onTierOpen : onAccountOpen} sx={{ alignItems: "stretch", bgcolor: t.color.surfaceMuted, border: 1, borderColor: "divider", borderRadius: `${t.radius.card}px`, display: "grid", gap: 1, mt: 1.5, p: 1.5, textAlign: "left", width: "100%" }}>
         <Box sx={{ alignItems: "center", display: "flex", gap: 1.25 }}>
           <ErgTierFrame size={36} tier={data.tier}>
             <Avatar sx={{ bgcolor: "primary.main", color: "primary.contrastText", typography: "caption", fontWeight: "fontWeightBold" }}>{initials}</Avatar>
