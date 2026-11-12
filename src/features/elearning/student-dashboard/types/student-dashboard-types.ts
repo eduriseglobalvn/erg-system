@@ -54,6 +54,18 @@ export type StudentDashboardAssignment = {
   lastActivityLabel?: string;
   focusNote?: string;
   attempts: StudentAssignmentAttempt[];
+  /** PRACTICE can be redone; TEST is one attempt. */
+  kind?: "PRACTICE" | "TEST";
+  estimatedMinutes?: number | null;
+  attemptCount?: number;
+  onTime?: boolean | null;
+  minutesBeforeDue?: number | null;
+  /** XP still on offer for handing in now; 0 once handed in. */
+  xpReward?: number;
+  /** Past the due date: new attempts are blocked. */
+  closed?: boolean;
+  /** Submitted but the teacher has not released the correct-answer count. */
+  correctCount?: number | null;
 };
 
 export type StudentDiscussionReply = {

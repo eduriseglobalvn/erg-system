@@ -48,6 +48,20 @@ query ElearningStudentDashboard($input: StudentDashboardInput) {
         dueAt
         scorePercent
         submittedAt
+        subjectName
+        teacherName
+        questionCount
+        estimatedMinutes
+        kind
+        answeredCount
+        score
+        maxScore
+        totalQuestions
+        attemptCount
+        onTime
+        minutesBeforeDue
+        xpReward
+        closed
       }
       nextActions {
         id
