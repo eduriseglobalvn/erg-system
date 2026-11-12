@@ -46,6 +46,8 @@ export type DashboardCopy = {
     open: string;
     overdue: string;
     average: string;
+    dueDone: string;
+    nextDue: string;
     completed: string;
   };
   priority: {
