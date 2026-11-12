@@ -16,6 +16,7 @@ import {
   type LeaderboardScope,
 } from "@/features/elearning/class-leaderboard/api/class-leaderboard-api";
 import { ClassLeaderboardTable } from "@/features/elearning/class-leaderboard/components/class-leaderboard-table";
+import { ViewerRankStrip } from "@/features/elearning/class-leaderboard/components/viewer-rank-strip";
 import { LeaderboardPodium } from "@/features/elearning/class-leaderboard/components/leaderboard-podium";
 import { LEADERBOARD_PERIODS, leaderboardClosesIn, leaderboardPeriodLabel } from "@/features/elearning/class-leaderboard/leaderboard-period";
 import { EmptyPanel, PageHeader, SectionCard, SkeletonRow } from "@/features/elearning/student-dashboard/components/student-dashboard-view-primitives";
@@ -65,6 +66,7 @@ export function RankingView({ accountId, classId, copy }: { accountId: string; c
         <EmptyPanel description={copy.ranking.errorDescription} title={copy.ranking.errorTitle} />
       ) : ranked ? (
         <>
+          <ViewerRankStrip entries={entries} label={scope === "CLASS" ? board.data?.className || "lớp" : "khối"} />
           <LeaderboardPodium entries={entries} />
           <ClassLeaderboardTable entries={entries} />
         </>
