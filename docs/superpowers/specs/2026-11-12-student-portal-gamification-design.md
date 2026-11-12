@@ -134,6 +134,7 @@ Xếp **mọi học sinh cùng trường, cùng khối, cùng năm học** đã 
 | 7 | Sắt (`sat`) | 82–94% | 15 | `hardware` |
 | 8 | Gỗ (`go`) | 6% cuối | 7 | `forest` |
 
+- **Lưu ý:** số chỗ trong bảng trên (12/25/26/7…) là số minh họa của canvas; cách làm tròn dưới đây cho 4/11/17/26/25/22/15/8 với N=128. Giao diện luôn hiển thị số do server trả về (`tierTable`), nên fixture dùng đúng bảng canvas, không tự tính ở FE.
 - Số chỗ mỗi bậc = `round(tỉ lệ × N)`; phần dư dồn cho Gỗ để tổng = N. Cao thủ tối thiểu 1 chỗ khi N ≥ 10.
 - Học sinh chưa đủ 3 bài: không có bậc. Giao diện hiện trạng thái "Nộp thêm X bài để được xếp bậc" (thiết kế **chưa có** → câu hỏi mở Q3).
 

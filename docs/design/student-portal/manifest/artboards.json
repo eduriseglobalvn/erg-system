@@ -1,0 +1,122 @@
+{
+  "H02b": {
+    "file": "H02b-DaNop.dc.html",
+    "contained": 0,
+    "viewport": "mobile"
+  },
+  "H02c": {
+    "file": "H02c-CanLam.dc.html",
+    "contained": 0,
+    "viewport": "mobile"
+  },
+  "H02d": {
+    "file": "H02d-QuaHan.dc.html",
+    "contained": 0,
+    "viewport": "mobile"
+  },
+  "H03b": {
+    "file": "H03b-ThiDua.dc.html",
+    "contained": 1,
+    "viewport": "mobile"
+  },
+  "H08": {
+    "file": "H08-ThiDua-Web.dc.html",
+    "contained": 1,
+    "viewport": "web"
+  },
+  "H09": {
+    "file": "H09-DaNop-Web.dc.html",
+    "contained": 0,
+    "viewport": "web"
+  },
+  "H10": {
+    "file": "H10-CanLam-Web.dc.html",
+    "contained": 0,
+    "viewport": "web"
+  },
+  "H11": {
+    "file": "H11-QuaHan-Web.dc.html",
+    "contained": 0,
+    "viewport": "web"
+  },
+  "H12": {
+    "file": "H12-HopThu-Web.dc.html",
+    "contained": 1,
+    "viewport": "web"
+  },
+  "H12m": {
+    "file": "H12m-HopThu-Chat.dc.html",
+    "contained": 0,
+    "viewport": "mobile"
+  },
+  "H13": {
+    "file": "H13-ThaoLuan-Web.dc.html",
+    "contained": 1,
+    "viewport": "web"
+  },
+  "H13m": {
+    "file": "H13m-ThaoLuan.dc.html",
+    "contained": 1,
+    "viewport": "mobile"
+  },
+  "H13m2": {
+    "file": "H13m2-ThaoLuan-ChuDe.dc.html",
+    "contained": 0,
+    "viewport": "mobile"
+  },
+  "H14": {
+    "file": "H14-CaLop-Web.dc.html",
+    "contained": 0,
+    "viewport": "web"
+  },
+  "H14m": {
+    "file": "H14m-CaLop.dc.html",
+    "contained": 0,
+    "viewport": "mobile"
+  },
+  "H15": {
+    "file": "H15-Bac-Web.dc.html",
+    "contained": 1,
+    "viewport": "web"
+  },
+  "H15m": {
+    "file": "H15m-Bac.dc.html",
+    "contained": 1,
+    "viewport": "mobile"
+  },
+  "H16": {
+    "file": "H16-LenBac-Web.dc.html",
+    "contained": 1,
+    "viewport": "web"
+  },
+  "H16m": {
+    "file": "H16m-LenBac.dc.html",
+    "contained": 1,
+    "viewport": "mobile"
+  },
+  "H17": {
+    "file": "H17-Khung-Web.dc.html",
+    "contained": 1,
+    "viewport": "web"
+  },
+  "H17m": {
+    "file": "H17m-Khung.dc.html",
+    "contained": 1,
+    "viewport": "mobile"
+  },
+  "H18": {
+    "file": "H18-BangBac-Web.dc.html",
+    "contained": 0,
+    "viewport": "web"
+  },
+  "H18m": {
+    "file": "H18m-BangBac.dc.html",
+    "contained": 0,
+    "viewport": "mobile"
+  },
+  "N14": {
+    "file": "N14-HS-HopThu.dc.html",
+    "contained": 1,
+    "viewport": "mobile"
+  }
+}
