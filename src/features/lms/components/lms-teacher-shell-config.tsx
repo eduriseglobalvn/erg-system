@@ -46,7 +46,7 @@ export const lmsNavItems: NavItem[] = [
   { id: "discussion", label: "Thảo luận", path: teacherPath("/discussion"), icon: ForumRoundedIcon },
   { id: "resources", label: LEARNING_RESOURCE_WORKSPACE_LABEL, path: teacherPath("/resources"), icon: FolderRoundedIcon },
   { id: "reports", label: "Báo cáo", path: teacherPath("/reports"), icon: FileText },
-  { id: "leaderboard", label: "Xếp hạng", path: teacherPath("/leaderboard"), icon: LeaderboardRoundedIcon },
+  { id: "leaderboard", label: "Thi đua", path: teacherPath("/leaderboard"), icon: LeaderboardRoundedIcon },
   { id: "timekeeping", label: "Chấm công", path: teacherPath("/timekeeping"), icon: FingerprintRoundedIcon },
 ];
 
@@ -132,7 +132,7 @@ export const LMS_MENU_GROUPS: MenuGroup[] = [
       },
       {
         id: "leaderboard",
-        label: "Xếp hạng",
+        label: "Thi đua",
         icon: <LeaderboardRoundedIcon />,
         path: teacherPath("/leaderboard"),
       },
@@ -180,7 +180,7 @@ export const lmsMobileMoreItems: LmsMobileMoreItem[] = [
   { group: "Giảng dạy", icon: <BarChartRoundedIcon />, label: "Báo cáo lớp học", path: teacherPath("/reports") },
   { group: "Giảng dạy", icon: <FactCheckRoundedIcon />, label: "Bảng điểm", path: teacherPath("/score") },
   { group: "Giảng dạy", icon: <ForumRoundedIcon />, label: "Thảo luận", path: teacherPath("/discussion") },
-  { group: "Giảng dạy", icon: <LeaderboardRoundedIcon />, label: "Xếp hạng", path: teacherPath("/leaderboard") },
+  { group: "Giảng dạy", icon: <LeaderboardRoundedIcon />, label: "Thi đua", path: teacherPath("/leaderboard") },
   { group: "Chấm công", icon: <FileText />, label: "Đơn từ", path: teacherPath("/timekeeping/requests"), tone: "success" },
   { group: "Chấm công", icon: <CalendarViewMonthRoundedIcon />, label: "Bảng công", path: teacherPath("/timekeeping/timesheet"), tone: "success" },
   { group: "Chấm công", icon: <PendingActionsRoundedIcon />, label: "Duyệt đơn", path: teacherPath("/timekeeping/approvals"), tone: "success" },

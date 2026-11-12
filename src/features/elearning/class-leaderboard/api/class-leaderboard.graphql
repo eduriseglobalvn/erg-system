@@ -4,7 +4,11 @@ query ElearningStudentClassLeaderboard($input: StudentClassLeaderboardInput) {
       classId
       className
       enabled
-      entries { rank studentId studentName averagePercent completedCount isViewer }
+      period
+      scope
+      periodEndsAt
+      viewerHidden
+      entries { rank studentId studentName xp streakDays rankChange isViewer }
     }
   }
 }
@@ -21,11 +25,19 @@ query ElearningClassLeaderboard($input: ClassLeaderboardInput!) {
       classId
       className
       enabled
-      entries { rank studentId studentName averagePercent completedCount isViewer }
+      period
+      scope
+      periodEndsAt
+      viewerHidden
+      entries { rank studentId studentName xp streakDays rankChange isViewer }
     }
   }
 }
 
 mutation ElearningSetClassLeaderboardEnabled($input: SetClassLeaderboardEnabledInput!) {
   setClassLeaderboardEnabled(input: $input) { id name leaderboardEnabled }
+}
+
+mutation ElearningSetMyLeaderboardHidden($input: SetMyLeaderboardHiddenInput!) {
+  setMyLeaderboardHidden(input: $input)
 }

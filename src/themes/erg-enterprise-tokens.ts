@@ -30,6 +30,8 @@ export const ergEnterpriseTokens = {
     info: "#0284C7",
     infoSoft: "rgba(2, 132, 199, 0.1)",
   },
+  // "Thi đua" podium (design H03): gold / silver / bronze for ranks 1-3.
+  medal: { gold: "#C9A227", silver: "#9A9AA3", bronze: "#B5743D" },
   // Tinted status badges: soft background + dark text of the same hue (plan 7.1).
   statusTint: {
     success: { bg: "#DCFAE5", color: "#04250E", dot: "#16A34A" },

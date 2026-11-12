@@ -13,6 +13,7 @@ export type AttendanceWorkspaceInput = {
 
 export type ClassLeaderboardInput = {
   readonly classId: string;
+  readonly period?: string | null | undefined;
   readonly tenantId?: string | null | undefined;
 };
 
@@ -58,6 +59,11 @@ export type SetClassLeaderboardEnabledInput = {
   readonly tenantId?: string | null | undefined;
 };
 
+export type SetMyLeaderboardHiddenInput = {
+  readonly hidden: boolean;
+  readonly tenantId?: string | null | undefined;
+};
+
 export type SetStudentDiscussionHiddenInput = {
   readonly hidden: boolean;
   readonly targetId: string;
@@ -72,8 +78,11 @@ export type SetStudentDiscussionReactionInput = {
   readonly tenantId?: string | null | undefined;
 };
 
+/** period: WEEK (default), MONTH or TERM. scope: CLASS (default) or GRADE. */
 export type StudentClassLeaderboardInput = {
   readonly classId?: string | null | undefined;
+  readonly period?: string | null | undefined;
+  readonly scope?: string | null | undefined;
   readonly tenantId?: string | null | undefined;
 };
 
@@ -132,7 +141,7 @@ export type ElearningStudentClassLeaderboardQueryVariables = Exact<{
 }>;
 
 
-export type ElearningStudentClassLeaderboardQuery = { readonly elearning: { readonly studentClassLeaderboard: { readonly classId: string, readonly className: string | null, readonly enabled: boolean, readonly entries: ReadonlyArray<{ readonly rank: number | null, readonly studentId: string, readonly studentName: string | null, readonly averagePercent: number | null, readonly completedCount: number, readonly isViewer: boolean }> } } };
+export type ElearningStudentClassLeaderboardQuery = { readonly elearning: { readonly studentClassLeaderboard: { readonly classId: string, readonly className: string | null, readonly enabled: boolean, readonly period: string, readonly scope: string, readonly periodEndsAt: string, readonly viewerHidden: boolean, readonly entries: ReadonlyArray<{ readonly rank: number | null, readonly studentId: string, readonly studentName: string | null, readonly xp: number, readonly streakDays: number, readonly rankChange: number | null, readonly isViewer: boolean }> } } };
 
 export type ElearningLeaderboardClassesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -144,7 +153,7 @@ export type ElearningClassLeaderboardQueryVariables = Exact<{
 }>;
 
 
-export type ElearningClassLeaderboardQuery = { readonly elearning: { readonly classLeaderboard: { readonly classId: string, readonly className: string | null, readonly enabled: boolean, readonly entries: ReadonlyArray<{ readonly rank: number | null, readonly studentId: string, readonly studentName: string | null, readonly averagePercent: number | null, readonly completedCount: number, readonly isViewer: boolean }> } } };
+export type ElearningClassLeaderboardQuery = { readonly elearning: { readonly classLeaderboard: { readonly classId: string, readonly className: string | null, readonly enabled: boolean, readonly period: string, readonly scope: string, readonly periodEndsAt: string, readonly viewerHidden: boolean, readonly entries: ReadonlyArray<{ readonly rank: number | null, readonly studentId: string, readonly studentName: string | null, readonly xp: number, readonly streakDays: number, readonly rankChange: number | null, readonly isViewer: boolean }> } } };
 
 export type ElearningSetClassLeaderboardEnabledMutationVariables = Exact<{
   input: SetClassLeaderboardEnabledInput;
@@ -152,6 +161,13 @@ export type ElearningSetClassLeaderboardEnabledMutationVariables = Exact<{
 
 
 export type ElearningSetClassLeaderboardEnabledMutation = { readonly setClassLeaderboardEnabled: { readonly id: string, readonly name: string | null, readonly leaderboardEnabled: boolean } };
+
+export type ElearningSetMyLeaderboardHiddenMutationVariables = Exact<{
+  input: SetMyLeaderboardHiddenInput;
+}>;
+
+
+export type ElearningSetMyLeaderboardHiddenMutation = { readonly setMyLeaderboardHidden: boolean };
 
 export type ElearningDiscussionModerationClassesQueryVariables = Exact<{ [key: string]: never; }>;
 

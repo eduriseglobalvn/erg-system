@@ -4,6 +4,8 @@ import type {
   ElearningLeaderboardClassesQuery,
   ElearningSetClassLeaderboardEnabledMutation,
   ElearningSetClassLeaderboardEnabledMutationVariables,
+  ElearningSetMyLeaderboardHiddenMutation,
+  ElearningSetMyLeaderboardHiddenMutationVariables,
   ElearningStudentClassLeaderboardQuery,
   ElearningStudentClassLeaderboardQueryVariables,
 } from "@/lib/api/generated/graphql";
@@ -14,20 +16,23 @@ import ClassLeaderboardDocument from "./class-leaderboard.graphql?raw";
 export type ClassLeaderboard = ElearningClassLeaderboardQuery["elearning"]["classLeaderboard"];
 export type ClassLeaderboardEntry = ClassLeaderboard["entries"][number];
 export type LeaderboardClass = ElearningLeaderboardClassesQuery["elearning"]["leaderboardClasses"][number];
+export type LeaderboardPeriod = "WEEK" | "MONTH" | "TERM";
+export type LeaderboardScope = "CLASS" | "GRADE";
 
 /** Teacher pages talk to the backend as "lms", Admin pages as "lcms"; the backend scopes classes by role. */
 export const classLeaderboardKeys = {
   classes: (portal: GraphQlPortal) => ["class-leaderboard", portal, "classes"] as const,
-  board: (portal: GraphQlPortal, classId: string) => ["class-leaderboard", portal, "board", classId] as const,
-  student: (accountId: string, classId: string) => ["class-leaderboard", "student", accountId, classId] as const,
+  board: (portal: GraphQlPortal, classId: string, period: LeaderboardPeriod) => ["class-leaderboard", portal, "board", classId, period] as const,
+  student: (accountId: string, classId: string, period: LeaderboardPeriod, scope: LeaderboardScope) =>
+    ["class-leaderboard", "student", accountId, classId, period, scope] as const,
 };
 
 function isBoard(value: unknown): value is ClassLeaderboard {
   return isObject(value) && Array.isArray(value.entries);
 }
 
-/** The signed-in student's class; `enabled: false` (no entries) once the teacher switches it off. */
-export async function loadStudentClassLeaderboard(classId: string, signal?: AbortSignal) {
+/** The signed-in student's class (or whole grade) ranked by XP; `enabled: false` (no entries) once the teacher switches it off. */
+export async function loadStudentClassLeaderboard(classId: string, period: LeaderboardPeriod, scope: LeaderboardScope, signal?: AbortSignal) {
   const tenantId = getDefaultTenantId();
   const response = await graphQlRequest<ElearningStudentClassLeaderboardQuery, ElearningStudentClassLeaderboardQueryVariables & Record<string, unknown>>({
     operationName: "ElearningStudentClassLeaderboard",
@@ -35,7 +40,7 @@ export async function loadStudentClassLeaderboard(classId: string, signal?: Abor
     query: ClassLeaderboardDocument,
     signal,
     tenantId,
-    variables: { input: { classId: classId || null, tenantId } },
+    variables: { input: { classId: classId || null, period, scope, tenantId } },
   });
   return validateResponse(response, (value): value is ElearningStudentClassLeaderboardQuery =>
     isObject(value) && isObject(value.elearning) && isBoard(value.elearning.studentClassLeaderboard),
@@ -54,13 +59,13 @@ export async function loadLeaderboardClasses(portal: GraphQlPortal, signal?: Abo
   "elearning.leaderboard-classes").elearning.leaderboardClasses;
 }
 
-export async function loadClassLeaderboard(portal: GraphQlPortal, classId: string, signal?: AbortSignal) {
+export async function loadClassLeaderboard(portal: GraphQlPortal, classId: string, period: LeaderboardPeriod, signal?: AbortSignal) {
   const response = await graphQlRequest<ElearningClassLeaderboardQuery, ElearningClassLeaderboardQueryVariables & Record<string, unknown>>({
     operationName: "ElearningClassLeaderboard",
     portal,
     query: ClassLeaderboardDocument,
     signal,
-    variables: { input: { classId } },
+    variables: { input: { classId, period } },
   });
   return validateResponse(response, (value): value is ElearningClassLeaderboardQuery =>
     isObject(value) && isObject(value.elearning) && isBoard(value.elearning.classLeaderboard),
@@ -73,5 +78,17 @@ export async function setClassLeaderboardEnabled(portal: GraphQlPortal, classId:
     portal,
     query: ClassLeaderboardDocument,
     variables: { input: { classId, enabled } },
+  });
+}
+
+/** A student hides themselves from classmates; they keep seeing their own rank. */
+export async function setMyLeaderboardHidden(hidden: boolean) {
+  const tenantId = getDefaultTenantId();
+  return graphQlRequest<ElearningSetMyLeaderboardHiddenMutation, ElearningSetMyLeaderboardHiddenMutationVariables & Record<string, unknown>>({
+    operationName: "ElearningSetMyLeaderboardHidden",
+    portal: "elearning",
+    query: ClassLeaderboardDocument,
+    tenantId,
+    variables: { input: { hidden, tenantId } },
   });
 }

@@ -4,25 +4,31 @@ import Box from "@mui/material/Box";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Stack from "@mui/material/Stack";
 import Switch from "@mui/material/Switch";
+import Tab from "@mui/material/Tab";
+import Tabs from "@mui/material/Tabs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import { ErgEmptyState, ErgSkeleton } from "@/components/erg-mui/erg-feedback";
 import { ErgSelect } from "@/components/erg-mui/erg-form";
 import { ErgPageHeader } from "@/components/erg-mui/erg-page-header";
+import { ergSegmentedTabsSx } from "@/components/erg-mui/erg-tabs";
 import type { GraphQlPortal } from "@/lib/graphql-client";
 import {
   classLeaderboardKeys,
   loadClassLeaderboard,
   loadLeaderboardClasses,
   setClassLeaderboardEnabled,
+  type LeaderboardPeriod,
 } from "@/features/elearning/class-leaderboard/api/class-leaderboard-api";
 import { ClassLeaderboardTable } from "@/features/elearning/class-leaderboard/components/class-leaderboard-table";
+import { LEADERBOARD_PERIODS, leaderboardPeriodLabel } from "@/features/elearning/class-leaderboard/leaderboard-period";
 
-/** "Xếp hạng" for Teacher (classes they teach) and Admin (every class of the tenant): view and switch on/off for students. */
+/** "Thi đua" (XP board) for Teacher (classes they teach) and Admin (every class of the tenant): view and switch on/off for students. */
 export function ClassLeaderboardPage({ portal }: { portal: GraphQlPortal }) {
   const queryClient = useQueryClient();
   const [pickedClassId, setPickedClassId] = useState("");
+  const [period, setPeriod] = useState<LeaderboardPeriod>("WEEK");
 
   const classes = useQuery({
     queryKey: classLeaderboardKeys.classes(portal),
@@ -31,8 +37,8 @@ export function ClassLeaderboardPage({ portal }: { portal: GraphQlPortal }) {
   const classId = pickedClassId || classes.data?.[0]?.id || "";
   const board = useQuery({
     enabled: Boolean(classId),
-    queryKey: classLeaderboardKeys.board(portal, classId),
-    queryFn: ({ signal }) => loadClassLeaderboard(portal, classId, signal),
+    queryKey: classLeaderboardKeys.board(portal, classId, period),
+    queryFn: ({ signal }) => loadClassLeaderboard(portal, classId, period, signal),
   });
   const enabled = classes.data?.find((item) => item.id === classId)?.leaderboardEnabled ?? true;
 
@@ -50,8 +56,8 @@ export function ClassLeaderboardPage({ portal }: { portal: GraphQlPortal }) {
   return (
     <Box sx={{ maxWidth: 880, mx: "auto", px: { xs: 2, md: 0 }, py: { xs: 2, md: 3 } }}>
       <ErgPageHeader
-        title="Xếp hạng"
-        description="Điểm trung bình các bài học sinh đã nộp trong lớp (mỗi bài tính lần nộp gần nhất). Học sinh chưa nộp bài nào đứng cuối, không có hạng."
+        title="Thi đua"
+        description="Xếp theo XP: mỗi bài nộp lần đầu +10–40 theo số câu, nộp trước hạn +10, chuỗi ≥ 7 ngày ×1,2. Không dùng điểm số. Học sinh chưa có XP đứng cuối, không có hạng."
       />
       {classes.data?.length ? (
         <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ alignItems: { sm: "center" }, mb: 2 }}>
@@ -74,6 +80,11 @@ export function ClassLeaderboardPage({ portal }: { portal: GraphQlPortal }) {
             label="Hiện xếp hạng cho học sinh"
           />
         </Stack>
+      ) : null}
+      {classId ? (
+        <Tabs aria-label="Kỳ thi đua" value={period} variant="fullWidth" onChange={(_, value: LeaderboardPeriod) => setPeriod(value)} sx={{ ...ergSegmentedTabsSx, mb: 2 }}>
+          {LEADERBOARD_PERIODS.map((value) => <Tab key={value} value={value} label={leaderboardPeriodLabel(value)} />)}
+        </Tabs>
       ) : null}
       {loading ? (
         <Stack spacing={1}>

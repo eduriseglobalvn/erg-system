@@ -131,7 +131,7 @@ export const ADMIN_BASE_MENU_GROUPS: MenuGroup[] = [
       }),
       item({
         id: "admin-leaderboard",
-        label: "Xếp hạng",
+        label: "Thi đua",
         icon: <LeaderboardRoundedIcon />,
         path: "/leaderboard",
         description: "Xem bảng xếp hạng từng lớp và bật hoặc tắt xếp hạng với học sinh.",
