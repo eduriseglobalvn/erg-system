@@ -9,9 +9,9 @@ export type StudentViewState =
       assignmentId: string;
     };
 
-export type StudentPageKey = "overview" | "assignments" | "scores" | "discussion" | "announcements" | "account";
+export type StudentPageKey = "overview" | "assignments" | "scores" | "discussion" | "ranking" | "announcements" | "account";
 
-export type StudentDockPageKey = "overview" | "assignments" | "scores" | "discussion" | "announcements" | "account";
+export type StudentDockPageKey = "overview" | "assignments" | "scores" | "discussion" | "ranking" | "announcements" | "account";
 
 export type DiscussionScrollTarget = {
   replyId?: string;
@@ -121,4 +121,12 @@ export type DashboardCopy = {
   sessionEyebrow: string;
   sessionDescription: (subject: string, teacher: string, dueLabel: string) => string;
   backToDashboard: string;
+  ranking: {
+    title: string;
+    description: string;
+    emptyTitle: string;
+    emptyDescription: string;
+    errorTitle: string;
+    errorDescription: string;
+  };
 };

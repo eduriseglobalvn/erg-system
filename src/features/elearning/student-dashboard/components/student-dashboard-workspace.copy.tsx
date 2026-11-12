@@ -2,17 +2,21 @@ import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurned
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
 import ForumOutlinedIcon from "@mui/icons-material/ForumOutlined";
+import LeaderboardOutlinedIcon from "@mui/icons-material/LeaderboardOutlined";
 
 
 import type { StudentAssignmentStatus } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
 import type { DashboardCopy } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
 
+const NAV_ICON_SX = { fontSize: 18 } as const;
+
 export const viCopy: DashboardCopy = {
   navItems: [
-    { key: "overview", label: "Tổng quan", icon: <HomeOutlinedIcon sx={{ fontSize: 18 }} /> },
-    { key: "assignments", label: "Bài tập", icon: <AssignmentTurnedInOutlinedIcon sx={{ fontSize: 18 }} /> },
-    { key: "discussion", label: "Thảo luận", icon: <ForumOutlinedIcon sx={{ fontSize: 18 }} /> },
-    { key: "announcements", label: "Hộp thư", icon: <NotificationsNoneOutlinedIcon sx={{ fontSize: 18 }} /> },
+    { key: "overview", label: "Tổng quan", icon: <HomeOutlinedIcon sx={NAV_ICON_SX} /> },
+    { key: "assignments", label: "Bài tập", icon: <AssignmentTurnedInOutlinedIcon sx={NAV_ICON_SX} /> },
+    { key: "discussion", label: "Thảo luận", icon: <ForumOutlinedIcon sx={NAV_ICON_SX} /> },
+    { key: "ranking", label: "Xếp hạng", icon: <LeaderboardOutlinedIcon sx={NAV_ICON_SX} /> },
+    { key: "announcements", label: "Hộp thư", icon: <NotificationsNoneOutlinedIcon sx={NAV_ICON_SX} /> },
   ],
   heroEyebrow: "Bảng học tập",
   learnerFallbackName: "bạn",
@@ -109,14 +113,23 @@ export const viCopy: DashboardCopy = {
   sessionDescription: (subject: string, teacher: string, dueLabel: string) =>
     `${subject} • ${teacher} • ${dueLabel}. Hoàn thành trọn phiên để hệ thống cập nhật tiến độ và điểm số.`,
   backToDashboard: "Quay lại",
+  ranking: {
+    title: "Xếp hạng lớp",
+    description: "Điểm trung bình các bài đã nộp (mỗi bài tính lần nộp gần nhất). Bằng điểm thì ai nộp nhiều bài hơn đứng trước.",
+    emptyTitle: "Chưa có xếp hạng",
+    emptyDescription: "Khi các bạn trong lớp nộp bài, bảng xếp hạng sẽ hiện ở đây.",
+    errorTitle: "Không tải được xếp hạng",
+    errorDescription: "Vui lòng thử lại sau.",
+  },
 };
 
 export const enCopy: DashboardCopy = {
   navItems: [
-    { key: "overview", label: "Overview", icon: <HomeOutlinedIcon sx={{ fontSize: 18 }} /> },
-    { key: "assignments", label: "Assignments", icon: <AssignmentTurnedInOutlinedIcon sx={{ fontSize: 18 }} /> },
-    { key: "discussion", label: "Discussion", icon: <ForumOutlinedIcon sx={{ fontSize: 18 }} /> },
-    { key: "announcements", label: "Notices", icon: <NotificationsNoneOutlinedIcon sx={{ fontSize: 18 }} /> },
+    { key: "overview", label: "Overview", icon: <HomeOutlinedIcon sx={NAV_ICON_SX} /> },
+    { key: "assignments", label: "Assignments", icon: <AssignmentTurnedInOutlinedIcon sx={NAV_ICON_SX} /> },
+    { key: "discussion", label: "Discussion", icon: <ForumOutlinedIcon sx={NAV_ICON_SX} /> },
+    { key: "ranking", label: "Ranking", icon: <LeaderboardOutlinedIcon sx={NAV_ICON_SX} /> },
+    { key: "announcements", label: "Notices", icon: <NotificationsNoneOutlinedIcon sx={NAV_ICON_SX} /> },
   ],
   heroEyebrow: "Learning board",
   learnerFallbackName: "there",
@@ -213,4 +226,12 @@ export const enCopy: DashboardCopy = {
   sessionDescription: (subject: string, teacher: string, dueLabel: string) =>
     `${subject} • ${teacher} • ${dueLabel}. Finish the full session to refresh progress and score.`,
   backToDashboard: "Back",
+  ranking: {
+    title: "Class ranking",
+    description: "Average score of handed-in work (the latest hand-in of each assignment). On a tie, more completed work ranks higher.",
+    emptyTitle: "No ranking yet",
+    emptyDescription: "The ranking appears once classmates hand in work.",
+    errorTitle: "Could not load the ranking",
+    errorDescription: "Please try again later.",
+  },
 };

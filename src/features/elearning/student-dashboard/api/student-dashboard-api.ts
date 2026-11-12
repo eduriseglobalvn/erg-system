@@ -147,6 +147,8 @@ function mapProfile(
     totalAssignments: activeAssignmentCount || assignmentCount || 0,
     motivationPoints: null,
     weeklyGoalProgress: null,
+    classId: profile?.academicClassId || "",
+    leaderboardEnabled: profile?.leaderboardEnabled === true,
   };
 }
 

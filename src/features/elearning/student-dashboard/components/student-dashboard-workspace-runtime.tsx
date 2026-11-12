@@ -11,15 +11,9 @@ import {
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import {
-  logoutElearningViewerSession,
-} from "@/platform/auth/api/elearning-viewer-session";
-import {
-  useI18n,
-} from "@/platform/i18n";
-import {
-  useNavigate,
-} from "@tanstack/react-router";
+import { logoutElearningViewerSession } from "@/platform/auth/api/elearning-viewer-session";
+import { useI18n } from "@/platform/i18n";
+import { useNavigate } from "@tanstack/react-router";
 import { studentPath } from "@/platform/workspaces/workspace-paths";
 import { ContentPendingSkeleton } from "@/routes/route-feedback";
 import { StudentTabReplaced } from "@/features/elearning/student-dashboard/components/student-tab-replaced";
@@ -32,12 +26,9 @@ import {
 import {
   markStudentAnnouncementRead as markStudentAnnouncementReadApi,
 } from "@/features/elearning/student-dashboard/api/student-engagement-api";
-import {
-  DiscussionView,
-} from "@/features/elearning/student-dashboard/components/student-dashboard-discussion-view";
-import {
-  ScoresView,
-} from "@/features/elearning/student-dashboard/components/student-dashboard-scores-view";
+import { DiscussionView } from "@/features/elearning/student-dashboard/components/student-dashboard-discussion-view";
+import { ScoresView } from "@/features/elearning/student-dashboard/components/student-dashboard-scores-view";
+import { RankingView } from "@/features/elearning/student-dashboard/components/student-dashboard-ranking-view";
 import { useUnreadNotificationCount } from "@/features/notifications/hooks/use-unread-notification-count";
 import { StudentInboxView } from "@/features/elearning/student-dashboard/components/student-inbox-view";
 import {
@@ -49,27 +40,17 @@ import type {
   StudentDockPageKey,
   StudentPageKey,
 } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
-import {
-  getDiscussionOverviewPreview,
-} from "@/features/elearning/student-dashboard/utils/discussion-overview";
+import { getDiscussionOverviewPreview } from "@/features/elearning/student-dashboard/utils/discussion-overview";
 import {
   ANNOUNCEMENT_POPUP_SNOOZE_MS,
   getInitials,
   writeAnnouncementPopupSnooze,
 } from "@/features/elearning/student-dashboard/utils/student-dashboard-workspace-utils";
-import {
-  useDebouncedCallback,
-} from "@/hooks/use-paced-callback";
-import {
-  usePacedStateBatch,
-} from "@/hooks/use-paced-state-batch";
-import {
-  hasApiBase,
-} from "@/lib/api-client";
+import { useDebouncedCallback } from "@/hooks/use-paced-callback";
+import { usePacedStateBatch } from "@/hooks/use-paced-state-batch";
+import { hasApiBase } from "@/lib/api-client";
 import { runtimeFixturesEnabled } from "@/lib/runtime-fixtures";
-import {
-  getDefaultTenantId,
-} from "@/lib/graphql-client";
+import { getDefaultTenantId } from "@/lib/graphql-client";
 import {
   MUI_TEXT,
   MUI_BG,
@@ -98,7 +79,7 @@ export function StudentDashboardWorkspaceRuntime() {
   const { locale } = useI18n();
   const surface = useDashboardSurface();
   const studentPreview = useIsStudentPreview();
-  const copy: DashboardCopy = locale === "vi" ? viCopy : enCopy;
+  const localeCopy: DashboardCopy = locale === "vi" ? viCopy : enCopy;
   const [activePage, setActivePage] = useState<StudentPageKey>(() => {
     if (typeof window === "undefined") return "overview";
     return initialStudentPage(window.location.search);
@@ -135,6 +116,11 @@ export function StudentDashboardWorkspaceRuntime() {
   const engagementScope = { accountId: account?.id, tenantId };
 
   const dashboardProfile = studentDashboardQuery.data?.profile ?? createStudentDashboardLoadingProfile(account);
+  // "Xếp hạng" disappears from the menu while the teacher keeps the class leaderboard off.
+  const leaderboardEnabled = dashboardProfile.leaderboardEnabled === true;
+  const copy = useMemo<DashboardCopy>(() => (leaderboardEnabled
+    ? localeCopy
+    : { ...localeCopy, navItems: localeCopy.navItems.filter((item) => item.key !== "ranking") }), [leaderboardEnabled, localeCopy]);
   const assignments = useMemo(
     () => studentDashboardQuery.data?.assignments ?? [],
     [studentDashboardQuery.data?.assignments],
@@ -294,12 +280,14 @@ export function StudentDashboardWorkspaceRuntime() {
       onClose={() => setAnnouncementPopupOpen(false)} onOpenDetail={openAnnouncementDetail} onSnooze={snoozeAnnouncementPopup}
     />
   ) : null;
+  // A ?tab=ranking link or a switched-off leaderboard falls back to the overview.
+  const shownPage: StudentPageKey = activePage === "ranking" && !leaderboardEnabled ? "overview" : activePage;
   const dashboardViews = (
     <>
       {studentDashboardQuery.isError ? (
         <Alert action={<Button variant="text" color="inherit" onClick={() => void studentDashboardQuery.refetch()} size="small" sx={{ minHeight: 44 }}>Thử lại</Button>} severity="error" sx={{ borderRadius: 2.5, color: "error.dark", mb: 2 }}>Không thể tải bảng học tập từ máy chủ.</Alert>
       ) : null}
-      {activePage === "overview" ? (
+      {shownPage === "overview" ? (
         <StudentDashboardOverviewSurface
           announcement={pinnedAnnouncement} assignmentsFailed={studentDashboardQuery.isError && openAssignments.length === 0} assignmentsLoading={studentDashboardQuery.isLoading && openAssignments.length === 0}
           completedAssignments={completedAssignments} copy={copy} discussionPreview={discussionPreview}
@@ -308,7 +296,7 @@ export function StudentDashboardWorkspaceRuntime() {
           onPageChange={(page, filter) => { setAssignmentsFilter(filter ?? "todo"); setActivePage(page); }}
         />
       ) : null}
-      {activePage === "assignments" ? (
+      {shownPage === "assignments" ? (
         <AssignmentsView
           key={assignmentsFilter}
           initialFilter={assignmentsFilter}
@@ -317,8 +305,8 @@ export function StudentDashboardWorkspaceRuntime() {
           onOpenAssignment={openAssignment}
         />
       ) : null}
-      {activePage === "scores" ? <ScoresView assignments={assignments} copy={copy} /> : null}
-      {activePage === "discussion" ? (
+      {shownPage === "scores" ? <ScoresView assignments={assignments} copy={copy} /> : null}
+      {shownPage === "discussion" ? (
         <DiscussionView
           copy={copy}
           posts={discussion.discussionPosts}
@@ -329,7 +317,10 @@ export function StudentDashboardWorkspaceRuntime() {
           onPostReaction={discussion.toggleDiscussionPostReaction}
         />
       ) : null}
-      {activePage === "announcements" ? (
+      {shownPage === "ranking" && account ? (
+        <RankingView accountId={account.id ?? ""} classId={dashboardProfile.classId ?? ""} copy={copy} />
+      ) : null}
+      {shownPage === "announcements" ? (
         <>
           {/* Signed-in viewers only: a guest has no inbox. Same portal as the quiz runtime (teacher preview reads lms). */}
           {account ? <Box sx={{ mb: 3 }}><StudentInboxView portal={quizRuntimePortal} /></Box> : null}
@@ -340,7 +331,7 @@ export function StudentDashboardWorkspaceRuntime() {
           />
         </>
       ) : null}
-      {activePage === "account" ? (
+      {shownPage === "account" ? (
         <AccountView
           account={account}
           averageAssignmentScore={averageAssignmentScore}
@@ -359,7 +350,7 @@ export function StudentDashboardWorkspaceRuntime() {
       <Box sx={{ bgcolor: MUI_BG, color: MUI_TEXT, fontFamily: "var(--font-app)", minHeight: "100vh" }}>
         {announcementToast}
         <StudentDashboardMobileShell
-          activePage={activePage} announcementUnreadCount={unreadInboxCount}
+          activePage={shownPage} announcementUnreadCount={unreadInboxCount}
           dockItems={mobileDockItems} onPageChange={handlePageChange}
         >
           {/* Inside the scroll area: above the 100dvh shell it pushed the page past the viewport. */}
@@ -375,7 +366,7 @@ export function StudentDashboardWorkspaceRuntime() {
       {announcementToast}
       <TopMenuShell
         account={account}
-        activePage={activePage}
+        activePage={shownPage}
         copy={copy}
         dashboardProfile={dashboardProfile}
         notificationAnchor={notificationAnchor}
@@ -396,5 +387,5 @@ export function StudentDashboardWorkspaceRuntime() {
 
 function initialStudentPage(search: string): StudentPageKey {
   const page = new URLSearchParams(search).get("tab");
-  return page === "assignments" || page === "scores" || page === "discussion" || page === "announcements" || page === "account" ? page : "overview";
+  return page === "assignments" || page === "scores" || page === "discussion" || page === "ranking" || page === "announcements" || page === "account" ? page : "overview";
 }

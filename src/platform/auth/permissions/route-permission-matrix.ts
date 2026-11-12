@@ -103,6 +103,7 @@ const ADMIN_EXTRA_PERMISSIONS: Record<string, Pick<RoutePermissionEntry, "resour
   "employees/teacher-absence": { resource: "timekeeping", action: "approve", permission: "timekeeping.approve" },
   // Student discussions: tenant admins moderate every class (scope is enforced by the backend).
   discussion: { resource: "discussion", action: "moderate", permission: "elearning.discussion.moderate" },
+  leaderboard: { resource: "leaderboard", action: "manage", permission: "elearning.leaderboard.manage" },
 };
 
 function adminEntry(path: string): RoutePermissionEntry {

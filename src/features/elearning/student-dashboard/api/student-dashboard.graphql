@@ -18,6 +18,7 @@ query ElearningStudentDashboard($input: StudentDashboardInput) {
         academicClassId
         status
         updatedAt
+        leaderboardEnabled
       }
       summary {
         enrolledCourseCount

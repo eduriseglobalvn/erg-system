@@ -12,6 +12,10 @@ export type StudentDashboardProfile = {
   totalAssignments: number | null;
   motivationPoints: number | null;
   weeklyGoalProgress: number | null;
+  /** Class the dashboard was read for (backend id). */
+  classId?: string;
+  /** The teacher keeps the class leaderboard ("Xếp hạng") on for students. */
+  leaderboardEnabled?: boolean;
 };
 
 export type StudentAssignmentAttempt = {

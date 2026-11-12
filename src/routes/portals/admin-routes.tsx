@@ -31,6 +31,10 @@ const discussionPage = lazyRouteComponent(
   () => import("@/features/elearning/discussion-moderation/components/discussion-moderation-page"),
   "AdminDiscussionModerationRoute",
 );
+const leaderboardPage = lazyRouteComponent(
+  () => import("@/features/elearning/class-leaderboard/components/class-leaderboard-page"),
+  "AdminClassLeaderboardRoute",
+);
 const timekeepingPages = () => import("@/features/timekeeping/components/timekeeping-route-pages");
 const timekeepingPage = (name: keyof Awaited<ReturnType<typeof timekeepingPages>>) => lazyRouteComponent(timekeepingPages, name);
 
@@ -52,6 +56,7 @@ function adminPageFor(wPath: string) {
   if (wPath === "notifications") return inboxPage("AdminNotificationsPage");
   if (wPath === "notifications/compose") return composePage("AdminNotificationComposePage");
   if (wPath === "discussion") return discussionPage;
+  if (wPath === "leaderboard") return leaderboardPage;
   if (wPath === "schools" || wPath.startsWith("schools/")) return page("AdminSchoolsRoute");
   return page("AdminGenericRoute");
 }

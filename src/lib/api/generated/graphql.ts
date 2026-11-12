@@ -11,6 +11,11 @@ export type AttendanceWorkspaceInput = {
   readonly to?: string | null | undefined;
 };
 
+export type ClassLeaderboardInput = {
+  readonly classId: string;
+  readonly tenantId?: string | null | undefined;
+};
+
 export type CreateStudentDiscussionInput = {
   readonly assignmentId?: string | null | undefined;
   readonly attachmentIds?: ReadonlyArray<string> | null | undefined;
@@ -47,6 +52,12 @@ export type ReplyStudentDiscussionInput = {
   readonly tenantId?: string | null | undefined;
 };
 
+export type SetClassLeaderboardEnabledInput = {
+  readonly classId: string;
+  readonly enabled: boolean;
+  readonly tenantId?: string | null | undefined;
+};
+
 export type SetStudentDiscussionHiddenInput = {
   readonly hidden: boolean;
   readonly targetId: string;
@@ -58,6 +69,11 @@ export type SetStudentDiscussionReactionInput = {
   readonly reaction: string;
   readonly targetId: string;
   readonly targetType: string;
+  readonly tenantId?: string | null | undefined;
+};
+
+export type StudentClassLeaderboardInput = {
+  readonly classId?: string | null | undefined;
   readonly tenantId?: string | null | undefined;
 };
 
@@ -111,6 +127,32 @@ export type UpsertGradebookScoreInput = {
   readonly tenantId?: string | null | undefined;
 };
 
+export type ElearningStudentClassLeaderboardQueryVariables = Exact<{
+  input?: StudentClassLeaderboardInput | null | undefined;
+}>;
+
+
+export type ElearningStudentClassLeaderboardQuery = { readonly elearning: { readonly studentClassLeaderboard: { readonly classId: string, readonly className: string | null, readonly enabled: boolean, readonly entries: ReadonlyArray<{ readonly rank: number | null, readonly studentId: string, readonly studentName: string | null, readonly averagePercent: number | null, readonly completedCount: number, readonly isViewer: boolean }> } } };
+
+export type ElearningLeaderboardClassesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ElearningLeaderboardClassesQuery = { readonly elearning: { readonly leaderboardClasses: ReadonlyArray<{ readonly id: string, readonly name: string | null, readonly leaderboardEnabled: boolean }> } };
+
+export type ElearningClassLeaderboardQueryVariables = Exact<{
+  input: ClassLeaderboardInput;
+}>;
+
+
+export type ElearningClassLeaderboardQuery = { readonly elearning: { readonly classLeaderboard: { readonly classId: string, readonly className: string | null, readonly enabled: boolean, readonly entries: ReadonlyArray<{ readonly rank: number | null, readonly studentId: string, readonly studentName: string | null, readonly averagePercent: number | null, readonly completedCount: number, readonly isViewer: boolean }> } } };
+
+export type ElearningSetClassLeaderboardEnabledMutationVariables = Exact<{
+  input: SetClassLeaderboardEnabledInput;
+}>;
+
+
+export type ElearningSetClassLeaderboardEnabledMutation = { readonly setClassLeaderboardEnabled: { readonly id: string, readonly name: string | null, readonly leaderboardEnabled: boolean } };
+
 export type ElearningDiscussionModerationClassesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -142,7 +184,7 @@ export type ElearningStudentDashboardQueryVariables = Exact<{
 }>;
 
 
-export type ElearningStudentDashboardQuery = { readonly elearning: { readonly studentDashboard: { readonly tenantId: string, readonly viewer: { readonly userId: string, readonly tenantId: string, readonly accountType: string | null, readonly accessLevel: string | null }, readonly profile: { readonly userId: string, readonly studentId: string | null, readonly studentCode: string | null, readonly fullName: string | null, readonly email: string | null, readonly schoolId: string | null, readonly academicClassId: string | null, readonly status: string | null, readonly updatedAt: string | null }, readonly summary: { readonly enrolledCourseCount: number, readonly activeAssignmentCount: number, readonly pendingActionCount: number, readonly generatedAt: string, readonly scoreSummary: { readonly completedAttemptCount: number, readonly attemptedAssignmentCount: number, readonly passedAttemptCount: number, readonly averagePercent: number, readonly bestPercent: number } }, readonly courses: ReadonlyArray<{ readonly id: string, readonly title: string, readonly status: string | null, readonly progressPercent: number, readonly updatedAt: string | null }>, readonly assignments: ReadonlyArray<{ readonly id: string, readonly quizId: string | null, readonly title: string, readonly status: string | null, readonly dueAt: string | null, readonly scorePercent: number | null, readonly submittedAt: string | null }>, readonly nextActions: ReadonlyArray<{ readonly id: string, readonly kind: string, readonly label: string, readonly targetId: string | null, readonly dueAt: string | null }>, readonly announcements: ReadonlyArray<{ readonly id: string, readonly title: string, readonly content: string | null, readonly pinned: boolean, readonly publishedAt: string | null, readonly updatedAt: string | null }> } } };
+export type ElearningStudentDashboardQuery = { readonly elearning: { readonly studentDashboard: { readonly tenantId: string, readonly viewer: { readonly userId: string, readonly tenantId: string, readonly accountType: string | null, readonly accessLevel: string | null }, readonly profile: { readonly userId: string, readonly studentId: string | null, readonly studentCode: string | null, readonly fullName: string | null, readonly email: string | null, readonly schoolId: string | null, readonly academicClassId: string | null, readonly status: string | null, readonly updatedAt: string | null, readonly leaderboardEnabled: boolean }, readonly summary: { readonly enrolledCourseCount: number, readonly activeAssignmentCount: number, readonly pendingActionCount: number, readonly generatedAt: string, readonly scoreSummary: { readonly completedAttemptCount: number, readonly attemptedAssignmentCount: number, readonly passedAttemptCount: number, readonly averagePercent: number, readonly bestPercent: number } }, readonly courses: ReadonlyArray<{ readonly id: string, readonly title: string, readonly status: string | null, readonly progressPercent: number, readonly updatedAt: string | null }>, readonly assignments: ReadonlyArray<{ readonly id: string, readonly quizId: string | null, readonly title: string, readonly status: string | null, readonly dueAt: string | null, readonly scorePercent: number | null, readonly submittedAt: string | null }>, readonly nextActions: ReadonlyArray<{ readonly id: string, readonly kind: string, readonly label: string, readonly targetId: string | null, readonly dueAt: string | null }>, readonly announcements: ReadonlyArray<{ readonly id: string, readonly title: string, readonly content: string | null, readonly pinned: boolean, readonly publishedAt: string | null, readonly updatedAt: string | null }> } } };
 
 export type ElearningStudentDiscussionFeedQueryVariables = Exact<{
   input?: StudentDiscussionFeedInput | null | undefined;

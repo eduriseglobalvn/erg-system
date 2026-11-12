@@ -1,0 +1,31 @@
+query ElearningStudentClassLeaderboard($input: StudentClassLeaderboardInput) {
+  elearning {
+    studentClassLeaderboard(input: $input) {
+      classId
+      className
+      enabled
+      entries { rank studentId studentName averagePercent completedCount isViewer }
+    }
+  }
+}
+
+query ElearningLeaderboardClasses {
+  elearning {
+    leaderboardClasses { id name leaderboardEnabled }
+  }
+}
+
+query ElearningClassLeaderboard($input: ClassLeaderboardInput!) {
+  elearning {
+    classLeaderboard(input: $input) {
+      classId
+      className
+      enabled
+      entries { rank studentId studentName averagePercent completedCount isViewer }
+    }
+  }
+}
+
+mutation ElearningSetClassLeaderboardEnabled($input: SetClassLeaderboardEnabledInput!) {
+  setClassLeaderboardEnabled(input: $input) { id name leaderboardEnabled }
+}

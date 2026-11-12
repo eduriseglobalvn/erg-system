@@ -4,6 +4,7 @@ import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurned
 import ForumOutlinedIcon from "@mui/icons-material/ForumOutlined";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import InboxOutlinedIcon from "@mui/icons-material/InboxOutlined";
+import LeaderboardOutlinedIcon from "@mui/icons-material/LeaderboardOutlined";
 import type { SvgIconProps } from "@mui/material/SvgIcon";
 
 import { ErgMobileDock } from "@/components/portal/erg-mobile-dock";
@@ -15,6 +16,7 @@ const DOCK_ICONS: Record<StudentDockPageKey, ComponentType<SvgIconProps>> = {
   assignments: AssignmentTurnedInOutlinedIcon,
   discussion: ForumOutlinedIcon,
   overview: HomeOutlinedIcon,
+  ranking: LeaderboardOutlinedIcon,
   scores: AssignmentTurnedInOutlinedIcon,
 };
 

@@ -8,6 +8,7 @@ import FingerprintRoundedIcon from "@mui/icons-material/FingerprintRounded";
 import FolderRoundedIcon from "@mui/icons-material/FolderRounded";
 import ForumRoundedIcon from "@mui/icons-material/ForumRounded";
 import HowToRegRoundedIcon from "@mui/icons-material/HowToRegRounded";
+import LeaderboardRoundedIcon from "@mui/icons-material/LeaderboardRounded";
 import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
 import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
 import { ADMIN_ENTERPRISE_CONNECTORS_PATH, ADMIN_LEARNING_STANDARDS_PATH } from "@/app/portal-route-registry";
@@ -127,6 +128,13 @@ export const ADMIN_BASE_MENU_GROUPS: MenuGroup[] = [
         icon: <ForumRoundedIcon />,
         path: "/discussion",
         description: "Xem bài viết và bình luận của học viên theo lớp; ẩn hoặc xoá nội dung không phù hợp.",
+      }),
+      item({
+        id: "admin-leaderboard",
+        label: "Xếp hạng",
+        icon: <LeaderboardRoundedIcon />,
+        path: "/leaderboard",
+        description: "Xem bảng xếp hạng từng lớp và bật hoặc tắt xếp hạng với học sinh.",
       }),
     ],
   },
