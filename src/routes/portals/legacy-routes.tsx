@@ -10,13 +10,15 @@ import {
 import { lcmsWorkspacePaths, lmsPaths } from "@/app/portal-route-registry";
 import { resolveActivePortal } from "@/app/router/portal-host-resolution";
 import { buildPortalHostUrl } from "@/app/router/portal-host-url";
-import { enforcePermissionRoute } from "@/app/router/route-guards";
+import { enforcePermissionRoute, redirectMisroutedStudent } from "@/app/router/route-guards";
+import type { AuthRouteState } from "@/platform/auth/router/auth-route-context";
 import { recordLegacyAliasHit, resolveLegacyRouteRedirect } from "@/app/router/legacy-route-redirects";
 import { canonicalAdminWorkspacePath } from "@/features/lcms/admin-content/admin-content-route";
 import { adminPath, studentPath, teacherPath } from "@/platform/workspaces/workspace-paths";
 import {
   canonicalLmsWorkspaceHostForRuntime,
   canonicalCrmWorkspaceHostForRuntime,
+  canonicalWorkspaceForPath,
   isCanonicalLmsWorkspaceHost,
 } from "@/platform/workspaces/workspace-route";
 import { sanitizeLocalRedirect } from "@/platform/auth/utils/auth-redirects";
@@ -128,7 +130,9 @@ function NotFoundRoute() {
 }
 
 /** Table-driven legacy aliases (resolveLegacyRouteRedirect); anything else falls through to the 404 page. */
-export function catchAllBeforeLoad() {
+export function catchAllBeforeLoad(ctx?: { context: { auth: AuthRouteState }; location: { pathname: string } }) {
+  // A learner on a missing /teacher or /admin page goes to the student home, not the 404 page.
+  if (ctx && canonicalWorkspaceForPath(ctx.location.pathname)) redirectMisroutedStudent(ctx.context.auth, ctx.location.pathname);
   const path = stripPath(window.location.pathname);
   const legacyRedirect = resolveLegacyRouteRedirect(path, resolveActivePortal());
   if (!legacyRedirect || !isRecognizedErgHost(window.location.hostname)) return;

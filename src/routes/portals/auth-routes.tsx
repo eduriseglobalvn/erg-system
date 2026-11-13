@@ -5,6 +5,7 @@ import { PortalLoginPage } from "@/platform/auth/components/portal-login-page";
 import { AUTH_BYPASS_ENABLED } from "@/platform/auth/config/auth-bypass";
 import { buildRedirectPath, sanitizeLocalRedirect } from "@/platform/auth/utils/auth-redirects";
 import { resolveActivePortal } from "@/app/router/portal-host-resolution";
+import { redirectMisroutedStudent } from "@/app/router/route-guards";
 import { teacherPath } from "@/platform/workspaces/workspace-paths";
 import {
   desktopLoginPortal,
@@ -68,6 +69,8 @@ const onboardingRoute = createRoute({
         search: { redirect: buildRedirectPath(location.pathname, location.searchStr, location.hash) },
       });
     }
+    // Onboarding is a staff flow: a learner-only account goes to the student home whatever its lifecycle flags say.
+    redirectMisroutedStudent(context.auth, location.pathname);
     if (context.auth.lifecycle?.status === "ACTIVE" && context.auth.lifecycle.nextSteps.length === 0) {
       throw redirect({ href: search.redirect });
     }
