@@ -18,6 +18,7 @@ A student's session lives in its own slots (erg-learning.student-session in sess
 
 ## Decided
 - Refresh runs under the Web Lock "erg-auth-refresh" and re-reads the token inside it, preferring the remembered localStorage copy when it belongs to the same student. The backend treats reuse of a rotated refresh token as theft and revokes every session of the account, so two tabs (or a tab plus the PWA) refreshing with the same or a stale token logged the student out everywhere.
+- Teacher/admin sessions had the same race: readRawStoredAuthSession took the in-memory tab snapshot first, which can hold a refresh token another tab already rotated. It now takes the refresh token from the remembered localStorage copy (erg-learning.session) when it belongs to the same accountId.
 - A refresh that fails offline, on timeout, 429 or 5xx keeps the session; only a 4xx answer from the server ends it. A slow server during the morning login storm used to turn into logouts and therefore more logins.
 - Student login sends deviceId/deviceName/deviceFingerprint like the back-office login, so the backend's "new device from an unknown IP replaces all sessions" rule can recognise the device.
 

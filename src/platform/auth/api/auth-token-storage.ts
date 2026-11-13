@@ -253,9 +253,10 @@ function readRawStoredAuthSession(portal?: StoredAuthSession["portal"]): StoredA
   if (!canUseStorage()) return null;
 
   const targetPortal = portal ?? resolveCurrentPortal();
+  const remembered = legacyPersistentSession<StoredAuthIdentity>(TEACHER_LOCAL_SESSION_KEY);
   const candidates = [
     teacherSessionSnapshot,
-    legacyPersistentSession<StoredAuthIdentity>(TEACHER_LOCAL_SESSION_KEY),
+    remembered,
     parseJson<StoredAuthIdentity | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "crm")), null),
     parseJson<StoredAuthIdentity | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "admin")), null),
     parseJson<StoredAuthIdentity | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "lms")), null),
@@ -265,10 +266,16 @@ function readRawStoredAuthSession(portal?: StoredAuthSession["portal"]): StoredA
   if (targetPortal === "elearning") {
     // Refreshing a shared teacher/admin credential must update its original
     // portal slot; writeStoredAuthIdentity uses session.portal for that.
-    return readStudentRefreshSession() ?? candidates.find(canRefreshStudentViewerSession) ?? null;
+    return readStudentRefreshSession() ?? withNewestRefreshToken(candidates.find(canRefreshStudentViewerSession), remembered);
   }
 
-  return candidates.find((session) => sessionMatchesRequestedPortal(session, targetPortal)) ?? null;
+  return withNewestRefreshToken(candidates.find((session) => sessionMatchesRequestedPortal(session, targetPortal)), remembered);
+}
+
+/** The remembered copy is shared by all tabs, so it holds the newest rotated token; this tab's snapshot may hold one another tab already used. */
+function withNewestRefreshToken(session: StoredAuthIdentity | undefined, remembered: StoredAuthIdentity | null): StoredAuthIdentity | null {
+  if (!session) return null;
+  return remembered?.refreshToken && remembered.accountId === session.accountId ? { ...session, refreshToken: remembered.refreshToken } : session;
 }
 
 type StoredStudentSession = StoredAuthSession & { id?: string; email?: string; rememberMe?: boolean };

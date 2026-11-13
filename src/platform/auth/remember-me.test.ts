@@ -33,3 +33,18 @@ test("without remember me nothing is persisted, and sign-out wipes it", () => {
   clearStoredAuthSessions();
   expect(window.localStorage.getItem(localKey)).toBeNull();
 });
+
+test("a tab refreshes with the token another tab already rotated, not its in-memory copy", () => {
+  // Reusing a rotated refresh token is treated as theft by the backend and revokes every session of the account.
+  writeStoredAuthIdentity({ ...session, rememberMe: true, refreshToken: "rotated-away" });
+  window.localStorage.setItem(localKey, JSON.stringify({ ...session, accessToken: undefined, rememberMe: true, refreshToken: "latest" }));
+
+  expect(readStoredRefreshSession("lms")?.refreshToken).toBe("latest");
+});
+
+test("another account's remembered token is never used for this tab's session", () => {
+  writeStoredAuthIdentity({ ...session, rememberMe: true, refreshToken: "mine" });
+  window.localStorage.setItem(localKey, JSON.stringify({ ...session, accountId: "u2", accessToken: undefined, rememberMe: true, refreshToken: "theirs" }));
+
+  expect(readStoredRefreshSession("lms")?.refreshToken).toBe("mine");
+});
