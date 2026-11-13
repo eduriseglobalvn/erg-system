@@ -79,7 +79,8 @@ export function useAuthSession(portal: StoredAuthSession["portal"] = resolveCurr
   const [session, setSession] = useState<StoredAuthSession | null>(() => readStoredAuthSession(portal));
   const [notice, setNotice] = useState<Notice | null>(null);
   const [reauthRequired, setReauthRequired] = useState(false);
-  const [rememberMe, setRememberMe] = useState(true);
+  // Students opt in to "remember me" (owner decision 2026-11-13); staff keep the old default.
+  const [rememberMe, setRememberMe] = useState(portal !== "elearning");
   const [showPassword, setShowPassword] = useState(false);
   const [loginForm, setLoginForm] = useState<LoginFormState>(defaultLoginForm);
   const [registerForm, setRegisterForm] = useState<RegisterFormState>(defaultRegisterForm);

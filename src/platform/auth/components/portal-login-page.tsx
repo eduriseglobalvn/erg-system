@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 
 import { getAuthScope, getCurrentAccount } from "@/platform/auth/api/auth-storage";
+import { applySharedDeviceParam, isSharedDevice } from "@/platform/auth/api/shared-device";
 import { getCurrentStudentSession } from "@/platform/auth/api/student-auth-storage";
 import { AuthFormPanel } from "@/platform/auth/components/auth-form-panel";
 import {
@@ -33,6 +34,12 @@ export function PortalLoginPage({ badge, description, portal, title }: PortalLog
   const location = useLocation();
   const navigate = useNavigate();
   const [studentNotice, setStudentNotice] = useState<AuthSession["notice"] | null>(null);
+  // ?shared-device=on|off on the student login marks this computer as shared (see shared-device.ts).
+  const [sharedDevice] = useState(() => {
+    if (portal !== "elearning") return false;
+    applySharedDeviceParam(location.searchStr);
+    return isSharedDevice();
+  });
   const requestedRedirect = new URLSearchParams(location.searchStr).get("redirect");
   const hasExplicitRedirect = Boolean(requestedRedirect && sanitizeLocalRedirect(requestedRedirect));
   const redirect = sanitizeRedirect(
@@ -84,6 +91,7 @@ export function PortalLoginPage({ badge, description, portal, title }: PortalLog
       <NoticeBanner notice={portal === "elearning" ? studentNotice : auth.notice} />
       <AuthFormPanel
         rememberMe={auth.rememberMe}
+        rememberMeDisabled={sharedDevice}
         showPassword={auth.showPassword}
         loginForm={auth.loginForm}
         onRememberMeChange={auth.setRememberMe}

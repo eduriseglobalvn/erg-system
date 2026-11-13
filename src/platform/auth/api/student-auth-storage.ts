@@ -6,6 +6,7 @@ import {
 } from "@/platform/auth/api/auth-token-storage";
 import { ApiClientError, apiRequest, hasApiBase, isBffAuthEnabled, withRefreshLock } from "@/lib/api-client";
 import { getLoginDeviceMetadata } from "@/platform/auth/api/auth-api";
+import { isSharedDevice } from "@/platform/auth/api/shared-device";
 import { getApiBase } from "@/lib/platform";
 import { getPersistedJsonValue, removePersistedJsonValue } from "@/stores/persisted-store";
 import { getOrCreateBrowserDeviceId } from "@/platform/auth/api/browser-device-id";
@@ -79,6 +80,8 @@ export async function loginStudentWithApi(input: StudentLoginInput) {
     return new Promise<StudentSession>(() => undefined);
   }
 
+  // Remembered = 30-day sliding session on the backend and a refresh token in localStorage; never on a shared computer.
+  const rememberMe = input.rememberMe && !isSharedDevice();
   const response = await apiRequest<{
     user?: { email?: string; fullName?: string; id?: string };
     accessToken?: string;
@@ -96,7 +99,7 @@ export async function loginStudentWithApi(input: StudentLoginInput) {
       ...getLoginDeviceMetadata(),
       identifier: input.email,
       password: input.password,
-      rememberMe: input.rememberMe,
+      rememberMe,
       portal: "elearning",
     }),
   });
@@ -116,7 +119,7 @@ export async function loginStudentWithApi(input: StudentLoginInput) {
     refreshToken,
     permissions: response.permissions ?? [],
     deniedPermissions: response.deniedPermissions ?? [],
-    rememberMe: input.rememberMe,
+    rememberMe,
     viewerKind: "student",
   };
 
