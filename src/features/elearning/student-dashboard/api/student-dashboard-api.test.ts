@@ -119,6 +119,26 @@ describe("student dashboard API", () => {
     }));
   });
 
+  test("60 assignments: asks for more with assignmentLimit and reports when the backend holds more", async () => {
+    hasApiBaseMock.mockReturnValue(true);
+    const card = (index: number) => ({ id: `asg-${index}`, title: `Bài ${index}`, status: "active", dueAt: "2026-12-01T00:00:00Z" });
+    const sixty = Array.from({ length: 60 }, (_, index) => card(index));
+    graphQlRequestMock.mockResolvedValueOnce(dashboardResponse({ assignments: sixty.slice(0, 50), assignmentsHasMore: true }));
+    graphQlRequestMock.mockResolvedValueOnce(dashboardResponse({ assignments: sixty, assignmentsHasMore: false }));
+
+    const first = await loadStudentDashboardData({ tenantId: "tenant-a" });
+    expect(first.assignments).toHaveLength(50);
+    expect(first.assignmentsHasMore).toBe(true);
+    expect(graphQlRequestMock).toHaveBeenLastCalledWith(expect.objectContaining({ variables: { input: { tenantId: "tenant-a" } } }));
+
+    const more = await loadStudentDashboardData({ assignmentLimit: 100, tenantId: "tenant-a" });
+    expect(more.assignments).toHaveLength(60);
+    expect(more.assignmentsHasMore).toBe(false);
+    expect(graphQlRequestMock).toHaveBeenLastCalledWith(expect.objectContaining({
+      variables: { input: { tenantId: "tenant-a", assignmentLimit: 100 } },
+    }));
+  });
+
   test("keeps API-enabled empty dashboard empty instead of refilling mock assignments", async () => {
     hasApiBaseMock.mockReturnValue(true);
     graphQlRequestMock.mockResolvedValueOnce(dashboardResponse());

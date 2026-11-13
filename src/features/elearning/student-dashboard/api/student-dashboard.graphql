@@ -78,6 +78,7 @@ query ElearningStudentDashboard($input: StudentDashboardInput) {
         publishedAt
         updatedAt
       }
+      assignmentsHasMore
     }
   }
 }

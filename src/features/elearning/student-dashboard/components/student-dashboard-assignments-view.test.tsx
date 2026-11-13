@@ -69,6 +69,19 @@ describe("AssignmentsView", () => {
     expect(screen.queryByText("HÔM NAY")).toBeNull();
   });
 
+  it("offers an outlined 'Xem thêm bài' only while the backend holds more", () => {
+    const onLoadMore = vi.fn();
+    const { container, rerender } = render(<AssignmentsView assignments={items} copy={viCopy} hasMore initialFilter="submitted" onLoadMore={onLoadMore} onOpenAssignment={vi.fn()} />);
+    const more = screen.getByRole("button", { name: "Xem thêm bài" });
+    expect(more.classList.contains("MuiButton-outlined")).toBe(true);
+    expect(container.querySelectorAll(".MuiButton-contained")).toHaveLength(0);
+    fireEvent.click(more);
+    expect(onLoadMore).toHaveBeenCalledTimes(1);
+
+    rerender(<AssignmentsView assignments={items} copy={viCopy} hasMore={false} initialFilter="submitted" onLoadMore={onLoadMore} onOpenAssignment={vi.fn()} />);
+    expect(screen.queryByRole("button", { name: "Xem thêm bài" })).toBeNull();
+  });
+
   it("shows an honest empty state", () => {
     render(<AssignmentsView assignments={[]} copy={viCopy} onOpenAssignment={vi.fn()} />);
     expect(screen.getByText("Chưa có bài trong mục này")).toBeTruthy();

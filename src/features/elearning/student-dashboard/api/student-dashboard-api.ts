@@ -22,20 +22,24 @@ type ElearningStudentDashboardDTO = ElearningStudentDashboardQuery["elearning"][
 
 export type StudentDashboardApiData = {
   assignments: StudentDashboardAssignment[];
+  /** The backend has more assignments than it returned: ask again with a larger assignmentLimit. */
+  assignmentsHasMore: boolean;
   profile: StudentDashboardProfile;
   teacherAnnouncements: StudentTeacherAnnouncement[];
 };
 
 export async function loadStudentDashboardData({
+  assignmentLimit,
   signal,
   tenantId = getDefaultTenantId(),
-}: { signal?: AbortSignal; tenantId?: string } = {}): Promise<StudentDashboardApiData> {
+}: { assignmentLimit?: number; signal?: AbortSignal; tenantId?: string } = {}): Promise<StudentDashboardApiData> {
   const session = getCurrentElearningViewerSession();
 
   if (import.meta.env.DEV && runtimeFixturesEnabled()) {
     const fixtures = await import("@/test/fixtures/mock-student-dashboard");
     return {
       assignments: fixtures.studentAssignments,
+      assignmentsHasMore: false,
       profile: mergeProfileSession(fixtures.studentDashboardProfile, session),
       teacherAnnouncements: fixtures.studentTeacherAnnouncements,
     };
@@ -52,6 +56,7 @@ export async function loadStudentDashboardData({
     variables: {
       input: {
         tenantId,
+        ...(assignmentLimit ? { assignmentLimit } : {}),
       },
     },
   });
@@ -100,6 +105,7 @@ function mapStudentDashboard(
 
   return {
     assignments,
+    assignmentsHasMore: dashboard.assignmentsHasMore === true,
     profile: mergeProfileSession(
       mapProfile(dashboard, assignments.length),
       session,
