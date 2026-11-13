@@ -10,3 +10,10 @@ test("allows notification fixtures only through the explicit dev runtime gate", 
     expect(source, `${fileName} does not use the explicit fixture gate`).toContain("runtimeFixturesEnabled()");
   }
 });
+
+test("loads notification mock stores only through a dynamic import, so production bundles drop them", () => {
+  for (const fileName of ["notification-api.ts", "notification-feed-api.ts", "notification-device-api.ts"]) {
+    const source = readFileSync(resolve(process.cwd(), "src/features/notifications/api", fileName), "utf8");
+    expect(source, `${fileName} statically imports a mock store`).not.toContain('from "./notification-mock-');
+  }
+});

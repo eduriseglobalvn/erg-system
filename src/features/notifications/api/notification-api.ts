@@ -19,10 +19,6 @@ export {
   revokeNotificationDevice,
   unregisterNotificationDevice,
 } from "./notification-device-api";
-export {
-  getMockNotificationFeed,
-  getMockUnreadCount,
-} from "./notification-mock-store";
 export { normalizePortal } from "./notification-mappers";
 export {
   notificationQueryKeys,

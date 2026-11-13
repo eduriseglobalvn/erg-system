@@ -15,19 +15,17 @@ import {
   normalizePortal,
   toApiPortal,
 } from "./notification-mappers";
-import {
-  heartbeatMockNotificationDevice,
-  registerMockNotificationDevice,
-  revokeMockNotificationDevice,
-  unregisterMockNotificationDevice,
-} from "./notification-mock-devices";
+
+// DEV is inlined at build time, so production bundles drop this branch and the fixture chunk with it.
+const loadMockDevices = () => (import.meta.env.DEV && runtimeFixturesEnabled() ? import("./notification-mock-devices") : undefined);
 
 export async function registerNotificationDevice(input: NotificationDeviceRegistrationInput) {
   const portal = normalizePortal(input.portal);
   assertNotificationDeviceIdentity(input);
 
-  if (runtimeFixturesEnabled()) {
-    return registerMockNotificationDevice({
+  const mock = await loadMockDevices();
+  if (mock) {
+    return mock.registerMockNotificationDevice({
       ...input,
       portal,
     });
@@ -60,8 +58,9 @@ export async function unregisterNotificationDevice(input: NotificationDeviceUnre
   const portal = normalizePortal(input.portal);
   assertNotificationDeviceIdentity(input);
 
-  if (runtimeFixturesEnabled()) {
-    unregisterMockNotificationDevice({
+  const mock = await loadMockDevices();
+  if (mock) {
+    mock.unregisterMockNotificationDevice({
       ...input,
       portal,
     });
@@ -82,8 +81,9 @@ export async function heartbeatNotificationDevice(input: NotificationDeviceHeart
   const portal = normalizePortal(input.portal);
   assertNotificationHeartbeatIdentity(input);
 
-  if (runtimeFixturesEnabled()) {
-    heartbeatMockNotificationDevice({
+  const mock = await loadMockDevices();
+  if (mock) {
+    mock.heartbeatMockNotificationDevice({
       ...input,
       portal,
     });
@@ -107,8 +107,9 @@ export async function revokeNotificationDevice(deviceId: string, portal: Notific
 
   const normalizedPortal = normalizePortal(portal);
 
-  if (runtimeFixturesEnabled()) {
-    revokeMockNotificationDevice(normalizedPortal, deviceId);
+  const mock = await loadMockDevices();
+  if (mock) {
+    mock.revokeMockNotificationDevice(normalizedPortal, deviceId);
     return { revoked: true };
   }
 
