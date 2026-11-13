@@ -6,7 +6,6 @@ import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import ButtonBase from "@mui/material/ButtonBase";
-import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import ListItemButton from "@mui/material/ListItemButton";
 import Typography from "@mui/material/Typography";
@@ -25,7 +24,7 @@ function NavBadge({ active, tone, children }: { active: boolean; tone: "info" | 
   const bg = active ? "rgba(255,255,255,.22)" : tone === "error" ? t.color.danger : t.statusTint.info.bg;
   const color = active || tone === "error" ? t.color.surface : t.statusTint.info.color;
   return (
-    <Box component="span" sx={{ alignItems: "center", bgcolor: bg, borderRadius: `${t.radius.chip}px`, color, display: "inline-flex", height: 22, justifyContent: "center", minWidth: 22, ml: "auto", px: 0.875, typography: "caption", fontWeight: "fontWeightBold" }}>
+    <Box component="span" sx={{ alignItems: "center", bgcolor: bg, borderRadius: `${t.radius.chip}px`, color, display: "inline-flex", height: 20, justifyContent: "center", minWidth: 20, ml: "auto", px: 0.75, typography: "caption", fontWeight: "fontWeightBold" }}>
       {children}
     </Box>
   );
@@ -33,8 +32,8 @@ function NavBadge({ active, tone, children }: { active: boolean; tone: "info" | 
 
 function NavGroup({ activePage, items, label, onPageChange }: { activePage: StudentPageKey; items: Item[]; label: string; onPageChange: (page: StudentPageKey) => void }) {
   return (
-    <Box component="nav" aria-label={label} sx={{ mt: 1.5 }}>
-      <Typography color="text.secondary" component="p" sx={{ letterSpacing: "0.06em", px: 1.5, py: 0.75, textTransform: "uppercase" }} variant="caption">{label}</Typography>
+    <Box component="nav" aria-label={label}>
+      <Typography color="text.secondary" component="p" sx={{ letterSpacing: "0.06em", pb: 0.5, pt: 1.5, px: 1.25, textTransform: "uppercase" }} variant="caption">{label}</Typography>
       <Box component="ul" sx={{ display: "grid", gap: 0.25, listStyle: "none", m: 0, p: 0 }}>
         {items.map((item) => {
           const active = activePage === item.key;
@@ -42,7 +41,7 @@ function NavGroup({ activePage, items, label, onPageChange }: { activePage: Stud
           const Icon = icons ? (active ? icons.activeIcon : icons.icon) : null;
           return (
             <Box component="li" key={item.key}>
-              <ListItemButton aria-current={active ? "page" : undefined} disableRipple onClick={() => onPageChange(item.key)} sx={{ ...navRowSx(active, { height: t.size.controlMd }), gap: 1.5 }}>
+              <ListItemButton aria-current={active ? "page" : undefined} disableRipple onClick={() => onPageChange(item.key)} sx={{ ...navRowSx(active, { height: 40 }), gap: 1.25, px: 1.25 }}>
                 {Icon ? <Icon sx={{ fontSize: NAV_ICON_SIZE }} /> : null}
                 <Typography color="inherit" component="span" variant="subtitle2">{item.label}</Typography>
                 {item.badge ? <NavBadge active={active} tone={item.badgeTone ?? "info"}>{item.badge}</NavBadge> : null}
@@ -59,7 +58,7 @@ const STAT_TONES = { info: { bg: t.statusTint.info.bg, color: t.statusTint.info.
 
 function StatChip({ tone, icon, children }: { tone: keyof typeof STAT_TONES; icon: ReactNode; children: string }) {
   return (
-    <Box component="span" sx={{ alignItems: "center", bgcolor: STAT_TONES[tone].bg, borderRadius: `${t.radius.chip}px`, color: STAT_TONES[tone].color, display: "inline-flex", gap: 0.5, height: 24, px: 1, typography: "caption", fontWeight: "fontWeightBold" }}>
+    <Box component="span" sx={{ alignItems: "center", bgcolor: STAT_TONES[tone].bg, borderRadius: `${t.radius.chip}px`, color: STAT_TONES[tone].color, display: "inline-flex", gap: 0.375, height: 26, pl: 0.75, pr: 1.125, typography: "caption", fontWeight: "fontWeightBold" }}>
       {icon}{children}
     </Box>
   );
@@ -95,15 +94,15 @@ export function StudentSidebar({ activePage, data, initials, name, rankingEnable
   ];
   return (
     <>
-      <Box sx={{ alignItems: "center", display: "flex", gap: 1.25, px: 0.5, py: 0.5 }}>
-        <Box sx={{ alignItems: "center", background: NAV_ACTIVE_BG, borderRadius: `${t.radius.control}px`, boxShadow: t.shadow.float, color: t.color.surface, display: "flex", flexShrink: 0, height: 42, justifyContent: "center", width: 42 }}><SchoolRoundedIcon fontSize="medium" /></Box>
+      <Box sx={{ alignItems: "center", display: "flex", gap: 1.25, pb: 1.5, pt: 0.25, px: 1 }}>
+        <Box sx={{ alignItems: "center", background: NAV_ACTIVE_BG, borderRadius: `${t.radius.control}px`, boxShadow: t.shadow.float, color: t.color.surface, display: "flex", flexShrink: 0, height: 34, justifyContent: "center", width: 34 }}><SchoolRoundedIcon fontSize="medium" /></Box>
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography component="p" variant="h6">ERG Học tập</Typography>
           <Typography color="text.secondary" component="p" variant="caption">Cổng học sinh</Typography>
         </Box>
         {notificationSlot}
       </Box>
-      <ButtonBase aria-label="Mở hồ sơ" data-design="sidebar-profile" onClick={data.tier && onTierOpen ? onTierOpen : onAccountOpen} sx={{ alignItems: "stretch", bgcolor: t.color.surfaceMuted, border: 1, borderColor: "divider", borderRadius: `${t.radius.card}px`, display: "grid", gap: 1, mt: 1.5, p: 1.5, textAlign: "left", width: "100%" }}>
+      <ButtonBase aria-label="Mở hồ sơ" data-design="sidebar-profile" onClick={data.tier && onTierOpen ? onTierOpen : onAccountOpen} sx={{ alignItems: "stretch", bgcolor: t.color.surfaceMuted, border: 1, borderColor: "divider", borderRadius: `${t.radius.card}px`, display: "grid", gap: 1.25, mb: 0.75, mx: 0.25, p: 1.5, textAlign: "left", width: "100%" }}>
         <Box sx={{ alignItems: "center", display: "flex", gap: 1.25 }}>
           <ErgTierFrame size={36} tier={data.tier}>
             <Avatar sx={{ bgcolor: "primary.main", color: "primary.contrastText", typography: "caption", fontWeight: "fontWeightBold" }}>{initials}</Avatar>
@@ -117,7 +116,7 @@ export function StudentSidebar({ activePage, data, initials, name, rankingEnable
           </Box>
         </Box>
         {data.xp !== null || data.streakDays ? (
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+          <Box sx={{ display: "flex", gap: 0.5 }}>
             {data.xp !== null ? <StatChip icon={<BoltRoundedIcon sx={{ fontSize: t.size.iconMd }} />} tone="info">{`${formatViNumber(data.xp)} XP`}</StatChip> : null}
             {data.streakDays ? <StatChip icon={<LocalFireDepartmentRoundedIcon sx={{ color: t.fireTint.icon, fontSize: t.size.iconMd }} />} tone="fire">{`${data.streakDays} ngày`}</StatChip> : null}
           </Box>
@@ -128,14 +127,13 @@ export function StudentSidebar({ activePage, data, initials, name, rankingEnable
         <NavGroup activePage={activePage} items={classItems} label="Lớp của tôi" onPageChange={onPageChange} />
       </Box>
       {data.streakNudge ? (
-        <Box data-design="streak-nudge" sx={{ alignItems: "center", bgcolor: t.fireTint.card, border: 1, borderColor: t.fireTint.border, borderRadius: `${t.radius.card}px`, color: t.fireTint.ink, display: "flex", gap: 1.25, mb: 1.5, p: 1.5 }}>
+        <Box data-design="streak-nudge" sx={{ alignItems: "center", bgcolor: t.fireTint.card, border: 1, borderColor: t.fireTint.border, borderRadius: `${t.radius.card}px`, color: t.fireTint.ink, display: "flex", gap: 1.25, px: 1.5, py: 1.25 }}>
           <LocalFireDepartmentRoundedIcon sx={{ color: t.fireTint.icon }} />
-          <Typography variant="subtitle2">{`Làm 1 bài hôm nay để giữ chuỗi ${data.streakNudge} ngày`}</Typography>
+          <Typography sx={{ fontWeight: "fontWeightBold", lineHeight: 1.35 }} variant="caption">{`Làm 1 bài hôm nay để giữ chuỗi ${data.streakNudge} ngày`}</Typography>
         </Box>
       ) : null}
-      <Divider />
-      <Box sx={{ alignItems: "center", display: "flex", gap: 1, pt: 1 }}>
-        <ButtonBase onClick={onAccountOpen} sx={{ borderRadius: `${t.radius.control}px`, flex: 1, justifyContent: "flex-start", minWidth: 0, px: 1.5, py: 0.75 }}><Typography color="text.secondary" noWrap variant="body2">Tài khoản &amp; cài đặt</Typography></ButtonBase>
+      <Box sx={{ alignItems: "center", borderTop: 1, borderColor: "divider", display: "flex", gap: 1, mt: 1, pb: 0.25, pl: 1, pr: 0.5, pt: 1 }}>
+        <ButtonBase onClick={onAccountOpen} sx={{ borderRadius: `${t.radius.control}px`, flex: 1, justifyContent: "flex-start", minWidth: 0, px: 0, py: 0.75 }}><Typography color="text.secondary" noWrap sx={t.type.small}>Tài khoản &amp; cài đặt</Typography></ButtonBase>
         {signedIn ? <IconButton aria-label="Đăng xuất" onClick={onSignOut} sx={{ flexShrink: 0, height: 36, width: 36 }}><LogoutRoundedIcon /></IconButton> : null}
       </Box>
     </>

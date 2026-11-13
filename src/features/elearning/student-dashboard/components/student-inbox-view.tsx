@@ -10,7 +10,6 @@ import { fetchNotificationFeed, notificationQueryKeys, resolveNotificationQueryS
 import type { NotificationPortal } from "@/features/notifications/api/notification-types";
 import { MarkAllReadButton } from "@/features/notifications/components/mark-all-read-button";
 import { NotificationDetail } from "@/features/notifications/components/notification-detail";
-import { useUnreadNotificationCount } from "@/features/notifications/hooks/use-unread-notification-count";
 import { QUERY_POLICIES } from "@/lib/query-policy";
 import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
 
@@ -53,12 +52,11 @@ export function StudentInboxView({ portal, assignments = [], onOpenAssignment }:
     staleTime: QUERY_POLICIES.realtime.staleTime,
     gcTime: QUERY_POLICIES.realtime.gcTime,
   });
-  const unreadNotes = useUnreadNotificationCount(portal) ?? 0;
   const all = mergeInboxEntries(threads.data ?? [], notes.data?.items ?? [], seen);
   const needle = query.trim().toLowerCase();
   const entries = filterInboxEntries(all, chip).filter((entry) => !needle || `${entry.title} ${entry.preview}`.toLowerCase().includes(needle));
   const threadUnread = all.filter((entry) => entry.kind === "THREAD" && entry.unread).length;
-  const unreadCount = unreadNotes + threadUnread;
+  const unreadCount = all.filter((entry) => entry.unread).length;
   // The web layout always shows a detail: the opened row, else the newest one. The phone shows the list until a row is opened.
   const selected = entries.find((entry) => entry.key === openKey) ?? (mobile ? undefined : entries[0]);
 

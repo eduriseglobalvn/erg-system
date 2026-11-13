@@ -5,6 +5,7 @@ import { expect, test, type Browser, type Page } from "@playwright/test";
 
 import { seedAuthenticatedPortal } from "./fixtures/portal-smoke-fixtures";
 import { setupPortalNetwork } from "./fixtures/portal-smoke-network";
+import { inboxGraphQlFixtures, notificationFeed, notificationUnread } from "./fixtures/student-design-inbox-fixtures";
 import { DESIGN_NOW, LEVEL_UP_NOW, graphQlFixtures, leaderboardFor, myTier } from "./fixtures/student-design-fixtures";
 
 // Baselines: docs/design/student-portal/baseline-by-id/<ArtboardId>.png (2x). Spec: docs/superpowers/specs/2026-11-12-student-portal-gamification-design.md section 9.
@@ -29,17 +30,19 @@ async function openStudent(page: Page, viewport: { width: number; height: number
     const op = body?.operationName ?? "";
     const data = op === "ElearningStudentClassLeaderboard" && !override[op]
       ? { elearning: { studentClassLeaderboard: leaderboardFor(body?.variables?.input?.period) } }
-      : (override[op] ?? graphQlFixtures[op]);
+      : (override[op] ?? graphQlFixtures[op] ?? inboxGraphQlFixtures[op]);
     if (!data) return route.fallback();
     await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ data }) });
   });
+  // Notification REST feed (not GraphQL): inbox list and the unread badge of the sidebar / dock.
+  await page.route(/\/api\/v1\/notifications(\/unread-count)?\?/, (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(route.request().url().includes("/unread-count") ? notificationUnread : notificationFeed) }));
   await seedAuthenticatedPortal(page, "elearning");
   await page.addInitScript(() => {
     const raw = localStorage.getItem("erg-learning.accounts");
     if (raw) localStorage.setItem("erg-learning.accounts", JSON.stringify((JSON.parse(raw) as object[]).map((a) => ({ ...a, role: "student", fullName: "Nguyễn Minh Anh" }))));
     const key = "erg-learning.student-session.temp";
     const session = sessionStorage.getItem(key);
-    if (session) sessionStorage.setItem(key, JSON.stringify({ ...JSON.parse(session), tenantId: "erg", roles: ["student"], workspaces: ["STUDENT"], portals: ["elearning"] }));
+    if (session) sessionStorage.setItem(key, JSON.stringify({ ...JSON.parse(session), id: "student-smoke", name: "Nguyễn Minh Anh", className: "7A", email: "minhanh@example.test", tenantId: "erg", roles: ["student"], workspaces: ["STUDENT"], portals: ["elearning"] }));
   });
   await page.goto("/");
   // The level-up gate (H16) is a modal that hides the shell from the accessibility tree.
@@ -160,15 +163,42 @@ test("H16m Len bac (mobile)", async ({ browser }) => {
   await context.close();
 });
 
-// Not driven yet. Each reason is what is missing, not a guess.
+// Inbox and discussion. Web rows open in place; the phone shows a list first.
+const THREAD_ROW = /đã trả lời câu 7/;
+test("H12 Hop thu (web)", async ({ page }) => {
+  await openStudent(page, web("H12"));
+  await page.getByRole("button", { name: "Hộp thư" }).first().click();
+  await expect(page.getByText("Luyện tập: Phương trình bậc nhất · Câu 7")).toBeVisible();
+  await compare(page, "H12");
+});
+mobileTest("H12m", "Hop thu chat", async (page) => {
+  await dock(page, "Hộp thư");
+  await page.getByRole("button", { name: THREAD_ROW }).click();
+  await expect(page.getByText("Phương trình bậc nhất · Câu 7")).toBeVisible();
+});
+test("H13 Thao luan (web)", async ({ page }) => {
+  await openStudent(page, web("H13"));
+  await page.getByRole("button", { name: "Thảo luận" }).first().click();
+  await page.getByRole("button", { name: /Ôn tập chương 2/ }).click();
+  await expect(page.getByText("Giáo viên chọn là lời giải hay")).toBeVisible();
+  await compare(page, "H13");
+});
+// The phone reaches the discussion from the overview card (the dock has no discussion tab).
+const openDiscussion = async (page: Page) => { await dock(page, "Tổng quan"); await page.getByRole("button", { name: "Mở diễn đàn" }).click(); };
+mobileTest("H13m", "Thao luan", openDiscussion);
+mobileTest("H13m2", "Thao luan chu de", async (page) => {
+  await openDiscussion(page);
+  await page.getByRole("button", { name: /Ôn tập chương 2/ }).click();
+  await expect(page.getByText("Chủ đề")).toBeVisible();
+});
+
+// Tier pages on the phone: dock Ho so (account page) -> "Bậc của tôi" -> "Đổi khung".
+const openTierOnPhone = async (page: Page) => { await dock(page, "Hồ sơ"); await page.getByRole("button", { name: "Bậc của tôi" }).click(); };
+mobileTest("H15m", "Bac", openTierOnPhone);
+mobileTest("H17m", "Khung", async (page) => { await openTierOnPhone(page); await page.getByRole("button", { name: "Đổi khung" }).click(); });
+
+// Not driven yet.
 const FIXME: Record<string, string> = {
-  H12: "Hop thu web: needs notification REST feed + question-thread fixtures",
-  H12m: "Hop thu chat mobile: as H12",
-  H13: "Thao luan web: needs discussion feed fixture",
-  H13m: "Thao luan mobile: as H13",
-  H13m2: "Thao luan chu de mobile: as H13",
-  H15m: "Bac mobile: no mobile route reaches the tier page. Dock Ho so opens the account page (no tier link); only the desktop sidebar chip calls openTierView. UI gap, see diff-report.md",
-  H17m: "Khung mobile: as H15m (frames page is reached from the tier page)",
   N14: "No baseline PNG yet (baseline-by-id/README.md)",
 };
 for (const [id, reason] of Object.entries(FIXME)) {

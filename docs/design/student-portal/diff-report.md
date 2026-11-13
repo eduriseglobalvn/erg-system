@@ -2,20 +2,24 @@
 
 Run: 2026-11-13, branch feat/student-portal-finish, tolerance unchanged (maxDiffPixelRatio 0.02, threshold 0.15). No per-screen tolerance was raised: every remaining diff is a real layout/content difference, not anti-aliasing. Icons are masked (magenta boxes in actual images).
 
-Result: 0 pass, 18 fail (diff ratio below), 6 fixme.
+Result: 0 pass, 23 fail (ratio below), 1 fixme (N14: no baseline PNG). Run 2: 2026-11-13 after the second alignment batch.
 
-| Artboard | Diff ratio | Artboard | Diff ratio |
+| Artboard | Ratio | Artboard | Ratio |
 |---|---|---|---|
-| H08 | 0.10 | H02b | 0.10 |
+| H08 | 0.06 | H02b | 0.10 |
 | H14 | 0.06 | H02c | 0.13 |
-| H18 | 0.05 | H02d | 0.08 |
-| H15 | 0.09 | H03b | 0.20 |
-| H17 | 0.07 | H14m | 0.11 |
+| H18 | 0.05 | H02d | 0.07 |
+| H15 | 0.05 | H03b | 0.14 |
+| H17 | 0.04 | H14m | 0.11 |
 | H09 | 0.04 | H18m | 0.10 |
-| H10 | 0.07 | H16 | 0.39 |
-| H11 | 0.03 | H16m | not re-measured (same cause as H16) |
+| H10 | 0.03 | H15m | 0.17 |
+| H11 | 0.03 | H17m | 0.16 |
+| H12 | 0.06 | H12m | 0.11 |
+| H13 | 0.05 | H13m | 0.09 |
+| H16 | 0.29 | H13m2 | 0.06 |
+| H16m | 0.20 | | |
 
-Fixme (6): H12, H12m, H13, H13m, H13m2 (fixtures not written, see below), H15m, H17m (no mobile route to tier page), N14 (no baseline PNG).
+Known causes of the remaining diff: H16 baseline is blurred under the overlay and its hint is squeezed by a rendering flaw in the design itself; H09 lacks `correctCount` and the average differs (6.7 vs 6.8, data contract); `gradeLabel` is always empty; mobile podium is ~46px taller than design; mobile H02 is ~28px lower because of the mobile shell header; H15m/H17m cause is in the tier page on mobile; notification label "THÔNG BÁO LỚP 7A" needs a class name the BE notification lacks; sidebar badge "2" fixed in the fixture because the runtime file is at its 400-line cap; TanStack Query Devtools button disabled in test mode (it overlapped the sidebar avatar).
 
 ## (a) Fixed in fixtures (no longer differences)
 

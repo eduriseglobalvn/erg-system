@@ -7,14 +7,14 @@ import Typography from "@mui/material/Typography";
 
 import { formatTimeVi } from "@/domain/formatters/format-date";
 import { formatViNumber } from "@/domain/student-tier/tiers";
-import { Pill, ProgressBar, SubjectIcon, boardCardSx, type PillTone } from "@/features/elearning/student-dashboard/components/student-assignment-parts";
+import { Pill, ProgressBar, SubjectIcon, boardCardSx, rowButtonSx, tableHeadSx, type PillTone } from "@/features/elearning/student-dashboard/components/student-assignment-parts";
 import type { StudentDashboardAssignment } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
 import {
   dueChip, dueClock, dueShort, groupSummary, groupTodo, pickResume, progressPercent, type BoardGroup,
 } from "@/features/elearning/student-dashboard/utils/assignment-board";
 import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
 
-const WEB_COLUMNS = "minmax(0,2.1fr) minmax(0,1.1fr) minmax(0,1.2fr) 96px 112px";
+const WEB_COLUMNS = "minmax(0,2.2fr) minmax(0,1.1fr) minmax(0,1.2fr) 84px 120px";
 const CHIP_TONE: Record<"warn" | "muted" | "error", PillTone> = { error: "error", muted: "muted", warn: "warn" };
 const actionLabel = (a: StudentDashboardAssignment) => (a.status === "in_progress" ? "Làm tiếp" : "Bắt đầu");
 
@@ -26,7 +26,7 @@ function metaLine(a: StudentDashboardAssignment, mobile: boolean): string {
 
 function RowAction({ a, contained, onOpen }: { a: StudentDashboardAssignment; contained: boolean; onOpen: (id: string) => void }) {
   return (
-    <Button disabled={!a.quizId} onClick={() => onOpen(a.id)} size="small" sx={{ minHeight: 40, minWidth: 0 }} variant={contained ? "contained" : "outlined"}>
+    <Button disabled={!a.quizId} onClick={() => onOpen(a.id)} size="small" sx={rowButtonSx} variant={contained ? "contained" : "outlined"}>
       {actionLabel(a)}
     </Button>
   );
@@ -40,12 +40,12 @@ function ResumeCard({ a, now, mobile, onOpen }: { a: StudentDashboardAssignment;
   const sub = [mobile ? progress : `Đã làm ${progress}`, left ? `còn khoảng ${left} phút` : "", clock ? `hạn ${clock}` : "", mobile ? "" : a.teacherName].filter(Boolean).join(" · ");
   const xp = a.xpReward ? (mobile ? `+${a.xpReward} XP` : `+${a.xpReward} XP nếu nộp trước ${formatTimeVi(a.dueAt)}`) : "";
   const action = (
-    <Button disabled={!a.quizId} onClick={() => onOpen(a.id)} sx={{ bgcolor: "background.paper", color: "primary.main", minHeight: 44, px: 3, "&:hover": { bgcolor: t.color.primarySofter } }} variant="contained">
+    <Button disabled={!a.quizId} onClick={() => onOpen(a.id)} sx={{ bgcolor: "background.paper", color: "primary.main", minHeight: mobile ? 44 : 52, px: mobile ? 3 : 4, "&:hover": { bgcolor: t.color.primarySofter } }} variant="contained">
       Làm tiếp
     </Button>
   );
   const xpPill = xp ? (
-    <Box component="span" sx={{ alignItems: "center", bgcolor: "rgba(255,255,255,.2)", borderRadius: `${t.radius.chip}px`, display: "inline-flex", gap: 0.5, minHeight: 28, px: 1.5, typography: "subtitle2", whiteSpace: "nowrap" }}>
+    <Box component="span" sx={{ alignItems: "center", bgcolor: "rgba(255,255,255,.2)", borderRadius: `${t.radius.chip}px`, display: "inline-flex", gap: 0.5, minHeight: 24, px: 1.25, ...t.type.label, whiteSpace: "nowrap" }}>
       <BoltRoundedIcon sx={{ fontSize: t.size.iconMd }} />{xp}
     </Box>
   ) : null;
@@ -55,9 +55,9 @@ function ResumeCard({ a, now, mobile, onOpen }: { a: StudentDashboardAssignment;
         <Typography component="p" sx={{ alignItems: "center", display: "flex", gap: 0.75, textTransform: "uppercase" }} variant="caption">
           <PlayCircleOutlineRoundedIcon sx={{ fontSize: t.size.iconMd }} />{`Đang làm dở${a.subjectLabel ? ` · ${a.subjectLabel}` : ""}`}
         </Typography>
-        <Typography component="h2" sx={{ my: 0.5 }} variant={mobile ? "h4" : "h2"}>{a.title}</Typography>
+        <Typography component="h2" sx={{ my: mobile ? 0.5 : 1 }} variant={mobile ? "h4" : "h2"}>{a.title}</Typography>
         <Typography sx={{ opacity: 0.9 }} variant="body2">{sub}</Typography>
-        <Box sx={{ bgcolor: "rgba(255,255,255,.25)", borderRadius: `${t.radius.chip}px`, height: 6, mt: 1.5, overflow: "hidden" }}>
+        <Box sx={{ bgcolor: "rgba(255,255,255,.25)", borderRadius: `${t.radius.chip}px`, height: mobile ? 6 : 8, maxWidth: 460, mt: mobile ? 1.5 : 1, overflow: "hidden" }}>
           <Box sx={{ bgcolor: "common.white", height: "100%", width: `${progressPercent(a)}%` }} />
         </Box>
       </Box>
@@ -74,7 +74,7 @@ function WebRow({ a, now, contained, onOpen }: { a: StudentDashboardAssignment; 
   const chip = dueChip(a, now);
   const doing = a.status === "in_progress" && a.answeredCount !== null && a.totalQuestions;
   return (
-    <Box data-design="todo-row" sx={{ alignItems: "center", borderTop: 1, borderColor: "divider", columnGap: 2, display: "grid", gridTemplateColumns: WEB_COLUMNS, px: 2, py: 1.5 }}>
+    <Box data-design="todo-row" sx={{ alignItems: "center", borderTop: 1, borderColor: "divider", columnGap: 2, display: "grid", gridTemplateColumns: WEB_COLUMNS, px: 2.5, py: 1.75 }}>
       <Box sx={{ alignItems: "center", display: "flex", gap: 1.5, minWidth: 0 }}>
         <SubjectIcon assignment={a} />
         <Box sx={{ minWidth: 0 }}>
@@ -84,10 +84,10 @@ function WebRow({ a, now, contained, onOpen }: { a: StudentDashboardAssignment; 
       </Box>
       <Box>
         {chip ? <Pill block icon={<ScheduleRoundedIcon sx={{ fontSize: t.size.iconSm }} />} tone={CHIP_TONE[chip.tone]}>{chip.text}</Pill> : null}
-        <Typography color="text.secondary" sx={{ mt: 0.5 }} variant="body2">{dueClock(a, now)}</Typography>
+        <Typography color="text.secondary" sx={{ mt: 0.25 }} variant="caption">{dueClock(a, now)}</Typography>
       </Box>
       <Box>
-        <Typography variant="body2">{doing ? `Đang làm ${a.answeredCount}/${a.totalQuestions}` : "Chưa làm"}</Typography>
+        <Typography sx={t.type.small}>{doing ? `Đang làm ${a.answeredCount}/${a.totalQuestions}` : "Chưa làm"}</Typography>
         <Box sx={{ mt: 0.75 }}><ProgressBar label="Tiến độ" percent={progressPercent(a)} /></Box>
       </Box>
       <Box>{a.xpReward ? <Pill tone="info">{`+${formatViNumber(a.xpReward)} XP`}</Pill> : null}</Box>
@@ -119,7 +119,7 @@ function MobileCard({ a, now, contained, onOpen }: { a: StudentDashboardAssignme
 
 function GroupHeader({ group, mobile }: { group: BoardGroup; mobile: boolean }) {
   return (
-    <Box sx={{ alignItems: "center", bgcolor: mobile ? "transparent" : t.color.surfaceMuted, borderTop: mobile ? 0 : 1, borderColor: "divider", display: "flex", justifyContent: "space-between", px: mobile ? 0.5 : 2, py: 1 }}>
+    <Box sx={{ alignItems: "center", bgcolor: mobile ? "transparent" : t.color.surfaceMuted, borderTop: mobile ? 0 : 1, borderColor: "divider", display: "flex", justifyContent: "space-between", ...(mobile ? { px: 0.5, py: 1 } : { borderBottom: 1, pb: 1, pt: 1.5, px: 2.5 }) }}>
       <Typography color="text.secondary" variant="caption">{group.label}</Typography>
       <Typography color="text.secondary" variant="caption">{groupSummary(group)}</Typography>
     </Box>
@@ -146,7 +146,7 @@ export function TodoBoard({ items, now, mobile, onOpen }: { items: StudentDashbo
         ))
       ) : (
         <Box sx={boardCardSx}>
-          <Box sx={{ columnGap: 2, display: "grid", gridTemplateColumns: WEB_COLUMNS, px: 2, py: 1.5 }}>
+          <Box sx={{ ...tableHeadSx, gridTemplateColumns: WEB_COLUMNS }}>
             {["Bài", "Hạn nộp", "Trạng thái", "Thưởng", ""].map((label, index) => <Typography color="text.secondary" key={index} variant="caption">{label}</Typography>)}
           </Box>
           {groups.map((group) => (
@@ -158,7 +158,7 @@ export function TodoBoard({ items, now, mobile, onOpen }: { items: StudentDashbo
         </Box>
       )}
       {!mobile ? (
-        <Typography color="text.secondary" variant="body2">
+        <Typography color="text.secondary" variant="caption">
           Nộp trước hạn được thêm +10 XP. Bài kiểm tra chỉ làm 1 lần; bài luyện tập làm lại được nhưng chỉ tính XP lần nộp đầu.
         </Typography>
       ) : null}

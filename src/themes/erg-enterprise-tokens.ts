@@ -49,6 +49,11 @@ export const ergEnterpriseTokens = {
   type: {
     display: { fontSize: 34, fontWeight: 700, lineHeight: 1.1 },
     ringRank: { fontSize: 30, fontWeight: 700, lineHeight: 1 },
+    pageTitle: { fontSize: 28, fontWeight: 600, lineHeight: 1.25, letterSpacing: "-0.01em" },
+    pageLead: { fontSize: 15, fontWeight: 400, lineHeight: 1.45 },
+    small: { fontSize: 13, fontWeight: 400, lineHeight: 1.45 },
+    stat: { fontSize: 26, fontWeight: 700, lineHeight: 1.15, letterSpacing: "-0.02em" },
+    label: { fontSize: 12, fontWeight: 600, lineHeight: 1.45 },
   },
   // Tier name colour (hero title, current ladder step) and hero tint (gradient start + corner glow).
   tierTitle: { go: "#6E4520", sat: "#4A515B", dong: "#8A431A", bac: "#5E6778", vang: "#7A5A00", bk: "#227A72", kc: "#3B52C8", ct: "#7A1FA2" },

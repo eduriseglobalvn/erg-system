@@ -179,6 +179,9 @@ export function StudentDashboardMobileOverview({
           <Typography color="text.secondary" variant="body2" sx={{ ...clampSx, mt: 0.5 }}>{announcement.content}</Typography>
         </Box>
       ) : null}
+
+      {/* The phone dock has no discussion tab: this is its entry point. */}
+      <Button onClick={() => onPageChange("discussion")} size="small" sx={{ alignSelf: "flex-start" }} variant="text">Mở diễn đàn</Button>
     </Stack>
   );
 }

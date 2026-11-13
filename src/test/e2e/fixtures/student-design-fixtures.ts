@@ -30,7 +30,7 @@ export const dashboard = {
   viewer: { userId: "elearning-smoke-user", tenantId: "tenant-smoke", accountType: "STUDENT", accessLevel: "LEARNER" },
   profile: {
     userId: "elearning-smoke-user", studentId: "student-smoke", studentCode: "STU-001", fullName: "Nguyễn Minh Anh",
-    email: "minhanh@example.test", schoolId: "school-smoke", academicClassId: "class-7a", status: "ACTIVE",
+    email: "minhanh@example.test", schoolId: "school-smoke", academicClassId: "7A", status: "ACTIVE",
     updatedAt: "2026-11-12T00:00:00Z", leaderboardEnabled: true,
   },
   summary: {
@@ -112,7 +112,7 @@ export const tierTable = TABLE.map(([tierKey, seats, divisions]) => ({
 
 export const myFrames = {
   selected: "dong",
-  frames: TIER_KEYS.map((tierKey) => ({ tierKey, unlocked: tierKey === "dong", unlockedAt: tierKey === "dong" ? "2026-09-07" : null, schoolYear: "2026-2027", studentsToPass: null })),
+  frames: TIER_KEYS.map((tierKey) => ({ tierKey, unlocked: ["go", "sat", "dong", "bk"].includes(tierKey), unlockedAt: tierKey === "dong" ? "2026-09-07" : null, schoolYear: tierKey === "bk" ? "hè 2026" : "2026-2027", studentsToPass: null })),
 };
 
 /** Leaderboard variant by request input: the full-board page reads the course board. */

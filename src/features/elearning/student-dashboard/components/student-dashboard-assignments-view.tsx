@@ -34,7 +34,7 @@ export function filterAssignments(assignments: StudentDashboardAssignment[], fil
   return assignments.filter((a) => a.status === "not_started" || a.status === "in_progress");
 }
 
-function SearchBox({ placeholder, value, onChange, mobile }: { placeholder: string; value: string; onChange: (value: string) => void; mobile: boolean }) {
+function SearchBox({ placeholder, value, onChange, mobile, hint }: { placeholder: string; value: string; onChange: (value: string) => void; mobile: boolean; hint: boolean }) {
   const ref = useRef<HTMLInputElement>(null);
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -44,10 +44,10 @@ function SearchBox({ placeholder, value, onChange, mobile }: { placeholder: stri
     return () => window.removeEventListener("keydown", onKey);
   }, []);
   return (
-    <Box sx={{ alignItems: "center", bgcolor: "background.paper", border: 1, borderColor: "divider", borderRadius: `${t.radius.control}px`, display: "flex", gap: 1, height: t.size.controlMd, px: 1.5, width: mobile ? "100%" : 280 }}>
+    <Box sx={{ alignItems: "center", bgcolor: "background.paper", border: 1, borderColor: "divider", borderRadius: `${t.radius.control}px`, display: "flex", gap: 1, height: 40, px: 1.75, width: mobile ? "100%" : 280 }}>
       <SearchRoundedIcon sx={{ color: "text.secondary", fontSize: t.size.iconMd }} />
       <InputBase fullWidth inputProps={{ "aria-label": placeholder }} inputRef={ref} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} sx={{ typography: "body2" }} value={value} />
-      {mobile ? null : <Box component="kbd" sx={{ bgcolor: t.color.divider, borderRadius: `${t.radius.xs}px`, color: "text.secondary", px: 0.75, typography: "caption" }}>Ctrl K</Box>}
+      {mobile || !hint ? null : <Box component="kbd" sx={{ bgcolor: t.color.divider, borderRadius: `${t.radius.xs}px`, color: "text.secondary", px: 0.875, typography: "caption", whiteSpace: "nowrap" }}>Ctrl K</Box>}
     </Box>
   );
 }
@@ -72,13 +72,13 @@ export function AssignmentsView({ assignments, copy, initialFilter = "todo", mob
   const needle = query.trim().toLowerCase();
   const list = lists[filter].filter((a) => (!activeSubject || a.subjectLabel === activeSubject) && (!needle || `${a.title} ${a.subjectLabel ?? ""}`.toLowerCase().includes(needle)));
   const subtitle = filter === "submitted" ? SUBMITTED_SUBTITLE : todoHeadline(lists.todo, now);
-  const search = <SearchBox mobile={mobile} onChange={setQuery} placeholder={filter === "submitted" ? "Tìm bài đã nộp" : "Tìm bài tập"} value={query} />;
+  const search = <SearchBox hint={filter !== "submitted"} mobile={mobile} onChange={setQuery} placeholder={filter === "submitted" ? "Tìm bài đã nộp" : "Tìm bài tập"} value={query} />;
   return (
-    <Stack spacing={mobile ? 1.5 : 2} sx={{ width: "100%" }}>
-      <Box sx={{ alignItems: "flex-start", display: "flex", gap: 2, justifyContent: "space-between" }}>
+    <Stack spacing={mobile ? 1.5 : 2.25} sx={{ width: "100%" }}>
+      <Box sx={{ alignItems: mobile ? "flex-start" : "flex-end", display: "flex", gap: 2, justifyContent: "space-between" }}>
         <Box>
-          <Typography component="h1" variant="h1">{copy.assignmentsTitle}</Typography>
-          {mobile ? null : <Typography color="text.secondary" sx={{ mt: 0.5 }} variant="body1">{subtitle}</Typography>}
+          <Typography component="h1" sx={mobile ? undefined : t.type.pageTitle} variant="h1">{copy.assignmentsTitle}</Typography>
+          {mobile ? null : <Typography color="text.secondary" sx={{ ...t.type.pageLead, mt: 0.5 }}>{subtitle}</Typography>}
         </Box>
         {mobile ? (
           <IconButton aria-label="Tìm bài tập" onClick={() => setSearchOpen((open) => !open)} sx={{ bgcolor: "background.paper", border: 1, borderColor: "divider", height: t.size.controlLg, width: t.size.controlLg }}>
@@ -88,7 +88,7 @@ export function AssignmentsView({ assignments, copy, initialFilter = "todo", mob
       </Box>
       {mobile && searchOpen ? search : null}
       <Box sx={{ alignItems: "center", display: "flex", gap: 2, justifyContent: "space-between" }}>
-        <Tabs aria-label="Lọc bài tập" sx={{ ...ergSegmentedTabsSx, flexShrink: 0, width: mobile ? "100%" : 480 }} value={filter} variant="fullWidth" onChange={(_, value: AssignmentFilter) => setFilter(value)}>
+        <Tabs aria-label="Lọc bài tập" sx={{ ...ergSegmentedTabsSx, flexShrink: 0, width: mobile ? "100%" : filter === "submitted" ? 520 : 480 }} value={filter} variant="fullWidth" onChange={(_, value: AssignmentFilter) => setFilter(value)}>
           {TABS.map((tab) => (
             <Tab key={tab.key} icon={<ErgTabCount count={lists[tab.key].length} tone={tab.key === "overdue" ? "error" : "info"} />} iconPosition="end" label={tab.label} value={tab.key} />
           ))}

@@ -89,7 +89,7 @@ export function FramePickerPage({ accountId, studentName, className = "", rank, 
   );
 
   return (
-    <Box sx={{ display: "grid", gap: phone ? 1.5 : 2.5, maxWidth: 1180, mx: "auto", px: { xs: 2, md: 0 }, py: { xs: 2, md: 3 }, pb: { xs: 22, md: 3 } }}>
+    <Box sx={{ display: "grid", gap: phone ? 1.5 : 2.5, px: { xs: 2, md: 0 }, py: { xs: 2, md: 0 }, pb: { xs: 22, md: 0 } }}>
       <TierHeader
         title={phone ? "Khung viền" : "Khung viền ảnh đại diện"}
         subtitle={phone ? `Hồ sơ › Khung viền · ${unlockedCount} / 8 đã mở` : "Mở từ menu tài khoản › Khung viền, hoặc từ trang Bậc của bạn. Đổi bất cứ lúc nào."}

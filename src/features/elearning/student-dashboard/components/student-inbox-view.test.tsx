@@ -26,7 +26,6 @@ vi.mock("@/features/notifications/api/notification-api", async (importOriginal) 
   fetchNotificationFeed: mocks.fetchNotificationFeed,
   resolveNotificationQueryScope: () => ({ accountId: "acc-1", tenantId: "t-1" }),
 }));
-vi.mock("@/features/notifications/hooks/use-unread-notification-count", () => ({ useUnreadNotificationCount: () => 1 }));
 vi.mock("@/features/notifications/components/mark-all-read-button", () => ({ MarkAllReadButton: () => null }));
 vi.mock("@/features/notifications/components/notification-detail", () => ({ NotificationDetail: () => <div>notification-detail</div> }));
 vi.mock("@/hooks/use-mobile", () => ({ useIsMobile: () => mocks.mobile }));

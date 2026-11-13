@@ -39,13 +39,13 @@ export function TierProgress({ value, tier, height = 10 }: { value: number; tier
 /** Title block of a tier screen; on phones a back arrow comes first, on web a text link above the title when `backLabel` is set. */
 export function TierHeader({ title, subtitle, onBack, backLabel, actions }: { title: string; subtitle?: ReactNode; onBack?: () => void; backLabel?: string; actions?: ReactNode }) {
   return (
-    <Box sx={{ alignItems: "flex-start", display: "flex", gap: 1.5, justifyContent: "space-between" }}>
+    <Box sx={{ alignItems: { xs: "flex-start", md: "flex-end" }, display: "flex", gap: 1.5, justifyContent: "space-between" }}>
       <Box sx={{ alignItems: "flex-start", display: "flex", gap: 1, minWidth: 0 }}>
         {onBack ? <ErgIconButton label="Quay lại" onClick={onBack} size="small" sx={{ display: { md: "none" } }}><ArrowBackRoundedIcon /></ErgIconButton> : null}
         <Box sx={{ minWidth: 0 }}>
-          {onBack && backLabel ? <Button onClick={onBack} size="small" startIcon={<ArrowBackRoundedIcon />} sx={{ display: { xs: "none", md: "inline-flex" }, ml: -1, mb: 0.5 }} variant="text">{backLabel}</Button> : null}
-          <Typography component="h1" variant="h1">{title}</Typography>
-          {subtitle ? <Typography variant="body2" sx={{ color: "text.secondary" }}>{subtitle}</Typography> : null}
+          {onBack && backLabel ? <Button onClick={onBack} size="small" startIcon={<ArrowBackRoundedIcon />} sx={{ ...t.type.small, display: { xs: "none", md: "inline-flex" }, fontWeight: "fontWeightBold", lineHeight: 1.45, minHeight: 0, minWidth: 0, mb: 0.25, p: 0 }} variant="text">{backLabel}</Button> : null}
+          <Typography component="h1" sx={(theme) => ({ [theme.breakpoints.up("md")]: t.type.pageTitle })} variant="h1">{title}</Typography>
+          {subtitle ? <Typography sx={(theme) => ({ color: "text.secondary", mt: 0.5, [theme.breakpoints.up("md")]: t.type.pageLead })} variant="body2">{subtitle}</Typography> : null}
         </Box>
       </Box>
       {actions}

@@ -35,7 +35,7 @@ function currentQueryScopeKey() {
 
 export default function App() {
   const router = useMemo(() => createAppRouter(), []);
-  const showQueryDevtools = import.meta.env.DEV && import.meta.env.VITE_SHOW_QUERY_DEVTOOLS !== "false";
+  const showQueryDevtools = import.meta.env.DEV && import.meta.env.MODE !== "test" && import.meta.env.VITE_SHOW_QUERY_DEVTOOLS !== "false";
   const [scopeKey, setScopeKey] = useState(currentQueryScopeKey);
   const persistOptions = useMemo(() => {
     return {

@@ -11,7 +11,7 @@ export const INBOX_CHIPS: ReadonlyArray<{ id: InboxChip; label: string }> = [
   { id: "RANK", label: "Thi đua" },
 ];
 
-export type InboxEntryKind = "THREAD" | "CLASS" | "RANK" | "CENTER" | "SYSTEM";
+export type InboxEntryKind = "THREAD" | "CLASS" | "DISCUSSION" | "RANK" | "CENTER" | "SYSTEM";
 export type InboxEntry = {
   /** Unique across both sources: `thread:<id>` or `note:<id>`. */
   key: string;
@@ -28,6 +28,7 @@ const RANK_EVENT = /leaderboard|rank|badge|tier|xp|streak/i;
 
 export function notificationKind(item: NotificationFeedItem): InboxEntryKind {
   if (RANK_EVENT.test(item.eventType)) return "RANK";
+  if (/discussion/i.test(item.eventType)) return "DISCUSSION";
   if (isSchoolMessage(item)) return item.campaignId || !item.senderName ? "CENTER" : "CLASS";
   return "SYSTEM";
 }

@@ -115,25 +115,26 @@ export function TierTablePage({ accountId, gradeLabel = "khối", onBack }: { ac
   const rows = TIER_KEYS.map((k) => table.data?.find((r) => r.tierKey === k)).filter((r): r is TierTableRow => Boolean(r)).reverse();
   const rank = mine.data?.gradeRank;
   const phone = useMediaQuery(useTheme().breakpoints.down("md"));
+  const gradeName = gradeLabel.charAt(0).toUpperCase() + gradeLabel.slice(1);
   const yourDivision = rows.find((r) => r.tierKey === mineTier)?.divisions.find((d) => d.division === mine.data?.division);
 
   return (
-    <Box sx={{ display: "grid", gap: 2.5, maxWidth: 1100, mx: "auto", px: { xs: 2, md: 0 }, py: { xs: 2, md: 3 } }}>
+    <Box sx={{ display: "grid", gap: 2.5, px: { xs: 2, md: 0 }, py: { xs: 2, md: 0 } }}>
       <TierHeader
         title="Bảng bậc & cấp"
-        subtitle={`${gradeLabel}${mine.data?.gradeSize ? ` · ${mine.data.gradeSize} bạn` : ""} · mốc XP của ${weekName.toLowerCase()}, tính lại 0 giờ thứ Hai`}
+        subtitle={`${gradeName}${mine.data?.gradeSize ? ` · ${mine.data.gradeSize} bạn` : ""} · mốc XP của ${weekName.toLowerCase()}, tính lại 0 giờ thứ Hai`}
         backLabel="Bậc của bạn"
         onBack={onBack}
         actions={(
           <Tabs aria-label="Tuần" value={week} sx={{ ...ergChipTabsSx, display: { xs: "none", md: "flex" } }} onChange={(_, v: "this" | "last") => setWeek(v)}>
-            <Tab value="this" label={gradeLabel} />
+            <Tab value="this" label={gradeName} />
             <Tab value="last" label="Tuần trước" />
           </Tabs>
         )}
       />
       <Box sx={{ display: "grid", gap: 2.5, alignItems: "start", gridTemplateColumns: { xs: "1fr", md: "2fr 1fr" } }}>
-        <Box sx={cardSx}>
-          {phone ? null : <Typography variant="h5" sx={{ mb: 2 }}>Bậc và cấp được tính thế nào?</Typography>}
+        <Box sx={{ ...cardSx, p: { xs: 2, md: 2.5 } }}>
+          {phone ? null : <Typography variant="h6" sx={{ mb: 2 }}>Bậc và cấp được tính thế nào?</Typography>}
           <Box component="ol" sx={{ display: { xs: "grid", md: "flex" }, gap: 2, listStyle: "none", m: 0, p: 0 }}>
             {STEPS.map(([title, body], i) => (
               <Fragment key={title}>
@@ -142,7 +143,7 @@ export function TierTablePage({ accountId, gradeLabel = "khối", onBack }: { ac
                 <Box sx={{ alignItems: "center", bgcolor: "primary.main", borderRadius: "50%", color: "primary.contrastText", display: "grid", flexShrink: 0, height: 28, placeItems: "center", typography: "caption", width: 28 }}>{i + 1}</Box>
                 <Box>
                   <Typography variant="subtitle2">{phone && i === 1 ? `Xếp hạng trong ${gradeLabel.toLowerCase()}` : phone && i === 2 && yourDivision && mineTier ? `Tra bảng: hạng #${yourDivision.rankFrom}–${yourDivision.rankTo} = ${tierLabel(mineTier, mine.data?.division)}` : title}</Typography>
-                  <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                  <Typography sx={{ ...t.type.small, color: "text.secondary" }}>
                     {i === 1 && rank && mine.data?.gradeSize ? phone ? `Bạn #${rank} / ${mine.data.gradeSize} với ${formatViNumber(mine.data.courseXp)} XP` : <>{`Xếp ${mine.data.gradeSize} bạn theo tổng XP. Bạn đang `}<b>{`#${rank}`}</b>{` với ${formatViNumber(mine.data.courseXp)} XP.`}</> : i === 2 && yourDivision && mineTier ? phone ? "Mỗi bậc 5 cấp: 5 thấp nhất → 1 cao nhất" : <>{`Hạng #${yourDivision.rankFrom}–${yourDivision.rankTo} là `}<b>{tierLabel(mineTier, mine.data?.division)}</b>{". Cấp 5 thấp nhất, cấp 1 cao nhất."}</> : phone && i === 0 ? "Bài nộp lần đầu +10–40, trước hạn +10, chuỗi 7 ngày ×1,2" : body}
                   </Typography>
                 </Box>
@@ -151,10 +152,10 @@ export function TierTablePage({ accountId, gradeLabel = "khối", onBack }: { ac
             ))}
           </Box>
         </Box>
-        <Box sx={{ ...cardSx, display: { xs: "none", md: "block" } }}>
-          <Typography variant="h5" sx={{ mb: 1 }}>XP đến từ đâu</Typography>
+        <Box sx={{ ...cardSx, display: { xs: "none", md: "block" }, p: 2.5 }}>
+          <Typography variant="h6" sx={{ mb: 1 }}>XP đến từ đâu</Typography>
           {XP_SOURCES.map(([label, value]) => (
-            <Box key={label} sx={{ borderTop: 1, borderColor: t.color.divider, display: "flex", justifyContent: "space-between", py: 1 }}>
+            <Box key={label} sx={{ borderTop: 1, borderColor: t.color.divider, display: "flex", justifyContent: "space-between", py: 1.5 }}>
               <Typography variant="body2" sx={label === GREYED_SOURCE ? { color: t.color.textMuted } : undefined}>{label}</Typography>
               <Typography variant={label === GREYED_SOURCE ? "body2" : "subtitle2"} sx={label === GREYED_SOURCE ? { color: t.color.textMuted } : undefined}>{value}</Typography>
             </Box>

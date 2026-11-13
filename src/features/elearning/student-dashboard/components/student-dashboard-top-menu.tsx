@@ -11,7 +11,7 @@ import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import { type ElearningViewerSession } from "@/platform/auth/api/elearning-viewer-session";
 import { getAuthScope } from "@/platform/auth/api/auth-storage";
-import { NAV_BORDER, NAV_CARD_RADIUS, NAV_CARD_SHADOW, NAV_PADDING } from "@/components/portal/portal-sidebar-styles";
+import { NAV_BORDER, NAV_CARD_RADIUS, NAV_CARD_SHADOW } from "@/components/portal/portal-sidebar-styles";
 import { PortalSidebarWorkspaceHeader } from "@/components/portal/portal-sidebar-workspace-header";
 import type { DashboardCopy, StudentDiscussionNotification, StudentPageKey } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
 import type { StudentDashboardProfile } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
@@ -74,7 +74,7 @@ export function TopMenuShell({
       <Box component="aside" sx={{
         bgcolor: "background.paper", border: `1px solid ${NAV_BORDER}`, borderRadius: NAV_CARD_RADIUS, boxShadow: NAV_CARD_SHADOW,
         display: "flex", flexDirection: "column", flexShrink: 0, height: { md: `calc(100vh - ${DESK_GAP * 2}px)` },
-        m: { xs: 1.5, md: `${DESK_GAP}px` }, mr: { md: 0 }, p: { xs: 1.25, md: `${NAV_PADDING}px` }, position: { md: "sticky" },
+        m: { xs: 1.5, md: `${DESK_GAP}px` }, mr: { md: 0 }, p: { xs: 1.25, md: "14px 10px 10px" }, position: { md: "sticky" },
         top: { md: DESK_GAP }, width: { xs: "calc(100% - 24px)", md: SIDEBAR_CARD_WIDTH }, zIndex: 12,
       }}>
         {/* A plain student has nowhere to switch to, so the switcher only shows for accounts with another workspace (e.g. teacher). */}
@@ -97,7 +97,7 @@ export function TopMenuShell({
       </Box>
 
       {/* Main content right side */}
-      <Box sx={{ display: "flex", flex: 1, flexDirection: "column", minWidth: 0, p: { xs: 1.5, md: `${DESK_GAP}px` } }}>
+      <Box sx={{ display: "flex", flex: 1, flexDirection: "column", minWidth: 0, p: { xs: 1.5, md: `${DESK_GAP + 8}px ${DESK_GAP + 8}px 32px` } }}>
         {/* Design has no bar above the page: ranking, tier, inbox, discussion and assignment pages carry their own title. */}
         {TITLED_BY_PAGE.has(activePage) ? null : <Typography variant="h5" component="h1" sx={{ mb: 2, px: { xs: 0.5, md: 0 } }}>{currentPageLabel}</Typography>}
 
