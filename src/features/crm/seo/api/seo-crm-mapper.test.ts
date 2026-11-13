@@ -30,6 +30,16 @@ describe("CRM workspace DTO mapper", () => {
     expect(result.handovers[0]?.status).toBe("ready");
   });
 
+  it("keeps the Vietnam day of a UTC timestamp (00:00-07:00 GMT+7 is the previous UTC day)", () => {
+    const result = mapSeoCrmWorkspaceDto({
+      leads: [{ id: "lead-1", schoolId: "school-1", status: "new_lead", nextFollowUpAt: "2026-08-02", lastTouchAt: "2026-07-29T18:30:00Z" }],
+      handovers: [{ id: "handover-1", leadId: "lead-1", opportunityId: "opp-1", status: "ready", requestedAt: "2026-07-29T18:30:00Z" }],
+    });
+
+    expect(result.leads[0]).toMatchObject({ nextFollowUpAt: "2026-08-02", lastTouchAt: "2026-07-30" });
+    expect(result.handovers[0]?.requestedAt).toBe("2026-07-30");
+  });
+
   it("rejects unknown enum values at the transport boundary", () => {
     expect(() => mapSeoCrmWorkspaceDto({ leads: [{ id: "lead-1", schoolId: "school-1", status: "invented" }] }))
       .toThrow(/lead status/i);
