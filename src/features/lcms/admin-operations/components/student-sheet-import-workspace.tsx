@@ -11,7 +11,7 @@ import { usePacedStateBatch } from "@/hooks/use-paced-state-batch";
 import type { ManagementScope } from "@/types/scope-types";
 import {
   fetchGoogleSheetTabs,
-  loadGoogleSheetViaJsonp,
+  fetchGoogleSheetTable,
   parseGoogleSheetUrl,
   type GoogleSheetTab as SheetTab,
 } from "@/features/lcms/imports/google-sheets-csv-adapter";
@@ -150,7 +150,7 @@ export function StudentSheetImportWorkspace({
           requestedSheetName && (!nextTabs.length || nextTabs.some((tab) => tab.name === requestedSheetName))
             ? requestedSheetName
             : "";
-        const payload = await loadGoogleSheetViaJsonp({
+        const payload = await fetchGoogleSheetTable({
           ...parsedUrl,
           sheetName: activeSheetName || undefined,
         });

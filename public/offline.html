@@ -79,7 +79,8 @@
       <div class="mark" aria-hidden="true">ERG</div>
       <h1>Chưa có kết nối mạng</h1>
       <p>ERG LMS vẫn giữ app shell để mở lại nhanh. Kết nối lại mạng để tải dữ liệu lớp học, điểm danh, bảng điểm và tài nguyên mới nhất.</p>
-      <button type="button" onclick="window.location.reload()">Thử lại</button>
+      <!-- A GET form reloads the page without an inline handler, which the CSP blocks. -->
+      <form><button type="submit">Thử lại</button></form>
     </main>
   </body>
 </html>
