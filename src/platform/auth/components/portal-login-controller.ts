@@ -12,6 +12,7 @@ import { PLATFORM_ROOT_ADMIN_EMAIL, projectVerifiedWorkspaces } from "@/platform
 import { resolveWorkspaceLandingTarget } from "@/platform/auth/utils/access-denied";
 import { canAccessPortal } from "@/platform/auth/utils/portal-access";
 import { ApiClientError } from "@/lib/api-client";
+import { rateLimitMessage } from "@/lib/api-client/errors";
 import { adminPath, teacherPath } from "@/platform/workspaces/workspace-paths";
 import { canonicalWorkspaceForPath } from "@/platform/workspaces/workspace-route";
 import type { Workspace } from "@/platform/workspaces/workspace-domain";
@@ -128,9 +129,11 @@ export function getFriendlyAuthErrorMessage(error: unknown, fallback: string) {
     if (LOCKED_CODES.has(error.code) || error.status === 423) {
       return `Tài khoản đang tạm khóa do đăng nhập sai nhiều lần.${retryHint(error.details) || " Vui lòng thử lại sau ít phút hoặc liên hệ quản trị viên để được mở khóa."}`;
     }
-    if (TOO_MANY_CODES.has(error.code) || error.status === 429) {
+    if (TOO_MANY_CODES.has(error.code)) {
       return `Bạn đã thử đăng nhập quá nhiều lần.${retryHint(error.details) || " Vui lòng thử lại sau ít phút."}`;
     }
+    // Any other 429 is load (nginx limit, AUTH_PASSWORD_HASH_BUSY), not this account's attempts.
+    if (error.status === 429) return rateLimitMessage(error) ?? fallback;
     if (error.status === 401) return "Email hoặc mật khẩu chưa đúng. Vui lòng kiểm tra lại thông tin đăng nhập.";
     if (error.code === "AUTH_LOGIN_IN_PROGRESS") return "Một tab khác đang xử lý đăng nhập cho tài khoản này. Vui lòng chờ một chút rồi thử lại.";
     return error.message || fallback;

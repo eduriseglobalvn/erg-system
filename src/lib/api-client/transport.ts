@@ -27,7 +27,7 @@ export async function fetchApi(url: string, headers: Headers, init?: ApiRequestO
     timeoutId = setTimeout(() => timeoutController.abort(new Error("API_REQUEST_TIMEOUT")), timeoutMs);
   }
 
-  const { signal: _signal, timeoutMs: _timeoutMs, responseType: _responseType, ...fetchInit } = init ?? {};
+  const { signal: _signal, timeoutMs: _timeoutMs, responseType: _responseType, retryOnRateLimit: _retryOnRateLimit, ...fetchInit } = init ?? {};
 
   try {
     return await fetch(url, {

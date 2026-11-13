@@ -40,3 +40,17 @@ it("never toasts silent queries or 401s", () => {
   reportQueryError(Object.assign(new Error("x"), { status: 401 }), query({ state: { data: 1 } }));
   expect(error).not.toHaveBeenCalled();
 });
+
+const rateLimitError = (seconds?: number) =>
+  Object.assign(new Error("Too many requests"), { status: 429, details: seconds ? { retryAfterSeconds: seconds } : undefined });
+
+it("shows one 'system busy' toast for a rate-limited mutation, with the wait in seconds", () => {
+  reportUnhandledMutationError(rateLimitError(30), {});
+  expect(error).toHaveBeenCalledTimes(1);
+  expect(error).toHaveBeenCalledWith("Hệ thống đang đông, vui lòng thử lại sau 30 giây", { id: "rate-limited" });
+});
+
+it("shows the 'system busy' toast for a rate-limited query even on first load", () => {
+  reportQueryError(rateLimitError(30), query());
+  expect(error).toHaveBeenCalledWith("Hệ thống đang đông, vui lòng thử lại sau 30 giây", { id: "rate-limited" });
+});

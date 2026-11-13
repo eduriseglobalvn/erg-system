@@ -24,6 +24,8 @@ export type ApiRequestOptions = RequestInit & {
   timeoutMs?: number;
   unwrapEnvelope?: boolean;
   responseType?: "json" | "blob";
+  /** Retry once after a short 429 although the method is not GET (read-only GraphQL queries). */
+  retryOnRateLimit?: boolean;
 };
 
 const apiResponseRequestIds = new WeakMap<object, string>();

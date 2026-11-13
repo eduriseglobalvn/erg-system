@@ -109,6 +109,8 @@ async function performGraphQlRequest<TData, TVariables extends Record<string, un
     }),
     method: "POST",
     portal,
+    // Only reads may be replayed after a 429; a document naming a mutation never is.
+    retryOnRateLimit: !/\bmutation\b/.test(query),
     signal,
     unwrapEnvelope: false,
     // headers: {
