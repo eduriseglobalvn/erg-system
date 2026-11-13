@@ -1,7 +1,7 @@
 import { describe, expect, test, vi, beforeEach } from "vitest";
 
 import { studentAssignments, studentTeacherAnnouncements } from "@/test/fixtures/mock-student-dashboard";
-import { loadStudentDashboardData } from "@/features/elearning/student-dashboard/api/student-dashboard-api";
+import { gradeLabelFromClassName, loadStudentDashboardData } from "@/features/elearning/student-dashboard/api/student-dashboard-api";
 import ElearningStudentDashboardDocument from "@/features/elearning/student-dashboard/api/student-dashboard.graphql?raw";
 import { graphQlRequest } from "@/lib/graphql-client";
 import { hasApiBase } from "@/lib/api-client";
@@ -269,5 +269,15 @@ describe("student dashboard API", () => {
     expect(graded?.lastActivityLabel).toContain("Nộp lúc 10/11/2026");
     expect(review).toMatchObject({ status: "submitted", score: 40 });
     expect(open).toMatchObject({ status: "in_progress", score: null, maxScore: null });
+  });
+});
+
+describe("gradeLabelFromClassName", () => {
+  test("derives the grade from class names and ignores ids", () => {
+    expect(gradeLabelFromClassName("7A")).toBe("Khối 7");
+    expect(gradeLabelFromClassName("Lớp 10C2")).toBe("Khối 10");
+    expect(gradeLabelFromClassName("3f2a9c10-1b7d-4e55-9a00-0123456789ab")).toBe("");
+    expect(gradeLabelFromClassName("")).toBe("");
+    expect(gradeLabelFromClassName(undefined)).toBe("");
   });
 });

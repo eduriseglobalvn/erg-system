@@ -1,6 +1,5 @@
 import { useState } from "react";
 import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
-import EmojiEventsOutlinedIcon from "@mui/icons-material/EmojiEventsOutlined";
 import HelpOutlineRoundedIcon from "@mui/icons-material/HelpOutlineRounded";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
@@ -24,7 +23,7 @@ import { PodiumArena } from "@/features/elearning/class-leaderboard/components/p
 import { EarnXpCard, RankPositionCard, WeekRewardsCard } from "@/features/elearning/class-leaderboard/components/ranking-side-cards";
 import { chaseOf } from "@/features/elearning/class-leaderboard/components/chase-strip";
 import { LEADERBOARD_PERIODS, leaderboardPeriodLabel, leaderboardWeekLabel } from "@/features/elearning/class-leaderboard/leaderboard-period";
-import { EmptyPanel, PageHeader, SkeletonRow } from "@/features/elearning/student-dashboard/components/student-dashboard-view-primitives";
+import { EmptyPanel, SkeletonRow } from "@/features/elearning/student-dashboard/components/student-dashboard-view-primitives";
 import { Stack } from "@/features/elearning/student-dashboard/components/student-dashboard-workspace-styles";
 import type { DashboardCopy } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
 import type { StudentDashboardAssignment } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
@@ -64,8 +63,10 @@ export function RankingView({ accountId, classId, copy, onOpenFullBoard, onOpenT
 
   return (
     <Stack spacing={2.5}>
-      <PageHeader description={period === "WEEK" && board.data?.periodEndsAt ? `${leaderboardWeekLabel(board.data.periodEndsAt)} · ${board.data.className || "Lớp"}` : copy.ranking.description} icon={<EmojiEventsOutlinedIcon />} title={copy.ranking.title} />
-      {onOpenTierTable ? <ErgIconButton label="Bảng bậc & cấp" onClick={onOpenTierTable} sx={{ alignSelf: "flex-end" }}><HelpOutlineRoundedIcon /></ErgIconButton> : null}
+      <div>
+        <Typography component="h1" variant="h1">{copy.ranking.title}</Typography>
+        <Typography variant="body2" sx={{ color: "text.secondary" }}>{period === "WEEK" && board.data?.periodEndsAt ? `${leaderboardWeekLabel(board.data.periodEndsAt)} · ${board.data.className || "Lớp"}` : copy.ranking.description}</Typography>
+      </div>
       <Tabs aria-label="Kỳ thi đua" value={period} variant="fullWidth" onChange={(_, value: LeaderboardPeriod) => setPeriod(value)} sx={ergSegmentedTabsSx}>
         {LEADERBOARD_PERIODS.map((value) => <Tab key={value} value={value} label={leaderboardPeriodLabel(value)} />)}
       </Tabs>
@@ -74,6 +75,7 @@ export function RankingView({ accountId, classId, copy, onOpenFullBoard, onOpenT
           <Tab value="CLASS" label={board.data?.className || "Lớp"} />
           <Tab value="GRADE" label="Cả khối" />
         </Tabs>
+        {onOpenTierTable ? <ErgIconButton label="Bảng bậc & cấp" onClick={onOpenTierTable}><HelpOutlineRoundedIcon /></ErgIconButton> : null}
       </Stack>
       {board.isPending ? (
         <Stack spacing={1.5}><SkeletonRow /><SkeletonRow /></Stack>
@@ -98,7 +100,7 @@ export function RankingView({ accountId, classId, copy, onOpenFullBoard, onOpenT
               <RankPositionCard entries={entries} periodWord={PERIOD_WORD[period]} size={entries.filter((entry) => entry.rank != null).length} />
               <EarnXpCard
                 gap={(() => { const chase = chaseOf(entries); return chase?.kind === "chase" ? chase.gap : undefined; })()}
-                items={openAssignments.map((a) => ({ id: a.id, title: a.title, subtitle: [a.subjectLabel, a.dueLabel].filter(Boolean).join(" · "), xp: a.xpReward ?? 0 }))}
+                items={openAssignments.map((a) => ({ id: a.id, title: a.title, subtitle: [a.subjectLabel, a.dueLabel].filter(Boolean).join(" · "), xp: a.xpReward ?? 0, kind: a.kind }))}
                 onStart={onDoAssignments ? () => onDoAssignments() : undefined}
               />
               <WeekRewardsCard />

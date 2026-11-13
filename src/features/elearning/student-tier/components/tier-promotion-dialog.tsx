@@ -89,11 +89,11 @@ export function TierPromotionDialog({ promotion, studentName, next, gradeLabel =
             <Typography variant="caption" sx={{ color: "text.secondary", whiteSpace: "nowrap" }}>{`vượt ${next.studentsToPass} bạn`}</Typography>
           </Box>
         ) : null}
-        <Box sx={{ alignItems: "center", display: "flex", flexDirection: { xs: "column", sm: "row-reverse" }, gap: 1, justifyContent: { sm: "flex-start" }, width: "100%" }}>
-          <ErgButton autoFocus variant="contained" onClick={onUseFrame} sx={{ width: { xs: "100%", sm: "auto" } }}>{`Dùng khung ${TIER_NAMES[to]}`}</ErgButton>
-          <ErgButton variant="outlined" startIcon={<StairsRoundedIcon />} onClick={onViewTier} sx={{ display: { xs: "none", sm: "inline-flex" } }}>Xem bậc của tôi</ErgButton>
-          <ErgButton variant="text" onClick={onClose}>Để sau</ErgButton>
-          <Typography variant="caption" sx={{ color: "text.secondary", flex: { sm: 1 }, order: 3, textAlign: { sm: "left" } }}>{phone ? "Đổi khung bất cứ lúc nào ở Hồ sơ › Khung viền" : "Đổi khung sau ở menu tài khoản › Khung viền"}</Typography>
+        <Box sx={{ alignItems: "center", display: "flex", flexDirection: { xs: "column-reverse", sm: "row" }, flexWrap: "wrap", gap: 1, justifyContent: "flex-end", mt: 1.5, width: "100%" }}>
+          <Typography variant="caption" sx={{ color: "text.secondary", flex: { sm: "1 0 100%" }, textAlign: { sm: "left" } }}>{phone ? "Đổi khung bất cứ lúc nào ở Hồ sơ › Khung viền" : "Đổi khung sau ở menu tài khoản › Khung viền"}</Typography>
+          <ErgButton variant="text" onClick={onClose} sx={{ width: { xs: "100%", sm: "auto" } }}>Để sau</ErgButton>
+          <ErgButton variant="outlined" startIcon={<StairsRoundedIcon />} onClick={onViewTier} sx={{ display: { xs: "none", sm: "inline-flex" }, whiteSpace: "nowrap" }}>Xem bậc của tôi</ErgButton>
+          <ErgButton autoFocus variant="contained" onClick={onUseFrame} sx={{ whiteSpace: "nowrap", width: { xs: "100%", sm: "auto" } }}>{`Dùng khung ${TIER_NAMES[to]}`}</ErgButton>
         </Box>
       </Box>
     </Dialog>

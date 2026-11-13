@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { ClassLeaderboardEntry } from "@/features/elearning/class-leaderboard/api/class-leaderboard-api";
 import { PodiumArena } from "./podium-arena";
-import { chaseOf } from "./chase-strip";
+import { ChaseStrip, chaseOf } from "./chase-strip";
 import { EarnXpCard, RankPositionCard, WeekRewardsCard } from "./ranking-side-cards";
 
 const e = (rank: number, xp: number, name: string, isViewer = false): ClassLeaderboardEntry =>
@@ -24,6 +24,13 @@ describe("PodiumArena (H08 / H03b)", () => {
     expect(contained()).toBe(1);
     fireEvent.click(screen.getByRole("button", { name: /Làm 1 bài để lên bục/ }));
     expect(onStart).toHaveBeenCalledTimes(1);
+  });
+
+  it("renders the compact chase card with 380 / 420 and one contained button", () => {
+    render(<ChaseStrip compact entries={chasing} onStart={vi.fn()} />);
+    expect(screen.getByText("Còn 40 XP là lên bục")).toBeTruthy();
+    expect(screen.getByText("380 / 420")).toBeTruthy();
+    expect(contained()).toBe(1);
   });
 
   it("says how far ahead of rank 4 a podium viewer is", () => {

@@ -1,6 +1,7 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import { keyframes } from "@mui/material/styles";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { keyframes, useTheme } from "@mui/material/styles";
 
 import type { ClassLeaderboardEntry } from "@/features/elearning/class-leaderboard/api/class-leaderboard-api";
 import { ChaseStrip } from "@/features/elearning/class-leaderboard/components/chase-strip";
@@ -32,7 +33,9 @@ type ArenaProps = {
 
 /** Top-3 card of the "Thi đua" screen (design H08 / H03b): title and countdown, spinning gold rays, confetti, podium and the chase strip. */
 export function PodiumArena({ entries, title, subtitle, endsAt, onStart }: ArenaProps) {
+  const phone = useMediaQuery(useTheme().breakpoints.down("sm"));
   return (
+    <>
     <Box aria-labelledby="podium-title" component="section" data-design="H08.arena" sx={{ background: t.podium.arena, border: 1, borderColor: t.color.border, borderRadius: `${t.radius.card}px`, display: "grid", gap: 2, overflow: "hidden", p: { xs: 2, md: 3 }, position: "relative" }}>
       <Box aria-hidden data-design="H08.rays" sx={{ animation: `${spin} 90s linear infinite`, background: t.podium.rays, height: 900, left: "50%", mask: t.podium.raysMask, pointerEvents: "none", position: "absolute", top: 150, WebkitMask: t.podium.raysMask, width: 900 }} />
       {CONFETTI.map((piece, i) => {
@@ -49,7 +52,9 @@ export function PodiumArena({ entries, title, subtitle, endsAt, onStart }: Arena
         {endsAt ? <LeaderboardCountdown endsAt={endsAt} /> : null}
       </Box>
       <Box sx={{ position: "relative" }}><LeaderboardPodium entries={entries} /></Box>
-      <ChaseStrip entries={entries} onStart={onStart} />
+      {phone ? null : <ChaseStrip entries={entries} onStart={onStart} />}
     </Box>
+    {phone ? <ChaseStrip compact entries={entries} onStart={onStart} /> : null}
+    </>
   );
 }

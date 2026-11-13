@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -14,7 +14,7 @@ import { useUnreadNotificationCount } from "@/features/notifications/hooks/use-u
 import { QUERY_POLICIES } from "@/lib/query-policy";
 import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
 
-import { loadMyQuestionThreads, questionThreadKeys } from "../api/student-question-thread-api";
+import { loadMyQuestionThreads, markQuestionThreadRead, questionThreadKeys } from "../api/student-question-thread-api";
 import { StudentInboxComposeDialog, type ComposeAssignment } from "./student-inbox-compose-dialog";
 import { filterInboxEntries, mergeInboxEntries, type InboxChip, type InboxEntry } from "./student-inbox-entries";
 import { StudentInboxListPane } from "./student-inbox-list-pane";
@@ -35,6 +35,7 @@ export function StudentInboxView({ portal, assignments = [], onOpenAssignment }:
   const mobile = useIsMobile();
   const scope = resolveNotificationQueryScope(portal);
   const accountId = scope.accountId ?? "anonymous";
+  const queryClient = useQueryClient();
   const [chip, setChip] = useState<InboxChip>("ALL");
   const [openKey, setOpenKey] = useState<string | null>(null);
   const [query, setQuery] = useState("");
@@ -63,7 +64,11 @@ export function StudentInboxView({ portal, assignments = [], onOpenAssignment }:
 
   const select = (entry: InboxEntry) => {
     setOpenKey(entry.key);
-    if (entry.thread) setSeen((prev) => new Set(prev).add(entry.thread!.id));
+    if (entry.thread) {
+      const id = entry.thread.id;
+      setSeen((prev) => new Set(prev).add(id));
+      if (entry.unread) void markQuestionThreadRead(id).then(() => queryClient.invalidateQueries({ queryKey: questionThreadKeys.list(accountId) })).catch(() => undefined);
+    }
   };
   const list = (
     <StudentInboxListPane
@@ -86,7 +91,24 @@ export function StudentInboxView({ portal, assignments = [], onOpenAssignment }:
     )
   ) : null;
 
-  if (mobile) return selected ? <Box sx={{ minHeight: "70vh" }}>{detail}</Box> : list;
+  const compose = (
+    <StudentInboxComposeDialog
+      assignments={assignments} open={composing} onClose={() => setComposing(false)}
+      onSent={(thread) => { setComposing(false); setChip("THREAD"); setQuery(""); setOpenKey(`thread:${thread.id}`); }}
+    />
+  );
+  if (mobile) {
+    return selected ? <Box sx={{ minHeight: "70vh" }}>{detail}</Box> : (
+      <Box sx={{ display: "grid", gap: 1.5 }}>
+        <Box sx={{ alignItems: "center", display: "flex", gap: 1.5 }}>
+          <Typography component="h1" variant="h1" sx={{ flex: 1 }}>Hộp thư</Typography>
+          <ErgButton variant="contained" size="small" startIcon={<EditRoundedIcon />} onClick={() => setComposing(true)}>Hỏi giáo viên</ErgButton>
+        </Box>
+        {list}
+        {compose}
+      </Box>
+    );
+  }
   return (
     <Box sx={{ display: "grid", gap: 2 }}>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
@@ -102,10 +124,7 @@ export function StudentInboxView({ portal, assignments = [], onOpenAssignment }:
         <Box sx={{ borderRight: 1, borderColor: "divider", overflowY: "auto", p: 1.5 }}>{list}</Box>
         <Box sx={{ minWidth: 0, minHeight: 0 }}>{detail}</Box>
       </Box>
-      <StudentInboxComposeDialog
-        assignments={assignments} open={composing} onClose={() => setComposing(false)}
-        onSent={(thread) => { setComposing(false); setChip("THREAD"); setQuery(""); setOpenKey(`thread:${thread.id}`); }}
-      />
+      {compose}
     </Box>
   );
 }

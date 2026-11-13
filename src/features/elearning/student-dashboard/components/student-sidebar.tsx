@@ -129,9 +129,9 @@ export function StudentSidebar({ activePage, data, initials, name, rankingEnable
         </Box>
       ) : null}
       <Divider />
-      <Box sx={{ alignItems: "center", display: "flex", justifyContent: "space-between", pt: 1, pl: 1.5 }}>
-        <ButtonBase onClick={onAccountOpen} sx={{ borderRadius: `${t.radius.control}px`, py: 0.75 }}><Typography color="text.secondary" variant="body2">Tài khoản &amp; cài đặt</Typography></ButtonBase>
-        {signedIn ? <IconButton aria-label="Đăng xuất" onClick={onSignOut} sx={{ height: 36, width: 36 }}><LogoutRoundedIcon /></IconButton> : null}
+      <Box sx={{ alignItems: "center", display: "flex", gap: 1, pt: 1 }}>
+        <ButtonBase onClick={onAccountOpen} sx={{ borderRadius: `${t.radius.control}px`, flex: 1, justifyContent: "flex-start", minWidth: 0, px: 1.5, py: 0.75 }}><Typography color="text.secondary" noWrap variant="body2">Tài khoản &amp; cài đặt</Typography></ButtonBase>
+        {signedIn ? <IconButton aria-label="Đăng xuất" onClick={onSignOut} sx={{ flexShrink: 0, height: 36, width: 36 }}><LogoutRoundedIcon /></IconButton> : null}
       </Box>
     </>
   );

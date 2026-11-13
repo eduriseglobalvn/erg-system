@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { Fragment, useRef, useState } from "react";
 import MyLocationRoundedIcon from "@mui/icons-material/MyLocationRounded";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import Box from "@mui/material/Box";
@@ -118,12 +118,12 @@ export function ClassFullBoardPage({ accountId, classId, initialPeriod = "COURSE
           <ErgButton variant="outlined" startIcon={<MyLocationRoundedIcon />} onClick={goToMe}>Tới chỗ của tôi</ErgButton>
         </Box>
       ) : null}
-      {mine && tier ? (
+      {mine || board.data?.me ? (
         <Box data-design="H14m.pinned" sx={{ ...cardSx, alignItems: "center", bottom: ergMobileDockAnchor(8), boxShadow: t.shadow.float, display: { xs: "flex", md: "none" }, gap: 1.5, left: 12, p: 1.25, position: "fixed", right: 12, zIndex: (theme) => theme.zIndex.appBar }}>
-          <ErgTierEmblem tier={tier} size={36} />
+          {tier ? <ErgTierEmblem tier={tier} size={36} /> : null}
           <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Typography noWrap variant="subtitle2">{`${tierLabel(tier, mine.division)}${board.data?.me?.rank ? ` · hạng ${board.data.me.rank}` : ""}`}</Typography>
-            {mine.nextDivision ? <Typography noWrap variant="caption" sx={{ color: "text.secondary", display: "block" }}>{`+${formatViNumber(Math.max(0, mine.nextDivision.minXp - mine.courseXp))} XP lên ${tierLabel(asTier(mine.nextDivision.tierKey) ?? tier, mine.nextDivision.division)}`}</Typography> : null}
+            <Typography noWrap variant="subtitle2">{tier && mine ? `${tierLabel(tier, mine.division)}${board.data?.me?.rank ? ` · hạng ${board.data.me.rank}` : ""}` : [board.data?.me?.rank ? `Hạng ${board.data.me.rank}` : "", `${formatViNumber(mine?.courseXp ?? board.data?.me?.xp ?? 0)} XP`].filter(Boolean).join(" · ")}</Typography>
+            {tier && mine?.nextDivision ? <Typography noWrap variant="caption" sx={{ color: "text.secondary", display: "block" }}>{`+${formatViNumber(Math.max(0, mine.nextDivision.minXp - mine.courseXp))} XP lên ${tierLabel(asTier(mine.nextDivision.tierKey) ?? tier, mine.nextDivision.division)}`}</Typography> : null}
           </Box>
           <ErgButton variant="outlined" onClick={goToMe}>Tới chỗ tôi</ErgButton>
         </Box>
@@ -144,7 +144,12 @@ export function ClassFullBoardPage({ accountId, classId, initialPeriod = "COURSE
                 {rows.map((e) => <Row key={e.studentId} entry={e} course top={top} viewerRef={viewerRef} />)}
               </div>
             );
-          }) : shown.map((e) => <Row key={e.studentId} entry={e} course={course} top={top} viewerRef={viewerRef} />)}
+          }) : shown.map((e) => (
+            <Fragment key={e.studentId}>
+              <Row entry={e} course={course} top={top} viewerRef={viewerRef} />
+              {e.rank === 3 && !query ? <Box aria-hidden data-design="H14.top3Line" sx={{ borderTop: `2px dashed ${t.medal.gold}` }} /> : null}
+            </Fragment>
+          ))}
           <Box sx={{ alignItems: "center", borderTop: 1, borderColor: t.color.divider, display: "flex", justifyContent: "space-between", px: 2, py: 1.5 }}>
             <Typography variant="caption" sx={{ color: "text.secondary" }}>{`Hiện ${shown.length} / ${matched.length} bạn`}</Typography>
             {shown.length < matched.length ? <ErgButton variant="outlined" onClick={() => setPages((p) => p + 1)}>{`Xem tiếp ${matched.length - shown.length} bạn`}</ErgButton> : null}

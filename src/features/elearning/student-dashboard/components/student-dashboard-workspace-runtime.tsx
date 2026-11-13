@@ -344,7 +344,7 @@ export function StudentDashboardWorkspaceRuntime() {
           copy={copy}
           openAssignments={openAssignments}
           profile={dashboardProfile}
-          onSignIn={handleSignIn}
+          onSignIn={handleSignIn} onTierOpen={sidebarData.tier ? () => openTierView("tier") : undefined}
           onSignOut={handleSignOut}
         />
       ) : null}

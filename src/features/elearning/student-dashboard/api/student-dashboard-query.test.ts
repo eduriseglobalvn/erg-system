@@ -12,7 +12,8 @@ const mocks = vi.hoisted(() => ({
   loadStudentDashboardData: vi.fn(),
 }));
 
-vi.mock("@/features/elearning/student-dashboard/api/student-dashboard-api", () => ({
+vi.mock("@/features/elearning/student-dashboard/api/student-dashboard-api", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/features/elearning/student-dashboard/api/student-dashboard-api")>()),
   loadStudentDashboardData: mocks.loadStudentDashboardData,
 }));
 
@@ -69,15 +70,15 @@ test("builds an API loading profile only from the active viewer session", () => 
   expect(createStudentDashboardLoadingProfile({
     id: "student-session",
     name: "Session Student",
-    className: "class-session",
+    className: "7A",
     schoolName: "school-session",
     title: undefined,
     viewerKind: "student",
   })).toEqual({
     id: "student-session",
     name: "Session Student",
-    className: "class-session",
-    gradeLabel: "",
+    className: "7A",
+    gradeLabel: "Khối 7",
     schoolName: "school-session",
     homeroomTeacher: "",
     averageScore: 0,

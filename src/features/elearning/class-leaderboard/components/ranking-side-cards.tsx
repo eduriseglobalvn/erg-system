@@ -1,9 +1,10 @@
 import type { ReactNode } from "react";
 import ArrowUpwardRoundedIcon from "@mui/icons-material/ArrowUpwardRounded";
-import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
 import BoltRoundedIcon from "@mui/icons-material/BoltRounded";
+import CalculateRoundedIcon from "@mui/icons-material/CalculateRounded";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import LocalFireDepartmentRoundedIcon from "@mui/icons-material/LocalFireDepartmentRounded";
+import QuizRoundedIcon from "@mui/icons-material/QuizRounded";
 import TrendingUpRoundedIcon from "@mui/icons-material/TrendingUpRounded";
 import WorkspacePremiumRoundedIcon from "@mui/icons-material/WorkspacePremiumRounded";
 import Box from "@mui/material/Box";
@@ -81,7 +82,7 @@ export function RankPositionCard({ entries, size, periodWord }: { entries: reado
   );
 }
 
-export type EarnXpItem = { id: string; title: string; subtitle: string; xp: number };
+export type EarnXpItem = { id: string; title: string; subtitle: string; xp: number; /** PRACTICE = Luyện tập, TEST = Trắc nghiệm; picks the icon. */ kind?: "PRACTICE" | "TEST" };
 
 /** "Kiếm XP ngay" (design H08): up to three open assignments with their XP and an outlined start button. */
 export function EarnXpCard({ items, gap, onStart }: { items: readonly EarnXpItem[]; /** XP missing for the podium; the first item says whether it is enough. */ gap?: number; onStart?: (id: string) => void }) {
@@ -91,7 +92,7 @@ export function EarnXpCard({ items, gap, onStart }: { items: readonly EarnXpItem
       <CardHead title="Kiếm XP ngay" note={`${items.length} bài đang mở`} />
       {items.slice(0, 3).map((item, index) => (
         <Box key={item.id} sx={{ alignItems: "center", bgcolor: index === 0 ? t.color.primarySofter : "transparent", display: "flex", gap: 1.5, px: 2.5, py: 1.5 }}>
-          <Box aria-hidden sx={{ alignItems: "center", bgcolor: index === 0 ? "primary.main" : t.color.primarySofter, borderRadius: `${t.radius.control}px`, color: index === 0 ? "primary.contrastText" : "primary.main", display: "grid", flexShrink: 0, height: 34, placeItems: "center", width: 34 }}><AssignmentOutlinedIcon fontSize="small" /></Box>
+          <Box aria-hidden sx={{ alignItems: "center", bgcolor: index === 0 ? "primary.main" : t.color.primarySofter, borderRadius: `${t.radius.control}px`, color: index === 0 ? "primary.contrastText" : "primary.main", display: "grid", flexShrink: 0, height: 34, placeItems: "center", width: 34 }}>{item.kind === "TEST" ? <QuizRoundedIcon fontSize="small" /> : <CalculateRoundedIcon fontSize="small" />}</Box>
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Typography noWrap variant="subtitle2">{item.title}</Typography>
             <Typography noWrap variant="caption" sx={{ color: index === 0 ? "primary.main" : "text.secondary", display: "block" }}>

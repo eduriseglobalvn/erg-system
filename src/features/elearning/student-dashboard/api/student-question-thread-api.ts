@@ -1,6 +1,8 @@
 import type {
   ElearningAskTeacherAboutQuestionMutation,
   ElearningAskTeacherAboutQuestionMutationVariables,
+  ElearningMarkQuestionThreadReadMutation,
+  ElearningMarkQuestionThreadReadMutationVariables,
   ElearningMyQuestionThreadsQuery,
   ElearningMyQuestionThreadsQueryVariables,
   ElearningQuestionThreadQuery,
@@ -57,4 +59,13 @@ export async function askTeacherAboutQuestion(assignmentId: string, questionInde
     variables: { input: { tenantId, idempotencyKey: crypto.randomUUID(), assignmentId, questionIndex, message } },
   });
   return validateResponse(response, (v): v is ElearningAskTeacherAboutQuestionMutation => isObject(v) && isObject(v.askTeacherAboutQuestion), "elearning.question-thread-ask").askTeacherAboutQuestion;
+}
+
+/** Stamps the thread as read by the student on the server, so the unread flag survives reloads and other devices. */
+export async function markQuestionThreadRead(threadId: string): Promise<boolean> {
+  const tenantId = getDefaultTenantId();
+  const response = await graphQlRequest<ElearningMarkQuestionThreadReadMutation, ElearningMarkQuestionThreadReadMutationVariables & Record<string, unknown>>({
+    ...request, operationName: "ElearningMarkQuestionThreadRead", tenantId, variables: { threadId, tenantId },
+  });
+  return validateResponse(response, (v): v is ElearningMarkQuestionThreadReadMutation => isObject(v) && typeof v.markStudentQuestionThreadRead === "boolean", "elearning.question-thread-read").markStudentQuestionThreadRead;
 }

@@ -1,11 +1,11 @@
 /// <reference types="node" />
 import { readFileSync } from "node:fs";
 
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Browser, type Page } from "@playwright/test";
 
 import { seedAuthenticatedPortal } from "./fixtures/portal-smoke-fixtures";
 import { setupPortalNetwork } from "./fixtures/portal-smoke-network";
-import { DESIGN_NOW, graphQlFixtures } from "./fixtures/student-design-fixtures";
+import { DESIGN_NOW, LEVEL_UP_NOW, graphQlFixtures, leaderboardFor, myTier } from "./fixtures/student-design-fixtures";
 
 // Baselines: docs/design/student-portal/baseline-by-id/<ArtboardId>.png (2x). Spec: docs/superpowers/specs/2026-11-12-student-portal-gamification-design.md section 9.
 // Viewport = artboard size: width fixed per device, height = baseline PNG height / 2 (read from the IHDR chunk).
@@ -17,15 +17,19 @@ const web = (id: string) => artboard(id, 1440);
 const mobile = (id: string) => artboard(id, 390);
 const FREEZE_CSS = "*{transition:none!important;animation:none!important;caret-color:transparent!important}";
 
-test.use({ contextOptions: { reducedMotion: "reduce" } });
+test.setTimeout(60_000);
+test.use({ contextOptions: { reducedMotion: "reduce" }, timezoneId: "Asia/Ho_Chi_Minh" });
 
-async function openStudent(page: Page, viewport: { width: number; height: number }) {
+async function openStudent(page: Page, viewport: { width: number; height: number }, override: Record<string, unknown> = {}) {
   await page.setViewportSize(viewport);
   await setupPortalNetwork(page, "elearning");
   // Registered after the smoke network, so it wins; unknown operations fall through to it.
   await page.route(/\/graphql/, async (route) => {
-    const op = (route.request().postDataJSON() as { operationName?: string } | null)?.operationName ?? "";
-    const data = graphQlFixtures[op];
+    const body = route.request().postDataJSON() as { operationName?: string; variables?: { input?: { period?: string } } } | null;
+    const op = body?.operationName ?? "";
+    const data = op === "ElearningStudentClassLeaderboard" && !override[op]
+      ? { elearning: { studentClassLeaderboard: leaderboardFor(body?.variables?.input?.period) } }
+      : (override[op] ?? graphQlFixtures[op]);
     if (!data) return route.fallback();
     await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ data }) });
   });
@@ -38,7 +42,8 @@ async function openStudent(page: Page, viewport: { width: number; height: number
     if (session) sessionStorage.setItem(key, JSON.stringify({ ...JSON.parse(session), tenantId: "erg", roles: ["student"], workspaces: ["STUDENT"], portals: ["elearning"] }));
   });
   await page.goto("/");
-  await expect(page.getByRole("button", { name: "Thi đua" }).first()).toBeVisible({ timeout: 30_000 });
+  // The level-up gate (H16) is a modal that hides the shell from the accessibility tree.
+  await expect(page.getByRole("button", { name: "Thi đua" }).first().or(page.getByText("Cập nhật bậc"))).toBeVisible({ timeout: 30_000 });
   // Frozen only after load: setFixedTime before navigation stalls the app boot (route bar never clears).
   await page.clock.setFixedTime(new Date(DESIGN_NOW));
 }
@@ -72,6 +77,7 @@ test("H08 Thi dua (web)", async ({ page }) => {
 test("H14 Ca lop (web)", async ({ page }) => {
   await openStudent(page, web("H14"));
   await openRanking(page);
+  await page.getByRole("tab", { name: "Cả khóa học" }).click();
   await page.getByRole("button", { name: "Xem cả lớp" }).click();
   await compare(page, "H14");
 });
@@ -97,33 +103,72 @@ test("H17 Khung (web)", async ({ page }) => {
   await compare(page, "H17");
 });
 
-test("H03b Thi dua (mobile)", async ({ browser }) => {
-  const context = await browser.newContext({ isMobile: true, hasTouch: true, deviceScaleFactor: 2, viewport: mobile("H03b"), ignoreHTTPSErrors: true });
+async function mobilePage(browser: Browser, id: string) {
+  const context = await browser.newContext({ isMobile: true, hasTouch: true, deviceScaleFactor: 2, viewport: mobile(id), ignoreHTTPSErrors: true, reducedMotion: "reduce", timezoneId: "Asia/Ho_Chi_Minh" });
   const page = await context.newPage();
-  await openStudent(page, mobile("H03b"));
-  await compare(page, "H03b");
+  await openStudent(page, mobile(id));
+  return { page, context };
+}
+const dock = (page: Page, name: string) => page.getByRole("navigation", { name: "Điều hướng học sinh" }).getByRole("button", { name }).click();
+
+/** Runs `drive` then compares; keeps every mobile test to a few lines. */
+function mobileTest(id: string, title: string, drive: (page: Page) => Promise<void>) {
+  test(`${id} ${title} (mobile)`, async ({ browser }) => {
+    const { page, context } = await mobilePage(browser, id);
+    await drive(page);
+    await compare(page, id);
+    await context.close();
+  });
+}
+
+mobileTest("H03b", "Thi dua", (page) => dock(page, "Thi đua"));
+mobileTest("H14m", "Ca lop", async (page) => {
+  await dock(page, "Thi đua");
+  await page.getByRole("tab", { name: "Cả khóa học" }).click();
+  await page.getByRole("button", { name: "Xem cả lớp" }).click();
+});
+mobileTest("H18m", "Bang bac", async (page) => {
+  await dock(page, "Thi đua");
+  await page.getByRole("button", { name: "Bảng bậc & cấp" }).click();
+});
+
+// Assignment board: tab = filter tab of "Lọc bài tập".
+const assignments = (tab: string | null) => async (page: Page) => {
+  await page.getByRole("button", { name: "Bài tập" }).first().click();
+  if (tab) await page.getByRole("tab", { name: new RegExp(tab) }).click();
+};
+test("H10 Can lam (web)", async ({ page }) => { await openStudent(page, web("H10")); await assignments(null)(page); await compare(page, "H10"); });
+test("H09 Da nop (web)", async ({ page }) => { await openStudent(page, web("H09")); await assignments("Đã nộp")(page); await compare(page, "H09"); });
+test("H11 Qua han (web)", async ({ page }) => { await openStudent(page, web("H11")); await assignments("Quá hạn")(page); await compare(page, "H11"); });
+mobileTest("H02c", "Can lam", async (page) => { await dock(page, "Bài tập"); });
+mobileTest("H02b", "Da nop", async (page) => { await dock(page, "Bài tập"); await page.getByRole("tab", { name: /Đã nộp/ }).click(); });
+mobileTest("H02d", "Qua han", async (page) => { await dock(page, "Bài tập"); await page.getByRole("tab", { name: /Quá hạn/ }).click(); });
+
+// H16: level-up screen. Needs myTier.pendingPromotion and the clock moved to Monday 16/11 07:00.
+const PROMOTION = { weekStart: "2026-11-16", fromKey: "dong", fromDivision: 1, toKey: "bac", toDivision: 5, studentsPassed: 11, gradePercentile: 63 };
+async function levelUp(page: Page, viewport: { width: number; height: number }) {
+  const tier = { ...myTier, tierKey: "bac", division: 5, gradeRank: 80, courseXp: 1490, pendingPromotion: PROMOTION };
+  await openStudent(page, viewport, { ElearningMyTier: { elearning: { myTier: tier } } });
+  await page.clock.setFixedTime(new Date(LEVEL_UP_NOW));
+}
+test("H16 Len bac (web)", async ({ page }) => { await levelUp(page, web("H16")); await compare(page, "H16"); });
+test("H16m Len bac (mobile)", async ({ browser }) => {
+  const context = await browser.newContext({ isMobile: true, hasTouch: true, deviceScaleFactor: 2, viewport: mobile("H16m"), ignoreHTTPSErrors: true, reducedMotion: "reduce", timezoneId: "Asia/Ho_Chi_Minh" });
+  const page = await context.newPage();
+  await levelUp(page, mobile("H16m"));
+  await compare(page, "H16m");
   await context.close();
 });
 
 // Not driven yet. Each reason is what is missing, not a guess.
 const FIXME: Record<string, string> = {
-  H02b: "Da nop: needs assignments-submitted fixture (scores, 4 KPI) and tab nav; no fixture yet",
-  H02c: "Can lam: needs open-assignment fixture with in-progress attempt",
-  H02d: "Qua han: needs overdue-assignment fixture",
-  H09: "Da nop web: same fixture as H02b",
-  H10: "Can lam web: same fixture as H02c",
-  H11: "Qua han web: same fixture as H02d",
-  H12: "Hop thu web: needs inbox/announcement + question-thread fixtures and DESIGN text",
-  H12m: "Hop thu chat mobile: same as H12",
-  H13: "Thao luan web: needs discussion thread fixtures",
-  H13m: "Thao luan mobile: same as H13",
-  H13m2: "Thao luan chu de mobile: same as H13",
-  H14m: "Ca lop mobile: H14 flow with mobile project; mobile navigation (dock) not scripted",
-  H15m: "Bac mobile: mobile route to tier page not scripted",
-  H16: "Len bac: needs myTier.pendingPromotion fixture and clock 2026-11-16T07:00+07:00 (separate test, not written)",
-  H16m: "Len bac mobile: as H16",
-  H17m: "Khung mobile: mobile route not scripted",
-  H18m: "Bang bac mobile: mobile route not scripted",
+  H12: "Hop thu web: needs notification REST feed + question-thread fixtures",
+  H12m: "Hop thu chat mobile: as H12",
+  H13: "Thao luan web: needs discussion feed fixture",
+  H13m: "Thao luan mobile: as H13",
+  H13m2: "Thao luan chu de mobile: as H13",
+  H15m: "Bac mobile: no mobile route reaches the tier page. Dock Ho so opens the account page (no tier link); only the desktop sidebar chip calls openTierView. UI gap, see diff-report.md",
+  H17m: "Khung mobile: as H15m (frames page is reached from the tier page)",
   N14: "No baseline PNG yet (baseline-by-id/README.md)",
 };
 for (const [id, reason] of Object.entries(FIXME)) {

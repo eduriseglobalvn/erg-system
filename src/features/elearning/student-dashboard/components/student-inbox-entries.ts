@@ -38,8 +38,8 @@ export function threadTitle(thread: QuestionThreadSummary) {
 }
 
 /**
- * One list, newest first. A thread has no unread flag in the contract, so an ANSWERED thread counts as unread only
- * until the student opens it in this session (`seenThreads`).
+ * One list, newest first. A thread is unread while the server says so; `seenThreads` hides it at once when the student
+ * opens it, before the mark-read round trip returns.
  */
 export function mergeInboxEntries(threads: ReadonlyArray<QuestionThreadSummary>, notes: ReadonlyArray<NotificationFeedItem>, seenThreads: ReadonlySet<string>): InboxEntry[] {
   const fromThreads: InboxEntry[] = threads.map((thread) => ({
@@ -48,7 +48,7 @@ export function mergeInboxEntries(threads: ReadonlyArray<QuestionThreadSummary>,
     title: threadTitle(thread),
     preview: thread.lastMessagePreview ?? thread.questionPrompt ?? "",
     at: thread.lastMessageAt ?? "",
-    unread: thread.status === "ANSWERED" && !seenThreads.has(thread.id),
+    unread: thread.unread && !seenThreads.has(thread.id),
     thread,
   }));
   const fromNotes: InboxEntry[] = notes.map((item) => ({

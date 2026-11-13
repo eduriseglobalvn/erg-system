@@ -35,7 +35,7 @@ export function StudentRankingSurface({ accountId, copy, name, openAssignments, 
   }
   if (view === "table") return <TierTablePage accountId={accountId} gradeLabel={gradeLabel} onBack={() => onView(null)} />;
   if (view === "frames") return <FramePickerPage accountId={accountId} className={profile.className} studentName={name} onBack={() => onView("tier")} onDone={() => onView("tier")} />;
-  if (view === "board") return <ClassFullBoardPage accountId={accountId} classId={profile.classId ?? ""} initialPeriod={boardPeriod} onBack={() => onView(null)} />;
+  if (view === "board") return <ClassFullBoardPage accountId={accountId} classId={profile.classId ?? ""} gradeLabel={profile.gradeLabel || undefined} initialPeriod={boardPeriod} onBack={() => onView(null)} />;
   return (
     <RankingView
       accountId={accountId} classId={profile.classId ?? ""} copy={copy}

@@ -35,7 +35,7 @@ const now = new Date().toISOString();
 const summary = {
   id: "th-1", assignmentId: "as-1", assignmentTitle: "Phương trình bậc nhất", subjectName: "Toán", className: "Lớp 7A", questionIndex: 7,
   questionPrompt: "2x + 5 = 13", studentAnswerText: "x = 9", correctAnswerText: "x = 4", teacherId: "te-1", teacherName: "Trần Thị Hạnh",
-  status: "ANSWERED", lastMessageAt: now, lastMessagePreview: "Em chuyển 5 sang vế phải", messages: [],
+  status: "ANSWERED", unread: true, lastMessageAt: now, lastMessagePreview: "Em chuyển 5 sang vế phải", messages: [],
 };
 const detail = {
   ...summary,
@@ -132,6 +132,14 @@ describe("StudentInboxView", () => {
     expect(await screen.findByLabelText("Tin nhắn cho giáo viên")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Quay lại Hộp thư" }));
     expect(await screen.findByText("Bài mới: Kiểm tra 15 phút")).toBeTruthy();
+  });
+
+  test("phone list has the Hỏi giáo viên entry that opens the compose dialog", async () => {
+    mocks.mobile = true;
+    renderView({ assignments: [{ id: "as-1", title: "Phương trình bậc nhất" }] });
+    expect(await screen.findByRole("heading", { name: "Hộp thư" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: /Hỏi giáo viên/ }));
+    expect(await screen.findByRole("dialog")).toBeTruthy();
   });
 
   test("empty and error states", async () => {

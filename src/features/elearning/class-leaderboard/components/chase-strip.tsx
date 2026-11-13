@@ -29,9 +29,10 @@ export function chaseOf(entries: readonly ClassLeaderboardEntry[]): Chase | null
 }
 
 /** "Bạn đang #4 · 380 XP" with the way onto the podium (design H08 / H03b); holds the page's one contained button. */
-export function ChaseStrip({ entries, onStart }: { entries: readonly ClassLeaderboardEntry[]; onStart?: () => void }) {
+export function ChaseStrip({ entries, onStart, compact = false }: { entries: readonly ClassLeaderboardEntry[]; onStart?: () => void; /** Phone layout (H03b): its own card under the arena, no avatar. */ compact?: boolean }) {
   const chase = chaseOf(entries);
   if (!chase) return null;
+  if (compact) return <CompactChase chase={chase} onStart={onStart} />;
   const { me } = chase;
   const name = me.studentName || "Học sinh";
   const holding = chase.kind === "hold";
@@ -58,6 +59,25 @@ export function ChaseStrip({ entries, onStart }: { entries: readonly ClassLeader
         </Box>
       )}
       {onStart ? <ErgButton variant="contained" trailingIcon={<ArrowForwardRoundedIcon />} onClick={onStart} sx={{ width: { xs: "100%", md: "auto" } }}>{holding ? "Làm 1 bài để giữ vị trí" : "Làm 1 bài để lên bục"}</ErgButton> : null}
+    </Box>
+  );
+}
+
+/** Phone chase card (design H03b): "Còn 40 XP là lên bục" with 380 / 420, the bar and a full-width contained button. */
+function CompactChase({ chase, onStart }: { chase: Chase; onStart?: () => void }) {
+  const holding = chase.kind === "hold";
+  return (
+    <Box data-design="H03b.chase" sx={{ bgcolor: t.color.primarySofter, border: 1, borderColor: t.color.primarySoft, borderRadius: `${t.radius.card}px`, display: "grid", gap: 1, p: 1.75 }}>
+      <Box sx={{ alignItems: "baseline", display: "flex", gap: 1, justifyContent: "space-between" }}>
+        <Typography variant="subtitle2">{holding ? `Giữ vị trí${chase.lead != null ? `: hơn hạng 4 ${formatViNumber(chase.lead)} XP` : ""}` : `Còn ${formatViNumber(chase.gap)} XP là lên bục`}</Typography>
+        {holding ? null : <Typography variant="caption" sx={{ color: "text.secondary" }}>{`${formatViNumber(chase.me.xp)} / ${formatViNumber(chase.third.xp)}`}</Typography>}
+      </Box>
+      {holding ? null : (
+        <Box aria-label={`${formatViNumber(chase.me.xp)} trên ${formatViNumber(chase.third.xp)} XP`} role="img" sx={{ bgcolor: t.color.surface, borderRadius: `${t.radius.chip}px`, height: 10 }}>
+          <Box sx={{ bgcolor: "primary.main", borderRadius: `${t.radius.chip}px`, height: "100%", width: `${Math.round(chase.ratio * 100)}%` }} />
+        </Box>
+      )}
+      {onStart ? <ErgButton fullWidth variant="contained" trailingIcon={<ArrowForwardRoundedIcon />} onClick={onStart}>{holding ? "Làm 1 bài để giữ vị trí" : "Làm 1 bài để lên bục"}</ErgButton> : null}
     </Box>
   );
 }
