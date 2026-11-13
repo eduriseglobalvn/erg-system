@@ -1,0 +1,26 @@
+query ElearningMyQuestionThreads($status: String, $tenantId: String) {
+  elearning {
+    myQuestionThreads(status: $status, tenantId: $tenantId) {
+      id assignmentId assignmentTitle subjectName className questionIndex questionPrompt studentAnswerText correctAnswerText
+      teacherId teacherName status lastMessageAt lastMessagePreview
+    }
+  }
+}
+
+query ElearningQuestionThread($id: String!, $tenantId: String) {
+  elearning {
+    questionThread(id: $id, tenantId: $tenantId) {
+      id assignmentId assignmentTitle subjectName className questionIndex questionPrompt studentAnswerText correctAnswerText
+      teacherId teacherName status lastMessageAt lastMessagePreview
+      messages { id senderId senderName senderRole mine body attachmentIds createdAt }
+    }
+  }
+}
+
+mutation ElearningSendQuestionThreadMessage($input: SendQuestionThreadMessageInput!) {
+  sendQuestionThreadMessage(input: $input) {
+    id assignmentId assignmentTitle subjectName className questionIndex questionPrompt studentAnswerText correctAnswerText
+    teacherId teacherName status lastMessageAt lastMessagePreview
+    messages { id senderId senderName senderRole mine body attachmentIds createdAt }
+  }
+}

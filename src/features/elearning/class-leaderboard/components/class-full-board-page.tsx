@@ -13,6 +13,7 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
 import { useQuery } from "@tanstack/react-query";
 
+import { ergMobileDockAnchor } from "@/components/portal/erg-mobile-dock";
 import { ErgButton } from "@/components/erg-mui/erg-actions";
 import { ErgEmptyState } from "@/components/erg-mui/erg-feedback";
 import { ergChipTabsSx, ergSegmentedTabsSx } from "@/components/erg-mui/erg-tabs";
@@ -134,7 +135,7 @@ export function ClassFullBoardPage({ accountId, classId, initialPeriod = "COURSE
   };
 
   return (
-    <Box sx={{ display: "grid", gap: 2, maxWidth: 1180, mx: "auto", px: { xs: 2, md: 0 }, py: { xs: 2, md: 3 } }}>
+    <Box sx={{ display: "grid", gap: 2, maxWidth: 1180, mx: "auto", px: { xs: 2, md: 0 }, py: { xs: 2, md: 3 }, pb: { xs: 11, md: 3 } }}>
       <ErgButton variant="text" onClick={onBack} sx={{ display: { xs: "none", md: "inline-flex" }, justifySelf: "start", minWidth: 0, p: 0 }}>← Thi đua</ErgButton>
       <TierHeader
         title={phone ? `Cả lớp ${className}` : `Bảng xếp hạng cả lớp ${className}`}
@@ -158,7 +159,7 @@ export function ClassFullBoardPage({ accountId, classId, initialPeriod = "COURSE
         <Tab value="GRADE" label={gradeLabel} />
       </Tabs>
       {mine ? (
-        <Box data-design="H14.mine" sx={{ ...cardSx, alignItems: "center", boxShadow: t.shadow.float, display: "flex", flexWrap: "wrap", gap: 2, py: 1.25 }}>
+        <Box data-design="H14.mine" sx={{ ...cardSx, alignItems: "center", boxShadow: t.shadow.float, display: { xs: "none", md: "flex" }, flexWrap: "wrap", gap: 2, py: 1.25 }}>
           {tier ? <ErgTierEmblem tier={tier} size={36} /> : null}
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Typography variant="subtitle2">
@@ -180,6 +181,16 @@ export function ClassFullBoardPage({ accountId, classId, initialPeriod = "COURSE
             onChange={(e) => { setQuery(e.target.value); setPages(1); }}
           />
           <ErgButton variant="outlined" startIcon={<MyLocationRoundedIcon />} onClick={goToMe}>Tới chỗ của tôi</ErgButton>
+        </Box>
+      ) : null}
+      {mine && tier ? (
+        <Box data-design="H14m.pinned" sx={{ ...cardSx, alignItems: "center", bottom: ergMobileDockAnchor(8), boxShadow: t.shadow.float, display: { xs: "flex", md: "none" }, gap: 1.5, left: 12, p: 1.25, position: "fixed", right: 12, zIndex: (theme) => theme.zIndex.appBar }}>
+          <ErgTierEmblem tier={tier} size={36} />
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography noWrap variant="subtitle2">{`${tierLabel(tier, mine.division)}${board.data?.me?.rank ? ` · hạng ${board.data.me.rank}` : ""}`}</Typography>
+            {mine.nextDivision ? <Typography noWrap variant="caption" sx={{ color: "text.secondary", display: "block" }}>{`+${formatViNumber(Math.max(0, mine.nextDivision.minXp - mine.courseXp))} XP lên ${tierLabel(asTier(mine.nextDivision.tierKey) ?? tier, mine.nextDivision.division)}`}</Typography> : null}
+          </Box>
+          <ErgButton variant="outlined" onClick={goToMe}>Tới chỗ tôi</ErgButton>
         </Box>
       ) : null}
       {board.isPending ? <TierLoading /> : board.isError ? <TierError onRetry={() => void board.refetch()} /> : !all.length ? (

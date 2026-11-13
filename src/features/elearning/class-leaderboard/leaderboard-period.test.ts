@@ -1,8 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { leaderboardClosesIn, leaderboardCountdown, leaderboardPeriodLabel } from "@/features/elearning/class-leaderboard/leaderboard-period";
+import { LEADERBOARD_PERIODS, TEACHER_LEADERBOARD_PERIODS, leaderboardClosesIn, leaderboardCountdown, leaderboardPeriodLabel } from "@/features/elearning/class-leaderboard/leaderboard-period";
 
 describe("leaderboard period", () => {
+  it("keeps TERM on the teacher board and COURSE on the student board", () => {
+    expect(TEACHER_LEADERBOARD_PERIODS).toEqual(["WEEK", "MONTH", "TERM"]);
+    expect(LEADERBOARD_PERIODS).toEqual(["WEEK", "MONTH", "COURSE"]);
+  });
+
   it("names the period like the design", () => {
     const nov = new Date(2026, 10, 12, 9);
     expect(leaderboardPeriodLabel("WEEK", nov)).toBe("Tuần này");

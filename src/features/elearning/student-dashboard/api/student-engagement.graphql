@@ -17,6 +17,10 @@ query ElearningStudentDiscussionFeed($input: StudentDiscussionFeedInput) {
         createdAt
         attachmentIds
         assignmentId
+        subject
+        pinned
+        acceptedReplyId
+        following
         viewerReaction
         reactions { reaction count }
         comments {
@@ -54,6 +58,10 @@ mutation ElearningCreateStudentDiscussion($input: CreateStudentDiscussionInput!)
     reactions { reaction count }
     comments { id }
   }
+}
+
+mutation ElearningFollowStudentDiscussion($input: FollowStudentDiscussionInput!) {
+  followStudentDiscussion(input: $input)
 }
 
 mutation ElearningReplyStudentDiscussion($input: ReplyStudentDiscussionInput!) {

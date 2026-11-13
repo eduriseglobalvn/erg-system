@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 
 import {
   createStudentDiscussion,
+  followStudentDiscussion,
   loadStudentDiscussionFeed,
   markStudentAnnouncementRead,
   replyStudentDiscussion,
@@ -76,6 +77,27 @@ describe("student engagement GraphQL API", () => {
     expect(requestMock).toHaveBeenLastCalledWith(expect.objectContaining({
       operationName: "ElearningReplyStudentDiscussion",
       variables: { input: expect.objectContaining({ idempotencyKey: "reply-1", postId: "post-1" }) },
+    }));
+  });
+
+  test("maps subject, pinned, accepted reply and follow state onto the feed post", async () => {
+    requestMock.mockResolvedValueOnce({
+      elearning: { discussionFeed: { page: 0, size: 20, totalItems: 1, hasNext: false, items: [{
+        id: "post-1", authorId: "user-1", authorName: "Co Hanh", authorInitials: "TH", academicClassId: "class-1", className: "7A",
+        title: "Lich kiem tra", content: "Noi dung", createdAt: "2026-07-30T12:00:00+07:00", attachmentIds: [], assignmentId: null,
+        subject: "Toan", pinned: true, acceptedReplyId: "comment-1", following: true, viewerReaction: null, reactions: [], comments: [],
+      }] } },
+    } as never);
+    const [post] = (await loadStudentDiscussionFeed({ tenantId: "tenant-a", accountId: "user-1" })).items;
+    expect(post).toMatchObject({ acceptedReplyId: "comment-1", authorId: "user-1", following: true, pinned: true, subject: "Toan", title: "Lich kiem tra" });
+  });
+
+  test("follows a thread through the named mutation", async () => {
+    requestMock.mockResolvedValueOnce({ followStudentDiscussion: true } as never);
+    await expect(followStudentDiscussion({ tenantId: "tenant-a", postId: "post-1", follow: true })).resolves.toBe(true);
+    expect(requestMock).toHaveBeenLastCalledWith(expect.objectContaining({
+      operationName: "ElearningFollowStudentDiscussion",
+      variables: { input: { follow: true, postId: "post-1", tenantId: "tenant-a" } },
     }));
   });
 

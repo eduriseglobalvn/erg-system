@@ -51,8 +51,9 @@ export function LeaderboardPodium({ entries }: { entries: readonly ClassLeaderbo
         const color = medalColor(entry.rank) ?? t.color.border;
         const name = entry.studentName || "Học sinh";
         const first = entry.rank === 1;
+        const look = t.podium.ranks[(entry.rank ?? 1) - 1];
         const initials = (
-          <Avatar sx={{ bgcolor: alpha(color, 0.16), boxShadow: `0 0 0 3px ${color}`, color: "text.primary", height: avatar, typography: first ? "h3" : "h5", width: avatar }}>{getInitials(name)}</Avatar>
+          <Avatar sx={{ bgcolor: alpha(color, 0.16), boxShadow: `0 0 0 3px ${color}`, color: look.ink, height: avatar, typography: first ? "h3" : "h5", width: avatar }}>{getInitials(name)}</Avatar>
         );
         return (
           <Box key={entry.studentId} sx={{ alignItems: "center", display: "flex", flexDirection: "column", gap: 0.5, minWidth: 0 }}>
@@ -64,12 +65,13 @@ export function LeaderboardPodium({ entries }: { entries: readonly ClassLeaderbo
             <Typography component="p" variant={first ? "h3" : "h5"}>{formatViNumber(entry.xp)}<Typography component="span" variant="caption" sx={{ color: "text.secondary", ml: 0.5 }}>XP</Typography></Typography>
             <Note entry={entry} next={fourth} />
             <Box sx={{ mt: 1, position: "relative", width: "100%" }}>
-              <Box aria-hidden sx={{ background: alpha(color, 0.12), height: 30, transform: "perspective(380px) rotateX(52deg)", transformOrigin: "bottom", width: "100%" }} />
+              <Box aria-hidden sx={{ background: look.lid, borderRadius: "6px 6px 0 0", height: 30, mx: 0.75, mb: "-1px", transform: "perspective(380px) rotateX(52deg)", transformOrigin: "bottom" }} />
               <Box
                 sx={{
                   alignItems: "center",
-                  background: `linear-gradient(${alpha(color, 0.12)}, ${alpha(color, 0.3)})`,
-                  color,
+                  background: look.face,
+                  borderRadius: "0 0 4px 4px",
+                  color: look.ink,
                   display: "flex",
                   flexDirection: "column",
                   height: front,

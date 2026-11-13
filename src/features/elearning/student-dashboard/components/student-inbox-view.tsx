@@ -1,14 +1,98 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 
-import { InboxList } from "@/features/notifications/components/inbox-list";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { fetchNotificationFeed, notificationQueryKeys, resolveNotificationQueryScope } from "@/features/notifications/api/notification-api";
+import type { NotificationPortal } from "@/features/notifications/api/notification-types";
+import { MarkAllReadButton } from "@/features/notifications/components/mark-all-read-button";
 import { NotificationDetail } from "@/features/notifications/components/notification-detail";
+import { useUnreadNotificationCount } from "@/features/notifications/hooks/use-unread-notification-count";
+import { QUERY_POLICIES } from "@/lib/query-policy";
+import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
 
-/** Hộp thư tab (N14): the student's notification inbox, a message opens in place (the student page has no detail route). */
-export function StudentInboxView({ portal }: { portal: "elearning" | "lms" }) {
-  const [openId, setOpenId] = useState<string | null>(null);
-  return openId ? (
-    <NotificationDetail portal={portal} notificationId={openId} onBack={() => setOpenId(null)} />
-  ) : (
-    <InboxList portal={portal} workspace="STUDENT" title="Hộp thư" onOpen={(item) => setOpenId(item.id)} />
+import { loadMyQuestionThreads, questionThreadKeys } from "../api/student-question-thread-api";
+import { filterInboxEntries, mergeInboxEntries, type InboxChip, type InboxEntry } from "./student-inbox-entries";
+import { StudentInboxListPane } from "./student-inbox-list-pane";
+import { StudentQuestionThreadPane } from "./student-question-thread-pane";
+
+const NOTE_SIZE = 50;
+
+type StudentInboxViewProps = {
+  portal: NotificationPortal;
+  /** Student assignments, to know which thread belongs to a PRACTICE assignment ("Làm lại câu N"). */
+  assignments?: ReadonlyArray<{ id: string; kind?: "PRACTICE" | "TEST" }>;
+  /** Opens an assignment in the dashboard; without it the "Mở câu hỏi" / "Làm lại câu N" shortcuts are hidden. */
+  onOpenAssignment?: (assignmentId: string) => void;
+};
+
+/** Hộp thư (H12 web, N14 + H12m phone): question threads with the teacher and notifications in one list; a row opens in place. */
+export function StudentInboxView({ portal, assignments = [], onOpenAssignment }: StudentInboxViewProps) {
+  const mobile = useIsMobile();
+  const scope = resolveNotificationQueryScope(portal);
+  const accountId = scope.accountId ?? "anonymous";
+  const [chip, setChip] = useState<InboxChip>("ALL");
+  const [openKey, setOpenKey] = useState<string | null>(null);
+  const [seen, setSeen] = useState<ReadonlySet<string>>(new Set());
+  const threads = useQuery({
+    queryKey: questionThreadKeys.list(accountId),
+    queryFn: ({ signal }) => loadMyQuestionThreads(signal),
+    staleTime: QUERY_POLICIES.realtime.staleTime,
+    gcTime: QUERY_POLICIES.realtime.gcTime,
+  });
+  const notes = useQuery({
+    queryKey: notificationQueryKeys.inbox(portal, "all", 0, NOTE_SIZE, scope),
+    queryFn: ({ signal }) => fetchNotificationFeed({ portal, status: "all", page: 0, size: NOTE_SIZE }, signal),
+    staleTime: QUERY_POLICIES.realtime.staleTime,
+    gcTime: QUERY_POLICIES.realtime.gcTime,
+  });
+  const unreadNotes = useUnreadNotificationCount(portal) ?? 0;
+  const all = mergeInboxEntries(threads.data ?? [], notes.data?.items ?? [], seen);
+  const entries = filterInboxEntries(all, chip);
+  const unreadCount = unreadNotes + all.filter((entry) => entry.kind === "THREAD" && entry.unread).length;
+  // The web layout always shows a detail: the opened row, else the newest one. The phone shows the list until a row is opened.
+  const selected = entries.find((entry) => entry.key === openKey) ?? (mobile ? undefined : entries[0]);
+
+  const select = (entry: InboxEntry) => {
+    setOpenKey(entry.key);
+    if (entry.thread) setSeen((prev) => new Set(prev).add(entry.thread!.id));
+  };
+  const list = (
+    <StudentInboxListPane
+      chip={chip} entries={entries} selectedKey={selected?.key ?? null} unreadCount={unreadCount}
+      loading={(threads.isPending || notes.isPending) && !entries.length}
+      failed={threads.isError && notes.isError}
+      onChip={setChip} onSelect={select}
+      onRetry={() => { void threads.refetch(); void notes.refetch(); }}
+    />
+  );
+  const detail = selected ? (
+    selected.thread ? (
+      <StudentQuestionThreadPane
+        key={selected.key} accountId={accountId} threadId={selected.thread.id} mobile={mobile}
+        practice={assignments.some((assignment) => assignment.id === selected.thread!.assignmentId && assignment.kind === "PRACTICE")}
+        onBack={mobile ? () => setOpenKey(null) : undefined} onOpenAssignment={onOpenAssignment}
+      />
+    ) : (
+      <Box sx={{ p: 2 }}><NotificationDetail key={selected.key} portal={portal} notificationId={selected.notification!.id} onBack={() => setOpenKey(null)} /></Box>
+    )
+  ) : null;
+
+  if (mobile) return selected ? <Box sx={{ minHeight: "70vh" }}>{detail}</Box> : list;
+  return (
+    <Box sx={{ display: "grid", gap: 2 }}>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+        <Box sx={{ flex: 1 }}>
+          <Typography variant="h1">Hộp thư</Typography>
+          <Typography variant="body2" sx={{ color: "text.secondary" }}>Thông báo của lớp, trả lời của giáo viên và tin thi đua ở cùng một chỗ</Typography>
+        </Box>
+        <MarkAllReadButton portal={portal} />
+      </Box>
+      <Box sx={{ display: "grid", gridTemplateColumns: "380px minmax(0, 1fr)", height: 820, border: 1, borderColor: "divider", borderRadius: `${t.radius.card}px`, bgcolor: "background.paper", overflow: "hidden" }}>
+        <Box sx={{ borderRight: 1, borderColor: "divider", overflowY: "auto", p: 1.5 }}>{list}</Box>
+        <Box sx={{ minWidth: 0, minHeight: 0 }}>{detail}</Box>
+      </Box>
+    </Box>
   );
 }

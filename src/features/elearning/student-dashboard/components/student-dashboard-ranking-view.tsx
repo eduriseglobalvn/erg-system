@@ -19,19 +19,17 @@ import {
   type LeaderboardScope,
 } from "@/features/elearning/class-leaderboard/api/class-leaderboard-api";
 import { ClassLeaderboardTable } from "@/features/elearning/class-leaderboard/components/class-leaderboard-table";
-import { LeaderboardCountdown } from "@/features/elearning/class-leaderboard/components/leaderboard-countdown";
 import { ViewerRankStrip } from "@/features/elearning/class-leaderboard/components/viewer-rank-strip";
-import { LeaderboardPodium } from "@/features/elearning/class-leaderboard/components/leaderboard-podium";
+import { PodiumArena } from "@/features/elearning/class-leaderboard/components/podium-arena";
+import { EarnXpCard, RankPositionCard, WeekRewardsCard } from "@/features/elearning/class-leaderboard/components/ranking-side-cards";
+import { chaseOf } from "@/features/elearning/class-leaderboard/components/chase-strip";
 import { LEADERBOARD_PERIODS, leaderboardPeriodLabel } from "@/features/elearning/class-leaderboard/leaderboard-period";
-import { EmptyPanel, PageHeader, SectionCard, SkeletonRow } from "@/features/elearning/student-dashboard/components/student-dashboard-view-primitives";
+import { EmptyPanel, PageHeader, SkeletonRow } from "@/features/elearning/student-dashboard/components/student-dashboard-view-primitives";
 import { Stack } from "@/features/elearning/student-dashboard/components/student-dashboard-workspace-styles";
 import type { DashboardCopy } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
+import type { StudentDashboardAssignment } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
 
-const XP_RULES = [
-  ["Hoàn thành bài", "+10–40"],
-  ["Nộp trước hạn", "+10"],
-  ["Giữ chuỗi ≥ 7 ngày", "×1,2"],
-] as const;
+const PERIOD_WORD = { WEEK: "tuần", MONTH: "tháng", TERM: "học kỳ", COURSE: "cả khóa" } as const;
 
 /** "Thi đua" (design H03): XP board of the class or grade by week, month or term. Shown only while the teacher keeps it on. */
 type RankingViewProps = {
@@ -42,9 +40,13 @@ type RankingViewProps = {
   onOpenFullBoard?: (period: LeaderboardPeriod) => void;
   /** The round "?" button (H18). */
   onOpenTierTable?: () => void;
+  /** Open assignments for "Kiếm XP ngay"; the card is hidden while the list is empty. */
+  openAssignments?: readonly StudentDashboardAssignment[];
+  /** Start button of the chase strip and of "Kiếm XP ngay" (goes to the assignments page). */
+  onDoAssignments?: () => void;
 };
 
-export function RankingView({ accountId, classId, copy, onOpenFullBoard, onOpenTierTable }: RankingViewProps) {
+export function RankingView({ accountId, classId, copy, onOpenFullBoard, onOpenTierTable, openAssignments = [], onDoAssignments }: RankingViewProps) {
   const queryClient = useQueryClient();
   const [period, setPeriod] = useState<LeaderboardPeriod>("WEEK");
   const [scope, setScope] = useState<LeaderboardScope>("CLASS");
@@ -72,7 +74,6 @@ export function RankingView({ accountId, classId, copy, onOpenFullBoard, onOpenT
           <Tab value="CLASS" label={board.data?.className || "Lớp"} />
           <Tab value="GRADE" label="Cả khối" />
         </Tabs>
-        {board.data && period !== "COURSE" ? <LeaderboardCountdown endsAt={board.data.periodEndsAt} /> : null}
       </Stack>
       {board.isPending ? (
         <Stack spacing={1.5}><SkeletonRow /><SkeletonRow /></Stack>
@@ -81,24 +82,32 @@ export function RankingView({ accountId, classId, copy, onOpenFullBoard, onOpenT
       ) : ranked ? (
         <>
           <ViewerRankStrip entries={entries} label={scope === "CLASS" ? board.data?.className || "lớp" : "khối"} />
-          <LeaderboardPodium entries={entries} />
-          <ClassLeaderboardTable entries={entries} />
-          {onOpenFullBoard ? <ErgButton variant="text" trailingIcon={<ChevronRightRoundedIcon />} onClick={() => onOpenFullBoard(period)} sx={{ alignSelf: "flex-start" }}>Xem cả lớp</ErgButton> : null}
+          <PodiumArena
+            endsAt={period === "COURSE" ? undefined : board.data?.periodEndsAt}
+            entries={entries}
+            subtitle={period === "COURSE" ? "Xếp theo tổng XP cả khóa" : `Ai đứng trên bục lúc chốt bảng sẽ nhận huy hiệu ${PERIOD_WORD[period]}`}
+            title={period === "WEEK" ? "Top 3 tuần này" : `Top 3 ${leaderboardPeriodLabel(period).toLowerCase()}`}
+            onStart={onDoAssignments}
+          />
+          <Stack direction={{ xs: "column", md: "row" }} spacing={2.5} sx={{ alignItems: "flex-start" }}>
+            <Stack spacing={1.5} sx={{ flex: { md: 2 }, minWidth: 0, width: "100%" }}>
+              <ClassLeaderboardTable entries={entries} />
+              {onOpenFullBoard ? <ErgButton variant="text" trailingIcon={<ChevronRightRoundedIcon />} onClick={() => onOpenFullBoard(period)} sx={{ alignSelf: "flex-start" }}>Xem cả lớp</ErgButton> : null}
+            </Stack>
+            <Stack spacing={2.5} sx={{ flex: { md: 1 }, minWidth: 0, width: "100%" }}>
+              <RankPositionCard entries={entries} periodWord={PERIOD_WORD[period]} size={entries.filter((entry) => entry.rank != null).length} />
+              <EarnXpCard
+                gap={(() => { const chase = chaseOf(entries); return chase?.kind === "chase" ? chase.gap : undefined; })()}
+                items={openAssignments.map((a) => ({ id: a.id, title: a.title, subtitle: [a.subjectLabel, a.dueLabel].filter(Boolean).join(" · "), xp: a.xpReward ?? 0 }))}
+                onStart={onDoAssignments ? () => onDoAssignments() : undefined}
+              />
+              <WeekRewardsCard />
+            </Stack>
+          </Stack>
         </>
       ) : (
         <EmptyPanel description={copy.ranking.emptyDescription} title={copy.ranking.emptyTitle} />
       )}
-      <SectionCard title="Kiếm XP thế nào?">
-        <Stack spacing={1}>
-          {XP_RULES.map(([label, value]) => (
-            <Stack key={label} direction="row" sx={{ justifyContent: "space-between" }}>
-              <Typography variant="body2">{label}</Typography>
-              <Typography variant="body2" sx={{ color: "primary.main", fontWeight: "fontWeightMedium" }}>{value}</Typography>
-            </Stack>
-          ))}
-          <Typography variant="caption" sx={{ color: "text.secondary", pt: 0.5 }}>Bảng chỉ dùng XP, không hiện điểm số bài làm của ai.</Typography>
-        </Stack>
-      </SectionCard>
       {board.data?.enabled ? (
         <Stack spacing={0.25}>
           <FormControlLabel

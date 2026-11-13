@@ -14,7 +14,7 @@ export function xpToNextRank(entries: readonly ClassLeaderboardEntry[]): number 
   const me = entries.find((entry) => entry.isViewer && entry.rank != null);
   if (!me || me.rank == null || me.rank <= 1) return null;
   const above = entries.find((entry) => entry.rank === me.rank! - 1);
-  return above ? Math.max(0, above.xp - me.xp + 1) : null;
+  return above ? Math.max(1, above.xp - me.xp) : null;
 }
 
 /** "Thứ hạng của bạn lúc này" (design H08): rank, board size, change since yesterday and XP to the next place. */

@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createStudentDiscussion,
+  followStudentDiscussion,
   replyStudentDiscussion,
   setStudentDiscussionReaction,
 } from "@/features/elearning/student-dashboard/api/student-engagement-api";
@@ -105,15 +106,17 @@ export function useStudentDiscussion({
     setDiscussionNotifications((currentNotifications) => [notification, ...currentNotifications].slice(0, 8));
   }
 
-  function createDiscussionPost(content: string, attachments: StudentDiscussionImageAttachment[]) {
+  function createDiscussionPost(content: string, attachments: StudentDiscussionImageAttachment[], subject?: string) {
     const now = createTimestamp();
     const safeContent = maskProfanity(content);
     const postId = `discussion-post-${now}`;
     const nextPost: StudentDiscussionFeedPost = {
       id: postId,
       content: safeContent.value,
+      authorId: profile.id,
       authorName: profile.name,
       authorInitials: getInitials(profile.name),
+      subject,
       createdAtLabel: justNow,
       createdAtMs: now,
       className: profile.className,
@@ -130,6 +133,7 @@ export function useStudentDiscussion({
         attachmentIds: attachments.map((attachment) => attachment.id),
         content: safeContent.value,
         idempotencyKey: postId,
+        subject,
         tenantId,
         title: safeContent.value.slice(0, 120) || copy.discussionTitle,
       }),
@@ -212,6 +216,22 @@ export function useStudentDiscussion({
     });
   }
 
+  function toggleDiscussionFollow(postId: string) {
+    const follow = !discussionPosts.find((post) => post.id === postId)?.following;
+    runCommand({
+      apply: () => setDiscussionPosts((currentPosts) =>
+        currentPosts.map((post) => (post.id === postId ? { ...post, following: follow } : post)),
+      ),
+      execute: () => followStudentDiscussion({ follow, postId, tenantId }),
+    });
+  }
+
+  // Own threads feed the "Của tôi" filter and the "Bạn" badge.
+  const viewerPosts = useMemo(
+    () => discussionPosts.map((post) => ({ ...post, mine: post.authorId === profile.id })),
+    [discussionPosts, profile.id],
+  );
+
   function markNotificationRead(threadId: string, replyId?: string) {
     setDiscussionNotifications((currentNotifications) =>
       currentNotifications.map((notification) =>
@@ -226,9 +246,10 @@ export function useStudentDiscussion({
     addDiscussionComment,
     createDiscussionPost,
     discussionNotifications,
-    discussionPosts,
+    discussionPosts: viewerPosts,
     markNotificationRead,
     toggleDiscussionCommentReaction,
+    toggleDiscussionFollow,
     toggleDiscussionPostReaction,
   };
 }

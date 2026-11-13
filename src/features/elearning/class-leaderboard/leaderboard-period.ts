@@ -1,6 +1,9 @@
 import type { LeaderboardPeriod } from "@/features/elearning/class-leaderboard/api/class-leaderboard-api";
 
+/** Student tabs (design H08): week, month, whole course. */
 export const LEADERBOARD_PERIODS: readonly LeaderboardPeriod[] = ["WEEK", "MONTH", "COURSE"];
+/** Teacher and admin tabs: the XP board by week, month or term (no tier board). */
+export const TEACHER_LEADERBOARD_PERIODS: readonly LeaderboardPeriod[] = ["WEEK", "MONTH", "TERM"];
 
 /** "Tuần này" / "Tháng 11" / "Học kỳ I" — term I runs 1 Sep – 15 Jan, as on the backend. */
 export function leaderboardPeriodLabel(period: LeaderboardPeriod, now = new Date()) {

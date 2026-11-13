@@ -27,6 +27,17 @@ export type StudentDiscussionComment = {
 
 export type StudentDiscussionFeedPost = {
   id: string;
+  /** Server id of the author; the hook turns it into `mine`. */
+  authorId?: string;
+  mine?: boolean;
+  title?: string;
+  subject?: string;
+  /** Pinned by the teacher. */
+  pinned?: boolean;
+  /** Id of the reply the teacher chose as the answer. */
+  acceptedReplyId?: string;
+  /** The viewer follows this thread. */
+  following?: boolean;
   authorName: string;
   authorInitials: string;
   className: string;
