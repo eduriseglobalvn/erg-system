@@ -73,7 +73,7 @@ describe("QuizTryRunner", () => {
     expect(screen.queryByText(/Chưa đúng/)).toBeNull();
   });
 
-  it("practice: a matching question can be checked once a piece is pushed in", () => {
+  it("practice: a matching question can be checked once a piece is pushed in", async () => {
     const matching = {
       id: "mt1",
       kind: "matching",
@@ -88,7 +88,8 @@ describe("QuizTryRunner", () => {
     render(<QuizTryRunner questions={[matching]} startIndex={0} initialMode="practice" />);
     const check = screen.getByRole("button", { name: "Xem kết quả" });
     expect(check).toBeDisabled();
-    fireEvent.keyDown(screen.getAllByRole("button", { name: /^Mảnh / })[0], { key: "Enter" });
+    // Matching is lazy-loaded (it pulls @dnd-kit), so wait for its pieces.
+    fireEvent.keyDown((await screen.findAllByRole("button", { name: /^Mảnh / }))[0], { key: "Enter" });
     expect(check).toBeEnabled();
   });
 

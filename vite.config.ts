@@ -10,6 +10,8 @@ import { VitePWA } from "vite-plugin-pwa";
 import { filterPwaPrecacheManifest } from "./scripts/pwa-precache-policy.mjs";
 
 const devHttpsPfx = path.resolve(__dirname, "certs/erg-dev.pfx");
+// Top-level copies only: nested ones (x-date-pickers bundles its own @mui/utils) stay with their owner.
+const muiModules = /^(?!.*node_modules.*node_modules).*node_modules[\\/](@mui[\\/](material|system|utils|styled-engine|private-theming|icons-material)|@emotion|@popperjs|react-transition-group|stylis|clsx|hoist-non-react-statics|react-is|prop-types)[\\/]/;
 
 export default defineConfig(({ command, mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
@@ -113,11 +115,13 @@ export default defineConfig(({ command, mode }) => {
   build: {
     target: "esnext",
       modulePreload: {
-        resolveDependencies(_filename, deps, context) {
+        resolveDependencies(filename, deps, context) {
           // Dynamic route chunks fetch their own graph on demand; preloading
           // every dependency eagerly inflated the entry and defeated route
           // code-splitting on mobile/PWA cold starts.
-          if (context.hostType !== "html") return [];
+          // Exception: the student portal is the cold-start path for whole school labs, so its
+          // dependencies are fetched in parallel when the route loads instead of as a waterfall.
+          if (context.hostType !== "html") return /(^|\/)student-page-/.test(filename) ? deps : [];
           return deps.filter(
             (dep) =>
               !/^(assets\/)?(pdfjs|pdf\.worker|dnd|radix|portal-brand-mark|learning-resource-library-page|teaching-schedule-panel|assign-homework-page)/.test(dep),
@@ -126,17 +130,33 @@ export default defineConfig(({ command, mode }) => {
       },
     reportCompressedSize: true,
     rollupOptions: {
+      treeshake: {
+        // The erg-mui barrel re-exports every wrapper (charts -> recharts, tables -> table-core). Its
+        // modules are pure component definitions, so let unused ones drop instead of being kept as side effects.
+        moduleSideEffects: [{ test: /[\\/]src[\\/]components[\\/]erg-mui[\\/]/, sideEffects: false }],
+      },
       output: {
-        manualChunks(id) {
-          if (id.includes("node_modules")) {
-            // pdfjs is not grouped: a manual pdfjs chunk captured Vite's preload helper, so the entry
-            // downloaded ~120 KB of pdfjs on every cold start. It now stays inside the lazy PDF viewer chunk.
-            if (id.includes("@tanstack/react-virtual")) return "virtual";
-            if (id.includes("@tanstack")) return "tanstack";
-            if (id.includes("radix-ui")) return "radix";
-            if (id.includes("@dnd-kit")) return "dnd";
-            if (id.includes("lucide-react")) return "icons";
-          }
+        // pdfjs is not grouped: a manual pdfjs chunk captured Vite's preload helper, so the entry
+        // downloaded ~120 KB of pdfjs on every cold start. It now stays inside the lazy PDF viewer chunk.
+        // Groups pull in their dependencies, so React gets its own higher-priority group; otherwise it
+        // landed in `dnd` and every page fetched @dnd-kit with it.
+        codeSplitting: {
+          groups: [
+            { name: "react", test: /node_modules[\\/](react|react-dom|scheduler)[\\/]/, priority: 30 },
+            { name: "virtual", test: /node_modules[\\/]@tanstack[\\/](react-)?virtual/, priority: 20 },
+            { name: "tanstack-table", test: /node_modules[\\/]@tanstack[\\/](react-)?table/, priority: 20 },
+            { name: "tanstack", test: /node_modules[\\/]@tanstack[\\/]/, priority: 10 },
+            { name: "radix", test: /node_modules[\\/].*radix-ui/, priority: 10 },
+            { name: "dnd", test: /node_modules[\\/]@dnd-kit[\\/]/, priority: 10 },
+            { name: "icons", test: /node_modules[\\/]lucide-react[\\/]/, priority: 10 },
+            // MUI is hundreds of tiny modules; left alone it became ~100 sub-KB chunks per route (one
+            // request each on weak school networks). `mui` = what the entry needs; `mui-lazy` = pieces
+            // shared by 2+ lazy routes. Pieces used by a single route stay inside that route's chunk.
+            { name: "mui", test: muiModules, priority: 6, tags: ["$initial"] },
+            { name: "mui-lazy", test: muiModules, priority: 5, minShareCount: 2 },
+            // App code the entry statically needs (auth, i18n, api client, route shell) in one chunk instead of ~40 small ones.
+            { name: "shell", test: /[\\/]src[\\/]/, priority: 1, tags: ["$initial"] },
+          ],
         },
       },
     },
