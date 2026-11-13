@@ -68,7 +68,6 @@ export function AdminOperationsWorkspace({
           centers={scopedCenters}
           classes={scopedClasses}
           managementScope={managementScope}
-          onCreateUnit={() => onOpenLeaf("admin-create-unit")}
           scopeDescription={scopeDescription}
         />
       </main>
@@ -112,14 +111,7 @@ export function getAdminActions(activeLeaf: DashboardLeaf, onOpenLeaf: (leafId: 
     return (
       <div className="flex flex-wrap gap-2">
         <Button disabled title="Chưa có contract báo cáo tổng hợp cho workspace này." variant="outlined" size="small">Xuất báo cáo</Button>
-        <Button variant="outlined" size="small" onClick={() => onOpenLeaf("resources")}>Tài nguyên</Button>
-        <Button
-          variant="contained"
-          size="small"
-          onClick={() => onOpenLeaf("admin-create-unit")}
-        >
-          Tạo trường/trung tâm
-        </Button>
+        <Button variant="contained" size="small" onClick={() => onOpenLeaf("resources")}>Tài nguyên</Button>
       </div>
     );
   }

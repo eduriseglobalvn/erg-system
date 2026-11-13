@@ -1,6 +1,5 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
-import { LMS_ROLE_GROUP_TEMPLATES } from "@/platform/auth/permissions/lms-permission-catalog";
 import { ApiClientError } from "@/lib/api-client";
 
 const mocks = vi.hoisted(() => ({
@@ -20,55 +19,10 @@ vi.mock("@/lib/graphql-client", () => ({
   graphQlRequest: mocks.graphQlRequest,
 }));
 
-function completeOptions() {
-  return {
-    scopes: [],
-    modules: [{ id: "lms", name: "LMS", description: "Learning management" }],
-    roleGroups: Object.entries(LMS_ROLE_GROUP_TEMPLATES).map(([id, template]) => ({
-      id,
-      name: template.name,
-      description: template.name,
-      scopeTypes: ["school"],
-      permissions: [...template.permissions],
-    })),
-  };
-}
-
-describe("access management options", () => {
+describe("access managed users", () => {
   beforeEach(() => {
     mocks.apiRequest.mockReset();
     mocks.graphQlRequest.mockReset();
-  });
-
-  test("accepts an LMS catalog containing every required teacher role group and permission", async () => {
-    mocks.apiRequest.mockResolvedValueOnce(completeOptions());
-    const { getAccessManagementOptions } = await import("@/features/lcms/admin-operations/api/access-management-api");
-
-    const options = await getAccessManagementOptions();
-
-    expect(options.modules.some((module) => module.id === "lms")).toBe(true);
-    expect(options.roleGroups.map((roleGroup) => roleGroup.id).sort()).toEqual(Object.keys(LMS_ROLE_GROUP_TEMPLATES).sort());
-  });
-
-  test("rejects backend options when an LMS role group is missing", async () => {
-    const options = completeOptions();
-    options.roleGroups = options.roleGroups.filter((roleGroup) => roleGroup.id !== "lms_teacher_readonly");
-    mocks.apiRequest.mockResolvedValueOnce(options);
-    const { getAccessManagementOptions } = await import("@/features/lcms/admin-operations/api/access-management-api");
-
-    await expect(getAccessManagementOptions()).rejects.toThrow("lms_teacher_readonly");
-  });
-
-  test("rejects backend options when a required LMS permission is missing", async () => {
-    const options = completeOptions();
-    options.roleGroups = options.roleGroups.map((roleGroup) => ({
-      ...roleGroup,
-      permissions: roleGroup.permissions.filter((permission) => permission !== "lms.dashboard.read"),
-    }));
-    mocks.apiRequest.mockResolvedValueOnce(options);
-    const { getAccessManagementOptions } = await import("@/features/lcms/admin-operations/api/access-management-api");
-
-    await expect(getAccessManagementOptions()).rejects.toThrow("lms.dashboard.read");
   });
 
   test("does not infer roles or scope level from permission text and aggregate counts", async () => {
@@ -127,13 +81,12 @@ describe("access management options", () => {
     expect(mocks.apiRequest).not.toHaveBeenCalled();
   });
 
-  test("uses the legacy REST fallback only when the GraphQL capability is unavailable", async () => {
+  test("never calls the removed REST user list, even when the GraphQL capability is unavailable", async () => {
     const unavailable = new ApiClientError("Not found", "GRAPHQL_ERROR", 404);
     mocks.graphQlRequest.mockRejectedValueOnce(unavailable);
-    mocks.apiRequest.mockResolvedValueOnce({ items: [], limit: 20, page: 1, total: 0 });
     const { listAccessManagedUsers } = await import("@/features/lcms/admin-operations/api/access-management-api");
 
-    await expect(listAccessManagedUsers({})).resolves.toEqual({ items: [], limit: 20, page: 1, total: 0 });
-    expect(mocks.apiRequest).toHaveBeenCalledTimes(1);
+    await expect(listAccessManagedUsers({})).rejects.toBe(unavailable);
+    expect(mocks.apiRequest).not.toHaveBeenCalled();
   });
 });

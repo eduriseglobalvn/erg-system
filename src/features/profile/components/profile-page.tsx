@@ -5,7 +5,6 @@ import Paper from "@mui/material/Paper";
 import Skeleton from "@mui/material/Skeleton";
 import Typography from "@mui/material/Typography";
 import { Link, useLocation } from "@tanstack/react-router";
-import { AvatarCropDialog } from "@/features/profile/components/avatar-crop-dialog";
 import { ProfileFormPanel, SecurityPanel } from "@/features/profile/components/profile-panels";
 import { ProfileSidebar } from "@/features/profile/components/profile-sidebar";
 import { useProfilePageController } from "@/features/profile/hooks/use-profile-page-controller";
@@ -26,28 +25,22 @@ export function ProfilePage() {
   const {
     account,
     activeTab,
-    avatarCrop,
-    avatarInputRef,
     canChangePassword,
     changePassword,
-    closeAvatarCropper,
     form,
     isLoading,
     isSavingPassword,
     isSavingProfile,
-    isUploadingAvatar,
     passwordForm,
     passwordScore,
     profileNotice,
     saveProfile,
     securityNotice,
-    setAvatarCrop,
     setShowPasswords,
     showPasswords,
     showWorkRoleFields,
     update,
     updatePasswordField,
-    uploadCroppedAvatar,
   } = controller;
 
   return (
@@ -148,14 +141,6 @@ export function ProfilePage() {
         </Box>
       </Box>
 
-      <AvatarCropDialog
-        crop={avatarCrop}
-        isUploading={isUploadingAvatar}
-        onChange={setAvatarCrop}
-        onClose={closeAvatarCropper}
-        onPickAnother={() => avatarInputRef.current?.click()}
-        onUpload={uploadCroppedAvatar}
-      />
     </Box>
   );
 }

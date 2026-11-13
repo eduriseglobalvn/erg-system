@@ -197,16 +197,6 @@ export const authApi = {
     return mapProfileToAccount(result);
   },
 
-  async uploadAvatar(accountId: string, file: File) {
-    const body = new FormData();
-    body.append("file", file);
-    const result = await apiRequest<BackendProfileResponseDTO>(API_ENDPOINTS.account.avatar(accountId), {
-      method: "POST",
-      body,
-    });
-    return mapProfileToAccount(result);
-  },
-
   async updatePassword(accountId: string, input: UpdatePasswordRequestDTO) {
     void accountId;
     await apiRequest<{ message: string }>(API_ENDPOINTS.account.password, {

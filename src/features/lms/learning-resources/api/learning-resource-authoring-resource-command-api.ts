@@ -23,7 +23,7 @@ import type { ContentAssetResponse, ContentItemResponse, ContentPlacementRespons
 
 export async function createLearningResourceResource(payload: CreateLearningResourceResourcePayload) {
   if (payload.selectedFileType === "PPTX" && payload.topicId && payload.upstreamUrl) {
-    const lecture = await apiRequest<GoogleSlidesLectureResponse>(API_ENDPOINTS.legacy.contentSlides, {
+    const lecture = await apiRequest<GoogleSlidesLectureResponse>(API_ENDPOINTS.content.googleSlides, {
       method: "POST",
       body: JSON.stringify({
         topicId: payload.topicId,
@@ -145,7 +145,7 @@ export function uploadLearningResourceResource(input: {
 }
 
 async function createCanonicalLearningResource(payload: CreateLearningResourceResourcePayload) {
-  const contentItem = await apiRequest<ContentItemResponse>(API_ENDPOINTS.legacy.contentItems, {
+  const contentItem = await apiRequest<ContentItemResponse>(API_ENDPOINTS.content.items, {
     method: "POST",
     body: JSON.stringify({
       contentType: contentTypeForResource(payload),
@@ -192,7 +192,7 @@ async function createCanonicalContentAsset(payload: CreateLearningResourceResour
   const hasAssetMetadata = Boolean(storageUrl || payload.originalFileName || payload.detectedMimeType || payload.totalSlides);
   if (!hasAssetMetadata) return null;
 
-  return apiRequest<ContentAssetResponse>(API_ENDPOINTS.legacy.contentAssets, {
+  return apiRequest<ContentAssetResponse>(API_ENDPOINTS.content.assets, {
     method: "POST",
     body: JSON.stringify(toCanonicalAssetCreateRequest({
       title: payload.title,

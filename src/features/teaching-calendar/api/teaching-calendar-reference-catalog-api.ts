@@ -12,7 +12,7 @@ import type {
 
 export async function loadTeachingCalendarSessionCatalog(portal: GraphQlPortal = "lms", signal?: AbortSignal) {
   if (!hasApiBase()) return emptyErgScheduleCatalog();
-  const session = await apiRequest<SessionCurrentResponseDTO>(API_ENDPOINTS.legacy.v1SessionsCurrent, { portal, signal });
+  const session = await apiRequest<SessionCurrentResponseDTO>(API_ENDPOINTS.sessions.current, { portal, signal });
   return mapSessionToErgScheduleCatalog(session);
 }
 
@@ -60,7 +60,7 @@ async function loadScopedEducationUnitSchools(portal: GraphQlPortal, signal?: Ab
 
 async function loadOrganizationEducationUnits(portal: GraphQlPortal, signal?: AbortSignal): Promise<EducationUnitDTO[]> {
   try {
-    const response = await apiRequest<OrganizationEducationUnitListResponseDTO>(API_ENDPOINTS.legacy.v1EducationUnits, { portal, signal });
+    const response = await apiRequest<OrganizationEducationUnitListResponseDTO>(API_ENDPOINTS.educationUnits, { portal, signal });
     return response.educationUnits ?? response.items ?? [];
   } catch (error) {
     if (signal?.aborted) throw signal.reason ?? error;

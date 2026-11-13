@@ -1,51 +1,8 @@
-import type {
-  AccessManagedUser,
-  AccessModule,
-  AccessScopeOption,
-  EffectiveAccess,
-  UserAccessPolicy,
-} from "@/features/lcms/admin-operations/api/access-management-api";
+import type { AccessManagedUser } from "@/features/lcms/admin-operations/api/access-management-api";
 import type { AdminUserDetail } from "@/features/lcms/admin-operations/api/user-admin-api";
-import type { DraftPolicy, ProfileDraft } from "@/features/lcms/admin-operations/types/user-access-control";
+import type { ProfileDraft } from "@/features/lcms/admin-operations/types/user-access-control";
 
 export const ROOT_ADMIN_EMAIL = "admin@erg.edu.vn";
-
-export function blankDraft(): DraftPolicy {
-  return {
-    scopeType: "",
-    scopeId: "",
-    roleGroup: "",
-    modules: [],
-  };
-}
-
-export function policyFromDraft(draft: DraftPolicy, scopes: AccessScopeOption[]): UserAccessPolicy | null {
-  if (!draft.scopeType || !draft.scopeId || !draft.roleGroup || draft.modules.length === 0) return null;
-  const scope = scopes.find((item) => item.scopeType === draft.scopeType && item.scopeId === draft.scopeId);
-  return {
-    scopeType: draft.scopeType,
-    scopeId: draft.scopeId,
-    scopeName: scope?.name,
-    roleGroup: draft.roleGroup,
-    modules: draft.modules,
-  };
-}
-
-export function mergeDraftPolicy(policies: UserAccessPolicy[], draftPolicy: UserAccessPolicy | null) {
-  if (!draftPolicy) return policies;
-  return [
-    ...policies.filter((policy) => !(policy.scopeType === draftPolicy.scopeType && policy.scopeId === draftPolicy.scopeId)),
-    draftPolicy,
-  ];
-}
-
-export function superAdminEffectiveAccess(modules?: AccessModule[]): EffectiveAccess {
-  return {
-    highestScope: "system",
-    modules: modules?.map((module) => module.id) ?? ["lms", "resources", "media"],
-    permissions: ["*"],
-  };
-}
 
 export function mergeUser(listUser?: AccessManagedUser, detail?: AdminUserDetail | null) {
   return {

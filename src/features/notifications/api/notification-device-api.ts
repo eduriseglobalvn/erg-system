@@ -33,7 +33,7 @@ export async function registerNotificationDevice(input: NotificationDeviceRegist
     });
   }
 
-  return apiRequest<NotificationDeviceRegistrationResponse>(API_ENDPOINTS.legacy.v1NotificationDevices, {
+  return apiRequest<NotificationDeviceRegistrationResponse>(API_ENDPOINTS.notifications.devices, {
     method: "POST",
     body: JSON.stringify({
       ...input,
