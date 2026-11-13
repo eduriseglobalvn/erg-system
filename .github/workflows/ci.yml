@@ -68,3 +68,53 @@ jobs:
             echo "::warning::Mock fixtures are still bundled in production"
           fi
       - run: bun run budget:check
+
+  # Pixel comparison against docs/design/student-portal/baseline-by-id. The comparison has never been green yet,
+  # so it reports but does not block (continue-on-error). Drop it once the baselines are validated.
+  student-design:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+      - name: Run only when student-portal files changed
+        id: scope
+        run: |
+          base="${{ github.event.pull_request.base.sha || github.event.before }}"
+          if [ -z "$base" ] || ! git cat-file -e "$base" 2>/dev/null; then echo "run=true" >> "$GITHUB_OUTPUT"; exit 0; fi
+          if git diff --name-only "$base" HEAD | grep -Eq '^(src/features/elearning/|src/components/portal/|src/themes/|src/components/erg-mui/|docs/design/student-portal/|src/test/e2e/student-design|playwright\.config\.ts)'; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.scope.outputs.run == 'true'
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version: 1.3.11
+      - if: steps.scope.outputs.run == 'true'
+        run: bun install --frozen-lockfile --ignore-scripts
+      - if: steps.scope.outputs.run == 'true'
+        run: bunx playwright install --with-deps chromium
+      # vite.config.ts serves HTTPS only when certs/erg-dev.pfx exists; same throwaway cert as portal-smoke.yml.
+      - if: steps.scope.outputs.run == 'true'
+        name: Create throwaway dev certificate
+        run: |
+          mkdir -p certs
+          openssl req -x509 -newkey rsa:2048 -nodes -days 1 -subj "/CN=erg.edu.local" \
+            -addext "subjectAltName=DNS:*.erg.edu.local,IP:127.0.0.1" \
+            -keyout "$RUNNER_TEMP/erg-dev.key" -out "$RUNNER_TEMP/erg-dev.crt"
+          openssl pkcs12 -export -passout pass:erg-local-dev \
+            -inkey "$RUNNER_TEMP/erg-dev.key" -in "$RUNNER_TEMP/erg-dev.crt" -out certs/erg-dev.pfx
+      - if: steps.scope.outputs.run == 'true'
+        run: bun run e2e:student-design
+      - if: always() && steps.scope.outputs.run == 'true'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: playwright-report-student-design
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: warn
+          retention-days: 14

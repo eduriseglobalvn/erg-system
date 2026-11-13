@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
 import { THANKS_MESSAGE } from "./student-question-thread-pane";
@@ -9,6 +9,7 @@ const mocks = vi.hoisted(() => ({
   loadMyQuestionThreads: vi.fn(),
   loadQuestionThread: vi.fn(),
   sendQuestionThreadMessage: vi.fn(),
+  askTeacherAboutQuestion: vi.fn(),
   fetchNotificationFeed: vi.fn(),
   mobile: false,
 }));
@@ -18,13 +19,13 @@ vi.mock("../api/student-question-thread-api", async (importOriginal) => ({
   loadMyQuestionThreads: mocks.loadMyQuestionThreads,
   loadQuestionThread: mocks.loadQuestionThread,
   sendQuestionThreadMessage: mocks.sendQuestionThreadMessage,
+  askTeacherAboutQuestion: mocks.askTeacherAboutQuestion,
 }));
 vi.mock("@/features/notifications/api/notification-api", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/features/notifications/api/notification-api")>()),
   fetchNotificationFeed: mocks.fetchNotificationFeed,
   resolveNotificationQueryScope: () => ({ accountId: "acc-1", tenantId: "t-1" }),
 }));
-vi.mock("@/features/notifications/hooks/use-unread-notification-count", () => ({ useUnreadNotificationCount: () => 1 }));
 vi.mock("@/features/notifications/components/mark-all-read-button", () => ({ MarkAllReadButton: () => null }));
 vi.mock("@/features/notifications/components/notification-detail", () => ({ NotificationDetail: () => <div>notification-detail</div> }));
 vi.mock("@/hooks/use-mobile", () => ({ useIsMobile: () => mocks.mobile }));
@@ -33,7 +34,7 @@ const now = new Date().toISOString();
 const summary = {
   id: "th-1", assignmentId: "as-1", assignmentTitle: "Phương trình bậc nhất", subjectName: "Toán", className: "Lớp 7A", questionIndex: 7,
   questionPrompt: "2x + 5 = 13", studentAnswerText: "x = 9", correctAnswerText: "x = 4", teacherId: "te-1", teacherName: "Trần Thị Hạnh",
-  status: "ANSWERED", lastMessageAt: now, lastMessagePreview: "Em chuyển 5 sang vế phải", messages: [],
+  status: "ANSWERED", unread: true, lastMessageAt: now, lastMessagePreview: "Em chuyển 5 sang vế phải", messages: [],
 };
 const detail = {
   ...summary,
@@ -70,7 +71,7 @@ describe("StudentInboxView", () => {
   test("chip filters to question threads only", async () => {
     renderView();
     await screen.findByText("Bài mới: Kiểm tra 15 phút");
-    fireEvent.click(screen.getByRole("tab", { name: "Hỏi giáo viên" }));
+    fireEvent.click(screen.getByRole("tab", { name: /Hỏi giáo viên/ }));
     await waitFor(() => expect(screen.queryByText("Bài mới: Kiểm tra 15 phút")).toBeNull());
   });
 
@@ -96,6 +97,33 @@ describe("StudentInboxView", () => {
     await waitFor(() => expect(mocks.sendQuestionThreadMessage).toHaveBeenCalledWith("th-1", "Em hiểu rồi"));
   });
 
+  test("search filters the loaded list by title and excerpt", async () => {
+    renderView();
+    await screen.findByText("Bài mới: Kiểm tra 15 phút");
+    fireEvent.change(screen.getByPlaceholderText("Tìm trong hộp thư"), { target: { value: "vế phải" } });
+    await waitFor(() => expect(screen.queryByText("Bài mới: Kiểm tra 15 phút")).toBeNull());
+    expect(screen.getByText("Cô Trần Thị Hạnh đã trả lời câu 7")).toBeTruthy();
+  });
+
+  test("unread count shows on the Hỏi giáo viên chip", async () => {
+    renderView();
+    await screen.findByText("Bài mới: Kiểm tra 15 phút");
+    expect(screen.getByRole("tab", { name: /Hỏi giáo viên/ }).textContent).toContain("1");
+  });
+
+  test("Hỏi giáo viên opens a new thread for the chosen assignment and question", async () => {
+    mocks.askTeacherAboutQuestion.mockResolvedValue(detail);
+    renderView({ assignments: [{ id: "as-1", title: "Phương trình bậc nhất" }] });
+    fireEvent.click(await screen.findByRole("button", { name: /Hỏi giáo viên/ }));
+    fireEvent.mouseDown(await screen.findByLabelText("Bài tập"));
+    fireEvent.click(await screen.findByRole("option", { name: "Phương trình bậc nhất" }));
+    fireEvent.change(screen.getByLabelText("Câu số"), { target: { value: "3" } });
+    const dialog = screen.getByRole("dialog");
+    fireEvent.change(within(dialog).getByLabelText("Tin nhắn cho giáo viên"), { target: { value: " Cô giảng lại ạ " } });
+    fireEvent.click(within(dialog).getByRole("button", { name: "Gửi" }));
+    await waitFor(() => expect(mocks.askTeacherAboutQuestion).toHaveBeenCalledWith("as-1", 3, "Cô giảng lại ạ"));
+  });
+
   test("phone: list first, a row opens the chat, back returns", async () => {
     mocks.mobile = true;
     renderView();
@@ -103,6 +131,14 @@ describe("StudentInboxView", () => {
     expect(await screen.findByLabelText("Tin nhắn cho giáo viên")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Quay lại Hộp thư" }));
     expect(await screen.findByText("Bài mới: Kiểm tra 15 phút")).toBeTruthy();
+  });
+
+  test("phone list has the Hỏi giáo viên entry that opens the compose dialog", async () => {
+    mocks.mobile = true;
+    renderView({ assignments: [{ id: "as-1", title: "Phương trình bậc nhất" }] });
+    expect(await screen.findByRole("heading", { name: "Hộp thư" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: /Hỏi giáo viên/ }));
+    expect(await screen.findByRole("dialog")).toBeTruthy();
   });
 
   test("empty and error states", async () => {

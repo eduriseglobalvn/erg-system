@@ -17,6 +17,7 @@
     "e2e:lcms": "playwright test --project=lcms",
     "e2e:crm": "playwright test --project=crm",
     "e2e:elearning": "playwright test --project=elearning",
+    "e2e:student-design": "playwright test --project=student-design",
     "contract:rest:sync": "node scripts/sync-api-contract.mjs",
     "contract:rest:generate": "openapi-typescript contracts/backend/erg-openapi.json -o src/lib/api/generated/erg-openapi.ts --alphabetize --immutable",
     "contract:rest:check": "node scripts/sync-api-contract.mjs --check",

@@ -20,6 +20,7 @@ import { INBOX_CHIPS, type InboxChip, type InboxEntry, type InboxEntryKind } fro
 const KIND: Record<InboxEntryKind, { label: string; Icon: ElementType; tone: keyof typeof t.statusTint }> = {
   THREAD: { label: "Hỏi giáo viên", Icon: ForumRoundedIcon, tone: "success" },
   CLASS: { label: "Thông báo lớp", Icon: CampaignRoundedIcon, tone: "info" },
+  DISCUSSION: { label: "Thảo luận lớp", Icon: ForumRoundedIcon, tone: "info" },
   RANK: { label: "Thi đua", Icon: EmojiEventsRoundedIcon, tone: "warning" },
   CENTER: { label: "Trung tâm", Icon: CampaignRoundedIcon, tone: "warning" },
   SYSTEM: { label: "Hệ thống", Icon: DnsRoundedIcon, tone: "neutral" },
@@ -33,18 +34,19 @@ type ListPaneProps = {
   loading: boolean;
   selectedKey: string | null;
   unreadCount: number;
+  threadUnread: number;
   onChip: (chip: InboxChip) => void;
   onRetry: () => void;
   onSelect: (entry: InboxEntry) => void;
 };
 
 /** Left column of H12 / the N14 list: filter chips and one merged list of question threads and notifications. */
-export function StudentInboxListPane({ chip, entries, failed, loading, selectedKey, unreadCount, onChip, onRetry, onSelect }: ListPaneProps) {
+export function StudentInboxListPane({ chip, entries, failed, loading, selectedKey, unreadCount, threadUnread, onChip, onRetry, onSelect }: ListPaneProps) {
   return (
     <Box sx={{ display: "grid", gap: 1.5, alignContent: "start" }}>
       <Tabs aria-label="Lọc hộp thư" value={chip} onChange={(_, value: InboxChip) => onChip(value)} variant="scrollable" scrollButtons={false} sx={ergChipTabsSx}>
         {INBOX_CHIPS.map((tab) => (
-          <Tab key={tab.id} value={tab.id} iconPosition="end" icon={tab.id === "ALL" ? <ErgTabCount count={unreadCount} /> : undefined} label={tab.label} />
+          <Tab key={tab.id} value={tab.id} iconPosition="end" icon={tab.id === "ALL" || tab.id === "THREAD" ? <ErgTabCount count={tab.id === "ALL" ? unreadCount : threadUnread} /> : undefined} label={tab.label} />
         ))}
       </Tabs>
       {loading ? (
@@ -63,7 +65,8 @@ export function StudentInboxListPane({ chip, entries, failed, loading, selectedK
 }
 
 function InboxRow({ entry, selected, onSelect }: { entry: InboxEntry; selected: boolean; onSelect: (entry: InboxEntry) => void }) {
-  const { label, Icon, tone } = KIND[entry.kind];
+  const { label: kindLabel, Icon, tone } = KIND[entry.kind];
+  const label = /badge/i.test(entry.notification?.eventType ?? "") ? "Huy hiệu" : kindLabel;
   const tint = t.statusTint[tone];
   return (
     <ListItemButton
@@ -82,7 +85,7 @@ function InboxRow({ entry, selected, onSelect }: { entry: InboxEntry; selected: 
       <Box sx={{ minWidth: 0, flex: 1 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <Typography variant="caption" sx={{ flex: 1, minWidth: 0, color: tint.color, fontWeight: "fontWeightBold", textTransform: "uppercase", ...clamp1 }}>{label}</Typography>
-          <Typography variant="caption" sx={{ flexShrink: 0, color: "text.secondary" }}>{formatListTimeVi(entry.at)}</Typography>
+          <Typography variant="caption" sx={{ flexShrink: 0, color: "text.secondary" }}>{formatListTimeVi(entry.at).replace(new RegExp("/" + new Date().getFullYear() + "$"), "")}</Typography>
           {entry.unread ? <Box aria-hidden sx={{ width: 8, height: 8, flexShrink: 0, borderRadius: "50%", bgcolor: "primary.main" }} /> : null}
         </Box>
         <Typography variant="subtitle2" sx={{ ...clamp1, fontWeight: entry.unread ? "fontWeightBold" : "fontWeightMedium" }}>{entry.title}</Typography>

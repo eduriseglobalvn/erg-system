@@ -1,9 +1,10 @@
 import type { ReactNode } from "react";
 import ArrowUpwardRoundedIcon from "@mui/icons-material/ArrowUpwardRounded";
-import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
 import BoltRoundedIcon from "@mui/icons-material/BoltRounded";
+import CalculateRoundedIcon from "@mui/icons-material/CalculateRounded";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import LocalFireDepartmentRoundedIcon from "@mui/icons-material/LocalFireDepartmentRounded";
+import QuizRoundedIcon from "@mui/icons-material/QuizRounded";
 import TrendingUpRoundedIcon from "@mui/icons-material/TrendingUpRounded";
 import WorkspacePremiumRoundedIcon from "@mui/icons-material/WorkspacePremiumRounded";
 import Box from "@mui/material/Box";
@@ -20,11 +21,11 @@ const STREAK_BONUS_DAYS = 7;
 
 const cardSx = { bgcolor: t.color.surface, border: 1, borderColor: t.color.border, borderRadius: `${t.radius.card}px`, overflow: "hidden" } as const;
 
-function CardHead({ title, note, overline }: { title: string; note?: string; overline?: boolean }) {
+function CardHead({ title, note, overline, aside }: { title: string; note?: string; overline?: boolean; /** Right-aligned element instead of the note. */ aside?: ReactNode }) {
   return (
-    <Box sx={{ alignItems: "baseline", display: "flex", justifyContent: "space-between", px: 2.5, pb: 1, pt: 2 }}>
-      <Typography component="h2" variant={overline ? "overline" : "h5"} sx={overline ? { color: "text.secondary" } : undefined}>{title}</Typography>
-      {note ? <Typography variant="caption" sx={{ color: "text.secondary" }}>{note}</Typography> : null}
+    <Box sx={{ alignItems: "center", display: "flex", justifyContent: "space-between", px: 2.5, pb: 1, pt: 2 }}>
+      <Typography component="h2" variant={overline ? "overline" : "h6"} sx={overline ? { color: "text.secondary" } : undefined}>{title}</Typography>
+      {aside ?? (note ? <Typography variant="caption" sx={{ color: "text.secondary" }}>{note}</Typography> : null)}
     </Box>
   );
 }
@@ -50,13 +51,15 @@ export function RankPositionCard({ entries, size, periodWord }: { entries: reado
     : `${formatViNumber(me.xp)} XP ${periodWord}`;
   return (
     <Box component="section" data-design="H08.position" sx={cardSx}>
-      <CardHead overline title="Vị trí của bạn" />
-      <Box sx={{ display: "grid", gap: 2, px: 2.5, pb: 2.5 }}>
-        {me.rankChange && me.rankChange > 0 ? (
-          <Box component="span" sx={{ alignItems: "center", alignSelf: "start", bgcolor: t.statusTint.success.bg, borderRadius: `${t.radius.chip}px`, color: t.statusTint.success.color, display: "inline-flex", height: 24, justifySelf: "start", px: 1, typography: "caption" }}>
+      <CardHead
+        aside={me.rankChange && me.rankChange > 0 ? (
+          <Box component="span" sx={{ alignItems: "center", bgcolor: t.statusTint.success.bg, borderRadius: `${t.radius.chip}px`, color: t.statusTint.success.color, display: "inline-flex", height: 24, px: 1.25, typography: "caption" }}>
             <ArrowUpwardRoundedIcon sx={{ fontSize: t.size.iconSm }} />{`Lên ${me.rankChange} hạng`}
           </Box>
-        ) : null}
+        ) : undefined}
+        overline title="Vị trí của bạn"
+      />
+      <Box sx={{ display: "grid", gap: 2, px: 2.5, pb: 2.5 }}>
         <Box sx={{ alignItems: "center", display: "flex", gap: 2 }}>
           <Box aria-hidden data-design="H08.ring" sx={{ alignItems: "center", background: `conic-gradient(${t.color.primary} 0 ${Math.round(ratio * 360)}deg, ${t.color.divider} 0)`, borderRadius: "50%", display: "grid", flexShrink: 0, height: 96, placeItems: "center", width: 96 }}>
             <Box sx={{ alignItems: "center", bgcolor: t.color.surface, borderRadius: "50%", display: "grid", height: 78, placeItems: "center", textAlign: "center", width: 78 }}>
@@ -67,7 +70,7 @@ export function RankPositionCard({ entries, size, periodWord }: { entries: reado
             </Box>
           </Box>
           <Box sx={{ minWidth: 0 }}>
-            <Typography component="p" variant="h3">{heading}</Typography>
+            <Typography component="p" variant="h2">{heading}</Typography>
             <Typography variant="body2" sx={{ color: "text.secondary" }}>{detail}</Typography>
           </Box>
         </Box>
@@ -81,21 +84,21 @@ export function RankPositionCard({ entries, size, periodWord }: { entries: reado
   );
 }
 
-export type EarnXpItem = { id: string; title: string; subtitle: string; xp: number };
+export type EarnXpItem = { id: string; title: string; subject?: string; /** Due text, e.g. "hạn 20:00 hôm nay". */ subtitle: string; xp: number; /** PRACTICE = Luyện tập, TEST = Trắc nghiệm; picks the icon. */ kind?: "PRACTICE" | "TEST" };
 
 /** "Kiếm XP ngay" (design H08): up to three open assignments with their XP and an outlined start button. */
 export function EarnXpCard({ items, gap, onStart }: { items: readonly EarnXpItem[]; /** XP missing for the podium; the first item says whether it is enough. */ gap?: number; onStart?: (id: string) => void }) {
   if (!items.length) return null;
   return (
     <Box component="section" data-design="H08.earn" sx={cardSx}>
-      <CardHead title="Kiếm XP ngay" note={`${items.length} bài đang mở`} />
+      <CardHead title="Kiếm XP ngay" note={`${Math.min(items.length, 3)} bài đang mở`} />
       {items.slice(0, 3).map((item, index) => (
         <Box key={item.id} sx={{ alignItems: "center", bgcolor: index === 0 ? t.color.primarySofter : "transparent", display: "flex", gap: 1.5, px: 2.5, py: 1.5 }}>
-          <Box aria-hidden sx={{ alignItems: "center", bgcolor: index === 0 ? "primary.main" : t.color.primarySofter, borderRadius: `${t.radius.control}px`, color: index === 0 ? "primary.contrastText" : "primary.main", display: "grid", flexShrink: 0, height: 34, placeItems: "center", width: 34 }}><AssignmentOutlinedIcon fontSize="small" /></Box>
+          <Box aria-hidden sx={{ alignItems: "center", bgcolor: index === 0 ? "primary.main" : item.kind === "TEST" ? t.statusTint.warning.bg : t.statusTint.success.bg, borderRadius: `${t.radius.control}px`, color: index === 0 ? "primary.contrastText" : item.kind === "TEST" ? t.statusTint.warning.color : t.statusTint.success.color, display: "grid", flexShrink: 0, height: 34, placeItems: "center", width: 34 }}>{item.kind === "TEST" ? <QuizRoundedIcon fontSize="small" /> : <CalculateRoundedIcon fontSize="small" />}</Box>
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Typography noWrap variant="subtitle2">{item.title}</Typography>
-            <Typography noWrap variant="caption" sx={{ color: index === 0 ? "primary.main" : "text.secondary", display: "block" }}>
-              {index === 0 && gap != null && item.xp >= gap ? `Đủ để lên bục · ${item.subtitle}` : item.subtitle}
+            <Typography variant="caption" sx={{ color: index === 0 ? "primary.main" : "text.secondary", display: "block" }}>
+              {index === 0 && gap != null && item.xp >= gap ? `Đủ để lên hạng 3 · ${item.subtitle}` : [item.subject, item.subtitle].filter(Boolean).join(" · ")}
             </Typography>
           </Box>
           <Box component="span" sx={{ bgcolor: t.statusTint.info.bg, borderRadius: `${t.radius.chip}px`, color: t.statusTint.info.color, px: 1, typography: "caption", whiteSpace: "nowrap" }}>{`+${formatViNumber(item.xp)} XP`}</Box>
@@ -111,6 +114,8 @@ const REWARDS = [
   { title: "Bền bỉ", note: "Chuỗi 7 ngày", icon: LocalFireDepartmentRoundedIcon, tint: t.statusTint.warning, color: t.podium.fire },
   { title: "Bứt phá", note: "Lên 3 hạng", icon: TrendingUpRoundedIcon, tint: t.statusTint.success, color: t.color.success },
 ] as const;
+
+export const XP_RULES = "XP: hoàn thành bài +10–40 · nộp trước hạn +10 · chuỗi ≥ 7 ngày ×1,2. Không hiện điểm số của ai.";
 
 /** "Phần thưởng tuần này" (design H08): the three weekly badges and the XP rules line. */
 export function WeekRewardsCard() {
@@ -129,7 +134,7 @@ export function WeekRewardsCard() {
         </Box>
         <Box sx={{ alignItems: "flex-start", color: "text.secondary", display: "flex", gap: 1 }}>
           <InfoOutlinedIcon sx={{ fontSize: t.size.iconSm, mt: 0.25 }} />
-          <Typography variant="caption" sx={{ flex: 1 }}>XP: hoàn thành bài +10–40 · nộp trước hạn +10 · chuỗi ≥ 7 ngày ×1,2. Không hiện điểm số của ai.</Typography>
+          <Typography variant="caption" sx={{ flex: 1 }}>{XP_RULES}</Typography>
         </Box>
       </Box>
     </Box>

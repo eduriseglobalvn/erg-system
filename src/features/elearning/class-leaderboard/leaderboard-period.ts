@@ -1,3 +1,4 @@
+import { formatDateVi } from "@/domain/formatters/format-date";
 import type { LeaderboardPeriod } from "@/features/elearning/class-leaderboard/api/class-leaderboard-api";
 
 /** Student tabs (design H08): week, month, whole course. */
@@ -30,4 +31,18 @@ export function leaderboardClosesIn(endsAt: string, now = new Date()) {
   if (hours < 1) return "Sắp chốt bảng";
   const days = Math.floor(hours / 24);
   return days ? `Chốt sau ${days} ngày ${hours % 24} giờ` : `Chốt sau ${hours} giờ`;
+}
+
+/** "Tuần 46 · 10/11 – 16/11" for the week that ends at `endsAt` (Mon–Sun, ISO week of its Monday); "" when unreadable. */
+export function leaderboardWeekLabel(endsAt: string) {
+  const end = new Date(endsAt);
+  if (Number.isNaN(end.getTime())) return "";
+  // periodEndsAt is the next Monday 00:00, so the last day of the week is one millisecond earlier.
+  const last = new Date(end.getTime() - 1);
+  const first = new Date(last.getFullYear(), last.getMonth(), last.getDate() - 6);
+  const thursday = new Date(first.getFullYear(), first.getMonth(), first.getDate() + 3);
+  const yearStart = new Date(thursday.getFullYear(), 0, 1);
+  const week = Math.ceil(((thursday.getTime() - yearStart.getTime()) / 86_400_000 + 1) / 7);
+  const day = (d: Date) => formatDateVi(d).slice(0, 5);
+  return `Tuần ${week} · ${day(first)} – ${day(last)}`;
 }

@@ -2,7 +2,7 @@ query ElearningMyQuestionThreads($status: String, $tenantId: String) {
   elearning {
     myQuestionThreads(status: $status, tenantId: $tenantId) {
       id assignmentId assignmentTitle subjectName className questionIndex questionPrompt studentAnswerText correctAnswerText
-      teacherId teacherName status lastMessageAt lastMessagePreview
+      teacherId teacherName status lastMessageAt lastMessagePreview unread
     }
   }
 }
@@ -11,7 +11,7 @@ query ElearningQuestionThread($id: String!, $tenantId: String) {
   elearning {
     questionThread(id: $id, tenantId: $tenantId) {
       id assignmentId assignmentTitle subjectName className questionIndex questionPrompt studentAnswerText correctAnswerText
-      teacherId teacherName status lastMessageAt lastMessagePreview
+      teacherId teacherName status lastMessageAt lastMessagePreview unread
       messages { id senderId senderName senderRole mine body attachmentIds createdAt }
     }
   }
@@ -20,7 +20,19 @@ query ElearningQuestionThread($id: String!, $tenantId: String) {
 mutation ElearningSendQuestionThreadMessage($input: SendQuestionThreadMessageInput!) {
   sendQuestionThreadMessage(input: $input) {
     id assignmentId assignmentTitle subjectName className questionIndex questionPrompt studentAnswerText correctAnswerText
-    teacherId teacherName status lastMessageAt lastMessagePreview
+    teacherId teacherName status lastMessageAt lastMessagePreview unread
     messages { id senderId senderName senderRole mine body attachmentIds createdAt }
   }
+}
+
+mutation ElearningAskTeacherAboutQuestion($input: AskTeacherAboutQuestionInput!) {
+  askTeacherAboutQuestion(input: $input) {
+    id assignmentId assignmentTitle subjectName className questionIndex questionPrompt studentAnswerText correctAnswerText
+    teacherId teacherName status lastMessageAt lastMessagePreview unread
+    messages { id senderId senderName senderRole mine body attachmentIds createdAt }
+  }
+}
+
+mutation ElearningMarkQuestionThreadRead($threadId: ID!, $tenantId: String) {
+  markStudentQuestionThreadRead(threadId: $threadId, tenantId: $tenantId)
 }

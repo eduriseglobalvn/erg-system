@@ -1,4 +1,4 @@
-import { loadStudentDashboardData } from "@/features/elearning/student-dashboard/api/student-dashboard-api";
+import { gradeLabelFromClassName, loadStudentDashboardData } from "@/features/elearning/student-dashboard/api/student-dashboard-api";
 import type { StudentDashboardProfile } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
 import { getDefaultTenantId } from "@/lib/graphql-client";
 import { persistedQueryMeta, QUERY_POLICIES } from "@/lib/query-policy";
@@ -30,7 +30,7 @@ export function createStudentDashboardLoadingProfile(
     id: viewer?.id ?? "",
     name: viewer?.name ?? "",
     className: viewer?.className ?? "",
-    gradeLabel: "",
+    gradeLabel: gradeLabelFromClassName(viewer?.className),
     schoolName: viewer?.schoolName ?? "",
     homeroomTeacher: "",
     averageScore: 0,

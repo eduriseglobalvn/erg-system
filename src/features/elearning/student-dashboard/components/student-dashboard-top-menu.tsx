@@ -12,15 +12,16 @@ import Typography from "@mui/material/Typography";
 import { OfflineShellStatus } from "@/components/erg-mui/offline";
 import { type ElearningViewerSession } from "@/platform/auth/api/elearning-viewer-session";
 import { getAuthScope } from "@/platform/auth/api/auth-storage";
-import { EXPANDED_SIDEBAR_WIDTH, SIDEBAR_GUTTER } from "@/components/portal/portal-sidebar-motion";
-import { NAV_BORDER, NAV_CARD_RADIUS, NAV_CARD_SHADOW, NAV_PADDING } from "@/components/portal/portal-sidebar-styles";
+import { NAV_BORDER, NAV_CARD_RADIUS, NAV_CARD_SHADOW } from "@/components/portal/portal-sidebar-styles";
 import { PortalSidebarWorkspaceHeader } from "@/components/portal/portal-sidebar-workspace-header";
 import type { DashboardCopy, StudentDiscussionNotification, StudentPageKey } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
 import type { StudentDashboardProfile } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
-import { MUI_TEXT, MUI_MUTED, MUI_BORDER, MUI_DIVIDER, Stack } from "@/features/elearning/student-dashboard/components/student-dashboard-workspace-styles";
+import { MUI_TEXT, MUI_MUTED, MUI_BORDER, MUI_DIVIDER } from "@/features/elearning/student-dashboard/components/student-dashboard-workspace-styles";
 import { StudentSidebar } from "@/features/elearning/student-dashboard/components/student-sidebar";
 import type { StudentSidebarData } from "@/features/elearning/student-dashboard/hooks/use-student-sidebar-data";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
+
+const TITLED_BY_PAGE = new Set<StudentPageKey>(["assignments", "ranking", "discussion", "announcements"]);
 
 function getInitials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -28,6 +29,10 @@ function getInitials(name: string): string {
   if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
+
+/** Canvas ".desk": 16px padding and gap around a 232px floating sidebar card (spec 7.0). */
+const DESK_GAP = 16;
+const SIDEBAR_CARD_WIDTH = 232;
 
 export function TopMenuShell({
   account, activePage, children, copy, dashboardProfile,
@@ -69,9 +74,9 @@ export function TopMenuShell({
       {/* Same floating card as the admin/teacher sidebar: shell radius, float shadow, token width. */}
       <Box component="aside" sx={{
         bgcolor: "background.paper", border: `1px solid ${NAV_BORDER}`, borderRadius: NAV_CARD_RADIUS, boxShadow: NAV_CARD_SHADOW,
-        display: "flex", flexDirection: "column", flexShrink: 0, height: { md: `calc(100vh - ${SIDEBAR_GUTTER * 2}px)` },
-        m: { xs: 1.5, md: `${SIDEBAR_GUTTER}px` }, mr: { md: 0 }, p: { xs: 1.25, md: `${NAV_PADDING}px` }, position: { md: "sticky" },
-        top: { md: SIDEBAR_GUTTER }, width: { xs: "calc(100% - 24px)", md: EXPANDED_SIDEBAR_WIDTH }, zIndex: 12,
+        display: "flex", flexDirection: "column", flexShrink: 0, height: { md: `calc(100vh - ${DESK_GAP * 2}px)` },
+        m: { xs: 1.5, md: `${DESK_GAP}px` }, mr: { md: 0 }, p: { xs: 1.25, md: "14px 10px 10px" }, position: { md: "sticky" },
+        top: { md: DESK_GAP }, width: { xs: "calc(100% - 24px)", md: SIDEBAR_CARD_WIDTH }, zIndex: 12,
       }}>
         {/* A plain student has nowhere to switch to, so the switcher only shows for accounts with another workspace (e.g. teacher). */}
         {workspaces.some((workspace) => workspace !== "STUDENT") ? (
@@ -81,27 +86,21 @@ export function TopMenuShell({
           activePage={activePage} data={sidebarData} initials={getInitials(studentName)} name={studentName}
           rankingEnabled={copy.navItems.some((item) => item.key === "ranking")} signedIn={Boolean(account)}
           todoCount={todoCount} unreadCount={unreadAnnouncementCount}
+          notificationSlot={(
+            <Tooltip title={copy.notificationTitle}>
+              <IconButton aria-label={copy.notificationTitle} onClick={(e) => onNotificationOpen(e.currentTarget)} sx={{ color: "text.secondary", flexShrink: 0, height: 36, width: 36 }}>
+                <Badge color="error" badgeContent={totalUnread}><NotificationsNoneRoundedIcon /></Badge>
+              </IconButton>
+            </Tooltip>
+          )}
           onAccountOpen={onAccountOpen} onTierOpen={onTierOpen} onPageChange={onPageChange} onSignOut={onSignOut}
         />
       </Box>
 
       {/* Main content right side */}
-      <Box sx={{ display: "flex", flex: 1, flexDirection: "column", minWidth: 0, p: { xs: 1.5, md: 2.25, lg: 3 } }}>
-        {activePage === "assignments" ? null : <Box component="header" sx={{ alignItems: "center", display: "flex", justifyContent: "space-between", minHeight: 44, mb: 2, px: { xs: 0.5, md: 0 } }}>
-          <Typography variant="h5" component="h1">
-            {currentPageLabel}
-          </Typography>
-
-          <Stack direction="row" alignItems="center" spacing={1.15}>
-            <Tooltip title={copy.notificationTitle}>
-              <IconButton aria-label={copy.notificationTitle} onClick={(e) => onNotificationOpen(e.currentTarget)} sx={{ bgcolor: "background.paper", border: `1px solid ${MUI_BORDER}`, borderRadius: `${ergEnterpriseTokens.radius.md}px`, color: "text.secondary", height: 44, width: 44 }}>
-                <Badge color="error" badgeContent={totalUnread}>
-                  <NotificationsNoneRoundedIcon />
-                </Badge>
-              </IconButton>
-            </Tooltip>
-          </Stack>
-        </Box>}
+      <Box sx={{ display: "flex", flex: 1, flexDirection: "column", minWidth: 0, p: { xs: 1.5, md: `${DESK_GAP + 8}px ${DESK_GAP + 8}px 32px` } }}>
+        {/* Design has no bar above the page: ranking, tier, inbox, discussion and assignment pages carry their own title. */}
+        {TITLED_BY_PAGE.has(activePage) ? null : <Typography variant="h5" component="h1" sx={{ mb: 2, px: { xs: 0.5, md: 0 } }}>{currentPageLabel}</Typography>}
 
         {/* The dashboard is kept for 24 h offline: say when what is shown may be old. */}
         <Box sx={{ mb: 2, "&:empty": { display: "none" } }}><OfflineShellStatus /></Box>

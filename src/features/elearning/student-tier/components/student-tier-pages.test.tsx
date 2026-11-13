@@ -69,6 +69,14 @@ describe("TierTablePage (H18)", () => {
     expect(document.querySelectorAll("[data-design='H18m.cell']").length).toBeGreaterThan(0);
     expect(screen.getByText("Không chia cấp · các bạn Cao thủ xếp theo XP")).toBeTruthy();
   });
+
+  it("links back to Bậc của bạn and names the ISO week in the subtitle", async () => {
+    const onBack = vi.fn();
+    renderWithQuery(<TierTablePage accountId="b2" gradeLabel="Khối 7" onBack={onBack} />);
+    fireEvent.click(await screen.findByRole("button", { name: /Bậc của bạn/ }));
+    expect(onBack).toHaveBeenCalledTimes(1);
+    expect(screen.getByText(/mốc XP của tuần \d+, tính lại 0 giờ thứ Hai/)).toBeTruthy();
+  });
 });
 
 describe("TierPromotionDialog (H16)", () => {

@@ -1,15 +1,16 @@
 import { useState } from "react";
-import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
-import EmojiEventsOutlinedIcon from "@mui/icons-material/EmojiEventsOutlined";
 import HelpOutlineRoundedIcon from "@mui/icons-material/HelpOutlineRounded";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
 import Typography from "@mui/material/Typography";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { useTheme } from "@mui/material/styles";
+import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { ErgButton, ErgIconButton } from "@/components/erg-mui/erg-actions";
+import { ErgIconButton } from "@/components/erg-mui/erg-actions";
 import { ergChipTabsSx, ergSegmentedTabsSx } from "@/components/erg-mui/erg-tabs";
 import {
   classLeaderboardKeys,
@@ -21,21 +22,31 @@ import {
 import { ClassLeaderboardTable } from "@/features/elearning/class-leaderboard/components/class-leaderboard-table";
 import { ViewerRankStrip } from "@/features/elearning/class-leaderboard/components/viewer-rank-strip";
 import { PodiumArena } from "@/features/elearning/class-leaderboard/components/podium-arena";
-import { EarnXpCard, RankPositionCard, WeekRewardsCard } from "@/features/elearning/class-leaderboard/components/ranking-side-cards";
+import { EarnXpCard, RankPositionCard, WeekRewardsCard, XP_RULES } from "@/features/elearning/class-leaderboard/components/ranking-side-cards";
 import { chaseOf } from "@/features/elearning/class-leaderboard/components/chase-strip";
-import { LEADERBOARD_PERIODS, leaderboardPeriodLabel } from "@/features/elearning/class-leaderboard/leaderboard-period";
-import { EmptyPanel, PageHeader, SkeletonRow } from "@/features/elearning/student-dashboard/components/student-dashboard-view-primitives";
+import { LEADERBOARD_PERIODS, leaderboardPeriodLabel, leaderboardWeekLabel } from "@/features/elearning/class-leaderboard/leaderboard-period";
+import { gradeLabelFromClassName } from "@/features/elearning/student-dashboard/api/student-dashboard-api";
+import { EmptyPanel, SkeletonRow } from "@/features/elearning/student-dashboard/components/student-dashboard-view-primitives";
 import { Stack } from "@/features/elearning/student-dashboard/components/student-dashboard-workspace-styles";
+import { dueClock } from "@/features/elearning/student-dashboard/utils/assignment-board";
 import type { DashboardCopy } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
 import type { StudentDashboardAssignment } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
 
+/** "hạn 20:00 hôm nay", "21:00 ngày mai", "Thứ Hai 16/11". */
+function dueText(a: StudentDashboardAssignment) {
+  const clock = dueClock(a, Date.now());
+  return clock.endsWith("hôm nay") ? `hạn ${clock}` : clock;
+}
+
 const PERIOD_WORD = { WEEK: "tuần", MONTH: "tháng", TERM: "học kỳ", COURSE: "cả khóa" } as const;
 
-/** "Thi đua" (design H03): XP board of the class or grade by week, month or term. Shown only while the teacher keeps it on. */
+/** "Thi đua" (design H08 / H03b): XP board of the class or grade by week, month or course. Shown only while the teacher keeps it on. */
 type RankingViewProps = {
   accountId: string;
   classId: string;
   copy: DashboardCopy;
+  /** "Khối 7": label of the grade chip and of the grade rank. */
+  gradeLabel?: string;
   /** "Xem cả lớp" (H14); receives the period picked here. */
   onOpenFullBoard?: (period: LeaderboardPeriod) => void;
   /** The round "?" button (H18). */
@@ -46,8 +57,9 @@ type RankingViewProps = {
   onDoAssignments?: () => void;
 };
 
-export function RankingView({ accountId, classId, copy, onOpenFullBoard, onOpenTierTable, openAssignments = [], onDoAssignments }: RankingViewProps) {
+export function RankingView({ accountId, classId, copy, gradeLabel: gradeProp, onOpenFullBoard, onOpenTierTable, openAssignments = [], onDoAssignments }: RankingViewProps) {
   const queryClient = useQueryClient();
+  const phone = useMediaQuery(useTheme().breakpoints.down("sm"));
   const [period, setPeriod] = useState<LeaderboardPeriod>("WEEK");
   const [scope, setScope] = useState<LeaderboardScope>("CLASS");
   const board = useQuery({
@@ -61,19 +73,35 @@ export function RankingView({ accountId, classId, copy, onOpenFullBoard, onOpenT
   const entries = board.data?.enabled ? board.data.entries : [];
   const ranked = entries.some((entry) => entry.rank != null);
   const viewerHidden = hide.isPending ? Boolean(hide.variables) : Boolean(board.data?.viewerHidden);
+  const className = board.data?.className || "Lớp";
+  const gradeLabel = gradeProp || gradeLabelFromClassName(className) || "Khối";
+  const size = board.data?.me?.size;
+  const subtitle = period === "WEEK" && board.data?.periodEndsAt
+    ? [leaderboardWeekLabel(board.data.periodEndsAt), `Lớp ${className}`, size ? `${size} bạn` : ""].filter(Boolean).join(" · ")
+    : copy.ranking.description;
+  const grade = board.data?.me?.gradeRank && board.data.me.gradeSize ? { label: gradeLabel, rank: board.data.me.gradeRank, size: board.data.me.gradeSize } : undefined;
+
+  const periodTabs = (
+    <Tabs aria-label="Kỳ thi đua" value={period} variant="fullWidth" onChange={(_, value: LeaderboardPeriod) => setPeriod(value)} sx={{ ...ergSegmentedTabsSx, width: { xs: "100%", md: 330 } }}>
+      {LEADERBOARD_PERIODS.map((value) => <Tab key={value} value={value} label={phone && value === "COURSE" ? "Cả khóa" : leaderboardPeriodLabel(value)} />)}
+    </Tabs>
+  );
+  const scopeTabs = (
+    <Tabs aria-label="Phạm vi" value={scope} onChange={(_, value: LeaderboardScope) => setScope(value)} sx={ergChipTabsSx}>
+      <Tab value="CLASS" label={`Lớp ${className}`} />
+      <Tab value="GRADE" label={gradeLabel} />
+    </Tabs>
+  );
+  const help = onOpenTierTable ? <ErgIconButton label="Bảng bậc & cấp" onClick={onOpenTierTable} sx={phone ? { bgcolor: "background.paper", border: 1, borderColor: "divider", height: t.size.controlLg, width: t.size.controlLg } : undefined}><HelpOutlineRoundedIcon /></ErgIconButton> : null;
 
   return (
-    <Stack spacing={2.5}>
-      <PageHeader description={copy.ranking.description} icon={<EmojiEventsOutlinedIcon />} title={copy.ranking.title} />
-      {onOpenTierTable ? <ErgIconButton label="Bảng bậc & cấp" onClick={onOpenTierTable} sx={{ alignSelf: "flex-end" }}><HelpOutlineRoundedIcon /></ErgIconButton> : null}
-      <Tabs aria-label="Kỳ thi đua" value={period} variant="fullWidth" onChange={(_, value: LeaderboardPeriod) => setPeriod(value)} sx={ergSegmentedTabsSx}>
-        {LEADERBOARD_PERIODS.map((value) => <Tab key={value} value={value} label={leaderboardPeriodLabel(value)} />)}
-      </Tabs>
-      <Stack direction="row" spacing={1.5} sx={{ alignItems: "center", flexWrap: "wrap", justifyContent: "space-between", rowGap: 1 }}>
-        <Tabs aria-label="Phạm vi" value={scope} onChange={(_, value: LeaderboardScope) => setScope(value)} sx={ergChipTabsSx}>
-          <Tab value="CLASS" label={board.data?.className || "Lớp"} />
-          <Tab value="GRADE" label="Cả khối" />
-        </Tabs>
+    <Stack spacing={phone ? 1.5 : 2.5}>
+      <Stack direction="row" spacing={2} sx={{ alignItems: phone ? "center" : "flex-end", flexWrap: "wrap", justifyContent: "space-between", rowGap: 1.5 }}>
+        <div>
+          <Typography component="h1" variant="h1">{copy.ranking.title}</Typography>
+          {phone ? null : <Typography variant="body2" sx={{ color: "text.secondary" }}>{subtitle}</Typography>}
+        </div>
+        {phone ? help : <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>{periodTabs}{scopeTabs}{help}</Stack>}
       </Stack>
       {board.isPending ? (
         <Stack spacing={1.5}><SkeletonRow /><SkeletonRow /></Stack>
@@ -81,7 +109,8 @@ export function RankingView({ accountId, classId, copy, onOpenFullBoard, onOpenT
         <EmptyPanel description={copy.ranking.errorDescription} title={copy.ranking.errorTitle} />
       ) : ranked ? (
         <>
-          <ViewerRankStrip entries={entries} label={scope === "CLASS" ? board.data?.className || "lớp" : "khối"} />
+          <ViewerRankStrip entries={entries} grade={grade} label={scope === "CLASS" ? `lớp ${className}` : gradeLabel.toLowerCase()} />
+          {phone ? <>{periodTabs}{scopeTabs}</> : null}
           <PodiumArena
             endsAt={period === "COURSE" ? undefined : board.data?.periodEndsAt}
             entries={entries}
@@ -90,19 +119,21 @@ export function RankingView({ accountId, classId, copy, onOpenFullBoard, onOpenT
             onStart={onDoAssignments}
           />
           <Stack direction={{ xs: "column", md: "row" }} spacing={2.5} sx={{ alignItems: "flex-start" }}>
-            <Stack spacing={1.5} sx={{ flex: { md: 2 }, minWidth: 0, width: "100%" }}>
-              <ClassLeaderboardTable entries={entries} />
-              {onOpenFullBoard ? <ErgButton variant="text" trailingIcon={<ChevronRightRoundedIcon />} onClick={() => onOpenFullBoard(period)} sx={{ alignSelf: "flex-start" }}>Xem cả lớp</ErgButton> : null}
+            <Stack spacing={1.5} sx={{ flex: { md: "2 1 620px" }, minWidth: 0, width: "100%" }}>
+              <ClassLeaderboardTable entries={entries} skipPodium total={size} onOpenAll={onOpenFullBoard ? () => onOpenFullBoard(period) : undefined} />
+              {phone ? <Typography variant="caption" sx={{ color: "text.secondary" }}>{XP_RULES}</Typography> : null}
             </Stack>
-            <Stack spacing={2.5} sx={{ flex: { md: 1 }, minWidth: 0, width: "100%" }}>
-              <RankPositionCard entries={entries} periodWord={PERIOD_WORD[period]} size={entries.filter((entry) => entry.rank != null).length} />
-              <EarnXpCard
-                gap={(() => { const chase = chaseOf(entries); return chase?.kind === "chase" ? chase.gap : undefined; })()}
-                items={openAssignments.map((a) => ({ id: a.id, title: a.title, subtitle: [a.subjectLabel, a.dueLabel].filter(Boolean).join(" · "), xp: a.xpReward ?? 0 }))}
-                onStart={onDoAssignments ? () => onDoAssignments() : undefined}
-              />
-              <WeekRewardsCard />
-            </Stack>
+            {phone ? null : (
+              <Stack spacing={2.5} sx={{ flex: "1 1 340px", minWidth: 0, width: "100%" }}>
+                <RankPositionCard entries={entries} periodWord={PERIOD_WORD[period]} size={entries.filter((entry) => entry.rank != null).length} />
+                <EarnXpCard
+                  gap={(() => { const chase = chaseOf(entries); return chase?.kind === "chase" ? chase.gap : undefined; })()}
+                  items={openAssignments.map((a) => ({ id: a.id, title: a.title, subject: a.subjectLabel, subtitle: dueText(a), xp: a.xpReward ?? 0, kind: a.kind }))}
+                  onStart={onDoAssignments ? () => onDoAssignments() : undefined}
+                />
+                <WeekRewardsCard />
+              </Stack>
+            )}
           </Stack>
         </>
       ) : (

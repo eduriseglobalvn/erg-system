@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { ClassLeaderboardEntry } from "@/features/elearning/class-leaderboard/api/class-leaderboard-api";
 import { PodiumArena } from "./podium-arena";
-import { chaseOf } from "./chase-strip";
+import { ChaseStrip, chaseOf } from "./chase-strip";
 import { EarnXpCard, RankPositionCard, WeekRewardsCard } from "./ranking-side-cards";
 
 const e = (rank: number, xp: number, name: string, isViewer = false): ClassLeaderboardEntry =>
@@ -24,6 +24,13 @@ describe("PodiumArena (H08 / H03b)", () => {
     expect(contained()).toBe(1);
     fireEvent.click(screen.getByRole("button", { name: /Làm 1 bài để lên bục/ }));
     expect(onStart).toHaveBeenCalledTimes(1);
+  });
+
+  it("renders the compact chase card with 380 / 420 and one contained button", () => {
+    render(<ChaseStrip compact entries={chasing} onStart={vi.fn()} />);
+    expect(screen.getByText("Còn 40 XP là lên bục")).toBeTruthy();
+    expect(screen.getByText("380 / 420")).toBeTruthy();
+    expect(contained()).toBe(1);
   });
 
   it("says how far ahead of rank 4 a podium viewer is", () => {
@@ -49,10 +56,10 @@ describe("ranking side cards (H08)", () => {
 
   it("lists open assignments with outlined buttons, and hides when none", () => {
     const onStart = vi.fn();
-    const items = [{ id: "a1", title: "Luyện tập", subtitle: "Toán · hôm nay", xp: 50 }, { id: "a2", title: "Trắc nghiệm", subtitle: "Văn", xp: 40 }];
+    const items = [{ id: "a1", title: "Luyện tập", subject: "Toán", subtitle: "hạn 20:00 hôm nay", xp: 50 }, { id: "a2", title: "Trắc nghiệm", subtitle: "ngày mai", xp: 40 }];
     const { rerender } = render(<EarnXpCard gap={40} items={items} onStart={onStart} />);
     expect(screen.getByText("2 bài đang mở")).toBeTruthy();
-    expect(screen.getByText("Đủ để lên bục · Toán · hôm nay")).toBeTruthy();
+    expect(screen.getByText("Đủ để lên hạng 3 · hạn 20:00 hôm nay")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Làm ngay" }));
     expect(onStart).toHaveBeenCalledWith("a1");
     expect(contained()).toBe(0);
