@@ -2,6 +2,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { QUERY_POLICIES } from "@/lib/query-policy";
 import type { ComponentType } from "react";
+import RefreshIcon from "@mui/icons-material/Refresh";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutlined";
 import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
 import ScheduleOutlinedIcon from "@mui/icons-material/ScheduleOutlined";
@@ -35,9 +36,11 @@ import {
 import type { AssignmentRun, ClassroomSnapshot, ClassroomStudent } from "@/domain/school/classroom-types";
 import { hasApiBase } from "@/lib/api-client";
 import { getDefaultTenantId } from "@/lib/graphql-client";
+import { ErgButton } from "@/components/erg-mui/erg-actions";
 import { ErgStatusChip } from "@/components/erg-mui/erg-feedback";
 import { ErgSearchField } from "@/components/erg-mui/erg-form";
 import { ErgTable } from "@/components/erg-mui/erg-table";
+import { formatDateTimeVi } from "@/domain/formatters/format-date";
 import { formatShortDateTimeVi } from "@/features/lms/api/lms-date-label";
 import { AssignmentProgressMobile } from "@/features/lms/components/assignment-progress-mobile";
 import { useLmsMobileBreakpoint } from "@/features/lms/mobile/hooks/use-lms-mobile-breakpoint";
@@ -155,6 +158,13 @@ export function HomeworkProgressPage({
   const inProgress = assignmentReportQuery.data?.inProgressCount ?? progressRows.filter((row) => row.status === "inprogress").length;
   const notStarted = assignmentReportQuery.data?.notStartedCount ?? progressRows.filter((row) => row.status === "notstarted").length;
   const completedPct = total ? Math.round((completed / total) * 100) : 0;
+  // Hand-ins reach this page up to 30 s (BE cache) + 15 s (staleTime) late: let the teacher see the age and reload.
+  const updatedAt = Math.max(progressQuery.dataUpdatedAt, assignmentReportQuery.dataUpdatedAt);
+  const updatedLabel = updatedAt ? `Cập nhật lúc ${formatDateTimeVi(updatedAt)}` : "";
+  const refreshing = progressQuery.isFetching || assignmentReportQuery.isFetching;
+  const refresh = apiBacked && selectedRunId
+    ? () => { void progressQuery.refetch(); void assignmentReportQuery.refetch(); }
+    : undefined;
   const needsReviewCount = assignmentReportQuery.data?.needsReviewCount ?? progressQuery.data?.summary.needsReviewCount ?? selectedRun?.needsReviewCount ?? 0;
 
   if (isMobile) {
@@ -165,9 +175,12 @@ export function HomeworkProgressPage({
         classLabel={selectedClass?.className}
         counts={{ completed, needsReview: needsReviewCount, total }}
         onBack={onBack}
+        onRefresh={refresh}
+        refreshing={refreshing}
         rows={progressRows}
         run={selectedRun}
         status={failed ? "error" : loading ? "loading" : "ready"}
+        updatedLabel={updatedLabel}
       />
     );
   }
@@ -206,6 +219,12 @@ export function HomeworkProgressPage({
                 <AssignmentProgressExportControl assignmentId={selectedRunId} classId={selectedClass?.id} />
               </span>
             </Tooltip>
+            {updatedLabel ? <Typography variant="caption" sx={{ color: "text.secondary" }}>{updatedLabel}</Typography> : null}
+            {refresh ? (
+              <ErgButton variant="outlined" loading={refreshing} startIcon={<RefreshIcon />} sx={{ height: 40, px: 1.5 }} onClick={refresh}>
+                Làm mới
+              </ErgButton>
+            ) : null}
             <Button variant="outlined" sx={{ height: 40, px: 1.5 }} onClick={onBack}>
               Về trang bài tập
             </Button>

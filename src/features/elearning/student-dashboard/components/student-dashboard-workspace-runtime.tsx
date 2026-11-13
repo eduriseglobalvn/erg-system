@@ -1,8 +1,4 @@
-import {
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   useMutation,
   useQuery,
@@ -18,6 +14,7 @@ import { studentPath } from "@/platform/workspaces/workspace-paths";
 import { ContentPendingSkeleton } from "@/routes/route-feedback";
 import { StudentTabReplaced } from "@/features/elearning/student-dashboard/components/student-tab-replaced";
 import { useSingleStudentTab } from "@/features/elearning/student-dashboard/hooks/use-single-student-tab";
+import { useStudentPushRefresh } from "@/features/elearning/student-dashboard/hooks/use-student-push-refresh";
 import { useStudentViewState } from "@/features/elearning/student-dashboard/hooks/use-student-view-state";
 import {
   createStudentDashboardLoadingProfile,
@@ -117,6 +114,7 @@ export function StudentDashboardWorkspaceRuntime() {
     tenantId,
   }));
   const engagementScope = { accountId: account?.id, tenantId };
+  useStudentPushRefresh();
 
   const dashboardProfile = studentDashboardQuery.data?.profile ?? createStudentDashboardLoadingProfile(account);
   // "Xếp hạng" disappears from the menu while the teacher keeps the class leaderboard off.
