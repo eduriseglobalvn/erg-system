@@ -24,3 +24,11 @@ mutation ElearningSendQuestionThreadMessage($input: SendQuestionThreadMessageInp
     messages { id senderId senderName senderRole mine body attachmentIds createdAt }
   }
 }
+
+mutation ElearningAskTeacherAboutQuestion($input: AskTeacherAboutQuestionInput!) {
+  askTeacherAboutQuestion(input: $input) {
+    id assignmentId assignmentTitle subjectName className questionIndex questionPrompt studentAnswerText correctAnswerText
+    teacherId teacherName status lastMessageAt lastMessagePreview
+    messages { id senderId senderName senderRole mine body attachmentIds createdAt }
+  }
+}

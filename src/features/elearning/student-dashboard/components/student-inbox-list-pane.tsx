@@ -33,18 +33,19 @@ type ListPaneProps = {
   loading: boolean;
   selectedKey: string | null;
   unreadCount: number;
+  threadUnread: number;
   onChip: (chip: InboxChip) => void;
   onRetry: () => void;
   onSelect: (entry: InboxEntry) => void;
 };
 
 /** Left column of H12 / the N14 list: filter chips and one merged list of question threads and notifications. */
-export function StudentInboxListPane({ chip, entries, failed, loading, selectedKey, unreadCount, onChip, onRetry, onSelect }: ListPaneProps) {
+export function StudentInboxListPane({ chip, entries, failed, loading, selectedKey, unreadCount, threadUnread, onChip, onRetry, onSelect }: ListPaneProps) {
   return (
     <Box sx={{ display: "grid", gap: 1.5, alignContent: "start" }}>
       <Tabs aria-label="Lọc hộp thư" value={chip} onChange={(_, value: InboxChip) => onChip(value)} variant="scrollable" scrollButtons={false} sx={ergChipTabsSx}>
         {INBOX_CHIPS.map((tab) => (
-          <Tab key={tab.id} value={tab.id} iconPosition="end" icon={tab.id === "ALL" ? <ErgTabCount count={unreadCount} /> : undefined} label={tab.label} />
+          <Tab key={tab.id} value={tab.id} iconPosition="end" icon={tab.id === "ALL" || tab.id === "THREAD" ? <ErgTabCount count={tab.id === "ALL" ? unreadCount : threadUnread} /> : undefined} label={tab.label} />
         ))}
       </Tabs>
       {loading ? (

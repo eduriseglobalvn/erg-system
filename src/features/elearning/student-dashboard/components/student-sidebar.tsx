@@ -92,7 +92,7 @@ export function StudentSidebar({ activePage, data, initials, name, rankingEnable
   return (
     <>
       <Box sx={{ alignItems: "center", display: "flex", gap: 1.25, px: 0.5, py: 0.5 }}>
-        <Box sx={{ alignItems: "center", background: NAV_ACTIVE_BG, borderRadius: `${t.radius.md}px`, color: t.color.surface, display: "flex", height: 34, justifyContent: "center", width: 34 }}><SchoolRoundedIcon /></Box>
+        <Box sx={{ alignItems: "center", background: NAV_ACTIVE_BG, borderRadius: `${t.radius.control}px`, boxShadow: t.shadow.float, color: t.color.surface, display: "flex", flexShrink: 0, height: 42, justifyContent: "center", width: 42 }}><SchoolRoundedIcon fontSize="medium" /></Box>
         <Box>
           <Typography component="p" variant="h6">ERG Học tập</Typography>
           <Typography color="text.secondary" component="p" variant="caption">Cổng học sinh</Typography>

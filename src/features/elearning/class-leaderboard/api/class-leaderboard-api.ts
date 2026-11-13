@@ -24,8 +24,8 @@ export type LeaderboardScope = "CLASS" | "GRADE";
 
 /** Teacher pages talk to the backend as "lms", Admin pages as "lcms"; the backend scopes classes by role. */
 export const classLeaderboardKeys = {
-  classes: (portal: GraphQlPortal) => ["class-leaderboard", portal, "classes"] as const,
-  board: (portal: GraphQlPortal, classId: string, period: LeaderboardPeriod) => ["class-leaderboard", portal, "board", classId, period] as const,
+  classes: (portal: GraphQlPortal, schoolId = "") => ["class-leaderboard", portal, "classes", schoolId] as const,
+  board: (portal: GraphQlPortal, classId: string, period: LeaderboardPeriod, schoolId = "") => ["class-leaderboard", portal, "board", classId, period, schoolId] as const,
   student: (accountId: string, classId: string, period: LeaderboardPeriod, scope: LeaderboardScope) =>
     ["class-leaderboard", "student", accountId, classId, period, scope] as const,
 };

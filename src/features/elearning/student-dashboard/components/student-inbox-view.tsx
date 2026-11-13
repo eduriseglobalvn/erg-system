@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 
+import { ErgButton, ErgSearchField } from "@/components/erg-mui";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { fetchNotificationFeed, notificationQueryKeys, resolveNotificationQueryScope } from "@/features/notifications/api/notification-api";
 import type { NotificationPortal } from "@/features/notifications/api/notification-types";
@@ -13,6 +15,7 @@ import { QUERY_POLICIES } from "@/lib/query-policy";
 import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
 
 import { loadMyQuestionThreads, questionThreadKeys } from "../api/student-question-thread-api";
+import { StudentInboxComposeDialog, type ComposeAssignment } from "./student-inbox-compose-dialog";
 import { filterInboxEntries, mergeInboxEntries, type InboxChip, type InboxEntry } from "./student-inbox-entries";
 import { StudentInboxListPane } from "./student-inbox-list-pane";
 import { StudentQuestionThreadPane } from "./student-question-thread-pane";
@@ -22,7 +25,7 @@ const NOTE_SIZE = 50;
 type StudentInboxViewProps = {
   portal: NotificationPortal;
   /** Student assignments, to know which thread belongs to a PRACTICE assignment ("Làm lại câu N"). */
-  assignments?: ReadonlyArray<{ id: string; kind?: "PRACTICE" | "TEST" }>;
+  assignments?: ReadonlyArray<ComposeAssignment & { kind?: "PRACTICE" | "TEST" }>;
   /** Opens an assignment in the dashboard; without it the "Mở câu hỏi" / "Làm lại câu N" shortcuts are hidden. */
   onOpenAssignment?: (assignmentId: string) => void;
 };
@@ -34,6 +37,8 @@ export function StudentInboxView({ portal, assignments = [], onOpenAssignment }:
   const accountId = scope.accountId ?? "anonymous";
   const [chip, setChip] = useState<InboxChip>("ALL");
   const [openKey, setOpenKey] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
+  const [composing, setComposing] = useState(false);
   const [seen, setSeen] = useState<ReadonlySet<string>>(new Set());
   const threads = useQuery({
     queryKey: questionThreadKeys.list(accountId),
@@ -49,8 +54,10 @@ export function StudentInboxView({ portal, assignments = [], onOpenAssignment }:
   });
   const unreadNotes = useUnreadNotificationCount(portal) ?? 0;
   const all = mergeInboxEntries(threads.data ?? [], notes.data?.items ?? [], seen);
-  const entries = filterInboxEntries(all, chip);
-  const unreadCount = unreadNotes + all.filter((entry) => entry.kind === "THREAD" && entry.unread).length;
+  const needle = query.trim().toLowerCase();
+  const entries = filterInboxEntries(all, chip).filter((entry) => !needle || `${entry.title} ${entry.preview}`.toLowerCase().includes(needle));
+  const threadUnread = all.filter((entry) => entry.kind === "THREAD" && entry.unread).length;
+  const unreadCount = unreadNotes + threadUnread;
   // The web layout always shows a detail: the opened row, else the newest one. The phone shows the list until a row is opened.
   const selected = entries.find((entry) => entry.key === openKey) ?? (mobile ? undefined : entries[0]);
 
@@ -60,7 +67,7 @@ export function StudentInboxView({ portal, assignments = [], onOpenAssignment }:
   };
   const list = (
     <StudentInboxListPane
-      chip={chip} entries={entries} selectedKey={selected?.key ?? null} unreadCount={unreadCount}
+      chip={chip} entries={entries} selectedKey={selected?.key ?? null} unreadCount={unreadCount} threadUnread={threadUnread}
       loading={(threads.isPending || notes.isPending) && !entries.length}
       failed={threads.isError && notes.isError}
       onChip={setChip} onSelect={select}
@@ -87,12 +94,18 @@ export function StudentInboxView({ portal, assignments = [], onOpenAssignment }:
           <Typography variant="h1">Hộp thư</Typography>
           <Typography variant="body2" sx={{ color: "text.secondary" }}>Thông báo của lớp, trả lời của giáo viên và tin thi đua ở cùng một chỗ</Typography>
         </Box>
+        <ErgSearchField aria-label="Tìm trong hộp thư" placeholder="Tìm trong hộp thư" value={query} onChange={(event) => setQuery(event.target.value)} sx={{ width: 260 }} />
         <MarkAllReadButton portal={portal} />
+        <ErgButton variant="contained" startIcon={<EditRoundedIcon />} onClick={() => setComposing(true)}>Hỏi giáo viên</ErgButton>
       </Box>
       <Box sx={{ display: "grid", gridTemplateColumns: "380px minmax(0, 1fr)", height: 820, border: 1, borderColor: "divider", borderRadius: `${t.radius.card}px`, bgcolor: "background.paper", overflow: "hidden" }}>
         <Box sx={{ borderRight: 1, borderColor: "divider", overflowY: "auto", p: 1.5 }}>{list}</Box>
         <Box sx={{ minWidth: 0, minHeight: 0 }}>{detail}</Box>
       </Box>
+      <StudentInboxComposeDialog
+        assignments={assignments} open={composing} onClose={() => setComposing(false)}
+        onSent={(thread) => { setComposing(false); setChip("THREAD"); setQuery(""); setOpenKey(`thread:${thread.id}`); }}
+      />
     </Box>
   );
 }

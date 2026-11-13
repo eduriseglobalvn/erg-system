@@ -15,6 +15,10 @@ describe("ViewerRankStrip", () => {
     expect(screen.getByText("Lên 2 hạng")).toBeTruthy();
     expect(screen.getByText("Còn 40 XP lên hạng 3")).toBeTruthy();
   });
+  it("shows the grade rank when provided", () => {
+    render(<ViewerRankStrip entries={board} grade={{ label: "Khối 7", rank: 12, size: 128 }} label="lớp 7A" />);
+    expect(screen.getByText("Khối 7 #12 / 128")).toBeTruthy();
+  });
   it("renders nothing for a hidden or unranked viewer", () => {
     const { container } = render(<ViewerRankStrip entries={[e(1, 5)]} label="lớp 7A" />);
     expect(container.firstChild).toBeNull();

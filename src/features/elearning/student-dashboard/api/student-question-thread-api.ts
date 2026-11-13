@@ -1,4 +1,6 @@
 import type {
+  ElearningAskTeacherAboutQuestionMutation,
+  ElearningAskTeacherAboutQuestionMutationVariables,
   ElearningMyQuestionThreadsQuery,
   ElearningMyQuestionThreadsQueryVariables,
   ElearningQuestionThreadQuery,
@@ -45,4 +47,14 @@ export async function sendQuestionThreadMessage(threadId: string, message: strin
     ...request, operationName: "ElearningSendQuestionThreadMessage", tenantId, variables: { input: { tenantId, threadId, message } },
   });
   return validateResponse(response, (v): v is ElearningSendQuestionThreadMessageMutation => isObject(v) && isObject(v.sendQuestionThreadMessage), "elearning.question-thread-send").sendQuestionThreadMessage;
+}
+
+/** Opens a new thread for question `questionIndex` (1-based) of an assignment; `idempotencyKey` makes a double submit harmless. */
+export async function askTeacherAboutQuestion(assignmentId: string, questionIndex: number, message: string): Promise<QuestionThread> {
+  const tenantId = getDefaultTenantId();
+  const response = await graphQlRequest<ElearningAskTeacherAboutQuestionMutation, ElearningAskTeacherAboutQuestionMutationVariables & Record<string, unknown>>({
+    ...request, operationName: "ElearningAskTeacherAboutQuestion", tenantId,
+    variables: { input: { tenantId, idempotencyKey: crypto.randomUUID(), assignmentId, questionIndex, message } },
+  });
+  return validateResponse(response, (v): v is ElearningAskTeacherAboutQuestionMutation => isObject(v) && isObject(v.askTeacherAboutQuestion), "elearning.question-thread-ask").askTeacherAboutQuestion;
 }

@@ -17,8 +17,8 @@ export function xpToNextRank(entries: readonly ClassLeaderboardEntry[]): number 
   return above ? Math.max(1, above.xp - me.xp) : null;
 }
 
-/** "Thứ hạng của bạn lúc này" (design H08): rank, board size, change since yesterday and XP to the next place. */
-export function ViewerRankStrip({ entries, label }: { entries: readonly ClassLeaderboardEntry[]; label: string }) {
+/** "Thứ hạng của bạn lúc này" (design H08): rank, board size, change since yesterday, grade rank (`grade`, from `me`) and XP to the next place. */
+export function ViewerRankStrip({ entries, label, grade }: { entries: readonly ClassLeaderboardEntry[]; label: string; grade?: { label: string; rank: number | null; size: number } }) {
   const me = entries.find((entry) => entry.isViewer && entry.rank != null);
   if (!me || me.rank == null) return null;
   const size = entries.filter((entry) => entry.rank != null).length;
@@ -58,6 +58,7 @@ export function ViewerRankStrip({ entries, label }: { entries: readonly ClassLea
           <BoltRoundedIcon sx={{ color: "primary.main", fontSize: t.size.iconSm }} />
           {`${formatViNumber(me.xp)} XP`}
         </Typography>
+        {grade?.rank != null ? <Typography component="span" variant="body2" sx={{ color: "text.secondary" }}>{`${grade.label} #${grade.rank} / ${grade.size}`}</Typography> : null}
         {gap != null ? <Typography component="span" variant="body2" sx={{ color: "text.secondary" }}>{`Còn ${formatViNumber(gap)} XP lên hạng ${me.rank - 1}`}</Typography> : null}
       </Box>
     </Box>

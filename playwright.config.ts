@@ -50,6 +50,12 @@ export default defineConfig({
     { name: "crm", testMatch: /crm\.smoke\.spec\.ts/, use: { baseURL: portalHost("crm") } },
     { name: "quiz-player-grid", testMatch: /quiz-player-grid.spec.ts/, use: { baseURL: "https://127.0.0.1:3001" } },
     { name: "elearning", testMatch: /elearning\.smoke\.spec\.ts/, use: { baseURL: portalHost("elearning") } },
+    {
+      name: "student-design",
+      testMatch: /student-design[.]spec[.]ts/,
+      snapshotPathTemplate: "docs/design/student-portal/baseline-by-id/{arg}{ext}",
+      use: { baseURL: portalHost("elearning"), deviceScaleFactor: 2, viewport: { width: 1440, height: 900 } },
+    },
   ],
   webServer: {
     command: "bun run dev -- --mode test --host 0.0.0.0 --port 3001",

@@ -23,7 +23,7 @@ import { ViewerRankStrip } from "@/features/elearning/class-leaderboard/componen
 import { PodiumArena } from "@/features/elearning/class-leaderboard/components/podium-arena";
 import { EarnXpCard, RankPositionCard, WeekRewardsCard } from "@/features/elearning/class-leaderboard/components/ranking-side-cards";
 import { chaseOf } from "@/features/elearning/class-leaderboard/components/chase-strip";
-import { LEADERBOARD_PERIODS, leaderboardPeriodLabel } from "@/features/elearning/class-leaderboard/leaderboard-period";
+import { LEADERBOARD_PERIODS, leaderboardPeriodLabel, leaderboardWeekLabel } from "@/features/elearning/class-leaderboard/leaderboard-period";
 import { EmptyPanel, PageHeader, SkeletonRow } from "@/features/elearning/student-dashboard/components/student-dashboard-view-primitives";
 import { Stack } from "@/features/elearning/student-dashboard/components/student-dashboard-workspace-styles";
 import type { DashboardCopy } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
@@ -64,7 +64,7 @@ export function RankingView({ accountId, classId, copy, onOpenFullBoard, onOpenT
 
   return (
     <Stack spacing={2.5}>
-      <PageHeader description={copy.ranking.description} icon={<EmojiEventsOutlinedIcon />} title={copy.ranking.title} />
+      <PageHeader description={period === "WEEK" && board.data?.periodEndsAt ? `${leaderboardWeekLabel(board.data.periodEndsAt)} · ${board.data.className || "Lớp"}` : copy.ranking.description} icon={<EmojiEventsOutlinedIcon />} title={copy.ranking.title} />
       {onOpenTierTable ? <ErgIconButton label="Bảng bậc & cấp" onClick={onOpenTierTable} sx={{ alignSelf: "flex-end" }}><HelpOutlineRoundedIcon /></ErgIconButton> : null}
       <Tabs aria-label="Kỳ thi đua" value={period} variant="fullWidth" onChange={(_, value: LeaderboardPeriod) => setPeriod(value)} sx={ergSegmentedTabsSx}>
         {LEADERBOARD_PERIODS.map((value) => <Tab key={value} value={value} label={leaderboardPeriodLabel(value)} />)}
@@ -81,7 +81,7 @@ export function RankingView({ accountId, classId, copy, onOpenFullBoard, onOpenT
         <EmptyPanel description={copy.ranking.errorDescription} title={copy.ranking.errorTitle} />
       ) : ranked ? (
         <>
-          <ViewerRankStrip entries={entries} label={scope === "CLASS" ? board.data?.className || "lớp" : "khối"} />
+          <ViewerRankStrip entries={entries} grade={board.data?.me?.gradeRank && board.data.me.gradeSize ? { label: "Khối", rank: board.data.me.gradeRank, size: board.data.me.gradeSize } : undefined} label={scope === "CLASS" ? board.data?.className || "lớp" : "khối"} />
           <PodiumArena
             endsAt={period === "COURSE" ? undefined : board.data?.periodEndsAt}
             entries={entries}
@@ -91,7 +91,7 @@ export function RankingView({ accountId, classId, copy, onOpenFullBoard, onOpenT
           />
           <Stack direction={{ xs: "column", md: "row" }} spacing={2.5} sx={{ alignItems: "flex-start" }}>
             <Stack spacing={1.5} sx={{ flex: { md: 2 }, minWidth: 0, width: "100%" }}>
-              <ClassLeaderboardTable entries={entries} />
+              <ClassLeaderboardTable entries={entries} total={board.data?.me?.size} />
               {onOpenFullBoard ? <ErgButton variant="text" trailingIcon={<ChevronRightRoundedIcon />} onClick={() => onOpenFullBoard(period)} sx={{ alignSelf: "flex-start" }}>Xem cả lớp</ErgButton> : null}
             </Stack>
             <Stack spacing={2.5} sx={{ flex: { md: 1 }, minWidth: 0, width: "100%" }}>
