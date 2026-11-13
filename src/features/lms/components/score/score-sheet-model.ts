@@ -1,4 +1,5 @@
 import type { ClassroomStudent } from "@/domain/school/classroom-types";
+import { gradeBandFor, type GradeBand } from "@/domain/school/grade-band";
 
 export type ScoreColumn = {
   id: string;
@@ -14,7 +15,7 @@ export type ScoreAttempt = {
   takenAt: string;
 };
 
-export type Classification = "A" | "B" | "C" | "D" | "E";
+export type Classification = GradeBand;
 export type ClassificationSort = "asc" | "desc" | null;
 export type StudentState = "active" | "disabled";
 
@@ -72,11 +73,7 @@ export function getStudentClassification(
   manual: Record<string, Classification>,
 ): Classification {
   if (manual[student.id]) return manual[student.id];
-  if (student.averageScore >= 90) return "A";
-  if (student.averageScore >= 80) return "B";
-  if (student.averageScore >= 70) return "C";
-  if (student.averageScore >= 60) return student.status === "support" ? "E" : "D";
-  return "E";
+  return gradeBandFor(student.averageScore, student.status === "support");
 }
 
 export function getClassificationBg(classification: Classification) {

@@ -23,12 +23,13 @@ import { ErgTable } from "@/components/erg-mui/erg-table";
 import { lmsAssignmentReadQueryKeys, lmsReadPersistMeta } from "@/features/lms/api/lms-assignment-command-query";
 import { loadLmsClassWorkspace, mapClassWorkspaceToStudents } from "@/features/lms/api/lms-classroom-api";
 import type { ClassroomSnapshot, ClassroomStudent } from "@/domain/school/classroom-types";
+import { gradeBandFor, type GradeBand } from "@/domain/school/grade-band";
 import { assignmentGroups } from "@/features/lms/components/assign-homework-groups";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { hasApiBase } from "@/lib/api-client";
 import { StudentProfileDetailDrawer, type StudentProfileDetailDraft } from "./student-profile-detail-drawer";
 
-type Classification = "A" | "B" | "C" | "D" | "E";
+type Classification = GradeBand;
 type ProgressFilter = "all" | "not-started" | "in-progress" | "completed";
 type ScopeMode = "class" | "grade" | "group";
 
@@ -442,11 +443,7 @@ function toneSx(tone: Tone) {
 
 function getStudentClassification(student: ClassroomStudent, manual: Record<string, Classification>): Classification {
   if (manual[student.id]) return manual[student.id];
-  if (student.averageScore >= 90) return "A";
-  if (student.averageScore >= 80) return "B";
-  if (student.averageScore >= 70) return "C";
-  if (student.averageScore >= 60) return student.status === "support" ? "E" : "D";
-  return "E";
+  return gradeBandFor(student.averageScore, student.status === "support");
 }
 
 function classificationSx(classification: Classification) {
