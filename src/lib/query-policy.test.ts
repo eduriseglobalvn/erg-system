@@ -36,3 +36,7 @@ describe("persisted query policy consistency", () => {
     }
   });
 });
+
+test("leaves 429 to the API client instead of retrying on top of it", () => {
+  expect(shouldRetryQuery(0, { status: 429 })).toBe(false);
+});
