@@ -95,24 +95,6 @@ export type LmsDashboardBootstrap = {
   systemUnits: LmsEducationUnitDTO[];
 };
 
-export type CreateEducationUnitInput = {
-  address?: string;
-  avatarUrl?: string;
-  code: string;
-  description?: string;
-  email?: string;
-  name: string;
-  parentId?: string;
-  phone?: string;
-  type: EducationUnitType;
-  website?: string;
-};
-
-export type UpdateEducationUnitInput = Partial<Omit<CreateEducationUnitInput, "code">> & {
-  status?: string;
-  managerUserId?: string;
-};
-
 export async function loadCurrentSessionBootstrap(signal?: AbortSignal) {
   if (!hasApiBase()) {
     return null;
@@ -129,8 +111,8 @@ export async function loadCurrentSessionBootstrap(signal?: AbortSignal) {
   }
 
   const request = (signal
-    ? apiRequest<SessionCurrentResponseDTO>(API_ENDPOINTS.legacy.v1SessionsCurrent, { signal })
-    : apiRequest<SessionCurrentResponseDTO>(API_ENDPOINTS.legacy.v1SessionsCurrent))
+    ? apiRequest<SessionCurrentResponseDTO>(API_ENDPOINTS.sessions.current, { signal })
+    : apiRequest<SessionCurrentResponseDTO>(API_ENDPOINTS.sessions.current))
     .then((data) => {
       if (signal?.aborted) throw signal.reason;
       currentSessionBootstrapCache = {
@@ -231,41 +213,6 @@ export async function loadLmsDashboardBootstrap(signal?: AbortSignal): Promise<L
 
 export async function updateLmsCurrentScope(scope: ManagementScope) {
   void scope;
-}
-
-export async function createEducationUnit(input: CreateEducationUnitInput) {
-  if (runtimeFixturesEnabled()) {
-    return {
-      id: `unit-${Math.random().toString(36).slice(2, 9)}`,
-      name: input.name,
-      type: input.type,
-      code: input.code,
-      status: "active",
-    } satisfies LmsEducationUnitDTO;
-  }
-
-  return apiRequest<LmsEducationUnitDTO>(API_ENDPOINTS.legacy.lmsEducationUnits, {
-    method: "POST",
-    body: JSON.stringify(input),
-  });
-}
-
-export async function updateEducationUnit(id: string, input: UpdateEducationUnitInput) {
-  if (runtimeFixturesEnabled()) {
-    return {
-      id,
-      name: input.name || "Cơ sở giáo dục",
-      type: input.type || "school",
-      code: "LOCAL",
-      status: input.status || "active",
-      ...input,
-    } satisfies LmsEducationUnitDTO;
-  }
-
-  return apiRequest<LmsEducationUnitDTO>(API_ENDPOINTS.lms.educationUnit(id), {
-    method: "PATCH",
-    body: JSON.stringify(input),
-  });
 }
 
 function normalizeManageableUnits(session: SessionCurrentResponseDTO): LmsEducationUnitDTO[] {

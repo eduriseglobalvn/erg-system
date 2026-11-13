@@ -1,8 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "@tanstack/react-router";
-import { createCroppedAvatarFile } from "@/features/profile/utils/profile-avatar";
 import { getPasswordScore, getProfileInitials, validatePasswordChange } from "@/features/profile/utils/profile-utils";
-import { EMPTY_PASSWORD_FORM, profileFormFromAccount, type AvatarCropState, type PasswordFormState, type ProfileFormState, type ProfileNotice, type ProfileTab } from "@/features/profile/types/profile-types";
+import { EMPTY_PASSWORD_FORM, profileFormFromAccount, type PasswordFormState, type ProfileFormState, type ProfileNotice, type ProfileTab } from "@/features/profile/types/profile-types";
 import { usePacedStateBatch } from "@/hooks/use-paced-state-batch";
 import { authApi } from "@/platform/auth/api/auth-api";
 import { getCurrentAccount, saveCurrentAccount } from "@/platform/auth/api/auth-storage";
@@ -16,13 +15,10 @@ export function useProfilePageController() {
   const [activeTab, setActiveTab] = useState<ProfileTab>("profile");
   const [isLoading, setIsLoading] = useState(true);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
-  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [isSavingPassword, setIsSavingPassword] = useState(false);
   const [showPasswords, setShowPasswords] = useState(false);
   const [profileNotice, setProfileNotice] = useState<ProfileNotice | null>(null);
   const [securityNotice, setSecurityNotice] = useState<ProfileNotice | null>(null);
-  const [avatarCrop, setAvatarCrop] = useState<AvatarCropState | null>(null);
-  const avatarInputRef = useRef<HTMLInputElement | null>(null);
   const paceStateUpdate = usePacedStateBatch();
 
   useEffect(() => {
@@ -41,7 +37,6 @@ export function useProfilePageController() {
     }).finally(() => { if (!cancelled) setIsLoading(false); });
     return () => { cancelled = true; };
   }, []);
-  useEffect(() => () => { if (avatarCrop?.previewUrl) URL.revokeObjectURL(avatarCrop.previewUrl); }, [avatarCrop?.previewUrl]);
 
   // Department and job title are staff fields; students never see or edit them.
   const showWorkRoleFields = !location.pathname.startsWith("/student");
@@ -86,37 +81,10 @@ export function useProfilePageController() {
       setSecurityNotice({ tone: "error", message: error instanceof Error ? error.message : "Không thể đổi mật khẩu." });
     } finally { setIsSavingPassword(false); }
   };
-  const openAvatarCropper = (file: File | null) => {
-    if (!file) return;
-    setProfileNotice(null);
-    if (!file.type.startsWith("image/")) { setProfileNotice({ tone: "error", message: "Vui lòng chọn file ảnh hợp lệ." }); return; }
-    if (file.size > 5 * 1024 * 1024) { setProfileNotice({ tone: "error", message: "Avatar tối đa 5MB." }); return; }
-    if (avatarCrop?.previewUrl) URL.revokeObjectURL(avatarCrop.previewUrl);
-    setAvatarCrop({ file, previewUrl: URL.createObjectURL(file), zoom: 1, offset: { x: 0, y: 0 }, image: null, drag: null });
-  };
-  const closeAvatarCropper = () => setAvatarCrop((current) => {
-    if (current?.previewUrl) URL.revokeObjectURL(current.previewUrl);
-    return null;
-  });
-  const uploadCroppedAvatar = async () => {
-    if (!account || !avatarCrop) return;
-    setProfileNotice(null); setIsUploadingAvatar(true);
-    try {
-      const croppedFile = await createCroppedAvatarFile(avatarCrop);
-      const updated = await authApi.uploadAvatar(account.id, croppedFile);
-      const nextAccount: TeacherAccount = { ...account, ...updated, department: account.department, title: account.title, avatarUrl: updated.avatarUrl || account.avatarUrl || "" };
-      saveCurrentAccount(nextAccount); setAccount(nextAccount);
-      setForm((current) => ({ ...current, avatarUrl: nextAccount.avatarUrl ?? "" }));
-      setProfileNotice({ tone: "success", message: "Avatar đã được căn chỉnh và upload lên R2 theo thư mục avatar/{userID}." });
-      closeAvatarCropper();
-    } catch (error) {
-      setProfileNotice({ tone: "error", message: error instanceof Error ? error.message : "Không thể upload avatar." });
-    } finally { setIsUploadingAvatar(false); }
-  };
   return {
-    account, activeTab, avatarCrop, avatarInputRef, avatarUrl, canChangePassword, changePassword, closeAvatarCropper,
-    completionPercent, form, initials, isLoading, isSavingPassword, isSavingProfile, isUploadingAvatar,
-    openAvatarCropper, passwordForm, passwordScore, profileNotice, saveProfile, securityNotice, setActiveTab,
-    setAvatarCrop, setShowPasswords, showPasswords, showWorkRoleFields, update, updatePasswordField, uploadCroppedAvatar,
+    account, activeTab, avatarUrl, canChangePassword, changePassword,
+    completionPercent, form, initials, isLoading, isSavingPassword, isSavingProfile,
+    passwordForm, passwordScore, profileNotice, saveProfile, securityNotice, setActiveTab,
+    setShowPasswords, showPasswords, showWorkRoleFields, update, updatePasswordField,
   };
 }

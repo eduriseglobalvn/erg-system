@@ -9,6 +9,7 @@ import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
+import { OfflineShellStatus } from "@/components/erg-mui/offline";
 import { type ElearningViewerSession } from "@/platform/auth/api/elearning-viewer-session";
 import { getAuthScope } from "@/platform/auth/api/auth-storage";
 import { NAV_BORDER, NAV_CARD_RADIUS, NAV_CARD_SHADOW } from "@/components/portal/portal-sidebar-styles";
@@ -101,6 +102,8 @@ export function TopMenuShell({
         {/* Design has no bar above the page: ranking, tier, inbox, discussion and assignment pages carry their own title. */}
         {TITLED_BY_PAGE.has(activePage) ? null : <Typography variant="h5" component="h1" sx={{ mb: 2, px: { xs: 0.5, md: 0 } }}>{currentPageLabel}</Typography>}
 
+        {/* The dashboard is kept for 24 h offline: say when what is shown may be old. */}
+        <Box sx={{ mb: 2, "&:empty": { display: "none" } }}><OfflineShellStatus /></Box>
         <Box component="main" sx={{ flex: 1, minWidth: 0, width: "100%" }}>
           {children}
         </Box>

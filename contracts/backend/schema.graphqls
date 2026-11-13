@@ -264,6 +264,8 @@ input StudentDashboardInput {
   tenantId: String
   studentUserId: String
   classId: String
+  "How many assignments to return, oldest due first: default 50, at most 500"
+  assignmentLimit: Int
 }
 
 type StudentDashboard {
@@ -277,6 +279,8 @@ type StudentDashboard {
   announcements: [StudentDashboardAnnouncementCard!]!
   selectedClassId: String
   classes: [StudentDashboardClassMembership!]!
+  "True when the student has more assignments than were returned (ask again with a larger assignmentLimit)"
+  assignmentsHasMore: Boolean
 }
 
 type StudentDashboardClassMembership {
@@ -364,6 +368,8 @@ type StudentDashboardAssignmentCard {
   "No late-submission window exists yet: always null"
   lateSubmitUntil: String
   closed: Boolean!
+  "The latest attempt is handed in (server state policy); clients must not classify status strings"
+  handedIn: Boolean!
 }
 
 type StudentDashboardNextAction {
@@ -509,6 +515,10 @@ type StudentRosterItem {
   email: String
   status: String
   updatedAt: String
+  "Mean of the student's latest hand-in per assignment in this class; null without hand-ins or lms.grade.read"
+  averagePercent: Int
+  "Assignments of this class the student has handed in; null without lms.grade.read"
+  completedAssignmentCount: Int
 }
 
 type AssignmentSummaryPage {

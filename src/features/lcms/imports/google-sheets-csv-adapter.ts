@@ -109,60 +109,40 @@ export async function fetchGoogleSheetTabs(spreadsheetId: string, options: Reque
   }
 }
 
-export function loadGoogleSheetViaJsonp({
+// fetch, not a JSONP <script>: the CSP keeps script-src 'self', and gviz answers CORS like the CSV export.
+export async function fetchGoogleSheetTable({
   spreadsheetId,
   gid,
   sheetName,
-  signal,
-  timeoutMs = DEFAULT_TIMEOUT_MS,
-}: {
+  ...options
+}: RequestOptions & {
   spreadsheetId: string;
   gid: string;
   sheetName?: string;
-  signal?: AbortSignal;
-  timeoutMs?: number;
-}) {
-  return new Promise<GoogleVisualizationResponse>((resolve, reject) => {
-    const callbackName = `__ergSheetImport_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-    const script = document.createElement("script");
-    const registry = window as unknown as Record<string, (payload: GoogleVisualizationResponse) => void>;
+}): Promise<GoogleVisualizationResponse> {
+  const request = createTimedSignal(options);
+  const params = new URLSearchParams({ tqx: "out:json" });
+  if (sheetName) params.set("sheet", sheetName);
+  else params.set("gid", gid);
 
-    const cleanup = () => {
-      delete registry[callbackName];
-      script.remove();
-      window.clearTimeout(timeoutId);
-      signal?.removeEventListener("abort", handleAbort);
-    };
-    const handleAbort = () => {
-      cleanup();
-      reject(signal?.reason ?? new DOMException("Aborted", "AbortError"));
-    };
-    const timeoutId = window.setTimeout(() => {
-      cleanup();
-      reject(new Error("Google Sheet phản hồi quá lâu. Kiểm tra lại quyền chia sẻ hoặc tệp sheet."));
-    }, timeoutMs);
-
-    if (signal?.aborted) {
-      handleAbort();
-      return;
-    }
-    signal?.addEventListener("abort", handleAbort, { once: true });
-    registry[callbackName] = (payload) => {
-      cleanup();
-      if (!payload.table) reject(new Error("Không đọc được dữ liệu trong sheet."));
-      else resolve(payload);
-    };
-    script.onerror = () => {
-      cleanup();
-      reject(new Error("Không tải được Google Sheet. Tệp sheet cần được cấp quyền xem công khai."));
-    };
-
-    const params = new URLSearchParams({ tqx: `out:json;responseHandler:${callbackName}` });
-    if (sheetName) params.set("sheet", sheetName);
-    else params.set("gid", gid);
-    script.src = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?${params.toString()}`;
-    document.body.appendChild(script);
-  });
+  let payload: GoogleVisualizationResponse;
+  try {
+    const response = await fetch(`https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?${params.toString()}`, {
+      signal: request.signal,
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    // The body is `/*O_o*/ google.visualization.Query.setResponse({...});`.
+    const text = await response.text();
+    payload = JSON.parse(text.slice(text.indexOf("(") + 1, text.lastIndexOf(")"))) as GoogleVisualizationResponse;
+  } catch (error) {
+    if (options.signal?.aborted) throw options.signal.reason ?? error;
+    if (request.timedOut()) throw new Error("Google Sheet phản hồi quá lâu. Kiểm tra lại quyền chia sẻ hoặc tệp sheet.");
+    throw new Error("Không tải được Google Sheet. Tệp sheet cần được cấp quyền xem công khai.", { cause: error });
+  } finally {
+    request.cleanup();
+  }
+  if (!payload.table) throw new Error("Không đọc được dữ liệu trong sheet.");
+  return payload;
 }
 
 function createTimedSignal({ signal, timeoutMs = DEFAULT_TIMEOUT_MS }: RequestOptions) {

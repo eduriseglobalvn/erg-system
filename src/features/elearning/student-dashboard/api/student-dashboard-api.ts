@@ -22,20 +22,24 @@ type ElearningStudentDashboardDTO = ElearningStudentDashboardQuery["elearning"][
 
 export type StudentDashboardApiData = {
   assignments: StudentDashboardAssignment[];
+  /** The backend has more assignments than it returned: ask again with a larger assignmentLimit. */
+  assignmentsHasMore: boolean;
   profile: StudentDashboardProfile;
   teacherAnnouncements: StudentTeacherAnnouncement[];
 };
 
 export async function loadStudentDashboardData({
+  assignmentLimit,
   signal,
   tenantId = getDefaultTenantId(),
-}: { signal?: AbortSignal; tenantId?: string } = {}): Promise<StudentDashboardApiData> {
+}: { assignmentLimit?: number; signal?: AbortSignal; tenantId?: string } = {}): Promise<StudentDashboardApiData> {
   const session = getCurrentElearningViewerSession();
 
   if (import.meta.env.DEV && runtimeFixturesEnabled()) {
     const fixtures = await import("@/test/fixtures/mock-student-dashboard");
     return {
       assignments: fixtures.studentAssignments,
+      assignmentsHasMore: false,
       profile: mergeProfileSession(fixtures.studentDashboardProfile, session),
       teacherAnnouncements: fixtures.studentTeacherAnnouncements,
     };
@@ -52,6 +56,7 @@ export async function loadStudentDashboardData({
     variables: {
       input: {
         tenantId,
+        ...(assignmentLimit ? { assignmentLimit } : {}),
       },
     },
   });
@@ -100,6 +105,7 @@ function mapStudentDashboard(
 
   return {
     assignments,
+    assignmentsHasMore: dashboard.assignmentsHasMore === true,
     profile: mergeProfileSession(
       mapProfile(dashboard, assignments.length),
       session,
@@ -162,7 +168,7 @@ function mapAssignment(
   assignment: NonNullable<ElearningStudentDashboardDTO["assignments"]>[number],
   dashboard: ElearningStudentDashboardDTO,
 ): StudentDashboardAssignment {
-  const status = normalizeStatus(assignment.status, assignment.dueAt, dashboard.summary?.generatedAt);
+  const status = normalizeStatus(assignment, dashboard.summary?.generatedAt);
   const focusNote = dashboard.nextActions?.find((action) => action.targetId === assignment.id)?.label;
   // Latest handed-in attempt, 0-100: the same score the dashboard average is built from.
   const scorePercent = typeof assignment.scorePercent === "number" ? Math.round(assignment.scorePercent) : null;
@@ -215,15 +221,16 @@ function hasId<TValue extends { id?: string | null }>(value: TValue): value is T
   return Boolean(value.id);
 }
 
-const HANDED_IN_STATES = new Set(["submitted", "completed", "done", "graded", "needs_review", "review_required"]);
-
-function normalizeStatus(status: string | null | undefined, dueAt?: string | null, nowValue?: string | null): StudentAssignmentStatus {
-  const normalized = status?.toLowerCase() ?? "";
-  // The server keeps the attempt state: a handed-in attempt is "graded" (auto-graded) or "needs_review" (manual grading).
-  if (HANDED_IN_STATES.has(normalized)) return "submitted";
+function normalizeStatus(
+  assignment: Pick<NonNullable<ElearningStudentDashboardDTO["assignments"]>[number], "status" | "dueAt" | "handedIn">,
+  nowValue?: string | null,
+): StudentAssignmentStatus {
+  // The server decides "handed in" from its own state policy; never classify attempt state strings here.
+  if (assignment.handedIn) return "submitted";
+  const normalized = assignment.status?.toLowerCase() ?? "";
   const nowMs = nowValue ? Date.parse(nowValue) : Number.NaN;
-  const dueMs = dueAt ? Date.parse(dueAt) : Number.NaN;
-  if (Number.isFinite(dueMs) && Number.isFinite(nowMs) && dueMs < nowMs && normalized !== "submitted") return "overdue";
+  const dueMs = assignment.dueAt ? Date.parse(assignment.dueAt) : Number.NaN;
+  if (Number.isFinite(dueMs) && Number.isFinite(nowMs) && dueMs < nowMs) return "overdue";
   if (normalized === "in_progress" || normalized === "doing" || normalized === "started") return "in_progress";
   if (normalized === "overdue") return "overdue";
   return "not_started";

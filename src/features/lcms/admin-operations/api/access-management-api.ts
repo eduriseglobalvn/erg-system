@@ -1,7 +1,4 @@
-import { API_ENDPOINTS } from "@/lib/api/api-endpoints";
-import { ApiClientError, apiRequest, getBackOfficePortal } from "@/lib/api-client";
 import { getDefaultTenantId, graphQlRequest, type GraphQlPage } from "@/lib/graphql-client";
-import { LMS_ROLE_GROUP_TEMPLATES } from "@/platform/auth/permissions/lms-permission-catalog";
 import { isObject, validateResponse } from "@/lib/validate-response";
 
 export type AccessScopeType = "system" | "center" | "school";
@@ -28,75 +25,11 @@ export type AccessManagedUser = {
   createdAt: string;
 };
 
-export type AccessScopeOption = {
-  scopeType: AccessScopeType;
-  scopeId: string;
-  name: string;
-  badge: string;
-  icon: string;
-  description: string;
-};
-
-export type AccessRoleGroup = {
-  id: string;
-  name: string;
-  description: string;
-  scopeTypes: AccessScopeType[];
-  permissions: string[];
-};
-
-export type AccessModule = {
-  id: string;
-  name: string;
-  description: string;
-};
-
-export type UserAccessPolicy = {
-  id?: string;
-  scopeType: AccessScopeType;
-  scopeId: string;
-  scopeName?: string;
-  roleGroup: string;
-  modules: string[];
-  permissions?: string[];
-};
-
-export type EffectiveAccess = {
-  highestScope: AccessPolicySummary["highestScope"];
-  modules: string[];
-  permissions: string[];
-  warnings?: string[];
-};
-
-export type AccessManagementOptions = {
-  scopes: AccessScopeOption[];
-  roleGroups: AccessRoleGroup[];
-  modules: AccessModule[];
-};
-
-export type AccessScopeList = {
-  items: AccessScopeOption[];
-  total: number;
-  page: number;
-  limit: number;
-};
-
 export type AccessManagementUserList = {
   items: AccessManagedUser[];
   total: number;
   page: number;
   limit: number;
-};
-
-export type UserAccessDetail = {
-  user: AccessManagedUser;
-  policies: UserAccessPolicy[];
-  effective: EffectiveAccess;
-  assignable: AccessManagementOptions;
-};
-
-export type SaveUserAccessRequest = {
-  policies: UserAccessPolicy[];
 };
 
 type AccessManagementWorkspaceInput = {
@@ -219,103 +152,23 @@ export async function listAccessManagedUsers(params: {
   page?: number;
   limit?: number;
 }, signal?: AbortSignal) {
-  try {
-    const page = Math.max((params.page ?? 1) - 1, 0);
-    const size = params.limit ?? 20;
-    const workspace = await loadAccessManagementWorkspace({
-      page,
-      size,
-      search: params.search || undefined,
-      roleId: params.role && params.role !== "all" ? params.role : undefined,
-      status: params.status && params.status !== "all" ? params.status : undefined,
-    }, signal);
-    const userPage = workspace.users;
+  const page = Math.max((params.page ?? 1) - 1, 0);
+  const size = params.limit ?? 20;
+  const workspace = await loadAccessManagementWorkspace({
+    page,
+    size,
+    search: params.search || undefined,
+    roleId: params.role && params.role !== "all" ? params.role : undefined,
+    status: params.status && params.status !== "all" ? params.status : undefined,
+  }, signal);
+  const userPage = workspace.users;
 
-    return {
-      items: (userPage?.items ?? []).map((user) => mapAccessWorkspaceUser(user, workspace.effectivePermissionsIncluded ?? false)),
-      limit: userPage?.size ?? size,
-      page: (userPage?.page ?? page) + 1,
-      total: userPage?.totalItems ?? 0,
-    } satisfies AccessManagementUserList;
-  } catch (error) {
-    if (!isUnavailableAccessWorkspaceCapability(error)) throw error;
-    return listAccessManagedUsersRest(params, signal);
-  }
-}
-
-function listAccessManagedUsersRest(params: {
-  search?: string;
-  status?: string;
-  role?: string;
-  page?: number;
-  limit?: number;
-}, signal?: AbortSignal) {
-  const search = new URLSearchParams();
-  if (params.search) search.set("search", params.search);
-  if (params.status && params.status !== "all") search.set("status", params.status);
-  if (params.role && params.role !== "all") search.set("role", params.role);
-  search.set("page", String(params.page ?? 1));
-  search.set("limit", String(params.limit ?? 20));
-
-  return apiRequest<AccessManagementUserList>(`${API_ENDPOINTS.access.legacyUsers}?${search.toString()}`, {
-    portal: getBackOfficePortal(),
-    signal,
-  });
-}
-
-function isUnavailableAccessWorkspaceCapability(error: unknown) {
-  return error instanceof ApiClientError &&
-    error.code === "GRAPHQL_ERROR" &&
-    (error.status === 404 || error.status === 501);
-}
-
-export async function getAccessManagementOptions(signal?: AbortSignal) {
-  const options = await apiRequest<AccessManagementOptions>(API_ENDPOINTS.legacy.lmsAccessOptions, {
-    portal: getBackOfficePortal(),
-    signal,
-  });
-  return validateAccessManagementOptions(options);
-}
-
-export function validateAccessManagementOptions(options: AccessManagementOptions) {
-  if (!options.modules.some((module) => module.id.trim().toLowerCase() === "lms")) {
-    throw new Error("Access management catalog is missing module: lms");
-  }
-
-  const roleGroups = new Map(options.roleGroups.map((roleGroup) => [roleGroup.id, roleGroup]));
-  for (const [roleGroupId, template] of Object.entries(LMS_ROLE_GROUP_TEMPLATES)) {
-    const roleGroup = roleGroups.get(roleGroupId);
-    if (!roleGroup) {
-      throw new Error(`Access management catalog is missing role group: ${roleGroupId}`);
-    }
-
-    const permissions = new Set(roleGroup.permissions.map((permission) => permission.trim().toLowerCase()));
-    for (const permission of template.permissions) {
-      if (!permissions.has(permission)) {
-        throw new Error(`Access management role group ${roleGroupId} is missing permission: ${permission}`);
-      }
-    }
-  }
-
-  return options;
-}
-
-export function listAccessScopes(params: {
-  scopeType?: AccessScopeType | "";
-  search?: string;
-  page?: number;
-  limit?: number;
-}, signal?: AbortSignal) {
-  const search = new URLSearchParams();
-  if (params.scopeType) search.set("scopeType", params.scopeType);
-  if (params.search) search.set("search", params.search);
-  search.set("page", String(params.page ?? 1));
-  search.set("limit", String(params.limit ?? 20));
-
-  return apiRequest<AccessScopeList>(`${API_ENDPOINTS.access.legacyScopes}?${search.toString()}`, {
-    portal: getBackOfficePortal(),
-    signal,
-  });
+  return {
+    items: (userPage?.items ?? []).map((user) => mapAccessWorkspaceUser(user, workspace.effectivePermissionsIncluded ?? false)),
+    limit: userPage?.size ?? size,
+    page: (userPage?.page ?? page) + 1,
+    total: userPage?.totalItems ?? 0,
+  } satisfies AccessManagementUserList;
 }
 
 function mapAccessWorkspaceUser(user: AccessWorkspaceUserDTO, effectivePermissionsIncluded: boolean): AccessManagedUser {
@@ -348,28 +201,4 @@ function deriveModules(permissions: AccessWorkspacePermissionDTO[]) {
     if (moduleName && moduleName !== "*") modules.add(moduleName);
   });
   return Array.from(modules);
-}
-
-export function getUserAccess(userId: string, signal?: AbortSignal) {
-  return apiRequest<UserAccessDetail>(API_ENDPOINTS.access.legacyUserAccess(userId), {
-    portal: getBackOfficePortal(),
-    signal,
-  });
-}
-
-export function saveUserAccess(userId: string, payload: SaveUserAccessRequest) {
-  return apiRequest<UserAccessDetail>(API_ENDPOINTS.access.legacyUserAccess(userId), {
-    portal: getBackOfficePortal(),
-    method: "PUT",
-    body: JSON.stringify(payload),
-  });
-}
-
-export function previewUserAccess(payload: SaveUserAccessRequest, signal?: AbortSignal) {
-  return apiRequest<EffectiveAccess>(API_ENDPOINTS.legacy.lmsAccessPreview, {
-    portal: getBackOfficePortal(),
-    signal,
-    method: "POST",
-    body: JSON.stringify(payload),
-  });
 }

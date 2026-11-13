@@ -1,7 +1,6 @@
 export type DashboardLeafVariant =
   | "admin-overview"
   | "admin-centers"
-  | "admin-create-unit"
   | "admin-members"
   | "admin-sheet-import"
   | "admin-internal-docs"

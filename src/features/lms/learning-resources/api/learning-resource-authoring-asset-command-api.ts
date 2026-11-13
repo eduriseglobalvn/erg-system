@@ -86,7 +86,7 @@ async function createCanonicalAssetForResource(
     metadata?: Record<string, unknown>;
   },
 ): Promise<StudioAssetResponse> {
-  const asset = await apiRequest<ContentAssetResponse>(API_ENDPOINTS.legacy.contentAssets, {
+  const asset = await apiRequest<ContentAssetResponse>(API_ENDPOINTS.content.assets, {
     method: "POST",
     body: JSON.stringify(toCanonicalAssetCreateRequest(input)),
   });

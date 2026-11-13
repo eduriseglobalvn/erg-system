@@ -8,6 +8,7 @@ import Stack from "@mui/material/Stack";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
 import Typography from "@mui/material/Typography";
+import { ErgButton } from "@/components/erg-mui/erg-actions";
 import { ErgEmptyState } from "@/components/erg-mui/erg-feedback";
 import { ErgTabCount, ergChipTabsSx, ergSegmentedTabsSx } from "@/components/erg-mui/erg-tabs";
 import { OverdueBoard } from "@/features/elearning/student-dashboard/components/student-assignment-overdue";
@@ -53,9 +54,13 @@ function SearchBox({ placeholder, value, onChange, mobile, hint }: { placeholder
 }
 
 /** Bài tập (canvas H10/H09/H11 web, H02c/H02b/H02d mobile): status tabs, subject chips, one board per tab. */
-export function AssignmentsView({ assignments, copy, initialFilter = "todo", mobile = false, onAskTeacher, onOpenAssignment }: {
+export function AssignmentsView({ assignments, copy, hasMore = false, initialFilter = "todo", loadingMore = false, mobile = false, onAskTeacher, onLoadMore, onOpenAssignment }: {
   assignments: StudentDashboardAssignment[];
   copy: DashboardCopy;
+  /** The backend holds more assignments than this list (it sends 50 at a time, oldest due first). */
+  hasMore?: boolean;
+  loadingMore?: boolean;
+  onLoadMore?: () => void;
   initialFilter?: AssignmentFilter;
   mobile?: boolean;
   onAskTeacher?: () => void;
@@ -104,6 +109,7 @@ export function AssignmentsView({ assignments, copy, initialFilter = "todo", mob
       {filter === "submitted" ? <SubmittedBoard items={list} mobile={mobile} onOpen={onOpenAssignment} /> : null}
       {filter === "overdue" ? <OverdueBoard items={list} mobile={mobile} now={now} onAsk={() => onAskTeacher?.()} onOpen={onOpenAssignment} /> : null}
       {list.length === 0 ? <ErgEmptyState description={TABS.find((tab) => tab.key === filter)?.empty} icon={<AssignmentOutlined />} title="Chưa có bài trong mục này" /> : null}
+      {hasMore && onLoadMore ? <ErgButton loading={loadingMore} onClick={onLoadMore} sx={{ alignSelf: "center" }} variant="outlined">Xem thêm bài</ErgButton> : null}
     </Stack>
   );
 }

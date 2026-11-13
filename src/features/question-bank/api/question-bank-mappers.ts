@@ -208,7 +208,7 @@ function buildWorkspaceSubjects(workspace: QuestionBankWorkspaceDTO, questions: 
       id: subject.id,
       label: subject.label,
       description: subject.description?.trim() || subject.label,
-      companyScopeLabel: subject.scopeLabel?.trim() || "Dung chung toan cong ty",
+      companyScopeLabel: subject.scopeLabel?.trim() || "Dùng chung toàn công ty",
       levels: effectiveLevels,
       categories: categories.filter((category) => !effectiveLevelIds.size || effectiveLevelIds.has(category.levelId)),
     };
@@ -259,12 +259,12 @@ function mapQuestion(question: QuestionBankQuestionDTO, subjects: QuestionBankSu
     levelId: level?.id ?? question.levelId ?? subject.levels[0]?.id ?? "level",
     levelLabel: readableLabel(question.levelLabel, question.levelId) || level?.label || template.levelLabel,
     categoryId: category?.id ?? question.topicId ?? subject.categories[0]?.id ?? "topic",
-    categoryLabel: readableLabel(question.categoryLabel, question.topicId) || category?.label || "Chu de",
+    categoryLabel: readableLabel(question.categoryLabel, question.topicId) || category?.label || "Chủ đề",
     gradeLabel: readableLabel(question.gradeLabel, question.levelId, question.subjectId) || level?.label || subject.label,
     type: mapQuestionType(question.type ?? template.type),
     difficulty: mapQuestionDifficulty(question.difficulty ?? template.difficulty),
     status: mapQuestionStatus(question.status ?? template.status),
-    stem: question.title || `Cau hoi ${index + 1}`,
+    stem: question.title || `Câu hỏi ${index + 1}`,
     objective: question.objective?.trim() || template.objective || `${subject.label} - ${level?.label ?? "Level"}`,
     tags: question.tags?.length
       ? question.tags.filter((tag): tag is string => Boolean(tag?.trim()))
@@ -272,7 +272,7 @@ function mapQuestion(question: QuestionBankQuestionDTO, subjects: QuestionBankSu
     masteryRate: question.masteryRate ?? template.masteryRate,
     usageCount: question.usageCount ?? template.usageCount,
     schoolsUsing: question.schoolsUsing ?? template.schoolsUsing,
-    lastUsedAt: question.lastUsedAt ? formatDateLabel(question.lastUsedAt) : question.updatedAt ? formatDateLabel(question.updatedAt) : "Moi cap nhat",
+    lastUsedAt: question.lastUsedAt ? formatDateLabel(question.lastUsedAt) : question.updatedAt ? formatDateLabel(question.updatedAt) : "Mới cập nhật",
     recommendedCluster: question.recommendedCluster?.trim() || template.recommendedCluster || "ERG",
     rationale: question.rationale?.trim() || template.rationale,
     answer: question.answer ?? template.answer,
@@ -440,6 +440,6 @@ function mapSourceMode(value?: string | null): QuizBankItem["sourceMode"] {
 
 function formatDateLabel(value: string) {
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "Moi cap nhat";
+  if (Number.isNaN(date.getTime())) return "Mới cập nhật";
   return date.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
 }

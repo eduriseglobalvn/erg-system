@@ -6,6 +6,8 @@ import type { StoredAuthSession } from "@/platform/auth/api/auth-token-storage";
 import { getCurrentStudentSession } from "@/platform/auth/api/student-auth-storage";
 import { ReauthDialog } from "@/platform/auth/components/reauth-dialog";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
+import { isStudentOnlySession, misroutedStudentHome } from "@/platform/auth/permissions/student-only";
+import { projectVerifiedWorkspaces } from "@/platform/auth/permissions/workspace-capability-projection";
 import { requiresTeacherOnboarding } from "@/platform/auth/types/account-lifecycle";
 import { buildLoginRedirectTarget, buildRedirectPath } from "@/platform/auth/utils/auth-redirects";
 import { canAccessPortal } from "@/platform/auth/utils/portal-access";
@@ -56,9 +58,11 @@ function EnforcedPortalAuthGate({ children, portal, requiredPermission }: Portal
   const teacherSession = isBffAuthEnabled()
     ? auth.session
     : auth.session ?? storedTeacherSession;
+  const workspaces = projectVerifiedWorkspaces({ ...teacherSession, accountEmail: normalizedTeacherAccount?.email ?? teacherSession?.accountEmail });
 
   if (canAccessPortal({ portal, studentSession, teacherAccount: normalizedTeacherAccount, teacherSession, requiredPermission })) {
-    if (needsOnboarding(normalizedTeacherAccount)) {
+    // Onboarding is a staff flow; a learner-only account is never sent there (STU-01).
+    if (needsOnboarding(normalizedTeacherAccount) && !isStudentOnlySession(workspaces)) {
       return <Navigate replace search={{ redirect }} to="/onboarding" />;
     }
 
@@ -75,6 +79,8 @@ function EnforcedPortalAuthGate({ children, portal, requiredPermission }: Portal
   }
 
   if (normalizedTeacherAccount) {
+    const studentHome = misroutedStudentHome({ workspaces, lifecycle: normalizedTeacherAccount.lifecycle }, location.pathname);
+    if (studentHome) return <Navigate replace to={studentHome} />;
     return <Navigate replace to={accessDeniedPath(portal, normalizedTeacherAccount.email, redirect)} />;
   }
 

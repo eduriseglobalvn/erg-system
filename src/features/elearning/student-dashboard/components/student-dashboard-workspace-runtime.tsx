@@ -1,11 +1,6 @@
-import {
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   useMutation,
-  useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
 import Alert from "@mui/material/Alert";
@@ -18,7 +13,9 @@ import { studentPath } from "@/platform/workspaces/workspace-paths";
 import { ContentPendingSkeleton } from "@/routes/route-feedback";
 import { StudentTabReplaced } from "@/features/elearning/student-dashboard/components/student-tab-replaced";
 import { useSingleStudentTab } from "@/features/elearning/student-dashboard/hooks/use-single-student-tab";
+import { useStudentPushRefresh } from "@/features/elearning/student-dashboard/hooks/use-student-push-refresh";
 import { useStudentViewState } from "@/features/elearning/student-dashboard/hooks/use-student-view-state";
+import { useStudentDashboardQuery } from "@/features/elearning/student-dashboard/hooks/use-student-dashboard-query";
 import {
   createStudentDashboardLoadingProfile,
   studentDashboardQueryOptions,
@@ -112,11 +109,9 @@ export function StudentDashboardWorkspaceRuntime() {
     });
   }, 120);
 
-  const studentDashboardQuery = useQuery(studentDashboardQueryOptions({
-    accountId: account?.id,
-    tenantId,
-  }));
+  const { loadMoreAssignments, query: studentDashboardQuery } = useStudentDashboardQuery({ accountId: account?.id, tenantId });
   const engagementScope = { accountId: account?.id, tenantId };
+  useStudentPushRefresh();
 
   const dashboardProfile = studentDashboardQuery.data?.profile ?? createStudentDashboardLoadingProfile(account);
   // "Xếp hạng" disappears from the menu while the teacher keeps the class leaderboard off.
@@ -153,7 +148,6 @@ export function StudentDashboardWorkspaceRuntime() {
       return { wasRead };
     },
     onSettled: () => queryClient.invalidateQueries({
-      exact: true,
       queryKey: studentDashboardQueryOptions(engagementScope).queryKey,
     }),
   });
@@ -306,6 +300,7 @@ export function StudentDashboardWorkspaceRuntime() {
         <AssignmentsView
           key={assignmentsFilter} initialFilter={assignmentsFilter} assignments={assignments} copy={copy} mobile={surface === "mobile-web"}
           onAskTeacher={() => handlePageChange("announcements")} onOpenAssignment={openAssignment}
+          hasMore={studentDashboardQuery.data?.assignmentsHasMore === true} loadingMore={studentDashboardQuery.isPlaceholderData} onLoadMore={loadMoreAssignments}
         />
       ) : null}
       {shownPage === "scores" ? <ScoresView assignments={assignments} copy={copy} /> : null}

@@ -156,7 +156,7 @@ test("uses CRM auth for shared admin endpoints on CRM host without client portal
   const fetchMock = vi.fn(async (_url?: string | URL | Request, _init?: RequestInit) => new Response(JSON.stringify({ data: [] }), { status: 200, headers: { "Content-Type": "application/json" } }));
   vi.stubGlobal("fetch", fetchMock);
 
-  await apiRequest("/api/users/crm-1");
+  await apiRequest("/api/v1/users/crm-1");
 
   const [, init] = fetchMock.mock.calls[0] ?? [];
   const headers = (init as RequestInit).headers as Headers;
@@ -540,4 +540,56 @@ test("does not treat an empty errors array on a successful response as a failure
   )));
 
   await expect(apiRequest("/api/v1/lcms/anything", { auth: "public" })).resolves.toEqual({ ok: true });
+});
+
+function rateLimited(retryAfter: string) {
+  return new Response(JSON.stringify({ error: { code: "RATE_LIMITED", message: "Too many requests" } }), {
+    status: 429,
+    headers: { "Content-Type": "application/json", "Retry-After": retryAfter },
+  });
+}
+
+test("waits out a short Retry-After on a GET 429 and retries exactly once", async () => {
+  vi.useFakeTimers();
+  try {
+    vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(rateLimited("2"))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ data: { ok: true } }), { status: 200, headers: { "Content-Type": "application/json" } }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = apiRequest("/api/v1/public/ping", { auth: "public" });
+    await vi.advanceTimersByTimeAsync(1_999);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    await vi.advanceTimersByTimeAsync(1);
+
+    await expect(result).resolves.toEqual({ ok: true });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  } finally {
+    vi.useRealTimers();
+  }
+});
+
+test("never retries a POST 429 and keeps retryAfterSeconds on the error", async () => {
+  vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
+  const fetchMock = vi.fn(async () => rateLimited("2"));
+  vi.stubGlobal("fetch", fetchMock);
+
+  await expect(apiRequest("/api/v1/auth/login", { auth: "public", method: "POST", body: "{}" })).rejects.toMatchObject({
+    status: 429,
+    details: expect.objectContaining({ retryAfterSeconds: 2 }),
+  });
+  expect(fetchMock).toHaveBeenCalledTimes(1);
+});
+
+test("fails a GET 429 at once when Retry-After is longer than 10 seconds", async () => {
+  vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
+  const fetchMock = vi.fn(async () => rateLimited("30"));
+  vi.stubGlobal("fetch", fetchMock);
+
+  await expect(apiRequest("/api/v1/public/ping", { auth: "public" })).rejects.toMatchObject({
+    status: 429,
+    details: expect.objectContaining({ retryAfterSeconds: 30 }),
+  });
+  expect(fetchMock).toHaveBeenCalledTimes(1);
 });

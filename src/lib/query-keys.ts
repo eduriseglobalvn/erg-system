@@ -19,14 +19,6 @@ export const queryKeys = {
         ["admin-operations", "user-access", tenantId, accountId, "detail", selectedUserId, "access"] as const,
       detailUser: (selectedUserId: string | null, tenantId: string = getDefaultTenantId(), accountId = "anonymous") =>
         ["admin-operations", "user-access", tenantId, accountId, "detail", selectedUserId, "user"] as const,
-      options: (tenantId: string = getDefaultTenantId(), accountId = "anonymous") =>
-        ["admin-operations", "user-access", tenantId, accountId, "options"] as const,
-      provision: (tenantId: string = getDefaultTenantId(), accountId = "anonymous") =>
-        ["admin-operations", "user-access", tenantId, accountId, "provision"] as const,
-      preview: (policies: unknown, tenantId: string = getDefaultTenantId(), accountId = "anonymous") =>
-        ["admin-operations", "user-access", tenantId, accountId, "preview", policies] as const,
-      scopes: (scopeType: string, query: string, tenantId: string = getDefaultTenantId(), accountId = "anonymous") =>
-        ["admin-operations", "user-access", tenantId, accountId, "scopes", scopeType, query] as const,
       users: (query: string, status: string, tenantId: string = getDefaultTenantId(), accountId = "anonymous") =>
         ["admin-operations", "user-access", tenantId, accountId, "users", query, status] as const,
     },

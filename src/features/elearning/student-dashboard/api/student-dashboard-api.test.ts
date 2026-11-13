@@ -119,6 +119,26 @@ describe("student dashboard API", () => {
     }));
   });
 
+  test("60 assignments: asks for more with assignmentLimit and reports when the backend holds more", async () => {
+    hasApiBaseMock.mockReturnValue(true);
+    const card = (index: number) => ({ id: `asg-${index}`, title: `Bài ${index}`, status: "active", dueAt: "2026-12-01T00:00:00Z" });
+    const sixty = Array.from({ length: 60 }, (_, index) => card(index));
+    graphQlRequestMock.mockResolvedValueOnce(dashboardResponse({ assignments: sixty.slice(0, 50), assignmentsHasMore: true }));
+    graphQlRequestMock.mockResolvedValueOnce(dashboardResponse({ assignments: sixty, assignmentsHasMore: false }));
+
+    const first = await loadStudentDashboardData({ tenantId: "tenant-a" });
+    expect(first.assignments).toHaveLength(50);
+    expect(first.assignmentsHasMore).toBe(true);
+    expect(graphQlRequestMock).toHaveBeenLastCalledWith(expect.objectContaining({ variables: { input: { tenantId: "tenant-a" } } }));
+
+    const more = await loadStudentDashboardData({ assignmentLimit: 100, tenantId: "tenant-a" });
+    expect(more.assignments).toHaveLength(60);
+    expect(more.assignmentsHasMore).toBe(false);
+    expect(graphQlRequestMock).toHaveBeenLastCalledWith(expect.objectContaining({
+      variables: { input: { tenantId: "tenant-a", assignmentLimit: 100 } },
+    }));
+  });
+
   test("keeps API-enabled empty dashboard empty instead of refilling mock assignments", async () => {
     hasApiBaseMock.mockReturnValue(true);
     graphQlRequestMock.mockResolvedValueOnce(dashboardResponse());
@@ -253,22 +273,25 @@ describe("student dashboard API", () => {
     expect(dashboard.assignments[0]?.lastActivityLabel).toBe("Chưa có hoạt động");
   });
 
-  test("files a graded or review-pending attempt under Đã nộp with its score", async () => {
+  test("files an assignment under Đã nộp only from the server handedIn flag, never from the status string", async () => {
     hasApiBaseMock.mockReturnValue(true);
     graphQlRequestMock.mockResolvedValueOnce(dashboardResponse({
       assignments: [
-        { id: "a", title: "A", status: "graded", dueAt: "2099-01-01T00:00:00Z", scorePercent: 79.6, submittedAt: "2026-11-10T03:00:00Z" },
-        { id: "b", title: "B", status: "needs_review", dueAt: null, scorePercent: 40, submittedAt: null },
-        { id: "c", title: "C", status: "in_progress", dueAt: null, scorePercent: null, submittedAt: null },
+        { id: "a", title: "A", status: "graded", handedIn: true, dueAt: "2099-01-01T00:00:00Z", scorePercent: 79.6, submittedAt: "2026-11-10T03:00:00Z" },
+        { id: "b", title: "B", status: "a_future_server_state", handedIn: true, dueAt: "2000-01-01T00:00:00Z", scorePercent: 40, submittedAt: null },
+        { id: "c", title: "C", status: "in_progress", handedIn: false, dueAt: null, scorePercent: null, submittedAt: null },
+        { id: "d", title: "D", status: "done", handedIn: false, dueAt: null, scorePercent: null, submittedAt: null },
       ],
     }));
 
-    const [graded, review, open] = (await loadStudentDashboardData()).assignments;
+    const [graded, futureState, open, notHandedIn] = (await loadStudentDashboardData()).assignments;
 
     expect(graded).toMatchObject({ status: "submitted", score: 80, maxScore: 100 });
     expect(graded?.lastActivityLabel).toContain("Nộp lúc 10/11/2026");
-    expect(review).toMatchObject({ status: "submitted", score: 40 });
+    // Past due, but handed in: the flag wins over the due date and over an unknown state string.
+    expect(futureState).toMatchObject({ status: "submitted", score: 40 });
     expect(open).toMatchObject({ status: "in_progress", score: null, maxScore: null });
+    expect(notHandedIn).toMatchObject({ status: "not_started" });
   });
 });
 

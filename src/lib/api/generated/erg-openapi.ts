@@ -4437,6 +4437,7 @@ export interface paths {
             readonly path?: never;
             readonly cookie?: never;
         };
+        /** @deprecated */
         readonly get: operations["metrics"];
         readonly put?: never;
         readonly post?: never;
@@ -7860,6 +7861,7 @@ export interface components {
             readonly parentName?: string;
             readonly parentPhone?: string;
             readonly parentRelationship?: string;
+            readonly password?: string;
             readonly phone?: string;
             readonly status?: string;
             readonly studentCode: string;
@@ -9201,6 +9203,7 @@ export interface components {
             };
             readonly contentHash?: string;
             readonly gradingMode?: string;
+            readonly id?: string;
             readonly packageHash?: string;
             readonly quiz?: components["schemas"]["QuizDetailResponse"];
             readonly signature?: string;

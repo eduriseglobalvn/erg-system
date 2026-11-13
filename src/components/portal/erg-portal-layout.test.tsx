@@ -137,3 +137,20 @@ it("hides the header bell on a phone only when the dock carries the inbox tab", 
   );
   expect(screen.getByRole("button", { name: /^Thông báo/ })).toBeInTheDocument();
 });
+
+it("tells a desktop user the screen shows saved data while the browser is offline", () => {
+  mockViewport(1440);
+  const onLine = vi.spyOn(navigator, "onLine", "get").mockReturnValue(false);
+  window.dispatchEvent(new Event("offline"));
+  try {
+    render(
+      <ErgPortalLayout menuGroups={[]} portalInfo={{ name: "LMS" }}>
+        <div>Lớp học</div>
+      </ErgPortalLayout>,
+    );
+    expect(screen.getByText("Bạn đang offline")).toBeTruthy();
+  } finally {
+    onLine.mockRestore();
+    window.dispatchEvent(new Event("online"));
+  }
+});

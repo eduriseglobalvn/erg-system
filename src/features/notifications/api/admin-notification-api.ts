@@ -43,11 +43,11 @@ export type AdminNotificationOutboxRunResponse = {
 };
 
 export async function sendAdminNotification(input: AdminNotificationCommandInput) {
-  return postAdminNotificationCommand(API_ENDPOINTS.legacy.v1AdminNotificationsSend, input);
+  return postAdminNotificationCommand(API_ENDPOINTS.notifications.adminSend, input);
 }
 
 export async function broadcastAdminNotification(input: AdminNotificationCommandInput) {
-  return postAdminNotificationCommand(API_ENDPOINTS.legacy.v1AdminNotificationsBroadcast, input);
+  return postAdminNotificationCommand(API_ENDPOINTS.notifications.adminBroadcast, input);
 }
 
 export async function fetchAdminNotificationStats() {
@@ -60,7 +60,7 @@ export async function fetchAdminNotificationStats() {
     } satisfies AdminNotificationStatsResponse;
   }
 
-  return apiRequest<AdminNotificationStatsResponse>(API_ENDPOINTS.legacy.v1AdminNotificationsStats, {
+  return apiRequest<AdminNotificationStatsResponse>(API_ENDPOINTS.notifications.adminStats, {
     portal: ADMIN_NOTIFICATION_PORTAL,
   });
 }
@@ -76,7 +76,7 @@ export async function runAdminNotificationOutbox() {
     } satisfies AdminNotificationOutboxRunResponse;
   }
 
-  return apiRequest<AdminNotificationOutboxRunResponse>(API_ENDPOINTS.legacy.v1AdminNotificationsOutboxRun, {
+  return apiRequest<AdminNotificationOutboxRunResponse>(API_ENDPOINTS.notifications.adminOutboxRun, {
     method: "POST",
     portal: ADMIN_NOTIFICATION_PORTAL,
   });

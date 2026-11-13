@@ -7,9 +7,10 @@ import { NoticeBanner } from "./portal-login-presentation";
 
 const loginForm = { email: "", password: "" } as never;
 
-function renderPanel() {
+function renderPanel(rememberMeDisabled?: boolean) {
   return render(
     <I18nProvider><AuthFormPanel
+      rememberMeDisabled={rememberMeDisabled}
       loginForm={loginForm}
       onForgotPassword={vi.fn()}
       onLoginFormChange={vi.fn()}
@@ -23,6 +24,12 @@ function renderPanel() {
 }
 
 describe("AuthFormPanel", () => {
+  it("hides remember me on a shared computer and says why", () => {
+    renderPanel(true);
+    expect(screen.queryByRole("checkbox")).toBeNull();
+    expect(screen.getByText("Máy dùng chung: không ghi nhớ đăng nhập")).toBeTruthy();
+  });
+
   it("uses the generic credential label for every role", () => {
     renderPanel();
     expect(screen.getByText("Email hoặc mã học sinh")).toBeTruthy();

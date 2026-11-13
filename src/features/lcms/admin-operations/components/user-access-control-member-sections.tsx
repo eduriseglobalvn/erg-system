@@ -16,7 +16,7 @@ import Skeleton from "@mui/material/Skeleton";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import type { AccessManagedUser, EffectiveAccess } from "@/features/lcms/admin-operations/api/access-management-api";
+import type { AccessManagedUser } from "@/features/lcms/admin-operations/api/access-management-api";
 import type { ProfileDraft } from "@/features/lcms/admin-operations/types/user-access-control";
 import { formatDateTime, initials, isSuperAdmin, mergeUser, statusLabel } from "@/features/lcms/admin-operations/utils/user-access-control-utils";
 import { actionSx, fieldSx, headingSx, helperSx, panelSx, scopeLabels, sectionHeaderSx } from "./user-access-control-section-config";
@@ -77,8 +77,8 @@ export function MemberRow({ active, user, onClick }: { active: boolean; user: Ac
   );
 }
 
-export function MemberDetailHeader({ effective, loading, rootAdmin, superAdmin, user, onActivate, onBan, onBlock, onDeactivate }: {
-  effective: EffectiveAccess | null;
+export function MemberDetailHeader({ effectivePermissions, loading, rootAdmin, superAdmin, user, onActivate, onBan, onBlock, onDeactivate }: {
+  effectivePermissions: string[] | null;
   loading: boolean;
   rootAdmin: boolean;
   superAdmin: boolean;
@@ -108,7 +108,7 @@ export function MemberDetailHeader({ effective, loading, rootAdmin, superAdmin, 
               <DetailPill icon={PhoneOutlinedIcon}>{user.phone || "Chưa cập nhật SĐT"}</DetailPill>
               <DetailPill icon={ExploreOutlinedIcon}>{user.isProfileCompleted ? "Đã onboarding" : "Chưa hoàn tất onboarding"}</DetailPill>
               <DetailPill icon={VpnKeyOutlinedIcon}>
-                {loading ? <Skeleton width={64} height={14} aria-label="Đang tính quyền" /> : `Quyền: ${scopeLabels[effective?.highestScope ?? "none"]}`}
+                {loading ? <Skeleton width={64} height={14} aria-label="Đang tính quyền" /> : effectivePermissions?.length ? `Quyền: ${effectivePermissions.length} quyền hiệu lực` : `Quyền: ${scopeLabels.none}`}
               </DetailPill>
             </Stack>
           </Box>

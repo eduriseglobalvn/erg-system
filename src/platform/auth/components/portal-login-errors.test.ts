@@ -11,9 +11,13 @@ describe("login lockout and rate-limit messages", () => {
     expect(msg(new ApiClientError("x", "HTTP_423", 423))).toContain("tạm khóa");
   });
 
-  it("maps AUTH_TOO_MANY_ATTEMPTS and HTTP 429 to a too-many-attempts message", () => {
+  it("maps AUTH_TOO_MANY_ATTEMPTS to a too-many-attempts message", () => {
     expect(msg(new ApiClientError("too many login attempts", "AUTH_TOO_MANY_ATTEMPTS", 429))).toContain("quá nhiều lần");
-    expect(msg(new ApiClientError("x", "HTTP_429", 429))).toContain("quá nhiều lần");
+  });
+
+  it("maps a load 429 (password hashing busy, nginx limit) to the 'system busy' message with seconds", () => {
+    expect(msg(new ApiClientError("busy", "AUTH_PASSWORD_HASH_BUSY", 429, { retryAfterSeconds: 2 }))).toBe("Hệ thống đang đông, vui lòng thử lại sau 2 giây");
+    expect(msg(new ApiClientError("x", "HTTP_429", 429, { retryAfterSeconds: 1 }))).toBe("Hệ thống đang đông, vui lòng thử lại sau 1 giây");
   });
 
   it("shows the wait time in minutes when the backend sends retry seconds", () => {

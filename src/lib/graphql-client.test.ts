@@ -169,3 +169,44 @@ test("rejects GraphQL variables containing sensitive keys", async () => {
 
   expect(fetchMock).not.toHaveBeenCalled();
 });
+
+function seedLmsSession() {
+  window.localStorage.setItem(
+    TEACHER_LOCAL_SESSION_KEY,
+    JSON.stringify({ accountId: "teacher-1", accessToken: "lms-token", loggedInAt: new Date().toISOString(), portal: "lms", portals: ["lms"], rememberMe: true }),
+  );
+}
+
+const rateLimited = () => new Response(JSON.stringify({ error: { code: "RATE_LIMITED", message: "Too many" } }), {
+  status: 429,
+  headers: { "Content-Type": "application/json", "Retry-After": "1" },
+});
+const ok = () => new Response(JSON.stringify({ data: { lms: { namespace: "lms" } } }), { status: 200, headers: { "Content-Type": "application/json" } });
+
+test("retries a read-only GraphQL query once after a short 429", async () => {
+  vi.useFakeTimers();
+  try {
+    vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
+    seedLmsSession();
+    const fetchMock = vi.fn().mockResolvedValueOnce(rateLimited()).mockResolvedValueOnce(ok());
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = graphQlRequest({ operationName: "Shell", portal: "lms", query: "query Shell { lms { namespace } }" });
+    await vi.advanceTimersByTimeAsync(1_000);
+
+    await expect(result).resolves.toEqual({ lms: { namespace: "lms" } });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  } finally {
+    vi.useRealTimers();
+  }
+});
+
+test("never retries a GraphQL mutation after a 429", async () => {
+  vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
+  seedLmsSession();
+  const fetchMock = vi.fn(async () => rateLimited());
+  vi.stubGlobal("fetch", fetchMock);
+
+  await expect(graphQlRequest({ operationName: "Save", portal: "lms", query: "mutation Save { lms { namespace } }" })).rejects.toMatchObject({ status: 429 });
+  expect(fetchMock).toHaveBeenCalledTimes(1);
+});

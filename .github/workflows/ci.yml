@@ -14,6 +14,22 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  gitleaks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_VERSION: 8.30.1
+          GITLEAKS_ENABLE_COMMENTS: "false"
+
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -28,9 +44,11 @@ jobs:
           key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
           restore-keys: bun-${{ runner.os }}-
       - run: bun install --frozen-lockfile --ignore-scripts
+      - run: bun audit --audit-level=high
       - run: bun run typecheck
       - run: bun run lint
       - run: bun run verify
+      - run: bun run contract:check
       - run: bun run test
       - run: bun run build
       - run: bun run budget:test
@@ -38,6 +56,11 @@ jobs:
         run: |
           if grep -rEl 'DEFAULT_BYPASS|dev-bypass|dev-admin-id|dev-student-id' dist; then
             echo "::error::Dev auth bypass fixtures leaked into the production bundle"; exit 1
+          fi
+      - name: Bundle must not contain the notification fixtures
+        run: |
+          if grep -rl 'recipient-system-schedule-updated' dist; then
+            echo "::error::Notification mock fixtures leaked into the production bundle"; exit 1
           fi
       - name: Warn when mock fixtures are in the bundle (P0-6 debt, not yet blocking)
         run: |

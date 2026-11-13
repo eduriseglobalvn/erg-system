@@ -78,5 +78,5 @@ export async function uploadTeachingScheduleExcelFile(input: TeachingScheduleExc
   const body = new FormData();
   body.set("file", file);
   body.set("metadata", JSON.stringify(withDefaultTenant(input)));
-  return apiRequest<TeachingSchedulePreviewPayload>(API_ENDPOINTS.legacy.v1CalendarImportExcel, { body, method: "POST", portal: "lcms" });
+  return apiRequest<TeachingSchedulePreviewPayload>(API_ENDPOINTS.calendar.importExcel, { body, method: "POST", portal: "lcms" });
 }

@@ -9,7 +9,7 @@ import type {
 } from "@/features/lcms/school-management/api/school-api/types";
 
 export async function createSchool(draft: SchoolDraft) {
-  const response = await apiRequest<SchoolCommandResponse>(API_ENDPOINTS.legacy.v1LcmsSchools, {
+  const response = await apiRequest<SchoolCommandResponse>(API_ENDPOINTS.lcms.schools, {
     method: "POST",
     portal: "lcms",
     body: JSON.stringify({

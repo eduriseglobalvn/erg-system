@@ -1,6 +1,7 @@
 import { useState } from "react";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
+import RefreshIcon from "@mui/icons-material/Refresh";
 import NotificationsActiveOutlinedIcon from "@mui/icons-material/NotificationsActiveOutlined";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
@@ -28,13 +29,18 @@ type Props = {
   /** Server totals for the header (the list below may be one page of them). */
   counts: { completed: number; needsReview: number; total: number };
   onBack: () => void;
+  /** Absent when there is nothing to reload (no server, no assignment). */
+  onRefresh?: () => void;
+  refreshing?: boolean;
   rows: ProgressMobileRow[];
   run?: AssignmentRun;
   status: "loading" | "error" | "ready";
+  /** "Cập nhật lúc …" for the data on screen; "" before the first load. */
+  updatedLabel?: string;
 };
 
 /** Phone "Tiến độ học tập" (canvas N10) on the desktop page's queries: ring, counts, segmented list, sticky "Nhắc". */
-export function AssignmentProgressMobile({ classLabel, counts, onBack, rows, run, status }: Props) {
+export function AssignmentProgressMobile({ classLabel, counts, onBack, onRefresh, refreshing, rows, run, status, updatedLabel }: Props) {
   const [segment, setSegment] = useState<Segment>("pending");
   const pending = rows.filter((row) => row.status !== "completed");
   const inProgress = rows.filter((row) => row.status === "inprogress");
@@ -58,6 +64,7 @@ export function AssignmentProgressMobile({ classLabel, counts, onBack, rows, run
           <Box sx={{ minWidth: 0 }}>
             <Typography sx={{ fontWeight: "fontWeightBold" }} variant="body1">{run.title}</Typography>
             <Typography color="text.secondary" variant="caption" component="p">{[classLabel, run.dueLabel].filter(Boolean).join(" · ")}</Typography>
+            {updatedLabel ? <Typography color="text.secondary" variant="caption" component="p">{updatedLabel}</Typography> : null}
           </Box>
           <Box sx={{ alignItems: "center", display: "flex", gap: 2 }}>
             <ProgressRing percent={percent} />
@@ -94,6 +101,7 @@ export function AssignmentProgressMobile({ classLabel, counts, onBack, rows, run
       <Box sx={{ alignItems: "center", display: "flex", gap: 1, minHeight: 60, pb: 1, pt: 1.5, px: 1 }}>
         <ErgIconButton label="Quay lại" onClick={onBack}><ArrowBackIcon /></ErgIconButton>
         <Typography component="h1" noWrap sx={{ flex: 1, minWidth: 0 }} variant="h4">Tiến độ học tập</Typography>
+        {onRefresh ? <ErgIconButton label="Làm mới" onClick={refreshing ? undefined : onRefresh}><RefreshIcon /></ErgIconButton> : null}
       </Box>
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, pb: showFooter ? `${FOOTER_RESERVE}px` : 2, pt: 0.5, px: 2 }}>

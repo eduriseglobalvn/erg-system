@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 
 import { useQuestionBankWorkspaceQuery } from "@/features/question-bank/api/question-bank-query";
-import { todayInput } from "@/domain/formatters/format-date";
+import { todayInput, viDateToInput } from "@/domain/formatters/format-date";
 import type { QuizBankItem } from "@/features/question-bank/types/question-bank-types";
 import { getPersistedJsonValue, setPersistedJsonValue } from "@/stores/persisted-store";
 import {
@@ -16,7 +16,7 @@ import {
 
 const TEACHER_EXERCISES_STORAGE_KEY = "erg:teacher-created-exercises:v1";
 
-function quizToExercise(quiz: QuizBankItem): Exercise {
+export function quizToExercise(quiz: QuizBankItem): Exercise {
   return {
     id: quiz.id,
     title: quiz.title,
@@ -28,7 +28,8 @@ function quizToExercise(quiz: QuizBankItem): Exercise {
     status: quiz.status === "ready" ? "published" : quiz.status === "draft" ? "draft" : "archived",
     questionCount: quiz.questionCount || quiz.questionIds?.length || 10,
     durationMinutes: Math.max(15, Math.round((quiz.questionCount || quiz.questionIds?.length || 10) * 2)),
-    updatedAt: quiz.updatedAt ? quiz.updatedAt.split("T")[0]! : "2026-06-01",
+    // The bank mapper already turned the timestamp into a dd/MM/yyyy label.
+    updatedAt: viDateToInput(quiz.updatedAt),
     assignedCount: 0,
     tags: [quiz.subjectLabel, quiz.levelLabel, ...(quiz.topicLabels || [])].filter(Boolean),
     source: quiz.ownerLabel === "Giáo viên" ? "teacher" : "system",

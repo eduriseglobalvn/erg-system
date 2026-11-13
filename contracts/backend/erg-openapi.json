@@ -8736,6 +8736,11 @@
             "minLength": 0,
             "type": "string"
           },
+          "password": {
+            "maxLength": 128,
+            "minLength": 6,
+            "type": "string"
+          },
           "phone": {
             "maxLength": 64,
             "minLength": 0,
@@ -12513,6 +12518,9 @@
             "type": "string"
           },
           "gradingMode": {
+            "type": "string"
+          },
+          "id": {
             "type": "string"
           },
           "packageHash": {
@@ -28642,6 +28650,7 @@
     },
     "/metrics": {
       "get": {
+        "deprecated": true,
         "operationId": "metrics",
         "responses": {
           "200": {
@@ -28655,7 +28664,6 @@
             "description": "OK"
           }
         },
-        "security": [],
         "tags": [
           "platform-health-controller"
         ]

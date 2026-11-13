@@ -1,12 +1,10 @@
 import BadgeCheck from "@mui/icons-material/VerifiedRounded";
 import Building2 from "@mui/icons-material/BusinessRounded";
-import Camera from "@mui/icons-material/PhotoCameraRounded";
 import CheckCircle2 from "@mui/icons-material/CheckCircleRounded";
 import Phone from "@mui/icons-material/PhoneRounded";
 import ShieldCheck from "@mui/icons-material/SecurityRounded";
 import UserRound from "@mui/icons-material/PersonRounded";
 import Box from "@mui/material/Box";
-import CircularProgress from "@mui/material/CircularProgress";
 import LinearProgress from "@mui/material/LinearProgress";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
@@ -18,13 +16,10 @@ import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 export function ProfileSidebar({
   account,
   activeTab,
-  avatarInputRef,
   avatarUrl,
   completionPercent,
   form,
   initials,
-  isUploadingAvatar,
-  openAvatarCropper,
   setActiveTab,
   showWorkRoleFields,
 }: ReturnType<typeof useProfilePageController>) {
@@ -70,47 +65,6 @@ export function ProfileSidebar({
                   </Box>
                 )}
               </Box>
-  
-              <Box
-                component="button"
-                aria-label="Upload avatar"
-                disabled={!account || isUploadingAvatar}
-                onClick={() => avatarInputRef.current?.click()}
-                type="button"
-                sx={{
-                  alignItems: "center",
-                  bgcolor: "#FFFFFF",
-                  border: `2px solid ${ergEnterpriseTokens.color.border}`,
-                  borderRadius: "50%",
-                  bottom: -2,
-                  boxShadow: "0 2px 6px rgba(0, 0, 0, 0.1)",
-                  color: "primary.main",
-                  cursor: "pointer",
-                  display: "flex",
-                  height: 28,
-                  justifyContent: "center",
-                  position: "absolute",
-                  right: -2,
-                  transition: "all 0.15s ease",
-                  width: 28,
-                  "&:hover": { bgcolor: alpha(ergEnterpriseTokens.color.primary, 0.08), transform: "scale(1.1)" },
-                }}
-              >
-                {isUploadingAvatar ? <CircularProgress color="inherit" size={14} /> : <Camera sx={{ fontSize: 15 }} />}
-              </Box>
-  
-              <Box
-                component="input"
-                accept="image/png,image/jpeg,image/webp,image/gif"
-                onChange={(event) => {
-                  const file = event.target.files?.[0] ?? null;
-                  event.target.value = "";
-                  openAvatarCropper(file);
-                }}
-                ref={avatarInputRef}
-                sx={{ clip: "rect(0 0 0 0)", clipPath: "inset(50%)", height: "1px", overflow: "hidden", position: "absolute", whiteSpace: "nowrap", width: "1px" }}
-                type="file"
-              />
             </Box>
   
             <Typography sx={{ color: "text.primary", fontSize: "1.1rem", fontWeight: 600, letterSpacing: "-0.015em", mt: 1.5 }}>

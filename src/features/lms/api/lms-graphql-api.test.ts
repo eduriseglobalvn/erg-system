@@ -86,7 +86,11 @@ test("maps class workspace students into classroom students", () => {
           email: "minhanh@example.com",
           status: "active",
           updatedAt: "2026-06-10T09:00:00+07:00",
+          averagePercent: 90,
+          completedAssignmentCount: 1,
         },
+        { id: "stu-2", fullName: "Trần Bảo", status: "active", averagePercent: 50, completedAssignmentCount: 1 },
+        { id: "stu-3", fullName: "Lê Chưa Nộp", status: "active", averagePercent: null, completedAssignmentCount: null },
       ],
       page: 0,
       size: 20,
@@ -137,15 +141,18 @@ test("maps class workspace students into classroom students", () => {
 
   const students = mapClassWorkspaceToStudents(workspace, selectedClass);
 
-  expect(students).toHaveLength(1);
-    expect(students[0]).toMatchObject({
-      id: "stu-1",
-      name: "Nguyễn Minh Anh",
-      schoolId: "school-1",
-      classId: "class-1",
-      className: "Lớp 6A1",
-      averageScore: 84,
-      completedAssignments: 12,
-      status: "steady",
-    });
+  // Each row carries the student's own score, never the class summary (84 / 12).
+  expect(students).toHaveLength(3);
+  expect(students[0]).toMatchObject({
+    id: "stu-1",
+    name: "Nguyễn Minh Anh",
+    schoolId: "school-1",
+    classId: "class-1",
+    className: "Lớp 6A1",
+    averageScore: 90,
+    completedAssignments: 1,
+    status: "steady",
+  });
+  expect(students[1]).toMatchObject({ id: "stu-2", averageScore: 50, completedAssignments: 1 });
+  expect(students[2]).toMatchObject({ id: "stu-3", averageScore: 0, completedAssignments: 0 });
 });

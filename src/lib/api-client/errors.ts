@@ -31,6 +31,19 @@ export function withRetryAfter(details: unknown, response: Response): unknown {
   return typeof details === "object" && !Array.isArray(details) ? { retryAfterSeconds: seconds, ...details } : details;
 }
 
+/** Longest Retry-After (seconds) the client waits out by itself before retrying a read once. */
+export const RATE_LIMIT_AUTO_RETRY_MAX_SECONDS = 10;
+
+/** User-facing text for a 429 the client did not absorb; undefined for any other error. */
+export function rateLimitMessage(error: unknown): string | undefined {
+  const candidate = error as { status?: number; details?: { retryAfterSeconds?: unknown } } | null;
+  if (candidate?.status !== 429) return undefined;
+  const seconds = candidate.details?.retryAfterSeconds;
+  return typeof seconds === "number" && seconds > 0
+    ? `Hệ thống đang đông, vui lòng thử lại sau ${Math.ceil(seconds)} giây`
+    : "Hệ thống đang đông, vui lòng thử lại sau ít phút";
+}
+
 export function createRequestId() {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
     return crypto.randomUUID();

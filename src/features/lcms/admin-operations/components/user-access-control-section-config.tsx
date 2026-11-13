@@ -1,10 +1,3 @@
-import type { ElementType } from "react";
-import BusinessOutlinedIcon from "@mui/icons-material/BusinessOutlined";
-import LayersOutlinedIcon from "@mui/icons-material/LayersOutlined";
-import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
-import OndemandVideoOutlinedIcon from "@mui/icons-material/OndemandVideoOutlined";
-import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
-import VerifiedUserOutlinedIcon from "@mui/icons-material/VerifiedUserOutlined";
 import type { AccessScopeType } from "@/features/lcms/admin-operations/api/access-management-api";
 
 export const scopeLabels: Record<AccessScopeType | "none", string> = {
@@ -12,24 +5,6 @@ export const scopeLabels: Record<AccessScopeType | "none", string> = {
   center: "Trung tâm",
   school: "Trường học",
   none: "Chưa cấp",
-};
-
-export const scopeHelp: Record<AccessScopeType, string> = {
-  system: "Quản lý toàn bộ ERG LMS.",
-  center: "Quản lý trung tâm và các trường trực thuộc.",
-  school: "Chỉ quản lý lớp trong trường được cấp.",
-};
-
-export const scopeIcons: Record<AccessScopeType, ElementType> = {
-  system: VerifiedUserOutlinedIcon,
-  center: BusinessOutlinedIcon,
-  school: SchoolOutlinedIcon,
-};
-
-export const moduleIcons: Record<string, ElementType> = {
-  lms: MenuBookOutlinedIcon,
-  resources: LayersOutlinedIcon,
-  media: OndemandVideoOutlinedIcon,
 };
 
 export const roleOptions = [

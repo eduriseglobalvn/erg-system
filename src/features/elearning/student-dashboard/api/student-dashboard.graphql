@@ -62,6 +62,7 @@ query ElearningStudentDashboard($input: StudentDashboardInput) {
         minutesBeforeDue
         xpReward
         closed
+        handedIn
       }
       nextActions {
         id
@@ -78,6 +79,7 @@ query ElearningStudentDashboard($input: StudentDashboardInput) {
         publishedAt
         updatedAt
       }
+      assignmentsHasMore
     }
   }
 }

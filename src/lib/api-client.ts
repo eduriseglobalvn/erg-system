@@ -18,6 +18,7 @@ import {
   AUTHORIZATION_CHANGED_EVENT,
   AUTHZ_VERSION_CHANGED,
   createRequestId,
+  RATE_LIMIT_AUTO_RETRY_MAX_SECONDS,
   withRetryAfter,
 } from "@/lib/api-client/errors";
 import { getCsrfToken, isCommandMethod } from "@/lib/api-client/csrf";
@@ -28,6 +29,7 @@ import {
   refreshStoredAuthSession,
   shouldRefreshAfterResponse,
 } from "@/lib/api-client/refresh";
+export { withRefreshLock } from "@/lib/api-client/refresh";
 import {
   getApiResponseRequestId,
   getEnvelopeMessage,
@@ -195,7 +197,12 @@ async function executeApiRequest<T>(
   init: ApiRequestOptions | undefined,
   context: { path: string; portal?: StoredAuthSession["portal"] },
 ): Promise<T> {
-  const response = await fetchApi(url, headers, init);
+  let response = await fetchApi(url, headers, init);
+  const waitSeconds = rateLimitRetryDelaySeconds(response, init);
+  if (waitSeconds !== undefined) {
+    await waitForRetry(waitSeconds * 1000, init?.signal);
+    response = await fetchApi(url, headers, init);
+  }
   if (response.status === 304) {
     return undefined as T;
   }
@@ -269,4 +276,27 @@ async function executeApiRequest<T>(
   }
 
   return body as T;
+}
+
+/** Seconds to wait before the single automatic retry of a rate-limited read; undefined when it must not be retried. */
+function rateLimitRetryDelaySeconds(response: Response, init: ApiRequestOptions | undefined) {
+  if (response.status !== 429) return undefined;
+  const isRead = (init?.method ?? "GET").toUpperCase() === "GET" || init?.retryOnRateLimit === true;
+  const seconds = Number(response.headers.get("Retry-After"));
+  return isRead && Number.isFinite(seconds) && seconds > 0 && seconds <= RATE_LIMIT_AUTO_RETRY_MAX_SECONDS ? seconds : undefined;
+}
+
+function waitForRetry(ms: number, signal: AbortSignal | null | undefined) {
+  return new Promise<void>((resolve, reject) => {
+    if (signal?.aborted) return reject(signal.reason);
+    const onAbort = () => {
+      clearTimeout(timer);
+      reject(signal?.reason);
+    };
+    const timer = setTimeout(() => {
+      signal?.removeEventListener("abort", onAbort);
+      resolve();
+    }, ms);
+    signal?.addEventListener("abort", onAbort, { once: true });
+  });
 }

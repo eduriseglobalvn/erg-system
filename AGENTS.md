@@ -82,7 +82,7 @@ erg-system/
 | `codegen.ts` | Cấu hình tự động sinh TypeScript types từ `contracts/backend/schema.graphqls` ra `src/lib/api/generated/graphql.ts`. |
 | `playwright.config.ts` | Cấu hình chạy test E2E cho các workspace: `lms`, `admin`, `crm`, `student`. |
 | `portable.html` | File HTML tối giản dùng để tải bộ engine thi ngoại tuyến trong ứng dụng desktop. |
-| `index.html` | File HTML chính, nạp font Manrope / JetBrains Mono và thẻ `#root` nạp ứng dụng. |
+| `index.html` | File HTML chính, nạp font Be Vietnam Pro / JetBrains Mono và thẻ `#root` nạp ứng dụng. |
 | `docker-compose.yml` & `Dockerfile` | Hỗ trợ đóng gói container hóa frontend để chạy độc lập hoặc tích hợp CI/CD. |
 
 ---
@@ -281,7 +281,7 @@ Mỗi module trong `src/features/` là một đơn vị độc lập hoàn chỉ
 #### `src/themes/` — Theme giao diện & Design Tokens
 
 - **`erg-enterprise-tokens.ts`**: Khai báo bảng mã màu chuẩn (Primary tím `#696CFF`, Success xanh lục, Warning cam, Neutral xám,...), bán kính bo góc (border radius 8px), bóng đổ và khoảng cách.
-- **`erg-enterprise-theme.tsx`**: Tạo MUI Theme instance với typography chuẩn (Manrope cho chữ thông thường, JetBrains Mono cho số/mã lệnh) và overrides cho MUI Material.
+- **`erg-enterprise-theme.tsx`**: Tạo MUI Theme instance với typography chuẩn (Be Vietnam Pro cho chữ thông thường, JetBrains Mono cho số/mã lệnh) và overrides cho MUI Material.
 - **`ErgMuiProvider.tsx`**: Provider bọc ngoài ứng dụng cung cấp Theme của MUI Material.
 
 ---

@@ -23,6 +23,7 @@ beforeEach(() => {
   loadStudentDashboardDataMock.mockReset();
   loadStudentDashboardDataMock.mockResolvedValue({
     assignments: [],
+    assignmentsHasMore: false,
     profile: {
       id: "student-a",
       name: "Student A",
@@ -51,6 +52,17 @@ test("isolates dashboard cache by tenant and account", () => {
   );
   expect(studentDashboardQueryKeys.workspace({ tenantId: " tenant-a ", accountId: " account-a " }))
     .toEqual(baseline);
+});
+
+test("a longer assignment list gets its own key under the workspace prefix that invalidation targets", async () => {
+  const scope = { tenantId: "tenant-a", accountId: "account-a" };
+  const workspace = studentDashboardQueryKeys.workspace(scope);
+  expect(studentDashboardQueryOptions({ ...scope, assignmentLimit: 50 }).queryKey).toEqual(workspace);
+  const longer = studentDashboardQueryOptions({ ...scope, assignmentLimit: 100 });
+  expect(longer.queryKey).toEqual([...workspace, 100]);
+
+  await longer.queryFn({ signal: new AbortController().signal });
+  expect(loadStudentDashboardDataMock).toHaveBeenCalledWith(expect.objectContaining({ assignmentLimit: 100, tenantId: "tenant-a" }));
 });
 
 test("passes TanStack cancellation and tenant scope to the API", async () => {

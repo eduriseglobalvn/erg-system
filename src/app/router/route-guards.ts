@@ -13,6 +13,7 @@ import { ELEARNING_PORTAL_HOSTS, isPortalHost, shouldRedirectLocalPortal } from 
 import { buildPortalHostUrl } from "@/app/router/portal-host-url";
 import { resolveActivePortal } from "@/app/router/portal-host-resolution";
 import { crmPaths } from "@/platform/auth/permissions/portal-route-registry";
+import { misroutedStudentHome } from "@/platform/auth/permissions/student-only";
 import {
   canonicalLmsWorkspaceHostForRuntime,
   canonicalWorkspaceForPath,
@@ -29,7 +30,7 @@ export function enforceProtectedRoute(
   const decision = resolveAuthRouteAccess(auth, { portal, permission });
   if (decision === "allow") return;
   const safeRedirect = safeLocationRedirect(location.href);
-  throwAuthRedirect(decision, portal, safeRedirect);
+  throwAuthRedirect(decision, portal, safeRedirect, auth);
 }
 
 export function enforcePermissionRoute(
@@ -40,7 +41,7 @@ export function enforcePermissionRoute(
   if (AUTH_BYPASS_ENABLED) return;
   const decision = resolveAuthRouteAccess(auth, { permission });
   if (decision === "allow") return;
-  throwAuthRedirect(decision, "shared", safeLocationRedirect(location.href));
+  throwAuthRedirect(decision, "shared", safeLocationRedirect(location.href), auth);
 }
 
 /** Enforce the canonical route/resource/action matrix for a workspace. */
@@ -51,22 +52,18 @@ export function enforceWorkspaceRoute(
 ): void {
   if (AUTH_BYPASS_ENABLED) return;
   if (getDesktopRuntime() === "tauri" && !isDesktopWorkspace(workspace)) {
-    throwAuthRedirect("access-denied", workspace, safeLocationRedirect(location.href));
+    throwAuthRedirect("access-denied", workspace, safeLocationRedirect(location.href), auth);
   }
   const entry = routePermissionForPath(location.pathname ?? new URL(location.href, "https://erg.local").pathname, workspace);
   const safeRedirect = safeLocationRedirect(location.href);
   if (!entry) {
     // A missing matrix row is a configuration/security failure, not a reason
     // to let a wildcard or platform role through an arbitrary route.
-    throwAuthRedirect("access-denied", workspace, safeRedirect);
+    throwAuthRedirect("access-denied", workspace, safeRedirect, auth);
   }
   const decisions = routeAcceptedPermissions(entry).map((permission) => resolveAuthRouteAccess(auth, { workspace, permission }));
   if (decisions.includes("allow")) return;
-  // A student who opens a teacher/admin page goes to the student portal instead of an access-denied page.
-  if (workspace !== "STUDENT" && decisions[0] === "access-denied" && auth.hasPermission("elearning.assignment.read_self")) {
-    throw redirect({ to: "/student", replace: true });
-  }
-  throwAuthRedirect(decisions[0], workspace, safeRedirect);
+  throwAuthRedirect(decisions[0], workspace, safeRedirect, auth);
 }
 
 const CRM_ROUTE_PATHS: ReadonlySet<string> = new Set(crmPaths.map((path) => `/${path}`));
@@ -130,10 +127,22 @@ function storedAuthRouteState() {
   return createAuthRouteState({ account: getCurrentAccount(portal), session: getAuthScope(portal).session, apiBacked: hasApiBase() });
 }
 
-function throwAuthRedirect(decision: ReturnType<typeof resolveAuthRouteAccess>, portal: string, safeRedirect: string): never {
+/** A signed-in learner-only account outside the student portal goes to the student home (STU-02), never an error or onboarding page. */
+export function redirectMisroutedStudent(auth: AuthRouteState, pathname: string): void {
+  const home = auth.authenticated ? misroutedStudentHome(auth, pathname) : null;
+  if (home) throw redirect({ to: home, replace: true });
+}
+
+function throwAuthRedirect(
+  decision: ReturnType<typeof resolveAuthRouteAccess>,
+  portal: string,
+  safeRedirect: string,
+  auth?: AuthRouteState,
+): never {
   if (decision === "login") {
     throw redirect({ to: "/login", search: { redirect: safeRedirect } });
   }
+  if (auth) redirectMisroutedStudent(auth, safeRedirect.split(/[?#]/, 1)[0]);
   if (decision === "onboarding") {
     throw redirect({ to: "/onboarding", search: { redirect: safeRedirect } });
   }
