@@ -101,6 +101,8 @@ query LmsClassWorkspace($input: ClassWorkspaceInput!) {
           email
           status
           updatedAt
+          averagePercent
+          completedAssignmentCount
         }
         page
         size
@@ -188,9 +190,10 @@ export function mapClassWorkspaceToStudents(
       // The API has no per-student progress; this is a status-based placeholder, so the UI shows "—" (hasProgressData=false).
       progressRate: status === "ahead" ? 88 : status === "steady" ? 62 : 28,
       hasProgressData: false,
-      averageScore: Math.round(workspace.scoreSummary?.averagePercent ?? 0),
+      // Per student (latest hand-in per assignment, averaged by the backend); 0 when none or no lms.grade.read.
+      averageScore: Math.round(student.averagePercent ?? 0),
       streakDays: 0,
-      completedAssignments: Math.round(workspace.scoreSummary?.completedAttemptCount ?? 0),
+      completedAssignments: student.completedAssignmentCount ?? 0,
       status,
       mentorNote: student.status === "inactive" ? "Cần kiểm tra trạng thái tài khoản học sinh." : "Theo dõi tiến độ học tập theo lớp hiện tại.",
       lastActivity: student.updatedAt ? formatDateLabel(student.updatedAt) : "Chưa có dữ liệu",

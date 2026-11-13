@@ -13,6 +13,9 @@ export type LmsStudent = {
   email?: string | null;
   status?: string | null;
   updatedAt?: string | null;
+  /** Class workspace roster only: this student's own score in the class. */
+  averagePercent?: number | null;
+  completedAssignmentCount?: number | null;
 };
 
 export type LmsAssignmentResource = {
