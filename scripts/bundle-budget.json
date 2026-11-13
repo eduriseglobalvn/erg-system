@@ -5,10 +5,14 @@
   "tanstack": 305000,
   "dnd": 60000,
   "icons": 24000,
-  "virtual": 3000,
+  "virtual": 26500,
   "radix": 3000,
+  "shell": 284000,
+  "mui": 585000,
+  "react": 218000,
   "_entry_gzip_budget": 102400,
   "_precache_entry_budget": 115,
   "_precache_byte_budget": 2000000,
-  "_performance_note": "The 100 KiB target applies to the Vite entry chunk. The current shared MUI/auth/i18n modulepreload graph is reported separately until the shell dependency split is implemented. PWA precache is bounded independently and must not contain lazy route JavaScript. Entry budget raised 80 -> 115 on 2026-11-13: Vite 8.1.6 (rolldown 1.1) splits small shared shell modules out of the entry (79 -> 109 entries, same ~1.6 MB precache bytes, entry 288 -> 234 KB)."
+  "_performance_note": "The 100 KiB target applies to the Vite entry chunk. The current shared MUI/auth/i18n modulepreload graph is reported separately until the shell dependency split is implemented. PWA precache is bounded independently and must not contain lazy route JavaScript. Entry budget raised 80 -> 115 on 2026-11-13: Vite 8.1.6 (rolldown 1.1) splits small shared shell modules out of the entry (79 -> 109 entries, same ~1.6 MB precache bytes, entry 288 -> 234 KB).",
+  "_chunking_note": "2026-11-13 student-bundle: vite.config.ts codeSplitting groups. `shell` = all app code the entry statically needs (was ~40 tiny chunks; `index` is now a ~1 KB bootstrap), `mui` covers mui (entry) + mui-lazy (MUI/icons shared by 2+ lazy routes), `react` split out of `dnd`. `virtual` now also holds @tanstack/virtual-core (moved out of the eager `tanstack` chunk)."
 }

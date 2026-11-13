@@ -4,13 +4,13 @@ import { useRemainingSeconds } from "@/components/quiz/player-countdown";
 import { AnswerKeyCard, SubmitConfirmDialog } from "@/components/quiz/player-shell-parts";
 import { PracticeFeedbackPanel } from "@/components/quiz/practice-feedback-panel";
 import { PlayerOfflineBanner } from "@/components/quiz/player-status";
-import { QuestionRenderer } from "@/components/quiz/question-renderer";
+import { preloadDragQuestionKinds, QuestionRenderer } from "@/components/quiz/question-renderer";
 import { QuizThemeSurface } from "@/components/quiz/quiz-theme-surface";
 import { LocalRetryPlayer } from "@/components/quiz/review/local-retry-player";
 import { ReviewLayout } from "@/components/quiz/review/review-layout";
 import { attemptElapsedSeconds } from "@/components/quiz/review/review-model";
 import type { Question } from "@/domain/quiz/types";
-import type { ComponentProps } from "react";
+import { useEffect, type ComponentProps } from "react";
 import { ergEnterpriseTokens as tk } from "@/themes/erg-enterprise-tokens";
 import type { PlayerReady } from "./use-player-ready-handlers";
 import type { PlayerRuntime } from "./use-player-runtime";
@@ -29,6 +29,7 @@ type QuestionBodyProps = {
 };
 
 export function PlayerQuestionBody({ online, question: readyQuestion, value, onChange, isTrainingMode, submitted, result, submitError }: QuestionBodyProps) {
+  useEffect(() => preloadDragQuestionKinds(), []);
   return (
     <>
       {online ? null : <PlayerOfflineBanner />}
