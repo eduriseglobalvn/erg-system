@@ -1,9 +1,11 @@
 import { useEffect } from "react";
 import { isRunningStandalone } from "@/hooks/use-install-prompt";
 import { getCurrentAccount } from "@/platform/auth/api/auth-storage";
-import { readStoredRefreshSession } from "@/platform/auth/api/auth-token-storage";
+import { readStoredRefreshSession, STUDENT_LOCAL_SESSION_KEY } from "@/platform/auth/api/auth-token-storage";
+import { isSharedDevice } from "@/platform/auth/api/shared-device";
 import { getCurrentStudentSession } from "@/platform/auth/api/student-auth-storage";
 import { getDesktopRuntime } from "@/platform/desktop";
+import { getPersistedJsonValue } from "@/stores/persisted-store";
 
 /** A browser tab signs out after this long without any interaction (installed PWA and desktop app are exempt). */
 export const IDLE_SIGN_OUT_MS = 156 * 60 * 1000;
@@ -30,6 +32,11 @@ function hasSession() {
   return Boolean(getCurrentAccount() || getCurrentStudentSession() || readStoredRefreshSession());
 }
 
+/** A student who ticked "remember me" on a personal device is not signed out for idling; the backend still caps the session at 90 days. */
+export function isIdleSignOutExempt() {
+  return Boolean(getPersistedJsonValue<{ refreshToken?: string } | null>(STUDENT_LOCAL_SESSION_KEY, null)?.refreshToken) && !isSharedDevice();
+}
+
 /** Calls `onExpire` once the signed-in user has been idle (in every tab) for IDLE_SIGN_OUT_MS. The clock is shared via localStorage so it survives reloads and closing the browser. */
 export function useIdleSignOut(onExpire: () => void) {
   useEffect(() => {
@@ -48,7 +55,7 @@ export function useIdleSignOut(onExpire: () => void) {
     }
 
     function check() {
-      if (!hasSession()) {
+      if (!hasSession() || isIdleSignOutExempt()) {
         touch();
         return;
       }

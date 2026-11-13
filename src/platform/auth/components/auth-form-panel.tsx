@@ -33,6 +33,7 @@ import { useI18n } from "@/platform/i18n";
 
 export function AuthFormPanel({
   rememberMe,
+  rememberMeDisabled = false,
   showPassword,
   loginForm,
   onRememberMeChange,
@@ -46,6 +47,8 @@ export function AuthFormPanel({
   credentialPlaceholder = LOGIN_CREDENTIAL_PLACEHOLDER,
 }: {
   rememberMe: boolean;
+  /** Shared computer: the box is replaced by a note and the login is never remembered. */
+  rememberMeDisabled?: boolean;
   showPassword: boolean;
   loginForm: LoginFormState;
   onRememberMeChange: (rememberMe: boolean) => void;
@@ -152,7 +155,11 @@ export function AuthFormPanel({
         </loginTanstackForm.Field>
 
         <Box sx={{ alignItems: "center", display: "flex", gap: 1.5, justifyContent: "space-between" }}>
-          <FormControlLabel control={<Checkbox checked={rememberMe} onChange={(event) => onRememberMeChange(event.target.checked)} />} label={t("auth.rememberMe")} slotProps={{ typography: { variant: "caption" } }} sx={{ color: "text.secondary", m: 0, minHeight: 44 }} />
+          {rememberMeDisabled ? (
+            <Typography color="text.secondary" variant="caption">Máy dùng chung: không ghi nhớ đăng nhập</Typography>
+          ) : (
+            <FormControlLabel control={<Checkbox checked={rememberMe} onChange={(event) => onRememberMeChange(event.target.checked)} />} label={t("auth.rememberMe")} slotProps={{ typography: { variant: "caption" } }} sx={{ color: "text.secondary", m: 0, minHeight: 44 }} />
+          )}
           <ButtonBase
             sx={{ color: "primary.main", minHeight: 44, px: 1, typography: "caption", "&:hover": { color: "primary.dark", textDecoration: "underline" } }}
             onClick={onForgotPassword}

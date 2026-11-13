@@ -73,15 +73,24 @@ export async function refreshStoredAuthSession(portal?: StoredAuthSession["porta
   const inFlight = inFlightRefreshRequests.get(key);
   if (inFlight) return inFlight;
 
-  const request = refreshStoredAuthSessionOnce(session, portal);
+  const request = withRefreshLock(() => refreshStoredAuthSessionOnce(portal));
   inFlightRefreshRequests.set(key, request);
   request.finally(() => inFlightRefreshRequests.delete(key));
   return request;
 }
 
-async function refreshStoredAuthSessionOnce(session: NonNullable<ReturnType<typeof readStoredRefreshSession>>, portal?: StoredAuthSession["portal"]) {
+/** One refresh at a time across tabs: the backend treats a reused rotated refresh token as theft and revokes every session of the account. */
+export function withRefreshLock<T>(run: () => Promise<T>): Promise<T> {
+  const locks = typeof navigator === "undefined" ? undefined : navigator.locks;
+  // shortcut: Safari < 15.4 has no Web Locks, so two tabs there can still race; fine while iOS 15.8 is the floor.
+  return locks ? locks.request("erg-auth-refresh", run) : run();
+}
+
+async function refreshStoredAuthSessionOnce(portal?: StoredAuthSession["portal"]) {
   const apiBase = getApiBase();
-  if (!apiBase) return null;
+  // Read inside the lock: another tab may have rotated the token while this one waited.
+  const session = readStoredRefreshSession(portal);
+  if (!apiBase || !session?.refreshToken) return null;
 
   try {
     const headers = new Headers({
@@ -127,7 +136,8 @@ async function refreshStoredAuthSessionOnce(session: NonNullable<ReturnType<type
       error instanceof ApiClientError
         ? error
         : new ApiClientError(error instanceof Error ? error.message : "Cannot refresh authentication session.", "AUTH_REFRESH_FAILED", 401);
-    invalidateStoredAuthSession(authError);
+    // Only a server that answered and refused the token ends the session; offline, timeout, 429 or 5xx keep it for the next try.
+    if (authError.status >= 400 && authError.status < 500 && authError.status !== 408 && authError.status !== 429) invalidateStoredAuthSession(authError);
     return null;
   }
 }

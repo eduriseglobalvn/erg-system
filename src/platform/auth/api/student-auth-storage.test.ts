@@ -44,6 +44,9 @@ test("student login sends elearning portal to backend and stores returned token"
     password: "password123",
     rememberMe: true,
     portal: "elearning",
+    // Lets the backend recognise this device instead of replacing the student's other sessions.
+    deviceId: expect.any(String),
+    deviceFingerprint: expect.any(String),
   });
   expect(session.accessToken).toBe("student-access-token");
   expect(JSON.parse(window.sessionStorage.getItem(STUDENT_TEMP_SESSION_KEY) ?? "{}")).toMatchObject({
