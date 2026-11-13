@@ -28,6 +28,7 @@ import {
   refreshStoredAuthSession,
   shouldRefreshAfterResponse,
 } from "@/lib/api-client/refresh";
+export { withRefreshLock } from "@/lib/api-client/refresh";
 import {
   getApiResponseRequestId,
   getEnvelopeMessage,

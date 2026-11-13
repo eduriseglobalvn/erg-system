@@ -129,6 +129,13 @@ export function updateStoredAuthSessionTokens(
 ) {
   if (!tokens.accessToken) return null;
 
+  const student = portal === "elearning" ? readStudentRefreshSession() : null;
+  if (student) {
+    const { accountId: _accountId, ...rest } = student;
+    persistStudentSession({ ...rest, accessToken: tokens.accessToken, refreshToken: tokens.refreshToken ?? rest.refreshToken, expiresAt: tokens.expiresAt ?? rest.expiresAt });
+    return student;
+  }
+
   const session = readStoredRefreshSession(portal) ?? readRawStoredAuthSession(portal);
   if (!session) return null;
 
@@ -258,10 +265,34 @@ function readRawStoredAuthSession(portal?: StoredAuthSession["portal"]): StoredA
   if (targetPortal === "elearning") {
     // Refreshing a shared teacher/admin credential must update its original
     // portal slot; writeStoredAuthIdentity uses session.portal for that.
-    return candidates.find(canRefreshStudentViewerSession) ?? null;
+    return readStudentRefreshSession() ?? candidates.find(canRefreshStudentViewerSession) ?? null;
   }
 
   return candidates.find((session) => sessionMatchesRequestedPortal(session, targetPortal)) ?? null;
+}
+
+type StoredStudentSession = StoredAuthSession & { id?: string; email?: string; rememberMe?: boolean };
+
+/** Access token stays in sessionStorage; "remember me" keeps only the refresh token across restarts. */
+export function persistStudentSession(session: StoredStudentSession) {
+  window.sessionStorage.setItem(STUDENT_TEMP_SESSION_KEY, JSON.stringify(session));
+  if (session.rememberMe && session.refreshToken) setPersistedJsonValue(STUDENT_LOCAL_SESSION_KEY, { ...session, accessToken: undefined });
+  else removePersistedJsonValue(STUDENT_LOCAL_SESSION_KEY);
+}
+
+/** The student's own refresh credential. The remembered copy is shared by all tabs, so it holds the newest rotated token. */
+function readStudentRefreshSession(): StoredAuthIdentity | null {
+  const current = parseJson<StoredStudentSession | null>(window.sessionStorage.getItem(STUDENT_TEMP_SESSION_KEY), null);
+  const remembered = legacyPersistentSession<StoredStudentSession>(STUDENT_LOCAL_SESSION_KEY);
+  const session = current ?? remembered;
+  if (!session?.refreshToken) return null;
+  const sameStudent = Boolean(remembered?.refreshToken) && (!current || (remembered?.id ?? remembered?.email) === (current.id ?? current.email));
+  return {
+    ...session,
+    accountId: session.id ?? session.email ?? "student",
+    rememberMe: Boolean(session.rememberMe),
+    refreshToken: sameStudent ? remembered?.refreshToken : session.refreshToken,
+  };
 }
 
 function canRefreshStudentViewerSession(session: StoredAuthIdentity) {

@@ -372,7 +372,7 @@ function expiresInToDate(expiresIn?: number) {
   return new Date(Date.now() + expiresIn * 1000).toISOString();
 }
 
-function getLoginDeviceMetadata() {
+export function getLoginDeviceMetadata() {
   const deviceId = getOrCreateBrowserDeviceId();
   const deviceName = getDeviceName();
 

@@ -1,11 +1,13 @@
 import {
   AUTH_SESSION_FALLBACK_MAX_AGE_MS,
+  persistStudentSession,
   STUDENT_LOCAL_SESSION_KEY,
   STUDENT_TEMP_SESSION_KEY,
 } from "@/platform/auth/api/auth-token-storage";
-import { ApiClientError, apiRequest, hasApiBase, isBffAuthEnabled } from "@/lib/api-client";
+import { ApiClientError, apiRequest, hasApiBase, isBffAuthEnabled, withRefreshLock } from "@/lib/api-client";
+import { getLoginDeviceMetadata } from "@/platform/auth/api/auth-api";
 import { getApiBase } from "@/lib/platform";
-import { getPersistedJsonValue, removePersistedJsonValue, setPersistedJsonValue } from "@/stores/persisted-store";
+import { getPersistedJsonValue, removePersistedJsonValue } from "@/stores/persisted-store";
 import { getOrCreateBrowserDeviceId } from "@/platform/auth/api/browser-device-id";
 import { API_ENDPOINTS } from "@/lib/api/api-endpoints";
 import { AUTH_BYPASS_ENABLED, DEFAULT_BYPASS_STUDENT_SESSION } from "@/platform/auth/config/auth-bypass";
@@ -91,6 +93,7 @@ export async function loginStudentWithApi(input: StudentLoginInput) {
     portal: "elearning",
     method: "POST",
     body: JSON.stringify({
+      ...getLoginDeviceMetadata(),
       identifier: input.email,
       password: input.password,
       rememberMe: input.rememberMe,
@@ -123,17 +126,14 @@ export async function loginStudentWithApi(input: StudentLoginInput) {
   return session;
 }
 
-/** Access token stays in sessionStorage; "remember me" keeps only the refresh token across restarts. */
-function persistStudentSession(session: StudentSession) {
-  window.sessionStorage.setItem(STUDENT_TEMP_SESSION_KEY, JSON.stringify(session));
-  if (session.rememberMe && session.refreshToken) setPersistedJsonValue(STUDENT_LOCAL_SESSION_KEY, { ...session, accessToken: undefined });
-  else removePersistedJsonValue(STUDENT_LOCAL_SESSION_KEY);
-}
-
 /** Startup: trade a remembered refresh token for a fresh student session. A rejected token signs out; a network error keeps it for the next start. */
 export async function restoreRememberedStudentSession() {
   if (!canUseStorage() || !hasApiBase() || isBffAuthEnabled() || getCurrentStudentSession()) return;
+  await withRefreshLock(restoreRememberedStudentSessionOnce);
+}
 
+async function restoreRememberedStudentSessionOnce() {
+  // Read inside the lock: a tab that started at the same time may already have rotated the token.
   const remembered = getPersistedJsonValue<StudentSession | null>(STUDENT_LOCAL_SESSION_KEY, null);
   if (!remembered?.refreshToken) return;
 
