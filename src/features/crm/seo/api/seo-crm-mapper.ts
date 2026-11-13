@@ -1,3 +1,4 @@
+import { formatDateVi, viDateToInput } from "@/domain/formatters/format-date";
 import type { components } from "@/lib/api/generated/erg-openapi";
 import type {
   SeoCostLine,
@@ -158,7 +159,8 @@ function optionalString(value: unknown) {
 
 function dateOnly(value: unknown) {
   const text = optionalString(value);
-  return text.length >= 10 ? text.slice(0, 10) : text;
+  // A timestamp takes its local (GMT+7) day; slicing the UTC string loses a day from 00:00 to 07:00.
+  return text.length > 10 ? viDateToInput(formatDateVi(text)) : text;
 }
 
 function finiteNumber(value: unknown) {
