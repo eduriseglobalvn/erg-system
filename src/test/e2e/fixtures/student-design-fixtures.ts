@@ -7,10 +7,10 @@ export const LEVEL_UP_NOW = "2026-11-16T07:00:00+07:00";
 // Assignment board of the canvas (H10/H09/H11 sources + gen-tabs.js): 4 todo, 5 handed in, 2 overdue. Dates are +07:00.
 const asg = (id: string, o: Record<string, unknown>) => ({
   id, quizId: `quiz-${id}`, status: "not_started", scorePercent: null, submittedAt: null, answeredCount: null, score: null, maxScore: null,
-  attemptCount: 0, onTime: null, minutesBeforeDue: null, xpReward: 0, closed: false, kind: "PRACTICE", teacherName: "cô Trần Thị Hạnh", ...o,
+  attemptCount: 0, onTime: null, minutesBeforeDue: null, xpReward: 0, closed: false, handedIn: false, kind: "PRACTICE", teacherName: "cô Trần Thị Hạnh", ...o,
 });
 const done = (id: string, title: string, subjectName: string, q: number, at: string, before: number, pct: number, score: number, max: number, tries: number, kind = "PRACTICE") =>
-  asg(id, { title, subjectName, questionCount: q, totalQuestions: q, status: "submitted", submittedAt: at, dueAt: new Date(Date.parse(at) + before * 60_000).toISOString(), scorePercent: pct, score, maxScore: max, attemptCount: tries, onTime: true, minutesBeforeDue: before, kind });
+  asg(id, { title, subjectName, questionCount: q, totalQuestions: q, status: "submitted", handedIn: true, submittedAt: at, dueAt: new Date(Date.parse(at) + before * 60_000).toISOString(), scorePercent: pct, score, maxScore: max, attemptCount: tries, onTime: true, minutesBeforeDue: before, kind });
 export const assignments = [
   asg("a1", { title: "Luyện tập: Phương trình bậc nhất một ẩn", subjectName: "Toán", questionCount: 20, totalQuestions: 20, estimatedMinutes: 15, status: "in_progress", answeredCount: 12, dueAt: "2026-11-12T20:00:00+07:00", xpReward: 50, attemptCount: 1 }),
   asg("a2", { title: "Kiểm tra 15 phút: Đơn thức", subjectName: "Toán", questionCount: 10, totalQuestions: 10, estimatedMinutes: 15, kind: "TEST", dueAt: "2026-11-12T20:00:00+07:00", xpReward: 40 }),
