@@ -33,7 +33,7 @@ export async function setupPortalNetwork(page: Page, portal: SmokePortal) {
     }
 
     const url = new URL(route.request().url());
-    if (url.pathname === API_ENDPOINTS.legacy.v1SessionsCurrent) {
+    if (url.pathname === API_ENDPOINTS.sessions.current) {
       await json(route, sessionBootstrap(portal));
       return;
     }

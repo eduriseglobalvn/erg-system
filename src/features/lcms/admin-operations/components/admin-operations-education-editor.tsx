@@ -1,7 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { useForm } from "@tanstack/react-form";
 import Building2 from "@mui/icons-material/BusinessOutlined";
-import CheckCircle from "@mui/icons-material/CheckCircleOutlined";
 import Globe from "@mui/icons-material/PublicOutlined";
 import Layers from "@mui/icons-material/LayersOutlined";
 import Mail from "@mui/icons-material/MailOutlined";
@@ -45,19 +43,13 @@ export function EditorField({ children, label, wide = false }: { children: React
 export function EducationUnitEditor({
   centers,
   classes,
-  isSaving,
   managementScope,
-  onSave,
-  successMessage,
   unit,
   units,
 }: {
   centers: ClassroomSchool[];
   classes: ClassroomSnapshot[];
-  isSaving: boolean;
   managementScope: ManagementScope;
-  onSave: (unit: LmsEducationUnitDTO) => void;
-  successMessage: string;
   unit: LmsEducationUnitDTO;
   units: LmsEducationUnitDTO[];
 }) {
@@ -74,11 +66,6 @@ export function EducationUnitEditor({
     ? "Cập nhật trung tâm và các thông tin quản lý trường trực thuộc."
     : "Cập nhật cấp hệ thống dùng chung cho toàn Admin.";
   const paceStateUpdate = usePacedStateBatch();
-  const form = useForm({
-    defaultValues: draft,
-    onSubmit: () => onSave(draft),
-  });
-
   useEffect(() => {
     paceStateUpdate(() => {
       setDraft(unit);
@@ -132,9 +119,8 @@ export function EducationUnitEditor({
             <Button type="button" variant="outlined" size="small" onClick={() => setShowAdvanced((current) => !current)} sx={{ minHeight: 36, px: 1.5, fontSize: 12, textTransform: "none" }}>
               {showAdvanced ? "Ẩn nâng cao" : "Nâng cao"}
             </Button>
-            <Button type="submit" variant="contained" size="small" disabled={isSaving || !draft.name?.trim()} sx={{ minHeight: 36, px: 1.5, fontSize: 12, textTransform: "none" }}>
-              {isSaving ? "Đang lưu..." : "Lưu"}
-            </Button>
+            {/* No POST/PATCH for education units in the backend contract yet: fields are read-only. */}
+            <LcmsStatusChip tone="amber">Chưa hỗ trợ chỉnh sửa</LcmsStatusChip>
           </>
         ) : null}
       </Stack>
@@ -159,26 +145,12 @@ export function EducationUnitEditor({
   }
 
   return (
-    <Box
-      component="form"
-      onSubmit={(event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        void form.handleSubmit();
-      }}
-      sx={{ display: "flex", height: "100%", flexDirection: "column" }}
-    >
+    <Box sx={{ display: "flex", height: "100%", flexDirection: "column" }}>
       {header}
 
       <Box sx={{ flex: 1, overflowY: "auto", bgcolor: "background.default", p: 2 }}>
         <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", "2xl": "minmax(0, 1fr) 340px" }, gap: 2 }}>
           <Stack spacing={2}>
-            {successMessage ? (
-              <Stack direction="row" spacing={1} sx={{ alignItems: "center", border: 1, borderColor: "success.light", borderRadius: 1.5, bgcolor: "success.50", color: "success.dark", px: 1.5, py: 1, fontSize: 12, fontWeight: 600 }}>
-                <CheckCircle sx={{ fontSize: 16 }} /> {successMessage}
-              </Stack>
-            ) : null}
-
             <Paper variant="outlined" sx={{ borderRadius: 2, p: 2, boxShadow: "0 8px 24px -22px rgba(15, 23, 42, 0.6)" }}>
               <Stack direction="row" spacing={1.5} sx={{ alignItems: "center", justifyContent: "space-between", borderBottom: 1, borderColor: "divider", pb: 1.5 }}>
                 <Stack direction="row" spacing={1} sx={{ alignItems: "center", color: "text.primary", fontSize: 12, fontWeight: 600, textTransform: "uppercase" }}>
@@ -191,10 +163,10 @@ export function EducationUnitEditor({
               </Stack>
               <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", xl: "minmax(0, 1fr) 190px 190px" }, gap: 1.5, mt: 2 }}>
                 <EditorField label="Tên hiển thị">
-                  <TextField size="small" fullWidth value={draft.name ?? ""} onChange={(event) => updateDraft("name", event.target.value)} placeholder="Tên trường học/trung tâm" />
+                  <TextField disabled size="small" fullWidth value={draft.name ?? ""} onChange={(event) => updateDraft("name", event.target.value)} placeholder="Tên trường học/trung tâm" />
                 </EditorField>
                 <EditorField label="Loại đơn vị">
-                  <TextField select size="small"
+                  <TextField disabled select size="small"
                     value={draft.type ?? "school"}
                     onChange={(event) => updateDraft("type", event.target.value)}
                   >
@@ -202,7 +174,7 @@ export function EducationUnitEditor({
                   </TextField>
                 </EditorField>
                 <EditorField label="Trạng thái">
-                  <TextField select size="small"
+                  <TextField disabled select size="small"
                     value={draft.status ?? "active"}
                     onChange={(event) => updateDraft("status", event.target.value)}
                   >
@@ -210,7 +182,7 @@ export function EducationUnitEditor({
                   </TextField>
                 </EditorField>
                 <EditorField label="Mô tả giới thiệu" wide>
-                  <TextField
+                  <TextField disabled
                     multiline
                     minRows={2}
                     value={draft.description ?? ""}
@@ -228,11 +200,11 @@ export function EducationUnitEditor({
                 <Mail sx={{ color: "primary.main", fontSize: 16 }} /> Thông tin liên hệ
               </Stack>
               <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))" }, gap: 1.5, mt: 1.5 }}>
-                <EditorField label="Logo URL" wide><TextField size="small" fullWidth value={draft.avatarUrl ?? ""} onChange={(event) => updateDraft("avatarUrl", event.target.value)} placeholder="https://domain.com/logo.png" /></EditorField>
-                <EditorField label="Địa chỉ chi tiết" wide><TextField size="small" fullWidth value={draft.address ?? ""} onChange={(event) => updateDraft("address", event.target.value)} placeholder="Số nhà, tên đường, phường, quận/huyện..." slotProps={{ input: { startAdornment: <InputAdornment position="start"><MapPin sx={{ color: "text.secondary", fontSize: 16 }} /></InputAdornment> } }} /></EditorField>
-                <EditorField label="Số điện thoại"><TextField size="small" fullWidth value={draft.phone ?? ""} onChange={(event) => updateDraft("phone", event.target.value)} placeholder="024xxx..." slotProps={{ input: { startAdornment: <InputAdornment position="start"><PhoneIcon sx={{ color: "text.secondary", fontSize: 16 }} /></InputAdornment> } }} /></EditorField>
-                <EditorField label="Email chính"><TextField size="small" fullWidth value={draft.email ?? ""} onChange={(event) => updateDraft("email", event.target.value)} placeholder="contact@domain.edu.vn" slotProps={{ input: { startAdornment: <InputAdornment position="start"><Mail sx={{ color: "text.secondary", fontSize: 16 }} /></InputAdornment> } }} /></EditorField>
-                <EditorField label="Website URL"><TextField size="small" fullWidth value={draft.website ?? ""} onChange={(event) => updateDraft("website", event.target.value)} placeholder="https://domain.edu.vn" slotProps={{ input: { startAdornment: <InputAdornment position="start"><Globe sx={{ color: "text.secondary", fontSize: 16 }} /></InputAdornment> } }} /></EditorField>
+                <EditorField label="Logo URL" wide><TextField disabled size="small" fullWidth value={draft.avatarUrl ?? ""} onChange={(event) => updateDraft("avatarUrl", event.target.value)} placeholder="https://domain.com/logo.png" /></EditorField>
+                <EditorField label="Địa chỉ chi tiết" wide><TextField disabled size="small" fullWidth value={draft.address ?? ""} onChange={(event) => updateDraft("address", event.target.value)} placeholder="Số nhà, tên đường, phường, quận/huyện..." slotProps={{ input: { startAdornment: <InputAdornment position="start"><MapPin sx={{ color: "text.secondary", fontSize: 16 }} /></InputAdornment> } }} /></EditorField>
+                <EditorField label="Số điện thoại"><TextField disabled size="small" fullWidth value={draft.phone ?? ""} onChange={(event) => updateDraft("phone", event.target.value)} placeholder="024xxx..." slotProps={{ input: { startAdornment: <InputAdornment position="start"><PhoneIcon sx={{ color: "text.secondary", fontSize: 16 }} /></InputAdornment> } }} /></EditorField>
+                <EditorField label="Email chính"><TextField disabled size="small" fullWidth value={draft.email ?? ""} onChange={(event) => updateDraft("email", event.target.value)} placeholder="contact@domain.edu.vn" slotProps={{ input: { startAdornment: <InputAdornment position="start"><Mail sx={{ color: "text.secondary", fontSize: 16 }} /></InputAdornment> } }} /></EditorField>
+                <EditorField label="Website URL"><TextField disabled size="small" fullWidth value={draft.website ?? ""} onChange={(event) => updateDraft("website", event.target.value)} placeholder="https://domain.edu.vn" slotProps={{ input: { startAdornment: <InputAdornment position="start"><Globe sx={{ color: "text.secondary", fontSize: 16 }} /></InputAdornment> } }} /></EditorField>
               </Box>
             </Paper>
             <Paper variant="outlined" sx={{ borderRadius: 1.5, p: 1.5 }}>
@@ -241,7 +213,7 @@ export function EducationUnitEditor({
               </Stack>
               <Box sx={{ mt: 1.5 }}>
                 <EditorField label="Thu thuộc Trung tâm quản lý">
-                  <TextField select size="small" fullWidth value={draft.parentId ?? ""} onChange={(event) => updateDraft("parentId", event.target.value)} disabled={draft.type !== "school"}>
+                  <TextField disabled select size="small" fullWidth value={draft.parentId ?? ""} onChange={(event) => updateDraft("parentId", event.target.value)}>
                     <MenuItem value="">Không liên kết trung tâm nào</MenuItem>
                     {centerOptions.map((center) => <MenuItem key={center.id} value={center.id}>{center.name}</MenuItem>)}
                   </TextField>

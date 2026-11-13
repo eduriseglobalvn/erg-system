@@ -7,7 +7,6 @@ const source = [
   "user-access-control-section-config.tsx",
   "user-access-control-member-sections.tsx",
   "user-access-control-role-section.tsx",
-  "user-access-control-access-section.tsx",
   "user-access-control-section-primitives.tsx",
 ]
   .map((fileName) => readFileSync(resolve(process.cwd(), "src/features/lcms/admin-operations/components", fileName), "utf8"))

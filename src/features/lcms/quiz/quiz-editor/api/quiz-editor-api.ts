@@ -380,7 +380,7 @@ function isQuizVersionsResponse(value: unknown): value is QuizVersionsResponse {
 }
 
 export async function createQuizEditorQuiz(input: QuizEditorCreateInput): Promise<QuizEditorCreateResult> {
-  return apiRequest<QuizEditorCreateResult>(API_ENDPOINTS.legacy.v1LcmsQuizzes, {
+  return apiRequest<QuizEditorCreateResult>(API_ENDPOINTS.lcms.quizzes, {
     body: JSON.stringify({
       title: input.title,
       subtitle: input.subtitle,
@@ -476,7 +476,7 @@ export async function forkQuizEditorVersion(input: {
 }
 
 export async function presignQuizEditorMedia(input: QuizEditorMediaPresignInput): Promise<QuizEditorMediaPresignResult> {
-  return apiRequest<QuizEditorMediaPresignResult>(API_ENDPOINTS.legacy.v1LcmsMediaPresign, {
+  return apiRequest<QuizEditorMediaPresignResult>(API_ENDPOINTS.lcms.mediaPresign, {
     body: JSON.stringify(input),
     method: "POST",
     portal: "lcms",

@@ -1,13 +1,4 @@
-import type { AccessScopeType } from "@/features/lcms/admin-operations/api/access-management-api";
-
 export type WorkspaceSection = "profile" | "roles" | "access";
-
-export type DraftPolicy = {
-  scopeType: AccessScopeType | "";
-  scopeId: string;
-  roleGroup: string;
-  modules: string[];
-};
 
 export type ProfileDraft = {
   fullName: string;

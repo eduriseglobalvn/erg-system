@@ -156,7 +156,7 @@ test("uses CRM auth for shared admin endpoints on CRM host without client portal
   const fetchMock = vi.fn(async (_url?: string | URL | Request, _init?: RequestInit) => new Response(JSON.stringify({ data: [] }), { status: 200, headers: { "Content-Type": "application/json" } }));
   vi.stubGlobal("fetch", fetchMock);
 
-  await apiRequest("/api/users/crm-1");
+  await apiRequest("/api/v1/users/crm-1");
 
   const [, init] = fetchMock.mock.calls[0] ?? [];
   const headers = (init as RequestInit).headers as Headers;

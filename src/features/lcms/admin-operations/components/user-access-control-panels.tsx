@@ -1,6 +1,4 @@
 import Search from "@mui/icons-material/Search";
-import PersonAddIcon from "@mui/icons-material/PersonAdd";
-import Button from "@mui/material/Button";
 
 import { AppSelect } from "@/components/erg-mui/app-select";
 import {
@@ -16,17 +14,13 @@ import type { WorkspaceSection } from "@/features/lcms/admin-operations/types/us
 import { cn } from "@/lib/utils";
 
 export function UserAccessHeader({
-  canCreateTeacher,
   error,
   notice,
-  onCreateTeacher,
   scopeDescription,
   users,
 }: {
-  canCreateTeacher: boolean;
   error: string;
   notice: string;
-  onCreateTeacher: () => void;
   scopeDescription?: string;
   users: AccessManagedUser[];
 }) {
@@ -42,9 +36,6 @@ export function UserAccessHeader({
           {scopeDescription ? <p className="mt-2 text-[10px] font-bold text-[var(--erg-blue)]">Cơ sở thụ hưởng: {scopeDescription}</p> : null}
         </div>
         <div className="flex flex-wrap items-center justify-end gap-3">
-          <Button disabled={!canCreateTeacher} startIcon={<PersonAddIcon />} variant="contained" onClick={onCreateTeacher}>
-            Tạo tài khoản giáo viên
-          </Button>
           <div className="grid grid-cols-3 overflow-hidden rounded-xl border border-slate-200 bg-white text-center divide-x divide-slate-200 shadow-sm shrink-0">
             <HeaderMetric label="Tổng tài khoản" value={String(users.length)} />
             <HeaderMetric label="Đang active" value={String(users.filter((user) => user.status === "ACTIVE").length)} />

@@ -8,18 +8,10 @@ import type { ClassroomSchool } from "@/domain/school/classroom-types";
  */
 export async function getCenters(): Promise<ClassroomSchool[]> {
   try {
-    const data = await apiRequest<ClassroomSchool[]>(API_ENDPOINTS.legacy.v1Centers, { portal: getBackOfficePortal() });
+    const data = await apiRequest<ClassroomSchool[]>(API_ENDPOINTS.centers, { portal: getBackOfficePortal() });
     return data;
   } catch (error) {
     if (hasApiBase()) throw error;
     return [];
   }
-}
-
-/**
- * Fetches the access scopes for a specific user.
- * Defines which centers and modules (LMS/learning resources) the user can access.
- */
-export async function getUserAccessScopes(userID: string) {
-  return apiRequest(API_ENDPOINTS.userAdmin.accessScopes(userID), { portal: getBackOfficePortal() });
 }

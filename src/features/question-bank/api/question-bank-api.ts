@@ -186,7 +186,7 @@ export async function loadQuestionBankData(
 }
 
 export async function createQuestionBankQuestion(input: QuestionBankSaveQuestionInput): Promise<QuestionBankSaveQuestionResult> {
-  return saveQuestionBankQuestion(input, "POST", API_ENDPOINTS.legacy.v1LcmsQuestions);
+  return saveQuestionBankQuestion(input, "POST", API_ENDPOINTS.lcms.questions);
 }
 
 export async function updateQuestionBankQuestion(input: QuestionBankSaveQuestionInput): Promise<QuestionBankSaveQuestionResult> {

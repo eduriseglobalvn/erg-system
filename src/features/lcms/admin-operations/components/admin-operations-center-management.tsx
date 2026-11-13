@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import Search from "@mui/icons-material/Search";
-import Button from "@mui/material/Button";
 import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
-import { listEducationUnits, updateEducationUnit, type LmsEducationUnitDTO } from "@/features/lms/infrastructure/lms-dashboard-api";
+import { listEducationUnits, type LmsEducationUnitDTO } from "@/features/lms/infrastructure/lms-dashboard-api";
 import type { ClassroomSchool, ClassroomSnapshot } from "@/domain/school/classroom-types";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { cn } from "@/lib/utils";
@@ -23,13 +22,11 @@ export function CenterManagement({
   centers,
   classes,
   managementScope,
-  onCreateUnit,
   scopeDescription,
 }: {
   centers: ClassroomSchool[];
   classes: ClassroomSnapshot[];
   managementScope: ManagementScope;
-  onCreateUnit: () => void;
   scopeDescription: string;
 }) {
   const queryClient = useQueryClient();
@@ -40,11 +37,9 @@ export function CenterManagement({
   const [keyword, setKeyword] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [sourceWarning, setSourceWarning] = useState("");
   const [unitSource, setUnitSource] = useState<"api" | "mock">("api");
-  const [successMessage, setSuccessMessage] = useState("");
   const [retryToken, setRetryToken] = useState(0);
   const debouncedKeyword = useDebouncedValue(keyword, 220);
 
@@ -100,34 +95,6 @@ export function CenterManagement({
     setRetryToken((current) => current + 1);
   }
 
-  async function handleSave(input: LmsEducationUnitDTO) {
-    setIsSaving(true);
-    setErrorMessage("");
-    setSuccessMessage("");
-    try {
-      const updated = await updateEducationUnit(input.id, {
-        address: input.address ?? "",
-        avatarUrl: input.avatarUrl ?? "",
-        description: input.description ?? "",
-        email: input.email ?? "",
-        managerUserId: input.managerUserId ?? "",
-        name: input.name,
-        parentId: input.parentId ?? "",
-        phone: input.phone ?? "",
-        status: input.status ?? "active",
-        type: input.type as "system" | "center" | "school",
-        website: input.website ?? "",
-      });
-      setUnits((current) => current.map((unit) => (unit.id === updated.id ? updated : unit)));
-      void queryClient.invalidateQueries({ queryKey: queryKeys.adminOperations.educationUnits(undefined, undefined, tenantId, accountId) });
-      setSuccessMessage("Đã lưu thông tin cơ sở giáo dục thành công.");
-    } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : "Không lưu được thông tin cơ sở giáo dục.");
-    } finally {
-      setIsSaving(false);
-    }
-  }
-
   return (
     <LcmsPanel className="flex h-full min-h-0 flex-col overflow-hidden">
       <LcmsPanelHeader
@@ -142,7 +109,6 @@ export function CenterManagement({
             <LcmsMiniStat label="Hệ thống" value={systemCount} tone="slate" />
             <LcmsMiniStat label="Trung tâm" value={centerCount} tone="emerald" />
             <LcmsMiniStat label="Trường" value={schoolCount} tone="blue" />
-            <Button variant="contained" size="small" onClick={onCreateUnit}>Tạo đơn vị</Button>
           </>
         }
       />
@@ -204,7 +170,6 @@ export function CenterManagement({
                 type="button"
                 onClick={() => {
                   setSelectedUnitId(unit.id);
-                  setSuccessMessage("");
                   setErrorMessage("");
                 }}
                 className={cn(
@@ -241,10 +206,7 @@ export function CenterManagement({
               units={units}
               centers={centers}
               classes={classes}
-              isSaving={isSaving}
               managementScope={managementScope}
-              successMessage={successMessage}
-              onSave={handleSave}
             />
           ) : (
             <div className="grid h-full place-items-center px-6 text-center">

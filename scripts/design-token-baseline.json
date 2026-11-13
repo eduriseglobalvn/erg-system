@@ -385,7 +385,7 @@
   },
   "src/features/lcms/admin-operations/components/admin-operations-education-editor.tsx": {
     "hex": 0,
-    "font": 30
+    "font": 26
   },
   "src/features/lcms/admin-operations/components/admin-operations-insight.tsx": {
     "hex": 15,
@@ -394,14 +394,6 @@
   "src/features/lcms/admin-operations/components/admin-operations-workspace.tsx": {
     "hex": 2,
     "font": 0
-  },
-  "src/features/lcms/admin-operations/components/create-education-unit-workspace.tsx": {
-    "hex": 3,
-    "font": 0
-  },
-  "src/features/lcms/admin-operations/components/create-teacher-account-dialog.tsx": {
-    "hex": 0,
-    "font": 4
   },
   "src/features/lcms/admin-operations/components/curriculum-excel-import-dialog.tsx": {
     "hex": 15,
@@ -571,10 +563,6 @@
     "hex": 0,
     "font": 7
   },
-  "src/features/lcms/admin-operations/components/user-access-control-access-section.tsx": {
-    "hex": 0,
-    "font": 32
-  },
   "src/features/lcms/admin-operations/components/user-access-control-member-sections.tsx": {
     "hex": 0,
     "font": 30
@@ -593,7 +581,7 @@
   },
   "src/features/lcms/admin-operations/components/user-access-control-section-primitives.tsx": {
     "hex": 0,
-    "font": 15
+    "font": 10
   },
   "src/features/lcms/components/admin-google-calendar-workspace.tsx": {
     "hex": 33,
@@ -939,10 +927,6 @@
     "hex": 0,
     "font": 7
   },
-  "src/features/profile/components/avatar-crop-dialog.tsx": {
-    "hex": 4,
-    "font": 2
-  },
   "src/features/profile/components/profile-page.tsx": {
     "hex": 1,
     "font": 3
@@ -956,12 +940,8 @@
     "font": 12
   },
   "src/features/profile/components/profile-sidebar.tsx": {
-    "hex": 5,
-    "font": 12
-  },
-  "src/features/profile/utils/profile-avatar.ts": {
-    "hex": 1,
-    "font": 0
+    "hex": 4,
+    "font": 11
   },
   "src/features/question-bank/components/question-bank-primitives.tsx": {
     "hex": 7,

@@ -194,7 +194,7 @@ export async function updateNotificationPreferences(input: { portal?: Notificati
     return setMockNotificationPreferences(portal, input.preferences);
   }
 
-  return apiRequest<NotificationPreferenceResponse[]>(API_ENDPOINTS.legacy.v1NotificationPreferences, {
+  return apiRequest<NotificationPreferenceResponse[]>(API_ENDPOINTS.notifications.preferences, {
     method: "PUT",
     body: JSON.stringify({
       portal,

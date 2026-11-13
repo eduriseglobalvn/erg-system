@@ -70,20 +70,6 @@ test("scopes admin operation read caches by tenant", () => {
     "workspace",
     120,
   ]);
-  expect(queryKeys.adminOperations.userAccess.options("tenant-a")).toEqual([
-    "admin-operations",
-    "user-access",
-    "tenant-a",
-    "anonymous",
-    "options",
-  ]);
-  expect(queryKeys.adminOperations.userAccess.provision("tenant-a")).toEqual([
-    "admin-operations",
-    "user-access",
-    "tenant-a",
-    "anonymous",
-    "provision",
-  ]);
 });
 
 test("scopes question-bank shared workspace key by tenant", () => {
