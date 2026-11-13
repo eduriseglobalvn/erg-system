@@ -31,4 +31,10 @@ export function injectFontDisplaySwap() {
     }
   `;
   document.head.appendChild(style);
+
+  // Non-blocking Google Fonts stylesheet; index.html cannot do this with an inline onload under the CSP.
+  const quizFonts = document.createElement("link");
+  quizFonts.rel = "stylesheet";
+  quizFonts.href = "https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500..700&family=Public+Sans:wght@400;500;600;700;800&display=swap";
+  document.head.appendChild(quizFonts);
 }
