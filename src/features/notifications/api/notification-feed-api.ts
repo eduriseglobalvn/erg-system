@@ -19,17 +19,9 @@ import {
   normalizePortal,
   toApiPortal,
 } from "./notification-mappers";
-import {
-  getMockNotificationFeed,
-  getMockNotificationPreferences,
-  getMockNotificationRecord,
-  getMockUnreadCount,
-  mapMockRecordToDetail,
-  markMockAllNotificationsRead,
-  markMockNotificationArchived,
-  markMockNotificationRead,
-  setMockNotificationPreferences,
-} from "./notification-mock-store";
+
+// DEV is inlined at build time, so production bundles drop this branch and the fixture chunk with it.
+const loadMockStore = () => (import.meta.env.DEV && runtimeFixturesEnabled() ? import("./notification-mock-store") : undefined);
 
 type AckResult = components["schemas"]["AckResponse"];
 
@@ -39,8 +31,9 @@ export async function fetchNotificationFeed(input: { page?: number; portal?: Not
   const size = clampSize(input.size ?? 20);
   const status = normalizeNotificationStatus(input.status);
 
-  if (runtimeFixturesEnabled()) {
-    return getMockNotificationFeed(portal, { page, size, status });
+  const mock = await loadMockStore();
+  if (mock) {
+    return mock.getMockNotificationFeed(portal, { page, size, status });
   }
 
   const search = new URLSearchParams();
@@ -60,8 +53,9 @@ export async function fetchNotificationFeed(input: { page?: number; portal?: Not
 export async function fetchUnreadNotificationCount(portal: NotificationPortal = "lms", signal?: AbortSignal) {
   const normalizedPortal = normalizePortal(portal);
 
-  if (runtimeFixturesEnabled()) {
-    return { unread: getMockUnreadCount(normalizedPortal) };
+  const mock = await loadMockStore();
+  if (mock) {
+    return { unread: mock.getMockUnreadCount(normalizedPortal) };
   }
 
   const search = new URLSearchParams();
@@ -79,12 +73,13 @@ export async function fetchNotificationDetail(notificationId: string, portal: No
 
   const normalizedPortal = normalizePortal(portal);
 
-  if (runtimeFixturesEnabled()) {
-    const record = getMockNotificationRecord(normalizedPortal, notificationId);
+  const mock = await loadMockStore();
+  if (mock) {
+    const record = mock.getMockNotificationRecord(normalizedPortal, notificationId);
     if (!record) {
       throw new Error("Notification not found.");
     }
-    return mapMockRecordToDetail(record);
+    return mock.mapMockRecordToDetail(record);
   }
 
   const search = new URLSearchParams();
@@ -104,8 +99,9 @@ export async function markNotificationRead(notificationId: string, portal: Notif
 
   const normalizedPortal = normalizePortal(portal);
 
-  if (runtimeFixturesEnabled()) {
-    markMockNotificationRead(normalizedPortal, notificationId);
+  const mock = await loadMockStore();
+  if (mock) {
+    mock.markMockNotificationRead(normalizedPortal, notificationId);
     return { read: true, updated: 1 };
   }
 
@@ -125,8 +121,9 @@ export async function ackNotification(notificationId: string, portal: Notificati
 
   const normalizedPortal = normalizePortal(portal);
 
-  if (runtimeFixturesEnabled()) {
-    markMockNotificationRead(normalizedPortal, notificationId);
+  const mock = await loadMockStore();
+  if (mock) {
+    mock.markMockNotificationRead(normalizedPortal, notificationId);
     return;
   }
 
@@ -141,8 +138,9 @@ export async function ackNotification(notificationId: string, portal: Notificati
 export async function markAllNotificationsRead(portal: NotificationPortal = "lms") {
   const normalizedPortal = normalizePortal(portal);
 
-  if (runtimeFixturesEnabled()) {
-    return { read: true, updated: markMockAllNotificationsRead(normalizedPortal) };
+  const mock = await loadMockStore();
+  if (mock) {
+    return { read: true, updated: mock.markMockAllNotificationsRead(normalizedPortal) };
   }
 
   const search = new URLSearchParams();
@@ -160,8 +158,9 @@ export async function archiveNotification(notificationId: string, portal: Notifi
 
   const normalizedPortal = normalizePortal(portal);
 
-  if (runtimeFixturesEnabled()) {
-    markMockNotificationArchived(normalizedPortal, notificationId);
+  const mock = await loadMockStore();
+  if (mock) {
+    mock.markMockNotificationArchived(normalizedPortal, notificationId);
     return { archived: true };
   }
 
@@ -176,8 +175,9 @@ export async function archiveNotification(notificationId: string, portal: Notifi
 export async function fetchNotificationPreferences(portal: NotificationPortal = "lms") {
   const normalizedPortal = normalizePortal(portal);
 
-  if (runtimeFixturesEnabled()) {
-    return getMockNotificationPreferences(normalizedPortal);
+  const mock = await loadMockStore();
+  if (mock) {
+    return mock.getMockNotificationPreferences(normalizedPortal);
   }
 
   const search = new URLSearchParams();
@@ -190,8 +190,9 @@ export async function fetchNotificationPreferences(portal: NotificationPortal = 
 export async function updateNotificationPreferences(input: { portal?: NotificationPortal; preferences: NotificationPreferenceResponse[] }) {
   const portal = normalizePortal(input.portal);
 
-  if (runtimeFixturesEnabled()) {
-    return setMockNotificationPreferences(portal, input.preferences);
+  const mock = await loadMockStore();
+  if (mock) {
+    return mock.setMockNotificationPreferences(portal, input.preferences);
   }
 
   return apiRequest<NotificationPreferenceResponse[]>(API_ENDPOINTS.notifications.preferences, {

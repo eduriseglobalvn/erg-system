@@ -209,3 +209,25 @@ test("uses the admin portal for admin notification endpoints", async () => {
     topicName: "t_erg_portal_lms",
   });
 });
+
+test("reports an API failure instead of falling back to fake notifications when fixtures are off", async () => {
+  vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
+  vi.stubEnv("VITE_ENABLE_RUNTIME_FIXTURES", "false");
+  storePortalSession("lms");
+  const fetchMock = vi.fn(async () => new Response(JSON.stringify({ error: { code: "INTERNAL", message: "boom" } }), { status: 500, headers: { "Content-Type": "application/json" } }));
+  vi.stubGlobal("fetch", fetchMock);
+
+  await expect(fetchNotificationFeed({ portal: "lms" })).rejects.toMatchObject({ status: 500 });
+  expect(fetchMock).toHaveBeenCalledTimes(1);
+});
+
+test("serves the mock inbox without calling the API when dev runtime fixtures are on", async () => {
+  vi.stubEnv("VITE_ENABLE_RUNTIME_FIXTURES", "true");
+  const fetchMock = vi.fn();
+  vi.stubGlobal("fetch", fetchMock);
+
+  const page = await fetchNotificationFeed({ portal: "lms" });
+
+  expect(page.items.length).toBeGreaterThan(0);
+  expect(fetchMock).not.toHaveBeenCalled();
+});

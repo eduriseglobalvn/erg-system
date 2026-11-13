@@ -40,6 +40,11 @@ jobs:
           if grep -rEl 'DEFAULT_BYPASS|dev-bypass|dev-admin-id|dev-student-id' dist; then
             echo "::error::Dev auth bypass fixtures leaked into the production bundle"; exit 1
           fi
+      - name: Bundle must not contain the notification fixtures
+        run: |
+          if grep -rl 'recipient-system-schedule-updated' dist; then
+            echo "::error::Notification mock fixtures leaked into the production bundle"; exit 1
+          fi
       - name: Warn when mock fixtures are in the bundle (P0-6 debt, not yet blocking)
         run: |
           if grep -rEl 'sessionId:`mock-|source:`mock`' dist/assets; then
