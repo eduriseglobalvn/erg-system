@@ -10,6 +10,9 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
 
+import { ErgTierChip, ErgTierFrame } from "@/components/erg-mui/erg-tier";
+import { tierLabel } from "@/domain/student-tier/tiers";
+import { asTier } from "@/features/elearning/student-tier/tier-format";
 import { ErgDataTableShell, ErgTable } from "@/components/erg-mui/erg-table";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 import type { ClassLeaderboardEntry } from "@/features/elearning/class-leaderboard/api/class-leaderboard-api";
@@ -66,6 +69,7 @@ export function ClassLeaderboardTable({ entries }: { entries: readonly ClassLead
           {entries.map((entry, index) => {
             const name = entry.studentName || "Học sinh";
             const medal = medalColor(entry.rank);
+            const tier = asTier(entry.tierKey);
             return (
               <TableRow
                 aria-current={entry.isViewer ? "true" : undefined}
@@ -77,12 +81,15 @@ export function ClassLeaderboardTable({ entries }: { entries: readonly ClassLead
                 </TableCell>
                 <TableCell>
                   <Stack direction="row" spacing={1.25} sx={{ alignItems: "center", minWidth: 0 }}>
-                    <Avatar sx={{ bgcolor: entry.isViewer ? "primary.main" : t.color.surfaceSubtle, color: entry.isViewer ? "primary.contrastText" : "text.secondary", height: 32, typography: "caption", width: 32 }}>
-                      {getInitials(name)}
-                    </Avatar>
+                    <ErgTierFrame tier={asTier(entry.frameKey)} size={32}>
+                      <Avatar sx={{ bgcolor: entry.isViewer ? "primary.main" : t.color.surfaceSubtle, color: entry.isViewer ? "primary.contrastText" : "text.secondary", height: 32, typography: "caption", width: 32 }}>
+                        {getInitials(name)}
+                      </Avatar>
+                    </ErgTierFrame>
                     <Typography noWrap variant="body2" sx={{ color: entry.isViewer ? "primary.main" : "text.primary", fontWeight: entry.isViewer ? "fontWeightMedium" : undefined }}>
                       {name}{entry.isViewer ? " (bạn)" : ""}
                     </Typography>
+                    {tier ? <ErgTierChip tier={tier}>{tierLabel(tier, entry.division)}</ErgTierChip> : null}
                   </Stack>
                 </TableCell>
                 <TableCell align="right"><StreakDays days={entry.streakDays} /></TableCell>

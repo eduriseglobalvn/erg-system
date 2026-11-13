@@ -8,7 +8,8 @@ query ElearningStudentClassLeaderboard($input: StudentClassLeaderboardInput) {
       scope
       periodEndsAt
       viewerHidden
-      entries { rank studentId studentName xp streakDays rankChange isViewer }
+      me { rank size xp gradeRank gradeSize xpToNextRank nextRankName }
+      entries { rank studentId studentName xp streakDays rankChange isViewer rankDelta submittedInPeriod xpToday tierKey division frameKey hidden }
     }
   }
 }

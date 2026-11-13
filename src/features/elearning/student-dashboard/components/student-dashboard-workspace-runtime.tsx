@@ -28,7 +28,8 @@ import {
 } from "@/features/elearning/student-dashboard/api/student-engagement-api";
 import { DiscussionView } from "@/features/elearning/student-dashboard/components/student-dashboard-discussion-view";
 import { ScoresView } from "@/features/elearning/student-dashboard/components/student-dashboard-scores-view";
-import { RankingView } from "@/features/elearning/student-dashboard/components/student-dashboard-ranking-view";
+import { StudentRankingSurface, type TierView } from "@/features/elearning/student-dashboard/components/student-ranking-surface";
+import { TierPromotionGate } from "@/features/elearning/student-tier/components/tier-promotion-dialog";
 import { useUnreadNotificationCount } from "@/features/notifications/hooks/use-unread-notification-count";
 import { StudentInboxView } from "@/features/elearning/student-dashboard/components/student-inbox-view";
 import {
@@ -57,7 +58,7 @@ import {
 } from "@/features/elearning/student-dashboard/components/student-dashboard-workspace-styles";
 import { AnnouncementToast } from "@/features/elearning/student-dashboard/components/student-dashboard-view-primitives";
 import { AccountView, AnnouncementsView } from "@/features/elearning/student-dashboard/components/student-dashboard-content-views";
-import { AssignmentsView, type AssignmentFilter } from "@/features/elearning/student-dashboard/components/student-dashboard-assignments-view";
+import { AssignmentsView, filterAssignments, type AssignmentFilter } from "@/features/elearning/student-dashboard/components/student-dashboard-assignments-view";
 import {
   StudentQuizAssignmentMissing,
   StudentQuizNotReady,
@@ -71,6 +72,7 @@ import { StudentDashboardOverviewSurface } from "@/features/elearning/student-da
 import { useAnnouncementPopup } from "@/features/elearning/student-dashboard/hooks/use-announcement-popup";
 import { useDashboardSurface } from "@/features/elearning/student-dashboard/hooks/use-dashboard-surface";
 import { useElearningViewerAccount } from "@/features/elearning/student-dashboard/hooks/use-elearning-viewer-account";
+import { useStudentSidebarData } from "@/features/elearning/student-dashboard/hooks/use-student-sidebar-data";
 import { useStudentDiscussion } from "@/features/elearning/student-dashboard/hooks/use-student-discussion";
 
 export function StudentDashboardWorkspaceRuntime() {
@@ -80,6 +82,7 @@ export function StudentDashboardWorkspaceRuntime() {
   const surface = useDashboardSurface();
   const studentPreview = useIsStudentPreview();
   const localeCopy: DashboardCopy = locale === "vi" ? viCopy : enCopy;
+  const [tierView, setTierView] = useState<TierView | null>(null);
   const [activePage, setActivePage] = useState<StudentPageKey>(() => {
     if (typeof window === "undefined") return "overview";
     return initialStudentPage(window.location.search);
@@ -121,6 +124,7 @@ export function StudentDashboardWorkspaceRuntime() {
   const copy = useMemo<DashboardCopy>(() => (leaderboardEnabled
     ? localeCopy
     : { ...localeCopy, navItems: localeCopy.navItems.filter((item) => item.key !== "ranking") }), [leaderboardEnabled, localeCopy]);
+  const sidebarData = useStudentSidebarData({ accountId: account?.id, classId: dashboardProfile.classId ?? "", leaderboardEnabled });
   const assignments = useMemo(
     () => studentDashboardQuery.data?.assignments ?? [],
     [studentDashboardQuery.data?.assignments],
@@ -269,7 +273,9 @@ export function StudentDashboardWorkspaceRuntime() {
     return <StudentQuizSession assignment={currentAssignment} copy={copy} runtimePortal={quizRuntimePortal} onBack={backToDashboard} />;
   }
 
+  const openTierView = (view: TierView) => { setTierView(view); setActivePage("ranking"); setViewState({ type: "dashboard" }); };
   const handlePageChange = (page: StudentPageKey) => {
+    setTierView(null);
     const targetPage = page === "scores" ? "assignments" : page;
     setActivePage(targetPage);
     setViewState({ type: "dashboard" });
@@ -298,11 +304,8 @@ export function StudentDashboardWorkspaceRuntime() {
       ) : null}
       {shownPage === "assignments" ? (
         <AssignmentsView
-          key={assignmentsFilter}
-          initialFilter={assignmentsFilter}
-          assignments={assignments}
-          copy={copy}
-          onOpenAssignment={openAssignment}
+          key={assignmentsFilter} initialFilter={assignmentsFilter} assignments={assignments} copy={copy} mobile={surface === "mobile-web"}
+          onAskTeacher={() => handlePageChange("announcements")} onOpenAssignment={openAssignment}
         />
       ) : null}
       {shownPage === "scores" ? <ScoresView assignments={assignments} copy={copy} /> : null}
@@ -318,8 +321,9 @@ export function StudentDashboardWorkspaceRuntime() {
         />
       ) : null}
       {shownPage === "ranking" && account ? (
-        <RankingView accountId={account.id ?? ""} classId={dashboardProfile.classId ?? ""} copy={copy} />
+        <StudentRankingSurface accountId={account.id ?? ""} copy={copy} name={account.name || dashboardProfile.name} openAssignments={openAssignments} profile={dashboardProfile} view={tierView} onDoAssignments={() => handlePageChange("assignments")} onView={setTierView} />
       ) : null}
+      {account ? <TierPromotionGate accountId={account.id ?? ""} studentName={account.name || dashboardProfile.name} gradeLabel={dashboardProfile.gradeLabel || "khối"} onViewTier={() => openTierView("tier")} /> : null}
       {shownPage === "announcements" ? (
         <>
           {/* Signed-in viewers only: a guest has no inbox. Same portal as the quiz runtime (teacher preview reads lms). */}
@@ -350,7 +354,7 @@ export function StudentDashboardWorkspaceRuntime() {
       <Box sx={{ bgcolor: MUI_BG, color: MUI_TEXT, fontFamily: "var(--font-app)", minHeight: "100vh" }}>
         {announcementToast}
         <StudentDashboardMobileShell
-          activePage={shownPage} announcementUnreadCount={unreadInboxCount}
+          activePage={shownPage} announcementUnreadCount={unreadInboxCount} avatarTier={sidebarData.tier}
           dockItems={mobileDockItems} onPageChange={handlePageChange}
         >
           {/* Inside the scroll area: above the 100dvh shell it pushed the page past the viewport. */}
@@ -369,10 +373,13 @@ export function StudentDashboardWorkspaceRuntime() {
         activePage={shownPage}
         copy={copy}
         dashboardProfile={dashboardProfile}
+        sidebarData={sidebarData}
+        todoCount={filterAssignments(assignments, "todo").length}
         notificationAnchor={notificationAnchor}
         notifications={discussion.discussionNotifications}
         unreadAnnouncementCount={unreadInboxCount}
         onAccountOpen={() => handlePageChange("account")}
+        onTierOpen={() => openTierView("tier")}
         onNotificationClose={() => setNotificationAnchor(null)}
         onNotificationClick={handleDiscussionNotificationClick}
         onNotificationOpen={(element) => setNotificationAnchor(element)}

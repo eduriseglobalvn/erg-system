@@ -1,8 +1,6 @@
 import type { ReactNode } from "react";
-import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
 import MessageSquare from "@mui/icons-material/ForumOutlined";
 import NotificationsNoneRoundedIcon from "@mui/icons-material/NotificationsNoneRounded";
-import Avatar from "@mui/material/Avatar";
 import Badge from "@mui/material/Badge";
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
@@ -13,13 +11,14 @@ import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import { type ElearningViewerSession } from "@/platform/auth/api/elearning-viewer-session";
 import { getAuthScope } from "@/platform/auth/api/auth-storage";
-import { SidebarLeafItem } from "@/components/portal/portal-sidebar-leaf-item";
 import { EXPANDED_SIDEBAR_WIDTH, SIDEBAR_GUTTER } from "@/components/portal/portal-sidebar-motion";
 import { NAV_BORDER, NAV_CARD_RADIUS, NAV_CARD_SHADOW, NAV_PADDING } from "@/components/portal/portal-sidebar-styles";
 import { PortalSidebarWorkspaceHeader } from "@/components/portal/portal-sidebar-workspace-header";
 import type { DashboardCopy, StudentDiscussionNotification, StudentPageKey } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
 import type { StudentDashboardProfile } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
-import { MUI_TEXT, MUI_MUTED, MUI_BORDER, MUI_DIVIDER, LOGO_URL, Stack } from "@/features/elearning/student-dashboard/components/student-dashboard-workspace-styles";
+import { MUI_TEXT, MUI_MUTED, MUI_BORDER, MUI_DIVIDER, Stack } from "@/features/elearning/student-dashboard/components/student-dashboard-workspace-styles";
+import { StudentSidebar } from "@/features/elearning/student-dashboard/components/student-sidebar";
+import type { StudentSidebarData } from "@/features/elearning/student-dashboard/hooks/use-student-sidebar-data";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 function getInitials(name: string): string {
@@ -31,8 +30,8 @@ function getInitials(name: string): string {
 
 export function TopMenuShell({
   account, activePage, children, copy, dashboardProfile,
-  notificationAnchor, notifications, unreadAnnouncementCount,
-  onAccountOpen, onNotificationClose, onNotificationClick,
+  notificationAnchor, notifications, sidebarData, todoCount, unreadAnnouncementCount,
+  onAccountOpen, onTierOpen, onNotificationClose, onNotificationClick,
   onNotificationOpen, onPageChange, onSignOut,
 }: {
   account: ElearningViewerSession | null;
@@ -42,8 +41,11 @@ export function TopMenuShell({
   dashboardProfile: StudentDashboardProfile;
   notificationAnchor: HTMLElement | null;
   notifications: StudentDiscussionNotification[];
+  sidebarData: StudentSidebarData;
+  todoCount: number;
   unreadAnnouncementCount: number;
   onAccountOpen: () => void;
+  onTierOpen?: () => void;
   onNotificationClose: () => void;
   onNotificationClick: (threadId: string, replyId?: string) => void;
   onNotificationOpen: (element: HTMLElement) => void;
@@ -53,17 +55,8 @@ export function TopMenuShell({
   const unreadDiscussionCount = notifications.filter((item) => item.unread).length;
   const totalUnread = unreadAnnouncementCount + unreadDiscussionCount;
   const studentName = account?.name || dashboardProfile.name || "Học sinh";
-  const studentHandle = account?.email ?? dashboardProfile.className;
   const currentNav = copy.navItems.find((item) => item.key === activePage);
   const currentPageLabel = currentNav?.label ?? (activePage === "account" ? copy.accountTitle : "Bài tập");
-
-  // Flat menu rendered with the same leaf item as the admin/teacher sidebar (path = page key).
-  const menuItems = copy.navItems.map((item) => ({
-    badge: item.key === "announcements" && totalUnread > 0 ? (totalUnread > 9 ? "9+" : String(totalUnread)) : undefined,
-    icon: item.icon,
-    label: item.label,
-    path: item.key,
-  }));
 
   const workspaces = getAuthScope().session?.workspaces ?? [];
 
@@ -79,45 +72,21 @@ export function TopMenuShell({
         m: { xs: 1.5, md: `${SIDEBAR_GUTTER}px` }, mr: { md: 0 }, p: { xs: 1.25, md: `${NAV_PADDING}px` }, position: { md: "sticky" },
         top: { md: SIDEBAR_GUTTER }, width: { xs: "calc(100% - 24px)", md: EXPANDED_SIDEBAR_WIDTH }, zIndex: 12,
       }}>
-        <Box sx={{ mb: 1.5 }}>
-          <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ px: 0.5, py: 0.5, mb: 1.25 }}>
-            <Box sx={{ alignItems: "center", display: "flex", height: 28, overflow: "hidden", width: 84 }}>
-              <Box component="img" alt="ERG" src={LOGO_URL} onError={(e) => { e.currentTarget.style.display = "none"; }} sx={{ display: "block", height: "100%", objectFit: "contain", width: "100%" }} />
-            </Box>
-          </Stack>
-          {/* A plain student has nowhere to switch to, so the switcher only shows for accounts with another workspace (e.g. teacher). */}
-          {workspaces.some((workspace) => workspace !== "STUDENT") ? (
-            <PortalSidebarWorkspaceHeader active collapsed={false} fluid portalInfo={{ name: "Học sinh", workspaceCapabilities: workspaces }} />
-          ) : null}
-        </Box>
-
-        <Box component="nav" aria-label="Điều hướng học sinh" sx={{ flex: 1, minHeight: 0, mt: 0.5 }}>
-          <Box component="ul" sx={{ display: "flex", flexDirection: "column", gap: 0.5, listStyle: "none", m: 0, p: 0 }}>
-            {menuItems.map((item) => (
-              <SidebarLeafItem key={item.path} currentPath={activePage} item={item} onNavigate={(path) => onPageChange(path as StudentPageKey)} />
-            ))}
-          </Box>
-        </Box>
-
-        <Box component="button" type="button" aria-label="Mở hồ sơ" onClick={onAccountOpen} sx={{
-          alignItems: "center", bgcolor: "background.default", border: `1px solid ${MUI_BORDER}`, borderRadius: `${ergEnterpriseTokens.radius.md}px`,
-          color: "inherit", cursor: "pointer", display: "flex", font: "inherit", gap: 0.9, minHeight: 44, mt: "auto", p: 0.85, textAlign: "left", width: "100%",
-          "&:hover": { bgcolor: ergEnterpriseTokens.color.primarySofter },
-        }}>
-          <Avatar sx={{ bgcolor: "primary.main", color: "primary.contrastText", height: 32, typography: "caption", width: 32 }}>
-            {getInitials(studentName)}
-          </Avatar>
-          <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Typography variant="subtitle2" noWrap>{studentName}</Typography>
-            <Typography variant="caption" color="text.secondary" noWrap sx={{ display: "block" }}>{studentHandle}</Typography>
-          </Box>
-          <ChevronRightRoundedIcon color="disabled" fontSize="small" />
-        </Box>
+        {/* A plain student has nowhere to switch to, so the switcher only shows for accounts with another workspace (e.g. teacher). */}
+        {workspaces.some((workspace) => workspace !== "STUDENT") ? (
+          <Box sx={{ mb: 1.5 }}><PortalSidebarWorkspaceHeader active collapsed={false} fluid portalInfo={{ name: "Học sinh", workspaceCapabilities: workspaces }} /></Box>
+        ) : null}
+        <StudentSidebar
+          activePage={activePage} data={sidebarData} initials={getInitials(studentName)} name={studentName}
+          rankingEnabled={copy.navItems.some((item) => item.key === "ranking")} signedIn={Boolean(account)}
+          todoCount={todoCount} unreadCount={unreadAnnouncementCount}
+          onAccountOpen={onAccountOpen} onTierOpen={onTierOpen} onPageChange={onPageChange} onSignOut={onSignOut}
+        />
       </Box>
 
       {/* Main content right side */}
       <Box sx={{ display: "flex", flex: 1, flexDirection: "column", minWidth: 0, p: { xs: 1.5, md: 2.25, lg: 3 } }}>
-        <Box component="header" sx={{ alignItems: "center", display: "flex", justifyContent: "space-between", minHeight: 44, mb: 2, px: { xs: 0.5, md: 0 } }}>
+        {activePage === "assignments" ? null : <Box component="header" sx={{ alignItems: "center", display: "flex", justifyContent: "space-between", minHeight: 44, mb: 2, px: { xs: 0.5, md: 0 } }}>
           <Typography variant="h5" component="h1">
             {currentPageLabel}
           </Typography>
@@ -131,7 +100,7 @@ export function TopMenuShell({
               </IconButton>
             </Tooltip>
           </Stack>
-        </Box>
+        </Box>}
 
         <Box component="main" sx={{ flex: 1, minWidth: 0, width: "100%" }}>
           {children}

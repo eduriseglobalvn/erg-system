@@ -1,0 +1,48 @@
+query ElearningMyTier($tenantId: String) {
+  elearning {
+    myTier(tenantId: $tenantId) {
+      tierKey
+      division
+      gradeRank
+      gradeSize
+      courseXp
+      eligible
+      submittedCount
+      protected
+      nextDivision { tierKey division minXp studentsToPass }
+      nextTier { tierKey division minXp studentsToPass }
+      pendingPromotion { weekStart fromKey fromDivision toKey toDivision studentsPassed gradePercentile }
+    }
+  }
+}
+
+query ElearningTierTable($weekStart: String, $tenantId: String) {
+  elearning {
+    tierTable(weekStart: $weekStart, tenantId: $tenantId) {
+      tierKey
+      share
+      seats
+      divisions { division rankFrom rankTo minXp }
+    }
+  }
+}
+
+query ElearningMyFrames($tenantId: String) {
+  elearning {
+    myFrames(tenantId: $tenantId) {
+      selected
+      frames { tierKey unlocked unlockedAt schoolYear studentsToPass }
+    }
+  }
+}
+
+mutation ElearningSelectFrame($tierKey: String, $tenantId: String) {
+  selectFrame(tierKey: $tierKey, tenantId: $tenantId) {
+    selected
+    frames { tierKey unlocked unlockedAt schoolYear studentsToPass }
+  }
+}
+
+mutation ElearningAcknowledgeTierPromotion($weekStart: String!, $tenantId: String) {
+  acknowledgeTierPromotion(weekStart: $weekStart, tenantId: $tenantId)
+}

@@ -4,6 +4,8 @@ import ButtonBase from "@mui/material/ButtonBase";
 import type { Breakpoint } from "@mui/material/styles";
 import type { SvgIconProps } from "@mui/material/SvgIcon";
 import Typography from "@mui/material/Typography";
+import { ErgTierFrame } from "@/components/erg-mui/erg-tier";
+import type { TierKey } from "@/domain/student-tier/tiers";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 import { useDockAutohide } from "./use-dock-autohide";
 
@@ -37,6 +39,8 @@ export type ErgMobileDockItem<TId extends string> = {
   id: TId;
   label: string;
   icon: ComponentType<SvgIconProps>;
+  /** Filled variant shown while the tab is selected. */
+  activeIcon?: ComponentType<SvgIconProps>;
   path: string;
   /** Shown as a red dot; the number is only announced in the aria-label. */
   badgeCount?: number;
@@ -44,6 +48,8 @@ export type ErgMobileDockItem<TId extends string> = {
   opensSheet?: boolean;
   /** Renders a 32px initials avatar instead of the icon (account tab). */
   avatarInitials?: string;
+  /** Wraps the avatar in the student tier ring (26px avatar). */
+  avatarTier?: TierKey | null;
 };
 
 export function formatDockBadge(count: number | undefined): string | null {
@@ -141,7 +147,7 @@ export function ErgMobileDock<TId extends string>({
 
 function DockButton<TId extends string>({
   active,
-  item: { avatarInitials, badgeCount, icon: Icon, label, opensSheet },
+  item: { activeIcon, avatarInitials, avatarTier, badgeCount, icon, label, opensSheet },
   onClick,
 }: {
   active: boolean;
@@ -149,6 +155,7 @@ function DockButton<TId extends string>({
   onClick: () => void;
 }) {
   const badge = formatDockBadge(badgeCount);
+  const Icon = active && activeIcon ? activeIcon : icon;
   return (
     <ButtonBase
       aria-current={active ? "page" : undefined}
@@ -176,21 +183,13 @@ function DockButton<TId extends string>({
     >
       <Box sx={{ display: "flex", flexShrink: 0, position: "relative" }}>
         {avatarInitials ? (
-          <Box
-            sx={{
-              alignItems: "center",
-              bgcolor: color.primarySofter,
-              borderRadius: "50%",
-              color: "primary.main",
-              display: "flex",
-              height: 32,
-              justifyContent: "center",
-              typography: "caption",
-              width: 32,
-            }}
-          >
-            {avatarInitials}
-          </Box>
+          avatarTier ? (
+            <ErgTierFrame size={26} tier={avatarTier}>
+              <Box sx={{ alignItems: "center", bgcolor: color.primary, borderRadius: "50%", color: "primary.contrastText", display: "flex", justifyContent: "center", typography: "caption" }}>{avatarInitials}</Box>
+            </ErgTierFrame>
+          ) : (
+            <Box sx={{ alignItems: "center", bgcolor: color.primarySofter, borderRadius: "50%", color: "primary.main", display: "flex", height: 32, justifyContent: "center", typography: "caption", width: 32 }}>{avatarInitials}</Box>
+          )
         ) : (
           <Icon sx={{ fontSize: size.iconLg }} />
         )}

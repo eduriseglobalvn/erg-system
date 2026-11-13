@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Học sinh · Hộp thư</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./erg.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400..600,0..1,0&amp;display=block">
+<style>body{margin:0}.ud{width:9px;height:9px;border-radius:50%;background:var(--p);flex-shrink:0;margin-top:6px}</style>
+</helmet>
+<div class="phone">
+  <div class="ptop">
+    <h1 class="t-h1 f1">Hộp thư</h1>
+    <button type="button" class="btn c sm"><span class="ms s" aria-hidden="true">edit</span>Hỏi giáo viên</button>
+  </div>
+  <div class="pbody" style="gap:12px">
+    <div class="chips">
+      <button type="button" class="chip on">Tất cả <span class="cnt">3</span></button>
+      <button type="button" class="chip">Thông báo</button>
+      <button type="button" class="chip">Hỏi giáo viên</button>
+      <button type="button" class="chip">Thảo luận lớp</button>
+    </div>
+    <div class="card p0">
+      <sc-for list="{{items}}" as="m" hint-placeholder-count="5">
+        <button type="button" class="li" style="width:100%;border-left:0;border-right:0;border-bottom:0;background:none;text-align:left;align-items:flex-start">
+          <span class="ico sm {{m.tone}}"><span class="ms f s" aria-hidden="true">{{m.icon}}</span></span>
+          <span class="f1 col g2">
+            <span class="row sp"><span class="t-m b6">{{m.kind}}</span><span class="t-m tn">{{m.time}}</span></span>
+            <span class="b6">{{m.title}}</span>
+            <span class="t-s">{{m.text}}</span>
+          </span>
+          <sc-if value="{{m.unread}}" hint-placeholder-val="{{false}}"><span class="ud" aria-label="Chưa đọc"></span></sc-if>
+        </button>
+      </sc-for>
+    </div>
+  </div>
+  <nav class="dock" aria-label="Điều hướng học sinh">
+    <button type="button" class="dk" aria-label="Trang chủ"><span class="ms" aria-hidden="true">home</span></button>
+    <button type="button" class="dk" aria-label="Bài tập"><span class="ms" aria-hidden="true">assignment</span></button>
+    <button type="button" class="dk" aria-label="Thi đua"><span class="ms" aria-hidden="true">emoji_events</span></button>
+    <button type="button" class="dk on" aria-current="page"><span class="ms f" aria-hidden="true">inbox</span>Hộp thư</button>
+    <button type="button" class="dk" aria-label="Hồ sơ và huy hiệu"><span class="av">MA</span></button>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      items: [
+        { icon: 'chat', tone: 'ok', kind: 'Hỏi giáo viên', time: '07:55', title: 'Cô Hạnh đã trả lời bạn', text: '“Khi chuyển 5 sang vế phải phải đổi dấu…”', unread: true },
+        { icon: 'assignment', tone: '', kind: 'Thông báo lớp 7A', time: '07:00', title: 'Bài mới: Kiểm tra 15 phút Đơn thức', text: 'Cô Hạnh · hạn 20:00 hôm nay · +30 XP', unread: true },
+        { icon: 'forum', tone: '', kind: 'Thảo luận lớp', time: 'Hôm qua', title: 'Gia Bảo trả lời trong “Ôn tập chương 2”', text: 'Mình làm câu 4 theo cách đặt ẩn phụ…', unread: true },
+        { icon: 'campaign', tone: 'wn', kind: 'Trung tâm', time: '05/11', title: 'Nghỉ học thứ Sáu 20/11', text: 'Chào mừng Ngày Nhà giáo Việt Nam.', unread: false },
+        { icon: 'emoji_events', tone: 'wn', kind: 'Thi đua', time: '02/11', title: 'Bạn vào top 5 tuần 44 của lớp', text: 'Nhận huy hiệu “Bền bỉ”.', unread: false }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

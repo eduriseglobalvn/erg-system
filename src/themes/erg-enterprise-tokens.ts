@@ -31,7 +31,18 @@ export const ergEnterpriseTokens = {
     infoSoft: "rgba(2, 132, 199, 0.1)",
   },
   // "Thi đua" podium (design H03): gold / silver / bronze for ranks 1-3.
-  medal: { gold: "#C9A227", silver: "#9A9AA3", bronze: "#B5743D" },
+  medal: { gold: "#C98A04", silver: "#8A94A6", bronze: "#B4632B" },
+  // Student tiers (design H15-H18): frame ring, shield emblem and chip fill per tier.
+  tier: {
+    go: { frame: "repeating-linear-gradient(115deg,#8B5A2B 0 4px,#A9743F 4px 7px,#6E4520 7px 9px)", emblem: "linear-gradient(#B07A45,#6E4520)", chip: "#8B5A2B", ink: "#FFFFFF", glow: "none" },
+    sat: { frame: "conic-gradient(from 200deg,#5B636E,#A3ABB5,#4A515B,#8E96A0,#5B636E)", emblem: "linear-gradient(#A3ABB5,#4A515B)", chip: "#5B636E", ink: "#FFFFFF", glow: "none" },
+    dong: { frame: "conic-gradient(from 200deg,#9A4E1F,#E3A06B,#8A431A,#D08850,#9A4E1F)", emblem: "linear-gradient(#E3A06B,#8A431A)", chip: "#B4632B", ink: "#FFFFFF", glow: "none" },
+    bac: { frame: "conic-gradient(from 200deg,#8A94A6,#F4F6F9,#7C8698,#DCE1E8,#8A94A6)", emblem: "linear-gradient(#F4F6F9,#7C8698)", chip: "linear-gradient(90deg,#DCE1E8,#AEB6C3)", ink: "#3D4553", glow: "none" },
+    vang: { frame: "conic-gradient(from 200deg,#B07A00,#FFE08A,#A86F00,#F2C94C,#B07A00)", emblem: "linear-gradient(#FFE08A,#A86F00)", chip: "#C98A04", ink: "#FFFFFF", glow: "0 0 0 2px #FFF3CC" },
+    bk: { frame: "conic-gradient(from 200deg,#2E8F86,#B9F3EA,#227A72,#7FD9CD,#2E8F86)", emblem: "linear-gradient(#B9F3EA,#227A72)", chip: "#2E8F86", ink: "#FFFFFF", glow: "0 0 0 2px #DDF7F3" },
+    kc: { frame: "conic-gradient(from 200deg,#2D5BD8,#A8C8FF,#6C3FD1,#7FB2FF,#3B6CF0,#C9B6FF,#2D5BD8)", emblem: "linear-gradient(#A8C8FF,#3B6CF0 55%,#6C3FD1)", chip: "linear-gradient(90deg,#2D5BD8,#6C3FD1)", ink: "#FFFFFF", glow: "0 0 0 2px #E3ECFF,0 0 14px rgba(59,108,240,.35)" },
+    ct: { frame: "conic-gradient(from 200deg,#7A1FA2,#F2C94C,#B0266B,#FFE08A,#7A1FA2)", emblem: "linear-gradient(#FFE08A,#B0266B 45%,#7A1FA2)", chip: "linear-gradient(90deg,#7A1FA2,#B0266B)", ink: "#FFFFFF", glow: "0 0 0 2px #FBE7FF,0 0 16px rgba(176,38,107,.35)" },
+  },
   // Tinted status badges: soft background + dark text of the same hue (plan 7.1).
   statusTint: {
     success: { bg: "#DCFAE5", color: "#04250E", dot: "#16A34A" },

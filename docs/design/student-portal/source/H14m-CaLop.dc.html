@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Học sinh · Thi đua · Cả lớp (mobile)</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./erg.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400..600,0..1,0&amp;display=block">
+<style>
+body{margin:0}
+.fr{position:relative;display:inline-grid;place-items:center;border-radius:50%;padding:3px;flex-shrink:0}
+.fr>.av{border:2px solid #fff;margin:0}
+.fr.t-go{background:repeating-linear-gradient(115deg,#8B5A2B 0 4px,#A9743F 4px 7px,#6E4520 7px 9px)}
+.fr.t-sat{background:conic-gradient(from 200deg,#5B636E,#A3ABB5,#4A515B,#8E96A0,#5B636E)}
+.fr.t-dong{background:conic-gradient(from 200deg,#9A4E1F,#E3A06B,#8A431A,#D08850,#9A4E1F)}
+.fr.t-bac{background:conic-gradient(from 200deg,#8A94A6,#F4F6F9,#7C8698,#DCE1E8,#8A94A6)}
+.fr.t-vang{background:conic-gradient(from 200deg,#B07A00,#FFE08A,#A86F00,#F2C94C,#B07A00);box-shadow:0 0 0 2px #FFF3CC}
+.fr.t-bk{background:conic-gradient(from 200deg,#2E8F86,#B9F3EA,#227A72,#7FD9CD,#2E8F86);box-shadow:0 0 0 2px #DDF7F3}
+.fr.t-kc{background:conic-gradient(from 200deg,#2D5BD8,#A8C8FF,#6C3FD1,#7FB2FF,#3B6CF0,#C9B6FF,#2D5BD8);box-shadow:0 0 0 2px #E3ECFF,0 0 14px rgba(59,108,240,.35)}
+.fr.t-ct{background:conic-gradient(from 200deg,#7A1FA2,#F2C94C,#B0266B,#FFE08A,#7A1FA2);box-shadow:0 0 0 2px #FBE7FF,0 0 16px rgba(176,38,107,.35)}
+.fr .gem{position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);height:16px;min-width:16px;padding:0 5px;border-radius:999px;display:inline-grid;place-items:center;font-size:9px;font-weight:700;color:#fff;border:1.5px solid #fff;white-space:nowrap}
+.fr .crn{position:absolute;top:-13px;left:50%;transform:translateX(-50%);font-size:18px;color:#E2A400;filter:drop-shadow(0 1px 0 #8F6200)}
+.g-go{background:#8B5A2B}.g-sat{background:#5B636E}.g-dong{background:#B4632B}.g-bac{background:#8A94A6}.g-vang{background:#C98A04}.g-bk{background:#2E8F86}.g-kc{background:linear-gradient(90deg,#2D5BD8,#6C3FD1)}.g-ct{background:linear-gradient(90deg,#7A1FA2,#B0266B)}
+.emb{position:relative;display:inline-grid;place-items:center;clip-path:polygon(50% 0,100% 16%,100% 60%,50% 100%,0 60%,0 16%);color:#fff;font-weight:700}
+.emb::after{content:"";position:absolute;inset:0;background:linear-gradient(160deg,rgba(255,255,255,.55),rgba(255,255,255,0) 50%);pointer-events:none}
+.emb .ms{position:relative;z-index:1;filter:drop-shadow(0 1px 0 rgba(0,0,0,.25))}
+.emb.t-go{background:linear-gradient(#B07A45,#6E4520)}.emb.t-sat{background:linear-gradient(#A3ABB5,#4A515B)}.emb.t-dong{background:linear-gradient(#E3A06B,#8A431A)}.emb.t-bac{background:linear-gradient(#F4F6F9,#7C8698);color:#3D4553}
+.emb.t-vang{background:linear-gradient(#FFE08A,#A86F00)}.emb.t-bk{background:linear-gradient(#B9F3EA,#227A72)}.emb.t-kc{background:linear-gradient(#A8C8FF,#3B6CF0 55%,#6C3FD1)}.emb.t-ct{background:linear-gradient(#FFE08A,#B0266B 45%,#7A1FA2)}
+.tchip{display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 8px 0 6px;border-radius:999px;font-size:11px;font-weight:700;color:#fff;white-space:nowrap}
+.tchip.t-bac{color:#3D4553;background:linear-gradient(90deg,#DCE1E8,#AEB6C3)}
+
+.trend{display:inline-flex;align-items:center;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums}
+.rk{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--nt);font-weight:700;font-size:13px;font-variant-numeric:tabular-nums}
+.lr.me{background:var(--pss);box-shadow:inset 3px 0 0 var(--p)}
+.lr.me .rk{background:var(--p);color:#fff}
+.hidn{color:var(--tx3);font-style:italic;font-weight:500}
+.pill{display:inline-flex;align-items:center;height:18px;padding:0 7px;border-radius:999px;background:var(--p);color:#fff;font-size:10px;font-weight:700;margin-left:6px;vertical-align:middle}
+.tg{display:flex;align-items:center;gap:10px;padding:10px 20px;background:var(--bg2);border-top:1px solid var(--dv);border-bottom:1px solid var(--dv)}
+.tg .t-m{margin-left:auto}
+.mebar{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:14px;background:#fff;border:1px solid #CFE3FB;box-shadow:var(--sh)}
+.pbody>*{flex-shrink:0}
+.lr{display:grid;grid-template-columns:30px 40px minmax(0,1fr) auto;align-items:center;gap:10px;padding:0 14px;height:62px;border-top:1px solid var(--dv)}
+.tg+.lr{border-top:0}
+.mebar{position:absolute;left:12px;right:12px;bottom:92px;z-index:4}
+</style>
+</helmet>
+<div class="phone" style="height:1620px">
+  <div class="ptop" style="gap:8px">
+    <button type="button" class="ib ghost" aria-label="Quay lại Thi đua"><span class="ms" aria-hidden="true">arrow_back</span></button>
+    <div class="f1"><h1 class="t-h1" style="font-size:20px">Cả lớp 7A</h1><div class="t-m">Mùa 1 · 32 bạn</div></div>
+    <button type="button" class="ib" aria-label="Tìm bạn"><span class="ms" aria-hidden="true">search</span></button>
+  </div>
+  <div class="pbody" style="gap:10px;padding-bottom:180px">
+    <div class="seg"><button type="button">Tuần này</button><button type="button">Tháng 11</button><button type="button" class="on">Cả khóa</button></div>
+    <div class="chips"><button type="button" class="chip on">Lớp 7A</button><button type="button" class="chip">Khối 7</button></div>
+    <div class="card p0" style="overflow:hidden">
+      <div class="tg" style="padding:8px 14px"><span class="emb t-ct" style="width:22px;height:25px" aria-label="Cao thủ"><span class="ms f" style="font-size:10px" aria-hidden="true">crown</span></span><span class="b7" style="font-size:13px">Cao thủ</span><span class="t-m">1 bạn</span></div>
+      <div class="lr"><span class="rk">1</span><span class="fr t-ct"><span class="ms f crn" aria-hidden="true">crown</span><span class="av" style="width:30px;height:30px;font-size:11px;background:var(--nt);color:var(--nx)">KT</span></span><div style="min-width:0"><div class="ell"><span class="b6 ell">Khánh Thy</span></div><div class="row g4" style="margin-top:2px"><span class="tchip g-ct t-ct">Cao thủ</span></div></div><span class="b7 tn">9.420</span></div>
+      <div class="tg" style="padding:8px 14px"><span class="emb t-kc" style="width:22px;height:25px" aria-label="Kim cương"><span class="ms f" style="font-size:10px" aria-hidden="true">diamond</span></span><span class="b7" style="font-size:13px">Kim cương</span><span class="t-m">1 bạn</span></div>
+      <div class="lr"><span class="rk">2</span><span class="fr t-kc"><span class="av" style="width:30px;height:30px;font-size:11px;background:var(--nt);color:var(--nx)">ĐH</span></span><div style="min-width:0"><div class="ell"><span class="b6 ell">Đức Huy</span></div><div class="row g4" style="margin-top:2px"><span class="tchip g-kc t-kc">Kim cương 4</span></div></div><span class="b7 tn">6.880</span></div>
+      <div class="tg" style="padding:8px 14px"><span class="emb t-bk" style="width:22px;height:25px" aria-label="Bạch kim"><span class="ms f" style="font-size:10px" aria-hidden="true">auto_awesome</span></span><span class="b7" style="font-size:13px">Bạch kim</span><span class="t-m">1 bạn</span></div>
+      <div class="lr"><span class="rk">3</span><span class="fr t-bk"><span class="av" style="width:30px;height:30px;font-size:11px;background:var(--nt);color:var(--nx)">GB</span></span><div style="min-width:0"><div class="ell"><span class="b6 ell">Gia Bảo</span></div><div class="row g4" style="margin-top:2px"><span class="tchip g-bk t-bk">Bạch kim 5</span></div></div><span class="b7 tn">4.310</span></div>
+      <div class="tg" style="padding:8px 14px"><span class="emb t-vang" style="width:22px;height:25px" aria-label="Vàng"><span class="ms f" style="font-size:10px" aria-hidden="true">star</span></span><span class="b7" style="font-size:13px">Vàng</span><span class="t-m">2 bạn</span></div>
+      <div class="lr"><span class="rk">4</span><span class="fr t-vang"><span class="av" style="width:30px;height:30px;font-size:11px;background:var(--nt);color:var(--nx)">TL</span></span><div style="min-width:0"><div class="ell"><span class="b6 ell">Thảo Linh</span></div><div class="row g4" style="margin-top:2px"><span class="tchip g-vang t-vang">Vàng 4</span></div></div><span class="b7 tn">2.900</span></div>
+      <div class="lr"><span class="rk">5</span><span class="fr t-vang"><span class="av" style="width:30px;height:30px;font-size:11px;background:var(--nt);color:var(--nx)">QH</span></span><div style="min-width:0"><div class="ell"><span class="b6 ell">Quang Hải</span></div><div class="row g4" style="margin-top:2px"><span class="tchip g-vang t-vang">Vàng 5</span></div></div><span class="b7 tn">2.620</span></div>
+      <div class="tg" style="padding:8px 14px"><span class="emb t-bac" style="width:22px;height:25px" aria-label="Bạc"><span class="ms f" style="font-size:10px" aria-hidden="true">shield</span></span><span class="b7" style="font-size:13px">Bạc</span><span class="t-m">1 bạn</span></div>
+      <div class="lr"><span class="rk">6</span><span class="fr t-bac"><span class="av" style="width:30px;height:30px;font-size:11px;background:var(--nt);color:var(--nx)">NV</span></span><div style="min-width:0"><div class="ell"><span class="b6 ell">Ngọc Vy</span></div><div class="row g4" style="margin-top:2px"><span class="tchip g-bac t-bac">Bạc 4</span></div></div><span class="b7 tn">1.720</span></div>
+      <div class="tg" style="padding:8px 14px"><span class="emb t-dong" style="width:22px;height:25px" aria-label="Đồng"><span class="ms f" style="font-size:10px" aria-hidden="true">shield</span></span><span class="b7" style="font-size:13px">Đồng</span><span class="t-m">3 bạn</span></div>
+      <div class="lr me"><span class="rk">7</span><span class="fr t-dong"><span class="av" style="width:30px;height:30px;font-size:11px;background:var(--p);color:#fff">MA</span></span><div style="min-width:0"><div class="ell"><span class="b6 ell">Minh Anh<span class="pill">Bạn</span></span></div><div class="row g4" style="margin-top:2px"><span class="tchip g-dong t-dong">Đồng 2</span></div></div><span class="b7 tn">1.240</span></div>
+      <div class="lr"><span class="rk">8</span><span class="fr t-dong"><span class="av" style="width:30px;height:30px;font-size:11px;background:var(--nt);color:var(--nx)">TK</span></span><div style="min-width:0"><div class="ell"><span class="b6 ell">Tuấn Kiệt</span></div><div class="row g4" style="margin-top:2px"><span class="tchip g-dong t-dong">Đồng 4</span></div></div><span class="b7 tn">1.010</span></div>
+      <div class="lr"><span class="rk">9</span><span class="fr t-dong"><span class="av" style="width:30px;height:30px;font-size:11px;background:var(--nt);color:var(--nx)">LC</span></span><div style="min-width:0"><div class="ell"><span class="b6 ell">Lan Chi</span></div><div class="row g4" style="margin-top:2px"><span class="tchip g-dong t-dong">Đồng 5</span></div></div><span class="b7 tn">860</span></div>
+      <div class="tg" style="padding:8px 14px"><span class="emb t-sat" style="width:22px;height:25px" aria-label="Sắt"><span class="ms f" style="font-size:10px" aria-hidden="true">hardware</span></span><span class="b7" style="font-size:13px">Sắt</span><span class="t-m">3 bạn</span></div>
+      <div class="lr"><span class="rk">10</span><span class="fr t-sat"><span class="av" style="width:30px;height:30px;font-size:11px;background:var(--nt);color:var(--nx)">PA</span></span><div style="min-width:0"><div class="ell"><span class="b6 ell">Phương Anh</span></div><div class="row g4" style="margin-top:2px"><span class="tchip g-sat t-sat">Sắt 2</span></div></div><span class="b7 tn">640</span></div>
+      <div class="lr"><span class="rk">11</span><span class="fr t-sat"><span class="av" style="width:30px;height:30px;font-size:11px;background:var(--nt);color:var(--nx)">BN</span></span><div style="min-width:0"><div class="ell"><span class="b6 ell">Bảo Ngọc</span></div><div class="row g4" style="margin-top:2px"><span class="tchip g-sat t-sat">Sắt 4</span></div></div><span class="b7 tn">420</span></div>
+      <div class="lr"><span class="rk">12</span><span class="fr" style="background:var(--bd)"><span class="av" style="width:30px;height:30px;background:var(--bg2);color:var(--tx3)">?</span></span><div style="min-width:0"><div class="ell"><span class="b6 ell hidn">Bạn ẩn tên</span></div><div class="row g4" style="margin-top:2px"><span class="tchip g-sat t-sat">Sắt 5</span></div></div><span class="b7 tn">310</span></div>
+      <div class="tg" style="padding:8px 14px"><span class="emb t-go" style="width:22px;height:25px" aria-label="Gỗ"><span class="ms f" style="font-size:10px" aria-hidden="true">forest</span></span><span class="b7" style="font-size:13px">Gỗ</span><span class="t-m">2 bạn</span></div>
+      <div class="lr"><span class="rk">13</span><span class="fr t-go"><span class="av" style="width:30px;height:30px;font-size:11px;background:var(--nt);color:var(--nx)">HM</span></span><div style="min-width:0"><div class="ell"><span class="b6 ell">Hoàng Minh</span></div><div class="row g4" style="margin-top:2px"><span class="tchip g-go t-go">Gỗ 2</span></div></div><span class="b7 tn">180</span></div>
+      <div class="lr"><span class="rk">14</span><span class="fr t-go"><span class="av" style="width:30px;height:30px;font-size:11px;background:var(--nt);color:var(--nx)">DK</span></span><div style="min-width:0"><div class="ell"><span class="b6 ell">Đăng Khoa</span></div><div class="row g4" style="margin-top:2px"><span class="tchip g-go t-go">Gỗ 4</span></div></div><span class="b7 tn">90</span></div>
+    </div>
+    <button type="button" class="btn o" style="width:100%">Xem tiếp 18 bạn</button>
+  </div>
+  <div class="mebar">
+    <span class="emb t-dong" style="width:30px;height:34px" aria-label="Đồng"><span class="ms f" style="font-size:14px" aria-hidden="true">shield</span></span>
+    <div class="f1" style="min-width:0"><div class="b6 ell">Đồng 2 · hạng 7</div><div class="t-m ell">+85 XP lên Đồng 1</div></div>
+    <button type="button" class="btn o sm">Tới chỗ tôi</button>
+  </div>
+  <nav class="dock" aria-label="Điều hướng học sinh">
+    <button type="button" class="dk" aria-label="Trang chủ"><span class="ms" aria-hidden="true">home</span></button>
+    <button type="button" class="dk" aria-label="Bài tập"><span class="ms" aria-hidden="true">assignment</span></button>
+    <button type="button" class="dk on" aria-current="page"><span class="ms f" aria-hidden="true">emoji_events</span>Thi đua</button>
+    <button type="button" class="dk" aria-label="Hộp thư, 2 chưa đọc"><span class="ms" aria-hidden="true">inbox</span><span class="dot"></span></button>
+    <button type="button" class="dk" aria-label="Hồ sơ và huy hiệu"><span class="fr t-dong"><span class="av" style="width:26px;height:26px;font-size:9px;background:var(--p);color:#fff">MA</span></span></button>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1620}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -1,6 +1,7 @@
 import Box from "@mui/material/Box";
 import { useState, type ReactNode } from "react";
 
+import type { TierKey } from "@/domain/student-tier/tiers";
 import { OfflineShellStatus } from "@/components/erg-mui/offline";
 import { ERG_ASSETS } from "@/config/seo";
 import { ERG_FULL_VIEWPORT_FALLBACK, ergMobileDockClearance } from "@/components/portal/erg-mobile-dock";
@@ -17,12 +18,14 @@ import { useStudentInstallBanner } from "@/features/elearning/student-dashboard/
 export function StudentDashboardMobileShell({
   activePage,
   announcementUnreadCount = 0,
+  avatarTier,
   children,
   dockItems,
   onPageChange,
 }: {
   activePage: StudentPageKey;
   announcementUnreadCount?: number;
+  avatarTier?: TierKey | null;
   children: ReactNode;
   dockItems: Array<{ key: StudentDockPageKey; label: string; }>;
   onPageChange: (page: StudentDockPageKey) => void;
@@ -82,6 +85,7 @@ export function StudentDashboardMobileShell({
       <StudentDashboardBottomDock
         activePage={activePage}
         announcementUnreadCount={announcementUnreadCount}
+        avatarTier={avatarTier}
         items={dockItems}
         onPageChange={onPageChange}
       />
