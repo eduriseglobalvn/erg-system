@@ -107,7 +107,7 @@ export function usePlayerRuntime({
   });
 
   usePlayerSyncEffects({
-    activePackage, activeSession, attemptCompleted, attemptScope, drafts, networkOnline: network.online,
+    activePackage, activeSession, attemptCompleted, attemptScope, currentIndex, drafts, networkOnline: network.online,
     runtimePortal, saveAttemptDraftAsync, started, syncAttemptAsync, setDraftSync,
   });
 

@@ -86,7 +86,8 @@ export type SubmitAttemptInput = {
 };
 
 export type SaveAttemptDraftPayload = {
-  answers: Record<string, AnswerPayload>;
+  /** Only answers changed since the last save; null removes that question's answer on the server. */
+  answers: Record<string, AnswerPayload | null>;
   packageHash?: string;
   quizVersion?: string;
   events?: Array<Record<string, unknown>>;
