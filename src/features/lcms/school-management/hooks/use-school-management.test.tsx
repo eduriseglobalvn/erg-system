@@ -3,11 +3,13 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { useSchoolManagement } from "@/features/lcms/school-management/hooks/use-school-management";
+import { lmsAssignmentReadQueryKeys } from "@/features/lms/api/lms-assignment-command-query";
 
 vi.mock("@/features/lcms/school-management/api/school-management-api", async (importOriginal) => ({
   ...(await importOriginal<object>()),
   getSchoolDirectory: vi.fn().mockResolvedValue({ items: [{ id: "a" }, { id: "b" }] }),
   getSchoolOperations: vi.fn().mockResolvedValue(null),
+  bulkEnrollSchoolStudents: vi.fn().mockResolvedValue({ items: [] }),
 }));
 
 function wrapper({ children }: { children: ReactNode }) {
@@ -26,5 +28,19 @@ describe("useSchoolManagement selection", () => {
 
     rerender({ id: "c" });
     await waitFor(() => expect(result.current.selectedSchoolId).toBe("c"));
+  });
+});
+
+describe("useSchoolManagement roster changes", () => {
+  it("drops the teacher class workspace cache so the class list shows the new roster at once", async () => {
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const invalidate = vi.spyOn(client, "invalidateQueries");
+    const { result } = renderHook(() => useSchoolManagement("a"), {
+      wrapper: ({ children }: { children: ReactNode }) => <QueryClientProvider client={client}>{children}</QueryClientProvider>,
+    });
+
+    await act(() => result.current.enrollStudentsInClass(["s1"], "c1"));
+
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: lmsAssignmentReadQueryKeys.classWorkspaceRoot });
   });
 });

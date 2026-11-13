@@ -6,6 +6,7 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import type { DashboardLeafVariant } from "@/layouts/dashboard/types/dashboard-types";
 import { useNavigate } from "@tanstack/react-router";
 import { ERG_FULL_VIEWPORT_FALLBACK, ErgMobileDock, ergMobileDockClearance, type ErgMobileDockItem } from "./erg-mobile-dock";
+import { OfflineShellStatus } from "@/components/erg-mui/offline";
 import { PwaInstallBanner } from "@/components/pwa/pwa-install-banner";
 import ErgPortalHeader from "./ErgPortalHeader";
 import ErgPortalSidebar from "./ErgPortalSidebar";
@@ -190,6 +191,8 @@ export default function ErgPortalLayout({
           workspacePortals={portalInfo?.workspacePortals}
           onNavigate={(path) => void navigate({ href: path })}
         />
+        {/* Below lg the header shows its own "Mất kết nối" chip; from lg that chip is hidden, so say it here. */}
+        <Box sx={{ display: { xs: "none", lg: "block" }, flexShrink: 0 }}><OfflineShellStatus /></Box>
         <Box
           component="main"
           ref={mainRef}

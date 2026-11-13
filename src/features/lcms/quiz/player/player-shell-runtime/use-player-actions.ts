@@ -22,6 +22,7 @@ import {
   useSaveAttemptAnswerMutation,
 } from "@/features/lcms/quiz/quiz-runtime";
 import { createInitialAnswer, isAnswerComplete, normalizeAnswerForSubmission, scoreQuestion } from "@/domain/quiz/quiz";
+import { studentDashboardQueryKeys } from "@/features/elearning/student-dashboard/api/student-dashboard-query";
 import { quizReportQueryKeys } from "@/lib/quiz-report-query-keys";
 import { getDefaultTenantId } from "@/lib/graphql-client";
 import type { LocalQuizAttemptSession, QuizRuntimePortal } from "@/domain/quiz/quiz-runtime-types";
@@ -174,6 +175,8 @@ export function usePlayerActions({
     const tenantId = getDefaultTenantId();
     void queryClient.invalidateQueries({ queryKey: quizReportQueryKeys.assignmentReport(serverSession.assignmentId, tenantId) });
     void queryClient.invalidateQueries({ queryKey: quizReportQueryKeys.reportTenantRoot(tenantId) });
+    // The student home counts handed-in work and is fresh for 30 s: drop it so going back shows this hand-in.
+    void queryClient.invalidateQueries({ queryKey: studentDashboardQueryKeys.root });
     setReviewingSubmittedAttempt(false);
     setCurrentIndex(0);
   }, [drafts, portableOffline, queryClient, questions, runtimePortal, setCurrentIndex, setDrafts, setLoadState, setReviewingSubmittedAttempt, setSubmitError]);

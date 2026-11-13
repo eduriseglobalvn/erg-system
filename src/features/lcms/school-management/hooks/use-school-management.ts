@@ -23,6 +23,7 @@ import {
 } from "@/features/lcms/school-management/api/school-management-api";
 import type { SchoolClass, SchoolDraft, SchoolStudent, SchoolSubject } from "@/features/lcms/school-management/types/school-management-types";
 import type { OperationalClassRecord, SchoolClassInput, SchoolStudentAccountInput, SchoolStudentInput, SchoolSubjectInput } from "@/features/lcms/school-management/api/school-management-api";
+import { lmsAssignmentReadQueryKeys } from "@/features/lms/api/lms-assignment-command-query";
 import { getDefaultTenantId } from "@/lib/graphql-client";
 import { QUERY_POLICIES } from "@/lib/query-policy";
 import { getCurrentAccountId } from "@/platform/auth/api/auth-storage";
@@ -71,6 +72,8 @@ export function useSchoolManagement(initialSchoolId?: string | null) {
 
   const refreshSchoolData = useCallback(async (schoolId?: string) => {
     await queryClient.invalidateQueries({ queryKey: schoolManagementQueryKeys.directory(tenantId, accountId) });
+    // Classes and rosters edited here are what the teacher class pages read; drop them so this user sees the change at once.
+    void queryClient.invalidateQueries({ queryKey: lmsAssignmentReadQueryKeys.classWorkspaceRoot });
     if (schoolId) {
       await queryClient.invalidateQueries({
         queryKey: schoolManagementQueryKeys.operations(tenantId, accountId, schoolId),
