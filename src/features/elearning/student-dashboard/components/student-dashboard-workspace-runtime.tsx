@@ -5,7 +5,6 @@ import {
 } from "react";
 import {
   useMutation,
-  useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
 import Alert from "@mui/material/Alert";
@@ -19,6 +18,7 @@ import { ContentPendingSkeleton } from "@/routes/route-feedback";
 import { StudentTabReplaced } from "@/features/elearning/student-dashboard/components/student-tab-replaced";
 import { useSingleStudentTab } from "@/features/elearning/student-dashboard/hooks/use-single-student-tab";
 import { useStudentViewState } from "@/features/elearning/student-dashboard/hooks/use-student-view-state";
+import { useStudentDashboardQuery } from "@/features/elearning/student-dashboard/hooks/use-student-dashboard-query";
 import {
   createStudentDashboardLoadingProfile,
   studentDashboardQueryOptions,
@@ -112,10 +112,7 @@ export function StudentDashboardWorkspaceRuntime() {
     });
   }, 120);
 
-  const studentDashboardQuery = useQuery(studentDashboardQueryOptions({
-    accountId: account?.id,
-    tenantId,
-  }));
+  const { loadMoreAssignments, query: studentDashboardQuery } = useStudentDashboardQuery({ accountId: account?.id, tenantId });
   const engagementScope = { accountId: account?.id, tenantId };
 
   const dashboardProfile = studentDashboardQuery.data?.profile ?? createStudentDashboardLoadingProfile(account);
@@ -153,7 +150,6 @@ export function StudentDashboardWorkspaceRuntime() {
       return { wasRead };
     },
     onSettled: () => queryClient.invalidateQueries({
-      exact: true,
       queryKey: studentDashboardQueryOptions(engagementScope).queryKey,
     }),
   });
@@ -306,6 +302,7 @@ export function StudentDashboardWorkspaceRuntime() {
         <AssignmentsView
           key={assignmentsFilter} initialFilter={assignmentsFilter} assignments={assignments} copy={copy} mobile={surface === "mobile-web"}
           onAskTeacher={() => handlePageChange("announcements")} onOpenAssignment={openAssignment}
+          hasMore={studentDashboardQuery.data?.assignmentsHasMore === true} loadingMore={studentDashboardQuery.isPlaceholderData} onLoadMore={loadMoreAssignments}
         />
       ) : null}
       {shownPage === "scores" ? <ScoresView assignments={assignments} copy={copy} /> : null}

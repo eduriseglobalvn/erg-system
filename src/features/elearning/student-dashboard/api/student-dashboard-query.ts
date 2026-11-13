@@ -4,9 +4,13 @@ import { getDefaultTenantId } from "@/lib/graphql-client";
 import { persistedQueryMeta, QUERY_POLICIES } from "@/lib/query-policy";
 
 const STUDENT_DASHBOARD_STALE_MS = 30_000;
+/** The backend returns this many assignments by default; "Xem thêm" asks for this many more each time. */
+export const STUDENT_ASSIGNMENT_PAGE_SIZE = 50;
 
 export type StudentDashboardQueryScope = {
   accountId?: string | null;
+  /** Above the default page the limit joins the key, under the workspace prefix that invalidation targets. */
+  assignmentLimit?: number;
   tenantId: string;
 };
 
@@ -58,9 +62,11 @@ export function studentDashboardQueryOptions(scope: StudentDashboardQueryScope) 
   const tenantId = normalizeTenantId(scope.tenantId);
   return {
     gcTime: QUERY_POLICIES.offlineCore.gcTime,
-    queryFn: ({ signal }: { signal: AbortSignal }) => loadStudentDashboardData({ signal, tenantId }),
+    queryFn: ({ signal }: { signal: AbortSignal }) => loadStudentDashboardData({ assignmentLimit: scope.assignmentLimit, signal, tenantId }),
     meta: persistedQueryMeta(tenantId, normalizeAccountId(scope.accountId)),
-    queryKey: studentDashboardQueryKeys.workspace(scope),
+    queryKey: (scope.assignmentLimit ?? 0) > STUDENT_ASSIGNMENT_PAGE_SIZE
+      ? [...studentDashboardQueryKeys.workspace(scope), scope.assignmentLimit]
+      : studentDashboardQueryKeys.workspace(scope),
     // A teacher can assign while this tab is open: refetch when the student comes back to it, and treat data as fresh for 30s only.
     refetchOnWindowFocus: true,
     staleTime: STUDENT_DASHBOARD_STALE_MS,
