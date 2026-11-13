@@ -459,7 +459,7 @@ function createLeveledSubject(
     id,
     label,
     description: `${label} question bank`,
-    companyScopeLabel: "Dung chung toan cong ty",
+    companyScopeLabel: "Dùng chung toàn công ty",
     levels: levels.map((level) => ({
       id: level.id,
       label: level.label,
