@@ -28,7 +28,7 @@ const isTierKey = (key: string | null): key is TierKey => TIER_KEYS.some((k) => 
 export function useStudentSidebarData({ accountId, classId, leaderboardEnabled }: { accountId: string | undefined; classId: string; leaderboardEnabled: boolean }): StudentSidebarData {
   const tier = useQuery({ enabled: Boolean(accountId), queryFn: ({ signal }) => loadMyTier(signal), queryKey: studentTierKeys.mine(accountId ?? ""), retry: false });
   const board = useQuery({
-    enabled: Boolean(accountId) && leaderboardEnabled,
+    enabled: leaderboardEnabled,
     queryFn: ({ signal }) => loadStudentClassLeaderboard(classId, "WEEK", "CLASS", signal),
     queryKey: classLeaderboardKeys.student(accountId ?? "", classId, "WEEK", "CLASS"),
     retry: false,

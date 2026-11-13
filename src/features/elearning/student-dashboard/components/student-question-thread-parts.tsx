@@ -28,8 +28,9 @@ export function questionSummary(thread: Pick<QuestionThread, "questionPrompt" | 
   ].filter(Boolean).join(" · ");
 }
 
-export function QuestionCard({ thread, onOpen }: { thread: QuestionThread; onOpen?: () => void }) {
-  const title = [thread.assignmentTitle, `Câu ${thread.questionIndex}`].filter(Boolean).join(" · ");
+export function QuestionCard({ thread, mobile = false, onOpen }: { thread: QuestionThread; mobile?: boolean; onOpen?: () => void }) {
+  // The phone card (H12m) drops the "Luyện tập:" prefix and keeps only a chevron.
+  const title = [mobile ? thread.assignmentTitle?.replace(/^Luyện tập:s*/u, "") : thread.assignmentTitle, `Câu ${thread.questionIndex}`].filter(Boolean).join(" · ");
   return (
     <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, px: 1.5, py: 1.25, border: 1, borderColor: "divider", borderRadius: `${t.radius.card}px`, bgcolor: "background.paper" }}>
       <Box aria-hidden sx={{ display: "grid", placeItems: "center", width: 32, height: 32, flexShrink: 0, borderRadius: `${t.radius.sm}px`, bgcolor: t.statusTint.info.bg, color: t.statusTint.info.dot }}>
@@ -39,7 +40,9 @@ export function QuestionCard({ thread, onOpen }: { thread: QuestionThread; onOpe
         <Typography variant="subtitle2" noWrap>{title}</Typography>
         <Typography variant="caption" noWrap sx={{ display: "block", color: "text.secondary" }}>{questionSummary(thread)}</Typography>
       </Box>
-      {onOpen ? (
+      {onOpen && mobile ? (
+        <IconButton aria-label="Mở câu hỏi" onClick={onOpen}><ChevronRightRoundedIcon /></IconButton>
+      ) : onOpen ? (
         <ErgButton variant="text" size="small" endIcon={<ChevronRightRoundedIcon />} onClick={onOpen} aria-label="Mở câu hỏi">Mở câu hỏi</ErgButton>
       ) : null}
     </Box>
@@ -48,11 +51,11 @@ export function QuestionCard({ thread, onOpen }: { thread: QuestionThread; onOpe
 
 export function MessageList({ messages, teacherInitials }: { messages: ReadonlyArray<QuestionMessage>; teacherInitials: string }) {
   return (
-    <Box sx={{ display: "grid", gap: 1.5 }}>
+    <Box sx={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr)", gap: 1.5 }}>
       {messages.map((message, index) => {
         const divider = index === 0 || formatDateVi(message.createdAt) !== formatDateVi(messages[index - 1].createdAt);
         return (
-          <Box key={message.id} sx={{ display: "grid", gap: 1.5 }}>
+          <Box key={message.id} sx={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr)", gap: 1.5 }}>
             {divider ? <Typography variant="caption" sx={{ justifySelf: "center", px: 1.25, py: 0.25, borderRadius: `${t.radius.chip}px`, bgcolor: t.color.surfaceMuted, color: "text.secondary", fontWeight: "fontWeightMedium" }}>{dayLabel(message.createdAt)}</Typography> : null}
             <Box sx={{ display: "flex", gap: 1, alignItems: "flex-start", justifyContent: message.mine ? "flex-end" : "flex-start" }}>
               {message.mine ? null : (
@@ -107,7 +110,7 @@ export function Composer({ disabled, mobile, onSend }: ComposerProps) {
         sx={{ minHeight: 44, px: 2, border: 1, borderColor: "divider", borderRadius: mobile ? "22px" : `${t.radius.lg}px` }}
       />
       {mobile ? (
-        <IconButton type="submit" aria-label="Gửi" disabled={disabled || !text.trim()} sx={{ width: 44, height: 44, bgcolor: "primary.main", color: "primary.contrastText", "&:hover": { bgcolor: "primary.dark" } }}>
+        <IconButton type="submit" aria-label="Gửi" disabled={disabled} sx={{ width: 44, height: 44, bgcolor: "primary.main", color: "primary.contrastText", "&:hover": { bgcolor: "primary.dark" } }}>
           <SendRoundedIcon fontSize="small" />
         </IconButton>
       ) : (

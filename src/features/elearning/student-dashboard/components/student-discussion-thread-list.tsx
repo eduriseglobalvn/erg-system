@@ -92,7 +92,7 @@ function ThreadRow({ onOpen, post, selected }: { onOpen: () => void; post: Stude
         <Typography variant="subtitle2" sx={{ color: color.text }}>{getPostTitle(post)}</Typography>
         <Box sx={{ alignItems: "center", color: color.textMuted, display: "flex", flexWrap: "wrap", gap: 1 }}>
           {post.subject ? <SubjectTag label={post.subject} /> : null}
-          <Typography variant="caption" sx={{ color: "inherit" }}>{post.authorName} · {post.createdAtLabel}</Typography>
+          <Typography variant="caption" sx={{ color: "inherit" }}>{post.authorName} · {post.createdAtLabel.replace(/ \d{2}:\d{2}$/, "")}</Typography>
         </Box>
         <ThreadStats hearts={getReactionTotal(post.reactions)} replies={getCommentCount(post.comments)} solved={Boolean(post.acceptedReplyId)} />
       </Box>

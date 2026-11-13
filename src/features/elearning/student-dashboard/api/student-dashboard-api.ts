@@ -108,6 +108,12 @@ function mapStudentDashboard(
   };
 }
 
+/** "7A" / "Lớp 10C2" -> "Khối 7" / "Khối 10"; "" when the name has no leading grade (ids, teacher titles). */
+export function gradeLabelFromClassName(className: string | null | undefined): string {
+  const grade = /^(?:lớp\s*)?(\d{1,2})(?:[\s._-]?\p{L}\w{0,3})?$/iu.exec((className ?? "").trim())?.[1];
+  return grade ? `Khối ${Number(grade)}` : "";
+}
+
 function mergeProfileSession(
   baseProfile: StudentDashboardProfile,
   session: ReturnType<typeof getCurrentElearningViewerSession>,
@@ -121,7 +127,7 @@ function mergeProfileSession(
     name: session.name ?? baseProfile.name,
     className: session.className || baseProfile.className,
     schoolName: session.schoolName || baseProfile.schoolName,
-    gradeLabel: isTeacherViewer ? session.title || session.className || "Giáo viên" : baseProfile.gradeLabel,
+    gradeLabel: isTeacherViewer ? session.title || session.className || "Giáo viên" : gradeLabelFromClassName(session.className),
     homeroomTeacher: isTeacherViewer ? "Tự truy cập Elearning" : baseProfile.homeroomTeacher,
   };
 }

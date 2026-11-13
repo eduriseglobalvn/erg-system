@@ -1,4 +1,5 @@
 import KeyIcon from "@mui/icons-material/KeyRounded";
+import StairsIcon from "@mui/icons-material/StairsRounded";
 import Bell from "@mui/icons-material/NotificationsNoneRounded";
 import LogIn from "@mui/icons-material/LoginRounded";
 import LogOut from "@mui/icons-material/LogoutRounded";
@@ -107,7 +108,7 @@ export function AnnouncementsView({ announcements, copy, selectedAnnouncementId 
   );
 }
 
-export function AccountView({ account, averageAssignmentScore, copy, openAssignments, profile, onSignIn, onSignOut }: { account: ElearningViewerSession | null; averageAssignmentScore: number | null; copy: DashboardCopy; openAssignments: StudentDashboardAssignment[]; profile: StudentDashboardProfile; onSignIn: () => void; onSignOut: () => void; }) {
+export function AccountView({ account, averageAssignmentScore, copy, openAssignments, profile, onSignIn, onSignOut, onTierOpen }: { account: ElearningViewerSession | null; averageAssignmentScore: number | null; copy: DashboardCopy; openAssignments: StudentDashboardAssignment[]; profile: StudentDashboardProfile; onSignIn: () => void; onSignOut: () => void; /** Phones reach the tier page (H15m) from here. */ onTierOpen?: () => void; }) {
   const isGuest = !account;
   const [passwordOpen, setPasswordOpen] = useState(false);
   return (
@@ -145,6 +146,7 @@ export function AccountView({ account, averageAssignmentScore, copy, openAssignm
                 <Button fullWidth variant="contained" startIcon={<LogIn />} onClick={onSignIn} sx={{ ...primaryButtonSx, borderRadius: 2 }}>{copy.signIn}</Button>
               ) : (
                 <>
+                  {onTierOpen ? <Button fullWidth variant="outlined" startIcon={<StairsIcon />} onClick={onTierOpen} sx={{ borderRadius: `${ergEnterpriseTokens.radius.control}px`, fontWeight: "fontWeightBold" }}>Bậc của tôi</Button> : null}
                   <Button fullWidth variant="outlined" startIcon={<KeyIcon />} onClick={() => setPasswordOpen(true)} sx={{ borderRadius: `${ergEnterpriseTokens.radius.control}px`, fontWeight: "fontWeightBold" }}>Đổi mật khẩu</Button>
                   <Button fullWidth variant="outlined" color="error" startIcon={<LogOut />} onClick={onSignOut} sx={{ borderRadius: `${ergEnterpriseTokens.radius.control}px`, fontWeight: "fontWeightBold" }}>{copy.signOut}</Button>
                 </>

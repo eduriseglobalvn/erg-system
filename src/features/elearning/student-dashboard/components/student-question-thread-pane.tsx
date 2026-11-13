@@ -68,8 +68,8 @@ export function StudentQuestionThreadPane({ accountId, threadId, mobile, practic
         </Box>
         {thread.status === "ANSWERED" && !mobile ? <ErgStatusChip label="Đã trả lời" tone="success" /> : null}
       </Box>
-      <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto", display: "grid", alignContent: "start", gap: 1.5, p: 2 }}>
-        <QuestionCard thread={thread} onOpen={openAssignment} />
+      <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto", display: "grid", gridTemplateColumns: "minmax(0, 1fr)", alignContent: "start", gap: 1.5, p: 2 }}>
+        <QuestionCard thread={thread} mobile={mobile} onOpen={openAssignment} />
         <MessageList messages={thread.messages} teacherInitials={teacherInitials(thread.teacherName)} />
         {lastFromTeacher ? (
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, pl: 4.5 }}>

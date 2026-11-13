@@ -30,7 +30,7 @@ query ElearningClassLeaderboard($input: ClassLeaderboardInput!) {
       scope
       periodEndsAt
       viewerHidden
-      entries { rank studentId studentName xp streakDays rankChange isViewer }
+      entries { rank studentId studentName xp streakDays rankChange isViewer tierKey division frameKey hidden }
     }
   }
 }

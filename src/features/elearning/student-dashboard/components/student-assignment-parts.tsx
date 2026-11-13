@@ -50,7 +50,7 @@ export type PillTone = keyof typeof PILL;
 /** Rounded status pill: due chip, XP reward, "Không còn XP". */
 export function Pill({ children, icon, tone, block = false }: { children: ReactNode; icon?: ReactNode; tone: PillTone; block?: boolean }) {
   return (
-    <Box component="span" sx={{ alignItems: "center", bgcolor: PILL[tone].bg, borderRadius: `${t.radius.chip}px`, color: PILL[tone].fg, display: block ? "flex" : "inline-flex", gap: 0.5, minHeight: 28, px: 1.25, typography: "subtitle2", whiteSpace: "nowrap", width: block ? "100%" : undefined }}>
+    <Box component="span" sx={{ alignItems: "center", bgcolor: PILL[tone].bg, borderRadius: `${t.radius.chip}px`, color: PILL[tone].fg, display: block ? "flex" : "inline-flex", gap: 0.5, minHeight: tone === "info" ? 24 : 26, px: 1.25, ...t.type.label, whiteSpace: "nowrap", width: block ? "100%" : undefined }}>
       {icon}
       {children}
     </Box>
@@ -64,6 +64,12 @@ export function ProgressBar({ percent, color = t.color.primary, label }: { perce
     </Box>
   );
 }
+
+/** Outlined row action (canvas .btn.o.sm: 36px high, 13px). */
+export const rowButtonSx = { ...t.type.small, fontWeight: "fontWeightBold", minHeight: 36, minWidth: 0 } as const;
+
+/** Column header strip of a board table (canvas: bg2 fill, 1px rule underneath). */
+export const tableHeadSx = { bgcolor: t.color.surfaceMuted, borderBottom: 1, borderColor: "divider", columnGap: 2, display: "grid", px: 2.5, py: 1.25 } as const;
 
 /** Card surface: 1px border, no shadow (CLAUDE.md). */
 export const boardCardSx = { bgcolor: "background.paper", border: 1, borderColor: "divider", borderRadius: `${t.radius.card}px`, overflow: "hidden" } as const;

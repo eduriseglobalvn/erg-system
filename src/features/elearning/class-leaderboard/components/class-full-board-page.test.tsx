@@ -52,6 +52,26 @@ describe("ClassFullBoardPage (H14)", () => {
     expect(screen.getByText("Hiện 1 / 1 bạn")).toBeTruthy();
   });
 
+  it("draws the gold dashed line under rank 3 on week boards only", async () => {
+    const week = [e(1, "An Bình", 500, "ct", null), e(3, "Cẩm Chi", 300, "ct", null), e(4, "Dũng Võ", 200, "ct", null)];
+    api.load.mockResolvedValue({ classId: "c", className: "Lớp 7A", enabled: true, period: "WEEK", scope: "CLASS", periodEndsAt: "2026-11-16T00:00:00Z", viewerHidden: false, me: null, entries: week });
+    const { unmount } = renderWithQuery(<ClassFullBoardPage accountId="d5" classId="c" initialPeriod="WEEK" />);
+    await screen.findAllByText("Cẩm Chi");
+    expect(document.querySelectorAll("[data-design=\"H14.top3Line\"]").length).toBe(1);
+    unmount();
+    api.load.mockResolvedValue({ classId: "c", className: "Lớp 7A", enabled: true, period: "COURSE", scope: "CLASS", periodEndsAt: "2026-11-16T00:00:00Z", viewerHidden: false, me: null, entries: week });
+    renderWithQuery(<ClassFullBoardPage accountId="d6" classId="c" />);
+    await screen.findAllByText("Cẩm Chi");
+    expect(document.querySelector("[data-design=\"H14.top3Line\"]")).toBeNull();
+  });
+
+  it("shows rank and XP in the pinned bar for a viewer without a tier", async () => {
+    api.loadMyTier.mockResolvedValue({ ...MINH_ANH, tierKey: null, division: null, eligible: false, nextDivision: null, nextTier: null });
+    renderWithQuery(<ClassFullBoardPage accountId="d7" classId="c" />);
+    const bar = await screen.findByText("Hạng 7 · 1.240 XP");
+    expect(bar.closest("[data-design=\"H14m.pinned\"]")).toBeTruthy();
+  });
+
   it("shows an error state", async () => {
     api.load.mockRejectedValue(new Error("boom"));
     renderWithQuery(<ClassFullBoardPage accountId="d3" classId="c" />);

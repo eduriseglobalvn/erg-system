@@ -323,18 +323,13 @@ export function StudentDashboardWorkspaceRuntime() {
         />
       ) : null}
       {shownPage === "ranking" && account ? (
-        <StudentRankingSurface accountId={account.id ?? ""} copy={copy} name={account.name || dashboardProfile.name} openAssignments={openAssignments} profile={dashboardProfile} view={tierView} onDoAssignments={() => handlePageChange("assignments")} onView={setTierView} />
+        <StudentRankingSurface accountId={account.id ?? ""} copy={copy} name={account.name || dashboardProfile.name} openAssignments={filterAssignments(assignments, "todo")} profile={dashboardProfile} view={tierView} onDoAssignments={() => handlePageChange("assignments")} onView={setTierView} />
       ) : null}
       {account ? <TierPromotionGate accountId={account.id ?? ""} studentName={account.name || dashboardProfile.name} gradeLabel={dashboardProfile.gradeLabel || "khối"} onViewTier={() => openTierView("tier")} /> : null}
       {shownPage === "announcements" ? (
         <>
           {/* Signed-in viewers only: a guest has no inbox. Same portal as the quiz runtime (teacher preview reads lms). */}
-          {account ? <Box sx={{ mb: 3 }}><StudentInboxView portal={quizRuntimePortal} assignments={assignments} onOpenAssignment={openAssignment} /></Box> : null}
-          <AnnouncementsView
-            announcements={teacherAnnouncements}
-            copy={copy}
-            selectedAnnouncementId={selectedAnnouncementId}
-          />
+          {account ? <StudentInboxView portal={quizRuntimePortal} assignments={assignments} onOpenAssignment={openAssignment} /> : <AnnouncementsView announcements={teacherAnnouncements} copy={copy} selectedAnnouncementId={selectedAnnouncementId} />}
         </>
       ) : null}
       {shownPage === "account" ? (
@@ -344,7 +339,7 @@ export function StudentDashboardWorkspaceRuntime() {
           copy={copy}
           openAssignments={openAssignments}
           profile={dashboardProfile}
-          onSignIn={handleSignIn}
+          onSignIn={handleSignIn} onTierOpen={sidebarData.tier ? () => openTierView("tier") : undefined}
           onSignOut={handleSignOut}
         />
       ) : null}
@@ -360,7 +355,7 @@ export function StudentDashboardWorkspaceRuntime() {
           dockItems={mobileDockItems} onPageChange={handlePageChange}
         >
           {/* Inside the scroll area: above the 100dvh shell it pushed the page past the viewport. */}
-          <Box sx={{ pb: 2.5, pt: 4, px: 2 }}><StudentPreviewBanner inset preview={studentPreview} />{dashboardViews}</Box>
+          <Box sx={{ pb: 2.5, pt: 2, px: 2 }}><StudentPreviewBanner inset preview={studentPreview} />{dashboardViews}</Box>
         </StudentDashboardMobileShell>
       </Box>
     );
