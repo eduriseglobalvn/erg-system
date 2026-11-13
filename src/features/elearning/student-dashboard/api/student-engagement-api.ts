@@ -2,6 +2,8 @@ import type {
   CreateStudentDiscussionInput,
   ElearningCreateStudentDiscussionMutation,
   ElearningCreateStudentDiscussionMutationVariables,
+  ElearningFollowStudentDiscussionMutation,
+  ElearningFollowStudentDiscussionMutationVariables,
   ElearningMarkStudentAnnouncementReadMutation,
   ElearningMarkStudentAnnouncementReadMutationVariables,
   ElearningReplyStudentDiscussionMutation,
@@ -10,6 +12,7 @@ import type {
   ElearningSetStudentDiscussionReactionMutationVariables,
   ElearningStudentDiscussionFeedQuery,
   ElearningStudentDiscussionFeedQueryVariables,
+  FollowStudentDiscussionInput,
   MarkStudentAnnouncementReadInput,
   ReplyStudentDiscussionInput,
   SetStudentDiscussionReactionInput,
@@ -79,6 +82,18 @@ export async function createStudentDiscussion(input: CreateStudentDiscussionInpu
   return validateResponse(response, hasObjectField("createStudentDiscussion", "id"), "elearning.discussion-create").createStudentDiscussion;
 }
 
+export async function followStudentDiscussion(input: FollowStudentDiscussionInput, signal?: AbortSignal) {
+  const response = await graphQlRequest<ElearningFollowStudentDiscussionMutation, ElearningFollowStudentDiscussionMutationVariables & Record<string, unknown>>({
+    operationName: "ElearningFollowStudentDiscussion",
+    portal: "elearning",
+    query: StudentEngagementDocument,
+    signal,
+    tenantId: input.tenantId ?? undefined,
+    variables: { input },
+  });
+  return response.followStudentDiscussion;
+}
+
 export async function replyStudentDiscussion(input: ReplyStudentDiscussionInput, signal?: AbortSignal) {
   const response = await graphQlRequest<ElearningReplyStudentDiscussionMutation, ElearningReplyStudentDiscussionMutationVariables & Record<string, unknown>>({
     operationName: "ElearningReplyStudentDiscussion",
@@ -130,7 +145,9 @@ function hasObjectField<TKey extends string, TField extends string>(key: TKey, f
 function mapPost(post: ElearningStudentDiscussionFeedQuery["elearning"]["discussionFeed"]["items"][number]): StudentDiscussionFeedPost {
   const createdAtMs = toTimestamp(post.createdAt);
   return {
+    acceptedReplyId: post.acceptedReplyId || undefined,
     attachments: mapAttachments(post.attachmentIds),
+    authorId: post.authorId || undefined,
     authorInitials: post.authorInitials || initials(post.authorName),
     authorName: post.authorName || "Học viên",
     className: post.className || post.academicClassId || "",
@@ -138,9 +155,13 @@ function mapPost(post: ElearningStudentDiscussionFeedQuery["elearning"]["discuss
     content: post.content || post.title || "",
     createdAtLabel: formatRelativeDate(createdAtMs),
     createdAtMs,
+    following: post.following,
     id: post.id,
+    pinned: post.pinned,
     reactions: mapReactionSummary(post.reactions),
     relatedAssignmentTitle: post.assignmentId || undefined,
+    subject: post.subject || undefined,
+    title: post.title || undefined,
     viewerReaction: asReaction(post.viewerReaction),
   };
 }

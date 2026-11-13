@@ -33,6 +33,12 @@ export type DeleteStudentDiscussionItemInput = {
   readonly tenantId?: string | null | undefined;
 };
 
+export type FollowStudentDiscussionInput = {
+  readonly follow: boolean;
+  readonly postId: string;
+  readonly tenantId?: string | null | undefined;
+};
+
 export type GradebookWorkspaceInput = {
   readonly classId: string;
   readonly schoolId?: string | null | undefined;
@@ -52,6 +58,13 @@ export type ReplyStudentDiscussionInput = {
   readonly parentCommentId?: string | null | undefined;
   readonly postId: string;
   readonly tenantId?: string | null | undefined;
+};
+
+export type SendQuestionThreadMessageInput = {
+  readonly attachmentIds?: ReadonlyArray<string> | null | undefined;
+  readonly message: string;
+  readonly tenantId?: string | null | undefined;
+  readonly threadId: string;
 };
 
 export type SetClassLeaderboardEnabledInput = {
@@ -211,7 +224,7 @@ export type ElearningStudentDiscussionFeedQueryVariables = Exact<{
 }>;
 
 
-export type ElearningStudentDiscussionFeedQuery = { readonly elearning: { readonly discussionFeed: { readonly page: number, readonly size: number, readonly totalItems: number, readonly hasNext: boolean, readonly items: ReadonlyArray<{ readonly id: string, readonly authorId: string | null, readonly authorName: string | null, readonly authorInitials: string | null, readonly academicClassId: string | null, readonly className: string | null, readonly title: string | null, readonly content: string | null, readonly createdAt: string | null, readonly attachmentIds: ReadonlyArray<string>, readonly assignmentId: string | null, readonly viewerReaction: string | null, readonly reactions: ReadonlyArray<{ readonly reaction: string, readonly count: number }>, readonly comments: ReadonlyArray<{ readonly id: string, readonly parentId: string | null, readonly authorId: string | null, readonly authorName: string | null, readonly authorInitials: string | null, readonly content: string | null, readonly createdAt: string | null, readonly attachmentIds: ReadonlyArray<string>, readonly viewerReaction: string | null, readonly reactions: ReadonlyArray<{ readonly reaction: string, readonly count: number }>, readonly replies: ReadonlyArray<{ readonly id: string, readonly parentId: string | null, readonly authorId: string | null, readonly authorName: string | null, readonly authorInitials: string | null, readonly content: string | null, readonly createdAt: string | null, readonly attachmentIds: ReadonlyArray<string>, readonly viewerReaction: string | null, readonly reactions: ReadonlyArray<{ readonly reaction: string, readonly count: number }> }> }> }> } } };
+export type ElearningStudentDiscussionFeedQuery = { readonly elearning: { readonly discussionFeed: { readonly page: number, readonly size: number, readonly totalItems: number, readonly hasNext: boolean, readonly items: ReadonlyArray<{ readonly id: string, readonly authorId: string | null, readonly authorName: string | null, readonly authorInitials: string | null, readonly academicClassId: string | null, readonly className: string | null, readonly title: string | null, readonly content: string | null, readonly createdAt: string | null, readonly attachmentIds: ReadonlyArray<string>, readonly assignmentId: string | null, readonly subject: string | null, readonly pinned: boolean, readonly acceptedReplyId: string | null, readonly following: boolean, readonly viewerReaction: string | null, readonly reactions: ReadonlyArray<{ readonly reaction: string, readonly count: number }>, readonly comments: ReadonlyArray<{ readonly id: string, readonly parentId: string | null, readonly authorId: string | null, readonly authorName: string | null, readonly authorInitials: string | null, readonly content: string | null, readonly createdAt: string | null, readonly attachmentIds: ReadonlyArray<string>, readonly viewerReaction: string | null, readonly reactions: ReadonlyArray<{ readonly reaction: string, readonly count: number }>, readonly replies: ReadonlyArray<{ readonly id: string, readonly parentId: string | null, readonly authorId: string | null, readonly authorName: string | null, readonly authorInitials: string | null, readonly content: string | null, readonly createdAt: string | null, readonly attachmentIds: ReadonlyArray<string>, readonly viewerReaction: string | null, readonly reactions: ReadonlyArray<{ readonly reaction: string, readonly count: number }> }> }> }> } } };
 
 export type ElearningCreateStudentDiscussionMutationVariables = Exact<{
   input: CreateStudentDiscussionInput;
@@ -219,6 +232,13 @@ export type ElearningCreateStudentDiscussionMutationVariables = Exact<{
 
 
 export type ElearningCreateStudentDiscussionMutation = { readonly createStudentDiscussion: { readonly id: string, readonly authorId: string | null, readonly authorName: string | null, readonly authorInitials: string | null, readonly academicClassId: string | null, readonly className: string | null, readonly title: string | null, readonly content: string | null, readonly createdAt: string | null, readonly attachmentIds: ReadonlyArray<string>, readonly assignmentId: string | null, readonly viewerReaction: string | null, readonly reactions: ReadonlyArray<{ readonly reaction: string, readonly count: number }>, readonly comments: ReadonlyArray<{ readonly id: string }> } };
+
+export type ElearningFollowStudentDiscussionMutationVariables = Exact<{
+  input: FollowStudentDiscussionInput;
+}>;
+
+
+export type ElearningFollowStudentDiscussionMutation = { readonly followStudentDiscussion: boolean };
 
 export type ElearningReplyStudentDiscussionMutationVariables = Exact<{
   input: ReplyStudentDiscussionInput;
@@ -240,6 +260,29 @@ export type ElearningMarkStudentAnnouncementReadMutationVariables = Exact<{
 
 
 export type ElearningMarkStudentAnnouncementReadMutation = { readonly markStudentAnnouncementRead: { readonly announcementId: string, readonly read: boolean, readonly readAt: string } };
+
+export type ElearningMyQuestionThreadsQueryVariables = Exact<{
+  status?: string | null | undefined;
+  tenantId?: string | null | undefined;
+}>;
+
+
+export type ElearningMyQuestionThreadsQuery = { readonly elearning: { readonly myQuestionThreads: ReadonlyArray<{ readonly id: string, readonly assignmentId: string, readonly assignmentTitle: string | null, readonly subjectName: string | null, readonly className: string | null, readonly questionIndex: number, readonly questionPrompt: string | null, readonly studentAnswerText: string | null, readonly correctAnswerText: string | null, readonly teacherId: string | null, readonly teacherName: string | null, readonly status: string, readonly lastMessageAt: string | null, readonly lastMessagePreview: string | null }> } };
+
+export type ElearningQuestionThreadQueryVariables = Exact<{
+  id: string;
+  tenantId?: string | null | undefined;
+}>;
+
+
+export type ElearningQuestionThreadQuery = { readonly elearning: { readonly questionThread: { readonly id: string, readonly assignmentId: string, readonly assignmentTitle: string | null, readonly subjectName: string | null, readonly className: string | null, readonly questionIndex: number, readonly questionPrompt: string | null, readonly studentAnswerText: string | null, readonly correctAnswerText: string | null, readonly teacherId: string | null, readonly teacherName: string | null, readonly status: string, readonly lastMessageAt: string | null, readonly lastMessagePreview: string | null, readonly messages: ReadonlyArray<{ readonly id: string, readonly senderId: string, readonly senderName: string | null, readonly senderRole: string, readonly mine: boolean, readonly body: string, readonly attachmentIds: ReadonlyArray<string>, readonly createdAt: string }> } } };
+
+export type ElearningSendQuestionThreadMessageMutationVariables = Exact<{
+  input: SendQuestionThreadMessageInput;
+}>;
+
+
+export type ElearningSendQuestionThreadMessageMutation = { readonly sendQuestionThreadMessage: { readonly id: string, readonly assignmentId: string, readonly assignmentTitle: string | null, readonly subjectName: string | null, readonly className: string | null, readonly questionIndex: number, readonly questionPrompt: string | null, readonly studentAnswerText: string | null, readonly correctAnswerText: string | null, readonly teacherId: string | null, readonly teacherName: string | null, readonly status: string, readonly lastMessageAt: string | null, readonly lastMessagePreview: string | null, readonly messages: ReadonlyArray<{ readonly id: string, readonly senderId: string, readonly senderName: string | null, readonly senderRole: string, readonly mine: boolean, readonly body: string, readonly attachmentIds: ReadonlyArray<string>, readonly createdAt: string }> } };
 
 export type ElearningMyTierQueryVariables = Exact<{
   tenantId?: string | null | undefined;

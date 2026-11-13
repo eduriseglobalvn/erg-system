@@ -35,6 +35,17 @@ describe("MyTierPage (H15)", () => {
     expect(contained()).toBe(1);
   });
 
+  it("colours the tier name and fills the bars by cutoffs, not by XP over cutoff", async () => {
+    renderWithQuery(<MyTierPage accountId="a4" studentName="Nguyễn Minh Anh" gradeLabel="khối 7" />);
+    const name = await screen.findByText("Đồng 2");
+    expect(getComputedStyle(name).color).toBe("rgb(138, 67, 26)");
+    await screen.findByText(/Top 65–82% · 22 bạn/);
+    const fills = [...document.querySelectorAll("[data-design='H15.hero'] [aria-hidden='true'] > div")].map((el) => (el as HTMLElement).style.width || getComputedStyle(el).width);
+    expect(fills).toContain("39%");
+    expect(fills).toContain("58%");
+    expect(document.querySelector("[data-design='H15.connector']")).toBeTruthy();
+  });
+
   it("asks for more hand-ins when not eligible", async () => {
     api.loadMyTier.mockResolvedValue({ ...MINH_ANH, eligible: false, tierKey: null, division: null, submittedCount: 1 });
     renderWithQuery(<MyTierPage accountId="a2" studentName="Nguyễn Minh Anh" />);
@@ -54,6 +65,8 @@ describe("TierTablePage (H18)", () => {
     const cell = (await screen.findAllByText("≥ 1.185 XP"))[0].closest("[aria-current]") as HTMLElement;
     expect(within(cell).getByText("Bạn")).toBeTruthy();
     expect(within(cell).getByText("hạng #90–94")).toBeTruthy();
+    expect(within(cell).getByText("1.185", { selector: "span" })).toBeTruthy();
+    expect(document.querySelectorAll("[data-design='H18m.cell']").length).toBeGreaterThan(0);
     expect(screen.getByText("Không chia cấp · các bạn Cao thủ xếp theo XP")).toBeTruthy();
   });
 });

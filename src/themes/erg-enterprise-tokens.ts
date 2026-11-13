@@ -32,6 +32,38 @@ export const ergEnterpriseTokens = {
   },
   // "Thi đua" podium (design H03): gold / silver / bronze for ranks 1-3.
   medal: { gold: "#C98A04", silver: "#8A94A6", bronze: "#B4632B" },
+  // Podium arena (design H08 / H03b): spinning rays, confetti, and lid + face + ink per place (1, 2, 3).
+  podium: {
+    arena: "linear-gradient(180deg,#F7FAFF 0,#fff 55%)",
+    rays: "repeating-conic-gradient(from 0deg,rgba(201,138,4,.10) 0 6deg,rgba(201,138,4,0) 6deg 18deg)",
+    raysMask: "radial-gradient(circle,#000 0,transparent 60%)",
+    confetti: { blue: "#0071E3", gold: "#C98A04", fire: "#EA580C", green: "#16A34A" },
+    ranks: [
+      { lid: "linear-gradient(#FFF8E1,#FBE7A8)", face: "linear-gradient(#F9E3A0,#EFC85E)", ink: "#7A5A00" },
+      { lid: "linear-gradient(#F7F8FA,#E6E9EE)", face: "linear-gradient(#E3E7ED,#CDD3DC)", ink: "#5B6474" },
+      { lid: "linear-gradient(#FDF1E8,#F4D9C5)", face: "linear-gradient(#F3D6C1,#E5B593)", ink: "#7C3A12" },
+    ],
+    fire: "#EA580C",
+  },
+  // Type roles without a theme variant: tier name on "Bậc của bạn" (34/700), big rank number in the position ring (30/700).
+  type: {
+    display: { fontSize: 34, fontWeight: 700, lineHeight: 1.1 },
+    ringRank: { fontSize: 30, fontWeight: 700, lineHeight: 1 },
+  },
+  // Tier name colour (hero title, current ladder step) and hero tint (gradient start + corner glow).
+  tierTitle: { go: "#6E4520", sat: "#4A515B", dong: "#8A431A", bac: "#5E6778", vang: "#7A5A00", bk: "#227A72", kc: "#3B52C8", ct: "#7A1FA2" },
+  // Solid line colour per tier: hero segments and the ladder connector up to the current step.
+  tierLine: { go: "#8B5A2B", sat: "#5B636E", dong: "#B4632B", bac: "#8A94A6", vang: "#C98A04", bk: "#2E8F86", kc: "#3B6CF0", ct: "#B0266B" },
+  tierTint: {
+    go: { from: "#F7EFE7", glow: "rgba(176,122,69,.25)" },
+    sat: { from: "#F0F2F4", glow: "rgba(163,171,181,.3)" },
+    dong: { from: "#FBF1E9", glow: "rgba(227,160,107,.25)" },
+    bac: { from: "#F3F5F8", glow: "rgba(174,182,195,.3)" },
+    vang: { from: "#FFF8E1", glow: "rgba(242,201,76,.28)" },
+    bk: { from: "#E9F8F5", glow: "rgba(127,217,205,.28)" },
+    kc: { from: "#EDF2FF", glow: "rgba(59,108,240,.2)" },
+    ct: { from: "#FBEFFD", glow: "rgba(176,38,107,.2)" },
+  },
   // Student tiers (design H15-H18): frame ring, shield emblem and chip fill per tier.
   tier: {
     go: { frame: "repeating-linear-gradient(115deg,#8B5A2B 0 4px,#A9743F 4px 7px,#6E4520 7px 9px)", emblem: "linear-gradient(#B07A45,#6E4520)", chip: "#8B5A2B", ink: "#FFFFFF", glow: "none" },

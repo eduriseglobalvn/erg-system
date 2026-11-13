@@ -26,3 +26,9 @@ export function previousWeekStart(today: string): string {
   const pad = (n: number) => String(n).padStart(2, "0");
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }
+
+/** How far `xp` is from `from` to `to` (the two cutoffs), 0..1; 0 when the cutoffs are unknown or do not rise. */
+export function cutoffProgress(xp: number, from: number | null | undefined, to: number): number {
+  if (from == null || to <= from) return 0;
+  return Math.min(1, Math.max(0, (xp - from) / (to - from)));
+}

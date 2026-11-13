@@ -35,6 +35,14 @@ describe("ClassFullBoardPage (H14)", () => {
     expect(within(mine).getByLabelText("Lên 2 hạng")).toBeTruthy();
   });
 
+  it("pins the viewer bar above the dock on phones", async () => {
+    renderWithQuery(<ClassFullBoardPage accountId="d4" classId="c" />);
+    const bar = await screen.findByText("Đồng 2 · hạng 7");
+    expect(bar.closest("[data-design='H14m.pinned']")).toBeTruthy();
+    expect(screen.getByText("+85 XP lên Đồng 1")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Tới chỗ tôi" })).toBeTruthy();
+  });
+
   it("hides the name of a student who turned it off, and filters by search", async () => {
     renderWithQuery(<ClassFullBoardPage accountId="d2" classId="c" />);
     expect((await screen.findAllByText("Bạn ẩn tên")).length).toBeGreaterThan(0);

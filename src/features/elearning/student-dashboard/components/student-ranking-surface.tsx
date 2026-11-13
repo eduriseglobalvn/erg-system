@@ -41,6 +41,7 @@ export function StudentRankingSurface({ accountId, copy, name, openAssignments, 
       accountId={accountId} classId={profile.classId ?? ""} copy={copy}
       onOpenFullBoard={(period) => { setBoardPeriod(period); onView("board"); }}
       onOpenTierTable={() => onView("table")}
+      openAssignments={openAssignments} onDoAssignments={onDoAssignments}
     />
   );
 }

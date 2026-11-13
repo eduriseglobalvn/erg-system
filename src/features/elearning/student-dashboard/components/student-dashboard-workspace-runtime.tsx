@@ -314,6 +314,8 @@ export function StudentDashboardWorkspaceRuntime() {
           copy={copy}
           posts={discussion.discussionPosts}
           studentClass={dashboardProfile.className}
+          viewerName={account?.name || dashboardProfile.name}
+          onToggleFollow={discussion.toggleDiscussionFollow}
           onAddComment={discussion.addDiscussionComment}
           onCommentReaction={discussion.toggleDiscussionCommentReaction}
           onCreatePost={discussion.createDiscussionPost}
@@ -327,7 +329,7 @@ export function StudentDashboardWorkspaceRuntime() {
       {shownPage === "announcements" ? (
         <>
           {/* Signed-in viewers only: a guest has no inbox. Same portal as the quiz runtime (teacher preview reads lms). */}
-          {account ? <Box sx={{ mb: 3 }}><StudentInboxView portal={quizRuntimePortal} /></Box> : null}
+          {account ? <Box sx={{ mb: 3 }}><StudentInboxView portal={quizRuntimePortal} assignments={assignments} onOpenAssignment={openAssignment} /></Box> : null}
           <AnnouncementsView
             announcements={teacherAnnouncements}
             copy={copy}

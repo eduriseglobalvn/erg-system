@@ -37,14 +37,21 @@ function Cell({ division, minXp, from, to, mine }: { division: number | null; mi
     <Box
       aria-current={mine ? "true" : undefined}
       data-design={mine ? "H18.myCell" : undefined}
-      sx={{ bgcolor: mine ? t.color.primarySofter : t.color.surfaceMuted, border: 1, borderColor: mine ? "primary.main" : t.color.border, borderRadius: `${t.radius.control}px`, boxShadow: mine ? `0 0 0 2px ${t.color.primarySoft}` : "none", px: 1.5, py: 1 }}
+      sx={{ bgcolor: mine ? t.color.primarySofter : t.color.surfaceMuted, border: 1, borderColor: mine ? "primary.main" : t.color.border, borderRadius: `${t.radius.control}px`, boxShadow: mine ? `0 0 0 2px ${t.color.primarySoft}` : "none", px: { xs: 0.5, md: 1.5 }, py: 1 }}
     >
-      <Typography variant="caption" sx={{ alignItems: "center", display: "flex", gap: 0.75, fontWeight: "fontWeightBold" }}>
-        {division == null ? "Cao thủ" : `Cấp ${division}`}
-        {mine ? <Box component="span" sx={{ bgcolor: "primary.main", borderRadius: `${t.radius.chip}px`, color: "primary.contrastText", px: 0.75 }}>Bạn</Box> : null}
-      </Typography>
-      <Typography variant="subtitle2">{`≥ ${formatViNumber(minXp)} XP`}</Typography>
-      <Typography variant="caption" sx={{ color: "text.secondary" }}>{rangeLabel(from, to)}</Typography>
+      <Box sx={{ display: { xs: "none", md: "block" } }}>
+        <Typography variant="caption" sx={{ alignItems: "center", display: "flex", gap: 0.75, fontWeight: "fontWeightBold" }}>
+          {division == null ? "Cao thủ" : `Cấp ${division}`}
+          {mine ? <Box component="span" sx={{ bgcolor: "primary.main", borderRadius: `${t.radius.chip}px`, color: "primary.contrastText", px: 0.75 }}>Bạn</Box> : null}
+        </Typography>
+        <Typography variant="subtitle2">{`≥ ${formatViNumber(minXp)} XP`}</Typography>
+        <Typography variant="caption" sx={{ color: "text.secondary" }}>{rangeLabel(from, to)}</Typography>
+      </Box>
+      {/* Phone (H18m): level on the first line, minimum XP on the second. */}
+      <Box data-design="H18m.cell" sx={{ display: { xs: "grid", md: "none" }, justifyItems: "center", textAlign: "center" }}>
+        <Typography component="span" variant="subtitle2">{division ?? "—"}</Typography>
+        <Typography component="span" variant="subtitle2" sx={{ fontVariantNumeric: "tabular-nums" }}>{formatViNumber(minXp)}</Typography>
+      </Box>
     </Box>
   );
 }

@@ -22,7 +22,7 @@ import {
   type LeaderboardPeriod,
 } from "@/features/elearning/class-leaderboard/api/class-leaderboard-api";
 import { ClassLeaderboardTable } from "@/features/elearning/class-leaderboard/components/class-leaderboard-table";
-import { LEADERBOARD_PERIODS, leaderboardPeriodLabel } from "@/features/elearning/class-leaderboard/leaderboard-period";
+import { TEACHER_LEADERBOARD_PERIODS, leaderboardPeriodLabel } from "@/features/elearning/class-leaderboard/leaderboard-period";
 
 /** "Thi đua" (XP board) for Teacher (classes they teach) and Admin (every class of the tenant): view and switch on/off for students. */
 export function ClassLeaderboardPage({ portal }: { portal: GraphQlPortal }) {
@@ -83,7 +83,7 @@ export function ClassLeaderboardPage({ portal }: { portal: GraphQlPortal }) {
       ) : null}
       {classId ? (
         <Tabs aria-label="Kỳ thi đua" value={period} variant="fullWidth" onChange={(_, value: LeaderboardPeriod) => setPeriod(value)} sx={{ ...ergSegmentedTabsSx, mb: 2 }}>
-          {LEADERBOARD_PERIODS.map((value) => <Tab key={value} value={value} label={leaderboardPeriodLabel(value)} />)}
+          {TEACHER_LEADERBOARD_PERIODS.map((value) => <Tab key={value} value={value} label={leaderboardPeriodLabel(value)} />)}
         </Tabs>
       ) : null}
       {loading ? (

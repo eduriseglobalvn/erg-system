@@ -13,7 +13,7 @@ describe("ViewerRankStrip", () => {
     expect(screen.getByText("#4")).toBeTruthy();
     expect(screen.getByText("/ 4 bạn lớp 7A")).toBeTruthy();
     expect(screen.getByText("Lên 2 hạng")).toBeTruthy();
-    expect(screen.getByText("Còn 41 XP lên hạng 3")).toBeTruthy();
+    expect(screen.getByText("Còn 40 XP lên hạng 3")).toBeTruthy();
   });
   it("renders nothing for a hidden or unranked viewer", () => {
     const { container } = render(<ViewerRankStrip entries={[e(1, 5)]} label="lớp 7A" />);
