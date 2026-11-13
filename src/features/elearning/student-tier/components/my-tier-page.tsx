@@ -49,7 +49,7 @@ export type MyTierPageProps = {
 function NextGoal({ label, note, next, from, xp, tier, height = 12 }: { label: ReactNode; note: string; next: Next; /** XP cutoff the student started from (current division or tier floor). */ from: number | null | undefined; xp: number; tier: TierKey; height?: number }) {
   return (
     <Box>
-      <Box sx={{ alignItems: "baseline", display: "flex", gap: 1, justifyContent: "space-between", mb: 1 }}>
+      <Box sx={{ alignItems: "baseline", display: "flex", gap: 1, justifyContent: "space-between", mb: { xs: 0.5, md: 1 } }}>
         <Typography variant="subtitle2">{label}</Typography>
         <Typography variant="caption" sx={{ color: "text.secondary", whiteSpace: "nowrap" }}>{`${note} ${formatViNumber(next.minXp)} XP`}</Typography>
       </Box>
@@ -70,12 +70,12 @@ function Hero({ phone, studentName, tier, me, gradeLabel, row, openAssignments, 
   const tierFrom = cutoffs.length ? Math.min(...cutoffs) : null;
   const tint = t.tierTint[tier];
   return (
-    <Box data-design="H15.hero" sx={{ ...cardSx, background: `linear-gradient(120deg, ${tint.from} 0, ${t.color.surface} 55%)`, display: "grid", gap: 3, gridTemplateColumns: { xs: "1fr", md: "auto minmax(0,520px)" }, justifyContent: "space-between", overflow: "hidden", position: "relative", "&::before": { background: `radial-gradient(circle, ${tint.glow}, transparent 70%)`, borderRadius: "50%", content: '""', height: 320, pointerEvents: "none", position: "absolute", right: -80, top: -80, width: 320 } }}>
-      <Box sx={{ position: "relative", alignItems: "center", display: "flex", flexDirection: { xs: "column", md: "row" }, gap: phone ? 3 : 2.5, textAlign: { xs: "center", md: "left" } }}>
-        <ErgTierEmblem tier={tier} size={phone ? 94 : 110} />
-        <Box sx={{ display: "grid", gap: 1, justifyItems: { xs: "center", md: "start" } }}>
+    <Box data-design="H15.hero" sx={{ ...cardSx, background: `linear-gradient(120deg, ${tint.from} 0, ${t.color.surface} 55%)`, display: "grid", gap: { xs: 2, md: 3 }, gridTemplateColumns: { xs: "1fr", md: "auto minmax(0,520px)" }, justifyContent: "space-between", overflow: "hidden", position: "relative", "&::before": { background: `radial-gradient(circle, ${tint.glow}, transparent 70%)`, borderRadius: "50%", content: '""', height: 320, pointerEvents: "none", position: "absolute", right: -80, top: -80, width: 320 } }}>
+      <Box sx={{ position: "relative", alignItems: "center", display: "flex", flexDirection: { xs: "column", md: "row" }, gap: phone ? 1 : 2.5, textAlign: { xs: "center", md: "left" } }}>
+        <ErgTierEmblem tier={tier} size={phone ? 86 : 110} />
+        <Box sx={{ display: "grid", gap: { xs: 0.5, md: 1 }, justifyItems: { xs: "center", md: "start" } }}>
           {phone ? null : <Typography variant="caption" sx={{ color: "text.secondary", letterSpacing: 1 }}>BẬC HIỆN TẠI</Typography>}
-          <Typography component="p" data-design="H15.tierName" sx={{ ...t.type.display, color: t.tierTitle[tier] }}>{tierLabel(tier, me.division)}</Typography>
+          <Typography component="p" data-design="H15.tierName" sx={{ ...t.type.display, color: t.tierTitle[tier], lineHeight: phone ? 1.1 : undefined }}>{tierLabel(tier, me.division)}</Typography>
           <Typography sx={{ ...t.type.small, color: "text.secondary" }}>
             <Box component="strong" sx={{ color: "text.primary" }}>{`${formatViNumber(me.courseXp)} XP`}</Box>
             {` cả khóa · #${me.gradeRank} / ${me.gradeSize} ${gradeLabel}${phone ? "" : ` · top ${topPercent(me.gradeRank ?? 0, me.gradeSize ?? 0)}%`}`}
@@ -126,10 +126,10 @@ function Ladder({ current, seats, studentName, wide }: { current: TierKey; seats
               key={key}
               sx={{ alignItems: "center", position: "relative", bgcolor: { xs: here ? t.tierTint[key].from : "transparent", md: "transparent" }, display: "flex", flex: 1, flexDirection: { xs: "row", md: "column" }, gap: { xs: 1.5, md: 0.75 }, minHeight: { xs: 60, md: 0 }, minWidth: 0, px: { xs: 2, md: 0.25 }, py: { xs: 1, md: 0 }, textAlign: { xs: "left", md: "center" } }}
             >
-              <Box sx={{ filter: i > at ? "grayscale(.85)" : undefined, opacity: i > at ? 0.5 : 1 }}><ErgTierEmblem tier={key} size={wide ? 64 : 38} /></Box>
+              <Box sx={{ filter: i > at ? "grayscale(.85)" : undefined, opacity: i > at ? 0.5 : 1 }}><ErgTierEmblem tier={key} size={wide ? 64 : 34} /></Box>
               <Box sx={{ flex: { xs: 1, md: "none" }, minWidth: 0 }}>
                 <Typography variant="subtitle2" sx={{ color: here ? t.tierTitle[key] : "text.primary", fontWeight: "fontWeightBold" }}>{TIER_NAMES[key]}</Typography>
-                <Typography variant="caption" sx={{ color: "text.secondary" }}>{`${TIER_BANDS[key]}${seat != null ? ` · ${seat} bạn` : ""}`}</Typography>
+                <Typography variant="caption" sx={{ color: "text.secondary", whiteSpace: "nowrap" }}>{`${TIER_BANDS[key]}${seat != null ? ` · ${seat} bạn` : ""}`}</Typography>
               </Box>
               <Box sx={{ alignItems: "center", display: "flex", flexDirection: { xs: "row", md: "column" }, gap: 0.75 }}>
                 <Box sx={i > at ? { filter: "grayscale(.85)", opacity: 0.5 } : undefined}><TierAvatar name={studentName} tier={key} size={wide ? 30 : 26} /></Box>
@@ -193,7 +193,7 @@ export function MyTierPage({ accountId, studentName, gradeLabel = "khối", seas
   const seats = new Map((table.data ?? []).map((row) => [row.tierKey, row.seats]));
 
   return (
-    <Box sx={{ display: "grid", gap: 2.5, px: { xs: 2, md: 0 }, py: { xs: 2, md: 0 } }}>
+    <Box sx={{ display: "grid", gap: 2.5 }}>
       <TierHeader
         title="Bậc của bạn"
         subtitle={phone ? `${seasonLabel} · khóa 2026–2027` : me?.gradeSize ? `${seasonLabel} · khóa 2026–2027 · xếp theo tỉ lệ trong ${gradeLabel} (${me.gradeSize} bạn) · cập nhật 0 giờ thứ Hai` : seasonLabel}

@@ -13,7 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { gradeLabelFromClassName } from "@/features/elearning/student-dashboard/api/student-dashboard-api";
 import { ergMobileDockAnchor } from "@/components/portal/erg-mobile-dock";
-import { ErgButton } from "@/components/erg-mui/erg-actions";
+import { ErgButton, ErgIconButton } from "@/components/erg-mui/erg-actions";
 import { ErgEmptyState } from "@/components/erg-mui/erg-feedback";
 import { ergChipTabsSx, ergSegmentedTabsSx } from "@/components/erg-mui/erg-tabs";
 import { ErgTierEmblem } from "@/components/erg-mui/erg-tier";
@@ -52,6 +52,7 @@ export function ClassFullBoardPage({ accountId, classId, initialPeriod = "COURSE
   const [scope, setScope] = useState<LeaderboardScope>("CLASS");
   const [query, setQuery] = useState("");
   const [pages, setPages] = useState(1);
+  const [searchOpen, setSearchOpen] = useState(false);
   const viewerRef = useRef<HTMLDivElement>(null);
   const board = useQuery({ queryKey: classLeaderboardKeys.student(accountId, classId, period, scope), queryFn: ({ signal }) => loadStudentClassLeaderboard(classId, period, scope, signal) });
   const mine = useMyTier(accountId).data;
@@ -62,6 +63,7 @@ export function ClassFullBoardPage({ accountId, classId, initialPeriod = "COURSE
   const all = board.data?.enabled ? board.data.entries : [];
   const matched = query.trim() ? all.filter((e) => strip(e.studentName ?? "").includes(strip(query.trim()))) : all;
   const shown = matched.slice(0, pages * pageSize);
+  const total = Math.max(board.data?.me?.size ?? 0, matched.length);
   const top = all.reduce((max, e) => Math.max(max, e.xp), 0);
   const tier = asTier(mine?.tierKey);
   const gap = (xp?: number) => (xp == null || !mine ? "" : ` (+${formatViNumber(Math.max(0, xp - mine.courseXp))})`);
@@ -71,6 +73,17 @@ export function ClassFullBoardPage({ accountId, classId, initialPeriod = "COURSE
       <Tab value="GRADE" label={gradeLabel} />
     </Tabs>
   );
+  const searchField = (
+    <TextField
+      hiddenLabel
+      placeholder={`Tìm bạn trong ${label.toLowerCase()}`}
+      size="small"
+      slotProps={{ htmlInput: { "aria-label": "Tìm bạn" }, input: { startAdornment: <InputAdornment position="start"><SearchRoundedIcon fontSize="small" /></InputAdornment> } }}
+      sx={{ width: { xs: "100%", md: 220 } }}
+      value={query}
+      onChange={(e) => { setQuery(e.target.value); setPages(1); }}
+    />
+  );
   const goToMe = () => {
     setQuery("");
     setPages(Math.ceil(all.length / pageSize));
@@ -78,13 +91,13 @@ export function ClassFullBoardPage({ accountId, classId, initialPeriod = "COURSE
   };
 
   return (
-    <Box sx={{ display: "grid", gap: 2, maxWidth: 1180, mx: "auto", px: { xs: 2, md: 0 }, py: { xs: 2, md: 3 }, pb: { xs: 11, md: 3 } }}>
+    <Box sx={{ display: "grid", gap: { xs: 1.25, md: 2 }, maxWidth: 1180, mx: "auto", px: { xs: 0, md: 0 }, py: { xs: 0, md: 3 }, pb: { xs: 11, md: 3 } }}>
       <ErgButton variant="text" onClick={onBack} sx={{ display: { xs: "none", md: "inline-flex" }, justifySelf: "start", minWidth: 0, p: 0 }}>← Thi đua</ErgButton>
       <TierHeader
         title={phone ? `Cả lớp ${className}` : `Bảng xếp hạng cả lớp ${className}`}
-        subtitle={phone ? `${seasonLabel} · ${all.length} bạn` : `${seasonLabel} · khóa 2026–2027 · xếp theo bậc, cùng bậc thì ai nhiều XP hơn đứng trên`}
+        subtitle={phone ? `${seasonLabel} · ${total} bạn` : `${seasonLabel} · khóa 2026–2027 · xếp theo bậc, cùng bậc thì ai nhiều XP hơn đứng trên`}
         onBack={phone ? onBack : undefined}
-        actions={(
+        actions={phone ? <ErgIconButton label="Tìm bạn" onClick={() => setSearchOpen((open) => !open)} sx={{ bgcolor: "background.paper", border: 1, borderColor: "divider", height: t.size.controlLg, width: t.size.controlLg }}><SearchRoundedIcon /></ErgIconButton> : (
           <Box sx={{ alignItems: "center", display: { xs: "none", md: "flex" }, gap: 1 }}>
             <Tabs aria-label="Kỳ thi đua" value={period} sx={ergSegmentedTabsSx} onChange={(_, v: LeaderboardPeriod) => { setPeriod(v); setPages(1); }}>
               {LEADERBOARD_PERIODS.map((p) => <Tab key={p} value={p} label={leaderboardPeriodLabel(p)} />)}
@@ -99,6 +112,7 @@ export function ClassFullBoardPage({ accountId, classId, initialPeriod = "COURSE
         </Tabs>
       </Box>
       <Box sx={{ display: { xs: "block", md: "none" } }}>{scopeTabs}</Box>
+      {phone && searchOpen ? searchField : null}
       {mine ? (
         <Box data-design="H14.mine" sx={{ ...cardSx, alignItems: "center", boxShadow: t.shadow.float, display: { xs: "none", md: "flex" }, flexWrap: "wrap", gap: 2, py: 1.25 }}>
           {tier ? <ErgTierEmblem tier={tier} size={36} /> : null}
@@ -112,15 +126,7 @@ export function ClassFullBoardPage({ accountId, classId, initialPeriod = "COURSE
               </Typography>
             ) : null}
           </Box>
-          <TextField
-            hiddenLabel
-            placeholder={`Tìm bạn trong ${label.toLowerCase()}`}
-            size="small"
-            slotProps={{ htmlInput: { "aria-label": "Tìm bạn" }, input: { startAdornment: <InputAdornment position="start"><SearchRoundedIcon fontSize="small" /></InputAdornment> } }}
-            sx={{ display: { xs: "none", md: "block" }, width: 220 }}
-            value={query}
-            onChange={(e) => { setQuery(e.target.value); setPages(1); }}
-          />
+          {searchField}
           <ErgButton variant="outlined" startIcon={<MyLocationRoundedIcon />} onClick={goToMe}>Tới chỗ của tôi</ErgButton>
         </Box>
       ) : null}
@@ -131,7 +137,7 @@ export function ClassFullBoardPage({ accountId, classId, initialPeriod = "COURSE
             <Typography noWrap variant="subtitle2">{tier && mine ? `${tierLabel(tier, mine.division)}${board.data?.me?.rank ? ` · hạng ${board.data.me.rank}` : ""}` : [board.data?.me?.rank ? `Hạng ${board.data.me.rank}` : "", `${formatViNumber(mine?.courseXp ?? board.data?.me?.xp ?? 0)} XP`].filter(Boolean).join(" · ")}</Typography>
             {tier && mine?.nextDivision ? <Typography noWrap variant="caption" sx={{ color: "text.secondary", display: "block" }}>{`+${formatViNumber(Math.max(0, mine.nextDivision.minXp - mine.courseXp))} XP lên ${tierLabel(asTier(mine.nextDivision.tierKey) ?? tier, mine.nextDivision.division)}`}</Typography> : null}
           </Box>
-          <ErgButton variant="outlined" onClick={goToMe}>Tới chỗ tôi</ErgButton>
+          <ErgButton size="small" variant="outlined" onClick={goToMe}>Tới chỗ tôi</ErgButton>
         </Box>
       ) : null}
       {board.isPending ? <TierLoading /> : board.isError ? <TierError onRetry={() => void board.refetch()} /> : !all.length ? (
@@ -143,26 +149,27 @@ export function ClassFullBoardPage({ accountId, classId, initialPeriod = "COURSE
           </Box>
           {course && !query ? TIER_KEYS.slice().reverse().map((key) => {
             const rows = shown.filter((e) => e.tierKey === key);
-            const total = all.filter((e) => e.tierKey === key).length;
+            const count = all.filter((e) => e.tierKey === key).length;
             return (
               <div key={key}>
-                <GroupHeader tierKey={key} count={total} />
-                {rows.map((e) => <Row key={e.studentId} entry={e} course top={top} viewerRef={viewerRef} />)}
+                <GroupHeader tierKey={key} count={count} />
+                {rows.map((e) => <Row key={e.studentId} entry={e} course phone={phone} top={top} viewerRef={viewerRef} />)}
               </div>
             );
           }) : shown.map((e) => (
             <Fragment key={e.studentId}>
-              <Row entry={e} course={course} top={top} viewerRef={viewerRef} />
+              <Row entry={e} course={course} phone={phone} top={top} viewerRef={viewerRef} />
               {e.rank === 3 && !query ? <Box aria-hidden data-design="H14.top3Line" sx={{ borderTop: `2px dashed ${t.medal.gold}` }} /> : null}
             </Fragment>
           ))}
-          <Box sx={{ alignItems: "center", borderTop: 1, borderColor: t.color.divider, display: "flex", justifyContent: "space-between", px: 2, py: 1.5 }}>
+          <Box sx={{ alignItems: "center", borderTop: 1, borderColor: t.color.divider, display: { xs: "none", md: "flex" }, justifyContent: "space-between", px: 2, py: 1.5 }}>
             <Typography variant="caption" sx={{ color: "text.secondary" }}>{`Hiện ${shown.length} / ${matched.length} bạn`}</Typography>
             {shown.length < matched.length ? <ErgButton variant="outlined" onClick={() => setPages((p) => p + 1)}>{`Xem tiếp ${matched.length - shown.length} bạn`}</ErgButton> : null}
           </Box>
         </Box>
       )}
-      <Typography variant="caption" sx={{ color: "text.secondary" }}>
+      {phone && shown.length < total ? <ErgButton fullWidth variant="outlined" onClick={() => setPages((p) => p + 1)}>{`Xem tiếp ${total - shown.length} bạn`}</ErgButton> : null}
+      <Typography variant="caption" sx={{ color: "text.secondary", display: { xs: "none", md: "block" } }}>
         Tuần này / Tháng: xếp theo XP kiếm được trong kỳ, như bảng thi đua. Cả khóa học: xếp theo bậc, bậc chia theo tỉ lệ trong khối và cập nhật mỗi thứ Hai. Bạn bật “Ẩn tên” hiện là “Bạn ẩn tên” và không hiện khung viền.
       </Typography>
     </Box>

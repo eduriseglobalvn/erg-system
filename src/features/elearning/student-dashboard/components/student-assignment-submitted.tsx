@@ -43,7 +43,7 @@ function Ring({ value, size, label }: { value: number; size: number; label: stri
 function Kpi({ title, children, note }: { title: string; children: ReactNode; note?: ReactNode }) {
   return (
     <Box sx={{ ...boardCardSx, display: "grid", gap: 0.5, p: 2 }}>
-      <Typography color="text.secondary" variant="caption">{title}</Typography>
+      <Typography color="textSecondary" variant="caption">{title}</Typography>
       <Box sx={{ alignItems: "baseline", display: "flex", gap: 0.25 }}>{children}</Box>
       {note}
     </Box>
@@ -51,7 +51,7 @@ function Kpi({ title, children, note }: { title: string; children: ReactNode; no
 }
 
 const Big = ({ children, color }: { children: ReactNode; color?: string }) => <Typography component="span" sx={{ ...t.type.stat, color, fontVariantNumeric: "tabular-nums" }}>{children}</Typography>;
-const Unit = ({ children }: { children: ReactNode }) => <Typography color="text.secondary" component="span" sx={t.type.pageLead}>{children}</Typography>;
+const Unit = ({ children }: { children: ReactNode }) => <Typography color="textSecondary" component="span" sx={t.type.pageLead}>{children}</Typography>;
 
 function WebKpis({ items }: { items: StudentDashboardAssignment[] }) {
   const s = submittedStats(items);
@@ -63,22 +63,22 @@ function WebKpis({ items }: { items: StudentDashboardAssignment[] }) {
     <Box data-design="submitted-kpis" sx={{ alignItems: "center", display: "grid", gap: 2, gridTemplateColumns: "repeat(4, minmax(0, 1fr))" }}>
       <Box sx={{ ...boardCardSx, alignItems: "center", display: "flex", flexDirection: "column", gap: 0.5, p: 2 }}>
         <Ring label={s.averageTen} size={64} value={Number(s.averageTen.replace(",", "."))} />
-        <Typography color="text.secondary" variant="caption">Điểm trung bình</Typography>
+        <Typography color="textSecondary" variant="caption">Điểm trung bình</Typography>
         <Box sx={{ alignItems: "baseline", display: "flex", gap: 0.25 }}><Big>{s.averageTen}</Big><Unit>/10</Unit></Box>
-        <Typography color="text.secondary" variant="caption">{`${s.count} bài · lần nộp gần nhất`}</Typography>
+        <Typography color="textSecondary" variant="caption">{`${s.count} bài · lần nộp gần nhất`}</Typography>
       </Box>
       {s.correct ? (
-        <Kpi note={<Typography color="text.secondary" variant="caption">{`${correctPct}% số câu của ${s.count} bài`}</Typography>} title="Câu trả lời đúng">
+        <Kpi note={<Typography color="textSecondary" variant="caption">{`${correctPct}% số câu của ${s.count} bài`}</Typography>} title="Câu trả lời đúng">
           <Big>{s.correct.right}</Big><Unit>{`/${s.correct.total} câu`}</Unit>
         </Kpi>
       ) : null}
       {best ? (
-        <Kpi note={<Typography color="text.secondary" noWrap variant="caption">{`${best.title}${bestCorrect}`}</Typography>} title="Bài cao nhất">
+        <Kpi note={<Typography color="textSecondary" noWrap variant="caption">{`${best.title}${bestCorrect}`}</Typography>} title="Bài cao nhất">
           <Big color={BAND_COLOR[scoreBand(best.score!, best.maxScore!)]}>{score10(best)}</Big><Unit>/10</Unit>
         </Kpi>
       ) : null}
       {s.onTime ? (
-        <Kpi note={<Typography color="text.secondary" variant="caption">Được +10 XP mỗi bài nộp trước hạn</Typography>} title="Nộp đúng hạn">
+        <Kpi note={<Typography color="textSecondary" variant="caption">Được +10 XP mỗi bài nộp trước hạn</Typography>} title="Nộp đúng hạn">
           <Big>{s.onTime.done}</Big><Unit>{`/${s.onTime.total} bài`}</Unit>
         </Kpi>
       ) : null}
@@ -96,7 +96,7 @@ function WebRow({ a, onOpen }: { a: StudentDashboardAssignment; onOpen: (id: str
         <SubjectIcon assignment={a} />
         <Box sx={{ minWidth: 0 }}>
           <Typography noWrap variant="subtitle2">{a.title}</Typography>
-          <Typography color="text.secondary" noWrap variant="caption">{meta(a)}</Typography>
+          <Typography color="textSecondary" noWrap variant="caption">{meta(a)}</Typography>
         </Box>
       </Box>
       <Box>
@@ -108,7 +108,7 @@ function WebRow({ a, onOpen }: { a: StudentDashboardAssignment; onOpen: (id: str
         {percent !== null ? (
           <>
             <ProgressBar color={BAR_COLOR[percentBand(percent)]} label="Tỉ lệ đúng" percent={percent} />
-            <Typography color="text.secondary" sx={{ minWidth: 36, textAlign: "right" }} variant="caption">{`${percent}%`}</Typography>
+            <Typography color="textSecondary" sx={{ minWidth: 36, textAlign: "right" }} variant="caption">{`${percent}%`}</Typography>
           </>
         ) : null}
       </Box>
@@ -119,7 +119,7 @@ function WebRow({ a, onOpen }: { a: StudentDashboardAssignment; onOpen: (id: str
               <Typography component="span" sx={{ color: BAND_COLOR[band], fontVariantNumeric: "tabular-nums", lineHeight: 1 }} variant="h2">{score10(a)}</Typography>
               <Unit>/10</Unit>
             </Box>
-            <Typography color="text.secondary" variant="caption">{rawScoreLabel(a)}</Typography>
+            <Typography color="textSecondary" variant="caption">{rawScoreLabel(a)}</Typography>
           </>
         ) : null}
       </Box>
@@ -134,29 +134,29 @@ function MobileCard({ a, onOpen }: { a: StudentDashboardAssignment; onOpen: (id:
   const band = a.score !== null && a.maxScore ? scoreBand(a.score, a.maxScore) : null;
   const done = [shortDateTime(a.submittedAt) ? `Nộp ${shortDateTime(a.submittedAt)}` : "", rawScoreLabel(a)].filter(Boolean).join(" · ");
   return (
-    <ButtonBase data-design="submitted-card" disabled={!a.quizId} onClick={() => onOpen(a.id)} sx={{ ...boardCardSx, display: "grid", gap: 1, p: 2, textAlign: "left", width: "100%" }}>
+    <ButtonBase data-design="submitted-card" disabled={!a.quizId} onClick={() => onOpen(a.id)} sx={{ ...boardCardSx, display: "grid", gap: 1, gridTemplateColumns: "minmax(0, 1fr)", justifyContent: "stretch", p: 2, textAlign: "left", width: "100%" }}>
       <Box sx={{ alignItems: "flex-start", display: "flex", gap: 1.5, justifyContent: "space-between" }}>
         <Box sx={{ minWidth: 0 }}>
           <Typography variant="subtitle1">{a.title}</Typography>
-          <Typography color="text.secondary" variant="body2">{`${meta(a)} · ${attemptsLabel(a).replace("lần", "lần làm")}`}</Typography>
+          <Typography color="textSecondary" sx={t.type.small}>{`${meta(a)} · ${attemptsLabel(a).replace("lần", "lần làm")}`}</Typography>
           {a.correctCount != null && a.totalQuestions ? (
             <Box sx={{ alignItems: "center", color: "success.main", display: "flex", gap: 0.75, mt: 1 }}>
               <CheckCircleRoundedIcon sx={{ fontSize: t.size.iconMd }} />
-              <Typography color="text.primary" variant="subtitle2">{`Đúng ${a.correctCount}/${a.totalQuestions} câu`}</Typography>
-              {percent !== null ? <Typography color="text.secondary" variant="body2">{`· ${percent}%`}</Typography> : null}
+              <Typography color="textPrimary" variant="subtitle2">{`Đúng ${a.correctCount}/${a.totalQuestions} câu`}</Typography>
+              {percent !== null ? <Typography color="textSecondary" variant="body2">{`· ${percent}%`}</Typography> : null}
             </Box>
           ) : null}
+          {percent !== null ? <Box sx={{ mt: 1 }}><ProgressBar color={BAR_COLOR[percentBand(percent)]} label="Tỉ lệ đúng" percent={percent} /></Box> : null}
         </Box>
         {band ? (
-          <Box sx={{ bgcolor: BAND_TILE[band].bg, borderRadius: `${t.radius.lg}px`, color: BAND_TILE[band].fg, flexShrink: 0, px: 1.5, py: 1, textAlign: "center" }}>
-            <Typography component="p" variant="subtitle2">{score10(a)}</Typography>
-            <Typography component="p" variant="subtitle2">/10</Typography>
+          <Box sx={{ alignSelf: "stretch", bgcolor: BAND_TILE[band].bg, borderRadius: `${t.radius.lg}px`, color: BAND_TILE[band].fg, display: "grid", flexShrink: 0, minWidth: 64, placeContent: "center", px: 1.5, textAlign: "center" }}>
+            <Typography component="p" variant="caption">{score10(a)}</Typography>
+            <Typography component="p" variant="caption">/10</Typography>
           </Box>
         ) : null}
       </Box>
-      {percent !== null ? <ProgressBar color={BAR_COLOR[percentBand(percent)]} label="Tỉ lệ đúng" percent={percent} /> : null}
       <Box sx={{ alignItems: "center", display: "flex", justifyContent: "space-between" }}>
-        <Typography color="text.secondary" sx={{ alignItems: "center", display: "inline-flex", gap: 0.5 }} variant="caption">
+        <Typography color="textSecondary" sx={{ alignItems: "center", display: "inline-flex", gap: 0.5 }} variant="caption">
           <ScheduleRoundedIcon sx={{ fontSize: t.size.iconSm }} />{done}
         </Typography>
         <Typography color="primary" sx={{ alignItems: "center", display: "inline-flex" }} variant="subtitle2">Xem bài làm<ChevronRightRoundedIcon sx={{ fontSize: t.size.iconMd }} /></Typography>
@@ -175,12 +175,12 @@ export function SubmittedBoard({ items, mobile, onOpen }: { items: StudentDashbo
           <Box data-design="submitted-summary" sx={{ ...boardCardSx, alignItems: "center", display: "flex", gap: 2, p: 2 }}>
             <Ring label={s.averageTen} size={60} value={Number(s.averageTen.replace(",", "."))} />
             <Box>
-              <Typography color="text.secondary" variant="body2">{`Điểm trung bình · ${s.count} bài`}</Typography>
+              <Typography color="textSecondary" variant="body2">{`Điểm trung bình · ${s.count} bài`}</Typography>
               <Box sx={{ alignItems: "center", display: "flex", gap: 1 }}>
                 <Box sx={{ alignItems: "baseline", display: "flex", gap: 0.25 }}><Big>{s.averageTen}</Big><Unit>/10</Unit></Box>
                 {s.correct ? <Box component="span" sx={{ bgcolor: t.statusTint.success.bg, borderRadius: `${t.radius.chip}px`, color: t.statusTint.success.color, px: 1.25, py: 0.25, typography: "subtitle2" }}>{`Đúng ${formatViNumber(s.correct.right)}/${formatViNumber(s.correct.total)} câu`}</Box> : null}
               </Box>
-              <Typography color="text.secondary" variant="body2">Mỗi bài lấy lần nộp gần nhất</Typography>
+              <Typography color="textSecondary" variant="body2">Mỗi bài lấy lần nộp gần nhất</Typography>
             </Box>
           </Box>
         ) : null}
@@ -193,7 +193,7 @@ export function SubmittedBoard({ items, mobile, onOpen }: { items: StudentDashbo
       <WebKpis items={items} />
       <Box sx={boardCardSx}>
         <Box sx={{ ...tableHeadSx, gridTemplateColumns: WEB_COLUMNS, px: 2, py: 1.5 }}>
-          {["Bài", "Nộp lúc", "Câu đúng", "Điểm", "Lần làm", ""].map((label, index) => <Typography color="text.secondary" key={index} sx={{ pr: index === 3 ? 2 : 0, textAlign: index === 3 ? "right" : "left" }} variant="caption">{label}</Typography>)}
+          {["Bài", "Nộp lúc", "Câu đúng", "Điểm", "Lần làm", ""].map((label, index) => <Typography color="textSecondary" key={index} sx={{ pr: index === 3 ? 2 : 0, textAlign: index === 3 ? "right" : "left" }} variant="caption">{label}</Typography>)}
         </Box>
         {items.map((a) => <WebRow a={a} key={a.id} onOpen={onOpen} />)}
       </Box>

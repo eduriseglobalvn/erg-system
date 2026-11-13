@@ -82,7 +82,7 @@ export function TierPromotionDialog({ promotion, studentName, next, gradeLabel =
         <Box aria-hidden key={`${left}-${top}`} sx={{ background: color, borderRadius: "2px", height: 18, left: `${left}%`, position: "absolute", top: `${top}%`, transform: `rotate(${rotate}deg)`, width: 10 }} />
       ))}
       {!phone ? <ErgIconButton label="Đóng" onClick={onClose} sx={{ left: 12, position: "absolute", top: 12, zIndex: 1 }}><CloseRoundedIcon /></ErgIconButton> : null}
-      <Box sx={{ display: "grid", gap: 2, justifyItems: "center", px: phone ? 3 : 5, pb: 3.5, pt: phone ? 6 : 3.5, position: "relative", textAlign: "center" }}>
+      <Box sx={{ display: "grid", gap: 2, justifyItems: "center", px: phone ? 3 : 5, pb: 3.5, pt: phone ? 16 : 3.5, position: "relative", textAlign: "center" }}>
         <Box sx={{ bgcolor: t.color.surface, border: 1, borderColor: t.color.border, borderRadius: `${t.radius.chip}px`, px: 2, py: 0.75, typography: "caption" }}>{`🎉 Cập nhật bậc · thứ Hai ${date}`}</Box>
         <ErgTierEmblem tier={to} size={128} />
         <Typography component="h2" variant="h1" data-design="H16.title" sx={{ ...t.type.display, letterSpacing: "-0.01em", lineHeight: 1.15 }}>{`Lên bậc ${TIER_NAMES[to]}!`}</Typography>
@@ -108,11 +108,11 @@ export function TierPromotionDialog({ promotion, studentName, next, gradeLabel =
             <Typography variant="caption" sx={{ color: "text.secondary", whiteSpace: "nowrap" }}>{`vượt ${next.studentsToPass} bạn`}</Typography>
           </Box>
         ) : null}
-        <Box sx={{ alignItems: "center", display: "flex", flexDirection: { xs: "column-reverse", sm: "row" }, flexWrap: "wrap", gap: 1, justifyContent: "flex-end", mt: 1.5, width: "100%" }}>
+        <Box sx={{ alignItems: "center", display: "flex", flexDirection: { xs: "column-reverse", sm: "row" }, flexWrap: "wrap", gap: 1, justifyContent: "flex-end", mt: { sm: 1.5 }, width: "100%" }}>
           <Typography variant="caption" sx={{ color: "text.secondary", flex: { sm: "1 0 100%" }, textAlign: { sm: "left" } }}>{phone ? "Đổi khung bất cứ lúc nào ở Hồ sơ › Khung viền" : "Đổi khung sau ở menu tài khoản › Khung viền"}</Typography>
           <ErgButton variant="text" onClick={onClose} sx={{ width: { xs: "100%", sm: "auto" } }}>Để sau</ErgButton>
           <ErgButton variant="outlined" startIcon={<StairsRoundedIcon />} onClick={onViewTier} sx={{ display: { xs: "none", sm: "inline-flex" }, whiteSpace: "nowrap" }}>Xem bậc của tôi</ErgButton>
-          <ErgButton autoFocus variant="contained" onClick={onUseFrame} sx={{ whiteSpace: "nowrap", width: { xs: "100%", sm: "auto" } }}>{`Dùng khung ${TIER_NAMES[to]}`}</ErgButton>
+          <ErgButton autoFocus variant="contained" onClick={onUseFrame} sx={{ minHeight: { xs: 52, sm: 0 }, whiteSpace: "nowrap", width: { xs: "100%", sm: "auto" } }}>{`Dùng khung ${TIER_NAMES[to]}`}</ErgButton>
         </Box>
       </Box>
     </Dialog>

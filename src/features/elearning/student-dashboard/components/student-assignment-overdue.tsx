@@ -70,20 +70,20 @@ export function OverdueBoard({ items, now, mobile, onAsk, onOpen }: { items: Stu
             <SubjectIcon assignment={a} />
             <Box sx={{ minWidth: 0 }}>
               <Typography variant="subtitle2">{a.title}</Typography>
-              <Typography color="text.secondary" variant="caption">{meta(a)}</Typography>
+              <Typography color="textSecondary" variant="caption">{meta(a)}</Typography>
             </Box>
           </Box>
           <Box sx={{ alignItems: "center", display: "flex", flexWrap: "wrap", gap: 1.5 }}>
             <AgoPill a={a} now={now} />
             <StateText a={a} />
-            <Typography color="text.secondary" variant="body2">{a.closed ? "cô đã chốt điểm" : lateUntil(a)}</Typography>
+            <Typography color="textSecondary" variant="body2">{a.closed ? "cô đã chốt điểm" : lateUntil(a)}</Typography>
           </Box>
           <Box sx={{ alignItems: "center", display: "flex", justifyContent: "space-between" }}><Reward a={a} />{action(a)}</Box>
         </Box>
       )) : (
         <Box sx={boardCardSx}>
           <Box sx={{ ...tableHeadSx, gridTemplateColumns: WEB_COLUMNS }}>
-            {["Bài", "Hạn nộp", "Nộp muộn", "Thưởng", ""].map((label, index) => <Typography color="text.secondary" key={index} variant="caption">{label}</Typography>)}
+            {["Bài", "Hạn nộp", "Nộp muộn", "Thưởng", ""].map((label, index) => <Typography color="textSecondary" key={index} variant="caption">{label}</Typography>)}
           </Box>
           {items.map((a) => (
             <Box data-design="overdue-row" key={a.id} sx={{ alignItems: "center", borderTop: 1, borderColor: "divider", columnGap: 2, display: "grid", gridTemplateColumns: WEB_COLUMNS, px: 2.5, py: 1.75 }}>
@@ -91,13 +91,13 @@ export function OverdueBoard({ items, now, mobile, onAsk, onOpen }: { items: Stu
                 <SubjectIcon assignment={a} />
                 <Box sx={{ minWidth: 0 }}>
                   <Typography noWrap variant="subtitle2">{a.title}</Typography>
-                  <Typography color="text.secondary" noWrap variant="caption">{meta(a)}</Typography>
+                  <Typography color="textSecondary" noWrap variant="caption">{meta(a)}</Typography>
                 </Box>
               </Box>
-              <Box><AgoPill a={a} now={now} /><Typography color="text.secondary" sx={{ mt: 0.25 }} variant="caption">{shortDue(a)}</Typography></Box>
+              <Box><AgoPill a={a} now={now} /><Typography color="textSecondary" sx={{ mt: 0.25 }} variant="caption">{shortDue(a)}</Typography></Box>
               <Box>
                 <StateText a={a} />
-                <Typography color="text.secondary" component="p" variant="caption">{a.closed ? "giáo viên đã chốt điểm" : lateUntil(a)}</Typography>
+                <Typography color="textSecondary" component="p" variant="caption">{a.closed ? "giáo viên đã chốt điểm" : lateUntil(a)}</Typography>
               </Box>
               <Box><Reward a={a} /></Box>
               <Box sx={{ textAlign: "right" }}>{action(a)}</Box>
@@ -105,7 +105,7 @@ export function OverdueBoard({ items, now, mobile, onAsk, onOpen }: { items: Stu
           ))}
         </Box>
       )}
-      <Typography color="text.secondary" variant={mobile ? "body2" : "caption"}>
+      <Typography color="textSecondary" variant={mobile ? "body2" : "caption"}>
         {mobile ? "Quá hạn không làm mất chuỗi ngày: chỉ cần mỗi ngày nộp ít nhất 1 bài bất kỳ." : "Quá hạn không làm mất chuỗi ngày: chuỗi chỉ cần mỗi ngày nộp ít nhất 1 bài bất kỳ."}
       </Typography>
     </>

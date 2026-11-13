@@ -52,7 +52,7 @@ export function LeaderboardPodium({ entries }: { entries: readonly ClassLeaderbo
   if (!top.length) return null;
   const fourth = entries.find((entry) => entry.rank === 4);
   return (
-    <Box data-design="H08.podium" sx={{ alignItems: "end", display: "grid", gap: { xs: 0.75, md: 1.25 }, gridTemplateColumns: "1fr 1.15fr 1fr", maxWidth: 660, mx: "auto", pt: 1, width: "100%" }}>
+    <Box data-design="H08.podium" sx={{ alignItems: "end", display: "grid", gap: { xs: 0.75, md: 1.25 }, gridTemplateColumns: "1fr 1.15fr 1fr", maxWidth: 660, mx: "auto", pt: { xs: 0, md: 1 }, width: "100%" }}>
       {PLACES.map(({ index, front, avatar }) => {
         const entry = top[index];
         if (!entry) return <Box key={index} />;

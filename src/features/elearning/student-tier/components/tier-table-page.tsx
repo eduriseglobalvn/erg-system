@@ -119,7 +119,7 @@ export function TierTablePage({ accountId, gradeLabel = "khối", onBack }: { ac
   const yourDivision = rows.find((r) => r.tierKey === mineTier)?.divisions.find((d) => d.division === mine.data?.division);
 
   return (
-    <Box sx={{ display: "grid", gap: 2.5, px: { xs: 2, md: 0 }, py: { xs: 2, md: 0 } }}>
+    <Box sx={{ display: "grid", gap: 2.5 }}>
       <TierHeader
         title="Bảng bậc & cấp"
         subtitle={`${gradeName}${mine.data?.gradeSize ? ` · ${mine.data.gradeSize} bạn` : ""} · mốc XP của ${weekName.toLowerCase()}, tính lại 0 giờ thứ Hai`}

@@ -7,6 +7,7 @@ import Tabs from "@mui/material/Tabs";
 import Typography from "@mui/material/Typography";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
+import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { ErgIconButton } from "@/components/erg-mui/erg-actions";
@@ -91,7 +92,7 @@ export function RankingView({ accountId, classId, copy, gradeLabel: gradeProp, o
       <Tab value="GRADE" label={gradeLabel} />
     </Tabs>
   );
-  const help = onOpenTierTable ? <ErgIconButton label="Bảng bậc & cấp" onClick={onOpenTierTable}><HelpOutlineRoundedIcon /></ErgIconButton> : null;
+  const help = onOpenTierTable ? <ErgIconButton label="Bảng bậc & cấp" onClick={onOpenTierTable} sx={phone ? { bgcolor: "background.paper", border: 1, borderColor: "divider", height: t.size.controlLg, width: t.size.controlLg } : undefined}><HelpOutlineRoundedIcon /></ErgIconButton> : null;
 
   return (
     <Stack spacing={phone ? 1.5 : 2.5}>

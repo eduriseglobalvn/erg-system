@@ -75,10 +75,10 @@ export function AssignmentsView({ assignments, copy, initialFilter = "todo", mob
   const search = <SearchBox hint={filter !== "submitted"} mobile={mobile} onChange={setQuery} placeholder={filter === "submitted" ? "Tìm bài đã nộp" : "Tìm bài tập"} value={query} />;
   return (
     <Stack spacing={mobile ? 1.5 : 2.25} sx={{ width: "100%" }}>
-      <Box sx={{ alignItems: mobile ? "flex-start" : "flex-end", display: "flex", gap: 2, justifyContent: "space-between" }}>
+      <Box sx={{ alignItems: mobile ? "center" : "flex-end", display: "flex", gap: 2, justifyContent: "space-between" }}>
         <Box>
           <Typography component="h1" sx={mobile ? undefined : t.type.pageTitle} variant="h1">{copy.assignmentsTitle}</Typography>
-          {mobile ? null : <Typography color="text.secondary" sx={{ ...t.type.pageLead, mt: 0.5 }}>{subtitle}</Typography>}
+          {mobile ? null : <Typography color="textSecondary" sx={{ ...t.type.pageLead, mt: 0.5 }}>{subtitle}</Typography>}
         </Box>
         {mobile ? (
           <IconButton aria-label="Tìm bài tập" onClick={() => setSearchOpen((open) => !open)} sx={{ bgcolor: "background.paper", border: 1, borderColor: "divider", height: t.size.controlLg, width: t.size.controlLg }}>

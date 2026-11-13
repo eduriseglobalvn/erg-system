@@ -4,20 +4,33 @@ Run: 2026-11-13, branch feat/student-portal-finish, tolerance unchanged (maxDiff
 
 Result: 0 pass, 23 fail (ratio below), 1 fixme (N14: no baseline PNG). Run 2: 2026-11-13 after the second alignment batch.
 
-| Artboard | Ratio | Artboard | Ratio |
-|---|---|---|---|
-| H08 | 0.06 | H02b | 0.10 |
-| H14 | 0.06 | H02c | 0.13 |
-| H18 | 0.05 | H02d | 0.07 |
-| H15 | 0.05 | H03b | 0.14 |
-| H17 | 0.04 | H14m | 0.11 |
-| H09 | 0.04 | H18m | 0.10 |
-| H10 | 0.03 | H15m | 0.17 |
-| H11 | 0.03 | H17m | 0.16 |
-| H12 | 0.06 | H12m | 0.11 |
-| H13 | 0.05 | H13m | 0.09 |
-| H16 | 0.29 | H13m2 | 0.06 |
-| H16m | 0.20 | | |
+| Artboard | Ratio |
+|---|---|
+| H08 | 0.06 |
+| H14 | 0.06 |
+| H18 | 0.05 |
+| H15 | 0.05 |
+| H17 | 0.04 |
+| H09 | 0.04 |
+| H10 | 0.03 |
+| H11 | 0.03 |
+| H12 | 0.06 |
+| H13 | 0.05 |
+| H16 | 0.29 |
+| H16m | 0.16 |
+| H02b | 0.09 |
+| H02c | 0.07 |
+| H02d | 0.07 |
+| H03b | 0.07 |
+| H14m | 0.07 |
+| H18m | 0.09 |
+| H15m | 0.14 |
+| H17m | 0.16 |
+| H12m | 0.11 |
+| H13m | 0.09 |
+| H13m2 | 0.06 |
+
+Run 3 (mobile batch). Mobile-only finding: MUI v9 Typography ignores color="text.secondary" (use textSecondary); still present in student-dashboard-content-views, top-menu, quiz-session, student-sidebar and portal/pwa/quiz/charts files.
 
 Known causes of the remaining diff: H16 baseline is blurred under the overlay and its hint is squeezed by a rendering flaw in the design itself; H09 lacks `correctCount` and the average differs (6.7 vs 6.8, data contract); `gradeLabel` is always empty; mobile podium is ~46px taller than design; mobile H02 is ~28px lower because of the mobile shell header; H15m/H17m cause is in the tier page on mobile; notification label "THÔNG BÁO LỚP 7A" needs a class name the BE notification lacks; sidebar badge "2" fixed in the fixture because the runtime file is at its 400-line cap; TanStack Query Devtools button disabled in test mode (it overlapped the sidebar avatar).
 

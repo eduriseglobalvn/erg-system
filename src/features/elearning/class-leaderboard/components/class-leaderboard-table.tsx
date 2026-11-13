@@ -97,7 +97,7 @@ function PhoneRow({ entry }: { entry: ClassLeaderboardEntry }) {
   const change = entry.rankChange ?? 0;
   const Arrow = change > 0 ? ArrowUpwardRoundedIcon : change < 0 ? ArrowDownwardRoundedIcon : RemoveRoundedIcon;
   return (
-    <Box aria-current={entry.isViewer ? "true" : undefined} role="listitem" sx={{ ...rowSx(entry.isViewer), gap: 1.5, gridTemplateColumns: "24px auto minmax(0,1fr) auto 20px", minHeight: 58, px: 2, py: 0.75 }}>
+    <Box aria-current={entry.isViewer ? "true" : undefined} role="listitem" sx={{ ...rowSx(entry.isViewer), gap: 1.5, gridTemplateColumns: "24px auto minmax(0,1fr) auto 20px", minHeight: 66, px: 1.5, py: 0.75 }}>
       <Typography component="span" variant="subtitle2" sx={{ fontVariantNumeric: "tabular-nums", textAlign: "center" }}>{entry.rank ?? "—"}</Typography>
       <ErgTierFrame tier={asTier(entry.tierKey)} size={36}>
         <Avatar sx={{ ...initialsSx, height: 36, width: 36 }}>{getInitials(entry.studentName || "Học sinh")}</Avatar>
@@ -152,7 +152,7 @@ export function ClassLeaderboardTable({ entries, total, skipPodium = false, onOp
           </div>
         ))}
       </Box>
-      <Box sx={{ alignItems: "center", borderTop: phone ? undefined : 1, borderColor: t.color.divider, color: "text.secondary", display: "flex", justifyContent: "space-between", px: phone ? 1 : 2.5, py: phone ? 0.5 : 1.25, typography: "caption" }}>
+      <Box sx={{ alignItems: "center", borderTop: phone ? undefined : 1, borderColor: t.color.divider, color: "text.secondary", display: "flex", justifyContent: "space-between", px: phone ? 0.5 : 2.5, py: phone ? 0 : 1.25, typography: "caption" }}>
         {phone ? null : <span>{`Hiện ${withViewer.length} / ${Math.max(total ?? 0, withViewer.length)} bạn`}</span>}
         {onOpenAll ? <ErgButton size="small" variant="text" trailingIcon={<ChevronRightRoundedIcon />} onClick={onOpenAll}>Xem cả lớp</ErgButton> : null}
       </Box>

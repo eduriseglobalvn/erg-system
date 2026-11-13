@@ -52,11 +52,11 @@ function ResumeCard({ a, now, mobile, onOpen }: { a: StudentDashboardAssignment;
   return (
     <Box data-design="resume-card" sx={{ bgcolor: "primary.main", borderRadius: `${t.radius.shell}px`, color: "primary.contrastText", display: "flex", flexDirection: mobile ? "column" : "row", gap: 2, justifyContent: "space-between", p: mobile ? 2 : 3 }}>
       <Box sx={{ flex: 1, minWidth: 0 }}>
-        <Typography component="p" sx={{ alignItems: "center", display: "flex", gap: 0.75, textTransform: "uppercase" }} variant="caption">
+        <Typography component="p" sx={{ alignItems: "center", display: "flex", gap: 0.75, textTransform: "uppercase", ...(mobile ? t.type.label : null) }} variant="caption">
           <PlayCircleOutlineRoundedIcon sx={{ fontSize: t.size.iconMd }} />{`Đang làm dở${a.subjectLabel ? ` · ${a.subjectLabel}` : ""}`}
         </Typography>
         <Typography component="h2" sx={{ my: mobile ? 0.5 : 1 }} variant={mobile ? "h4" : "h2"}>{a.title}</Typography>
-        <Typography sx={{ opacity: 0.9 }} variant="body2">{sub}</Typography>
+        <Typography sx={{ opacity: 0.9, ...(mobile ? t.type.small : null) }} variant="body2">{sub}</Typography>
         <Box sx={{ bgcolor: "rgba(255,255,255,.25)", borderRadius: `${t.radius.chip}px`, height: mobile ? 6 : 8, maxWidth: 460, mt: mobile ? 1.5 : 1, overflow: "hidden" }}>
           <Box sx={{ bgcolor: "common.white", height: "100%", width: `${progressPercent(a)}%` }} />
         </Box>
@@ -79,12 +79,12 @@ function WebRow({ a, now, contained, onOpen }: { a: StudentDashboardAssignment; 
         <SubjectIcon assignment={a} />
         <Box sx={{ minWidth: 0 }}>
           <Typography noWrap variant="subtitle2">{a.title}</Typography>
-          <Typography color="text.secondary" noWrap variant="caption">{metaLine(a, false)}</Typography>
+          <Typography color="textSecondary" noWrap variant="caption">{metaLine(a, false)}</Typography>
         </Box>
       </Box>
       <Box>
         {chip ? <Pill block icon={<ScheduleRoundedIcon sx={{ fontSize: t.size.iconSm }} />} tone={CHIP_TONE[chip.tone]}>{chip.text}</Pill> : null}
-        <Typography color="text.secondary" sx={{ mt: 0.25 }} variant="caption">{dueClock(a, now)}</Typography>
+        <Typography color="textSecondary" sx={{ mt: 0.25 }} variant="caption">{dueClock(a, now)}</Typography>
       </Box>
       <Box>
         <Typography sx={t.type.small}>{doing ? `Đang làm ${a.answeredCount}/${a.totalQuestions}` : "Chưa làm"}</Typography>
@@ -105,10 +105,10 @@ function MobileCard({ a, now, contained, onOpen }: { a: StudentDashboardAssignme
         <SubjectIcon assignment={a} />
         <Box sx={{ minWidth: 0 }}>
           <Typography variant="subtitle2">{a.title}</Typography>
-          <Typography color="text.secondary" variant="caption">{metaLine(a, true)}</Typography>
+          <Typography color="textSecondary" variant="caption">{metaLine(a, true)}</Typography>
         </Box>
       </Box>
-      <Box sx={{ alignItems: "center", display: "flex", gap: 1, mt: 1.5 }}>
+      <Box sx={{ alignItems: "center", display: "flex", gap: 1, mt: 0.75 }}>
         {chip ? <Pill icon={<ScheduleRoundedIcon sx={{ fontSize: t.size.iconSm }} />} tone={today ? "warn" : "muted"}>{today ? chip.text : dueShort(a, now)}</Pill> : null}
         {a.xpReward ? <Pill tone="info">{`+${formatViNumber(a.xpReward)} XP`}</Pill> : null}
         <Box sx={{ ml: "auto" }}><RowAction a={a} contained={contained} onOpen={onOpen} /></Box>
@@ -119,9 +119,9 @@ function MobileCard({ a, now, contained, onOpen }: { a: StudentDashboardAssignme
 
 function GroupHeader({ group, mobile }: { group: BoardGroup; mobile: boolean }) {
   return (
-    <Box sx={{ alignItems: "center", bgcolor: mobile ? "transparent" : t.color.surfaceMuted, borderTop: mobile ? 0 : 1, borderColor: "divider", display: "flex", justifyContent: "space-between", ...(mobile ? { px: 0.5, py: 1 } : { borderBottom: 1, pb: 1, pt: 1.5, px: 2.5 }) }}>
-      <Typography color="text.secondary" variant="caption">{group.label}</Typography>
-      <Typography color="text.secondary" variant="caption">{groupSummary(group)}</Typography>
+    <Box sx={{ alignItems: "center", bgcolor: mobile ? "transparent" : t.color.surfaceMuted, borderTop: mobile ? 0 : 1, borderColor: "divider", display: "flex", justifyContent: "space-between", ...(mobile ? { px: 0.5, py: 0.5 } : { borderBottom: 1, pb: 1, pt: 1.5, px: 2.5 }) }}>
+      <Typography color="textSecondary" variant="caption">{group.label}</Typography>
+      <Typography color="textSecondary" variant="caption">{groupSummary(group)}</Typography>
     </Box>
   );
 }
@@ -147,7 +147,7 @@ export function TodoBoard({ items, now, mobile, onOpen }: { items: StudentDashbo
       ) : (
         <Box sx={boardCardSx}>
           <Box sx={{ ...tableHeadSx, gridTemplateColumns: WEB_COLUMNS }}>
-            {["Bài", "Hạn nộp", "Trạng thái", "Thưởng", ""].map((label, index) => <Typography color="text.secondary" key={index} variant="caption">{label}</Typography>)}
+            {["Bài", "Hạn nộp", "Trạng thái", "Thưởng", ""].map((label, index) => <Typography color="textSecondary" key={index} variant="caption">{label}</Typography>)}
           </Box>
           {groups.map((group) => (
             <Box key={group.key}>
@@ -158,7 +158,7 @@ export function TodoBoard({ items, now, mobile, onOpen }: { items: StudentDashbo
         </Box>
       )}
       {!mobile ? (
-        <Typography color="text.secondary" variant="caption">
+        <Typography color="textSecondary" variant="caption">
           Nộp trước hạn được thêm +10 XP. Bài kiểm tra chỉ làm 1 lần; bài luyện tập làm lại được nhưng chỉ tính XP lần nộp đầu.
         </Typography>
       ) : null}

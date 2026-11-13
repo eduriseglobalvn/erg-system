@@ -101,7 +101,7 @@ export function StudentDashboardMobileOverview({
       {/* Canvas H01: page title, then one plain line under it. */}
       <Stack spacing={0.5}>
         <Typography variant="h1">{copy.greetingLead(name)}</Typography>
-        <Typography color="text.secondary" variant="body1">{greetingLine}</Typography>
+        <Typography color="textSecondary" variant="body1">{greetingLine}</Typography>
       </Stack>
 
       <Stack component="section" aria-label={copy.heroEyebrow} spacing={1.75} sx={{ ...panelSx, p: 2 }}>
@@ -111,7 +111,7 @@ export function StudentDashboardMobileOverview({
               <SubjectTile label={activeAssignment.subjectLabel} />
               <Box sx={{ flex: 1, minWidth: 0 }}>
                 <Typography sx={{ ...clampSx, typography: "subtitle1" }}>{activeAssignment.title}</Typography>
-                <Typography color="text.secondary" noWrap variant="caption" component="p">
+                <Typography color="textSecondary" noWrap variant="caption" component="p">
                   {[activeAssignment.subjectLabel, activeAssignment.teacherName].filter(Boolean).join(" · ") || activeAssignment.statusLabel}
                 </Typography>
               </Box>
@@ -138,7 +138,7 @@ export function StudentDashboardMobileOverview({
             {activeAssignment.progressRate !== null ? (
               <Stack spacing={0.75}>
                 <Stack direction="row" sx={{ justifyContent: "space-between" }}>
-                  <Typography color="text.secondary" variant="caption">{activeAssignment.statusLabel}</Typography>
+                  <Typography color="textSecondary" variant="caption">{activeAssignment.statusLabel}</Typography>
                   <Typography variant="caption">{Math.round(activeAssignment.progressRate)}%</Typography>
                 </Stack>
                 <LinearProgress
@@ -176,7 +176,7 @@ export function StudentDashboardMobileOverview({
         <Box component="section" aria-label={copy.announcementTitle} sx={{ ...panelSx, p: 2 }}>
           <Typography color="primary.main" variant="caption">{copy.announcementTitle}</Typography>
           <Typography variant="subtitle2" sx={{ mt: 0.5 }}>{announcement.title}</Typography>
-          <Typography color="text.secondary" variant="body2" sx={{ ...clampSx, mt: 0.5 }}>{announcement.content}</Typography>
+          <Typography color="textSecondary" variant="body2" sx={{ ...clampSx, mt: 0.5 }}>{announcement.content}</Typography>
         </Box>
       ) : null}
 
