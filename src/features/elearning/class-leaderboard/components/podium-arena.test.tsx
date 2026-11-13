@@ -56,10 +56,10 @@ describe("ranking side cards (H08)", () => {
 
   it("lists open assignments with outlined buttons, and hides when none", () => {
     const onStart = vi.fn();
-    const items = [{ id: "a1", title: "Luyện tập", subtitle: "Toán · hôm nay", xp: 50 }, { id: "a2", title: "Trắc nghiệm", subtitle: "Văn", xp: 40 }];
+    const items = [{ id: "a1", title: "Luyện tập", subject: "Toán", subtitle: "hạn 20:00 hôm nay", xp: 50 }, { id: "a2", title: "Trắc nghiệm", subtitle: "ngày mai", xp: 40 }];
     const { rerender } = render(<EarnXpCard gap={40} items={items} onStart={onStart} />);
     expect(screen.getByText("2 bài đang mở")).toBeTruthy();
-    expect(screen.getByText("Đủ để lên bục · Toán · hôm nay")).toBeTruthy();
+    expect(screen.getByText("Đủ để lên hạng 3 · hạn 20:00 hôm nay")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Làm ngay" }));
     expect(onStart).toHaveBeenCalledWith("a1");
     expect(contained()).toBe(0);

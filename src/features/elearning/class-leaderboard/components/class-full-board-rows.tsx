@@ -18,7 +18,7 @@ type RowProps = { entry: ClassLeaderboardEntry; course: boolean; top: number; vi
 
 export function Row({ entry, course, top, viewerRef }: RowProps) {
   const hidden = entry.hidden === true && !entry.isViewer;
-  const tier = hidden ? null : asTier(entry.tierKey);
+  const tier = asTier(entry.tierKey);
   const name = hidden ? HIDDEN_NAME : entry.studentName || "Học sinh";
   const medal = course ? undefined : medalColor(entry.rank);
   const chip = tier ? <ErgTierChip tier={tier}>{tierLabel(tier, entry.division)}</ErgTierChip> : null;

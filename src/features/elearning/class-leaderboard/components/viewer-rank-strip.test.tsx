@@ -12,12 +12,15 @@ describe("ViewerRankStrip", () => {
     render(<ViewerRankStrip entries={board} label="lớp 7A" />);
     expect(screen.getByText("#4")).toBeTruthy();
     expect(screen.getByText("/ 4 bạn lớp 7A")).toBeTruthy();
-    expect(screen.getByText("Lên 2 hạng")).toBeTruthy();
-    expect(screen.getByText("Còn 40 XP lên hạng 3")).toBeTruthy();
+    expect(screen.getByText("Lên 2 hạng so với hôm qua")).toBeTruthy();
+    expect(screen.getByText("Lên top 3")).toBeTruthy();
+    expect(screen.getByText("còn 40 XP")).toBeTruthy();
   });
   it("shows the grade rank when provided", () => {
     render(<ViewerRankStrip entries={board} grade={{ label: "Khối 7", rank: 12, size: 128 }} label="lớp 7A" />);
-    expect(screen.getByText("Khối 7 #12 / 128")).toBeTruthy();
+    expect(screen.getByText("Khối 7")).toBeTruthy();
+    expect(screen.getByText("#12")).toBeTruthy();
+    expect(screen.getByText("/ 128")).toBeTruthy();
   });
   it("renders nothing for a hidden or unranked viewer", () => {
     const { container } = render(<ViewerRankStrip entries={[e(1, 5)]} label="lớp 7A" />);

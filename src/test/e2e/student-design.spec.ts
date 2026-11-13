@@ -77,7 +77,7 @@ test("H08 Thi dua (web)", async ({ page }) => {
 test("H14 Ca lop (web)", async ({ page }) => {
   await openStudent(page, web("H14"));
   await openRanking(page);
-  await page.getByRole("tab", { name: "Cả khóa học" }).click();
+  await page.getByRole("tab", { name: "Cả khóa" }).click();
   await page.getByRole("button", { name: "Xem cả lớp" }).click();
   await compare(page, "H14");
 });
@@ -124,7 +124,7 @@ function mobileTest(id: string, title: string, drive: (page: Page) => Promise<vo
 mobileTest("H03b", "Thi dua", (page) => dock(page, "Thi đua"));
 mobileTest("H14m", "Ca lop", async (page) => {
   await dock(page, "Thi đua");
-  await page.getByRole("tab", { name: "Cả khóa học" }).click();
+  await page.getByRole("tab", { name: "Cả khóa" }).click();
   await page.getByRole("button", { name: "Xem cả lớp" }).click();
 });
 mobileTest("H18m", "Bang bac", async (page) => {

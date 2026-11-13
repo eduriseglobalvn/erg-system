@@ -47,7 +47,7 @@ const row = (rank: number, studentName: string, xp: number, streakDays: number, 
 
 // Week board: top rows copied from H08 / H03b (gen-mobile.js); ranks 11-32 are filler (the canvas shows "Hiện 10 / 32").
 const WEEK: [string, number, number, number, string][] = [
-  ["Khánh Thy", 512, 15, 0, "dong"], ["Đức Huy", 486, 9, 0, "dong"], ["Gia Bảo", 420, 6, 0, "dong"], ["Nguyễn Minh Anh", 380, 12, 2, "dong"],
+  ["Khánh Thy", 512, 15, 0, "dong"], ["Đức Huy", 486, 9, 0, "dong"], ["Gia Bảo", 420, 6, 0, "dong"], ["Minh Anh", 380, 12, 2, "dong"],
   ["Thảo Linh", 362, 9, -1, "vang"], ["Quang Hải", 318, 4, 3, "vang"], ["Ngọc Vy", 296, 15, 0, "bac"], ["Tuấn Kiệt", 241, 2, -2, "dong"],
   ["Phương Anh", 198, 5, 1, "dong"], ["Bảo Ngọc", 150, 1, 0, "dong"],
 ];
@@ -62,12 +62,15 @@ const weekEntries = [
 const TIER_MIN: [string, number][] = [["ct", 9000], ["kc", 6000], ["bk", 4000], ["vang", 2500], ["bac", 1500], ["dong", 800], ["sat", 300], ["go", 0]];
 const COURSE: [string, number, number, number][] = [
   ["Khánh Thy", 9420, 15, 0], ["Đức Huy", 6880, 9, 1], ["Gia Bảo", 4310, 6, -1], ["Thảo Linh", 2900, 9, 0], ["Quang Hải", 2620, 4, 2], ["Ngọc Vy", 1720, 15, 0],
-  ["Nguyễn Minh Anh", 1240, 12, 2], ["Tuấn Kiệt", 1010, 2, -1], ["Lan Chi", 860, 7, 1], ["Phương Anh", 640, 5, 0], ["Bảo Ngọc", 420, 1, -2],
+  ["Minh Anh", 1240, 12, 2], ["Tuấn Kiệt", 1010, 2, -1], ["Lan Chi", 860, 7, 1], ["Phương Anh", 640, 5, 0], ["Bảo Ngọc", 420, 1, -2],
   ["Bạn ẩn tên", 310, 3, 0], ["Hoàng Minh", 180, 0, 0], ["Đăng Khoa", 90, 1, 1],
 ];
+// Division inside the tier, as printed in the H14 canvas (rank order).
+const DIVISIONS = [null, 4, 5, 4, 5, 4, 2, 4, 5, 2, 4, 5, 2, 4];
 const courseEntries = COURSE.map(([name, xp, streak, delta], i) => {
   const tierKey = TIER_MIN.find(([, min]) => xp >= min)![0];
-  return row(i + 1, name, xp, streak, { isViewer: name === "Nguyễn Minh Anh", rankDelta: delta, rankChange: delta, tierKey, division: tierKey === "ct" ? null : 2, hidden: name === "Bạn ẩn tên" });
+  const hidden = name === "Bạn ẩn tên";
+  return row(i + 1, name, xp, streak, { isViewer: name === "Minh Anh", rankDelta: delta, rankChange: delta, tierKey, division: DIVISIONS[i], frameKey: hidden ? null : tierKey, hidden });
 });
 
 export const leaderboard = {

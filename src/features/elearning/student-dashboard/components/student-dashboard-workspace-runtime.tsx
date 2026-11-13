@@ -323,7 +323,7 @@ export function StudentDashboardWorkspaceRuntime() {
         />
       ) : null}
       {shownPage === "ranking" && account ? (
-        <StudentRankingSurface accountId={account.id ?? ""} copy={copy} name={account.name || dashboardProfile.name} openAssignments={openAssignments} profile={dashboardProfile} view={tierView} onDoAssignments={() => handlePageChange("assignments")} onView={setTierView} />
+        <StudentRankingSurface accountId={account.id ?? ""} copy={copy} name={account.name || dashboardProfile.name} openAssignments={filterAssignments(assignments, "todo")} profile={dashboardProfile} view={tierView} onDoAssignments={() => handlePageChange("assignments")} onView={setTierView} />
       ) : null}
       {account ? <TierPromotionGate accountId={account.id ?? ""} studentName={account.name || dashboardProfile.name} gradeLabel={dashboardProfile.gradeLabel || "khối"} onViewTier={() => openTierView("tier")} /> : null}
       {shownPage === "announcements" ? (

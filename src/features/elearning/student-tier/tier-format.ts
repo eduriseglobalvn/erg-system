@@ -32,3 +32,16 @@ export function cutoffProgress(xp: number, from: number | null | undefined, to: 
   if (from == null || to <= from) return 0;
   return Math.min(1, Math.max(0, (xp - from) / (to - from)));
 }
+
+/** ISO instant a week ends (next Monday 00:00 local): the current week, or last week when `last`. Feeds `leaderboardWeekLabel`. */
+export function weekEndsAt(last: boolean, today: string): string {
+  const [y, m, d] = today.split("-").map(Number);
+  const date = new Date(y, m - 1, d);
+  date.setDate(date.getDate() - ((date.getDay() + 6) % 7) + (last ? 0 : 7));
+  return date.toISOString();
+}
+
+/** School year of the frames earned now: the explicit one, else the year of the frame for the student's current tier. */
+export function currentFrameYear(frames: ReadonlyArray<{ tierKey: string; schoolYear: string | null }>, tierKey: string | null | undefined, explicit?: string): string | undefined {
+  return explicit ?? frames.find((f) => f.tierKey === tierKey)?.schoolYear ?? undefined;
+}

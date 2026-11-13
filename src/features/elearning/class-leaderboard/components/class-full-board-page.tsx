@@ -11,6 +11,7 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
 import { useQuery } from "@tanstack/react-query";
 
+import { gradeLabelFromClassName } from "@/features/elearning/student-dashboard/api/student-dashboard-api";
 import { ergMobileDockAnchor } from "@/components/portal/erg-mobile-dock";
 import { ErgButton } from "@/components/erg-mui/erg-actions";
 import { ErgEmptyState } from "@/components/erg-mui/erg-feedback";
@@ -44,7 +45,7 @@ export type ClassFullBoardPageProps = {
 };
 
 /** "Bảng xếp hạng cả lớp" (design H14 / H14m): the whole class by tier (course) or by XP (week, month), with search and paging. */
-export function ClassFullBoardPage({ accountId, classId, initialPeriod = "COURSE", gradeLabel = "Khối", seasonLabel = "Mùa 1", onBack }: ClassFullBoardPageProps) {
+export function ClassFullBoardPage({ accountId, classId, initialPeriod = "COURSE", gradeLabel: gradeProp, seasonLabel = "Mùa 1", onBack }: ClassFullBoardPageProps) {
   const phone = useMediaQuery(useTheme().breakpoints.down("sm"));
   const pageSize = phone ? 14 : 16;
   const [period, setPeriod] = useState<LeaderboardPeriod>(initialPeriod);
@@ -56,6 +57,7 @@ export function ClassFullBoardPage({ accountId, classId, initialPeriod = "COURSE
   const mine = useMyTier(accountId).data;
   const course = period === "COURSE";
   const className = board.data?.className || "lớp";
+  const gradeLabel = gradeProp || gradeLabelFromClassName(className) || "Khối";
   const label = scope === "CLASS" ? className : gradeLabel;
   const all = board.data?.enabled ? board.data.entries : [];
   const matched = query.trim() ? all.filter((e) => strip(e.studentName ?? "").includes(strip(query.trim()))) : all;
@@ -63,6 +65,12 @@ export function ClassFullBoardPage({ accountId, classId, initialPeriod = "COURSE
   const top = all.reduce((max, e) => Math.max(max, e.xp), 0);
   const tier = asTier(mine?.tierKey);
   const gap = (xp?: number) => (xp == null || !mine ? "" : ` (+${formatViNumber(Math.max(0, xp - mine.courseXp))})`);
+  const scopeTabs = (
+    <Tabs aria-label="Phạm vi" value={scope} sx={ergChipTabsSx} onChange={(_, v: LeaderboardScope) => { setScope(v); setPages(1); }}>
+      <Tab value="CLASS" label={`Lớp ${board.data?.className || ""}`.trim()} />
+      <Tab value="GRADE" label={gradeLabel} />
+    </Tabs>
+  );
   const goToMe = () => {
     setQuery("");
     setPages(Math.ceil(all.length / pageSize));
@@ -81,6 +89,7 @@ export function ClassFullBoardPage({ accountId, classId, initialPeriod = "COURSE
             <Tabs aria-label="Kỳ thi đua" value={period} sx={ergSegmentedTabsSx} onChange={(_, v: LeaderboardPeriod) => { setPeriod(v); setPages(1); }}>
               {LEADERBOARD_PERIODS.map((p) => <Tab key={p} value={p} label={leaderboardPeriodLabel(p)} />)}
             </Tabs>
+            {scopeTabs}
           </Box>
         )}
       />
@@ -89,10 +98,7 @@ export function ClassFullBoardPage({ accountId, classId, initialPeriod = "COURSE
           {LEADERBOARD_PERIODS.map((p) => <Tab key={p} value={p} label={p === "COURSE" ? "Cả khóa" : leaderboardPeriodLabel(p)} />)}
         </Tabs>
       </Box>
-      <Tabs aria-label="Phạm vi" value={scope} sx={ergChipTabsSx} onChange={(_, v: LeaderboardScope) => { setScope(v); setPages(1); }}>
-        <Tab value="CLASS" label={board.data?.className || "Lớp"} />
-        <Tab value="GRADE" label={gradeLabel} />
-      </Tabs>
+      <Box sx={{ display: { xs: "block", md: "none" } }}>{scopeTabs}</Box>
       {mine ? (
         <Box data-design="H14.mine" sx={{ ...cardSx, alignItems: "center", boxShadow: t.shadow.float, display: { xs: "none", md: "flex" }, flexWrap: "wrap", gap: 2, py: 1.25 }}>
           {tier ? <ErgTierEmblem tier={tier} size={36} /> : null}

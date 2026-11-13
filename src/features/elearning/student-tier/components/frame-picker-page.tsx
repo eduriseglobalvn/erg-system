@@ -15,7 +15,7 @@ import { ErgTierChip } from "@/components/erg-mui/erg-tier";
 import { TIER_KEYS, TIER_NAMES, formatViNumber, tierLabel, type TierKey } from "@/domain/student-tier/tiers";
 import { TierAvatar, TierError, TierHeader, TierLoading, cardSx } from "@/features/elearning/student-tier/components/tier-parts";
 import { useMyFrames, useMyTier, useSelectFrame } from "@/features/elearning/student-tier/components/use-student-tier";
-import { asTier } from "@/features/elearning/student-tier/tier-format";
+import { asTier, currentFrameYear } from "@/features/elearning/student-tier/tier-format";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 const t = ergEnterpriseTokens;
@@ -74,6 +74,8 @@ export function FramePickerPage({ accountId, studentName, className = "", rank, 
   const currentTier = asTier(current);
   const realTier = asTier(mine.data?.tierKey);
   const unlockedCount = frames.data?.frames.filter((f) => f.unlocked).length ?? 0;
+  const frameYear = currentFrameYear(frames.data?.frames ?? [], realTier, currentSchoolYear);
+  const classLabel = /^lớps/i.test(className) ? className : `Lớp ${className}`;
   const firstName = studentName.split(" ").slice(-2).join(" ");
 
   const onSave = () => save.mutate(current, {
@@ -107,13 +109,13 @@ export function FramePickerPage({ accountId, studentName, className = "", rank, 
             <Typography variant="h5">{studentName}</Typography>
             <Box sx={{ alignItems: "center", display: "flex", gap: 1 }}>
               {realTier ? <ErgTierChip tier={realTier}>{tierLabel(realTier, mine.data?.division)}</ErgTierChip> : null}
-              {className ? <Typography variant="caption" sx={{ color: "text.secondary" }}>{className}</Typography> : null}
+              {className ? <Typography variant="caption" sx={{ color: "text.secondary" }}>{classLabel}</Typography> : null}
             </Box>
             {rank != null ? (
               <Box sx={{ alignItems: "center", border: 1, borderColor: t.color.border, borderRadius: `${t.radius.card}px`, display: "flex", gap: 1.5, px: 1.5, py: 1, textAlign: "left", width: "100%" }}>
                 <Typography variant="subtitle2">{rank}</Typography>
                 <TierAvatar name={studentName} tier={currentTier} size={32} />
-                <Box sx={{ flex: 1 }}><Typography variant="subtitle2">{firstName}</Typography><Typography variant="caption" sx={{ color: "text.secondary" }}>Bảng xếp hạng</Typography></Box>
+                <Box sx={{ flex: 1 }}><Typography variant="subtitle2" sx={{ alignItems: "center", display: "flex", gap: 0.75 }}>{firstName}<Box component="span" sx={{ bgcolor: "primary.main", borderRadius: `${t.radius.chip}px`, color: "primary.contrastText", px: 0.75, typography: "caption" }}>Bạn</Box></Typography><Typography variant="caption" sx={{ color: "text.secondary" }}>Bảng xếp hạng</Typography></Box>
                 {xp != null ? <Typography variant="subtitle2">{formatViNumber(xp)}</Typography> : null}
               </Box>
             ) : null}
@@ -148,7 +150,7 @@ export function FramePickerPage({ accountId, studentName, className = "", rank, 
                     key={key}
                     lock={!unlocked}
                     name={TIER_NAMES[key]}
-                    note={tileNote(key, frame, currentSchoolYear)}
+                    note={tileNote(key, frame, frameYear)}
                     onPick={() => setPicked(key)}
                     selected={current === key}
                   />

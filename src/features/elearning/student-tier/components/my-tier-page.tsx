@@ -3,8 +3,12 @@ import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
 import HelpOutlineRoundedIcon from "@mui/icons-material/HelpOutlineRounded";
+import GroupsRoundedIcon from "@mui/icons-material/GroupsRounded";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import StairsRoundedIcon from "@mui/icons-material/StairsRounded";
+import VerifiedUserRoundedIcon from "@mui/icons-material/VerifiedUserRounded";
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
 import Typography from "@mui/material/Typography";
@@ -19,7 +23,7 @@ import { TIER_BANDS, TIER_KEYS, TIER_NAMES, formatViNumber, tierLabel, type Tier
 import type { MyTier, TierTableRow } from "@/features/elearning/student-tier/api/student-tier-api";
 import { TierAvatar, TierError, TierHeader, TierIneligible, TierLoading, TierProgress, cardSx } from "@/features/elearning/student-tier/components/tier-parts";
 import { useMyFrames, useMyTier, useTierTable } from "@/features/elearning/student-tier/components/use-student-tier";
-import { asTier, cutoffProgress, submitMoreLabel, topPercent } from "@/features/elearning/student-tier/tier-format";
+import { asTier, currentFrameYear, cutoffProgress, submitMoreLabel, topPercent } from "@/features/elearning/student-tier/tier-format";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 const t = ergEnterpriseTokens;
@@ -54,9 +58,9 @@ function NextGoal({ label, note, next, from, xp, tier, height = 12 }: { label: R
   );
 }
 
-type HeroProps = { phone: boolean; tier: TierKey; me: MyTier; gradeLabel: string; row?: TierTableRow } & Pick<MyTierPageProps, "openAssignments" | "onDoAssignments">;
+type HeroProps = { phone: boolean; studentName: string; tier: TierKey; me: MyTier; gradeLabel: string; row?: TierTableRow } & Pick<MyTierPageProps, "openAssignments" | "onDoAssignments">;
 
-function Hero({ phone, tier, me, gradeLabel, row, openAssignments, onDoAssignments }: HeroProps) {
+function Hero({ phone, studentName, tier, me, gradeLabel, row, openAssignments, onDoAssignments }: HeroProps) {
   const { nextDivision, nextTier } = me;
   const nextTierKey = asTier(nextTier?.tierKey);
   const nextDivisionKey = asTier(nextDivision?.tierKey) ?? tier;
@@ -66,7 +70,7 @@ function Hero({ phone, tier, me, gradeLabel, row, openAssignments, onDoAssignmen
   const tierFrom = cutoffs.length ? Math.min(...cutoffs) : null;
   const tint = t.tierTint[tier];
   return (
-    <Box data-design="H15.hero" sx={{ ...cardSx, background: `linear-gradient(120deg, ${tint.from} 0, ${t.color.surface} 55%)`, display: "grid", gap: 3, gridTemplateColumns: { xs: "1fr", md: "minmax(0,1fr) minmax(0,1.2fr)" }, overflow: "hidden", position: "relative", "&::before": { background: `radial-gradient(circle, ${tint.glow}, transparent 70%)`, borderRadius: "50%", content: '""', height: 320, pointerEvents: "none", position: "absolute", right: -80, top: -80, width: 320 } }}>
+    <Box data-design="H15.hero" sx={{ ...cardSx, background: `linear-gradient(120deg, ${tint.from} 0, ${t.color.surface} 55%)`, display: "grid", gap: 3, gridTemplateColumns: { xs: "1fr", md: "auto minmax(0,520px)" }, justifyContent: "space-between", overflow: "hidden", position: "relative", "&::before": { background: `radial-gradient(circle, ${tint.glow}, transparent 70%)`, borderRadius: "50%", content: '""', height: 320, pointerEvents: "none", position: "absolute", right: -80, top: -80, width: 320 } }}>
       <Box sx={{ position: "relative", alignItems: "center", display: "flex", flexDirection: { xs: "column", md: "row" }, gap: 3, textAlign: { xs: "center", md: "left" } }}>
         <ErgTierEmblem tier={tier} size={phone ? 94 : 110} />
         <Box>
@@ -90,7 +94,7 @@ function Hero({ phone, tier, me, gradeLabel, row, openAssignments, onDoAssignmen
       </Box>
       <Box sx={{ alignContent: "center", display: "grid", gap: 2, position: "relative" }}>
         {nextDivision ? <NextGoal label={`Vượt ${nextDivision.studentsToPass} bạn trong khối lên ${tierLabel(nextDivisionKey, nextDivision.division)}`} note="mốc tuần này" next={nextDivision} from={divisionFrom} xp={me.courseXp} tier={tier} /> : null}
-        {nextTier && nextTierKey ? <NextGoal label={phone ? <>Vượt {nextTier.studentsToPass} bạn lên <b>{TIER_NAMES[nextTierKey]}</b></> : `Vượt ${nextTier.studentsToPass} bạn lên ${TIER_NAMES[nextTierKey]}, mở khung viền ${TIER_NAMES[nextTierKey]}`} note={phone ? "mốc" : "mốc tuần này"} height={phone ? 8 : 12} next={nextTier} from={tierFrom} xp={me.courseXp} tier={nextTierKey} /> : null}
+        {nextTier && nextTierKey ? <NextGoal label={phone ? <>Vượt {nextTier.studentsToPass} bạn lên <b>{TIER_NAMES[nextTierKey]}</b></> : <Box component="span" sx={{ alignItems: "center", display: "inline-flex", gap: 1 }}><TierAvatar name={studentName} tier={nextTierKey} size={26} />{`Vượt ${nextTier.studentsToPass} bạn lên ${TIER_NAMES[nextTierKey]}, mở khung viền ${TIER_NAMES[nextTierKey]}`}</Box>} note={phone ? "mốc" : "mốc tuần này"} height={phone ? 8 : 12} next={nextTier} from={tierFrom} xp={me.courseXp} tier={nextTierKey} /> : null}
         <Box sx={{ alignItems: "center", display: "flex", flexWrap: "wrap", gap: 1.5 }}>
           <ErgButton data-design="H15.cta" variant="contained" trailingIcon={<ArrowForwardRoundedIcon />} onClick={onDoAssignments} sx={{ width: { xs: "100%", md: "auto" } }}>Làm bài lấy XP</ErgButton>
           {openAssignments && !phone ? <Typography variant="caption" sx={{ color: "text.secondary" }}>{`${openAssignments.count} bài đang mở · tới +${formatViNumber(openAssignments.xp)} XP`}</Typography> : null}
@@ -147,28 +151,30 @@ function Ladder({ current, seats, studentName, wide }: { current: TierKey; seats
 }
 
 const RULES = [
-  ["Bậc theo vị trí của bạn trong khối", "Xếp bạn trong khối theo tổng XP cả khóa rồi chia theo tỉ lệ: top 3% Cao thủ, 3–12% Kim cương, 12–25% Bạch kim, 25–45% Vàng… Cập nhật 0 giờ thứ Hai hằng tuần."],
-  ["Mỗi bậc có 5 cấp: 5 → 4 → 3 → 2 → 1", "Chia đều theo vị trí trong bậc. Mốc XP để lên bậc thay đổi theo cả khối, nên luôn hiện “mốc tuần này” để bạn biết cần bao nhiêu XP."],
-  ["Có thể tụt bậc, nhưng có 1 tuần bảo vệ", "Chỉ tụt khi ở dưới mốc 2 lần cập nhật liên tiếp. Khung viền đã mở giữ mãi. Chỉ xét bạn đã nộp ít nhất 3 bài trong khóa."],
+  [GroupsRoundedIcon, t.statusTint.info, "Bậc theo vị trí của bạn trong khối", "Xếp bạn trong khối theo tổng XP cả khóa rồi chia theo tỉ lệ: top 3% Cao thủ, 3–12% Kim cương, 12–25% Bạch kim, 25–45% Vàng… Cập nhật 0 giờ thứ Hai hằng tuần."],
+  [StairsRoundedIcon, t.statusTint.warning, "Mỗi bậc có 5 cấp: 5 → 4 → 3 → 2 → 1", "Chia đều theo vị trí trong bậc. Mốc XP để lên bậc thay đổi theo cả khối, nên luôn hiện “mốc tuần này” để bạn biết cần bao nhiêu XP."],
+  [VerifiedUserRoundedIcon, t.statusTint.success, "Có thể tụt bậc, nhưng có 1 tuần bảo vệ", "Chỉ tụt khi ở dưới mốc 2 lần cập nhật liên tiếp. Khung viền đã mở giữ mãi. Chỉ xét bạn đã nộp ít nhất 3 bài trong khóa."],
 ] as const;
 
-function FramesCard({ accountId, studentName, onOpenFrames }: { accountId: string; studentName: string; onOpenFrames?: () => void }) {
+function FramesCard({ accountId, studentName, tier, onOpenFrames }: { accountId: string; studentName: string; tier: TierKey; onOpenFrames?: () => void }) {
   const frames = useMyFrames(accountId);
+  const year = currentFrameYear(frames.data?.frames ?? [], tier);
   return (
     <Box sx={cardSx}>
       <Box sx={{ alignItems: "center", display: "flex", justifyContent: "space-between", mb: 2 }}>
         <Typography variant="h5">Khung viền của bạn</Typography>
-        <ErgButton variant="text" trailingIcon={<ChevronRightRoundedIcon />} onClick={onOpenFrames}>Đổi khung</ErgButton>
+        <Button endIcon={<ChevronRightRoundedIcon />} onClick={onOpenFrames} size="small" sx={{ mr: -1 }} variant="text">Đổi khung</Button>
       </Box>
       <Box sx={{ display: "grid", gap: 1, gridTemplateColumns: "repeat(4, minmax(0, 1fr))" }}>
         {TIER_KEYS.map((key) => {
           const unlocked = Boolean(frames.data?.frames.find((f) => f.tierKey === key)?.unlocked);
           const using = frames.data?.selected === key;
+          const earlier = frames.data?.frames.find((f) => f.tierKey === key)?.schoolYear;
           return (
             <Box key={key} sx={{ alignItems: "center", border: 1, borderColor: using ? "primary.main" : t.color.border, borderRadius: `${t.radius.card}px`, display: "grid", justifyItems: "center", p: 1 }}>
               <TierAvatar name={studentName} tier={key} size={34} muted={!unlocked} />
               <Typography variant="caption" sx={{ fontWeight: "fontWeightMedium" }}>{TIER_NAMES[key]}</Typography>
-              <Typography variant="caption" sx={{ color: using ? "primary.main" : "text.secondary" }}>{using ? "Đang dùng" : unlocked ? "Đã mở" : `Bậc ${TIER_NAMES[key]}`}</Typography>
+              <Typography variant="caption" sx={{ color: using ? "primary.main" : "text.secondary" }}>{using ? "Đang dùng" : unlocked ? (earlier && year && earlier !== year ? `Khóa ${earlier}` : "Đã mở") : `Bậc ${TIER_NAMES[key]}`}</Typography>
             </Box>
           );
         })}
@@ -206,18 +212,21 @@ export function MyTierPage({ accountId, studentName, gradeLabel = "khối", seas
         <TierIneligible message={submitMoreLabel(me.submittedCount)} />
       ) : (
         <>
-          <Hero phone={phone} tier={tier} me={me} gradeLabel={gradeLabel} row={table.data?.find((r) => r.tierKey === tier)} openAssignments={openAssignments} onDoAssignments={onDoAssignments} />
+          <Hero phone={phone} studentName={studentName} tier={tier} me={me} gradeLabel={gradeLabel} row={table.data?.find((r) => r.tierKey === tier)} openAssignments={openAssignments} onDoAssignments={onDoAssignments} />
           <Ladder current={tier} seats={seats} studentName={studentName} wide={!phone} />
           <Box sx={{ display: "grid", gap: 2.5, gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" } }}>
             <Box sx={cardSx}>
               <Typography variant="h5" sx={{ mb: 2 }}>Luật lên bậc</Typography>
               <Box sx={{ display: "grid", gap: 2 }}>
-                {RULES.map(([title, body]) => (
-                  <Box key={title}><Typography variant="subtitle2">{title}</Typography><Typography variant="body2" sx={{ color: "text.secondary" }}>{body}</Typography></Box>
+                {RULES.map(([Icon, tint, title, body]) => (
+                  <Box key={title} sx={{ display: "flex", gap: 1.5 }}>
+                    <Box aria-hidden sx={{ alignItems: "center", bgcolor: tint.bg, borderRadius: `${t.radius.sm}px`, color: tint.dot, display: "grid", flexShrink: 0, height: 32, placeItems: "center", width: 32 }}><Icon sx={{ fontSize: t.size.iconMd }} /></Box>
+                    <Box><Typography variant="subtitle2">{title}</Typography><Typography variant="body2" sx={{ color: "text.secondary" }}>{body}</Typography></Box>
+                  </Box>
                 ))}
               </Box>
             </Box>
-            <FramesCard accountId={accountId} studentName={studentName} onOpenFrames={onOpenFrames} />
+            <FramesCard accountId={accountId} studentName={studentName} tier={tier} onOpenFrames={onOpenFrames} />
           </Box>
         </>
       )}

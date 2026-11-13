@@ -83,6 +83,8 @@ export const ergEnterpriseTokens = {
     info: { bg: "#EBF4FE", color: "#004A94", dot: "#0071E3" },
     neutral: { bg: "#F1F3F5", color: "#4B5563", dot: "#9CA3AF" },
   },
+  // Streak / flame accents (design H08-H18): streak chip, sidebar reminder card.
+  fireTint: { chip: "#FFEDD5", card: "#FFF7ED", border: "#FED7AA", ink: "#9A3412", icon: "#EA580C" },
   font: {
     body: '"Be Vietnam Pro", "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
     mono: '"JetBrains Mono", "SFMono-Regular", Consolas, monospace',

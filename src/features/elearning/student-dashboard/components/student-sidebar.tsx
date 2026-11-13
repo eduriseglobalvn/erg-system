@@ -55,16 +55,20 @@ function NavGroup({ activePage, items, label, onPageChange }: { activePage: Stud
   );
 }
 
-function StatChip({ tone, icon, children }: { tone: "info" | "warning"; icon: ReactNode; children: string }) {
+const STAT_TONES = { info: { bg: t.statusTint.info.bg, color: t.statusTint.info.color }, fire: { bg: t.fireTint.chip, color: t.fireTint.ink } } as const;
+
+function StatChip({ tone, icon, children }: { tone: keyof typeof STAT_TONES; icon: ReactNode; children: string }) {
   return (
-    <Box component="span" sx={{ alignItems: "center", bgcolor: t.statusTint[tone].bg, borderRadius: `${t.radius.chip}px`, color: t.statusTint[tone].color, display: "inline-flex", gap: 0.5, height: 26, px: 1.25, typography: "caption", fontWeight: "fontWeightBold" }}>
+    <Box component="span" sx={{ alignItems: "center", bgcolor: STAT_TONES[tone].bg, borderRadius: `${t.radius.chip}px`, color: STAT_TONES[tone].color, display: "inline-flex", gap: 0.5, height: 24, px: 1, typography: "caption", fontWeight: "fontWeightBold" }}>
       {icon}{children}
     </Box>
   );
 }
 
 /** Student sidebar body (spec 7.0): brand, tier profile card, grouped nav, streak reminder, account row. */
-export function StudentSidebar({ activePage, data, initials, name, rankingEnabled, todoCount, unreadCount, onAccountOpen, onTierOpen, onPageChange, onSignOut, signedIn }: {
+export function StudentSidebar({ activePage, data, initials, name, rankingEnabled, todoCount, unreadCount, notificationSlot, onAccountOpen, onTierOpen, onPageChange, onSignOut, signedIn }: {
+  /** Bell button: the web design has no top bar, so the notification entry sits in the brand row. */
+  notificationSlot?: ReactNode;
   activePage: StudentPageKey;
   data: StudentSidebarData;
   initials: string;
@@ -93,10 +97,11 @@ export function StudentSidebar({ activePage, data, initials, name, rankingEnable
     <>
       <Box sx={{ alignItems: "center", display: "flex", gap: 1.25, px: 0.5, py: 0.5 }}>
         <Box sx={{ alignItems: "center", background: NAV_ACTIVE_BG, borderRadius: `${t.radius.control}px`, boxShadow: t.shadow.float, color: t.color.surface, display: "flex", flexShrink: 0, height: 42, justifyContent: "center", width: 42 }}><SchoolRoundedIcon fontSize="medium" /></Box>
-        <Box>
+        <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography component="p" variant="h6">ERG Học tập</Typography>
           <Typography color="text.secondary" component="p" variant="caption">Cổng học sinh</Typography>
         </Box>
+        {notificationSlot}
       </Box>
       <ButtonBase aria-label="Mở hồ sơ" data-design="sidebar-profile" onClick={data.tier && onTierOpen ? onTierOpen : onAccountOpen} sx={{ alignItems: "stretch", bgcolor: t.color.surfaceMuted, border: 1, borderColor: "divider", borderRadius: `${t.radius.card}px`, display: "grid", gap: 1, mt: 1.5, p: 1.5, textAlign: "left", width: "100%" }}>
         <Box sx={{ alignItems: "center", display: "flex", gap: 1.25 }}>
@@ -107,14 +112,14 @@ export function StudentSidebar({ activePage, data, initials, name, rankingEnable
             <Typography noWrap variant="subtitle2">{name}</Typography>
             <Box sx={{ alignItems: "center", display: "flex", gap: 0.75 }}>
               {data.tier ? <ErgTierChip tier={data.tier}>{tierLabel(data.tier, data.division)}</ErgTierChip> : null}
-              {data.className ? <Typography color="text.secondary" noWrap variant="caption">{data.className}</Typography> : null}
+              {data.className ? <Typography color="text.secondary" noWrap variant="caption">{/^lớp\s/i.test(data.className) ? data.className : `Lớp ${data.className}`}</Typography> : null}
             </Box>
           </Box>
         </Box>
         {data.xp !== null || data.streakDays ? (
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75 }}>
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
             {data.xp !== null ? <StatChip icon={<BoltRoundedIcon sx={{ fontSize: t.size.iconMd }} />} tone="info">{`${formatViNumber(data.xp)} XP`}</StatChip> : null}
-            {data.streakDays ? <StatChip icon={<LocalFireDepartmentRoundedIcon sx={{ fontSize: t.size.iconMd }} />} tone="warning">{`${data.streakDays} ngày`}</StatChip> : null}
+            {data.streakDays ? <StatChip icon={<LocalFireDepartmentRoundedIcon sx={{ color: t.fireTint.icon, fontSize: t.size.iconMd }} />} tone="fire">{`${data.streakDays} ngày`}</StatChip> : null}
           </Box>
         ) : null}
       </ButtonBase>
@@ -123,8 +128,8 @@ export function StudentSidebar({ activePage, data, initials, name, rankingEnable
         <NavGroup activePage={activePage} items={classItems} label="Lớp của tôi" onPageChange={onPageChange} />
       </Box>
       {data.streakNudge ? (
-        <Box data-design="streak-nudge" sx={{ alignItems: "center", bgcolor: t.statusTint.warning.bg, border: 1, borderColor: t.color.warningSoft, borderRadius: `${t.radius.card}px`, color: t.statusTint.warning.color, display: "flex", gap: 1.25, mb: 1.5, p: 1.5 }}>
-          <LocalFireDepartmentRoundedIcon sx={{ color: "warning.main" }} />
+        <Box data-design="streak-nudge" sx={{ alignItems: "center", bgcolor: t.fireTint.card, border: 1, borderColor: t.fireTint.border, borderRadius: `${t.radius.card}px`, color: t.fireTint.ink, display: "flex", gap: 1.25, mb: 1.5, p: 1.5 }}>
+          <LocalFireDepartmentRoundedIcon sx={{ color: t.fireTint.icon }} />
           <Typography variant="subtitle2">{`Làm 1 bài hôm nay để giữ chuỗi ${data.streakNudge} ngày`}</Typography>
         </Box>
       ) : null}

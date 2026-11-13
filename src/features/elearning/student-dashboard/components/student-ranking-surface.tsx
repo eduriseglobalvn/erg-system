@@ -38,10 +38,10 @@ export function StudentRankingSurface({ accountId, copy, name, openAssignments, 
   if (view === "board") return <ClassFullBoardPage accountId={accountId} classId={profile.classId ?? ""} gradeLabel={profile.gradeLabel || undefined} initialPeriod={boardPeriod} onBack={() => onView(null)} />;
   return (
     <RankingView
-      accountId={accountId} classId={profile.classId ?? ""} copy={copy}
+      accountId={accountId} classId={profile.classId ?? ""} copy={copy} gradeLabel={profile.gradeLabel || undefined}
       onOpenFullBoard={(period) => { setBoardPeriod(period); onView("board"); }}
       onOpenTierTable={() => onView("table")}
-      openAssignments={openAssignments} onDoAssignments={onDoAssignments}
+      openAssignments={openAssignments.filter((a) => a.status === "not_started" || a.status === "in_progress")} onDoAssignments={onDoAssignments}
     />
   );
 }

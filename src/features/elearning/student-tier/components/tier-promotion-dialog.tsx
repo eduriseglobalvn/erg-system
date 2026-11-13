@@ -58,7 +58,7 @@ export function TierPromotionDialog({ promotion, studentName, next, gradeLabel =
       open={open}
       slotProps={{ backdrop: { sx: { bgcolor: alpha(t.color.text, 0.38) } }, paper: { sx: { backgroundImage: `linear-gradient(180deg, ${t.color.surfaceSubtle} 0, ${t.color.surface} 60%)`, borderRadius: phone ? 0 : `${t.radius.shell}px`, maxWidth: 520, overflow: "hidden", position: "relative" } } }}
     >
-      <Box aria-hidden sx={{ background: `repeating-conic-gradient(from 0deg at 50% 28%, ${alpha(t.color.borderStrong, 0.35)} 0 10deg, transparent 10deg 20deg)`, inset: 0, position: "absolute" }} />
+      <Box aria-hidden data-design="H16.rays" sx={{ background: `repeating-conic-gradient(${alpha(t.medal.silver, 0.16)} 0 7deg, transparent 7deg 20deg)`, height: 760, left: "50%", mask: t.podium.raysMask, pointerEvents: "none", position: "absolute", top: 190, transform: "translate(-50%, -50%)", WebkitMask: t.podium.raysMask, width: 760 }} />
       {CONFETTI.map(([color, left, top, rotate]) => (
         <Box aria-hidden key={`${left}-${top}`} sx={{ background: color, borderRadius: "2px", height: 18, left: `${left}%`, position: "absolute", top: `${top}%`, transform: `rotate(${rotate}deg)`, width: 10 }} />
       ))}
@@ -85,7 +85,7 @@ export function TierPromotionDialog({ promotion, studentName, next, gradeLabel =
         {next && nextKey ? (
           <Box sx={{ alignItems: "center", display: "flex", gap: 1.5, width: "100%" }}>
             <Typography variant="caption" sx={{ color: "text.secondary", whiteSpace: "nowrap" }}>{`Tiếp: ${tierLabel(nextKey, next.division)}`}</Typography>
-            <Box sx={{ flex: 1 }}><TierProgress tier={to} value={0.12} /></Box>
+            <Box sx={{ flex: 1 }}><TierProgress height={8} tier={to} value={0.12} /></Box>
             <Typography variant="caption" sx={{ color: "text.secondary", whiteSpace: "nowrap" }}>{`vượt ${next.studentsToPass} bạn`}</Typography>
           </Box>
         ) : null}
