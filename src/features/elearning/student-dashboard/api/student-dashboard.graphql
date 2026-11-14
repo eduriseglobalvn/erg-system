@@ -57,6 +57,7 @@ query ElearningStudentDashboard($input: StudentDashboardInput) {
         score
         maxScore
         totalQuestions
+        correctCount
         attemptCount
         onTime
         minutesBeforeDue
