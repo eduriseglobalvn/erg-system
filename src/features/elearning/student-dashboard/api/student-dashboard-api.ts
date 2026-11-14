@@ -182,6 +182,7 @@ function mapAssignment(
     progressRate: null,
     answeredCount: assignment.answeredCount ?? null,
     totalQuestions: assignment.totalQuestions ?? assignment.questionCount ?? null,
+    correctCount: assignment.correctCount ?? null,
     score: assignment.score ?? scorePercent,
     maxScore: assignment.score != null && assignment.maxScore ? assignment.maxScore : scorePercent === null ? null : 100,
     ...(assignment.subjectName ? { subjectLabel: assignment.subjectName } : {}),
