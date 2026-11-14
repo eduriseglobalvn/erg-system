@@ -90,16 +90,27 @@ export function parseAssignDateTime(value: string) {
 export function createAssignmentIdempotencyKey({
   dueAt,
   quizIds,
+  recipient,
   startAt,
+  supplementary,
   title,
 }: {
   dueAt: string;
   quizIds: string[];
+  recipient: AssignmentRecipientInput;
   startAt: string;
+  supplementary?: boolean;
   title: string;
 }) {
+  // Recipients are part of the key: the same quiz/dates/title sent to a second group is a new assignment, not a replay.
+  const recipientPart = [
+    recipient.recipientMode,
+    recipient.classId ?? "",
+    recipient.groupId ?? "",
+    (recipient.studentIds ?? []).slice().sort().join(","),
+  ].join("/");
   // The server stores this key as the sync operationId (max 128 chars), so the raw quiz ids cannot go in.
-  const fingerprint = cyrb53Hex(`${quizIds.slice().sort().join(",")}|${startAt}|${dueAt}|${title}`);
+  const fingerprint = cyrb53Hex(`${quizIds.slice().sort().join(",")}|${startAt}|${dueAt}|${title}|${recipientPart}${supplementary ? "|supplementary" : ""}`);
   return `assign:${slugPart(title).slice(0, 40)}:${fingerprint}`;
 }
 

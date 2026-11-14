@@ -1,5 +1,7 @@
 import Box from "@mui/material/Box";
+import FormControlLabel from "@mui/material/FormControlLabel";
 import InputAdornment from "@mui/material/InputAdornment";
+import Switch from "@mui/material/Switch";
 import Typography from "@mui/material/Typography";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
@@ -11,6 +13,7 @@ import { parseAssignDateTime } from "@/features/lms/components/assign-homework-r
 import type { AssignHomeworkController } from "@/features/lms/components/use-assign-homework-controller";
 
 const ASSIGN_DATE_FORMAT = "DD/MM/YYYY HH:mm:ss";
+const SUPPLEMENTARY_LABEL = "Bài bổ sung (không tính vào điểm TB chính và danh sách nợ bài, XP tối đa 50/tuần)";
 
 function toPickerValue(value: string): Dayjs | null {
   const iso = parseAssignDateTime(value);
@@ -29,6 +32,8 @@ export function AssignHomeworkSetupCard({ model }: { model: AssignHomeworkContro
     setTargetType,
     attemptLimit,
     setAttemptLimit,
+    supplementary,
+    setSupplementary,
     maxDurationMinutes,
     setMaxDurationMinutes,
     selectedStudentIds,
@@ -97,6 +102,11 @@ export function AssignHomeworkSetupCard({ model }: { model: AssignHomeworkContro
             onChange={(next) => next?.isValid() && setEndDate(next.format(ASSIGN_DATE_FORMAT))}
             slotProps={pickerSlot}
             value={toPickerValue(endDate)}
+          />
+          <FormControlLabel
+            control={<Switch checked={supplementary} onChange={(event) => setSupplementary(event.target.checked)} />}
+            label={SUPPLEMENTARY_LABEL}
+            sx={{ gridColumn: "1 / -1" }}
           />
         </Box>
       </LocalizationProvider>

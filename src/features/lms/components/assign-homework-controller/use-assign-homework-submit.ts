@@ -24,6 +24,7 @@ export function useAssignHomeworkSubmit(params: {
   apiBacked: boolean;
   createAssignmentMutation: ReturnType<typeof useCreateLmsAssignmentMutation>;
   attemptLimit: number;
+  supplementary: boolean;
   endDate: string;
   startDate: string;
   maxDurationMinutes: number;
@@ -48,6 +49,7 @@ export function useAssignHomeworkSubmit(params: {
     apiBacked,
     createAssignmentMutation,
     attemptLimit,
+    supplementary,
     endDate,
     startDate,
     maxDurationMinutes,
@@ -94,12 +96,15 @@ export function useAssignHomeworkSubmit(params: {
             idempotencyKey: createAssignmentIdempotencyKey({
               dueAt: endDate,
               quizIds: Array.from(selectedResourceIds),
+              recipient,
               startAt: startDate,
+              supplementary,
               title,
             }),
             maxDurationMinutes,
             quizIds: Array.from(selectedResourceIds),
             startAt: parseAssignDateTime(startDate),
+            supplementary,
             teacherNote: selectedSubject?.label ?? subject,
             title,
             ...recipient,

@@ -4,6 +4,7 @@ import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 import Box from "@mui/material/Box";
 import ButtonBase from "@mui/material/ButtonBase";
 import InputAdornment from "@mui/material/InputAdornment";
+import Switch from "@mui/material/Switch";
 import Typography from "@mui/material/Typography";
 
 import { ErgTextField } from "@/components/erg-mui/erg-form";
@@ -74,6 +75,10 @@ export function OptionsSection({ model: m }: { model: AssignHomeworkController }
             type="number"
             value={m.maxDurationMinutes}
           />
+        </Box>
+        <Box sx={{ ...mobileRowSx, borderTop: 1, borderColor: "divider" }}>
+          <MobileRowText meta="Không tính điểm TB chính, XP tối đa 50/tuần" title="Bài bổ sung" />
+          <Switch checked={m.supplementary} onChange={(event) => m.setSupplementary(event.target.checked)} slotProps={{ input: { "aria-label": "Bài bổ sung" } }} />
         </Box>
       </Box>
     </MobileFormSection>
