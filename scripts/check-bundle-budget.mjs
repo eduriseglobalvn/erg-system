@@ -3,7 +3,7 @@ import path from "node:path";
 import zlib from "node:zlib";
 import { fileURLToPath } from "node:url";
 
-import { extractShellAssetUrls } from "./pwa-precache-policy.mjs";
+import { extractShellAssetUrls, labColdPathAssetUrls } from "./pwa-precache-policy.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -50,8 +50,9 @@ export function collectPerformanceMetrics(assetsDir, options = {}) {
     .map((url) => path.join(distDir, url))
     .filter((file) => fs.existsSync(file));
   const precacheMissing = precacheUrls.filter((url) => !fs.existsSync(path.join(distDir, url)));
+  const labColdPath = labColdPathAssetUrls(distDir, files.map((asset) => path.relative(distDir, path.join(assetsDir, asset.name)).replaceAll("\\", "/")));
   const precacheUnexpectedJavaScript = precacheUrls.filter((url) =>
-    url.startsWith("assets/") && url.endsWith(".js") && !shellAssets.has(url),
+    url.startsWith("assets/") && url.endsWith(".js") && !shellAssets.has(url) && !labColdPath.has(url),
   );
 
   return {
