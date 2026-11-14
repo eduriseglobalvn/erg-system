@@ -9,3 +9,4 @@ export function filterPwaPrecacheManifest(
   entries: PwaManifestEntry[],
   indexHtmlPath: string,
 ): Promise<{ manifest: PwaManifestEntry[]; warnings: string[] }>;
+export function labColdPathAssetUrls(distDir: string, assetUrls: string[]): Set<string>;

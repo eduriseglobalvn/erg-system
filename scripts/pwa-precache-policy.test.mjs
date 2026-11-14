@@ -21,7 +21,7 @@ test("keeps shell JavaScript and static files but removes lazy JavaScript", asyn
       { url: "index.html", revision: "index" },
       { url: "assets/index-hash.js", revision: null },
       { url: "assets/auth-hash.js", revision: null },
-      { url: "assets/student-page-hash.js", revision: null },
+      { url: "assets/quiz-editor-hash.js", revision: null },
       { url: "assets/index-hash.css", revision: null },
       { url: "favicon.svg", revision: "favicon" },
     ], temp);
@@ -84,5 +84,31 @@ test("filterPwaPrecacheManifest keeps one entry per URL", async () => {
     assert.deepEqual(result.manifest.map((entry) => entry.url), ["assets/index-hash.js", "icon.png"]);
   } finally {
     await rm(temp, { force: true });
+  }
+});
+
+test("precaches the student and quiz player chunks with their static imports for school labs", async () => {
+  const { mkdtemp, mkdir, writeFile, rm } = await import("node:fs/promises");
+  const { tmpdir } = await import("node:os");
+  const { join } = await import("node:path");
+  const dist = await mkdtemp(join(tmpdir(), "pwa-lab-"));
+  await mkdir(join(dist, "assets"));
+  await writeFile(join(dist, "index.html"), '<script src="/assets/index-hash.js"></script>');
+  await writeFile(join(dist, "assets/student-page-hash.js"), 'import{a}from"./mui-hash.js";const l=()=>import("./xlsx-hash.js");');
+  await writeFile(join(dist, "assets/mui-hash.js"), 'import "./react-hash.js";');
+  await writeFile(join(dist, "assets/react-hash.js"), "");
+  try {
+    const result = await filterPwaPrecacheManifest(
+      ["index-hash", "student-page-hash", "mui-hash", "react-hash", "xlsx-hash", "admin-hash"].map((name) => ({ url: `assets/${name}.js`, revision: null })),
+      join(dist, "index.html"),
+    );
+    assert.deepEqual(result.manifest.map((entry) => entry.url), [
+      "assets/index-hash.js",
+      "assets/student-page-hash.js",
+      "assets/mui-hash.js",
+      "assets/react-hash.js",
+    ]);
+  } finally {
+    await rm(dist, { recursive: true, force: true });
   }
 });
