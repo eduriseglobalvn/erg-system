@@ -1,10 +1,8 @@
 import { useState } from "react";
 import Box from "@mui/material/Box";
-import Chip from "@mui/material/Chip";
 import Link from "@mui/material/Link";
 import Popover from "@mui/material/Popover";
 import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
 import CloseIcon from "@mui/icons-material/Close";
 import ContentCopyOutlinedIcon from "@mui/icons-material/ContentCopyOutlined";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
@@ -20,6 +18,8 @@ import type { ScheduleConflict } from "@/features/teaching-calendar/domain/sched
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 import { scheduleTokens } from "../shared/schedule-cell-sx";
 import { teacherTone } from "../shared/teacher-tone";
+
+const color = ergEnterpriseTokens.color;
 
 type Props = {
   anchorEl: HTMLElement | null;
@@ -44,31 +44,34 @@ export function EventDetails({ canDelete, conflicts, event, onClose, onDelete, o
   const draft = event.status === "DRAFT";
   return (
     <>
-      <Box>
-        <Stack direction="row" spacing={0.5} sx={{ justifyContent: "flex-end" }}>
+      <Box sx={{ color: color.textSecondary, display: "flex", flexDirection: "column", fontSize: "0.8125rem", gap: 1 }}>
+        <Stack direction="row" spacing={0.5} sx={{ color: color.textMuted, justifyContent: "flex-end" }}>
           <ErgIconButton label="Sửa" disabled={!event.batchId} onClick={() => onOpenSchedule(event, "edit")} size="small"><EditOutlinedIcon fontSize="small" /></ErgIconButton>
           <ErgIconButton label="Nhân bản" disabled={!event.batchId} onClick={() => onOpenSchedule(event, "copy")} size="small"><ContentCopyOutlinedIcon fontSize="small" /></ErgIconButton>
           {canDelete ? <ErgIconButton label="Xoá" onClick={() => setConfirm(true)} size="small"><DeleteOutlinedIcon fontSize="small" /></ErgIconButton> : null}
           {showClose ? <ErgIconButton label="Đóng" onClick={onClose} size="small"><CloseIcon fontSize="small" /></ErgIconButton> : null}
         </Stack>
-        <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-          <Typography sx={{ typography: "subtitle1" }}>{[event.className, event.subjectName, event.levelName].filter(Boolean).join(" · ")}</Typography>
-          {draft ? <Chip label="Nháp" size="small" /> : null}
-        </Stack>
-        <Typography sx={{ typography: "body2" }}>{dayLabel(event.date)} · Tiết {event.periodStart} · {event.startTime} – {event.endTime}</Typography>
-        {repeatUntil ? <Typography sx={{ color: "text.secondary", typography: "body2" }}>Hằng tuần, đến {formatDateVi(repeatUntil)}</Typography> : null}
-        <Typography sx={{ color: "text.secondary", typography: "body2" }}>{[event.schoolName, event.roomName].filter(Boolean).join(" · ")}</Typography>
-        <Typography sx={{ alignItems: "center", display: "flex", gap: 0.75, typography: "body2" }}>{main ? <Box aria-hidden component="span" sx={{ bgcolor: teacherTone(event.teachers.find((teacher) => teacher.role === "MAIN")?.userId).border, borderRadius: "50%", flexShrink: 0, height: 8, width: 8 }} /> : null}GV: {main ?? "—"} · Trợ giảng: {assistant ?? "—"}</Typography>
+        <Box sx={{ display: "flex", gap: "10px" }}>
+          <Box aria-hidden component="span" sx={{ bgcolor: teacherTone(event.teachers.find((teacher) => teacher.role === "MAIN")?.userId).border, borderRadius: "4px", flexShrink: 0, height: 12, mt: "4px", width: 12 }} />
+          <Box>
+            <Box sx={{ color: color.text, typography: "h5", fontSize: "1rem" }}>{[event.className, event.subjectName, event.levelName].filter(Boolean).join(" · ")}</Box>
+            <Box>{dayLabel(event.date)} · Tiết {event.periodStart} · {event.startTime} – {event.endTime}</Box>
+            {repeatUntil ? <Box>Hằng tuần, đến {formatDateVi(repeatUntil)}</Box> : null}
+          </Box>
+        </Box>
+        <Box>{[event.schoolName, event.roomName].filter(Boolean).join(" · ")}</Box>
+        <Box>GV: <Box component="strong" sx={{ color: color.text, typography: "subtitle2", fontSize: "0.8125rem" }}>{main ?? "—"}</Box> · Trợ giảng: {assistant ?? "—"}</Box>
         {own.map((conflict) => {
           const text = conflict.kind === "TRAVEL_TIME" && conflict.travel
             ? `Không kịp di chuyển: tiết trước ở ${conflict.other?.schoolName ?? conflict.travel.fromSchoolName}, hết ${conflict.travel.previousEndTime} → chỉ ${conflict.travel.gapMinutes}′ (cần ≥ ${conflict.travel.requiredMinutes}′)`
             : `Trùng: ${popoverConflictLine(conflict)}${conflict.other?.batchLabel ? ` (${conflict.other.batchLabel}, ${conflict.other.batchStatus === "PUBLISHED" ? "đã xuất bản" : "nháp"})` : ""}`;
-          return <Box key={conflict.id} sx={{ bgcolor: scheduleTokens.clash.bg, borderRadius: "6px", color: scheduleTokens.clash.text, mt: 1, p: 1, typography: "caption" }}>{text}</Box>;
+          return <Box key={conflict.id} sx={{ bgcolor: scheduleTokens.clash.bg, borderRadius: `${ergEnterpriseTokens.radius.control}px`, color: scheduleTokens.clash.text, px: "10px", py: 1 }}>{text}</Box>;
         })}
-        <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
-          <Link component="button" disabled={!event.batchId} onClick={() => onOpenSchedule(event, "teacher")} sx={{ typography: "caption" }} type="button" underline="hover">Đổi giáo viên</Link>
-          <Link component="button" disabled={!event.batchId} onClick={() => onOpenSchedule(event, "move")} sx={{ typography: "caption" }} type="button" underline="hover">Dời tiết</Link>
-        </Stack>
+        <Box sx={{ alignItems: "center", borderTop: `1px solid ${color.divider}`, display: "flex", gap: 1, pt: 1 }}>
+          <Link component="button" disabled={!event.batchId} onClick={() => onOpenSchedule(event, "teacher")} sx={{ typography: "subtitle2", fontSize: "0.8125rem" }} type="button" underline="none">Đổi giáo viên</Link>
+          <Link component="button" color="inherit" disabled={!event.batchId} onClick={() => onOpenSchedule(event, "move")} sx={{ fontSize: "0.8125rem" }} type="button" underline="none">Dời tiết</Link>
+          {draft ? <Box component="span" sx={{ bgcolor: scheduleTokens.neutral.bg, borderRadius: "999px", color: scheduleTokens.neutral.text, fontSize: "0.75rem", ml: "auto", px: 1, py: "1px" }}>Nháp</Box> : null}
+        </Box>
       </Box>
       <ErgConfirmDialog
         confirmLabel="Xoá" description="Hành động này sẽ huỷ tiết khỏi lịch giáo viên." destructive
@@ -84,7 +87,7 @@ export function EventDetails({ canDelete, conflicts, event, onClose, onDelete, o
 export function EventPopover({ anchorEl, event, ...rest }: Props) {
   if (!event) return null;
   return (
-    <Popover anchorEl={anchorEl} onClose={rest.onClose} open={Boolean(anchorEl)} slotProps={{ paper: { sx: { borderRadius: `${ergEnterpriseTokens.radius.card}px`, boxShadow: ergEnterpriseTokens.shadow.float, p: 1.5, width: 360 } } }}>
+    <Popover anchorEl={anchorEl} onClose={rest.onClose} open={Boolean(anchorEl)} slotProps={{ paper: { sx: { borderRadius: `${ergEnterpriseTokens.radius.card}px`, boxShadow: ergEnterpriseTokens.shadow.float, px: 2, py: "14px", width: 320 } } }}>
       <EventDetails event={event} {...rest} />
     </Popover>
   );

@@ -20,11 +20,12 @@ describe("Teacher PWA calendar and action-button policy", () => {
     expect(source).not.toMatch(/className\s*=/);
   });
 
-  it("selects agenda as the mobile calendar default without removing desktop week view", () => {
+  it("keeps the teacher calendar responsive: mobile day list, desktop week view", () => {
     const source = readFileSync(resolve("src/features/lms/components/teaching-schedule/lms-erg-calendar-workspace.tsx"), "utf8");
 
     expect(source).toContain("useLmsMobileBreakpoint");
-    expect(source).toContain('initialMode={isMobile ? "schedule" : "week"}');
+    expect(source).toContain("TeacherMobileDay");
+    expect(source).toContain("TeacherWeekGrid");
   });
 
   it("exposes a stable calendar workspace test hook", () => {

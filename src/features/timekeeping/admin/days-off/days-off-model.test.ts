@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { HolidayConfig } from "../../api/timekeeping-types";
 import {
-  addCommand, affectedNotice, datesBetween, holidayCardSubtitle, holidayCardTitle, holidayCellSub, holidayCountStrip, isPayLocked, monthGrid,
+  addCommand, affectedNotice, datesBetween, holidayCardSubtitle, holidayCardTitle, holidayCellSub, isPayLocked, monthGrid,
   pastPeriodsPayload, pastWarningIntro, rangeSummary, saturdaysOf, shiftMonth, sumLoads, weekdayDayMonth,
 } from "./days-off-model";
 
@@ -96,11 +96,5 @@ describe("HOLIDAY_AFFECTS_PAST_PERIODS payload", () => {
     expect(pastWarningIntro(one!)).toBe("Thứ 5, 12/11 đã qua. Hôm đó có 14 tiết đã dạy ở 2 trường, 9 tiết đã có báo giảng. Thêm ngày nghỉ với «Huỷ tiết» sẽ huỷ cả các tiết này.");
     const range = pastPeriodsPayload({ code: "HOLIDAY_AFFECTS_PAST_PERIODS", details: { data: { ...payload, dates: ["2026-11-13", "2026-11-12"] } } });
     expect(pastWarningIntro(range!)).toMatch(/^Thứ 5, 12\/11 – Thứ 6, 13\/11 đã qua\. Các ngày đó có 14 tiết/);
-  });
-});
-
-describe("holidayCountStrip", () => {
-  it("counts state (incl. compensatory), company and unpaid company days", () => {
-    expect(holidayCountStrip([{ kind: "STATE" }, { kind: "COMPENSATORY" }, NHA_GIAO, { kind: "COMPANY", payMode: "PAID" }])).toBe("2 Nghỉ lễ nhà nước · 2 Nghỉ công ty · 1 Không lương (KL)");
   });
 });

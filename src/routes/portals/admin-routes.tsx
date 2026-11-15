@@ -63,6 +63,7 @@ function adminPageFor(wPath: string) {
   if (wPath === "calendar/days-off") return timekeepingPage("AdminDaysOffRoute");
   if (wPath === "calendar/overview") return page("AdminCalendarOverviewRoute");
   if (wPath === "calendar/settings/travel") return page("AdminCalendarTravelRoute");
+  if (wPath === "calendar/settings/periods") return page("AdminCalendarPeriodsRoute");
   if (wPath === "ui-kit") return page("AdminUiKitRoute");
   if (wPath === "notifications") return inboxPage("AdminNotificationsPage");
   if (wPath === "notifications/compose") return composePage("AdminNotificationComposePage");

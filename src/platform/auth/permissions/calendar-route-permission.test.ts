@@ -15,6 +15,7 @@ describe("lich giang day: ma tran quyen cho cac route moi", () => {
     ["/admin/calendar/schedule", "lms.schedule.create"],
     ["/admin/calendar/overview", "lms.schedule.read"],
     ["/admin/calendar/settings/travel", "lms.schedule.manage"],
+    ["/admin/calendar/settings/periods", "lms.schedule.manage"],
     ["/admin/calendar/days-off", "timekeeping.manage"],
   ])("%s yeu cau %s", (path, permission) => {
     expect(routePermissionForPath(path, "ADMIN")?.permission).toBe(permission);
@@ -25,6 +26,8 @@ describe("lich giang day: ma tran quyen cho cac route moi", () => {
     ["/admin/calendar/overview", ["lms.dashboard.read"], "access-denied"],
     ["/admin/calendar/settings/travel", ["lms.schedule.manage"], "allow"],
     ["/admin/calendar/settings/travel", ["lms.schedule.read"], "access-denied"],
+    ["/admin/calendar/settings/periods", ["lms.schedule.manage"], "allow"],
+    ["/admin/calendar/settings/periods", ["lms.schedule.read"], "access-denied"],
     ["/admin/calendar/schedule", ["lms.schedule.create"], "allow"],
     ["/admin/calendar/schedule", ["lms.schedule.read"], "access-denied"],
     ["/admin/calendar/days-off", ["timekeeping.manage"], "allow"],

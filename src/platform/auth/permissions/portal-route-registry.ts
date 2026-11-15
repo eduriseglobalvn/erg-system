@@ -63,6 +63,7 @@ export const lcmsWorkspacePaths = [
   "calendar/overview",
   "calendar/days-off",
   "calendar/settings/travel",
+  "calendar/settings/periods",
   "notifications",
   "notifications/compose",
   "discussion",

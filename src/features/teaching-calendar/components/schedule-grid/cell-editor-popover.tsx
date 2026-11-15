@@ -10,7 +10,7 @@ import { toast } from "sonner";
 
 import { loadTeachingSlotOptions } from "@/features/teaching-calendar/api/teaching-calendar-slot-options-api";
 import { teachingCalendarQueryKeys } from "@/features/teaching-calendar/api/teaching-calendar-query-keys";
-import { dayLabel, periodLabel, weekdayName, type PeriodSlotLike } from "@/features/teaching-calendar/domain/schedule-copy";
+import { dayLabel, weekdayName, type PeriodSlotLike } from "@/features/teaching-calendar/domain/schedule-copy";
 import { getDefaultTenantId } from "@/lib/graphql-client";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 import { newClientRowId, withTeacher, type GridRow } from "@/features/teaching-calendar/domain/schedule-grid-model";
@@ -36,13 +36,13 @@ type Props = {
 
 export function FieldButton({ label, onClick, value, disabled, muted }: { disabled?: boolean; label: string; muted?: boolean; onClick: () => void; value: string }) {
   return (
-    <Box>
-      <Typography sx={{ color: "text.secondary", typography: "caption" }}>{label}</Typography>
+    <Box sx={{ alignItems: "center", display: "grid", gap: 1, gridTemplateColumns: "72px 1fr" }}>
+      <Typography sx={{ color: ergEnterpriseTokens.color.textSecondary, ...ergEnterpriseTokens.type.note }}>{label}</Typography>
       <ButtonBase
         aria-label={label}
         disabled={disabled}
         onClick={onClick}
-        sx={{ border: 1, borderColor: "divider", borderRadius: 1.25, color: muted ? "text.secondary" : "text.primary", justifyContent: "space-between", opacity: disabled ? 0.5 : 1, px: 1.5, py: 1, textAlign: "left", typography: "body2", width: "100%" }}
+        sx={{ border: 1, borderColor: "divider", borderRadius: `${ergEnterpriseTokens.radius.control}px`, color: muted ? "text.secondary" : "text.primary", height: 34, justifyContent: "space-between", opacity: disabled ? 0.5 : 1, px: 1.25, textAlign: "left", typography: "body2", width: "100%" }}
       >
         {value}<span aria-hidden>▾</span>
       </ButtonBase>
@@ -76,15 +76,16 @@ export function CellEditorPopover({ anchorEl, batchId, date, initialView, onChan
       anchorOrigin={{ horizontal: "left", vertical: "bottom" }}
       onClose={close}
       open={Boolean(anchorEl)}
-      slotProps={{ paper: { sx: { borderRadius: `${ergEnterpriseTokens.radius.card}px`, boxShadow: ergEnterpriseTokens.shadow.float, width: view === "form" ? 360 : 440 } } }}
+      slotProps={{ paper: { sx: { borderRadius: `${ergEnterpriseTokens.radius.card}px`, boxShadow: ergEnterpriseTokens.shadow.float, width: view === "form" ? 308 : 440 } } }}
     >
-      <Typography sx={{ borderBottom: 1, borderColor: "divider", px: 1.5, py: 1, typography: "subtitle2" }}>
-        {dayLabel(date)} · {periodLabel(slot, "compact")}
-      </Typography>
+      <Box sx={{ alignItems: "baseline", display: "flex", justifyContent: "space-between", px: view === "form" ? 1.75 : 1.5, pb: view === "form" ? 0 : 1, pt: 1.75 }}>
+        <Typography component="strong" sx={{ typography: "subtitle2" }}>{dayLabel(date)} · Tiết {slot.periodNo}</Typography>
+        {slot.startTime && slot.endTime ? <Typography sx={{ color: "text.secondary", typography: "caption" }}>{slot.startTime}–{slot.endTime}</Typography> : null}
+      </Box>
       {options.isPending ? <Stack spacing={1} sx={{ p: 1.5 }}><Skeleton height={40} /><Skeleton height={40} /></Stack> : null}
       {options.isError ? <Typography color="error" sx={{ p: 1.5, typography: "body2" }}>Không tải được gợi ý cho ô này.</Typography> : null}
       {data && view === "form" ? (
-        <Stack spacing={1.5} sx={{ p: 1.5 }}>
+        <Stack spacing={1} sx={{ p: 1.75 }}>
           <ClassCombobox
             batchId={batchId}
             classes={data.classes}

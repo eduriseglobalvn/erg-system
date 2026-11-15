@@ -19,9 +19,23 @@ import { MobileBottomSheet } from "@/features/lms/mobile/components/mobile-botto
 import { ClassCombobox } from "../pickers/class-combobox";
 import { RoomPick } from "../pickers/room-pick";
 import { TeacherPick } from "../pickers/teacher-pick";
-import { FieldButton } from "../schedule-grid/cell-editor-popover";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 import { scheduleTokens } from "../shared/schedule-cell-sx";
 import { useAdminMobileAdd } from "./use-admin-mobile-add";
+
+const color = ergEnterpriseTokens.color;
+
+/** Truong chon cua board 6.9: nhan 12px tren, o 48px bo 10, 15px, ▾; `error` = vien do 2px (giao vien trung). */
+function MobileField({ disabled, error, label, muted, onClick, value }: { disabled?: boolean; error?: boolean; label: string; muted?: boolean; onClick: () => void; value: string }) {
+  return (
+    <Box component="label" sx={{ color: color.textSecondary, display: "flex", flexDirection: "column", fontSize: "0.75rem", gap: "4px" }}>
+      {label}
+      <ButtonBase aria-label={label} disabled={disabled} onClick={onClick} sx={{ border: error ? `2px solid ${scheduleTokens.clash.edge}` : `1px solid ${color.border}`, borderRadius: `${ergEnterpriseTokens.radius.control}px`, boxSizing: "border-box", color: muted ? color.textMuted : color.text, fontSize: "0.9375rem", height: 48, justifyContent: "space-between", opacity: disabled ? 0.5 : 1, px: 1.5, textAlign: "left", width: "100%" }}>
+        {value}<Box aria-hidden component="span" sx={{ color: color.textMuted }}>▾</Box>
+      </ButtonBase>
+    </Box>
+  );
+}
 
 type View = "form" | "teacher" | "assistant" | "room";
 type Row = GridRow;
@@ -74,16 +88,24 @@ function AdminMobileSheetBody({ date, events, onClose, open, schoolId, schoolNam
     <MobileBottomSheet description={[schoolName, program].filter(Boolean).join(" · ")} onOpenChange={(next) => !next && onClose()} open={open} title={`Thêm tiết · ${dayLabel(date)}`}>
       {view === "form" ? (
         <Stack spacing={1.5}>
-          <Box role="radiogroup" sx={{ display: "grid", gap: 0.75, gridTemplateColumns: "repeat(5, minmax(0, 1fr))" }}>
-            {(template?.slots ?? []).map((item) => (
-              <ButtonBase
-                aria-checked={item.periodNo === periodNo} disabled={!item.startTime} key={item.periodNo} onClick={() => { setPeriodNo(item.periodNo); setRow((current) => (current ? { ...current, periodNo: item.periodNo } : current)); }} role="radio"
-                sx={{ bgcolor: item.periodNo === periodNo ? "primary.main" : "background.paper", border: 1, borderColor: "divider", borderRadius: "10px", color: item.periodNo === periodNo ? "primary.contrastText" : "text.primary", flexDirection: "column", minWidth: 0, opacity: item.startTime ? 1 : 0.5, px: 1, py: 0.75 }}
-              >
-                <Typography sx={{ typography: "subtitle2" }}>{item.periodNo}</Typography>
-                <Typography sx={{ typography: "caption" }}>{periodChipHint(item, item.periodNo === periodNo, takenPeriods.has(item.periodNo))}</Typography>
-              </ButtonBase>
-            ))}
+          <Box>
+            <Box sx={{ mb: "6px", typography: "subtitle2", fontSize: "0.8125rem" }}>Tiết</Box>
+            <Box role="radiogroup" sx={{ display: "grid", gap: "6px", gridTemplateColumns: "repeat(5, minmax(0, 1fr))" }}>
+              {(template?.slots ?? []).map((item) => {
+                const on = item.periodNo === periodNo;
+                const none = !item.startTime;
+                const taken = !on && takenPeriods.has(item.periodNo);
+                return (
+                  <ButtonBase
+                    aria-checked={on} disabled={none} key={item.periodNo} onClick={() => { setPeriodNo(item.periodNo); setRow((current) => (current ? { ...current, periodNo: item.periodNo } : current)); }} role="radio"
+                    sx={{ bgcolor: on ? "primary.main" : taken ? scheduleTokens.neutral.bg : "background.paper", border: none ? `1px dashed ${color.border}` : on || taken ? 0 : `1px solid ${color.border}`, borderRadius: `${ergEnterpriseTokens.radius.control}px`, color: on ? "primary.contrastText" : taken ? color.textMuted : none ? color.textSoft : color.text, flexDirection: "column", height: 48, minWidth: 0 }}
+                  >
+                    <Box component="span" sx={{ typography: "subtitle2" }}>{item.periodNo}</Box>
+                    <Box component="span" sx={{ fontSize: "0.625rem" }}>{periodChipHint(item, on, takenPeriods.has(item.periodNo))}</Box>
+                  </ButtonBase>
+                );
+              })}
+            </Box>
           </Box>
           {data ? (
             <ClassCombobox
@@ -91,21 +113,21 @@ function AdminMobileSheetBody({ date, events, onClose, open, schoolId, schoolNam
               periodNo={periodNo} schoolName={data.schoolName} value={row?.classId} weekdayName={weekdayName(weekday)}
             />
           ) : null}
-          <FieldButton disabled={!row} label="Giáo viên" muted={!row?.teacherName} onClick={() => setView("teacher")} value={row?.teacherName ?? "Chọn giáo viên"} />
-          <FieldButton disabled={!row} label="Phòng học" muted={!row?.roomName && !row?.newRoomName} onClick={() => setView("room")} value={row?.roomName ?? row?.newRoomName ?? "PM 03 · chọn hoặc gõ"} />
-          <FieldButton disabled={!row} label="Trợ giảng" muted={!row?.assistantName} onClick={() => setView("assistant")} value={row?.assistantName ?? "Không có"} />
+          <MobileField disabled={!row} error={Boolean(busy)} label="Giáo viên" muted={!row?.teacherName} onClick={() => setView("teacher")} value={row?.teacherName ?? "Chọn giáo viên"} />
+          <MobileField disabled={!row} label="Phòng học" muted={!row?.roomName && !row?.newRoomName} onClick={() => setView("room")} value={row?.roomName ?? row?.newRoomName ?? "PM 03 · chọn hoặc gõ"} />
+          <MobileField disabled={!row} label="Trợ giảng" muted={!row?.assistantName} onClick={() => setView("assistant")} value={row?.assistantName ?? "Không có"} />
           {busy ? (
-            <Box role="alert" sx={{ bgcolor: scheduleTokens.clash.bg, borderRadius: "10px", color: scheduleTokens.clash.text, p: 1.5 }}>
-              <Typography sx={{ typography: "subtitle2" }}>{busy.state === "TRAVEL" ? "Không kịp di chuyển" : "Trùng giáo viên"} · Tiết {periodNo}{slot?.startTime ? `, ${slot.startTime}–${slot.endTime}` : ""}</Typography>
-              {busy.busy ? <Typography sx={{ typography: "caption" }}>{busy.teacherName} đang dạy {[busy.busy.className, busy.busy.roomName, busy.busy.schoolName].filter(Boolean).join(" · ")}</Typography> : null}
-              {busy.busy ? <Typography sx={{ typography: "caption" }}>{sourceLabel(busy.busy)}</Typography> : null}
-              {swap ? <Link component="button" onClick={() => row && apply(withTeacher(row, { id: swap.teacherId, name: swap.teacherName }).row)} sx={{ typography: "caption" }} type="button" underline="hover">Đổi sang {swap.teacherName} (trống tiết {periodNo}) →</Link> : null}
+            <Box role="alert" sx={{ bgcolor: scheduleTokens.clash.bg, borderRadius: `${ergEnterpriseTokens.radius.card}px`, color: color.textSecondary, display: "flex", flexDirection: "column", fontSize: "0.8125rem", gap: "4px", p: 1.5 }}>
+              <Box component="strong" sx={{ color: scheduleTokens.clash.text, typography: "subtitle2", fontSize: "0.8125rem" }}>{busy.state === "TRAVEL" ? "Không kịp di chuyển" : "Trùng giáo viên"} · Tiết {periodNo}{slot?.startTime ? `, ${slot.startTime}–${slot.endTime}` : ""}</Box>
+              {busy.busy ? <span>{busy.teacherName} đang dạy <Box component="strong" sx={{ color: color.text, typography: "subtitle2", fontSize: "0.8125rem" }}>{[busy.busy.className, busy.busy.roomName, busy.busy.schoolName].filter(Boolean).join(" · ")}</Box></span> : null}
+              {busy.busy ? <Box component="span" sx={{ color: color.textMuted, fontSize: "0.75rem" }}>{sourceLabel(busy.busy)}</Box> : null}
+              {swap ? <Link component="button" onClick={() => row && apply(withTeacher(row, { id: swap.teacherId, name: swap.teacherName }).row)} sx={{ alignItems: "center", display: "flex", minHeight: 32, textAlign: "left", typography: "subtitle2", fontSize: "0.8125rem" }} type="button" underline="none">Đổi sang {swap.teacherName} (trống tiết {periodNo}) →</Link> : null}
             </Box>
           ) : null}
-          {row?.className ? <Typography sx={{ color: "text.secondary", typography: "caption" }}>Khi xuất bản: cấp quyền lớp {row.className} cho giáo viên được chọn.</Typography> : null}
+          {row?.className ? <Box sx={{ bgcolor: scheduleTokens.published.bg, borderRadius: `${ergEnterpriseTokens.radius.control}px`, color: scheduleTokens.published.text, fontSize: "0.75rem", px: "10px", py: 1 }}>Khi xuất bản: cấp quyền lớp {row.className} cho giáo viên được chọn.</Box> : null}
           {sunday ? <Typography color="error" role="alert" sx={{ typography: "caption" }}>Chủ nhật không có trong lưới xếp lịch. Chọn ngày từ Thứ 2 đến Thứ 7.</Typography> : null}
           {add.isError ? <Typography color="error" role="alert" sx={{ typography: "caption" }}>Chưa lưu được · Thử lại</Typography> : null}
-          <ErgButton disabled={!canAdd} fullWidth loading={add.isPending} onClick={() => row && add.mutate({ date, periodTemplateId, row, schoolId })} variant="contained">Thêm vào nháp</ErgButton>
+          <ErgButton disabled={!canAdd} fullWidth sx={{ borderRadius: `${ergEnterpriseTokens.radius.control}px`, fontSize: "0.9375rem", height: 48 }} loading={add.isPending} onClick={() => row && add.mutate({ date, periodTemplateId, row, schoolId })} variant="contained">Thêm vào nháp</ErgButton>
         </Stack>
       ) : null}
       {data && view === "room" && row ? (

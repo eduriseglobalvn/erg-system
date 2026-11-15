@@ -30,7 +30,7 @@ export function useOverviewData(params: OverviewParams) {
     queryKey: teachingCalendarQueryKeys.overview(tenantId, "schools", { q, quick, week }),
   });
   const schoolItems = useMemo(() => schoolPages.data?.pages.flatMap((page) => page.items) ?? [], [schoolPages.data]);
-  const selected = params.schools.length ? params.schools.slice(0, MAX_COMPARED_SCHOOLS) : schoolItems.slice(0, 2).map((school) => school.schoolId);
+  const selected = params.schools.length ? params.schools.slice(0, MAX_COMPARED_SCHOOLS) : schoolItems.slice(0, MAX_COMPARED_SCHOOLS).map((school) => school.schoolId);
   const grid = useQuery({
     enabled: schoolsTab && selected.length > 0,
     placeholderData: keepPreviousData,

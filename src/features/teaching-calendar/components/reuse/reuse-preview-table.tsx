@@ -1,14 +1,11 @@
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import Typography from "@mui/material/Typography";
+import Box from "@mui/material/Box";
 
-import { ErgTable } from "@/components/erg-mui/erg-table";
 import type { TeachingReusePreview } from "@/features/teaching-calendar/api/teaching-calendar-reuse-api";
 import { conflictLines } from "@/features/teaching-calendar/domain/conflict-copy";
 import { compactWeekRange } from "@/features/teaching-calendar/domain/schedule-copy";
 import { formatDateVi } from "@/domain/formatters/format-date";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
+import { scheduleTokens } from "../shared/schedule-cell-sx";
 
 type Week = TeachingReusePreview["weeks"][number];
 
@@ -24,32 +21,33 @@ export function reuseWeekDetail(week: Week): string {
   return "Như tuần gốc";
 }
 
-/** Bang xem truoc (6.5): Tuan | Sẽ tạo | Bỏ qua | Trùng | Chi tiết. */
+const { color, radius, type } = ergEnterpriseTokens;
+const COLUMNS = "150px 80px 80px 80px 1fr";
+const head = { px: 1, py: 1.25 } as const;
+
+/** Bang xem truoc (board AdminReuse): luoi 150 / 80 / 80 / 80 / 1fr, header nen FAFAFC, o tren 12px 8px. */
 export function ReusePreviewTable({ weeks }: { weeks: readonly Week[] }) {
   return (
-    <ErgTable aria-label="Xem trước các tuần sẽ tạo" size="small">
-      <TableHead>
-        <TableRow>
-          <TableCell>Tuần</TableCell>
-          <TableCell align="right">Sẽ tạo</TableCell>
-          <TableCell align="right">Bỏ qua</TableCell>
-          <TableCell align="right">Trùng</TableCell>
-          <TableCell>Chi tiết</TableCell>
-        </TableRow>
-      </TableHead>
-      <TableBody>
-        {weeks.map((week) => (
-          <TableRow key={week.weekStart}>
-            <TableCell>{compactWeekRange(week.weekStart)}</TableCell>
-            <TableCell align="right">{week.toCreate}</TableCell>
-            <TableCell align="right">{week.skipped}</TableCell>
-            <TableCell align="right">{week.conflicts}</TableCell>
-            <TableCell sx={{ maxWidth: 360 }}>
-              <Typography noWrap sx={{ typography: "body2" }} title={reuseWeekDetail(week)}>{reuseWeekDetail(week)}</Typography>
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </ErgTable>
+    <Box aria-label="Xem trước các tuần sẽ tạo" role="table" sx={{ border: 1, borderColor: "divider", borderRadius: `${radius.card}px`, overflow: "hidden" }}>
+      <Box role="row" sx={{ bgcolor: color.surfaceMuted, borderBottom: 1, borderColor: "divider", color: color.textSecondary, display: "grid", gridTemplateColumns: COLUMNS, ...type.label }}>
+        <Box role="columnheader" sx={{ ...head, px: 2 }}>Tuần</Box>
+        <Box role="columnheader" sx={head}>Sẽ tạo</Box>
+        <Box role="columnheader" sx={head}>Bỏ qua</Box>
+        <Box role="columnheader" sx={head}>Trùng</Box>
+        <Box role="columnheader" sx={head}>Chi tiết</Box>
+      </Box>
+      {weeks.map((week) => {
+        const clash = week.conflicts > 0;
+        return (
+          <Box key={week.weekStart} role="row" sx={{ alignItems: "start", borderBottom: `1px solid ${color.divider}`, display: "grid", gridTemplateColumns: COLUMNS, "&:last-of-type": { borderBottom: 0 }, ...type.small }}>
+            <Box role="cell" sx={{ px: 2, py: 1.5, ...type.smallStrong }}>{compactWeekRange(week.weekStart)}</Box>
+            <Box role="cell" sx={{ px: 1, py: 1.5 }}>{week.toCreate}</Box>
+            <Box role="cell" sx={{ color: color.textMuted, px: 1, py: 1.5 }}>{week.skipped}</Box>
+            <Box role="cell" sx={{ color: clash ? scheduleTokens.clash.text : color.textMuted, px: 1, py: 1.5, ...(clash ? type.smallStrong : {}) }}>{week.conflicts}</Box>
+            <Box role="cell" sx={{ color: clash ? scheduleTokens.clash.text : color.textSecondary, px: 1, py: 1.5, ...type.note, lineHeight: 1.5 }}>{reuseWeekDetail(week)}</Box>
+          </Box>
+        );
+      })}
+    </Box>
   );
 }

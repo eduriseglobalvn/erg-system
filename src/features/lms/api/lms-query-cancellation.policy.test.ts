@@ -11,7 +11,6 @@ const cancellationCallSites = [
   ["classroom/components/class-students-workspace.tsx", "loadLmsClassWorkspace"],
   ["components/student-groups-page.tsx", "loadLmsClassWorkspace"],
   ["components/teaching-schedule/lms-erg-calendar-workspace.tsx", "loadLmsMyTeachingCalendar"],
-  ["components/teaching-schedule/lms-erg-calendar-workspace.tsx", "loadTeachingCalendarReferenceCatalog"],
 ] as const;
 
 describe("LMS query cancellation policy", () => {

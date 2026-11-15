@@ -5,7 +5,7 @@ export type OverviewCell = TeachingOverviewGrid["cells"][number];
 export type OverviewConflict = TeachingOverviewGrid["conflicts"][number];
 export type OverviewSlot = TeachingOverviewGrid["template"]["slots"][number];
 
-export const MAX_COMPARED_SCHOOLS = 3;
+export const MAX_COMPARED_SCHOOLS = 4;
 /** Luoi bang tong khong hien tiet 5 / 10 (khong co gio): chi cac tiet co gio. */
 export type OverviewRow = {
   cells: ReadonlyMap<string, readonly OverviewCell[]>;
@@ -67,10 +67,56 @@ export function overviewCellKind(cell: OverviewCell): OverviewCellKind {
   return cell.status === "DRAFT" ? "draft" : "published";
 }
 
-/** Tick truong: toi da 3; tick thu 4 bi bo qua (UI hien tooltip). */
+/** Tick truong: toi da `MAX_COMPARED_SCHOOLS`; tick vuot bi bo qua (UI hien tooltip). */
 export function toggleSchool(selected: readonly string[], id: string): string[] {
   if (selected.includes(id)) return selected.filter((item) => item !== id);
   return selected.length >= MAX_COMPARED_SCHOOLS ? [...selected] : [...selected, id];
+}
+
+/** Mot khung gio tren bang tong theo truong (6.6): cac tiet lien nhau cung lop/GV/trang thai gop thanh mot khung. */
+export type OverviewChip = {
+  cell: OverviewCell;
+  endTime: string;
+  firstPeriod: number;
+  kind: OverviewCellKind;
+  lastPeriod: number;
+  session: string;
+  startTime: string;
+  weekday: number;
+};
+
+/**
+ * Gom cac o cua tung truong theo ngay thanh khung gio: tiet lien nhau (theo thu tu tiet co gio) cung lop, phong, GV, tro giang,
+ * trang thai va xung dot thi gop thanh mot khung «07:15–10:45». Khoa map: `schoolId:weekday`, da sap theo gio bat dau.
+ */
+export function buildSchoolDayChips(grid: TeachingOverviewGrid): Map<string, OverviewChip[]> {
+  const timed = [...grid.template.slots].filter((slot) => slot.startTime && slot.endTime).sort((a, b) => a.periodNo - b.periodNo);
+  const index = new Map(timed.map((slot, position) => [slot.periodNo, position]));
+  const signature = (cell: OverviewCell) => [cell.className, cell.roomName, cell.teacherName, cell.assistantName, cell.status, [...cell.conflictKinds].sort().join("+")].join("|");
+  const sorted = grid.cells.filter((cell) => index.has(cell.periodNo)).sort((a, b) => (index.get(a.periodNo) ?? 0) - (index.get(b.periodNo) ?? 0));
+  const out = new Map<string, OverviewChip[]>();
+  const open = new Map<string, OverviewChip>();
+  for (const cell of sorted) {
+    const slot = timed[index.get(cell.periodNo) ?? 0];
+    const key = `${cell.schoolId}:${cell.weekday}`;
+    const runKey = `${key}|${signature(cell)}`;
+    const previous = open.get(runKey);
+    if (previous && previous.session === slot.session && (index.get(previous.lastPeriod) ?? -9) + 1 === index.get(cell.periodNo)) {
+      previous.lastPeriod = cell.periodNo;
+      previous.endTime = slot.endTime ?? previous.endTime;
+      continue;
+    }
+    const chip: OverviewChip = { cell, endTime: slot.endTime ?? "", firstPeriod: cell.periodNo, kind: overviewCellKind(cell), lastPeriod: cell.periodNo, session: slot.session, startTime: slot.startTime ?? "", weekday: cell.weekday };
+    open.set(runKey, chip);
+    out.set(key, [...(out.get(key) ?? []), chip]);
+  }
+  for (const [key, list] of out) out.set(key, list.sort((a, b) => a.startTime.localeCompare(b.startTime) || (a.cell.teacherName ?? "").localeCompare(b.cell.teacherName ?? "")));
+  return out;
+}
+
+/** «Q.Vương + B.Ngọc, P.Nhi»: GV chinh cong tro giang (board 6.6). */
+export function chipWho(cell: Pick<OverviewCell, "assistantName" | "teacherName">): string {
+  return `${cell.teacherName ?? "—"}${cell.assistantName ? ` + ${cell.assistantName}` : ""}`;
 }
 
 export function rowLabel(row: OverviewRow): string {

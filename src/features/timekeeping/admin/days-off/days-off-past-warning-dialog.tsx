@@ -8,7 +8,9 @@ import Typography from "@mui/material/Typography";
 import { useState } from "react";
 
 import { ErgButton } from "@/components/erg-mui/erg-actions";
-import { ErgDialog } from "@/components/erg-mui/erg-overlays";
+import ReportProblemOutlinedIcon from "@mui/icons-material/ReportProblemOutlined";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
+import { DaysOffDialog } from "./days-off-dialog";
 import { pastPeriodsPayload, pastWarningIntro, type PastPeriodsPayload } from "./days-off-model";
 
 type PastWarning = { payload: PastPeriodsPayload; confirm: () => void };
@@ -26,54 +28,60 @@ export function usePastConfirm() {
 
 type Props = { warning: PastWarning; loading?: boolean; onCancel: () => void };
 
+const t = ergEnterpriseTokens;
+const head = { bgcolor: t.color.surfaceMuted, color: t.color.textSecondary, fontSize: "0.75rem", py: 1 } as const;
+const cell = { fontSize: "0.8125rem", fontVariantNumeric: "tabular-nums", py: 1 } as const;
+
 /** AdminDaysOffWarn: a day off with «Huỷ tiết» would cancel periods already taught. Nothing is saved until the user confirms. */
 export function DaysOffPastWarningDialog({ loading, onCancel, warning }: Props) {
   const { payload } = warning;
   return (
-    <ErgDialog
+    <DaysOffDialog
       actions={
         <>
           <ErgButton disabled={loading} onClick={onCancel} variant="text">Huỷ</ErgButton>
           <ErgButton color="error" loading={loading} onClick={() => { warning.confirm(); onCancel(); }} variant="contained">{`Vẫn huỷ ${payload.taughtPeriods} tiết`}</ErgButton>
         </>
       }
+      description={pastWarningIntro(payload)}
+      icon={<ReportProblemOutlinedIcon />}
       onClose={onCancel}
-      open
       role="alertdialog"
-      sx={{ "& .MuiDialog-paper": { maxWidth: 520 } }}
       title={`Huỷ ${payload.taughtPeriods} tiết đã dạy?`}
+      width={520}
     >
-      <Box sx={{ display: "grid", gap: 2 }}>
-        <Typography variant="body2">{pastWarningIntro(payload)}</Typography>
-        <Table size="small">
-          <TableHead>
-            <TableRow>
-              <TableCell>Trường</TableCell>
-              <TableCell align="right">Tiết đã dạy</TableCell>
-              <TableCell align="right">Đã báo giảng</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {payload.schools.map((school) => (
-              <TableRow key={school.schoolId ?? school.schoolName}>
-                <TableCell>{school.schoolName}</TableCell>
-                <TableCell align="right">{school.taughtPeriods}</TableCell>
-                <TableCell align="right">{school.reportedPeriods}</TableCell>
+      <>
+        <Box aria-label="Tiết bị ảnh hưởng" component="section" sx={{ border: `1px solid ${t.color.border}`, borderRadius: `${t.radius.card}px`, overflow: "hidden" }}>
+          <Table size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell sx={{ ...head, px: 2 }}>Trường</TableCell>
+                <TableCell sx={{ ...head, width: 90 }}>Tiết đã dạy</TableCell>
+                <TableCell sx={{ ...head, width: 110 }}>Đã báo giảng</TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-        <Box>
-          <Typography component="p" variant="subtitle2">Sau khi xác nhận</Typography>
-          <Box component="ul" sx={{ color: "text.secondary", m: 0, mt: 0.5, pl: 2.5, typography: "body2" }}>
+            </TableHead>
+            <TableBody>
+              {payload.schools.map((school) => (
+                <TableRow key={school.schoolId ?? school.schoolName}>
+                  <TableCell sx={{ ...cell, px: 2 }}>{school.schoolName}</TableCell>
+                  <TableCell sx={cell}>{school.taughtPeriods}</TableCell>
+                  <TableCell sx={cell}>{school.reportedPeriods}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Box>
+        <Box sx={{ display: "grid", gap: 0.75 }}>
+          <Typography component="strong" sx={{ fontSize: "0.8125rem" }} variant="subtitle2">Sau khi xác nhận</Typography>
+          <Box component="ul" sx={{ color: t.color.textSecondary, display: "grid", fontSize: "0.8125rem", gap: 0.5, m: 0, pl: 2.25 }}>
             <li>{`${payload.taughtPeriods} tiết chuyển sang «Nghỉ lễ», không tính vào công tiết dạy.`}</li>
             <li>{`${payload.reportedPeriods} báo giảng đã nộp không còn được tính công.`}</li>
             <li>Giáo viên thỉnh giảng mất công của các tiết này.</li>
             <li>Giáo viên được báo về thay đổi.</li>
           </Box>
+          <Typography sx={{ color: t.color.textMuted }} variant="caption">Muốn giữ công các tiết đã dạy, chọn «Vẫn dạy» cho ngày này.</Typography>
         </Box>
-        <Typography color="text.secondary" variant="caption">Muốn giữ công các tiết đã dạy, chọn «Vẫn dạy» cho ngày này.</Typography>
-      </Box>
-    </ErgDialog>
+      </>
+    </DaysOffDialog>
   );
 }

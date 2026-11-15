@@ -104,6 +104,7 @@ const ADMIN_EXTRA_PERMISSIONS: Record<string, Pick<RoutePermissionEntry, "resour
   // Ngay nghi & thu 7 (LD F12): lenh chay tren REST cham cong, nen cung quyen voi cham cong.
   "calendar/days-off": { resource: "timekeeping", action: "manage", permission: "timekeeping.manage" },
   "calendar/settings/travel": { resource: "schedule", action: "manage", permission: "lms.schedule.manage" },
+  "calendar/settings/periods": { resource: "schedule", action: "manage", permission: "lms.schedule.manage" },
   "employees/timekeeping": { resource: "timekeeping", action: "manage", permission: "timekeeping.manage" },
   "employees/timesheet": { resource: "timekeeping", action: "manage", permission: "timekeeping.manage" },
   "employees/timekeeping-settings": { resource: "timekeeping", action: "manage", permission: "timekeeping.manage" },

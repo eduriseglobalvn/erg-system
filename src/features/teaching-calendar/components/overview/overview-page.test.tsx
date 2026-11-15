@@ -48,26 +48,45 @@ beforeEach(() => {
   });
 });
 
-it("filters the school tab with quick chips through the URL", async () => {
-  renderPage("?week=2026-11-09");
-  fireEvent.click(await screen.findByRole("button", { name: "Có xung đột · 3" }));
-  expect(mocks.navigate.mock.calls[0][0].href).toContain("quick=CONFLICT");
+const SLOTS = [[1, "MORNING", "07:15", "08:00"], [2, "MORNING", "08:00", "08:45"], [6, "AFTERNOON", "13:30", "14:15"]].map(([periodNo, session, startTime, endTime]) => ({ endTime, periodNo, session, startTime }));
+const lesson = (patch: object) => ({ assistantName: null, batchLabel: "Đợt HK1·2", className: "9A4", conflictKinds: [], eventId: null, note: null, roomName: "PM 03", schoolId: "s1", status: "PUBLISHED", teacherName: "T.Tuấn", weekday: 1, ...patch });
+
+it("draws schools as rows and Thứ 2…Thứ 7 as columns with merged time ranges and teacher names", async () => {
+  mocks.grid.mockResolvedValue({ cells: [lesson({ periodNo: 1 }), lesson({ periodNo: 2 }), lesson({ conflictKinds: ["TEACHER_TIME"], periodNo: 6, teacherName: "Q.Vương", weekday: 3 })], conflicts: [], holidays: [], schools: SCHOOLS.items.slice(0, 2), template: { id: "t", name: "THCS", periodsPerDay: 10, slots: SLOTS }, weekStart: "2026-11-09" });
+  renderPage("?week=2026-11-09&schools=s1,s2");
+  expect(await screen.findByRole("button", { name: "Trường: 2 / 4 ▾" })).toBeInTheDocument();
+  expect(await screen.findByText("07:15–08:45")).toBeInTheDocument();
+  expect(screen.getByText("13:30–14:15")).toBeInTheDocument();
+  expect(screen.getByText("Thứ 7")).toBeInTheDocument();
+  expect(screen.getByText("Bấm vào khung giờ để xem chi tiết")).toBeInTheDocument();
+  fireEvent.click(screen.getByText("T.Tuấn"));
+  const dialog = await screen.findByRole("dialog", { name: "Chi tiết khung giờ" });
+  expect(within(dialog).getByText("Không có")).toBeInTheDocument();
+  expect(within(dialog).getByText("Đã xuất bản · Đợt HK1·2")).toBeInTheDocument();
+  expect(within(dialog).getByRole("button", { name: "Đổi giáo viên" })).toBeInTheDocument();
 });
 
-it("caps side-by-side schools at three and shows the counter", async () => {
-  renderPage("?week=2026-11-09&schools=s1,s2,s3");
-  expect(await screen.findByText(/Đang xem cạnh nhau/)).toHaveTextContent("3/3");
-  fireEvent.click(await screen.findByRole("checkbox", { name: "THCS Minh Đức" }));
+it("caps side-by-side schools at four", async () => {
+  mocks.schools.mockResolvedValue({ ...SCHOOLS, items: [...SCHOOLS.items, school("s5", "THCS Bạch Đằng")], total: 5 });
+  renderPage("?week=2026-11-09&schools=s1,s2,s3,s4");
+  fireEvent.click(await screen.findByRole("button", { name: "Trường: 4 / 5 ▾" }));
+  fireEvent.click(await screen.findByRole("checkbox", { name: "THCS Bạch Đằng" }));
   expect(mocks.navigate).not.toHaveBeenCalled();
+});
+
+it("filters the teacher tab with quick chips through the URL", async () => {
+  renderPage("?tab=teachers&week=2026-11-09");
+  fireEvent.click(await screen.findByRole("button", { name: "Có xung đột · 1" }));
+  expect(mocks.navigate.mock.calls[0][0].href).toContain("quick=CONFLICT");
 });
 
 it("shows assistant slots, the folded tiet 5 mark and the extended load cell on the teacher tab", async () => {
   renderPage("?tab=teachers&week=2026-11-09");
-  const row = (await screen.findByText("Q.Vương")).closest("tr") as HTMLElement;
+  const row = (await screen.findByText("Q.Vương")).closest("[role=row]") as HTMLElement;
   expect(within(row).getByText("TG 9A3")).toBeInTheDocument();
   expect(within(row).getByText("9A1 +1")).toBeInTheDocument();
-  expect(within(row).getByText(/7 \/ 24 tiết/)).toHaveTextContent("gồm 1 trợ giảng");
-  const only = screen.getByText("Bảo Ngọc").closest("tr") as HTMLElement;
+  expect(within(row).getByText(/^\s*\/ 24 tiết/)).toHaveTextContent("7 / 24 tiết gồm 1 trợ giảng");
+  const only = screen.getByText("Bảo Ngọc").closest("[role=row]") as HTMLElement;
   expect(within(only).getByText("Chỉ trợ giảng · 1 tiết")).toBeInTheDocument();
   expect(screen.getByRole("button", { name: "Quá 18 tiết · 1" })).toBeInTheDocument();
 });

@@ -1,6 +1,7 @@
 import { scheduleTokens } from "./schedule-cell-sx";
 
-const TONES = Object.values(scheduleTokens.tones);
+// Do la mau «trung lich», khong dung cho giao vien de khong lan voi o xung dot.
+const TONES = Object.entries(scheduleTokens.tones).filter(([key]) => key !== "red").map(([, tone]) => tone);
 
 /** Mau on dinh theo giao vien (hash id), dung chung cho luoi tuan, danh sach loc va popover. */
 export function teacherTone(userId?: string | null) {

@@ -1,111 +1,112 @@
-import { Fragment, useMemo } from "react";
+import { useMemo, useState, type MouseEvent } from "react";
 import Box from "@mui/material/Box";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import Typography from "@mui/material/Typography";
 
-import { ErgTable } from "@/components/erg-mui/erg-table";
+import { formatDateVi } from "@/domain/formatters/format-date";
 import type { TeachingOverviewGrid } from "@/features/teaching-calendar/api/teaching-calendar-overview-api";
-import { buildOverviewRows, overviewCellKind, type OverviewCell } from "@/features/teaching-calendar/domain/overview-model";
-import { addDaysToDate, dayLabel, weekdayName } from "@/features/teaching-calendar/domain/schedule-copy";
+import type { TeachingCalendarEvent } from "@/features/teaching-calendar/api/teaching-calendar-workspace-types";
+import { buildSchoolDayChips, chipWho, type OverviewChip, type OverviewConflict } from "@/features/teaching-calendar/domain/overview-model";
+import { addDaysToDate, weekdayName } from "@/features/teaching-calendar/domain/schedule-copy";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
-import { scheduleCellSx, scheduleTokens } from "../shared/schedule-cell-sx";
+import { teacherTone } from "../shared/teacher-tone";
+import { OverviewCellPopover } from "./overview-cell-popover";
+import { ink, SCHOOL_COLUMNS, stripes, tone, type, weight } from "./overview-styles";
 
-const FIXED = [56, 64, 48, 100] as const;
-const LEFT = FIXED.map((_, index) => FIXED.slice(0, index).reduce((sum, width) => sum + width, 0));
-const LINE = 28;
-const ROW_FIELDS = ["className", "roomName", "teacherName", "assistantName"] as const;
-const FIELD_LABELS = ["Lớp", "Phòng", "Giáo viên", "Trợ giảng"] as const;
+type School = TeachingOverviewGrid["schools"][number];
+type Props = { eventsById: ReadonlyMap<string, TeachingCalendarEvent>; grid: TeachingOverviewGrid; onOpen: (chip: OverviewChip, schoolId: string, intent: "edit" | "teacher") => void };
 
-type Props = { grid: TeachingOverviewGrid; onOpenCell: (cell: OverviewCell | null, schoolId: string, weekday: number, periodNo: number) => void };
+const chipBg = {
+  clash: { backgroundColor: tone.clash.bg },
+  draft: { backgroundColor: tone.surface, backgroundImage: stripes(6, "transparent", tone.draft.stripe) },
+  published: { backgroundColor: ink.surfaceSubtle },
+  travel: { backgroundColor: tone.clash.bg },
+} as const;
 
-const stickyLeft = (index: number, header = false) => ({
-  bgcolor: "background.paper", left: LEFT[index], minWidth: FIXED[index], position: "sticky", width: FIXED[index], zIndex: header ? 4 : 2,
-}) as const;
+const badgeSx = { ...type(11, 600), alignItems: "center", borderRadius: `${ergEnterpriseTokens.radius.chip}px`, display: "inline-flex", height: 18, px: "7px" } as const;
 
-function Lines({ cells, field, off, onOpen }: { cells: readonly OverviewCell[]; field: (typeof ROW_FIELDS)[number]; off: boolean; onOpen: (cell: OverviewCell) => void }) {
-  return (
-    <>
-      {cells.map((cell) => {
-        const value = cell[field];
-        const assistant = field === "assistantName";
-        return (
-          <Box
-            key={cell.eventId ?? `${cell.className}-${cell.roomName}`} onDoubleClick={() => onOpen(cell)}
-            sx={[{ alignItems: "center", display: "flex", height: LINE, px: 0.75, typography: "body2" }, scheduleCellSx(off ? "off" : overviewCellKind(cell)),
-              assistant && value ? { color: scheduleTokens.published.text, fontWeight: 600 } : {}] as never}
-          >
-            {assistant && value ? `TG ${value}` : value ?? ""}
-          </Box>
-        );
-      })}
-    </>
-  );
+/** Huy hieu duoi ten truong (board 6.6): «⚠ n» / «Nháp» / «Chưa có lịch»; truong binh thuong khong co huy hieu. */
+export function schoolBadge(school: Pick<School, "conflictCount" | "hasDraft" | "periodCount">) {
+  if (school.conflictCount > 0) return { bg: tone.clash.bg, color: tone.clash.text, label: `⚠ ${school.conflictCount}` };
+  if (school.hasDraft) return { bg: tone.published.bg, color: tone.published.text, label: "Nháp" };
+  if (school.periodCount === 0) return { bg: tone.warn.bg, color: tone.warn.text, label: "Chưa có lịch" };
+  return null;
 }
 
-/** Luoi bang tong theo truong (6.6): 4 cot dinh trai (Thu/Buoi/Tiet/Gio), moi truong mot nhom Lop/Phong/GV/Tro giang, cot cuoi Ghi chu. */
-export function OverviewSchoolGrid({ grid, onOpenCell }: Props) {
-  const rows = useMemo(() => buildOverviewRows(grid), [grid]);
-  const perDay = rows.filter((row) => row.weekday === 1).length;
+const swatch = { borderRadius: "3px", display: "inline-block", height: 10, verticalAlign: "middle", width: 12 } as const;
+const LEGEND = [
+  { label: "Đã xuất bản", sx: { backgroundColor: ink.surfaceSubtle, boxShadow: `inset 3px 0 0 ${ink.primary}` } },
+  { label: "Nháp", sx: { backgroundImage: stripes(3, tone.surface, tone.draft.stripe), boxShadow: `inset 0 0 0 1px ${ink.primary}` } },
+  { label: "Trùng / không kịp di chuyển", sx: { backgroundColor: tone.clash.bg, boxShadow: `inset 0 0 0 1.5px ${tone.clash.edge}` } },
+] as const;
+
+/** Bang tong theo truong (board AdminOverview): hang = truong, cot = Thu 2…Thu 7; moi khung gio la mot the co vach mau giao vien. */
+export function OverviewSchoolGrid({ eventsById, grid, onOpen }: Props) {
+  const chips = useMemo(() => buildSchoolDayChips(grid), [grid]);
+  const [picked, setPicked] = useState<{ anchor: HTMLElement; chip: OverviewChip; school: School } | null>(null);
+  const holidayByDay = useMemo(() => new Map(grid.holidays.map((holiday) => [(new Date(`${holiday.date}T00:00:00Z`).getUTCDay() + 6) % 7 + 1, holiday.name])), [grid.holidays]);
+  const conflict = picked ? (grid.conflicts as readonly OverviewConflict[]).find((item) => item.weekday === picked.chip.weekday && item.periodNo >= picked.chip.firstPeriod && item.periodNo <= picked.chip.lastPeriod
+    && (item.mine.eventId === picked.chip.cell.eventId || item.other?.eventId === picked.chip.cell.eventId)) : undefined;
+  const subject = picked?.chip.cell.eventId ? eventsById.get(picked.chip.cell.eventId)?.subjectName : undefined;
   return (
-    <TableContainer sx={{ border: 1, borderColor: "divider", borderRadius: `${ergEnterpriseTokens.radius.card}px`, maxHeight: "75vh" }}>
-      <ErgTable aria-label="Bảng tổng thời khoá biểu" size="small" sx={{ borderCollapse: "separate", tableLayout: "fixed", width: "max-content" }}>
-        <TableHead>
-          <TableRow>
-            {["Thứ", "Buổi", "Tiết", "Giờ"].map((label, index) => <TableCell key={label} rowSpan={2} sx={stickyLeft(index, true)}>{label}</TableCell>)}
-            {grid.schools.map((school) => (
-              <TableCell colSpan={4} key={school.schoolId} sx={{ borderLeft: 1, borderColor: "divider", textAlign: "center" }}>
-                {school.schoolName} · {school.periodCount} tiết
-              </TableCell>
-            ))}
-            <TableCell rowSpan={2} sx={{ borderLeft: 1, borderColor: "divider", width: 320 }}>Ghi chú</TableCell>
-          </TableRow>
-          <TableRow>
-            {grid.schools.flatMap((school) => FIELD_LABELS.map((label, index) => (
-              <TableCell key={`${school.schoolId}-${label}`} sx={{ borderLeft: index === 0 ? 1 : 0, borderColor: "divider", top: 37, width: 96 }}>{label}</TableCell>
-            )))}
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {rows.map((row, index) => {
-            const firstOfDay = index % perDay === 0;
-            const firstOfSession = firstOfDay || rows[index - 1].slot.session !== row.slot.session;
-            const sessionSpan = rows.filter((other) => other.weekday === row.weekday && other.slot.session === row.slot.session).length;
-            const lines = Math.max(1, ...grid.schools.map((school) => row.cells.get(school.schoolId)?.length ?? 0));
-            const off = Boolean(row.holiday);
-            return (
-              <Fragment key={`${row.weekday}-${row.slot.periodNo}`}>
-                <TableRow sx={{ "& td": { borderTop: firstOfDay ? 2 : undefined, verticalAlign: "top" } }}>
-                  {firstOfDay ? (
-                    <TableCell rowSpan={perDay} sx={stickyLeft(0)}>
-                      <Typography sx={{ typography: "subtitle2" }}>{weekdayName(row.weekday)}</Typography>
-                      <Typography sx={{ color: "text.secondary", typography: "caption" }}>{dayLabel(addDaysToDate(grid.weekStart, row.weekday - 1)).split(", ")[1]}</Typography>
-                    </TableCell>
-                  ) : null}
-                  {firstOfSession ? <TableCell rowSpan={sessionSpan} sx={stickyLeft(1)}>{row.slot.session === "MORNING" ? "Sáng" : "Chiều"}</TableCell> : null}
-                  <TableCell sx={stickyLeft(2)}>{row.slot.periodNo}</TableCell>
-                  <TableCell sx={stickyLeft(3)}>{row.slot.startTime}–{row.slot.endTime}</TableCell>
-                  {grid.schools.flatMap((school) => ROW_FIELDS.map((field, fieldIndex) => {
-                    const cells = row.cells.get(school.schoolId) ?? [];
-                    return (
-                      <TableCell key={`${school.schoolId}-${field}`} onDoubleClick={() => !cells.length && onOpenCell(null, school.schoolId, row.weekday, row.slot.periodNo)} sx={{ borderLeft: fieldIndex === 0 ? 1 : 0, borderColor: "divider", minHeight: lines * LINE, p: 0, ...(off && !cells.length ? scheduleCellSx("off") : {}) } as never}>
-                        <Lines cells={cells} field={field} off={off} onOpen={(cell) => onOpenCell(cell, school.schoolId, row.weekday, row.slot.periodNo)} />
-                        {!cells.length ? <Box sx={{ height: LINE }} /> : null}
-                      </TableCell>
-                    );
-                  }))}
-                  <TableCell sx={{ borderLeft: 1, borderColor: "divider", color: row.note.startsWith("⚠") ? scheduleTokens.clash.text : "text.secondary", typography: "caption" }}>
-                    {[row.holiday, row.note].filter(Boolean).join(" · ")}
-                  </TableCell>
-                </TableRow>
-              </Fragment>
-            );
-          })}
-        </TableBody>
-      </ErgTable>
-    </TableContainer>
+    <Box aria-label={`Bảng tổng tuần ${formatDateVi(grid.weekStart).slice(0, 5)}`} component="section" sx={{ ...type(13), bgcolor: ink.surface, border: `1px solid ${ink.border}`, borderRadius: `${ergEnterpriseTokens.radius.card}px`, display: "flex", flexDirection: "column", minWidth: 0, overflowX: "auto", overflowY: "hidden", position: "relative" }}>
+      <Box sx={{ display: "flex", flexDirection: "column", minWidth: 960 }}>
+        <Box sx={{ bgcolor: ink.surfaceMuted, borderBottom: `1px solid ${ink.border}`, color: ink.textSecondary, display: "grid", ...weight(600), gridTemplateColumns: SCHOOL_COLUMNS }}>
+          <Box component="span" sx={{ ...type(12), px: "14px", py: "10px" }}>Trường</Box>
+          {[1, 2, 3, 4, 5, 6].map((weekday) => (
+            <Box component="span" key={weekday} sx={{ ...type(12), borderLeft: `1px solid ${ink.divider}`, color: weekday === 6 ? ink.primary : undefined, p: "10px" }}>
+              {weekdayName(weekday)} <Box component="span" sx={{ color: weekday === 6 ? undefined : ink.textMuted, ...weight(400) }}>{formatDateVi(addDaysToDate(grid.weekStart, weekday - 1)).slice(0, 5)}</Box>
+            </Box>
+          ))}
+        </Box>
+        {grid.schools.map((school, rowIndex) => {
+          const badge = schoolBadge(school);
+          return (
+            <Box key={school.schoolId} sx={{ borderTop: rowIndex ? `1px solid ${ink.divider}` : 0, display: "grid", gridTemplateColumns: SCHOOL_COLUMNS, minHeight: 120 }}>
+              <Box sx={{ display: "flex", flexDirection: "column", gap: "3px", minWidth: 0, px: "14px", py: 1 }}>
+                <Box component="span" sx={{ ...weight(600), overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{school.schoolName}</Box>
+                <Box component="span" sx={{ ...type(11), alignItems: "center", color: ink.textMuted, display: "flex", gap: "6px" }}>
+                  {school.periodCount} tiết
+                  {badge ? <Box component="span" sx={{ ...badgeSx, bgcolor: badge.bg, color: badge.color }}>{badge.label}</Box> : null}
+                </Box>
+              </Box>
+              {[1, 2, 3, 4, 5, 6].map((weekday) => {
+                const list = chips.get(`${school.schoolId}:${weekday}`) ?? [];
+                const holiday = holidayByDay.get(weekday);
+                return (
+                  <Box key={weekday} sx={{ bgcolor: weekday === 6 ? ink.surfaceMuted : undefined, borderLeft: `1px solid ${ink.divider}`, display: "flex", flexDirection: "column", gap: "4px", minWidth: 0, p: "6px" }} title={holiday}>
+                    {holiday && !list.length ? <Box component="span" sx={{ ...type(11), color: ink.textMuted }}>{holiday}</Box> : null}
+                    {list.map((chip) => {
+                      const cell = chip.cell;
+                      const edge = chip.kind === "clash" ? tone.clash.edge : cell.teacherName ? teacherTone(cell.teacherName).border : ink.textSoft;
+                      const bad = chip.kind === "clash" || chip.kind === "travel";
+                      return (
+                        <Box
+                          component="button" key={`${cell.eventId ?? cell.className}-${chip.firstPeriod}`} onClick={(event: MouseEvent<HTMLElement>) => setPicked({ anchor: event.currentTarget, chip, school })}
+                          sx={{ ...chipBg[chip.kind], border: 0, borderRadius: "8px", boxShadow: [`inset 3px 0 0 ${edge}`, chip.kind === "travel" ? `inset 0 0 0 1px ${tone.clash.edge}` : "", picked?.chip === chip ? `0 0 0 2px ${ink.primary}` : ""].filter(Boolean).join(", "), color: "inherit", cursor: "pointer", display: "flex", flexDirection: "column", font: "inherit", gap: "1px", px: 1, py: "4px", textAlign: "left" }}
+                        >
+                          <Box component="span" sx={{ ...type(11), color: ink.textMuted, fontVariantNumeric: "tabular-nums" }}>{chip.startTime}–{chip.endTime}</Box>
+                          <Box component="span" sx={{ ...type(12, 600), color: bad ? tone.clash.text : ink.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{chipWho(cell)}</Box>
+                        </Box>
+                      );
+                    })}
+                  </Box>
+                );
+              })}
+            </Box>
+          );
+        })}
+        <Box sx={{ ...type(12), borderTop: `1px solid ${ink.divider}`, color: ink.textMuted, display: "flex", gap: 2, px: "14px", py: 1 }}>
+          <span>Bấm vào khung giờ để xem chi tiết</span>
+          <Box component="span" sx={{ display: "inline-flex", gap: "14px", ml: "auto" }}>
+            {LEGEND.map((item) => <span key={item.label}><Box component="span" sx={{ ...swatch, ...item.sx }} /> {item.label}</span>)}
+          </Box>
+        </Box>
+      </Box>
+      <OverviewCellPopover
+        anchorEl={picked?.anchor ?? null} chip={picked?.chip ?? null} conflict={conflict} onClose={() => setPicked(null)}
+        onChangeTeacher={() => { if (picked) { onOpen(picked.chip, picked.school.schoolId, "teacher"); setPicked(null); } }}
+        onEdit={() => { if (picked) { onOpen(picked.chip, picked.school.schoolId, "edit"); setPicked(null); } }}
+        schoolName={picked?.school.schoolName ?? ""} subjectName={subject} weekStart={grid.weekStart}
+      />
+    </Box>
   );
 }

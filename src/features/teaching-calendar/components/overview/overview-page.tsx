@@ -1,25 +1,23 @@
 import { useCallback } from "react";
+import Box from "@mui/material/Box";
+import ButtonBase from "@mui/material/ButtonBase";
 import GlobalStyles from "@mui/material/GlobalStyles";
 import Link from "@mui/material/Link";
-import Stack from "@mui/material/Stack";
-import Tab from "@mui/material/Tab";
-import Tabs from "@mui/material/Tabs";
 import Typography from "@mui/material/Typography";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 
-import { ErgButton, ErgIconButton } from "@/components/erg-mui/erg-actions";
+import { ErgButton } from "@/components/erg-mui/erg-actions";
 import { ErgEmptyState, ErgErrorState } from "@/components/erg-mui/erg-feedback";
-import { ergChipTabsSx } from "@/components/erg-mui/erg-tabs";
 import { exportSheets, overviewFileName, overviewSheets } from "@/features/teaching-calendar/domain/schedule-excel";
 import { toggleSchool } from "@/features/teaching-calendar/domain/overview-model";
 import { addDaysToDate, weekRangeLabel } from "@/features/teaching-calendar/domain/schedule-copy";
 import { adminPath } from "@/platform/workspaces/workspace-paths";
 import { ContentPendingSkeleton } from "@/routes/route-feedback";
-import { OverviewFilterBar, type QuickChip } from "./overview-filter-bar";
-import { OverviewSchoolAside } from "./overview-school-aside";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
+import { OverviewFilterBar, teacherLegend, type QuickChip } from "./overview-filter-bar";
 import { OverviewSchoolGrid } from "./overview-school-grid";
+import { OverviewSchoolPicker } from "./overview-school-picker";
 import { OverviewTeacherPanel } from "./overview-teacher-panel";
+import { ink, tone, type } from "./overview-styles";
 import { useOverviewData } from "./use-overview-data";
 import { useOverviewParams } from "./use-overview-params";
 
@@ -32,84 +30,80 @@ const PRINT_CSS = {
   },
 };
 
-/** Bảng tổng thời khoá biểu (6.6, 6.7): một trang hai tab, một thanh lọc dùng chung, URL giữ tab/week/schools/q/quick. */
+const stepSx = { ...type(18), borderRadius: `${ergEnterpriseTokens.radius.chip}px`, color: ink.textSecondary, height: 36, width: 36 } as const;
+const tabSx = (on: boolean) => ({ ...type(13, on ? 600 : 400), alignItems: "center", bgcolor: on ? ink.primarySofter : undefined, borderRadius: "7px", color: on ? tone.published.text : ink.textSecondary, display: "inline-flex", height: 30, px: "12px" }) as const;
+
+/** Bảng tổng thời khoá biểu (board AdminOverview / AdminOverviewTeacher): một trang hai tab, URL giữ tab/week/schools/q/quick. */
 export function OverviewPage() {
   const params = useOverviewParams();
   const data = useOverviewData(params);
   const { quick, tab, update, week } = params;
   const onSearch = useCallback((q: string) => update({ q }), [update]);
   const onQuick = useCallback((key: string) => update({ quick: key }), [update]);
-  const quickCounts = data.schools.quickCounts;
   const counts = data.teachers.data?.quickCounts;
-  const chips: QuickChip[] = tab === "schools"
-    ? [
-      { count: quickCounts?.conflicts ?? 0, key: "CONFLICT", label: "Có xung đột", tone: "clash" },
-      { count: quickCounts?.travel ?? 0, key: "TRAVEL", label: "Không kịp di chuyển", tone: "clash" },
-      { count: quickCounts?.drafts ?? 0, key: "DRAFT", label: "Có nháp", tone: "neutral" },
-      { count: quickCounts?.empty ?? 0, key: "EMPTY", label: "Chưa có lịch", tone: "neutral" },
-    ]
-    : [
-      { count: counts?.conflicts ?? 0, key: "CONFLICT", label: "Có xung đột", tone: "clash" },
-      { count: counts?.travel ?? 0, key: "TRAVEL", label: "Không kịp di chuyển", tone: "clash" },
-      { count: counts?.multiSchool ?? 0, key: "MULTI_SCHOOL", label: "Chạy 2 trường/buổi", tone: "warn" },
-      { count: counts?.overload ?? 0, key: "OVERLOAD", label: `Quá ${data.loadSettings?.loadWarn ?? 18} tiết`, tone: "warn" },
-      { count: counts?.empty ?? 0, key: "EMPTY", label: "Chưa có tiết", tone: "neutral" },
-    ];
+  const chips: QuickChip[] = [
+    { count: counts?.conflicts ?? 0, key: "CONFLICT", label: "Có xung đột", tone: "clash" },
+    { count: counts?.travel ?? 0, key: "TRAVEL", label: "Không kịp di chuyển", tone: "clash" },
+    { count: counts?.multiSchool ?? 0, key: "MULTI_SCHOOL", label: "Chạy 2 trường/buổi", tone: "warn" },
+    { count: counts?.overload ?? 0, key: "OVERLOAD", label: `Quá ${data.loadSettings?.loadWarn ?? 18} tiết`, tone: "neutral" },
+    { count: counts?.empty ?? 0, key: "EMPTY", label: "Chưa có tiết", tone: "neutral" },
+  ];
+  const requiredMinutes = data.teachers.data?.items.flatMap((row) => row.days.map((day) => day.travel?.requiredMinutes ?? 0)).find((minutes) => minutes > 0) ?? 50;
   const step = (direction: 1 | -1) => update({ week: addDaysToDate(week, direction * 7) });
   const failed = tab === "schools" ? data.schools.query.error ?? data.grid.error : data.teachers.error;
-  const retry = () => { void data.schools.query.refetch(); void data.grid.refetch(); void data.teachers.refetch(); };
-  const openCell = (eventId: string | null | undefined, schoolId: string, weekday: number, periodNo: number) =>
-    data.openSchedule(eventId ? data.eventsById.get(eventId) : undefined, { date: addDaysToDate(week, weekday - 1), periodNo, schoolId });
+  const retry = () => { if (tab === "teachers") void data.teachers.refetch(); else { void data.schools.query.refetch(); if (data.selected.length) void data.grid.refetch(); } };
+  const gridSchools = data.grid.data?.schools ?? [];
+  const selectedRows = data.selected.flatMap((id) => { const row = gridSchools.find((school) => school.schoolId === id) ?? data.schools.items.find((school) => school.schoolId === id); return row ? [row] : []; });
+  const onToggle = (id: string) => { const next = toggleSchool(data.selected, id); if (next.join() !== data.selected.join()) update({ schools: next }); };
 
   return (
-    <Stack spacing={2} sx={{ px: { xs: 2, md: 3 }, py: 2 }}>
+    <Box sx={{ display: "flex", flexDirection: "column", gap: "12px", mt: "-4px" }}>
       <GlobalStyles styles={PRINT_CSS} />
-      <Link className="erg-print-hide" href={adminPath("/calendar")} sx={{ typography: "body2" }} underline="hover">← Lịch giảng dạy</Link>
-      <Stack direction="row" sx={{ alignItems: "center", flexWrap: "wrap", gap: 1.5, justifyContent: "space-between" }}>
-        <Typography component="h1" variant="h1">Bảng tổng thời khoá biểu</Typography>
-        <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-          <ErgIconButton className="erg-print-hide" label="Tuần trước" onClick={() => step(-1)}><ChevronLeftIcon /></ErgIconButton>
-          <Typography sx={{ typography: "subtitle2" }}>{weekRangeLabel(week, "overview")}</Typography>
-          <ErgIconButton className="erg-print-hide" label="Tuần sau" onClick={() => step(1)}><ChevronRightIcon /></ErgIconButton>
-        </Stack>
-      </Stack>
-      <Stack className="erg-print-hide" direction="row" sx={{ alignItems: "center", justifyContent: "space-between" }}>
-        <Tabs onChange={(_event, value: "schools" | "teachers") => update({ tab: value })} sx={ergChipTabsSx} value={tab}>
-          <Tab label="Theo trường" value="schools" />
-          <Tab label="Theo giáo viên" value="teachers" />
-        </Tabs>
-        <Stack direction="row" spacing={1}>
-          <ErgButton onClick={() => window.print()} variant="outlined">In</ErgButton>
+      <Box component="header" sx={{ alignItems: "flex-end", display: "flex", flexWrap: "wrap", gap: 2, justifyContent: "space-between" }}>
+        <Box>
+          <Link className="erg-print-hide" href={adminPath("/calendar")} sx={{ ...type(13) }} underline="none">← Lịch giảng dạy</Link>
+          <Typography component="h1" sx={{ m: "4px 0 0" }} variant="h1">Bảng tổng thời khoá biểu</Typography>
+        </Box>
+        <Box className="erg-print-hide" sx={{ alignItems: "center", display: "flex", gap: 1 }}>
+          <ButtonBase aria-label="Tuần trước" onClick={() => step(-1)} sx={stepSx}>‹</ButtonBase>
+          <Typography component="span" sx={type(16, 500)}>{weekRangeLabel(week, "overview")}</Typography>
+          <ButtonBase aria-label="Tuần sau" onClick={() => step(1)} sx={stepSx}>›</ButtonBase>
+          <Box aria-label={tab === "schools" ? "Nhóm hàng" : "Nhóm cột"} role="tablist" sx={{ bgcolor: ink.surface, border: `1px solid ${ink.border}`, borderRadius: `${ergEnterpriseTokens.radius.control}px`, display: "flex", ml: 1, p: "3px" }}>
+            <ButtonBase aria-selected={tab === "schools"} onClick={() => update({ tab: "schools" })} role="tab" sx={tabSx(tab === "schools")}>Theo trường</ButtonBase>
+            <ButtonBase aria-selected={tab === "teachers"} onClick={() => update({ tab: "teachers" })} role="tab" sx={tabSx(tab === "teachers")}>Theo giáo viên</ButtonBase>
+          </Box>
+          <ErgButton onClick={() => window.print()} sx={{ ...type(14), height: 36, minHeight: 36, minWidth: 0, px: "14px" }} variant="outlined">In</ErgButton>
           {tab === "schools" ? (
             <ErgButton
               disabled={!data.grid.data?.schools.length} onClick={() => { const grid = data.grid.data; if (grid) void exportSheets(() => overviewSheets(grid), overviewFileName(grid.weekStart)); }}
-              variant="contained"
+              sx={{ height: 36, minHeight: 36, minWidth: 0, px: 2 }} variant="contained"
             >
               Xuất Excel
             </ErgButton>
           ) : null}
-        </Stack>
-      </Stack>
-      <OverviewFilterBar
-        chips={chips} legend={tab === "schools" ? ["published", "draft", "clash", "travel", "off"] : ["published", "draft", "clash", "travel", "off", "assistant"]}
-        legendLabels={tab === "schools" ? { draft: "Nháp (chưa xuất bản)" } : undefined}
-        onQuick={onQuick} onSearch={onSearch} placeholder={tab === "schools" ? "Tìm trường, lớp, giáo viên…" : "Tìm giáo viên…"} quick={quick} search={params.q}
-      />
-      {failed ? <ErgErrorState action={<ErgButton onClick={retry} variant="outlined">Thử lại</ErgButton>} description="Kiểm tra kết nối rồi thử lại." title="Không tải được lịch." /> : tab === "teachers" ? (
-        <OverviewTeacherPanel data={data} params={params} />
+        </Box>
+      </Box>
+      {tab === "teachers" ? (
+        <OverviewFilterBar
+          chips={chips} legend={teacherLegend(requiredMinutes)} onQuick={onQuick} onSearch={onSearch}
+          placeholder="Tìm giáo viên…" quick={quick} search={params.q}
+        />
       ) : (
-        <Stack direction={{ md: "row", xs: "column" }} spacing={2} sx={{ alignItems: "flex-start" }}>
-          <OverviewSchoolAside
-            hasMore={data.schools.hasMore} loadMore={data.schools.fetchNext} onToggle={(id) => { const next = toggleSchool(data.selected, id); if (next.join() !== data.selected.join()) update({ schools: next }); }}
-            schools={data.schools.items} selected={data.selected} total={data.schools.total}
-          />
-          <Stack sx={{ flex: 1, minWidth: 0, width: "100%" }}>
-            {data.schools.query.isPending || (data.selected.length > 0 && data.grid.isPending) ? <ContentPendingSkeleton />
-              : !data.schools.items.length ? <ErgEmptyState title="Không có trường nào khớp bộ lọc" />
-                : data.grid.data ? <OverviewSchoolGrid grid={data.grid.data} onOpenCell={(cell, schoolId, weekday, periodNo) => openCell(cell?.eventId, schoolId, weekday, periodNo)} /> : null}
-          </Stack>
-        </Stack>
+        <OverviewSchoolPicker
+          hasMore={data.schools.hasMore} loadMore={data.schools.fetchNext} onSearch={onSearch} onToggle={onToggle}
+          rows={data.schools.items} search={params.q} selected={data.selected} selectedRows={selectedRows} total={data.schools.total}
+        />
       )}
-    </Stack>
+      {failed ? <ErgErrorState action={<ErgButton onClick={retry} variant="outlined">Thử lại</ErgButton>} description="Kiểm tra kết nối rồi thử lại." title="Không tải được lịch." /> : tab === "teachers" ? (
+        <OverviewTeacherPanel data={data} params={params} requiredMinutes={requiredMinutes} />
+      ) : data.schools.query.isPending || (data.selected.length > 0 && data.grid.isPending) ? <ContentPendingSkeleton />
+        : !data.schools.items.length ? <ErgEmptyState title="Không có trường nào khớp bộ lọc" />
+          : data.grid.data ? (
+            <OverviewSchoolGrid
+              eventsById={data.eventsById} grid={data.grid.data}
+              onOpen={(chip, schoolId, intent) => data.openSchedule(chip.cell.eventId ? data.eventsById.get(chip.cell.eventId) : undefined, { date: addDaysToDate(week, chip.weekday - 1), intent, periodNo: chip.firstPeriod, schoolId })}
+            />
+          ) : null}
+    </Box>
   );
 }

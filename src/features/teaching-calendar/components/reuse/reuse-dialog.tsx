@@ -13,6 +13,8 @@ import { ErgSelect, ErgTextField } from "@/components/erg-mui/erg-form";
 import { ErgDialog } from "@/components/erg-mui/erg-overlays";
 import { formatDateVi } from "@/domain/formatters/format-date";
 import { compactWeekRange, weekRangeLabel, weekdayName } from "@/features/teaching-calendar/domain/schedule-copy";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
+import { scheduleTokens } from "../shared/schedule-cell-sx";
 import { ReusePreviewTable } from "./reuse-preview-table";
 import { useReuse } from "./use-reuse";
 
@@ -55,17 +57,18 @@ export function ReuseDialog({ onClose, onSchoolChange, open, schoolId, schools, 
           </ErgButton>
         </>
       )}
-      fullScreen={fullScreen} maxWidth="md" onClose={onClose} open={open}
+      description={data ? (
+        <>
+          {school?.name} · {data.sourcePeriods} tiết · {data.perTeacher.map((teacher) => `${teacher.teacherName} ${teacher.periods}`).join(", ")}.
+          {excludedSentence(data.excludedConflicts)}
+        </>
+      ) : undefined}
+      fullScreen={fullScreen} maxWidth={false} onClose={onClose} open={open} sx={{ "& .MuiDialog-paper": { maxWidth: 760 } }}
       title={`Dùng lại lịch tuần ${weekRangeLabel(weekStart, "reuse")}`}
     >
       <Stack spacing={2}>
+        <Typography sx={{ ...ergEnterpriseTokens.type.smallStrong }}>Áp dụng cho</Typography>
         {schools.length > 1 ? <ErgSelect label="Trường nguồn" onChange={(event) => onSchoolChange(event.target.value)} options={schools.map((item) => ({ label: item.name, value: item.id }))} size="small" value={schoolId} /> : null}
-        {data ? (
-          <Typography sx={{ typography: "body2" }}>
-            {school?.name} · {data.sourcePeriods} tiết · {data.perTeacher.map((teacher) => `${teacher.teacherName} ${teacher.periods}`).join(", ")}.
-            {excludedSentence(data.excludedConflicts)}
-          </Typography>
-        ) : null}
         {reuse.preview.isError ? <Typography color="error" role="alert" sx={{ typography: "body2" }}>Không xem trước được. Thử lại sau.</Typography> : null}
         {reuse.create.isError ? <Typography color="error" role="alert" sx={{ typography: "body2" }}>Chưa tạo được. Thử lại sau.</Typography> : null}
         <RadioGroup onChange={(event) => reuse.setMode(event.target.value as typeof reuse.mode)} value={reuse.mode}>
@@ -75,8 +78,9 @@ export function ReuseDialog({ onClose, onSchoolChange, open, schoolId, schools, 
               const on = reuse.weekStarts.includes(week);
               return (
                 <Chip
-                  clickable color={on ? "primary" : "default"} disabled={reuse.mode !== "SELECTED_WEEKS"} key={week}
+                  clickable disabled={reuse.mode !== "SELECTED_WEEKS"} key={week}
                   label={`${on ? "✓ " : ""}${compactWeekRange(week)}`} onClick={() => reuse.toggleWeek(week)} variant={on ? "filled" : "outlined"}
+                  sx={{ bgcolor: on ? scheduleTokens.published.bg : undefined, borderColor: on ? undefined : ergEnterpriseTokens.color.border, color: on ? scheduleTokens.published.text : ergEnterpriseTokens.color.textSecondary, height: 30, ...(on ? ergEnterpriseTokens.type.smallStrong : ergEnterpriseTokens.type.small), "&:hover": { bgcolor: on ? scheduleTokens.published.bg : undefined } }}
                 />
               );
             })}
@@ -98,7 +102,7 @@ export function ReuseDialog({ onClose, onSchoolChange, open, schoolId, schools, 
           <FormControlLabel control={<Checkbox checked={reuse.keepRoomAndAssistant} onChange={(event) => reuse.setKeepRoomAndAssistant(event.target.checked)} />} label="Giữ phòng học và trợ giảng" />
         </Stack>
         {data ? <ReusePreviewTable weeks={data.weeks} /> : null}
-        <Typography sx={{ color: "text.secondary", typography: "caption" }}>
+        <Typography sx={{ color: ergEnterpriseTokens.color.textMuted, ...ergEnterpriseTokens.type.small }}>
           Lịch được tạo thành bản nháp: giáo viên chưa thấy cho đến khi bạn xuất bản. Tiết trùng không được tạo; mở lưới tuần đó để xử lý.
         </Typography>
       </Stack>

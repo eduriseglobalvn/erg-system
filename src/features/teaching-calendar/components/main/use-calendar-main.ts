@@ -73,11 +73,16 @@ export function useCalendarMain() {
     return [...counts.values()].sort((a, b) => a.name.localeCompare(b.name, "vi"));
   }, [all]);
 
-  const toggle = (setter: typeof setSchoolIds) => (id: string) => setter((current) => (current.includes(id) ? current.filter((item) => item !== id) : [...current, id]));
+  // Danh sach rong = tat ca; bo chon 1 muc khi dang «tat ca» -> chon moi muc con lai (chuc nang cua hop kiem).
+  const toggle = (setter: typeof setSchoolIds, all: readonly string[]) => (id: string) => setter((current) => {
+    const effective = current.length ? current : all;
+    const next = effective.includes(id) ? effective.filter((item) => item !== id) : [...effective, id];
+    return next.length === all.length || !next.length ? [] : next;
+  });
   return {
     anchor, canDelete: Boolean(workspace.data?.permissions.canDelete), conflicts, draftCards, events,
     error: workspace.error, loading: workspace.isPending, mode, range, refetch: () => void workspace.refetch(), repeatUntilOf,
     schoolIds, schoolOptions: schools.data?.items ?? [], setAnchor, setMode, setSchoolIds, shortNames, teacherCounts, teacherIds,
-    toggleSchool: toggle(setSchoolIds), toggleTeacher: toggle(setTeacherIds), weekStart,
+    toggleSchool: toggle(setSchoolIds, (schools.data?.items ?? []).map((school) => school.schoolId)), toggleTeacher: toggle(setTeacherIds, teacherCounts.map((teacher) => teacher.id)), weekStart,
   };
 }

@@ -1,7 +1,7 @@
 import { ErgButton } from "@/components/erg-mui/erg-actions";
-import { ErgDialog } from "@/components/erg-mui/erg-overlays";
 import { toast } from "sonner";
 import { AddHolidayFields, useAddHolidayForm } from "./add-holiday-form";
+import { DaysOffDialog } from "./days-off-dialog";
 import { DaysOffPastWarningDialog } from "./days-off-past-warning-dialog";
 
 type Props = { date: string; onClose: () => void; onSaved: (date: string) => void };
@@ -11,7 +11,7 @@ export function DaysOffAddDialog({ date, onClose, onSaved }: Props) {
   const form = useAddHolidayForm(date, (from) => { toast.success("Đã thêm ngày nghỉ"); onSaved(from); onClose(); });
   return (
     <>
-      <ErgDialog
+      <DaysOffDialog
         actions={
           <>
             <ErgButton onClick={onClose} variant="text">Huỷ</ErgButton>
@@ -20,11 +20,11 @@ export function DaysOffAddDialog({ date, onClose, onSaved }: Props) {
         }
         description="Áp cho toàn hệ thống."
         onClose={onClose}
-        open
         title="Thêm ngày nghỉ"
+        width={600}
       >
         <AddHolidayFields form={form} />
-      </ErgDialog>
+      </DaysOffDialog>
       {form.past.warning ? <DaysOffPastWarningDialog loading={form.create.isPending} onCancel={form.past.close} warning={form.past.warning} /> : null}
     </>
   );

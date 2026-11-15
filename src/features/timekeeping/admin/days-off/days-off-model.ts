@@ -178,11 +178,3 @@ export function addCommand(state: AddFormState): HolidayCommand | null {
   if (!state.from || !to || to < state.from || !state.name.trim() || !payMode) return null;
   return { from: state.from, to, name: state.name.trim(), kind: state.kind, payMode, teachingAction: state.teachingAction };
 }
-
-/** Dải đếm dưới lịch tháng: «N Nghỉ lễ nhà nước · N Nghỉ công ty · N Không lương (KL)» (nghỉ bù tính vào lễ nhà nước; KL chỉ đếm ngày nghỉ công ty). */
-export function holidayCountStrip(holidays: ReadonlyArray<Pick<HolidayConfig, "kind" | "payMode">>): string {
-  const state = holidays.filter((item) => item.kind === "STATE" || item.kind === "COMPENSATORY").length;
-  const company = holidays.filter((item) => item.kind === "COMPANY").length;
-  const unpaid = holidays.filter((item) => item.kind === "COMPANY" && item.payMode === "UNPAID").length;
-  return `${state} Nghỉ lễ nhà nước · ${company} Nghỉ công ty · ${unpaid} Không lương (KL)`;
-}

@@ -1,6 +1,6 @@
 import { expect, it } from "vitest";
 
-import { conflictNote, foldPeriod, foldSlots, slotText, type TeacherSlotInput, overviewCellKind, rowNote, toggleSchool, type OverviewCell, type OverviewConflict } from "./overview-model";
+import { buildSchoolDayChips, chipWho, conflictNote, foldPeriod, foldSlots, slotText, type TeacherSlotInput, overviewCellKind, rowNote, toggleSchool, type OverviewCell, type OverviewConflict } from "./overview-model";
 
 const side = (className: string, schoolShortName: string, teacherName = "Q.Vương", eventId = className) => ({ className, eventId, roomName: "PM 03", schoolShortName, teacherName });
 const clash = { kind: "TEACHER_TIME", mine: side("9A4", "TCĐ"), other: side("8A2", "Nguyễn Du"), severity: "ERROR" } as unknown as OverviewConflict;
@@ -26,8 +26,8 @@ it("classifies cells for styling", () => {
   expect(overviewCellKind(cell({}))).toBe("published");
 });
 
-it("limits side-by-side schools to three", () => {
-  expect(toggleSchool(["a", "b", "c"], "d")).toEqual(["a", "b", "c"]);
+it("limits side-by-side schools to four", () => {
+  expect(toggleSchool(["a", "b", "c", "d"], "e")).toEqual(["a", "b", "c", "d"]);
   expect(toggleSchool(["a", "b", "c"], "b")).toEqual(["a", "c"]);
   expect(toggleSchool(["a"], "b")).toEqual(["a", "b"]);
 });
@@ -49,4 +49,21 @@ it("shows «+1» when tiet 5 folds into tiet 4", () => {
 it("labels clash and assistant slots", () => {
   expect(slotText(foldSlots([slot({ classNames: ["9A4", "8A2"], conflict: true })]).get("1:1")!)).toBe("2 lớp");
   expect(slotText(foldSlots([slot({ classNames: ["9A3"], roles: ["ASSISTANT"] })]).get("1:1")!)).toBe("TG 9A3");
+});
+
+const GRID = {
+  cells: [1, 2, 3, 6].map((periodNo) => cell({ className: "9A4", eventId: "e" + periodNo, periodNo, schoolId: "s1", teacherName: "T.Tuấn", weekday: 1 } as never)),
+  template: { slots: [[1, "MORNING", "07:15", "08:00"], [2, "MORNING", "08:00", "08:45"], [3, "MORNING", "09:15", "10:00"], [6, "AFTERNOON", "13:30", "14:15"]].map(([periodNo, session, startTime, endTime]) => ({ endTime, periodNo, session, startTime })) },
+} as never;
+
+it("merges consecutive periods of the same lesson into one time range per day", () => {
+  const chips = buildSchoolDayChips(GRID).get("s1:1")!;
+  expect(chips.map((chip) => chip.startTime + "–" + chip.endTime)).toEqual(["07:15–10:00", "13:30–14:15"]);
+  expect([chips[0].firstPeriod, chips[0].lastPeriod]).toEqual([1, 3]);
+});
+
+it("keeps different teachers apart and writes the assistant after a plus", () => {
+  const grid = { ...(GRID as object), cells: [cell({ className: "9A4", periodNo: 1, schoolId: "s1", teacherName: "A", weekday: 1 } as never), cell({ className: "9A4", periodNo: 2, schoolId: "s1", teacherName: "B", weekday: 1 } as never)] } as never;
+  expect(buildSchoolDayChips(grid).get("s1:1")).toHaveLength(2);
+  expect(chipWho({ assistantName: "B.Ngọc, P.Nhi", teacherName: "T.Tuấn" })).toBe("T.Tuấn + B.Ngọc, P.Nhi");
 });

@@ -137,12 +137,12 @@ export function SchedulePage() {
   const editSlot = template.slots.find((slot) => slot.periodNo === editPeriod) ?? { periodNo: editPeriod };
 
   return (
-    <Stack spacing={2} sx={{ px: { xs: 2, md: 3 }, py: 2 }}>
+    <Stack spacing={1.75} sx={{ px: { xs: 2, md: 3 }, py: 2.5 }}>
       <ScheduleHeader
         batchLabel={draft.batchLabel} batchStatus={batchStatus} errorCount={errors}
         onExport={() => void exportSheets(() => [scheduleSheet({ rows, schoolName: school?.schoolName ?? "", template, weekStart })], overviewFileName(weekStart))} onPublish={() => setConfirmPublish(true)}
         onRename={setRenameAnchor} onReusePrevious={meta.schoolId ? () => setReuseOpen(true) : undefined} onRetry={() => void draft.flush()} publishing={publishing} rowCount={rows.length}
-        savedAt={draft.savedAt} schoolName={school?.schoolName ?? ""} status={draft.status}
+        savedAt={draft.savedAt} schoolName={school?.schoolName ?? ""} status={draft.status} templateName={template.name}
       />
       {draft.status === "stale" ? <Alert action={<ErgButton onClick={() => window.location.reload()} variant="text">Tải lại</ErgButton>} severity="error">{STALE_VERSION_MESSAGE}</Alert> : null}
       {publishError ? <Alert onClose={() => setPublishError(null)} severity="error">{publishError}</Alert> : null}
@@ -159,7 +159,7 @@ export function SchedulePage() {
             rows={cells} states={states} template={template} unknown={unknown} weekStart={weekStart}
           />
         </Box>
-        <Stack spacing={2}>
+        <Stack spacing={1.5}>
           <ConflictPanel
             conflicts={draft.conflicts} onFix={(conflict) => setRows((current) => applyConflictFix(current, conflict))}
             onGoTo={focusConflict}

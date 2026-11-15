@@ -1,13 +1,12 @@
 import Box from "@mui/material/Box";
-import Chip from "@mui/material/Chip";
 import Link from "@mui/material/Link";
-import Typography from "@mui/material/Typography";
 
 import type { TeachingScheduleDraftResult } from "@/features/teaching-calendar/api/teaching-calendar-schedule-api";
 import type { TeachingCalendarEvent } from "@/features/teaching-calendar/api/teaching-calendar-workspace-types";
 import { conflictKindName, weekdayName } from "@/features/teaching-calendar/domain/schedule-copy";
 import { errorConflicts } from "@/features/teaching-calendar/domain/schedule-grid-model";
 import { adminPath } from "@/platform/workspaces/workspace-paths";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 import { scheduleTokens } from "../shared/schedule-cell-sx";
 
 type Props = {
@@ -32,14 +31,14 @@ export function DraftCard({ draft, events, shortNames }: Props) {
   const school = shortNames.get(draft.batch.schoolId) ?? own[0]?.schoolName ?? "";
   const issues = draftIssueLine(errorConflicts(draft.conflicts));
   return (
-    <Box component="article" sx={{ bgcolor: "background.paper", border: 1, borderColor: "divider", borderRadius: "10px", p: 1.5 }}>
-      <Box sx={{ alignItems: "center", display: "flex", gap: 1, justifyContent: "space-between" }}>
-        <Typography sx={{ typography: "subtitle2" }}>{draft.batch.label}</Typography>
-        <Chip label="Nháp" size="small" sx={{ bgcolor: scheduleTokens.published.bg, color: scheduleTokens.published.text }} />
+    <Box component="article" sx={{ bgcolor: "background.paper", border: `1px solid ${ergEnterpriseTokens.color.border}`, borderRadius: `${ergEnterpriseTokens.radius.card}px`, display: "flex", flexDirection: "column", gap: "6px", p: 1.5 }}>
+      <Box sx={{ typography: "subtitle2", fontSize: "0.8125rem" }}>
+        {draft.batch.label}{" "}
+        <Box component="span" sx={{ bgcolor: scheduleTokens.neutral.bg, borderRadius: "999px", color: scheduleTokens.neutral.text, fontSize: "0.6875rem", fontWeight: "fontWeightRegular", px: 1, py: "1px" }}>Nháp</Box>
       </Box>
-      <Typography sx={{ color: "text.secondary", typography: "caption" }}>{[`${own.length} tiết`, weekdays.join(", "), school].filter(Boolean).join(" · ")}</Typography>
-      {issues ? <Typography sx={{ color: scheduleTokens.clash.edge, typography: "caption" }}>{issues}</Typography> : null}
-      <Link href={`${adminPath("/calendar/schedule")}?batchId=${draft.batch.id}`} sx={{ typography: "caption" }} underline="hover">Mở để xuất bản →</Link>
+      <Box sx={{ color: ergEnterpriseTokens.color.textSecondary }}>{[`${own.length} tiết`, weekdays.join(", "), school].filter(Boolean).join(" · ")}</Box>
+      {issues ? <Box sx={{ color: scheduleTokens.clash.text }}>{issues}</Box> : null}
+      <Link href={`${adminPath("/calendar/schedule")}?batchId=${draft.batch.id}`} sx={{ typography: "subtitle2", fontSize: "0.8125rem" }} underline="none">Mở để xuất bản →</Link>
     </Box>
   );
 }

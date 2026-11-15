@@ -1,11 +1,10 @@
-import Divider from "@mui/material/Divider";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
+import type { ReactNode } from "react";
+import Box from "@mui/material/Box";
+import InputAdornment from "@mui/material/InputAdornment";
 
-import { ErgSelect } from "@/components/erg-mui/erg-form";
-import { ErgTextField } from "@/components/erg-mui/erg-form";
+import { ErgSelect, ErgTextField } from "@/components/erg-mui/erg-form";
 import type { TeachingPeriodTemplate } from "@/features/teaching-calendar/api/teaching-calendar-schedule-api";
-import { formatDateVi } from "@/domain/formatters/format-date";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 import type { DraftMeta } from "./use-schedule-draft";
 
 type Option = { id: string; label: string };
@@ -24,47 +23,78 @@ export function weeksBetween(from: string, until: string) {
   return Math.max(0, Math.ceil(((Date.parse(until) - Date.parse(from)) / 86_400_000 + 1) / 7));
 }
 
-const field = { flex: 1, minWidth: 160 } as const;
+const { color, radius, type } = ergEnterpriseTokens;
 
-/** Thanh thong tin 1 hang (6.2): Truong | Mon · Chuong trinh | Ap dung tu | Lap den | Khung gio tiet. */
+/** O nhap cao 36px, bo 10, chu 14/400 (board AdminCreate); nhan nam tren o, 12px xam. */
+const controlSx = {
+  "& .MuiOutlinedInput-root": { borderRadius: `${radius.control}px`, height: 36, minHeight: 36, typography: "body2" },
+  "& .MuiOutlinedInput-input": { py: 0, height: "100%", boxSizing: "border-box" },
+  "& .MuiOutlinedInput-root fieldset": { borderColor: color.border },
+  "& .MuiSelect-select": { py: 0 },
+} as const;
+
+function Labeled({ children, label }: { children: ReactNode; label: string }) {
+  return (
+    <Box component="label" sx={{ color: color.textMuted, display: "flex", flexDirection: "column", gap: 0.5, minWidth: 0, ...type.note }}>
+      {label}
+      {children}
+    </Box>
+  );
+}
+
+/** Thanh thong tin 1 hang (board AdminCreate): grid 1.4fr 1.4fr 1fr 1fr 1.2fr, gap 12, p 12/16, the vien 14. */
 export function ScheduleInfoBar({ meta, onChange, onSchoolChange, programs, schools, templates }: Props) {
   const weeks = weeksBetween(meta.applyFrom, meta.repeatUntil);
   const program = meta.levelId ? `${meta.subjectId ?? ""}|${meta.levelId}` : "";
   return (
-    <Stack aria-label="Thông tin thời khóa biểu" direction="row" divider={<Divider flexItem orientation="vertical" />} spacing={1.5} sx={{ alignItems: "flex-start", bgcolor: "background.paper", border: 1, borderColor: "divider", borderRadius: "14px", flexWrap: "wrap", p: 1.5, rowGap: 1.5 }}>
-      <ErgSelect
-        label="Trường"
-        onChange={(event) => onSchoolChange(event.target.value)}
-        options={schools.map((school) => ({ label: school.label, value: school.id }))}
-        size="small"
-        sx={field}
-        value={meta.schoolId}
-      />
-      <ErgSelect
-        disabled={!programs.length}
-        label="Môn · Chương trình"
-        onChange={(event) => {
-          const [subjectId, levelId] = event.target.value.split("|");
-          onChange({ levelId, subjectId });
-        }}
-        options={programs.map((item) => ({ label: item.label, value: `${item.subjectId}|${item.levelId}` }))}
-        size="small"
-        sx={field}
-        value={program}
-      />
-      <ErgTextField label="Áp dụng từ" onChange={(event) => onChange({ applyFrom: event.target.value })} slotProps={{ inputLabel: { shrink: true } }} sx={field} type="date" value={meta.applyFrom} />
-      <Stack sx={field}>
-        <ErgTextField label="Lặp đến" onChange={(event) => onChange({ repeatUntil: event.target.value })} slotProps={{ inputLabel: { shrink: true } }} type="date" value={meta.repeatUntil} />
-        <Typography sx={{ color: "text.secondary", typography: "caption" }}>{formatDateVi(meta.repeatUntil)} · {weeks} tuần</Typography>
-      </Stack>
-      <ErgSelect
-        label="Khung giờ tiết"
-        onChange={(event) => onChange({ periodTemplateId: event.target.value })}
-        options={templates.map((template) => ({ label: template.name, value: template.id }))}
-        size="small"
-        sx={field}
-        value={meta.periodTemplateId}
-      />
-    </Stack>
+    <Box aria-label="Thông tin áp dụng" component="section" sx={{ bgcolor: "background.paper", border: 1, borderColor: "divider", borderRadius: `${radius.card}px`, display: "grid", gap: 1.5, gridTemplateColumns: { md: "1.4fr 1.4fr 1fr 1fr 1.2fr", xs: "1fr 1fr" }, px: 2, py: 1.5 }}>
+      <Labeled label="Trường">
+        <ErgSelect
+          onChange={(event) => onSchoolChange(event.target.value)}
+          options={schools.map((school) => ({ label: school.label, value: school.id }))}
+          size="small"
+          slotProps={{ select: { SelectDisplayProps: { "aria-label": "Trường" } as never } }}
+          sx={controlSx}
+          value={meta.schoolId}
+        />
+      </Labeled>
+      <Labeled label="Môn · Chương trình">
+        <ErgSelect
+          disabled={!programs.length}
+          onChange={(event) => {
+            const [subjectId, levelId] = event.target.value.split("|");
+            onChange({ levelId, subjectId });
+          }}
+          options={programs.map((item) => ({ label: item.label, value: `${item.subjectId}|${item.levelId}` }))}
+          size="small"
+          slotProps={{ select: { SelectDisplayProps: { "aria-label": "Môn · Chương trình" } as never } }}
+          sx={controlSx}
+          value={program}
+        />
+      </Labeled>
+      <Labeled label="Áp dụng từ">
+        <ErgTextField onChange={(event) => onChange({ applyFrom: event.target.value })} size="small" slotProps={{ htmlInput: { "aria-label": "Áp dụng từ" } }} sx={controlSx} type="date" value={meta.applyFrom} />
+      </Labeled>
+      <Labeled label="Lặp đến">
+        <ErgTextField
+          onChange={(event) => onChange({ repeatUntil: event.target.value })}
+          size="small"
+          slotProps={{ htmlInput: { "aria-label": "Lặp đến" }, input: { endAdornment: <InputAdornment position="end" sx={{ whiteSpace: "nowrap" }}>· {weeks} tuần</InputAdornment> } }}
+          sx={controlSx}
+          type="date"
+          value={meta.repeatUntil}
+        />
+      </Labeled>
+      <Labeled label="Khung giờ tiết">
+        <ErgSelect
+          onChange={(event) => onChange({ periodTemplateId: event.target.value })}
+          options={templates.map((template) => ({ label: template.name, value: template.id }))}
+          size="small"
+          slotProps={{ select: { SelectDisplayProps: { "aria-label": "Khung giờ tiết" } as never } }}
+          sx={controlSx}
+          value={meta.periodTemplateId}
+        />
+      </Labeled>
+    </Box>
   );
 }

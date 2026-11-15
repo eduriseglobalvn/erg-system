@@ -1,8 +1,8 @@
 import Box from "@mui/material/Box";
-import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 
 import { errorConflicts, type ScheduleConflict } from "@/features/teaching-calendar/domain/schedule-grid-model";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 import { scheduleTokens } from "../shared/schedule-cell-sx";
 import { ConflictArticle } from "./conflict-article";
 
@@ -15,28 +15,29 @@ type Props = {
   unknownNames: readonly string[];
 };
 
-/** Panel phai «Xung đột cần xử lý»: loi truoc, canh bao nghi sau (khong dem vao badge). */
+/** Panel phai «Xung đột cần xử lý» (board AdminCreate): the vien 14px, header do nhat, loi truoc, canh bao sau (khong dem vao badge). */
 export function ConflictPanel({ conflicts, onFix, onGoTo, onRemove, unknownNames }: Props) {
   const errors = errorConflicts(conflicts);
   const warnings = conflicts.filter((conflict) => conflict.severity !== "ERROR");
   const count = errors.length + unknownNames.length;
+  const tone = count ? scheduleTokens.clash : scheduleTokens.published;
   return (
-    <Stack aria-label="Xung đột" component="section" spacing={1} sx={{ maxHeight: 520, overflowY: "auto" }}>
-      <Stack direction="row" spacing={1.25} sx={{ alignItems: "center" }}>
-        <Box sx={{ bgcolor: count ? scheduleTokens.clash.bg : scheduleTokens.published.bg, borderRadius: "999px", color: count ? scheduleTokens.clash.text : scheduleTokens.published.text, minWidth: 28, px: 1, py: 0.25, textAlign: "center", typography: "subtitle2" }}>{count}</Box>
-        <Box>
-          <Typography sx={{ typography: "subtitle2" }}>{count ? "Xung đột cần xử lý" : "Không có xung đột"}</Typography>
-          <Typography sx={{ color: "text.secondary", typography: "caption" }}>{count ? "Chưa xuất bản được cho đến khi hết xung đột" : "Sẵn sàng xuất bản"}</Typography>
+    <Box aria-label="Xung đột" component="section" sx={{ bgcolor: "background.paper", border: 1, borderColor: "divider", borderRadius: `${ergEnterpriseTokens.radius.card}px`, maxHeight: 520, overflow: "hidden auto" }}>
+      <Box component="header" sx={{ alignItems: "center", bgcolor: tone.bg, borderBottom: 1, borderColor: count ? scheduleTokens.clash.line : "divider", display: "flex", gap: 1.25, px: 1.75, py: 1.5 }}>
+        <Box aria-hidden sx={{ alignItems: "center", bgcolor: count ? scheduleTokens.clash.edge : "primary.main", borderRadius: "999px", color: "common.white", display: "flex", flex: "0 0 28px", height: 28, justifyContent: "center", typography: "subtitle2", width: 28 }}>{count}</Box>
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Typography component="h2" sx={{ color: tone.text, typography: "subtitle2" }}>{count ? "Xung đột cần xử lý" : "Không có xung đột"}</Typography>
+          <Typography sx={{ color: tone.text, opacity: 0.8, typography: "caption" }}>{count ? "Chưa xuất bản được cho đến khi hết xung đột" : "Sẵn sàng xuất bản"}</Typography>
         </Box>
-      </Stack>
+      </Box>
       {unknownNames.map((name) => (
-        <Box component="article" key={name} sx={{ bgcolor: scheduleTokens.clash.bg, borderRadius: "10px", color: scheduleTokens.clash.text, p: 1.5, typography: "body2" }}>
+        <Box component="article" key={name} sx={{ borderTop: 1, borderColor: "divider", color: scheduleTokens.clash.text, px: 1.75, py: 1.5, typography: "body2" }}>
           Không tìm thấy “{name}”
         </Box>
       ))}
       {[...errors, ...warnings].map((conflict) => (
         <ConflictArticle conflict={conflict} key={conflict.id} onFix={onFix} onGoTo={onGoTo} onRemove={onRemove} />
       ))}
-    </Stack>
+    </Box>
   );
 }

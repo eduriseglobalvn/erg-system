@@ -1,4 +1,5 @@
 import Box from "@mui/material/Box";
+import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -50,16 +51,16 @@ export function SelectedHolidayCard({ bare = false, holiday }: Props) {
       sx={{ bgcolor: "background.paper", border: bare ? 0 : 1, borderColor: "divider", borderRadius: `${ergEnterpriseTokens.radius.card}px`, display: "grid", gap: 1.5, p: bare ? 0 : 2 }}
     >
       <Box>
-        <Typography component="h2" variant="subtitle1">{holidayCardTitle(holiday)}</Typography>
-        <Typography color="text.secondary" variant="body2">{holidayCardSubtitle(holiday)}</Typography>
+        <Typography component="h2" variant="h5">{holidayCardTitle(holiday)}</Typography>
+        <Typography color="text.secondary" sx={{ fontSize: "0.8125rem" }} variant="body2">{holidayCardSubtitle(holiday)}</Typography>
       </Box>
       <HolidayFields kind={kind} onKind={(next) => save({ kind: next })} onPayMode={(next) => save({ payMode: next })} onTeachingAction={(next) => save({ teachingAction: next })} payMode={payMode} teachingAction={teachingAction} />
       {(holiday.affectedPeriods ?? 0) > 0 ? <AffectedNotice>{affectedNotice(holiday.affectedPeriods ?? 0, holiday.affectedSchools ?? 0, false)}</AffectedNotice> : null}
       {exists ? <AffectedNotice>{holidayErrorText(update.error)}</AffectedNotice> : null}
       {failed && !exists ? (
         <Box role="alert" sx={{ alignItems: "center", bgcolor: ergEnterpriseTokens.schedule.clash.bg, borderRadius: `${ergEnterpriseTokens.radius.control}px`, color: ergEnterpriseTokens.schedule.clash.text, display: "flex", gap: 1, px: 1.25, py: 1 }}>
-          <Typography sx={{ flex: 1 }} variant="body2">{errorCodeOf(update.error) === "PERIOD_LOCKED" ? `Chưa lưu được. ${holidayErrorText(update.error)}` : "Chưa lưu được."}</Typography>
-          <ErgButton color="error" onClick={() => run((update.variables as { body: HolidayCommand }).body)} variant="text">Thử lại</ErgButton>
+          <Typography sx={{ flex: 1, fontSize: "0.8125rem" }} variant="body2">{errorCodeOf(update.error) === "PERIOD_LOCKED" ? `Chưa lưu được. ${holidayErrorText(update.error)}` : "Chưa lưu được."}</Typography>
+          <Link component="button" onClick={() => run((update.variables as { body: HolidayCommand }).body)} type="button" underline="none" variant="subtitle2">Thử lại</Link>
         </Box>
       ) : null}
       <Box>

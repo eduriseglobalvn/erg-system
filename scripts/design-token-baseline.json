@@ -883,10 +883,6 @@
     "hex": 16,
     "font": 0
   },
-  "src/features/lms/components/teaching-schedule/lms-erg-calendar-workspace.tsx": {
-    "hex": 51,
-    "font": 0
-  },
   "src/features/lms/learning-paths/certificates/components/certificate-registry-workspace.tsx": {
     "hex": 0,
     "font": 1
@@ -938,10 +934,6 @@
   "src/features/teaching-calendar/api/teaching-calendar-mappers.ts": {
     "hex": 24,
     "font": 0
-  },
-  "src/features/teaching-calendar/components/overview/overview-school-grid.tsx": {
-    "hex": 0,
-    "font": 1
   },
   "src/layouts/dashboard/components/dashboard-content.tsx": {
     "hex": 4,

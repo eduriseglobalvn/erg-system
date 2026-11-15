@@ -1,6 +1,7 @@
 import Box from "@mui/material/Box";
 import ButtonBase from "@mui/material/ButtonBase";
 import Typography from "@mui/material/Typography";
+import type { Theme } from "@mui/material/styles";
 import type { ReactNode } from "react";
 
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
@@ -9,16 +10,27 @@ import { HOLIDAY_KIND_OPTIONS, PAY_MODE_OPTIONS, TEACHING_ACTION_OPTIONS, isPayL
 
 const tokens = ergEnterpriseTokens;
 
+/** Board segmented control (Một ngày / Khoảng ngày, Thứ 7 modes): grey track, 8 px segments, the chosen one white with the semibold weight. */
+export const segmentedSx = (height: number, padding: number, fontSize: string) => (theme: Theme) => ({
+  bgcolor: tokens.color.surfaceSubtle,
+  borderRadius: `${tokens.radius.control}px`,
+  p: `${padding}px`,
+  "& .MuiToggleButton-root": { border: 0, borderRadius: "8px !important", color: tokens.color.textMuted, flex: 1, fontSize, height, minWidth: 0, px: 0.5, textTransform: "none", whiteSpace: "nowrap" },
+  "& .MuiToggleButton-root.Mui-selected": { bgcolor: tokens.color.surface, boxShadow: tokens.shadow.xs, color: tokens.color.text, fontWeight: theme.typography.subtitle2.fontWeight },
+});
+
 type ChipChoiceProps<T extends string> = {
   label: string;
   value: T | null;
   options: ReadonlyArray<{ value: T; label: string; disabled?: boolean }>;
   onChange: (value: T) => void;
   disabled?: boolean;
+  /** Phone sheet: 36 px pills (board AdminDaysOffMobileSheet). */
+  touch?: boolean;
 };
 
 /** Pill radio group of the days-off forms (board: 32px pills, selected = primary tint). */
-export function ChipChoice<T extends string>({ disabled, label, onChange, options, value }: ChipChoiceProps<T>) {
+export function ChipChoice<T extends string>({ disabled, label, onChange, options, touch = false, value }: ChipChoiceProps<T>) {
   return (
     <Box aria-label={label} role="radiogroup" sx={{ display: "flex", flexWrap: "wrap", gap: 0.75 }}>
       {options.map((option) => {
@@ -37,7 +49,8 @@ export function ChipChoice<T extends string>({ disabled, label, onChange, option
               borderColor: checked ? tokens.color.primary : tokens.color.border,
               borderRadius: `${tokens.radius.chip}px`,
               color: checked ? tokens.schedule.published.text : tokens.color.textSecondary,
-              height: 32,
+              fontSize: "0.8125rem",
+              height: touch ? 36 : 32,
               px: 1.5,
               typography: checked ? "subtitle2" : "body2",
               "&.Mui-disabled": { opacity: checked ? 1 : 0.5 },
@@ -54,9 +67,9 @@ export function ChipChoice<T extends string>({ disabled, label, onChange, option
 export function FieldBlock({ children, hint, hintTone = "meta", label }: { children: ReactNode; hint?: string; hintTone?: "meta" | "warn"; label: string }) {
   return (
     <Box sx={{ display: "grid", gap: 0.75 }}>
-      <Typography color="text.secondary" component="span" variant="caption">{label}</Typography>
+      <Typography component="span" sx={{ color: tokens.color.textSecondary, fontWeight: "fontWeightRegular" }} variant="caption">{label}</Typography>
       {children}
-      {hint ? <Typography component="span" sx={{ color: hintTone === "warn" ? tokens.schedule.warn.text : "text.disabled" }} variant="caption">{hint}</Typography> : null}
+      {hint ? <Typography component="span" sx={{ color: hintTone === "warn" ? tokens.schedule.warn.text : tokens.color.textMuted, fontWeight: "fontWeightRegular" }} variant="caption">{hint}</Typography> : null}
     </Box>
   );
 }
@@ -75,15 +88,16 @@ type HolidayFieldsProps = {
   disabled?: boolean;
   /** The add form shows the shorter hints of its board. */
   compact?: boolean;
+  touch?: boolean;
 };
 
 /** Loại · Tính lương · Tiết dạy: the three choices of a day off, shared by the card, the add dialog and the phone sheet. */
-export function HolidayFields({ compact = false, disabled, kind, onKind, onPayMode, onTeachingAction, payMode, teachingAction }: HolidayFieldsProps) {
+export function HolidayFields({ compact = false, disabled, kind, onKind, onPayMode, onTeachingAction, payMode, teachingAction, touch }: HolidayFieldsProps) {
   const locked = isPayLocked(kind);
   return (
     <>
       <FieldBlock hint={compact ? "Nghỉ bù tính là ngày nghỉ lễ." : KIND_HINT} label={compact ? "Loại" : "Loại ngày nghỉ"}>
-        <ChipChoice disabled={disabled} label="Loại ngày nghỉ" onChange={onKind} options={HOLIDAY_KIND_OPTIONS} value={kind} />
+        <ChipChoice disabled={disabled} touch={touch} label="Loại ngày nghỉ" onChange={onKind} options={HOLIDAY_KIND_OPTIONS} value={kind} />
       </FieldBlock>
       <FieldBlock
         hint={compact ? "Bắt buộc chọn. Có lương (L): tính 1 công. Trừ phép năm (P): trừ 1 ngày phép, ai hết phép thì thành KL. Không lương (KL): không tính công. Lễ nhà nước và nghỉ bù khoá ở «Có lương»." : PAY_HINT}
@@ -92,6 +106,7 @@ export function HolidayFields({ compact = false, disabled, kind, onKind, onPayMo
       >
         <ChipChoice
           disabled={disabled}
+          touch={touch}
           label="Tính lương ngày này"
           onChange={onPayMode}
           options={PAY_MODE_OPTIONS.map((option) => ({ value: option.value, label: option.label, disabled: locked && option.value !== "PAID" }))}
@@ -99,7 +114,7 @@ export function HolidayFields({ compact = false, disabled, kind, onKind, onPayMo
         />
       </FieldBlock>
       <FieldBlock hint={ACTION_HINT} label={compact ? "Tiết dạy" : "Tiết dạy trong ngày"}>
-        <ChipChoice disabled={disabled} label="Tiết dạy trong ngày" onChange={onTeachingAction} options={TEACHING_ACTION_OPTIONS} value={teachingAction} />
+        <ChipChoice disabled={disabled} touch={touch} label="Tiết dạy trong ngày" onChange={onTeachingAction} options={TEACHING_ACTION_OPTIONS} value={teachingAction} />
       </FieldBlock>
     </>
   );
@@ -108,7 +123,7 @@ export function HolidayFields({ compact = false, disabled, kind, onKind, onPayMo
 export function AffectedNotice({ children }: { children: ReactNode }) {
   return (
     <Box sx={{ bgcolor: tokens.schedule.warn.bg, borderRadius: `${tokens.radius.control}px`, color: tokens.schedule.warn.text, px: 1.25, py: 1 }}>
-      <Typography component="p" variant="body2">{children}</Typography>
+      <Typography component="p" sx={{ fontSize: "0.8125rem" }} variant="body2">{children}</Typography>
     </Box>
   );
 }

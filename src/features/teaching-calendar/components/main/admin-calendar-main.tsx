@@ -7,13 +7,11 @@ import Tabs from "@mui/material/Tabs";
 import Typography from "@mui/material/Typography";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import AddIcon from "@mui/icons-material/Add";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 
 import { ErgButton, ErgIconButton } from "@/components/erg-mui/erg-actions";
 import { ErgEmptyState, ErgErrorState } from "@/components/erg-mui/erg-feedback";
-import { ergSegmentedTabsSx } from "@/components/erg-mui/erg-tabs";
 import { deleteTeachingScheduleEvent } from "@/features/teaching-calendar/api/teaching-calendar-command-api";
 import { teachingCalendarQueryKeys } from "@/features/teaching-calendar/api/teaching-calendar-query-keys";
 import type { TeachingCalendarEvent } from "@/features/teaching-calendar/api/teaching-calendar-workspace-types";
@@ -23,6 +21,8 @@ import { getDefaultTenantId } from "@/lib/graphql-client";
 import { adminPath } from "@/platform/workspaces/workspace-paths";
 import { ContentPendingSkeleton } from "@/routes/route-feedback";
 import { AdminMobileDay } from "../mobile/admin-mobile-day";
+import { scheduleTokens } from "../shared/schedule-cell-sx";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 import { teacherTone } from "../shared/teacher-tone";
 import { ReuseDialog } from "../reuse/reuse-dialog";
 import { DaysOffLink } from "./days-off-link";
@@ -36,6 +36,18 @@ import { useCalendarMain, type CalendarMode } from "./use-calendar-main";
 const MODES: ReadonlyArray<{ label: string; value: CalendarMode | "overview" }> = [
   { label: "Ngày", value: "day" }, { label: "Tuần", value: "week" }, { label: "Tháng", value: "month" }, { label: "Bảng tổng", value: "overview" },
 ];
+
+const color = ergEnterpriseTokens.color;
+/** Board 6.1: nut 36px bo 10, vien xam, chu 14/400. */
+const controlSx = { borderColor: color.border, borderRadius: `${ergEnterpriseTokens.radius.control}px`, fontWeight: "fontWeightRegular", height: 36, minHeight: 36, px: "14px" } as const;
+const arrowSx = { borderRadius: "999px", color: color.textSecondary, height: 36, width: 36 } as const;
+/** Tab dang segmented cua board: nen trang + vien, o 28px bo 7, chon = nen xanh nhat chu dam. */
+const segmentedSx = {
+  bgcolor: "background.paper", border: `1px solid ${color.border}`, borderRadius: `${ergEnterpriseTokens.radius.control}px`, minHeight: 0, p: "3px",
+  "& .MuiTabs-indicator": { display: "none" },
+  "& .MuiTab-root": { borderRadius: "7px", color: color.textSecondary, fontSize: "0.8125rem", fontWeight: "fontWeightRegular", height: 28, minHeight: 28, minWidth: 0, px: "12px" },
+  "& .MuiTab-root.Mui-selected": { bgcolor: color.primarySofter, color: scheduleTokens.published.text, typography: "subtitle2", fontSize: "0.8125rem" },
+} as const;
 
 /** Cong `delta` thang that (kep ngay ve cuoi thang ngan hon), khong nhay 30 ngay. */
 export function addMonthsToDate(date: string, delta: number) {
@@ -75,26 +87,26 @@ function AdminCalendarDesktop() {
   };
 
   return (
-    <Stack spacing={2} sx={{ px: { xs: 2, md: 3 }, py: 2 }}>
-      <Stack direction="row" sx={{ alignItems: "center", flexWrap: "wrap", gap: 1.5, justifyContent: "space-between" }}>
-        <Typography component="h1" variant="h1">Lịch giảng dạy</Typography>
-        <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap" }}>
-          <ErgButton onClick={() => main.setAnchor(todayInput())} variant="outlined">Hôm nay</ErgButton>
-          <ErgIconButton label={`${unit[0].toUpperCase()}${unit.slice(1)} trước`} onClick={() => step(-1)}><ChevronLeftIcon /></ErgIconButton>
-          <ErgIconButton label={`${unit[0].toUpperCase()}${unit.slice(1)} sau`} onClick={() => step(1)}><ChevronRightIcon /></ErgIconButton>
-          <Typography sx={{ typography: "subtitle2" }}>{label}</Typography>
+    <Stack spacing={1.5} sx={{ px: { xs: 2, md: 3 }, py: 2 }}>
+      <Stack direction="row" sx={{ alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
+        <Typography component="h1" sx={{ mr: 1 }} variant="h1">Lịch giảng dạy</Typography>
+        <ErgButton onClick={() => main.setAnchor(todayInput())} sx={controlSx} variant="outlined">Hôm nay</ErgButton>
+        <ErgIconButton label={`${unit[0].toUpperCase()}${unit.slice(1)} trước`} onClick={() => step(-1)} sx={arrowSx}><ChevronLeftIcon /></ErgIconButton>
+        <ErgIconButton label={`${unit[0].toUpperCase()}${unit.slice(1)} sau`} onClick={() => step(1)} sx={arrowSx}><ChevronRightIcon /></ErgIconButton>
+        <Typography sx={{ fontSize: "1.125rem", fontWeight: "fontWeightMedium" }}>{label}</Typography>
+        <Stack direction="row" sx={{ alignItems: "center", gap: 1, ml: "auto" }}>
           <Tabs
             onChange={(_event, value: CalendarMode | "overview") => (value === "overview" ? go("/calendar/overview", `?week=${weekStartOf(main.anchor)}`) : main.setMode(value))}
-            sx={ergSegmentedTabsSx} value={main.mode}
+            sx={segmentedSx} value={main.mode}
           >
             {MODES.map((mode) => <Tab key={mode.value} label={mode.label} value={mode.value} />)}
           </Tabs>
           <DaysOffLink />
-          <ErgButton disabled={!reuseSchoolId} onClick={() => setReuseOpen(true)} variant="outlined">Dùng lại tuần này…</ErgButton>
-          <ErgButton onClick={() => go("/calendar/schedule")} startIcon={<AddIcon />} variant="contained">Xếp lịch</ErgButton>
+          <ErgButton disabled={!reuseSchoolId} onClick={() => setReuseOpen(true)} sx={controlSx} variant="outlined">Dùng lại tuần này…</ErgButton>
+          <ErgButton onClick={() => go("/calendar/schedule")} sx={{ ...controlSx, px: 2, typography: "button" }} variant="contained">+ Xếp lịch</ErgButton>
         </Stack>
       </Stack>
-      <Stack direction={{ md: "row", xs: "column" }} spacing={2} sx={{ alignItems: "flex-start" }}>
+      <Stack direction={{ md: "row", xs: "column" }} spacing={1.5}>
         <MainSidePanel
           anchor={main.anchor} onPickDay={(day) => { main.setAnchor(day); if (main.mode === "month") main.setMode("day"); }}
           onToggleSchool={main.toggleSchool} onToggleTeacher={main.toggleTeacher} schoolIds={main.schoolIds}

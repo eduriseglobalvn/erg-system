@@ -13,7 +13,7 @@ import { ErgTextField } from "@/components/erg-mui/erg-form";
 import { useTeachingDayLoads } from "@/features/teaching-calendar/api/teaching-calendar-day-loads-api";
 import { useCreateHoliday } from "../../api/timekeeping-config-query";
 import type { HolidayCommand } from "../../api/timekeeping-types";
-import { AffectedNotice, FieldBlock, HolidayFields } from "./days-off-fields";
+import { AffectedNotice, FieldBlock, HolidayFields, segmentedSx } from "./days-off-fields";
 import { addCommand, addDays, affectedNotice, errorCodeOf, rangeSummary, sumLoads, type AddFormState } from "./days-off-model";
 import { requestErrorText } from "../../components/requests/request-model";
 import { usePastConfirm } from "./days-off-past-warning-dialog";
@@ -58,13 +58,13 @@ export const holidayErrorText = (error: unknown) =>
 type FormApi = ReturnType<typeof useAddHolidayForm>;
 
 /** Ngày · Tên ngày nghỉ · Loại · Tính lương · Tiết dạy · khối cam · lỗi. */
-export function AddHolidayFields({ form }: { form: FormApi }) {
+export function AddHolidayFields({ form, touch = false }: { form: FormApi; touch?: boolean }) {
   const { set, state } = form;
   return (
     <LocalizationProvider adapterLocale="vi" dateAdapter={AdapterDayjs}>
       <Box sx={{ display: "grid", gap: 2 }}>
         <FieldBlock label="Ngày">
-          <ToggleButtonGroup aria-label="Số ngày" exclusive onChange={(_, value) => { if (value) set({ mode: value, to: value === "ONE" ? state.from : state.to || state.from }); }} role="radiogroup" size="small" value={state.mode}>
+          <ToggleButtonGroup aria-label="Số ngày" exclusive onChange={(_, value) => { if (value) set({ mode: value, to: value === "ONE" ? state.from : state.to || state.from }); }} role="radiogroup" size="small" sx={[segmentedSx(touch ? 32 : 30, 3, "0.8125rem"), { width: touch ? "100%" : 260 }]} value={state.mode}>
             <ToggleButton aria-checked={state.mode === "ONE"} role="radio" value="ONE">Một ngày</ToggleButton>
             <ToggleButton aria-checked={state.mode === "RANGE"} role="radio" value="RANGE">Khoảng ngày</ToggleButton>
           </ToggleButtonGroup>
@@ -75,7 +75,7 @@ export function AddHolidayFields({ form }: { form: FormApi }) {
           {state.mode === "RANGE" && rangeSummary(state.from, state.to) ? <Typography color="text.secondary" variant="caption">{rangeSummary(state.from, state.to)}</Typography> : null}
         </FieldBlock>
         <ErgTextField label="Tên ngày nghỉ" onChange={(event) => set({ name: event.target.value })} slotProps={{ htmlInput: { maxLength: 120 } }} value={state.name} />
-        <HolidayFields compact kind={state.kind} onKind={(kind) => set({ kind })} onPayMode={(payMode) => set({ payMode })} onTeachingAction={(teachingAction) => set({ teachingAction })} payMode={state.payMode} teachingAction={state.teachingAction} />
+        <HolidayFields compact touch={touch} kind={state.kind} onKind={(kind) => set({ kind })} onPayMode={(payMode) => set({ payMode })} onTeachingAction={(teachingAction) => set({ teachingAction })} payMode={state.payMode} teachingAction={state.teachingAction} />
         {form.impact.periods > 0 ? <AffectedNotice>{affectedNotice(form.impact.periods, form.impact.schools, state.mode === "RANGE" && state.to > state.from)}</AffectedNotice> : null}
         {form.exists ? <AffectedNotice>{form.errorText}</AffectedNotice> : form.errorText ? <Typography color="error" role="alert" variant="body2">{form.errorText}</Typography> : null}
       </Box>

@@ -5,7 +5,6 @@ import Fab from "@mui/material/Fab";
 import Link from "@mui/material/Link";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import AddIcon from "@mui/icons-material/Add";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
@@ -27,13 +26,14 @@ import { ErgButton } from "@/components/erg-mui/erg-actions";
 import { draftIssueLine } from "../main/draft-card";
 import { EventDetails } from "../main/event-popover";
 import { useCalendarMain } from "../main/use-calendar-main";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 import { scheduleTokens } from "../shared/schedule-cell-sx";
 import { AdminMobileCard, mobileCardTag } from "./admin-mobile-card";
 import { AdminMobileFilterSheet } from "./admin-mobile-filter-sheet";
 import { AdminMobileSheet } from "./admin-mobile-sheet";
 
+const color = ergEnterpriseTokens.color;
 const DAY_HEAD = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
-const dayTab = (date: string) => `${DAY_HEAD[new Date(`${date}T00:00:00Z`).getUTCDay()]} ${Number(date.slice(8))}`;
 
 /** Trang «Lịch giảng dạy» khi `isPhone` (6.8): chọn trường, tab ngày, banner đợt nháp, thẻ tiết, FAB «Tạo lịch dạy». */
 export function AdminMobileDay() {
@@ -49,6 +49,7 @@ export function AdminMobileDay() {
   const school = schoolOptions.find((item) => item.schoolId === schoolId);
   const days = Array.from({ length: 7 }, (_, index) => addDaysToDate(weekStartOf(main.anchor), index));
   const errorIds = useMemo(() => new Set(main.conflicts.filter((conflict) => conflict.severity === "ERROR" && conflict.mine.eventId).map((conflict) => conflict.mine.eventId as string)), [main.conflicts]);
+  const clashDays = useMemo(() => new Set(main.events.filter((event) => errorIds.has(event.id)).map((event) => event.date)), [main.events, errorIds]);
   const busyDays = useMemo(() => new Set(main.events.map((event) => event.date)), [main.events]);
   const today = main.events.filter((event) => event.date === main.anchor).sort((a, b) => a.startTime.localeCompare(b.startTime));
   const draft = main.draftCards.find((card) => card.batch.schoolId === schoolId) ?? main.draftCards[0];
@@ -61,37 +62,44 @@ export function AdminMobileDay() {
 
   return (
     <Stack spacing={1.5} sx={{ pb: 10, px: 0.5, py: 1 }}>
-      <Stack direction="row" sx={{ alignItems: "flex-start", justifyContent: "space-between" }}>
+      <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between" }}>
         <Box sx={{ minWidth: 0 }}>
           <ErgSelect
             aria-label="Trường" onChange={(event) => setSchoolIds([event.target.value])}
             options={schoolOptions.map((item) => ({ label: item.schoolName, value: item.schoolId }))} size="small" value={schoolId}
           />
-          <Typography component="h1" sx={{ mt: 1 }} variant="h1">Lịch giảng dạy</Typography>
+          <Typography component="h1" sx={{ fontSize: "1.375rem" }} variant="h1">Lịch giảng dạy</Typography>
         </Box>
-        <ErgIconButton label="Bộ lọc" onClick={() => setFiltering(true)}><FilterListIcon /></ErgIconButton>
+        <ErgIconButton label="Bộ lọc" onClick={() => setFiltering(true)} sx={{ bgcolor: "background.paper", border: `1px solid ${color.border}`, borderRadius: `${ergEnterpriseTokens.radius.control}px`, color: color.textSecondary, height: 44, width: 44 }}><FilterListIcon /></ErgIconButton>
       </Stack>
-      <Stack direction="row" role="tablist" spacing={0.75} sx={{ overflowX: "auto", pb: 0.5 }}>
-        {days.map((day) => (
-          <ButtonBase
-            aria-selected={day === main.anchor} key={day} onClick={() => main.setAnchor(day)} role="tab"
-            sx={{ bgcolor: day === main.anchor ? "primary.main" : "background.default", borderRadius: "10px", color: day === main.anchor ? "primary.contrastText" : "text.primary", flexDirection: "column", flexShrink: 0, px: 1.5, py: 1, typography: "body2" }}
-          >
-            {dayTab(day)}
-            <Box aria-hidden data-testid={busyDays.has(day) ? "day-dot" : undefined} sx={{ bgcolor: busyDays.has(day) ? (day === main.anchor ? "primary.contrastText" : "primary.main") : "transparent", borderRadius: "50%", height: 4, mt: 0.25, width: 4 }} />
-          </ButtonBase>
-        ))}
-      </Stack>
+      <Box role="tablist" sx={{ display: "grid", gap: "4px", gridTemplateColumns: "repeat(7, minmax(0, 1fr))", py: 1 }}>
+        {days.map((day) => {
+          const on = day === main.anchor;
+          const dot = clashDays.has(day) ? scheduleTokens.clash.edge : busyDays.has(day) ? (on ? "primary.contrastText" : "primary.main") : "transparent";
+          return (
+            <ButtonBase
+              aria-selected={on} key={day} onClick={() => main.setAnchor(day)} role="tab"
+              sx={{ bgcolor: on ? "primary.main" : "background.paper", borderRadius: "12px", color: on ? "primary.contrastText" : color.text, flexDirection: "column", gap: "2px", height: 64, justifyContent: "center" }}
+            >
+              <Box component="span" sx={{ fontSize: "0.6875rem" }}>{DAY_HEAD[new Date(`${day}T00:00:00Z`).getUTCDay()]}</Box>
+              <Box component="span" sx={{ typography: "subtitle2", fontSize: "1rem" }}>{Number(day.slice(8))}</Box>
+              <Box aria-hidden component="span" data-testid={busyDays.has(day) ? "day-dot" : undefined} sx={{ bgcolor: dot, borderRadius: "999px", height: 5, width: 5 }} />
+            </ButtonBase>
+          );
+        })}
+      </Box>
       {draft ? (
-        <Box sx={{ bgcolor: scheduleTokens.published.bg, borderRadius: "10px", p: 1.5 }}>
-          <Typography sx={{ color: scheduleTokens.published.text, typography: "subtitle2" }}>{draft.batch.label} · Nháp</Typography>
-          <Typography sx={{ color: issues ? scheduleTokens.clash.text : "text.secondary", typography: "caption" }}>
-            {[`${main.events.filter((event) => event.batchId === draft.batch.id).length} buổi`, issues].filter(Boolean).join(" · ")}
-          </Typography>
-          <Link href={`${adminPath("/calendar/schedule")}?batchId=${draft.batch.id}`} sx={{ typography: "caption" }} underline="hover">Xem đợt</Link>
+        <Box sx={{ alignItems: "center", bgcolor: "background.paper", border: `1px solid ${color.border}`, borderRadius: `${ergEnterpriseTokens.radius.card}px`, display: "flex", gap: "10px", p: 1.5 }}>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Box sx={{ typography: "subtitle2" }}>{draft.batch.label} · Nháp</Box>
+            <Box sx={{ color: scheduleTokens.warn.text, fontSize: "0.75rem" }}>
+              {[`${main.events.filter((event) => event.batchId === draft.batch.id).length} buổi`, issues].filter(Boolean).join(" · ")}
+            </Box>
+          </Box>
+          <Link href={`${adminPath("/calendar/schedule")}?batchId=${draft.batch.id}`} sx={{ alignItems: "center", border: `1px solid ${color.primary}`, borderRadius: `${ergEnterpriseTokens.radius.control}px`, display: "inline-flex", height: 36, px: 1.5, typography: "subtitle2", fontSize: "0.8125rem" }} underline="none">Xem đợt</Link>
         </Box>
       ) : null}
-      <Typography sx={{ typography: "subtitle2" }}>{dayLabel(main.anchor)} · {today.length} buổi</Typography>
+      <Box component="h2" sx={{ color: color.textSecondary, m: "8px 0 0", typography: "subtitle2", fontSize: "0.8125rem" }}>{dayLabel(main.anchor)} · {today.length} buổi</Box>
       {main.loading ? <ContentPendingSkeleton /> : main.error ? (
         <ErgErrorState action={<ErgButton onClick={main.refetch} variant="outlined">Thử lại</ErgButton>} description="Kiểm tra kết nối rồi thử lại." title="Không tải được lịch." />
       ) : !today.length ? <ErgEmptyState title="Chưa có tiết nào trong tuần này" /> : (
@@ -101,9 +109,9 @@ export function AdminMobileDay() {
       )}
       <Fab
         color="primary" onClick={() => setAdding(true)}
-        sx={{ bottom: `calc(var(--erg-pwa-banner-lift, 0px) + ${ergMobileDockAnchor(16)})`, position: "fixed", right: 16, zIndex: "speedDial" }} variant="extended"
+        sx={{ bottom: `calc(var(--erg-pwa-banner-lift, 0px) + ${ergMobileDockAnchor(16)})`, borderRadius: "999px", height: 48, minHeight: 48, position: "fixed", px: 2.5, right: 16, typography: "subtitle2", fontSize: "0.9375rem", zIndex: "speedDial" }} variant="extended"
       >
-        <AddIcon sx={{ mr: 1 }} />Tạo lịch dạy
+        + Tạo lịch dạy
       </Fab>
       <MobileBottomSheet onOpenChange={(open) => !open && setSelected(null)} open={Boolean(selected)} title={selected ? `${selected.className} · ${dayLabel(selected.date)}` : "Chi tiết"}>
         {selected ? (

@@ -24,7 +24,7 @@ type Props = {
 
 function Pill({ label, tone }: { label: string; tone: Tone }) {
   return (
-    <Typography component="span" sx={{ alignSelf: "flex-start", bgcolor: tone.bg, borderRadius: `${tokens.radius.chip}px`, color: tone.color, px: 1, py: 0.25, typography: "caption" }}>
+    <Typography component="span" sx={{ alignItems: "center", alignSelf: "flex-start", bgcolor: tone.bg, borderRadius: `${tokens.radius.chip}px`, color: tone.color, display: "inline-flex", fontSize: "0.75rem", height: 22, maxWidth: "100%", overflow: "hidden", px: 1, textOverflow: "ellipsis", whiteSpace: "nowrap" }} variant="subtitle2">
       {label}
     </Typography>
   );
@@ -35,7 +35,7 @@ export function DaysOffMonthGrid({ holidays, modes, month, onPick, periods, sele
   return (
     <Box aria-label={`Lịch tháng ${Number(month.slice(5, 7))}`} component="section" sx={{ bgcolor: "background.paper", border: 1, borderColor: "divider", borderRadius: `${tokens.radius.card}px`, display: "flex", flexDirection: "column", overflow: "hidden" }}>
       <Box sx={{ borderBottom: 1, borderColor: "divider", display: "grid", gridTemplateColumns: "repeat(7, minmax(0, 1fr))" }}>
-        {HEAD.map((label) => <Typography color="text.secondary" key={label} sx={{ py: 0.75, textAlign: "center" }} variant="subtitle2">{label}</Typography>)}
+        {HEAD.map((label) => <Typography color="text.secondary" key={label} sx={{ fontSize: "0.75rem", height: 32, lineHeight: "32px", textAlign: "center" }} variant="subtitle2">{label}</Typography>)}
       </Box>
       <Box sx={{ display: "grid", flex: 1, gridAutoRows: "minmax(92px, 1fr)", gridTemplateColumns: "repeat(7, minmax(0, 1fr))" }}>
         {monthGrid(month).map((date) => {
@@ -70,7 +70,7 @@ export function DaysOffMonthGrid({ holidays, modes, month, onPick, periods, sele
                 textAlign: "left",
               }}
             >
-              <Typography component="span" sx={{ bgcolor: isToday ? "primary.main" : undefined, borderRadius: "50%", color: isToday ? "primary.contrastText" : inMonth && weekdayIndex(date) !== 6 ? "text.primary" : tokens.color.textMuted, height: 26, lineHeight: "26px", textAlign: "center", width: 26 }} variant="body2">
+              <Typography component="span" sx={{ bgcolor: isToday ? "primary.main" : undefined, borderRadius: "50%", color: isToday ? "primary.contrastText" : !inMonth ? tokens.color.textSoft : weekdayIndex(date) !== 6 ? "text.primary" : tokens.color.textMuted, fontSize: "0.8125rem", height: 26, lineHeight: "26px", textAlign: "center", width: 26 }} variant={isToday ? "subtitle2" : "body2"}>
                 {Number(date.slice(8))}
               </Typography>
               {inMonth && holiday ? <Pill label={kindLabel(holiday.kind)} tone={holidayTone(holiday.kind)} /> : null}
