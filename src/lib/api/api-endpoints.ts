@@ -157,9 +157,6 @@ export const API_ENDPOINTS = {
   sessions: {
     current: path("/api/v1/sessions/current"),
   },
-  calendar: {
-    importExcel: path("/api/v1/calendar/import-excel"),
-  },
   lcms: {
     mediaPresign: path("/api/v1/lcms/media/presign"),
     mediaCommit: (mediaId: string) => path(`/api/v1/lcms/media/${encodeApiPathSegment(mediaId)}/commit`),
@@ -235,6 +232,16 @@ export const API_ENDPOINTS = {
       month: "/api/v1/timekeeping/me/month" satisfies ContractPath,
       day: (date: string) => path(`${timekeepingRoot}/me/days/${encodeApiPathSegment(date)}`),
     },
+    teaching: {
+      myMonth: (month: string) => path(`${timekeepingRoot}/me/teaching/${encodeApiPathSegment(month)}`),
+      confirm: (month: string) => path(`${timekeepingRoot}/me/teaching/${encodeApiPathSegment(month)}/confirm`),
+      issue: (month: string) => path(`${timekeepingRoot}/me/teaching/${encodeApiPathSegment(month)}/issue`),
+      myPeriods: (month: string) => path(`${timekeepingRoot}/me/teaching/${encodeApiPathSegment(month)}/periods`),
+      adminPeriods: "/api/v1/timekeeping/admin/teaching/periods" satisfies ContractPath,
+      adminMonth: (month: string) => path(`${timekeepingRoot}/admin/teaching/months/${encodeApiPathSegment(month)}`),
+      adminMonthClose: (month: string) => path(`${timekeepingRoot}/admin/teaching/months/${encodeApiPathSegment(month)}/close`),
+      adminExport: "/api/v1/timekeeping/admin/teaching/export" satisfies ContractPath,
+    },
     requests: {
       root: "/api/v1/timekeeping/requests" satisfies ContractPath,
       mine: "/api/v1/timekeeping/requests/mine" satisfies ContractPath,
@@ -265,6 +272,10 @@ export const API_ENDPOINTS = {
       shift: (id: string) => path(`${timekeepingRoot}/admin/shifts/${encodeApiPathSegment(id)}`),
       holidays: "/api/v1/timekeeping/admin/holidays" satisfies ContractPath,
       holiday: (id: string) => path(`${timekeepingRoot}/admin/holidays/${encodeApiPathSegment(id)}`),
+      holidaysImportPreview: "/api/v1/timekeeping/admin/holidays/import-preview" satisfies ContractPath,
+      holidaysImport: "/api/v1/timekeeping/admin/holidays/import" satisfies ContractPath,
+      saturdayModes: "/api/v1/timekeeping/admin/saturday-modes" satisfies ContractPath,
+      saturdayMode: (date: string) => path(`${timekeepingRoot}/admin/saturday-modes/${encodeApiPathSegment(date)}`),
       remoteRules: "/api/v1/timekeeping/admin/remote-rules" satisfies ContractPath,
       remoteRule: (id: string) => path(`${timekeepingRoot}/admin/remote-rules/${encodeApiPathSegment(id)}`),
       policy: (schoolId: string) => path(`${timekeepingRoot}/admin/policies/${encodeApiPathSegment(schoolId)}`),

@@ -98,6 +98,11 @@ export async function readResponseBody<T>(response: Response, responseType: ApiR
   return response.blob() as Promise<T>;
 }
 
+/** A bare error code keeps its string shape; an error body that carries a payload in `data` (e.g. HOLIDAY_AFFECTS_PAST_PERIODS) exposes it as `details.data`. */
+function codeWithData(code: string, data: unknown): unknown {
+  return data !== null && typeof data === "object" ? { code, data } : code;
+}
+
 export function getErrorBody(value: unknown) {
   if (!isApiEnvelope<unknown>(value)) {
     return null;
@@ -105,13 +110,13 @@ export function getErrorBody(value: unknown) {
 
   if (value.error) {
     return typeof value.error === "string"
-      ? { code: value.error, message: value.message, details: value.error, requestId: value.request_id }
+      ? { code: value.error, message: value.message, details: codeWithData(value.error, value.data), requestId: value.request_id }
       : { code: value.error.code, message: value.error.message ?? value.message, details: value.error, requestId: value.request_id };
   }
 
   if (value.errors && !Array.isArray(value.errors)) {
     return typeof value.errors === "string"
-      ? { code: value.errors, message: value.message, details: value.errors, requestId: value.request_id }
+      ? { code: value.errors, message: value.message, details: codeWithData(value.errors, value.data), requestId: value.request_id }
       : { code: value.errors.code, message: value.message, details: value.errors, requestId: value.request_id };
   }
 
