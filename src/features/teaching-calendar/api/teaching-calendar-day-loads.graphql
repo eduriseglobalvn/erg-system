@@ -1,0 +1,5 @@
+query TeachingCalendarDayLoads($from: Date!, $to: Date!) {
+  lcms {
+    teachingScheduleDayLoads(from: $from, to: $to) { date periods schools }
+  }
+}

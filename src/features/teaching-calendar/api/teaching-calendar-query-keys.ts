@@ -34,6 +34,20 @@ export const teachingCalendarQueryKeys = {
     [...teachingCalendarQueryKeys.portalRoot(portal, tenantId), "batches"] as const,
   batchDetail: (portal: GraphQlPortal, tenantId: string, batchId: string) =>
     [...teachingCalendarQueryKeys.portalRoot(portal, tenantId), "batch-detail", batchId] as const,
+  periodTemplates: (tenantId: string = getDefaultTenantId()) =>
+    [...teachingCalendarQueryKeys.portalRoot("lcms", tenantId), "period-templates"] as const,
+  scheduleDraft: (tenantId: string, batchId: string) =>
+    [...teachingCalendarQueryKeys.portalRoot("lcms", tenantId), "schedule-draft", batchId] as const,
+  slotOptions: (tenantId: string, input: object) =>
+    [...teachingCalendarQueryKeys.portalRoot("lcms", tenantId), "slot-options", input] as const,
+  reusePreview: (tenantId: string, input: object) =>
+    [...teachingCalendarQueryKeys.portalRoot("lcms", tenantId), "reuse-preview", input] as const,
+  overviewRoot: (tenantId: string) => [...teachingCalendarQueryKeys.portalRoot("lcms", tenantId), "overview"] as const,
+  overview: (tenantId: string, kind: "schools" | "grid" | "teachers", input: object) =>
+    [...teachingCalendarQueryKeys.overviewRoot(tenantId), kind, input] as const,
+  loadSettings: (tenantId: string) => [...teachingCalendarQueryKeys.portalRoot("lcms", tenantId), "load-settings"] as const,
+  travelTimes: (tenantId: string, search: string) =>
+    [...teachingCalendarQueryKeys.portalRoot("lcms", tenantId), "travel-times", search] as const,
   batchMutationTargets: (portal: GraphQlPortal, tenantId: string, batchId: string) => [
     teachingCalendarQueryKeys.batchesRoot(portal, tenantId),
     teachingCalendarQueryKeys.batchDetail(portal, tenantId, batchId),

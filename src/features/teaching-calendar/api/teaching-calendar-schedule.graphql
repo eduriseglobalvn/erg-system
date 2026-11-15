@@ -1,0 +1,29 @@
+query TeachingCalendarPeriodTemplates {
+  lcms { teachingPeriodTemplates { ...TeachingCalendarTemplateFields } }
+}
+
+query TeachingCalendarScheduleDraft($batchId: ID!) {
+  lcms { teachingScheduleDraft(batchId: $batchId) { ...TeachingCalendarDraftResultFields } }
+}
+
+mutation TeachingCalendarSaveScheduleDraft($input: SaveTeachingScheduleDraftInput!) {
+  saveTeachingScheduleDraft(input: $input) { ...TeachingCalendarDraftResultFields }
+}
+
+mutation TeachingCalendarPublishScheduleBatchV2($batchId: ID!, $expectedVersion: Int!) {
+  publishTeachingScheduleBatch(batchId: $batchId, expectedVersion: $expectedVersion) {
+    id schoolId label status version periodTemplateId applyFrom repeatWeeks publishedAt affectedEventCount
+  }
+}
+
+mutation TeachingCalendarCancelScheduleBatchV2($batchId: ID!, $expectedVersion: Int!) {
+  cancelTeachingScheduleBatch(batchId: $batchId, expectedVersion: $expectedVersion) {
+    id schoolId label status version periodTemplateId applyFrom repeatWeeks publishedAt affectedEventCount
+  }
+}
+
+mutation TeachingCalendarRenameScheduleBatch($batchId: ID!, $label: String!, $expectedVersion: Int!) {
+  renameTeachingScheduleBatch(batchId: $batchId, label: $label, expectedVersion: $expectedVersion) {
+    id schoolId label status version periodTemplateId applyFrom repeatWeeks publishedAt affectedEventCount
+  }
+}

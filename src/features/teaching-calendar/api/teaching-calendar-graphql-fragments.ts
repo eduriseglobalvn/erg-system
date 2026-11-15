@@ -3,7 +3,7 @@ export const calendarEventFields = `
     id batchId title startAt endAt date startTime endTime schoolId schoolName
     classId className subjectId subjectName levelId levelName roomId roomName
     periodStart periodCount teachers { userId displayName role colorKey }
-    status note colorGroup { key label kind }
+    status note colorGroup { key label kind } myRole mainTeacherName assistantName
   }
 `;
 

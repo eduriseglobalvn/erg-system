@@ -1,0 +1,46 @@
+query TeachingCalendarOverviewSchools($weekStart: Date!, $search: String, $quick: String, $page: Int!, $size: Int!) {
+  lcms {
+    teachingScheduleOverviewSchools(weekStart: $weekStart, search: $search, quick: $quick, page: $page, size: $size) {
+      total
+      items { ...TeachingCalendarSchoolRowFields }
+      quickCounts { conflicts travel drafts empty }
+    }
+  }
+}
+
+query TeachingCalendarOverviewGrid($weekStart: Date!, $schoolIds: [ID!]!) {
+  lcms {
+    teachingScheduleOverviewGrid(weekStart: $weekStart, schoolIds: $schoolIds) {
+      weekStart
+      template { ...TeachingCalendarTemplateFields }
+      schools { ...TeachingCalendarSchoolRowFields }
+      cells { schoolId weekday periodNo eventId className roomName teacherName assistantName status conflictKinds note batchLabel }
+      holidays { date name kind }
+      conflicts { ...TeachingCalendarConflictFields }
+    }
+  }
+}
+
+query TeachingCalendarOverviewTeachers($weekStart: Date!, $search: String, $quick: String, $sort: String, $page: Int!, $size: Int!) {
+  lcms {
+    teachingScheduleOverviewTeachers(weekStart: $weekStart, search: $search, quick: $quick, sort: $sort, page: $page, size: $size) {
+      total
+      quickCounts { conflicts travel multiSchool overload empty }
+      items {
+        teacherId teacherName initials schoolCount conflictCount weeklyPeriods maxPeriods
+        leave { fromDate toDate part }
+        revokeNotice { ...TeachingCalendarAccessFields }
+        days { weekday schoolShortNames multiSchoolSameSession onLeave travel { ...TeachingCalendarTravelFields } }
+        slots { weekday periodNo eventIds classNames schoolShortNames conflict travel onLeave status roles }
+      }
+    }
+  }
+}
+
+query TeachingCalendarScheduleLoadSettings {
+  lcms { teachingScheduleLoadSettings { loadWarn loadMax updatedAt } }
+}
+
+mutation TeachingCalendarUpdateScheduleLoadSettings($loadWarn: Int!, $loadMax: Int!) {
+  updateTeachingScheduleLoadSettings(loadWarn: $loadWarn, loadMax: $loadMax) { loadWarn loadMax updatedAt }
+}

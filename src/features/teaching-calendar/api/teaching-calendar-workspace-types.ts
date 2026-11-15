@@ -43,6 +43,10 @@ export type TeachingCalendarEvent = {
   id: string;
   levelId?: string | null;
   levelName?: string | null;
+  mainTeacherName?: string | null;
+  assistantName?: string | null;
+  /** Vai tro cua nguoi dang xem lich (lich giao vien): MAIN hoac ASSISTANT. */
+  myRole?: "MAIN" | "ASSISTANT" | null;
   note?: string | null;
   periodCount: number;
   periodStart: number;

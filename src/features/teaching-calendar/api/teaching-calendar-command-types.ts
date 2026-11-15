@@ -127,14 +127,3 @@ export type TeachingScheduleBatchDetail = TeachingScheduleBatchSummary & {
 
 export type CreateRoomInput = { roomName: string; schoolId: string; tenantId?: string };
 export type TeachingScheduleRoomOption = { id: string; label: string; schoolId: string };
-
-export type TeachingScheduleExcelImportInput = {
-  academicYear?: string;
-  applyFrom: string;
-  note?: string;
-  overrideConflicts?: boolean;
-  repeatWeeks: number;
-  resolveMode?: TeachingScheduleResolveMode;
-  schoolId: string;
-  tenantId?: string;
-};
