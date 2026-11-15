@@ -33,6 +33,7 @@ type LcmsQuery {
   teachingScheduleBatches(input: TeachingScheduleBatchListInput): TeachingScheduleBatchPage!
   teachingScheduleBatch(input: TeachingScheduleBatchDetailInput!): TeachingScheduleBatchDetail!
   teachingPeriodTemplates: [TeachingPeriodTemplate!]!
+  schoolPeriodAssignments(schoolIds: [ID!]): [SchoolPeriodAssignment!]!
   teachingScheduleSlotOptions(schoolId: ID!, batchId: ID, date: Date!, periodNo: Int!, classId: ID, excludeEventId: ID): TeachingSlotOptions!
   teachingScheduleDraft(batchId: ID!): TeachingScheduleDraftResult!
   previewTeachingScheduleReuse(input: TeachingScheduleReuseInput!): TeachingScheduleReusePreview!
@@ -1074,6 +1075,11 @@ type Mutation {
   renameTeachingScheduleBatch(batchId: ID!, label: String!, expectedVersion: Int!): TeachingScheduleBatch!
   updateTeachingScheduleLoadSettings(loadWarn: Int!, loadMax: Int!): TeachingScheduleLoadSettings!
   reuseTeachingScheduleWeek(input: TeachingScheduleReuseInput!): TeachingScheduleDraftResult!
+  editTeachingScheduleSlot(input: EditTeachingScheduleSlotInput!): TeachingScheduleSlotChangeResult!
+  swapTeachingScheduleTeacher(input: SwapTeachingScheduleTeacherInput!): TeachingScheduleSlotChangeResult!
+  saveTeachingPeriodTemplate(input: SaveTeachingPeriodTemplateInput!): TeachingPeriodTemplate!
+  assignSchoolPeriodTemplate(schoolId: ID!, templateId: ID!, effectiveFrom: Date!): SchoolPeriodAssignment!
+  saveSchoolPeriodTimes(input: SaveSchoolPeriodTimesInput!): SchoolPeriodAssignment!
   upsertSchoolTravelTime(schoolAId: ID!, schoolBId: ID!, minutes: Int!): SchoolTravelTime!
   deleteSchoolTravelTime(schoolAId: ID!, schoolBId: ID!): Boolean!
   createRoom(input: CreateRoomInput!): TeachingScheduleRoomOption!
@@ -1342,7 +1348,7 @@ scalar DateTime
 
 enum TeachingScheduleConflictKind { TEACHER_TIME CLASS_TIME ROOM_TIME TRAVEL_TIME TEACHER_ON_LEAVE }
 enum TeachingScheduleSeverity { ERROR WARNING }
-enum TeachingSession { MORNING AFTERNOON }
+enum TeachingSession { MORNING AFTERNOON EVENING }
 enum TeachingScheduleFixKind { CHANGE_TEACHER CHANGE_ROOM CHANGE_PREVIOUS_TEACHER }
 enum TeachingAccessState { EXISTING NEW REVOKE }
 enum TeachingSlotOptionState { SUGGESTED FREE BUSY TRAVEL LEAVE }
@@ -1352,6 +1358,46 @@ type TeachingScheduleBatch { id: ID!, schoolId: ID!, label: String!, status: Tea
 
 type TeachingPeriodSlot { periodNo: Int!, session: TeachingSession!, startTime: String, endTime: String }
 type TeachingPeriodTemplate { id: ID!, name: String!, periodsPerDay: Int!, slots: [TeachingPeriodSlot!]! }
+enum TeachingScheduleChangeScopeKind { THIS_ONLY FROM_DATE_TO_END SELECTED_DATES }
+enum TeachingScheduleSwapReason { TIME_CONFLICT TEACHER_ON_LEAVE REASSIGNMENT }
+# THIS_ONLY: the period eventId. FROM_DATE_TO_END: the weekly repeats of that period from its date to the batch end. SELECTED_DATES: the repeats on dates.
+input TeachingScheduleChangeScopeInput { kind: TeachingScheduleChangeScopeKind!, dates: [Date!] }
+# Patch of a PUBLISHED period: null = unchanged. newDate needs scope THIS_ONLY. dryRun reports conflicts and affected periods without writing.
+input EditTeachingScheduleSlotInput {
+  eventId: ID!
+  expectedVersion: Int
+  scope: TeachingScheduleChangeScopeInput!
+  dryRun: Boolean
+  periodNo: Int
+  newDate: Date
+  roomId: ID
+  subjectId: ID
+  assistantId: ID
+  removeAssistant: Boolean
+  reason: String
+}
+input SwapTeachingScheduleTeacherInput {
+  eventId: ID!
+  expectedVersion: Int
+  scope: TeachingScheduleChangeScopeInput!
+  newTeacherId: ID!
+  reason: TeachingScheduleSwapReason
+  note: String
+  dryRun: Boolean
+}
+type TeachingScheduleChangedEvent { eventId: ID!, date: Date!, periodNo: Int!, version: Int }
+type TeachingScheduleSlotChangeResult {
+  applied: Boolean!
+  blocking: Boolean!
+  affectedCount: Int!
+  events: [TeachingScheduleChangedEvent!]!
+  conflicts: [TeachingScheduleConflictDetail!]!
+}
+# One dated table of a school ("Áp dụng từ 01/11/2026"); effectiveFrom is null for the table that predates dating.
+type SchoolPeriodAssignment { schoolId: ID!, schoolName: String!, templateId: ID!, templateName: String!, effectiveFrom: Date, current: Boolean! }
+input TeachingPeriodSlotInput { periodNo: Int!, session: TeachingSession!, startTime: String, endTime: String }
+input SaveTeachingPeriodTemplateInput { id: ID, name: String!, slots: [TeachingPeriodSlotInput!]! }
+input SaveSchoolPeriodTimesInput { schoolId: ID!, effectiveFrom: Date!, name: String!, slots: [TeachingPeriodSlotInput!]! }
 
 type TeachingScheduleSide {
   eventId: ID

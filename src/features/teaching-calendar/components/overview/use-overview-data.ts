@@ -10,6 +10,7 @@ import { MAX_COMPARED_SCHOOLS } from "@/features/teaching-calendar/domain/overvi
 import { addDaysToDate } from "@/features/teaching-calendar/domain/schedule-copy";
 import { getDefaultTenantId } from "@/lib/graphql-client";
 import { adminPath } from "@/platform/workspaces/workspace-paths";
+import { useSlotChangeDialogs } from "../slot-change/use-slot-change-dialogs";
 import type { OverviewParams } from "./use-overview-params";
 
 export const OVERVIEW_PAGE_SIZE = 50;
@@ -61,14 +62,16 @@ export function useOverviewData(params: OverviewParams) {
   const eventsById = useMemo(() => new Map<string, TeachingCalendarEvent>((workspace.data?.events ?? []).map((event) => [event.id, event])), [workspace.data]);
 
   /** Bam doi o / slot: mo trang xep cua dot chua tiet, focus o; o trong thi mo trang xep tuan do cua truong. */
+  const slotDialogs = useSlotChangeDialogs(Boolean(workspace.data?.permissions.canDelete));
   const openSchedule = (event: TeachingCalendarEvent | undefined, fallback: { date: string; intent?: "edit" | "teacher"; periodNo: number; schoolId?: string }) => {
+    if (slotDialogs.open(event, fallback.intent ?? "edit")) return;
     const focus = `focus=${event?.date ?? fallback.date}:${event?.periodStart ?? fallback.periodNo}&intent=${fallback.intent ?? "edit"}`;
     const target = event?.batchId ? `batchId=${event.batchId}&${focus}` : `${fallback.schoolId ? `schoolId=${fallback.schoolId}&` : ""}week=${week}&${focus}`;
     void navigate({ href: `${adminPath("/calendar/schedule")}?${target}` });
   };
 
   return {
-    eventsById, grid, loadSettings: settings.data, openSchedule, selected,
+    eventsById, grid, loadSettings: settings.data, openSchedule, selected, slotDialog: slotDialogs.element,
     schools: { fetchNext: () => void schoolPages.fetchNextPage(), hasMore: Boolean(schoolPages.hasNextPage), items: schoolItems, query: schoolPages, quickCounts: schoolPages.data?.pages[0]?.quickCounts, total: schoolPages.data?.pages[0]?.total ?? 0 },
     setTeacherPage, teacherPage, teachers,
   };

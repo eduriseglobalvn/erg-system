@@ -37,3 +37,13 @@ fragment TeachingCalendarSchoolRowFields on TeachingOverviewSchoolRow {
 fragment TeachingCalendarTemplateFields on TeachingPeriodTemplate {
   id name periodsPerDay slots { periodNo session startTime endTime }
 }
+
+fragment TeachingCalendarSlotChangeFields on TeachingScheduleSlotChangeResult {
+  applied blocking affectedCount
+  events { eventId date periodNo version }
+  conflicts { ...TeachingCalendarConflictFields }
+}
+
+fragment TeachingCalendarAssignmentFields on SchoolPeriodAssignment {
+  schoolId schoolName templateId templateName effectiveFrom current
+}

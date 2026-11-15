@@ -1,0 +1,7 @@
+query TeachingCalendarSchoolPeriodAssignments($schoolIds: [ID!]) {
+  lcms { schoolPeriodAssignments(schoolIds: $schoolIds) { ...TeachingCalendarAssignmentFields } }
+}
+
+mutation TeachingCalendarSaveSchoolPeriodTimes($input: SaveSchoolPeriodTimesInput!) {
+  saveSchoolPeriodTimes(input: $input) { ...TeachingCalendarAssignmentFields }
+}

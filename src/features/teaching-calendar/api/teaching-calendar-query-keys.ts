@@ -36,6 +36,10 @@ export const teachingCalendarQueryKeys = {
     [...teachingCalendarQueryKeys.portalRoot(portal, tenantId), "batch-detail", batchId] as const,
   periodTemplates: (tenantId: string = getDefaultTenantId()) =>
     [...teachingCalendarQueryKeys.portalRoot("lcms", tenantId), "period-templates"] as const,
+  periodAssignments: (tenantId: string, schoolIds: readonly string[] = []) =>
+    [...teachingCalendarQueryKeys.portalRoot("lcms", tenantId), "period-assignments", schoolIds.join(",")] as const,
+  slotChangePreview: (tenantId: string, kind: "edit" | "swap", input: object) =>
+    [...teachingCalendarQueryKeys.portalRoot("lcms", tenantId), "slot-change-preview", kind, input] as const,
   scheduleDraft: (tenantId: string, batchId: string) =>
     [...teachingCalendarQueryKeys.portalRoot("lcms", tenantId), "schedule-draft", batchId] as const,
   slotOptions: (tenantId: string, input: object) =>

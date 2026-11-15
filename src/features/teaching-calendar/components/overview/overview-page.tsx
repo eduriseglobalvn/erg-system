@@ -94,6 +94,7 @@ export function OverviewPage() {
           rows={data.schools.items} search={params.q} selected={data.selected} selectedRows={selectedRows} total={data.schools.total}
         />
       )}
+      {data.slotDialog}
       {failed ? <ErgErrorState action={<ErgButton onClick={retry} variant="outlined">Thử lại</ErgButton>} description="Kiểm tra kết nối rồi thử lại." title="Không tải được lịch." /> : tab === "teachers" ? (
         <OverviewTeacherPanel data={data} params={params} requiredMinutes={requiredMinutes} />
       ) : data.schools.query.isPending || (data.selected.length > 0 && data.grid.isPending) ? <ContentPendingSkeleton />

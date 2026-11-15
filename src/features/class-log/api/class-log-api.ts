@@ -19,40 +19,40 @@ export type ClassLogCurriculumRow = ClassLogCurriculumQuery["lms"]["lessonLogCur
 export type ClassLogStats = ClassLogConfirmWeekMutation["confirmLessonLogWeek"];
 export type ClassLogEntryInput = UpdateLessonLogEntryInput;
 
-function request<TData>(operationName: string, variables: Record<string, unknown>, signal?: AbortSignal) {
+function request<TData>({ operationName }: { operationName: string }, variables: Record<string, unknown>, signal?: AbortSignal) {
   return graphQlRequest<TData, Record<string, unknown>>({
     operationName, portal: "lms", query: ClassLogDocument, signal, tenantId: getDefaultTenantId(), variables,
   });
 }
 
 export async function loadTeacherWeek(vars: { weekStart: string; session?: string; status?: string }, signal?: AbortSignal) {
-  const data = await request<ClassLogTeacherWeekQuery>("ClassLogTeacherWeek", {
+  const data = await request<ClassLogTeacherWeekQuery>({ operationName: "ClassLogTeacherWeek" }, {
     weekStart: vars.weekStart, session: vars.session || null, status: vars.status || null,
   }, signal);
   return data.lms.lessonLogTeacherWeek;
 }
 
 export async function loadClassWeek(vars: { classId: string; weekStart: string }, signal?: AbortSignal) {
-  const data = await request<ClassLogClassWeekQuery>("ClassLogClassWeek", vars, signal);
+  const data = await request<ClassLogClassWeekQuery>({ operationName: "ClassLogClassWeek" }, vars, signal);
   return data.lms.lessonLogClassWeek;
 }
 
 export async function loadChanges(vars: { weekStart: string; classId?: string }, signal?: AbortSignal) {
-  const data = await request<ClassLogChangesQuery>("ClassLogChanges", { weekStart: vars.weekStart, classId: vars.classId || null }, signal);
+  const data = await request<ClassLogChangesQuery>({ operationName: "ClassLogChanges" }, { weekStart: vars.weekStart, classId: vars.classId || null }, signal);
   return data.lms.lessonLogChanges;
 }
 
 export async function loadCurriculum(vars: { classId: string; subjectId: string }, signal?: AbortSignal) {
-  const data = await request<ClassLogCurriculumQuery>("ClassLogCurriculum", vars, signal);
+  const data = await request<ClassLogCurriculumQuery>({ operationName: "ClassLogCurriculum" }, vars, signal);
   return data.lms.lessonLogCurriculum;
 }
 
 export async function updateLessonLogEntry(input: ClassLogEntryInput) {
-  const data = await request<ClassLogUpdateEntryMutation>("ClassLogUpdateEntry", { input });
+  const data = await request<ClassLogUpdateEntryMutation>({ operationName: "ClassLogUpdateEntry" }, { input });
   return data.updateLessonLogEntry;
 }
 
 export async function confirmLessonLogWeek(weekStart: string) {
-  const data = await request<ClassLogConfirmWeekMutation>("ClassLogConfirmWeek", { weekStart });
+  const data = await request<ClassLogConfirmWeekMutation>({ operationName: "ClassLogConfirmWeek" }, { weekStart });
   return data.confirmLessonLogWeek;
 }

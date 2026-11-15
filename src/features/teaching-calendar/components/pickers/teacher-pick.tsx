@@ -23,6 +23,8 @@ type Props = {
   mode?: TeacherPickMode;
   /** Giao vien chinh cua tiet: o che do tro giang luon nam o nhom «Không xếp được», khong chon duoc. */
   mainTeacher?: { id?: string; name?: string };
+  /** Trong dialog «Đổi giáo viên»: dòng chọn tô nền, không hiện dòng giải thích «khi xuất bản». */
+  inDialog?: boolean;
   onClose: () => void;
   onSelect: (teacher: { id: string; name: string } | null) => void;
   teachers: readonly Teacher[];
@@ -67,7 +69,7 @@ const TAGS: Record<string, { label: string; tone: "free" | "busy" | "travel" | "
 };
 
 /** AdminTeacherPick (6.3) va AdminAssistantPick (6.16): MOT component, khac nhau o prop `mode`. */
-export function TeacherPick({ className, mainTeacher, mode = "teacher", onClose, onSelect, selectedId, teachers }: Props) {
+export function TeacherPick({ className, inDialog = false, mainTeacher, mode = "teacher", onClose, onSelect, selectedId, teachers }: Props) {
   const assistant = mode === "assistant";
   const [query, setQuery] = useState("");
   const [cursor, setCursor] = useState(0);
@@ -100,7 +102,7 @@ export function TeacherPick({ className, mainTeacher, mode = "teacher", onClose,
         onClick={() => pick(teacher)}
         onMouseEnter={() => setCursor(index)}
         role="option"
-        sx={{ alignItems: "flex-start", bgcolor: highlighted === teacher ? scheduleTokens.published.bg : "transparent", borderTop: `1px solid ${color.divider}`, gap: 1.25, opacity: main ? 0.5 : teacher.state === "LEAVE" ? 0.55 : 1, px: 1.25, py: 1, textAlign: "left", width: "100%" }}
+        sx={{ alignItems: "flex-start", bgcolor: (inDialog ? teacher.teacherId === selectedId : highlighted === teacher) ? scheduleTokens.published.bg : "transparent", borderTop: `1px solid ${color.divider}`, gap: 1.25, opacity: main ? 0.5 : teacher.state === "LEAVE" ? 0.55 : 1, px: 1.25, py: 1, textAlign: "left", width: "100%" }}
       >
         <Avatar sx={{ bgcolor: teacherTone(teacher.teacherId).background, color: teacherTone(teacher.teacherId).text, height: 28, ...type.microStrong, width: 28 }}>{teacher.initials}</Avatar>
         <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -119,7 +121,7 @@ export function TeacherPick({ className, mainTeacher, mode = "teacher", onClose,
     );
   };
 
-  const status = preview
+  const status = preview && !inDialog
     ? assistant
       ? `Chọn ${preview.teacherName} làm trợ giảng: khi xuất bản sẽ cấp quyền lớp ${className} (${preview.classAccess === "NEW" ? "mới" : "đã có"}) và gửi lịch cho ${preview.teacherName}. Tiết trợ giảng được tính vào tải tuần.`
       : `Chọn ${preview.teacherName}: khi xuất bản sẽ cấp quyền lớp ${className} (${preview.classAccess === "NEW" ? "mới" : "đã có"}).`
@@ -127,11 +129,11 @@ export function TeacherPick({ className, mainTeacher, mode = "teacher", onClose,
   let index = assistant ? 1 : 0;
 
   return (
-    <Stack onKeyDown={onKeyDown} sx={{ width: { sm: 440, xs: "100%" } }}>
-      <Box sx={{ p: 1.5 }}>
+    <Stack onKeyDown={onKeyDown} sx={{ width: inDialog ? "100%" : { sm: 440, xs: "100%" } }}>
+      <Box sx={{ p: inDialog ? 0 : 1.5, pb: inDialog ? 0.75 : 1.5 }}>
         <ErgTextField autoFocus compact onChange={(event) => { setQuery(event.target.value); setCursor(0); }} placeholder={assistant ? "Tìm trợ giảng…" : "Tìm giáo viên…"} value={query} />
       </Box>
-      <Box aria-label="Giáo viên" role="listbox" sx={{ border: 1, borderColor: "divider", borderRadius: `${radius.control}px`, maxHeight: 420, mx: 1.5, overflow: "hidden auto" }}>
+      <Box aria-label="Giáo viên" role="listbox" sx={{ border: 1, borderColor: "divider", borderRadius: `${radius.control}px`, maxHeight: inDialog ? 240 : 420, mx: inDialog ? 0 : 1.5, overflow: "hidden auto" }}>
         {assistant ? (
           <ButtonBase onClick={() => pick(null)} onMouseEnter={() => setCursor(0)} role="option" sx={{ alignItems: "center", bgcolor: highlighted === null ? "action.hover" : "transparent", gap: 1.25, px: 1.5, py: 1, width: "100%" }}>
             <Box aria-hidden sx={{ border: 1, borderColor: "text.disabled", borderRadius: "50%", borderStyle: "dashed", height: 32, width: 32 }} />

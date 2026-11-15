@@ -25,6 +25,7 @@ import { scheduleTokens } from "../shared/schedule-cell-sx";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 import { teacherTone } from "../shared/teacher-tone";
 import { ReuseDialog } from "../reuse/reuse-dialog";
+import { useSlotChangeDialogs } from "../slot-change/use-slot-change-dialogs";
 import { DaysOffLink } from "./days-off-link";
 import { DraftCard } from "./draft-card";
 import { EventPopover } from "./event-popover";
@@ -81,7 +82,9 @@ function AdminCalendarDesktop() {
   const unit = main.mode === "day" ? "ngày" : main.mode === "week" ? "tuần" : "tháng";
   const label = main.mode === "day" ? main.anchor.split("-").reverse().join("/") : main.mode === "month" ? `Tháng ${Number(main.anchor.slice(5, 7))}, ${main.anchor.slice(0, 4)}` : weekRangeLabel(main.weekStart);
 
+  const slotDialogs = useSlotChangeDialogs(main.canDelete);
   const openSchedule = (event: TeachingCalendarEvent, intent: "edit" | "copy" | "teacher" | "move") => {
+    if (slotDialogs.open(event, intent)) { setSelected(null); return; }
     if (!event.batchId) return;
     go("/calendar/schedule", `?batchId=${encodeURIComponent(event.batchId)}&focus=${event.date}:${event.periodStart}&intent=${intent}`);
   };
@@ -131,6 +134,7 @@ function AdminCalendarDesktop() {
         </Box>
       </Stack>
       <ReuseDialog onClose={() => setReuseOpen(false)} onSchoolChange={setReuseSchool} open={reuseOpen} schoolId={reuseSchoolId} schools={reuseSchools} weekStart={main.weekStart} />
+      {slotDialogs.element}
       <EventPopover
         anchorEl={selected?.anchor ?? null} canDelete={main.canDelete} conflicts={main.conflicts} event={selected?.event ?? null}
         onClose={() => setSelected(null)} onDelete={(event) => deleteEvent.mutateAsync(event).then(() => undefined)} onOpenSchedule={openSchedule}

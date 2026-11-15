@@ -31,6 +31,7 @@ import { scheduleTokens } from "../shared/schedule-cell-sx";
 import { AdminMobileCard, mobileCardTag } from "./admin-mobile-card";
 import { AdminMobileFilterSheet } from "./admin-mobile-filter-sheet";
 import { AdminMobileSheet } from "./admin-mobile-sheet";
+import { useSlotChangeDialogs } from "../slot-change/use-slot-change-dialogs";
 
 const color = ergEnterpriseTokens.color;
 const DAY_HEAD = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
@@ -59,6 +60,7 @@ export function AdminMobileDay() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: teachingCalendarQueryKeys.portalRoot("lcms", getDefaultTenantId()) }),
   });
   const go = (query: string) => void navigate({ href: `${adminPath("/calendar/schedule")}${query}` });
+  const slotDialogs = useSlotChangeDialogs(main.canDelete);
 
   return (
     <Stack spacing={1.5} sx={{ pb: 10, px: 0.5, py: 1 }}>
@@ -118,10 +120,11 @@ export function AdminMobileDay() {
           <EventDetails
             canDelete={main.canDelete} conflicts={main.conflicts} event={selected} onClose={() => setSelected(null)} repeatUntil={main.repeatUntilOf(selected.batchId)} showClose={false}
             onDelete={(event) => deleteEvent.mutateAsync(event).then(() => undefined)}
-            onOpenSchedule={(event, intent) => go(`?batchId=${event.batchId ?? ""}&focus=${event.date}:${event.periodStart}&intent=${intent}`)}
+            onOpenSchedule={(event, intent) => (slotDialogs.open(event, intent) ? setSelected(null) : go(`?batchId=${event.batchId ?? ""}&focus=${event.date}:${event.periodStart}&intent=${intent}`))}
           />
         ) : null}
       </MobileBottomSheet>
+      {slotDialogs.element}
       <AdminMobileSheet
         date={nearestGridDay(main.anchor)} events={main.events} onClose={() => setAdding(false)} open={adding}
         schoolId={schoolId} schoolName={school?.schoolName ?? ""}

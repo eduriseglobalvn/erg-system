@@ -12,6 +12,7 @@ import { ErgIconButton } from "@/components/erg-mui/erg-actions";
 import { ErgConfirmDialog } from "@/components/erg-mui/erg-confirm-dialog";
 import type { TeachingCalendarEvent } from "@/features/teaching-calendar/api/teaching-calendar-workspace-types";
 import { popoverConflictLine } from "@/features/teaching-calendar/domain/conflict-copy";
+import { isChangeable } from "@/features/teaching-calendar/domain/slot-change-model";
 import { dayLabel } from "@/features/teaching-calendar/domain/schedule-copy";
 import { formatDateVi } from "@/domain/formatters/format-date";
 import type { ScheduleConflict } from "@/features/teaching-calendar/domain/schedule-grid-model";
@@ -42,11 +43,12 @@ export function EventDetails({ canDelete, conflicts, event, onClose, onDelete, o
   const assistant = event.teachers.find((teacher) => teacher.role === "ASSISTANT")?.displayName;
   const own = conflicts.filter((conflict) => conflict.mine.eventId === event.id && conflict.severity === "ERROR");
   const draft = event.status === "DRAFT";
+  const canOpen = Boolean(event.batchId) || isChangeable(event);
   return (
     <>
       <Box sx={{ color: color.textSecondary, display: "flex", flexDirection: "column", fontSize: "0.8125rem", gap: 1 }}>
         <Stack direction="row" spacing={0.5} sx={{ color: color.textMuted, justifyContent: "flex-end" }}>
-          <ErgIconButton label="Sửa" disabled={!event.batchId} onClick={() => onOpenSchedule(event, "edit")} size="small"><EditOutlinedIcon fontSize="small" /></ErgIconButton>
+          <ErgIconButton label="Sửa" disabled={!canOpen} onClick={() => onOpenSchedule(event, "edit")} size="small"><EditOutlinedIcon fontSize="small" /></ErgIconButton>
           <ErgIconButton label="Nhân bản" disabled={!event.batchId} onClick={() => onOpenSchedule(event, "copy")} size="small"><ContentCopyOutlinedIcon fontSize="small" /></ErgIconButton>
           {canDelete ? <ErgIconButton label="Xoá" onClick={() => setConfirm(true)} size="small"><DeleteOutlinedIcon fontSize="small" /></ErgIconButton> : null}
           {showClose ? <ErgIconButton label="Đóng" onClick={onClose} size="small"><CloseIcon fontSize="small" /></ErgIconButton> : null}
@@ -68,8 +70,8 @@ export function EventDetails({ canDelete, conflicts, event, onClose, onDelete, o
           return <Box key={conflict.id} sx={{ bgcolor: scheduleTokens.clash.bg, borderRadius: `${ergEnterpriseTokens.radius.control}px`, color: scheduleTokens.clash.text, px: "10px", py: 1 }}>{text}</Box>;
         })}
         <Box sx={{ alignItems: "center", borderTop: `1px solid ${color.divider}`, display: "flex", gap: 1, pt: 1 }}>
-          <Link component="button" disabled={!event.batchId} onClick={() => onOpenSchedule(event, "teacher")} sx={{ typography: "subtitle2", fontSize: "0.8125rem" }} type="button" underline="none">Đổi giáo viên</Link>
-          <Link component="button" color="inherit" disabled={!event.batchId} onClick={() => onOpenSchedule(event, "move")} sx={{ fontSize: "0.8125rem" }} type="button" underline="none">Dời tiết</Link>
+          <Link component="button" disabled={!canOpen} onClick={() => onOpenSchedule(event, "teacher")} sx={{ typography: "subtitle2", fontSize: "0.8125rem" }} type="button" underline="none">Đổi giáo viên</Link>
+          <Link component="button" color="inherit" disabled={!canOpen} onClick={() => onOpenSchedule(event, "move")} sx={{ fontSize: "0.8125rem" }} type="button" underline="none">Dời tiết</Link>
           {draft ? <Box component="span" sx={{ bgcolor: scheduleTokens.neutral.bg, borderRadius: "999px", color: scheduleTokens.neutral.text, fontSize: "0.75rem", ml: "auto", px: 1, py: "1px" }}>Nháp</Box> : null}
         </Box>
       </Box>
