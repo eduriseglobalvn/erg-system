@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import IosShareRoundedIcon from "@mui/icons-material/IosShareRounded";
 import MoreVertRoundedIcon from "@mui/icons-material/MoreVertRounded";
@@ -53,7 +53,15 @@ export function PwaInstallBanner() {
   const [guideOpen, setGuideOpen] = useState(false);
   const os = install.platform === "ios" ? "ios" : install.platform === "android" ? "android" : null;
 
-  if (install.installed || dismissed || !os) return null;
+  const visible = !install.installed && !dismissed && Boolean(os);
+  // Bao cho nut noi (FAB) biet banner dang chiem day man hinh de nang len tren no.
+  useEffect(() => {
+    if (!visible) return undefined;
+    document.documentElement.style.setProperty("--erg-pwa-banner-lift", "76px");
+    return () => { document.documentElement.style.removeProperty("--erg-pwa-banner-lift"); };
+  }, [visible]);
+
+  if (!visible || !os) return null;
   const guide = GUIDES[os];
 
   function dismiss() {

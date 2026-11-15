@@ -9,6 +9,13 @@ export function formatDateVi(value: string | number | Date | null | undefined): 
   return Number.isNaN(date.getTime()) ? "" : `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()}`;
 }
 
+/** dd/MM/yyyy of an instant (e.g. UTC `closedAt`) in Asia/Ho_Chi_Minh (UTC+7, no DST), whatever the device zone. */
+export function formatDateViHcm(value: string | number | Date | null | undefined): string {
+  if (value === null || value === undefined || value === "") return "";
+  const d = new Date(new Date(value).getTime() + 7 * 3_600_000);
+  return Number.isNaN(d.getTime()) ? "" : `${pad(d.getUTCDate())}/${pad(d.getUTCMonth() + 1)}/${d.getUTCFullYear()}`;
+}
+
 /** dd/MM/yyyy -> yyyy-MM-dd for <input type="date">; "" when not a valid dd/MM/yyyy. */
 export function viDateToInput(value: string): string {
   const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value);

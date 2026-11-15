@@ -61,6 +61,20 @@ export const ROLE_DISPLAY_CATALOG: Record<string, RoleDisplayMeta> = {
     keyPermissions: ["Sắp xếp thời khóa biểu", "Kiểm duyệt sổ đầu bài", "Quản lý danh sách lớp"],
     label: "Chuyên viên Phòng Đào tạo (PĐT)",
   },
+  "school.training_head": {
+    badgeTone: "info",
+    category: "Quản lý Nhà trường & Đào tạo",
+    description: "Toàn bộ quyền của Phòng Đào tạo, thêm duyệt công tiết dạy và đơn chấm công của giáo viên.",
+    keyPermissions: ["Sắp xếp thời khóa biểu", "Duyệt công tiết dạy", "Duyệt đơn chấm công"],
+    label: "Trưởng phòng Đào tạo",
+  },
+  "school.hr": {
+    badgeTone: "info",
+    category: "Hành chính & Nhân sự",
+    description: "Duyệt công và đơn chấm công, xem bảng công toàn trường và chốt công cuối tháng.",
+    keyPermissions: ["Duyệt công", "Xem bảng công", "Chốt công tháng"],
+    label: "Nhân sự (HR)",
+  },
   "lms.admin": {
     badgeTone: "info",
     category: "Quản lý Nhà trường & Đào tạo",

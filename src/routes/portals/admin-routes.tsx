@@ -35,6 +35,10 @@ const leaderboardPage = lazyRouteComponent(
   () => import("@/features/elearning/class-leaderboard/components/class-leaderboard-page"),
   "AdminClassLeaderboardRoute",
 );
+const lessonReportPage = lazyRouteComponent(
+  () => import("@/features/class-log/reports/lesson-report-matrix-page"),
+  "LessonReportMatrixPage",
+);
 const timekeepingPages = () => import("@/features/timekeeping/components/timekeeping-route-pages");
 const timekeepingPage = (name: keyof Awaited<ReturnType<typeof timekeepingPages>>) => lazyRouteComponent(timekeepingPages, name);
 
@@ -50,8 +54,15 @@ function adminPageFor(wPath: string) {
   if (wPath === "employees/access-logs") return page("AdminEmployeeAccessLogsRoute");
   if (wPath === "employees/timekeeping") return timekeepingPage("AdminTimekeepingTodayRoute");
   if (wPath === "employees/timesheet") return timekeepingPage("AdminTimesheetRoute");
+  if (wPath === "employees/teaching-hours") return timekeepingPage("AdminTeachingHoursRoute");
+  if (wPath === "training/lesson-reports") return lessonReportPage;
   if (wPath === "employees/teacher-absence") return timekeepingPage("AdminTimekeepingApprovalsRoute");
   if (wPath === "employees/timekeeping-settings") return timekeepingPage("AdminTimekeepingSettingsRoute");
+  if (wPath === "calendar") return page("AdminCalendarRoute");
+  if (wPath === "calendar/schedule") return page("AdminCalendarScheduleRoute");
+  if (wPath === "calendar/days-off") return timekeepingPage("AdminDaysOffRoute");
+  if (wPath === "calendar/overview") return page("AdminCalendarOverviewRoute");
+  if (wPath === "calendar/settings/travel") return page("AdminCalendarTravelRoute");
   if (wPath === "ui-kit") return page("AdminUiKitRoute");
   if (wPath === "notifications") return inboxPage("AdminNotificationsPage");
   if (wPath === "notifications/compose") return composePage("AdminNotificationComposePage");

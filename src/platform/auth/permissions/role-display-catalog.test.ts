@@ -44,6 +44,8 @@ describe("role-display-catalog", () => {
     expect(getRoleMeta("lms_homeroom_teacher").label).toBe("Giáo viên chủ nhiệm");
     expect(getRoleMeta("pdt_operator").label).toBe("Chuyên viên Phòng Đào tạo (PĐT)");
     expect(getRoleMeta("seo.manager").label).toBe("Trưởng phòng Tuyển sinh & CRM");
+    expect(getRoleMeta("school.training_head").label).toBe("Trưởng phòng Đào tạo");
+    expect(getRoleMeta("school.hr").category).toBe("Hành chính & Nhân sự");
   });
 
   it("handles unknown roles gracefully with clean formatting and fallback metadata", () => {

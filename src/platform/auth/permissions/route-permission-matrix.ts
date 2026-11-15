@@ -97,9 +97,19 @@ const ADMIN_EXTRA_PERMISSIONS: Record<string, Pick<RoutePermissionEntry, "resour
   notifications: { resource: "notification", action: "read", permission: "lms.admin", alternatePermissions: ["notification.campaign.send"], matchChildren: true },
   // Children: /admin/notifications/compose/$campaignId.
   "notifications/compose": { resource: "notification.campaign", action: "send", permission: "notification.campaign.send", matchChildren: true },
+  // Lich day (LD F1): xem lich, xep lich (tao hoac sua), bang tong, cai dat di chuyen giua truong.
+  calendar: { resource: "schedule", action: "read", permission: "lms.schedule.read", alternatePermissions: ["lms.admin"] },
+  "calendar/schedule": { resource: "schedule", action: "create", permission: "lms.schedule.create", alternatePermissions: ["lms.schedule.update"] },
+  "calendar/overview": { resource: "schedule", action: "read", permission: "lms.schedule.read", alternatePermissions: ["lms.admin"] },
+  // Ngay nghi & thu 7 (LD F12): lenh chay tren REST cham cong, nen cung quyen voi cham cong.
+  "calendar/days-off": { resource: "timekeeping", action: "manage", permission: "timekeeping.manage" },
+  "calendar/settings/travel": { resource: "schedule", action: "manage", permission: "lms.schedule.manage" },
   "employees/timekeeping": { resource: "timekeeping", action: "manage", permission: "timekeeping.manage" },
   "employees/timesheet": { resource: "timekeeping", action: "manage", permission: "timekeeping.manage" },
   "employees/timekeeping-settings": { resource: "timekeeping", action: "manage", permission: "timekeeping.manage" },
+  // Cong bao giang (CBG F1): bang cong tiet day va quan ly bao giang, quyen duyet cong.
+  "employees/teaching-hours": { resource: "timekeeping", action: "approve", permission: "timekeeping.approve" },
+  "training/lesson-reports": { resource: "timekeeping", action: "approve", permission: "timekeeping.approve" },
   "employees/teacher-absence": { resource: "timekeeping", action: "approve", permission: "timekeeping.approve" },
   // Student discussions: tenant admins moderate every class (scope is enforced by the backend).
   discussion: { resource: "discussion", action: "moderate", permission: "elearning.discussion.moderate" },

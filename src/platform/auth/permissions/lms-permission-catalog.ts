@@ -34,6 +34,7 @@ export const LMS_PERMISSION_CATALOG = [
   "lms.schedule.delete",
   "lms.schedule.publish",
   "lms.schedule.import",
+  "lms.schedule.manage",
   "lms.class_log.read",
   "lms.class_log.write",
   "lms.resource.read",

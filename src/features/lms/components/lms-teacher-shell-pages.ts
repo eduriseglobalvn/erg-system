@@ -10,9 +10,9 @@ export const TeachingSchedulePanel = lazy(() =>
     default: module.LmsErgCalendarWorkspace,
   })),
 );
-export const WeeklyClassLogPage = lazy(() =>
-  import("@/features/lms/weekly-class-log").then((module) => ({
-    default: module.WeeklyClassLogPage,
+export const ClassLogPage = lazy(() =>
+  import("@/features/class-log").then((module) => ({
+    default: module.ClassLogPage,
   })),
 );
 export const ScoreSheetPanel = lazy(() =>

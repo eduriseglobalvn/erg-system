@@ -88,6 +88,27 @@ export const ergEnterpriseTokens = {
     info: { bg: "#EBF4FE", color: "#004A94", dot: "#0071E3" },
     neutral: { bg: "#F1F3F5", color: "#4B5563", dot: "#9CA3AF" },
   },
+  // Lich day (KE_HOACH_LICH_DAY.md 4.3): o/chip da xuat ban, nhap, trung, khong kip di chuyen, nghi. Dung qua schedule-cell-sx.ts.
+  schedule: {
+    surface: "#FFFFFF",
+    published: { bg: "#EBF4FE", text: "#004A94" },
+    draft: { stripe: "#EBF4FE", edge: "#0071E3" },
+    clash: { bg: "#FFEDEA", text: "#831C1E", edge: "#D92D20" },
+    warn: { bg: "#FFFBEB", text: "#92400E" },
+    neutral: { bg: "#F1F3F5", text: "#4B5563" },
+    off: { stripe: "#F1F3F5", stripeAlt: "#E3E3E8" },
+    // Event tones of the shared calendar board (replaces the former Google palette).
+    tones: {
+      blue: { background: "#EBF4FE", border: "#0071E3", text: "#004A94" },
+      green: { background: "#DCFAE5", border: "#16A34A", text: "#04250E" },
+      indigo: { background: "#E8EAFB", border: "#4F5BD5", text: "#2B3485" },
+      purple: { background: "#F0E8FB", border: "#8944D6", text: "#52259A" },
+      orange: { background: "#FFF1DD", border: "#D97706", text: "#92400E" },
+      pink: { background: "#FDE8F1", border: "#D6457F", text: "#8C1F4E" },
+      red: { background: "#FFEDEA", border: "#D92D20", text: "#831C1E" },
+      teal: { background: "#DDF4F2", border: "#0F8B8D", text: "#0B5557" },
+    },
+  },
   // Streak / flame accents (design H08-H18): streak chip, sidebar reminder card.
   fireTint: { chip: "#FFEDD5", card: "#FFF7ED", border: "#FED7AA", ink: "#9A3412", icon: "#EA580C" },
   font: {

@@ -147,7 +147,7 @@ export const LMS_MENU_GROUPS: MenuGroup[] = [
         icon: <FingerprintRoundedIcon />,
         children: [
           { id: "timekeeping-today", label: "Chấm công hôm nay", path: teacherPath("/timekeeping") },
-          { id: "timekeeping-timesheet", label: "Bảng công", path: teacherPath("/timekeeping/timesheet") },
+          { id: "timekeeping-timesheet", label: "Công của tôi", path: teacherPath("/timekeeping/timesheet") },
           { id: "timekeeping-requests", label: "Đơn từ", path: teacherPath("/timekeeping/requests") },
           { id: "timekeeping-approvals", label: "Duyệt đơn", path: teacherPath("/timekeeping/approvals") },
         ],
@@ -182,7 +182,7 @@ export const lmsMobileMoreItems: LmsMobileMoreItem[] = [
   { group: "Giảng dạy", icon: <ForumRoundedIcon />, label: "Thảo luận", path: teacherPath("/discussion") },
   { group: "Giảng dạy", icon: <LeaderboardRoundedIcon />, label: "Thi đua", path: teacherPath("/leaderboard") },
   { group: "Chấm công", icon: <FileText />, label: "Đơn từ", path: teacherPath("/timekeeping/requests"), tone: "success" },
-  { group: "Chấm công", icon: <CalendarViewMonthRoundedIcon />, label: "Bảng công", path: teacherPath("/timekeeping/timesheet"), tone: "success" },
+  { group: "Chấm công", icon: <CalendarViewMonthRoundedIcon />, label: "Công của tôi", path: teacherPath("/timekeeping/timesheet"), tone: "success" },
   { group: "Chấm công", icon: <PendingActionsRoundedIcon />, label: "Duyệt đơn", path: teacherPath("/timekeeping/approvals"), tone: "success" },
 ];
 
@@ -215,6 +215,7 @@ const MOBILE_TITLES: Array<[string, string]> = [
   ["/homework/student-groups", "Nhóm học sinh"],
   ["/homework/class", "Lớp học"],
   ["/attendance", "Điểm danh"],
+  ["/timekeeping/timesheet", "Công của tôi"],
   ["/reports", "Báo cáo lớp học"],
   ["/notifications", "Thông báo"],
   ["/account", "Tài khoản"],
