@@ -21,7 +21,7 @@ import { useConfirmWeek, useTeacherWeek } from "../hooks/use-class-log-queries";
 import { dayDot, groupPeriods, lessonLines, whenText, type DayDot, type PeriodGroup } from "./lesson-report-mobile-model";
 import { LessonReportPeriodSheet } from "./lesson-report-period-sheet";
 
-const dots: Record<DayDot, string> = { ok: t.statusTint.success.dot, late: t.statusTint.warning.dot, miss: t.statusTint.error.dot, none: "transparent" };
+const dots: Record<DayDot, string> = { ok: t.classLog.present.color, late: t.classLog.late.color, miss: t.statusTint.error.dot, none: "transparent" };
 const DAYS_SHOWN = 6;
 
 /** Phone «Báo giảng» (6.11): the week's unconfirmed periods first, with «Đổi» (lesson sheet) and «Xác nhận». */
@@ -111,7 +111,7 @@ function DoneRow({ group, first }: { group: PeriodGroup; first: boolean }) {
         <Typography sx={{ color: t.color.textMuted, fontSize: t.type.label.fontSize }}>{`${whenText(group)}${group.late ? " · muộn" : ""}`}</Typography>
         <Typography noWrap sx={{ fontSize: t.type.small.fontSize }}>{lessonLines(group).join(" · ")}</Typography>
       </Box>
-      <Box aria-label={group.late ? "Đã xác nhận muộn" : "Đã xác nhận"} component="span" role="img" sx={{ color: group.late ? t.statusTint.warning.color : t.statusTint.success.dot, fontWeight: t.type.label.fontWeight }}>✓</Box>
+      <Box aria-label={group.late ? "Đã xác nhận muộn" : "Đã xác nhận"} component="span" role="img" sx={{ color: group.late ? t.classLog.late.color : t.classLog.present.color, fontWeight: t.type.label.fontWeight }}>✓</Box>
     </Box>
   );
 }

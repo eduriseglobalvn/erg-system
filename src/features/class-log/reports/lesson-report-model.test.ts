@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { LessonReportMatrix, LessonReportRow } from "./lesson-report-api";
-import { cellNote, dayHead, overdueText, remindTargets, rowRate, sheetRows, summarize, weekTitle } from "./lesson-report-model";
+import { cellNote, dayHead, overdueText, rateTone, remindTargets, rowRate, sheetRows, summarize, weekTitle } from "./lesson-report-model";
 
 const cell = (date: string, state: LessonReportRow["cells"][number]["state"], periods = state === "NONE" ? 0 : 2) => ({ date, state, periods });
 const days = ["2026-11-09", "2026-11-10", "2026-11-11"];
@@ -51,5 +51,9 @@ describe("lesson report model", () => {
     expect(sheet[0]).toEqual(["Giáo viên", "Trường", "T2 09/11", "T3 10/11", "T4 11/11", "Đúng hạn"]);
     expect(sheet[1]?.[0]).toBe("'=HYPERLINK()");
     expect(sheet[1]?.slice(2)).toEqual(["Đúng hạn (2)", "Muộn (2)", "Chưa báo (2)", "33%"]);
+  });
+
+  it("bands the on-time rate", () => {
+    expect([50, 69, 70, 99, 100].map(rateTone)).toEqual(["bad", "bad", "warn", "warn", "good"]);
   });
 });

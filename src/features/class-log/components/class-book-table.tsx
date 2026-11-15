@@ -15,7 +15,7 @@ import { shortDateVi, weekdayVi } from "../domain/class-log-week";
 
 const line = `1px solid ${t.color.border}`;
 const dotted = `1px dotted ${t.color.border}`;
-const th = { border: line, bgcolor: t.color.surfaceMuted, ...t.type.label, px: 0.5, py: 0.75, textAlign: "center" } as const;
+const th = { border: line, bgcolor: t.color.surfaceMuted, ...t.type.label, px: "2px", py: 0.75, textAlign: "center" } as const;
 const numberRow = { ...th, bgcolor: "background.paper", color: t.color.textMuted, fontStyle: "italic", fontWeight: t.type.small.fontWeight } as const;
 const td = { border: line, fontSize: t.type.label.fontSize, px: 0.75, py: 0.5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } as const;
 const noScore = "—";
@@ -30,20 +30,20 @@ export function ClassBookTable({ week }: { week: ClassLogWeek }) {
         <ErgTable aria-label="Sổ đầu bài lớp" sx={{ minWidth: 980, tableLayout: "fixed" }}>
           <TableHead>
             <TableRow>
-              <TableCell rowSpan={2} sx={{ ...th, width: 76 }}>Thứ, ngày</TableCell>
-              <TableCell rowSpan={2} sx={{ ...th, width: 40 }}>Tiết</TableCell>
-              <TableCell rowSpan={2} sx={{ ...th, width: 90 }}>Môn</TableCell>
-              <TableCell rowSpan={2} sx={{ ...th, width: 56 }}>Tiết PPCT</TableCell>
-              <TableCell rowSpan={2} sx={{ ...th, width: 60 }}>Tiết thực tế</TableCell>
-              <TableCell rowSpan={2} sx={{ ...th, width: 130 }}>Học sinh vắng</TableCell>
+              <TableCell rowSpan={2} sx={{ ...th, width: 64 }}>Thứ, ngày</TableCell>
+              <TableCell rowSpan={2} sx={{ ...th, width: 34 }}>Tiết</TableCell>
+              <TableCell rowSpan={2} sx={{ ...th, width: 72 }}>Môn</TableCell>
+              <TableCell rowSpan={2} sx={{ ...th, width: 40 }}>Tiết PPCT</TableCell>
+              <TableCell rowSpan={2} sx={{ ...th, width: 44 }}>Tiết thực tế</TableCell>
+              <TableCell rowSpan={2} sx={{ ...th, width: 120 }}>Học sinh vắng</TableCell>
               <TableCell rowSpan={2} sx={th}>Tên bài học</TableCell>
               <TableCell rowSpan={2} sx={{ ...th, width: 150 }}>Nhận xét</TableCell>
               <TableCell colSpan={3} sx={th}>Điểm</TableCell>
-              <TableCell rowSpan={2} sx={{ ...th, width: 54 }}>Tổng điểm</TableCell>
-              <TableCell rowSpan={2} sx={{ ...th, width: 78 }}>GV dạy kí tên</TableCell>
+              <TableCell rowSpan={2} sx={{ ...th, width: 40 }}>Tổng điểm</TableCell>
+              <TableCell rowSpan={2} sx={{ ...th, width: 60 }}>GV dạy kí tên</TableCell>
             </TableRow>
             <TableRow>
-              {["Học tập", "Kỷ luật", "Vệ sinh"].map((label) => <TableCell key={label} sx={{ ...th, fontWeight: "fontWeightMedium", width: 52 }}>{label}</TableCell>)}
+              {["Học tập", "Kỷ luật", "Vệ sinh"].map((label) => <TableCell key={label} sx={{ ...th, fontWeight: "fontWeightMedium", width: 40 }}>{label}</TableCell>)}
             </TableRow>
             <TableRow>
               {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => <TableCell key={n} sx={numberRow}>{n}</TableCell>)}
@@ -57,7 +57,7 @@ export function ClassBookTable({ week }: { week: ClassLogWeek }) {
               const unsigned = p.happened && !signed;
               const bottom = i === all.length - 1 ? line : dotted;
               return (
-                <TableRow key={`${p.eventId}|${p.date}|${p.periodNo}`} sx={unsigned ? { bgcolor: t.statusTint.error.bg } : undefined}>
+                <TableRow key={`${p.eventId}|${p.date}|${p.periodNo}`} sx={unsigned ? { bgcolor: t.classLog.rowUnsigned } : undefined}>
                   {i === 0 ? (
                     <TableCell rowSpan={all.length} sx={{ ...td, bgcolor: "background.paper", textAlign: "center", verticalAlign: "top" }}>
                       <Box sx={{ fontWeight: t.type.label.fontWeight }}>{weekdayVi(day.date)}</Box>
@@ -88,25 +88,25 @@ export function ClassBookTable({ week }: { week: ClassLogWeek }) {
 
 function WeekSummary({ absence, unsigned, unsignedCount }: { absence: string; unsigned: string; unsignedCount: number }) {
   const rows: Array<[string, string, boolean?]> = [
-    ["Vắng:", absence], ["Đi học muộn:", noScore], ["Vi phạm khác:", noScore], ["Học tập:", noScore], ["Kỷ luật:", noScore], ["Vệ sinh:", noScore],
-    ["Điểm TB của tuần:", noScore], ["Xếp thứ:", noScore], ["Số tiết GVBM không kí:", unsigned, unsignedCount > 0],
+    ["Vắng:", absence], ["Đi học muộn:", noScore], ["Vi phạm khác:", noScore], ["Điểm cuối tuần:", ""], ["Học tập:", noScore], ["Kỷ luật:", noScore], ["Vệ sinh:", noScore],
+    ["Điểm trừ (HS vắng, …):", noScore], ["Điểm TB của tuần:", noScore], ["Đạt tuần học tốt *:", noScore], ["Xếp thứ:", noScore], ["Số tiết GVBM không kí:", unsigned, unsignedCount > 0],
   ];
   const title = { borderBottom: line, borderTop: line, fontSize: t.type.small.fontSize, fontWeight: "fontWeightBold", py: 1, textAlign: "center" } as const;
   return (
     <Box component="aside" sx={{ borderLeft: line, display: "flex", flexDirection: "column", flex: "none", fontSize: t.type.label.fontSize, overflow: "auto", width: 260 }}>
-      <Box sx={{ ...title, bgcolor: t.color.surfaceMuted, borderTop: 0, fontSize: t.type.pageLead.fontSize }}>TỔNG KẾT TUẦN</Box>
-      <Box sx={{ px: 2, py: 1 }}>
+      <Box sx={{ ...title, bgcolor: t.color.surfaceMuted, borderTop: 0, fontWeight: "fontWeightBold", py: "10px", typography: "body2" }}>TỔNG KẾT TUẦN</Box>
+      <Box sx={{ pb: "10px", pt: "6px", px: 2 }}>
         {rows.map(([label, value, alert]) => (
-          <Box key={label} sx={{ borderBottom: dotted, display: "flex", gap: 1, justifyContent: "space-between", py: 0.75 }}>
+          <Box key={label} sx={{ borderBottom: dotted, display: "flex", gap: 1, justifyContent: "space-between", mt: label === "Điểm cuối tuần:" ? 1 : 0, py: "5px" }}>
             <Box component="span" sx={{ color: t.color.textMuted }}>{label}</Box>
             <Box component="span" sx={{ color: alert ? t.color.brandRedHover : undefined, fontWeight: t.type.label.fontWeight, textAlign: "right" }}>{value}</Box>
           </Box>
         ))}
       </Box>
       <Box sx={title}>Kiến nghị của GVBM</Box>
-      <Typography sx={{ color: t.color.textSoft, fontSize: t.type.label.fontSize, fontStyle: "italic", p: 2 }}>{noScore}</Typography>
+      <Typography sx={{ color: t.color.textSoft, fontSize: t.type.label.fontSize, fontStyle: "italic", px: 2, py: "10px" }}>{noScore}</Typography>
       <Box sx={title}>Ý kiến của GVCN</Box>
-      <Typography sx={{ color: t.color.textSoft, fontSize: t.type.label.fontSize, fontStyle: "italic", p: 2 }}>GVCN chưa ghi</Typography>
+      <Typography sx={{ color: t.color.textSoft, fontSize: t.type.label.fontSize, fontStyle: "italic", px: 2, py: "10px" }}>GVCN chưa ghi</Typography>
     </Box>
   );
 }

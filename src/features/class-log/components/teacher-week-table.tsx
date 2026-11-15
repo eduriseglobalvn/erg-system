@@ -18,9 +18,9 @@ import { ActualPeriodSelect } from "./actual-period-select";
 import { bodyCellSx, ConfirmPill, headCellSx, LagNote } from "./class-log-ui";
 
 const columns: ReadonlyArray<{ label: string; width: number; center?: boolean }> = [
-  { label: "Tiết", width: 56, center: true }, { label: "Lớp", width: 72 }, { label: "Môn học", width: 130 },
-  { label: "Học sinh vắng", width: 170 }, { label: "PPCT", width: 64, center: true }, { label: "Tiết thực tế", width: 120 },
-  { label: "Bài dạy (tự tra KCT)", width: 0 }, { label: "Nhận xét", width: 200 }, { label: "Xác nhận", width: 170 },
+  { label: "Tiết", width: 56, center: true }, { label: "Lớp", width: 64 }, { label: "Môn học", width: 110 },
+  { label: "Học sinh vắng", width: 150 }, { label: "PPCT", width: 64, center: true }, { label: "Tiết thực tế", width: 110 },
+  { label: "Bài dạy (tự tra KCT)", width: 0 }, { label: "Nhận xét", width: 180 }, { label: "Xác nhận", width: 140 },
 ];
 
 type Props = {
@@ -54,7 +54,7 @@ export function TeacherWeekTable({ week, drafts, onEdit }: Props) {
 function DayHeading({ row }: { row: DayRow }) {
   return (
     <TableRow>
-      <TableCell colSpan={columns.length} sx={{ bgcolor: t.color.surfaceSubtle, borderBottom: `1px solid ${t.color.divider}`, fontSize: t.type.label.fontSize, py: 1, px: 1.5 }}>
+      <TableCell colSpan={columns.length} sx={{ bgcolor: t.color.surfaceSubtle, borderBottom: `1px solid ${t.color.divider}`, fontSize: t.type.note.fontSize, py: 1, px: 1.5 }}>
         <Box component="strong" sx={{ color: "text.primary", fontWeight: t.type.label.fontWeight }}>{row.weekday}</Box>
         <Box component="span" sx={{ color: t.color.textMuted, ml: 1 }}>{row.shortDate}</Box>
         <Box component="span" sx={{ color: row.empty ? t.color.textSoft : t.color.textMuted, ml: 1.5 }}>{row.meta}</Box>
@@ -72,11 +72,11 @@ const PeriodRowView = memo(function PeriodRowView({ period, draft, onEdit }: { p
   const label = `${period.className} · tiết ${period.periodNo}`;
   const cell = { ...bodyCellSx, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } as const;
   return (
-    <TableRow sx={warn ? { bgcolor: t.statusTint.warning.bg } : undefined}>
+    <TableRow sx={warn ? { bgcolor: t.classLog.rowLag } : undefined}>
       <TableCell sx={{ ...cell, color: t.color.textMuted, textAlign: "center" }}>{period.periodNo}</TableCell>
       <TableCell sx={{ ...cell, fontWeight: t.type.label.fontWeight }}>{period.className}</TableCell>
       <TableCell sx={{ ...cell, color: "text.secondary" }}>{period.subjectName}</TableCell>
-      <TableCell sx={{ ...cell, color: absent ? t.color.brandRedHover : t.color.textSoft }}>{absenteesText(period.absentees)}</TableCell>
+      <TableCell sx={{ ...cell, color: absent ? t.classLog.absentK.color : t.classLog.placeholder }}>{absenteesText(period.absentees)}</TableCell>
       <TableCell sx={{ ...cell, color: t.color.textMuted, textAlign: "center" }}>{period.ppctPeriod}</TableCell>
       <TableCell sx={cell}>
         <ActualPeriodSelect actual={actual} label={`Tiết thực tế · ${label}`} lagging={warn} onChange={(value) => onEdit(period, { actualPeriod: value })} ppct={period.ppctPeriod} />

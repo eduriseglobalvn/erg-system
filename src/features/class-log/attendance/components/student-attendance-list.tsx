@@ -16,13 +16,13 @@ type Props = {
   students: AttendanceStudent[];
 };
 
-const { statusTint } = ergEnterpriseTokens;
-/** Same four tones as the board: Có mặt xanh lá, Muộn cam, Vắng K đỏ, Vắng P xanh dương. */
-export const MARK_TINT: Record<AttendanceMark, { bg: string; color: string; dot: string }> = {
-  absentExcused: statusTint.info,
-  absentUnexcused: statusTint.error,
-  late: statusTint.warning,
-  present: statusTint.success,
+const { classLog } = ergEnterpriseTokens;
+/** Same four tones as the board: Có mặt xanh lá, Muộn cam, Vắng K đỏ, Vắng P xanh dương (edge = selected border). */
+export const MARK_TINT: Record<AttendanceMark, { bg: string; color: string; edge: string }> = {
+  absentExcused: classLog.absentP,
+  absentUnexcused: classLog.absentK,
+  late: classLog.late,
+  present: classLog.present,
 };
 
 export function StudentAttendanceList({ activeStudentId, marks, onActive, onKeyDown, onMark, students }: Props) {
@@ -49,14 +49,14 @@ export function StudentAttendanceList({ activeStudentId, marks, onActive, onKeyD
             onClick={() => onActive(student.id)}
             sx={{
               alignItems: { md: "center", xs: "stretch" },
-              bgcolor: student.id === activeStudentId ? color.primarySofter : current === "absentUnexcused" ? color.dangerSoft : color.surface,
+              bgcolor: student.id === activeStudentId ? color.primarySofter : current === "absentUnexcused" ? classLog.rowAbsent : color.surface,
               borderBottom: `1px solid ${color.divider}`,
               display: "flex",
               flexDirection: { md: "row", xs: "column" },
               gap: { md: 0, xs: 0.75 },
               minHeight: 44,
               px: { md: 2, xs: 1.25 },
-              py: 0.75,
+              py: { md: "3px", xs: 1 },
             }}
           >
             <Box sx={{ alignItems: "center", display: "flex", flex: 1, minWidth: 0 }}>
@@ -76,11 +76,11 @@ export function StudentAttendanceList({ activeStudentId, marks, onActive, onKeyD
                     role="radio"
                     sx={{
                       bgcolor: on ? tint.bg : color.surface,
-                      border: `1px solid ${on ? tint.dot : color.divider}`,
+                      border: `1px solid ${on ? tint.edge : color.divider}`,
                       borderRadius: `${radius.sm}px`,
                       color: on ? tint.color : color.textMuted,
                       flex: 1,
-                      minHeight: 44,
+                      height: { md: 30, xs: 32 },
                     }}
                   >
                     <Typography variant={on ? "subtitle2" : "caption"}>{markLabels[mark]}</Typography>

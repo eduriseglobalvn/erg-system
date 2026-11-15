@@ -10,7 +10,7 @@ import { classLogText } from "../domain/class-log-copy";
 
 /** Status pill of a period: green once confirmed ("muộn" when it was after the day), blue while waiting. */
 export function ConfirmPill({ confirmed, late }: { confirmed: boolean; late: boolean }) {
-  const tone = confirmed ? t.statusTint.success : t.statusTint.info;
+  const tone = confirmed ? t.classLog.present : t.classLog.absentP;
   return (
     <Box
       component="span"
@@ -26,11 +26,11 @@ export function ConfirmPill({ confirmed, late }: { confirmed: boolean; late: boo
 
 /** "Chậm N tiết so với PPCT" line under the lesson title. */
 export function LagNote({ text }: { text: string }) {
-  return <Typography sx={{ color: t.statusTint.warning.color, fontSize: t.type.label.fontSize }}>{text}</Typography>;
+  return <Typography sx={{ color: t.classLog.late.color, fontSize: t.type.label.fontSize }}>{text}</Typography>;
 }
 
 /** The table header cell look of the boards: grey caps-free label on the muted fill. */
-export const headCellSx = { bgcolor: t.color.surfaceMuted, color: t.color.textMuted, ...t.type.label, py: 1.25, px: 1.5 } as const;
+export const headCellSx = { bgcolor: t.color.surfaceMuted, borderBottom: `1px solid ${t.color.border}`, color: t.color.textMuted, ...t.type.label, py: 1.25, px: 1.5 } as const;
 export const bodyCellSx = { fontSize: t.type.small.fontSize, height: 44, py: 0, px: 1.5, borderBottom: `1px solid ${t.color.divider}` } as const;
 
 type PanelStateProps = { isPending: boolean; isError: boolean; onRetry: () => void; children: ReactNode };

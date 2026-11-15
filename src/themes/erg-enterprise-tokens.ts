@@ -94,6 +94,18 @@ export const ergEnterpriseTokens = {
     info: { bg: "#EBF4FE", color: "#004A94", dot: "#0071E3" },
     neutral: { bg: "#F1F3F5", color: "#4B5563", dot: "#9CA3AF" },
   },
+  // So dau bai / diem danh (boards DiemDanh, SoDauBai): four attendance tones (fill, ink, selected edge), lag row and neutral pill.
+  classLog: {
+    present: { bg: "#E8F5EC", color: "#1E6B3A", edge: "#7CC495" },
+    late: { bg: "#FFF4E5", color: "#92400E", edge: "#F5B866" },
+    absentK: { bg: "#FFEDEA", color: "#B42318", edge: "#F2A39A" },
+    absentP: { bg: "#EBF4FE", color: "#004A94", edge: "#9CC7F5" },
+    neutral: { bg: "#EDEDF0", color: "#424245" },
+    rowAbsent: "#FFF8F7",
+    rowLag: "#FFFBF5",
+    rowUnsigned: "#FFF7F5",
+    placeholder: "#AEAEB2",
+  },
   // Lich day (KE_HOACH_LICH_DAY.md 4.3): o/chip da xuat ban, nhap, trung, khong kip di chuyen, nghi. Dung qua schedule-cell-sx.ts.
   schedule: {
     surface: "#FFFFFF",

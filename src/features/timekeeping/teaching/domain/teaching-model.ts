@@ -130,3 +130,46 @@ export function myMonthState(data: Pick<MyTeachingMonth, "status" | "confirmatio
 /** The "Tiết dạy" tab only exists for someone who has (or had) teaching periods that month. */
 export const hasTeaching = (data: MyTeachingMonth | undefined) =>
   Boolean(data && ((data.total ?? 0) > 0 || (data.assistantTotal ?? 0) > 0 || data.rows?.length || data.assistantRows?.length || data.cancelled?.length));
+
+/** The backend writes week labels with a hyphen («01-04»); the boards use an en dash («01–04»). */
+export const weekLabelVi = (label: string | undefined) => (label ?? "").replace("-", "–");
+
+/** Phone week row: «01–02/10», the label followed by the month the week ends in. */
+export const weekCaptionVi = (week: { label?: string; to?: string }) => `${weekLabelVi(week.label)}/${(week.to ?? "").slice(5, 7)}`;
+
+/** Distinct schools of a table («tháng 10 · 1 trường»). */
+export const schoolCount = (rows: readonly TeachingRow[]) => new Set(rows.map((r) => r.schoolName).filter(Boolean)).size;
+
+/** Week columns the month has not reached yet (the board greys them instead of writing «–»). */
+export const weekNotStarted = (week: { from?: string }, today: string) => (week.from ?? "") > today;
+
+/** "13:15:00" -> "13h15", as the Total board writes lesson times. */
+export const hmVi = (time: string | undefined) => (time ? hhmm(time).replace(":", "h") : "");
+
+/** Month sheet: `span` on the first row of each run of the same school (the «Trường liên kết» cell is merged), 0 on the rest. */
+export function schoolSpans(rows: readonly { schoolName?: string }[]): number[] {
+  const spans = rows.map(() => 0);
+  let head = -1;
+  rows.forEach((row, i) => {
+    if (head >= 0 && rows[head].schoolName === row.schoolName) spans[head] += 1;
+    else {
+      head = i;
+      spans[i] = 1;
+    }
+  });
+  return spans;
+}
+
+/** Total sheet: the board shades alternate DAYS (not rows). `true` for every row of an even-numbered day. */
+export function dayShading(cells: readonly { daySpan: number }[]): boolean[] {
+  let day = 0;
+  return cells.map((cell) => {
+    if (cell.daySpan > 0) day += 1;
+    return day % 2 === 0;
+  });
+}
+
+/** «N buổi dạy · M tiết»: only when every period is on the page, otherwise the number of days would be wrong. */
+export function totalSummary(rows: readonly { date?: string }[], total: number): string {
+  return rows.length === total ? `${new Set(rows.map((r) => r.date)).size} buổi dạy · ${total} tiết` : `${total} tiết`;
+}

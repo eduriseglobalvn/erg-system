@@ -54,6 +54,9 @@ export function rowRate(row: LessonReportRow) {
   return counted.length === 0 ? null : Math.round((counted.filter((c) => c.state === "ON_TIME").length / counted.length) * 100);
 }
 
+/** Colour band of the «Đúng hạn» column: under 70% red, under 100% amber, otherwise green. */
+export const rateTone = (percent: number): "good" | "warn" | "bad" => (percent < 70 ? "bad" : percent < 100 ? "warn" : "good");
+
 /** «Nhắc N giáo viên»: the teachers with at least one day not reported. */
 export const remindTargets = (rows: ReadonlyArray<LessonReportRow>) => rows.filter((r) => r.cells.some((c) => c.state === "MISSING")).map((r) => r.teacherId);
 

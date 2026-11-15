@@ -58,12 +58,14 @@ function SheetBody({ group, onClose }: { group: PeriodGroup; onClose: () => void
         <Box sx={{ alignItems: "center", bgcolor: t.color.primarySofter, borderRadius: `${t.radius.control}px`, color: t.statusTint.info.color, display: "flex", fontWeight: t.type.label.fontWeight, height: 40, justifyContent: "center", width: 52 }}>{group.className}</Box>
         <Box sx={{ display: "flex", flexDirection: "column" }}>
           <Typography sx={{ fontWeight: t.type.label.fontWeight }}>{whenText(group)}</Typography>
-          <Typography sx={{ color: t.color.textMuted, fontSize: t.type.label.fontSize }}>{`PPCT tiết ${first.ppctPeriod}${count > 1 ? `–${first.ppctPeriod + count - 1}` : ""}`}</Typography>
+          <Typography sx={{ color: t.color.textMuted, fontSize: t.type.label.fontSize }}>{rows.length ? `Đã dạy ${first.actualPeriod - 1} / ${last} tiết` : `PPCT tiết ${first.ppctPeriod}${count > 1 ? `–${first.ppctPeriod + count - 1}` : ""}`}</Typography>
         </Box>
       </Box>
       <Box role="listbox" aria-label="Khung chương trình" sx={{ border: `1px solid ${t.color.border}`, borderRadius: `${t.radius.card}px`, maxHeight: 280, overflowY: "auto" }}>
+        <Typography sx={{ bgcolor: t.color.surfaceMuted, borderBottom: `1px solid ${t.color.border}`, color: t.color.textSecondary, fontSize: t.type.label.fontSize, fontWeight: t.type.label.fontWeight, px: 1.75, py: "10px" }}>{`Khung chương trình · ${first.subjectName}`}</Typography>
         {options.map((o, i) => {
           const selected = o.period >= start && o.period < start + count;
+          const done = !selected && o.period < first.actualPeriod;
           return (
             <ButtonBase
               aria-selected={selected}
@@ -72,9 +74,9 @@ function SheetBody({ group, onClose }: { group: PeriodGroup; onClose: () => void
               role="option"
               sx={{ alignItems: "center", bgcolor: selected ? t.color.primarySofter : "transparent", borderTop: i ? `1px solid ${t.color.divider}` : 0, display: "flex", fontSize: t.type.small.fontSize, gap: 1.5, justifyContent: "flex-start", minHeight: 44, px: 1.75, textAlign: "left", width: "100%" }}
             >
-              <Box component="span" sx={{ color: selected ? t.color.primary : t.color.textMuted, fontWeight: t.type.label.fontWeight, width: 28 }}>{o.period}</Box>
-              <Box component="span" sx={{ color: selected ? t.statusTint.info.color : "text.primary", flex: 1 }}>{o.title || classLogText.noLesson}</Box>
-              {selected ? <Box component="span" aria-hidden sx={{ color: t.color.primary }}>✓</Box> : null}
+              <Box component="span" sx={{ color: selected ? t.color.primary : done ? t.color.textMuted : "text.primary", fontWeight: t.type.label.fontWeight, flex: "none", width: 28 }}>{o.period}</Box>
+              <Box component="span" sx={{ color: selected ? t.statusTint.info.color : done ? t.color.textMuted : "text.primary", flex: 1, fontWeight: selected ? t.type.label.fontWeight : undefined }}>{o.title || classLogText.noLesson}</Box>
+              <Box component="span" aria-hidden sx={{ alignItems: "center", bgcolor: selected ? t.color.primary : undefined, border: selected ? 0 : `1.5px solid ${t.color.border}`, borderRadius: `${t.radius.xs}px`, boxSizing: "border-box", color: t.color.surface, display: "inline-flex", flex: "none", fontWeight: "fontWeightBold", height: 22, justifyContent: "center", width: 22 }}>{selected ? "✓" : ""}</Box>
             </ButtonBase>
           );
         })}

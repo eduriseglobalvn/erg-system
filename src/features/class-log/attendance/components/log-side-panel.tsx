@@ -42,7 +42,7 @@ const ReadOnly = ({ children, tone }: { children: React.ReactNode; tone?: "dange
       bgcolor: ergEnterpriseTokens.color.surfaceMuted,
       border: `1px solid ${ergEnterpriseTokens.color.divider}`,
       borderRadius: `${ergEnterpriseTokens.radius.control}px`,
-      color: tone === "danger" ? ergEnterpriseTokens.color.danger : "text.primary",
+      color: tone === "danger" ? ergEnterpriseTokens.classLog.absentK.color : "text.primary",
       minHeight: 36,
       px: 1.25,
       py: 0.75,
@@ -126,7 +126,7 @@ export function LogSidePanel({
       </Field>
       <Field label="Nhận xét tiết học" source="GV nhập">{commentField}</Field>
       <Typography
-        sx={{ bgcolor: ergEnterpriseTokens.statusTint.warning.bg, borderRadius: `${ergEnterpriseTokens.radius.control}px`, color: ergEnterpriseTokens.statusTint.warning.color, p: 1.25 }}
+        sx={{ bgcolor: ergEnterpriseTokens.classLog.late.bg, borderRadius: `${ergEnterpriseTokens.radius.control}px`, color: ergEnterpriseTokens.classLog.late.color, p: 1.25 }}
         variant="caption"
       >
         Bài dạy đổi theo Tiết thực tế. Nếu dạy chậm/nhanh hơn PPCT, sửa Tiết thực tế: hệ thống tra lại tên bài từ KCT.

@@ -61,7 +61,7 @@ export function TeacherWeekPanel({ weekStart, onWeek, onCurriculum }: Props) {
           <>
             <Box sx={{ alignItems: "center", borderBottom: `1px solid ${t.color.divider}`, color: t.color.textSecondary, display: "flex", flexWrap: "wrap", fontSize: t.type.small.fontSize, gap: 2.5, px: 2, py: 1.25 }}>
               {[
-                [stats.taught, "tiết đã dạy", t.color.textSoft], [stats.confirmed, "đã xác nhận", t.statusTint.success.dot], [stats.pending, "chờ xác nhận", t.statusTint.info.dot],
+                [stats.taught, "tiết đã dạy", t.classLog.placeholder], [stats.confirmed, "đã xác nhận", t.classLog.present.color], [stats.pending, "chờ xác nhận", t.color.primary],
               ].map(([n, label, dot]) => (
                 <Box key={String(label)} sx={{ alignItems: "center", display: "flex", gap: 1 }}>
                   <Box sx={{ bgcolor: String(dot), borderRadius: "50%", height: 8, width: 8 }} />

@@ -45,3 +45,6 @@ export function attendanceErrorMessage(error: unknown): string {
   const code = attendanceErrorCode(error);
   return (code && ERROR_MESSAGES[code]) || "Chưa lưu được điểm danh. Thử lại sau.";
 }
+
+/** Desktop count pill: only the first letter drops to lower case ("Vắng K" -> "vắng K"), as on the board. */
+export const countLabel = (label: string) => label.replace(/^./u, (c) => c.toLocaleLowerCase("vi"));

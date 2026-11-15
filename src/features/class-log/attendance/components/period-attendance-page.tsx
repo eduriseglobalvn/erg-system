@@ -10,14 +10,14 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { teacherPath } from "@/platform/workspaces/workspace-paths";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
-import { attendanceCopy, markLabels } from "../attendance-copy";
+import { attendanceCopy, countLabel, markLabels } from "../attendance-copy";
 import { ATTENDANCE_MARKS, periodRangeLabel } from "../attendance-model";
 import { usePeriodAttendance } from "../use-period-attendance";
 import { LogSidePanel } from "./log-side-panel";
 import { PeriodRail } from "./period-rail";
 import { MARK_TINT, StudentAttendanceList } from "./student-attendance-list";
 
-const { color, radius } = ergEnterpriseTokens;
+const { classLog, color, radius } = ergEnterpriseTokens;
 const cardSx = { bgcolor: color.surface, border: `1px solid ${color.border}`, borderRadius: `${radius.card}px`, overflow: "hidden" } as const;
 
 /** /teacher/attendance: attendance by timetable period, saved together with the class-log entry. */
@@ -57,9 +57,9 @@ export function PeriodAttendancePage() {
           key={mark}
           sx={{
             alignItems: "center",
-            bgcolor: MARK_TINT[mark].bg,
+            bgcolor: !isMobile && mark === "absentExcused" ? classLog.neutral.bg : MARK_TINT[mark].bg,
             borderRadius: `${radius.chip}px`,
-            color: MARK_TINT[mark].color,
+            color: !isMobile && mark === "absentExcused" ? classLog.neutral.color : MARK_TINT[mark].color,
             display: "flex",
             flex: { md: "none", xs: 1 },
             flexDirection: { md: "row", xs: "column" },
@@ -70,7 +70,7 @@ export function PeriodAttendancePage() {
           }}
         >
           <Typography component="strong" variant="subtitle2">{m.counts[mark]}</Typography>
-          <Typography variant="caption">{isMobile ? markLabels[mark] : markLabels[mark].toLocaleLowerCase("vi")}</Typography>
+          <Typography variant="caption">{isMobile ? markLabels[mark] : countLabel(markLabels[mark])}</Typography>
         </Box>
       ))}
     </Box>
@@ -122,7 +122,7 @@ export function PeriodAttendancePage() {
             </Box>
             {roster}
             <Box sx={{ alignItems: "center", display: { md: "flex", xs: "none" }, gap: 1, px: 2, py: 1 }}>
-              <Typography color="text.secondary" sx={{ flex: 1 }} variant="caption">{m.visibleStudents.length} / {m.students.length} học sinh</Typography>
+              <Typography color="text.secondary" sx={{ flex: 1 }} variant="caption">{m.visibleStudents.length ? `1–${m.visibleStudents.length}` : "0"} / {m.students.length} học sinh</Typography>
               <Typography color="text.secondary" variant="caption">{attendanceCopy.shortcuts}</Typography>
             </Box>
           </Box>

@@ -9,7 +9,7 @@ export function LagChip({ chip }: { chip: { className: string; lag: number } }) 
   return (
     <Box
       sx={{
-        alignItems: "center", bgcolor: t.statusTint.warning.bg, borderRadius: `${t.radius.chip}px`, color: t.statusTint.warning.color,
+        alignItems: "center", bgcolor: t.classLog.late.bg, borderRadius: `${t.radius.chip}px`, color: t.classLog.late.color,
         display: "flex", fontSize: t.type.label.fontSize, gap: 1, height: 28, ml: "auto", px: 1.25,
       }}
     >

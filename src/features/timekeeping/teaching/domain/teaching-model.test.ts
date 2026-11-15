@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { TeachingPeriodRow } from "../../api/timekeeping-teaching-api";
-import { groupByDay, groupTeachingRows, hasTeaching, missingCells, mondayOf, monthEnded, myMonthState, periodRangeLabel, yearMonths, teachingErrorText, weekIndexOf } from "./teaching-model";
+import { dayShading, groupByDay, hmVi, schoolCount, schoolSpans, totalSummary, weekCaptionVi, weekLabelVi, weekNotStarted, groupTeachingRows, hasTeaching, missingCells, mondayOf, monthEnded, myMonthState, periodRangeLabel, yearMonths, teachingErrorText, weekIndexOf } from "./teaching-model";
 
 describe("teaching-model", () => {
   it("merges consecutive periods of the same day", () => {
@@ -51,5 +51,27 @@ describe("teaching-model", () => {
     expect(hasTeaching({ total: 0, rows: [] })).toBe(false);
     expect(hasTeaching({ total: 4 })).toBe(true);
     expect(teachingErrorText(Object.assign(new Error("x"), { code: "TOTAL_CHANGED", status: 409 }))).toBe("Số tiết vừa thay đổi, kiểm tra lại trước khi xác nhận.");
+  });
+
+  it("writes week labels and lesson times as the boards do", () => {
+    expect(weekLabelVi("01-04")).toBe("01–04");
+    expect(weekLabelVi("30")).toBe("30");
+    expect(weekCaptionVi({ label: "01-02", to: "2026-10-02" })).toBe("01–02/10");
+    expect(hmVi("13:15:00")).toBe("13h15");
+    expect(hmVi(undefined)).toBe("");
+  });
+
+  it("merges school cells, shades alternate days and greys weeks not started", () => {
+    expect(schoolSpans([{ schoolName: "A" }, { schoolName: "A" }, { schoolName: "B" }, { schoolName: "A" }])).toEqual([2, 0, 1, 1]);
+    expect(dayShading([{ daySpan: 2 }, { daySpan: 0 }, { daySpan: 1 }, { daySpan: 1 }])).toEqual([false, false, true, false]);
+    expect(weekNotStarted({ from: "2026-11-09" }, "2026-11-05")).toBe(true);
+    expect(weekNotStarted({ from: "2026-11-02" }, "2026-11-05")).toBe(false);
+    expect(schoolCount([{ schoolName: "A" }, { schoolName: "A" }, { schoolName: "B" }, {}])).toBe(2);
+  });
+
+  it("only counts days in the summary when every period is on the page", () => {
+    const rows = [{ date: "2026-11-09" }, { date: "2026-11-09" }, { date: "2026-11-10" }];
+    expect(totalSummary(rows, 3)).toBe("2 buổi dạy · 3 tiết");
+    expect(totalSummary(rows, 40)).toBe("40 tiết");
   });
 });
