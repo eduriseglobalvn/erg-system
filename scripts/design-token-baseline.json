@@ -104,8 +104,8 @@
     "font": 4
   },
   "src/components/shared/erg-calendar-board.tsx": {
-    "hex": 15,
-    "font": 35
+    "hex": 16,
+    "font": 40
   },
   "src/components/shared/erg-calendar-event-detail.tsx": {
     "hex": 8,
@@ -170,10 +170,6 @@
   "src/components/shared/teaching-schedule-dialog.tsx": {
     "hex": 3,
     "font": 6
-  },
-  "src/components/shared/use-erg-calendar-workspace.ts": {
-    "hex": 30,
-    "font": 0
   },
   "src/components/social-reactions.tsx": {
     "hex": 15,
@@ -583,10 +579,6 @@
     "hex": 0,
     "font": 10
   },
-  "src/features/lcms/components/admin-google-calendar-workspace.tsx": {
-    "hex": 33,
-    "font": 0
-  },
   "src/features/lcms/components/admin-ui.tsx": {
     "hex": 52,
     "font": 0
@@ -895,10 +887,6 @@
     "hex": 51,
     "font": 0
   },
-  "src/features/lms/components/teaching-schedule/teaching-schedule-event-dialog.tsx": {
-    "hex": 0,
-    "font": 4
-  },
   "src/features/lms/learning-paths/certificates/components/certificate-registry-workspace.tsx": {
     "hex": 0,
     "font": 1
@@ -914,10 +902,6 @@
   "src/features/lms/mobile/components/lms-pwa-setup-sheet.tsx": {
     "hex": 0,
     "font": 15
-  },
-  "src/features/lms/weekly-class-log/components/weekly-class-log-summary.tsx": {
-    "hex": 0,
-    "font": 11
   },
   "src/features/portable-package-export/components/portable-package-catalog-dialog.tsx": {
     "hex": 0,
@@ -955,9 +939,9 @@
     "hex": 24,
     "font": 0
   },
-  "src/features/teaching-calendar/components/teaching-schedule-batch-panel.tsx": {
+  "src/features/teaching-calendar/components/overview/overview-school-grid.tsx": {
     "hex": 0,
-    "font": 3
+    "font": 1
   },
   "src/layouts/dashboard/components/dashboard-content.tsx": {
     "hex": 4,

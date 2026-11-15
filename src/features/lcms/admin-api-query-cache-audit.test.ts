@@ -83,7 +83,6 @@ describe("LCMS API/query/cache audit characterization", () => {
       "../question-bank/api/question-bank-query.ts",
       "quiz/quiz-editor/api/quiz-editor-query.ts",
       "school-management/hooks/use-school-management.ts",
-      "components/admin-google-calendar-workspace.tsx",
     ];
 
     owners.forEach((relativePath) => {
