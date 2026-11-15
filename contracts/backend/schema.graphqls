@@ -1316,7 +1316,7 @@ input TeachingScheduleBatchDetailInput { tenantId: String, batchId: String! }
 enum TeachingScheduleResolveMode { REJECT DELETE_CONFLICTING }
 
 type TeachingCalendarWorkspace { tenantId: String!, from: String!, to: String!, viewMode: TeachingCalendarViewMode!, events: [TeachingCalendarEvent!]!, filterOptions: TeachingCalendarFilterOptions!, laneSummaries: [TeachingCalendarLaneSummary!]!, catalog: TeachingScheduleCatalog!, permissions: TeachingCalendarPermissions!, generatedAt: String! }
-type TeachingCalendarEvent { id: String!, batchId: String, title: String!, startAt: String!, endAt: String!, date: String!, startTime: String!, endTime: String!, schoolId: String!, schoolName: String!, classId: String!, className: String!, subjectId: String, subjectName: String, levelId: String, levelName: String, roomId: String, roomName: String, periodStart: Int!, periodCount: Int!, teachers: [TeachingScheduleTeacherAssignment!]!, status: TeachingScheduleStatus!, note: String, colorGroup: TeachingCalendarColorGroup!, myRole: TeachingScheduleRole!, mainTeacherName: String, assistantName: String }
+type TeachingCalendarEvent { id: String!, batchId: String, title: String!, startAt: String!, endAt: String!, date: String!, startTime: String!, endTime: String!, schoolId: String!, schoolName: String!, classId: String!, className: String!, subjectId: String, subjectName: String, levelId: String, levelName: String, roomId: String, roomName: String, periodStart: Int!, periodCount: Int!, teachers: [TeachingScheduleTeacherAssignment!]!, status: TeachingScheduleStatus!, note: String, colorGroup: TeachingCalendarColorGroup!, myRole: TeachingScheduleRole!, mainTeacherName: String, assistantName: String, version: Int! }
 type TeachingScheduleTeacherAssignment { userId: String!, displayName: String!, role: TeachingScheduleTeacherRole!, colorKey: String }
 type TeachingCalendarFilterOptions { schools: [TeachingCalendarFilterOption!]!, classes: [TeachingCalendarFilterOption!]!, teachers: [TeachingCalendarFilterOption!]!, subjects: [TeachingCalendarFilterOption!]!, levels: [TeachingCalendarFilterOption!]! }
 type TeachingCalendarFilterOption { id: String!, label: String!, count: Int!, colorKey: String }
@@ -1649,7 +1649,7 @@ input LessonLogAttendanceInput { studentId: ID!, status: String! }
 
 type LessonLogWeek { weekStart: Date!, weekEnd: Date!, weekNo: Int!, days: [LessonLogDay!]!, stats: LessonLogStats!, lagChip: LessonLogLag }
 type LessonLogDay { date: Date!, session: String, periods: [LessonLogPeriod!]! }
-type LessonLogPeriod { eventId: ID!, date: Date!, periodNo: Int!, classId: ID!, className: String!, subjectId: ID, subjectName: String!, teacherName: String, ppctPeriod: Int!, actualPeriod: Int!, lessonTitle: String, absentees: [LessonLogAbsentee!]!, comment: String, status: LessonLogStatus!, late: Boolean!, happened: Boolean!, version: Int! }
+type LessonLogPeriod { eventId: ID!, date: Date!, periodNo: Int!, classId: ID!, className: String!, subjectId: ID, subjectName: String!, teacherName: String, ppctPeriod: Int!, actualPeriod: Int!, lessonTitle: String, absentees: [LessonLogAbsentee!]!, comment: String, status: LessonLogStatus!, late: Boolean!, happened: Boolean!, version: Int!, "Highest period of the subject KCT (the limit of actualPeriod); null when the KCT is not set up" curriculumPeriodCount: Int }
 type LessonLogAbsentee { studentId: ID!, shortName: String!, excused: Boolean! }
 type LessonLogStats { taught: Int!, confirmed: Int!, pending: Int! }
 type LessonLogLag { classId: ID!, className: String!, lag: Int! }

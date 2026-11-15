@@ -19,7 +19,7 @@ import { scheduleTokens } from "../shared/schedule-cell-sx";
 import { teacherTone } from "../shared/teacher-tone";
 import { ChangePreview } from "./change-preview";
 import { ScopeField, type ScopeOption } from "./scope-field";
-import { useSlotOptions } from "./use-slot-dialog-data";
+import { useFreshEvent, useSlotOptions } from "./use-slot-dialog-data";
 import { useSlotChange } from "./use-slot-change";
 
 const { color, radius, type } = ergEnterpriseTokens;
@@ -40,7 +40,8 @@ function Person({ id, initials, name, note }: { id: string; initials: string; na
 }
 
 /** Dialog «Đổi giáo viên» (board AdminTeacherSwap) cho tiet da xuat ban: gui `swapTeachingScheduleTeacher`, xem truoc bang dryRun. */
-export function TeacherSwapDialog({ event, onClose }: Props) {
+export function TeacherSwapDialog({ event: held, onClose }: Props) {
+  const event = useFreshEvent(held);
   const [scope, setScope] = useState<ScopeState>({ dates: [], kind: "THIS_ONLY" });
   const [reason, setReason] = useState<SwapReason | null>(null);
   const [note, setNote] = useState("");

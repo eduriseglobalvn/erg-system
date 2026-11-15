@@ -5,16 +5,15 @@ import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
 
 import { selectSx } from "./class-log-toolbar";
 
-type Props = { actual: number; ppct: number; label: string; lagging: boolean; onChange: (value: number) => void };
+type Props = { actual: number; ppct: number; curriculumPeriodCount?: number | null; label: string; lagging: boolean; onChange: (value: number) => void };
 
-// shortcut: the week query has no curriculum size, so the list runs to PPCT + 10; the server rejects a value past the
-// framework (ACTUAL_PERIOD_OUT_OF_RANGE) and the row falls back. Upgrade when the period exposes the framework size.
+// Without a KCT (curriculumPeriodCount null) there is no real limit, so the list runs to PPCT + 10.
 const EXTRA_PERIODS = 10;
 
-export function ActualPeriodSelect({ actual, ppct, label, lagging, onChange }: Props) {
+export function ActualPeriodSelect({ actual, ppct, curriculumPeriodCount, label, lagging, onChange }: Props) {
   const options = useMemo(
-    () => Array.from({ length: Math.max(ppct, actual) + EXTRA_PERIODS }, (_, i) => ({ value: i + 1, label: String(i + 1) })),
-    [actual, ppct],
+    () => Array.from({ length: Math.max(actual, curriculumPeriodCount ?? ppct + EXTRA_PERIODS) }, (_, i) => ({ value: i + 1, label: String(i + 1) })),
+    [actual, ppct, curriculumPeriodCount],
   );
   return (
     <ErgSelect

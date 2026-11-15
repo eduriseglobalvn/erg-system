@@ -79,7 +79,7 @@ const PeriodRowView = memo(function PeriodRowView({ period, draft, onEdit }: { p
       <TableCell sx={{ ...cell, color: absent ? t.classLog.absentK.color : t.classLog.placeholder }}>{absenteesText(period.absentees)}</TableCell>
       <TableCell sx={{ ...cell, color: t.color.textMuted, textAlign: "center" }}>{period.ppctPeriod}</TableCell>
       <TableCell sx={cell}>
-        <ActualPeriodSelect actual={actual} label={`Tiết thực tế · ${label}`} lagging={warn} onChange={(value) => onEdit(period, { actualPeriod: value })} ppct={period.ppctPeriod} />
+        <ActualPeriodSelect actual={actual} label={`Tiết thực tế · ${label}`} lagging={warn} onChange={(value) => onEdit(period, { actualPeriod: value })} ppct={period.ppctPeriod} curriculumPeriodCount={period.curriculumPeriodCount} />
       </TableCell>
       <TableCell sx={{ ...bodyCellSx, py: 0.5 }}>
         <Typography noWrap sx={{ fontSize: t.type.small.fontSize }}>{period.lessonTitle ?? classLogText.noLesson}</Typography>

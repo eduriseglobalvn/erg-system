@@ -20,7 +20,7 @@ import { getDefaultTenantId } from "@/lib/graphql-client";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 import { ChangePreview } from "./change-preview";
 import { ScopeField, type ScopeOption } from "./scope-field";
-import { useSchoolPeriodsOn, useSlotOptions, useSubjectOptions } from "./use-slot-dialog-data";
+import { useFreshEvent, useSchoolPeriodsOn, useSlotOptions, useSubjectOptions } from "./use-slot-dialog-data";
 import { useSlotChange } from "./use-slot-change";
 
 const { color, type } = ergEnterpriseTokens;
@@ -47,7 +47,8 @@ function Field({ children, help, label }: { children: ReactNode; help?: string; 
 const dd = (date: string) => formatDateVi(date).slice(0, 5);
 
 /** Dialog «Sửa tiết» (board AdminSlotEdit) cho tiet da xuat ban: gui `editTeachingScheduleSlot`, xem truoc bang dryRun. */
-export function SlotEditDialog({ canDelete, event, focus, onClose }: Props) {
+export function SlotEditDialog({ canDelete, event: held, focus, onClose }: Props) {
+  const event = useFreshEvent(held);
   const queryClient = useQueryClient();
   const [draft, setDraft] = useState<EditDraft>(() => initialDraft(event));
   const [scope, setScope] = useState<ScopeState>({ dates: [], kind: "THIS_ONLY" });
@@ -57,7 +58,7 @@ export function SlotEditDialog({ canDelete, event, focus, onClose }: Props) {
   const subjects = useSubjectOptions(event);
   const main = mainTeacherOf(event);
   const patch = useMemo(() => editPatch(event, draft, scope), [draft, event, scope]);
-  const input = patch && scopeReady(scope) ? { ...patch, eventId: event.id, scope: scopeInput(scope) } : null;
+  const input = patch && scopeReady(scope) ? { ...patch, eventId: event.id, expectedVersion: event.version, scope: scopeInput(scope) } : null;
   const change = useSlotChange("edit", input, editTeachingScheduleSlot, onClose);
   const remove = useMutation({
     meta: { silent: true },

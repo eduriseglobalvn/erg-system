@@ -28,9 +28,26 @@ export function useSchoolPeriodsOn(schoolId: string, date: string) {
   return (template?.slots ?? []).filter((slot) => slot.startTime && slot.endTime).sort((a, b) => a.periodNo - b.periodNo);
 }
 
+function daySchoolInput(event: TeachingCalendarEvent) {
+  return { from: event.date, schoolIds: [event.schoolId], statuses: ["PUBLISHED" as const], tenantId: getDefaultTenantId(), to: event.date };
+}
+
+/** Ban moi nhat cua tiet (version moi nhat) tu lich cua ngay do; chua co thi dung ban dang cam. Dung chung cache voi useSubjectOptions. */
+export function useFreshEvent(event: TeachingCalendarEvent): TeachingCalendarEvent {
+  const input = daySchoolInput(event);
+  const fresh = useQuery({
+    queryFn: ({ signal }) => loadLcmsTeachingCalendarWorkspace(input, signal),
+    queryKey: teachingCalendarQueryKeys.workspace("lcms", "slot-subjects", input),
+    refetchOnMount: "always",
+    select: (workspace) => workspace.events.find((item) => item.id === event.id),
+    staleTime: 5 * 60_000,
+  });
+  return fresh.data ?? event;
+}
+
 /** Danh sach mon cua catalog lich (cung nguon voi man xep lich); chi nap khi dialog mo. */
 export function useSubjectOptions(event: TeachingCalendarEvent) {
-  const input = { from: event.date, schoolIds: [event.schoolId], statuses: ["PUBLISHED" as const], tenantId: getDefaultTenantId(), to: event.date };
+  const input = daySchoolInput(event);
   return useQuery({
     queryFn: ({ signal }) => loadLcmsTeachingCalendarWorkspace(input, signal),
     queryKey: teachingCalendarQueryKeys.workspace("lcms", "slot-subjects", input),

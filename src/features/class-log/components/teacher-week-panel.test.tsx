@@ -68,4 +68,18 @@ describe("teacher week panel", () => {
     expect(await screen.findByText("Bài 5")).toBeInTheDocument();
     expect(screen.getByText("Chậm 2 tiết so với PPCT")).toBeInTheDocument();
   });
+  it("caps the actual-period options at the KCT size when the subject has one", async () => {
+    api.loadTeacherWeek.mockResolvedValue(week([period({ curriculumPeriodCount: 12 })], { taught: 1, confirmed: 0, pending: 1 }));
+    renderPanel();
+    fireEvent.mouseDown(await screen.findByRole("combobox", { name: /Tiết thực tế/ }));
+    expect(await screen.findByRole("option", { name: "12" })).toBeInTheDocument();
+    expect(screen.queryByRole("option", { name: "13" })).toBeNull();
+  });
+
+  it("disables confirm with a hint when no period of the week has happened yet", async () => {
+    api.loadTeacherWeek.mockResolvedValue(week([period({ happened: false })], { taught: 0, confirmed: 0, pending: 1 }));
+    renderPanel();
+    expect(await screen.findByRole("button", { name: "Xác nhận 1 tiết" })).toBeDisabled();
+    expect(screen.getByTitle("Tuần này chưa có tiết nào diễn ra nên chưa thể xác nhận.")).toBeInTheDocument();
+  });
 });

@@ -20,7 +20,7 @@ import { TeacherSwapDialog } from "./teacher-swap-dialog";
 const EVENT = {
   assistantName: null, batchId: "b1", className: "9A4", classId: "c1", date: "2026-11-11", endTime: "14:15", id: "e1", periodStart: 6, roomId: "r1", roomName: "PM 03",
   schoolId: "s1", schoolName: "THCS Trương Công Định", startTime: "13:30", status: "PUBLISHED", subjectId: "sub1", subjectName: "IC3",
-  teachers: [{ displayName: "Q.Vương", role: "MAIN", userId: "t1" }],
+  teachers: [{ displayName: "Q.Vương", role: "MAIN", userId: "t1" }], version: 3,
 } as unknown as TeachingCalendarEvent;
 
 const result = (extra: object = {}) => ({ affectedCount: 1, applied: false, blocking: false, conflicts: [], events: [], ...extra });
@@ -38,7 +38,7 @@ beforeEach(() => {
     { endTime: "14:15", periodNo: 6, session: "AFTERNOON", startTime: "13:30" }, { endTime: "15:00", periodNo: 7, session: "AFTERNOON", startTime: "14:15" }, { endTime: null, periodNo: 8, session: "AFTERNOON", startTime: null },
   ] }]);
   mocks.options.mockResolvedValue({ classes: [], grade: null, rooms: [{ roomId: "r1", roomName: "PM 03", state: "FREE" }, { roomId: "r2", roomName: "PM 04", state: "BUSY" }], schoolName: "A", teachers: [teacher("t1", "Q.Vương"), teacher("t2", "T.Tuấn"), teacher("t3", "Lan Anh", { state: "BUSY" })] });
-  mocks.workspace.mockResolvedValue({ catalog: { subjects: [{ id: "sub1", label: "IC3" }] } });
+  mocks.workspace.mockResolvedValue({ catalog: { subjects: [{ id: "sub1", label: "IC3" }] }, events: [EVENT] });
 });
 
 it("edit dialog previews with dryRun after a period change and saves with the same patch", async () => {
@@ -48,7 +48,7 @@ it("edit dialog previews with dryRun after a period change and saves with the sa
   expect(screen.getByRole("button", { name: "Lưu thay đổi" })).toBeDisabled();
   fireEvent.mouseDown(await screen.findByRole("combobox", { name: /Tiết/ }));
   fireEvent.click(await screen.findByRole("option", { name: /Tiết 7/ }));
-  await waitFor(() => expect(mocks.edit).toHaveBeenCalledWith(expect.objectContaining({ dryRun: true, eventId: "e1", periodNo: 7, scope: { dates: undefined, kind: "THIS_ONLY" } }), expect.anything()));
+  await waitFor(() => expect(mocks.edit).toHaveBeenCalledWith(expect.objectContaining({ dryRun: true, eventId: "e1", expectedVersion: 3, periodNo: 7, scope: { dates: undefined, kind: "THIS_ONLY" } }), expect.anything()));
   expect(await screen.findByText(/1 tiết sẽ đổi/)).toBeInTheDocument();
   const save = screen.getByRole("button", { name: "Lưu thay đổi" });
   await waitFor(() => expect(save).toBeEnabled());
@@ -78,6 +78,7 @@ it("edit dialog shows the Vietnamese message of a backend error code and offers 
   await waitFor(() => expect(save).toBeEnabled());
   fireEvent.click(save);
   expect(await screen.findByRole("alert")).toHaveTextContent("người khác");
+  await waitFor(() => expect(mocks.workspace.mock.calls.length).toBeGreaterThan(1)); // STALE_VERSION tai lai lich
   fireEvent.click(screen.getByRole("button", { name: "Xoá tiết" }));
   fireEvent.click(await screen.findByRole("button", { name: "Xoá" }));
   await waitFor(() => expect(mocks.remove).toHaveBeenCalledWith({ eventId: "e1", tenantId: expect.any(String) }, "lcms"));
@@ -93,7 +94,7 @@ it("swap dialog lists candidates without the current teacher and sends scope, re
   fireEvent.click(screen.getByRole("radio", { name: /Từ 11\/11 đến hết đợt/ }));
   fireEvent.click(screen.getByRole("button", { name: "Giáo viên nghỉ" }));
   fireEvent.click(within(list).getByRole("option", { name: /T\.Tuấn/ }));
-  await waitFor(() => expect(mocks.swap).toHaveBeenCalledWith(expect.objectContaining({ dryRun: true, eventId: "e1", newTeacherId: "t2", reason: "TEACHER_ON_LEAVE", scope: { dates: undefined, kind: "FROM_DATE_TO_END" } }), expect.anything()));
+  await waitFor(() => expect(mocks.swap).toHaveBeenCalledWith(expect.objectContaining({ dryRun: true, eventId: "e1", expectedVersion: 3, newTeacherId: "t2", reason: "TEACHER_ON_LEAVE", scope: { dates: undefined, kind: "FROM_DATE_TO_END" } }), expect.anything()));
   expect(screen.queryByRole("listbox", { name: "Giáo viên" })).toBeNull();
   fireEvent.click(screen.getByRole("button", { name: "Chọn giáo viên khác" }));
   expect(await screen.findByRole("listbox", { name: "Giáo viên" })).toBeInTheDocument();

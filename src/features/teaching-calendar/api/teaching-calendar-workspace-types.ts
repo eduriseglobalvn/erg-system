@@ -61,6 +61,8 @@ export type TeachingCalendarEvent = {
   subjectName?: string | null;
   teachers: TeachingScheduleTeacherAssignment[];
   title: string;
+  /** record_version cua tiet: gui lai la expectedVersion khi sua/doi giao vien de BE bao STALE_VERSION. */
+  version: number;
 };
 
 export type TeachingScheduleTeacherAssignment = {

@@ -46,7 +46,7 @@ export function editPatch(event: TeachingCalendarEvent, draft: EditDraft, scope:
 }
 
 export function swapInput(event: TeachingCalendarEvent, scope: ScopeState, teacherId: string, reason: SwapReason | null, note: string): Omit<SwapTeacherInput, "dryRun"> {
-  return { eventId: event.id, newTeacherId: teacherId, note: note.trim() || undefined, reason: reason ?? undefined, scope: scopeInput(scope) };
+  return { eventId: event.id, expectedVersion: event.version, newTeacherId: teacherId, note: note.trim() || undefined, reason: reason ?? undefined, scope: scopeInput(scope) };
 }
 
 const ERROR_COPY: Record<string, string> = {

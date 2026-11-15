@@ -3,7 +3,7 @@ import type { ClassLogPeriod, ClassLogWeek } from "../api/class-log-api";
 export function period(over: Partial<ClassLogPeriod> = {}): ClassLogPeriod {
   return {
     eventId: "e1", date: "2026-11-09", periodNo: 1, classId: "c1", className: "6A1", subjectName: "Tin học IC3", subjectId: null, teacherName: null, ppctPeriod: 10, actualPeriod: 10,
-    lessonTitle: "Bài 7", absentees: [], comment: null, status: "PENDING", late: false, happened: true, version: 0, ...over,
+    lessonTitle: "Bài 7", absentees: [], comment: null, status: "PENDING", late: false, happened: true, version: 0, curriculumPeriodCount: null, ...over,
   };
 }
 

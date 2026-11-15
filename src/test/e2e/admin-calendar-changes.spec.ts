@@ -11,7 +11,7 @@ const EVENT = {
   batchId: "b1", classId: "c1", className: "9A4", colorGroup: { key: "blue", kind: "PUBLISHED", label: "Trương Công Định" }, date: "2026-11-11", endAt: "2026-11-11T14:45:00+07:00", endTime: "14:45",
   id: "e1", levelId: null, levelName: null, myRole: "MAIN", note: null, periodCount: 1, periodStart: 6, roomId: "r1", roomName: "PM 03", schoolId: "s1", schoolName: "THCS Trương Công Định",
   startAt: "2026-11-11T14:00:00+07:00", startTime: "14:00", status: "PUBLISHED", subjectId: "sub1", subjectName: "IC3",
-  teachers: [{ colorKey: "blue", displayName: "Q.Vương", role: "MAIN", userId: "t1" }], title: "9A4 · IC3",
+  teachers: [{ colorKey: "blue", displayName: "Q.Vương", role: "MAIN", userId: "t1" }], title: "9A4 · IC3", version: 3,
 };
 const workspace = {
   catalog: { assistantTeachers: [], classes: [], levels: [], rooms: [], schools: [], subjects: [{ id: "sub1", label: "IC3" }], teachers: [] },
@@ -99,7 +99,7 @@ test("admin edits a published slot and swaps its teacher: both show a dryRun pre
   await edit.getByRole("combobox", { name: /Tiết/ }).click();
   await page.getByRole("option", { name: /Tiết 7/ }).click();
   await expect(edit.getByText(/1 tiết sẽ đổi/)).toBeVisible();
-  expect(calls.at(-1)).toMatchObject({ operation: "TeachingCalendarEditScheduleSlot", input: { dryRun: true, eventId: "e1", periodNo: 7 } });
+  expect(calls.at(-1)).toMatchObject({ operation: "TeachingCalendarEditScheduleSlot", input: { dryRun: true, eventId: "e1", expectedVersion: 3, periodNo: 7 } });
   await edit.getByRole("button", { name: "Huỷ" }).click();
 
   await eventButton.click();
@@ -108,7 +108,7 @@ test("admin edits a published slot and swaps its teacher: both show a dryRun pre
   await swap.getByRole("button", { name: "Giáo viên nghỉ" }).click();
   await swap.getByRole("listbox", { name: "Giáo viên" }).getByRole("option", { name: /T\.Tuấn/ }).click();
   await expect(swap.getByText(/1 tiết sẽ đổi/)).toBeVisible();
-  expect(calls.at(-1)).toMatchObject({ operation: "TeachingCalendarSwapScheduleTeacher", input: { dryRun: true, eventId: "e1", newTeacherId: "t2", reason: "TEACHER_ON_LEAVE" } });
+  expect(calls.at(-1)).toMatchObject({ operation: "TeachingCalendarSwapScheduleTeacher", input: { dryRun: true, eventId: "e1", expectedVersion: 3, newTeacherId: "t2", reason: "TEACHER_ON_LEAVE" } });
   expect(calls.every((call) => call.input.dryRun === true)).toBe(true);
   expect(network.pageErrors).toEqual([]);
 });

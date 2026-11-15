@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -24,9 +25,15 @@ export function useSlotChange<I extends object>(kind: "edit" | "swap", input: I 
     retry: false,
     staleTime: 0,
   });
+  /** STALE_VERSION: tai lai lich de dialog nhan tiet moi (version moi) roi tu xem truoc lai. */
+  const refetchIfStale = (error: unknown) => {
+    if (teachingScheduleErrorCode(error) === "STALE_VERSION") void queryClient.invalidateQueries({ queryKey: teachingCalendarQueryKeys.portalRoot("lcms", tenantId) });
+  };
+  useEffect(() => { if (preview.error) refetchIfStale(preview.error); }, [preview.error]); // eslint-disable-line react-hooks/exhaustive-deps
   const save = useMutation({
     meta: { silent: true },
     mutationFn: () => run({ ...(input as I), dryRun: false }),
+    onError: refetchIfStale,
     onSuccess: async (result) => {
       toast.success(`Đã lưu thay đổi cho ${result.affectedCount} tiết`);
       await queryClient.invalidateQueries({ queryKey: teachingCalendarQueryKeys.portalRoot("lcms", tenantId) });

@@ -16,6 +16,7 @@ fragment ClassLogPeriodFields on LessonLogPeriod {
   late
   happened
   version
+  curriculumPeriodCount
 }
 
 fragment ClassLogWeekFields on LessonLogWeek {
