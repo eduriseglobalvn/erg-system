@@ -44,6 +44,7 @@ export function TeacherSwapDialog({ event, onClose }: Props) {
   const [scope, setScope] = useState<ScopeState>({ dates: [], kind: "THIS_ONLY" });
   const [reason, setReason] = useState<SwapReason | null>(null);
   const [note, setNote] = useState("");
+  const [listOpen, setListOpen] = useState(true);
   const [teacher, setTeacher] = useState<{ id: string; name: string } | null>(null);
   const options = useSlotOptions(event, event.date, event.periodStart);
   const current = mainTeacherOf(event);
@@ -69,7 +70,7 @@ export function TeacherSwapDialog({ event, onClose }: Props) {
     <ErgDialog
       actions={(
         <>
-          <ErgButton onClick={onClose} variant="text">Huỷ</ErgButton>
+          <ErgButton onClick={onClose} sx={{ color: color.textSecondary, fontWeight: "fontWeightMedium", px: 2 }} variant="text">Huỷ</ErgButton>
           <ErgButton disabled={!input || blocked || Boolean(change.previewError) || change.previewLoading} loading={change.saving} onClick={change.submit} variant="contained">Đổi giáo viên</ErgButton>
         </>
       )}
@@ -101,7 +102,13 @@ export function TeacherSwapDialog({ event, onClose }: Props) {
           <Typography sx={{ color: color.textSecondary, ...type.noteMedium }}>Giáo viên mới</Typography>
           {options.isPending ? <Typography sx={{ color: color.textMuted, ...type.small }}>Đang tải giáo viên…</Typography> : null}
           {options.isError ? <Typography color="error" role="alert" sx={type.small}>Không tải được danh sách giáo viên.</Typography> : null}
-          {options.data ? <TeacherPick className={event.className} inDialog onClose={onClose} onSelect={(item) => item && setTeacher(item)} selectedId={teacher?.id} teachers={candidates} /> : null}
+          {options.data && (listOpen || !teacher) ? <TeacherPick className={event.className} inDialog onClose={onClose} onSelect={(item) => { if (!item) return; setTeacher(item); setListOpen(false); }} selectedId={teacher?.id} teachers={candidates} /> : null}
+          {options.data && teacher && !listOpen ? (
+            <Stack direction="row" sx={{ alignItems: "center", border: 1, borderColor: "divider", borderRadius: `${radius.control}px`, px: 1.25, py: 1 }}>
+              <Box sx={{ flex: 1, minWidth: 0 }}><Person id={teacher.id} initials={picked?.initials ?? initialsOf(teacher.name)} name={teacher.name} /></Box>
+              <ErgButton aria-label="Chọn giáo viên khác" onClick={() => setListOpen(true)} variant="text">Đổi người</ErgButton>
+            </Stack>
+          ) : null}
         </Stack>
         <ErgTextField compact helperText={`${note.length}/${NOTE_MAX}`} label="Ghi chú (không bắt buộc)" onChange={(e) => setNote(e.target.value)} slotProps={{ htmlInput: { maxLength: NOTE_MAX } }} value={note} />
         <ChangePreview error={change.previewError} loading={change.previewLoading} state={change.previewState} />

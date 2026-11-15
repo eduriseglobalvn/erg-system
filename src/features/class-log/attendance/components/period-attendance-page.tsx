@@ -151,7 +151,7 @@ export function PeriodAttendancePage() {
           type="date"
           value={m.date}
         />
-        <ErgButton onClick={openLog} sx={{ display: { md: "inline-flex", xs: "none" } }} variant="outlined">Xem cả tuần</ErgButton>
+        <ErgButton onClick={openLog} sx={{ borderColor: ergEnterpriseTokens.color.border, color: "primary.main", display: { md: "inline-flex", xs: "none" }, px: "14px" }} variant="outlined">Xem cả tuần</ErgButton>
       </Box>
       {body}
     </Box>

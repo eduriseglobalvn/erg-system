@@ -50,9 +50,9 @@ export function OverviewSchoolGrid({ eventsById, grid, onOpen }: Props) {
     <Box aria-label={`Bảng tổng tuần ${formatDateVi(grid.weekStart).slice(0, 5)}`} component="section" sx={{ ...type(13), bgcolor: ink.surface, border: `1px solid ${ink.border}`, borderRadius: `${ergEnterpriseTokens.radius.card}px`, display: "flex", flexDirection: "column", minWidth: 0, overflowX: "auto", overflowY: "hidden", position: "relative" }}>
       <Box sx={{ display: "flex", flexDirection: "column", minWidth: 960 }}>
         <Box sx={{ bgcolor: ink.surfaceMuted, borderBottom: `1px solid ${ink.border}`, color: ink.textSecondary, display: "grid", ...weight(600), gridTemplateColumns: SCHOOL_COLUMNS }}>
-          <Box component="span" sx={{ ...type(12), px: "14px", py: "10px" }}>Trường</Box>
+          <Box component="span" sx={{ ...type(12, 600), px: "14px", py: "10px" }}>Trường</Box>
           {[1, 2, 3, 4, 5, 6].map((weekday) => (
-            <Box component="span" key={weekday} sx={{ ...type(12), borderLeft: `1px solid ${ink.divider}`, color: weekday === 6 ? ink.primary : undefined, p: "10px" }}>
+            <Box component="span" key={weekday} sx={{ ...type(12, 600), borderLeft: `1px solid ${ink.divider}`, color: weekday === 6 ? ink.primary : undefined, p: "10px" }}>
               {weekdayName(weekday)} <Box component="span" sx={{ color: weekday === 6 ? undefined : ink.textMuted, ...weight(400) }}>{formatDateVi(addDaysToDate(grid.weekStart, weekday - 1)).slice(0, 5)}</Box>
             </Box>
           ))}

@@ -1,4 +1,5 @@
 import { ErgButton } from "@/components/erg-mui/erg-actions";
+import { ergEnterpriseTokens as tokens } from "@/themes/erg-enterprise-tokens";
 import { toast } from "sonner";
 import { AddHolidayFields, useAddHolidayForm } from "./add-holiday-form";
 import { DaysOffDialog } from "./days-off-dialog";
@@ -14,8 +15,8 @@ export function DaysOffAddDialog({ date, onClose, onSaved }: Props) {
       <DaysOffDialog
         actions={
           <>
-            <ErgButton onClick={onClose} variant="text">Huỷ</ErgButton>
-            <ErgButton disabled={!form.command} loading={form.create.isPending} onClick={form.submit} variant="outlined">Thêm ngày nghỉ</ErgButton>
+            <ErgButton onClick={onClose} sx={{ color: "primary.main", px: "14px" }} variant="text">Huỷ</ErgButton>
+            <ErgButton disabled={!form.command} loading={form.create.isPending} onClick={form.submit} sx={{ borderColor: tokens.color.border, "&.Mui-disabled": { bgcolor: tokens.color.surface, borderColor: tokens.color.border, color: tokens.schedule.disabled }, px: 2 }} variant="outlined">Thêm ngày nghỉ</ErgButton>
           </>
         }
         description="Áp cho toàn hệ thống."

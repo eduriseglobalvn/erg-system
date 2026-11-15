@@ -94,6 +94,9 @@ it("swap dialog lists candidates without the current teacher and sends scope, re
   fireEvent.click(screen.getByRole("button", { name: "Giáo viên nghỉ" }));
   fireEvent.click(within(list).getByRole("option", { name: /T\.Tuấn/ }));
   await waitFor(() => expect(mocks.swap).toHaveBeenCalledWith(expect.objectContaining({ dryRun: true, eventId: "e1", newTeacherId: "t2", reason: "TEACHER_ON_LEAVE", scope: { dates: undefined, kind: "FROM_DATE_TO_END" } }), expect.anything()));
+  expect(screen.queryByRole("listbox", { name: "Giáo viên" })).toBeNull();
+  fireEvent.click(screen.getByRole("button", { name: "Chọn giáo viên khác" }));
+  expect(await screen.findByRole("listbox", { name: "Giáo viên" })).toBeInTheDocument();
   expect(await screen.findByText(/6 tiết sẽ đổi/)).toBeInTheDocument();
   expect(screen.getByText(/Sau khi đổi/)).toBeInTheDocument();
   await waitFor(() => expect(swap).toBeEnabled());

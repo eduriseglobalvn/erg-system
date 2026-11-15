@@ -9,7 +9,7 @@ import { hasTeaching } from "../domain/teaching-model";
 
 export type MyCongTab = "days" | "periods";
 
-const tab = { color: t.color.textSecondary, fontWeight: "fontWeightMedium", minHeight: t.size.controlMd, minWidth: 0, px: 2, py: 0, textTransform: "none", "&.Mui-selected": { fontWeight: t.type.label.fontWeight } } as const;
+const tab = { color: t.color.textSecondary, fontWeight: "fontWeightRegular", minHeight: t.size.controlMd, minWidth: 0, px: 2, py: 0, textTransform: "none", "&.Mui-selected": { fontWeight: t.type.label.fontWeight } } as const;
 
 /** «Ngày công | Tiết dạy» switch of «Công của tôi». «Tiết dạy» only shows for someone who has teaching periods that month.
  *  Desktop board: tabs hug their text on the left; phone board: two equal tabs 44 high. */

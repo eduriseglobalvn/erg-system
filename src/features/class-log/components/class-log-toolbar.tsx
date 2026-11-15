@@ -23,8 +23,8 @@ type Props = {
 };
 
 // Board toolbar controls are 36px tall (stepper, selects, buttons), 13px text.
-export const selectSx = { "& .MuiOutlinedInput-root": { borderRadius: `${t.radius.control}px`, fontSize: t.type.small.fontSize, height: 36 } } as const;
-const buttonSx = { fontSize: t.type.small.fontSize, height: 36, px: 1.75 } as const;
+export const selectSx = { "& .MuiOutlinedInput-root": { borderRadius: `${t.radius.control}px`, fontSize: t.type.small.fontSize, height: 36, minHeight: 36 } } as const;
+const buttonSx = { borderColor: t.color.border, fontSize: t.type.small.fontSize, height: 36, minHeight: 36, px: 1.75 } as const;
 
 /** Week stepper, session/status filters, «Khung chương trình» and the single contained «Xác nhận N tiết». */
 export function ClassLogToolbar(p: Props) {
@@ -43,12 +43,12 @@ export function ClassLogToolbar(p: Props) {
 export function WeekStepper({ weekNo, rangeLabel, onStep }: { weekNo?: number; rangeLabel: string; onStep: (direction: -1 | 1) => void }) {
   return (
     <Box sx={{ alignItems: "center", border: `1px solid ${t.color.border}`, borderRadius: `${t.radius.control}px`, display: "flex", height: 36, overflow: "hidden" }}>
-      <ErgIconButton label="Tuần trước" onClick={() => onStep(-1)} size="small"><ChevronLeftIcon /></ErgIconButton>
+      <ErgIconButton label="Tuần trước" onClick={() => onStep(-1)} size="small" sx={{ height: 36, width: 36 }}><ChevronLeftIcon /></ErgIconButton>
       <Box sx={{ alignItems: "center", borderInline: `1px solid ${t.color.border}`, display: "flex", fontSize: t.type.small.fontSize, gap: 1, height: "100%", px: 1.5 }}>
         {weekNo ? <Box component="strong" sx={{ fontWeight: t.type.label.fontWeight }}>{`Tuần ${weekNo}`}</Box> : null}
         <Box component="span" sx={{ color: t.color.textMuted }}>{rangeLabel}</Box>
       </Box>
-      <ErgIconButton label="Tuần sau" onClick={() => onStep(1)} size="small"><ChevronRightIcon /></ErgIconButton>
+      <ErgIconButton label="Tuần sau" onClick={() => onStep(1)} size="small" sx={{ height: 36, width: 36 }}><ChevronRightIcon /></ErgIconButton>
     </Box>
   );
 }

@@ -2,6 +2,7 @@ import Link from "@mui/material/Link";
 import { useNavigate } from "@tanstack/react-router";
 import { useMemo } from "react";
 
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 import { AUTH_BYPASS_ENABLED } from "@/platform/auth/config/auth-bypass";
 import { getAuthScope } from "@/platform/auth/api/auth-storage";
 import { evaluatePermission } from "@/platform/auth/permissions/permission-evaluator";
@@ -19,7 +20,7 @@ export function DaysOffLink() {
   const allowed = useMemo(() => canManageDaysOff(), []);
   if (!allowed) return null;
   return (
-    <Link color="text.secondary" component="button" onClick={() => void navigate({ href: adminPath("/calendar/days-off") })} type="button" underline="hover" variant="body2">
+    <Link component="button" sx={{ color: ergEnterpriseTokens.color.textSecondary, alignItems: "center", borderRadius: "10px", display: "inline-flex", height: 36, px: "10px" }} onClick={() => void navigate({ href: adminPath("/calendar/days-off") })} type="button" underline="hover" variant="body2">
       Ngày nghỉ &amp; thứ 7
     </Link>
   );

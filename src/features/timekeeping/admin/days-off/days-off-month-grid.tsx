@@ -55,9 +55,8 @@ export function DaysOffMonthGrid({ holidays, modes, month, onPick, periods, sele
               sx={{
                 alignItems: "flex-start",
                 background: holiday && inMonth ? stripeBackground : undefined,
-                borderBottom: 1,
-                borderColor: "divider",
-                borderRight: 1,
+                borderBottom: `1px solid ${tokens.color.divider}`,
+                borderRight: `1px solid ${tokens.color.divider}`,
                 display: "flex",
                 flexDirection: "column",
                 gap: 0.75,

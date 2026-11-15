@@ -60,7 +60,7 @@ export function SchoolPeriodsEditor({ assignment, onPickAssignment, school, sour
           />
         ) : null}
       </Box>
-      <Box sx={{ display: "grid", gridTemplateColumns: { md: "repeat(3, 1fr)", xs: "1fr" } }}>
+      <Box sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))" }}>
         {SESSION_ORDER.map((session: PeriodSession, index) => (
           <PeriodSessionColumn
             key={session} last={index === SESSION_ORDER.length - 1} numbers={numbers} onAdd={() => change(addRow(rows, session))} onRemove={(key) => change(removeRow(rows, key))}
@@ -71,8 +71,8 @@ export function SchoolPeriodsEditor({ assignment, onPickAssignment, school, sour
       </Box>
       {error ? <Typography color="error" role="alert" sx={{ borderTop: `1px solid ${color.divider}`, px: 2.5, py: 1, ...type.small }}>{error}</Typography> : null}
       <Box sx={{ alignItems: "center", borderTop: `1px solid ${color.divider}`, display: "flex", flexWrap: "wrap", gap: 1, px: 2.5, py: 1.75 }}>
-        <ErgButton onClick={(event) => setMenu({ anchor: event.currentTarget, kind: "template" })} sx={{ height: 36 }} variant="text">Tự điền theo mẫu…</ErgButton>
-        <ErgButton color="inherit" disabled={!sources.length} onClick={(event) => setMenu({ anchor: event.currentTarget, kind: "copy" })} sx={{ color: color.textSecondary, height: 36 }} variant="text">Sao chép từ trường khác</ErgButton>
+        <ErgButton onClick={(event) => setMenu({ anchor: event.currentTarget, kind: "template" })} sx={{ color: "primary.main", fontSize: "0.8125rem", height: 36, minHeight: 36, px: 1 }} variant="text">Tự điền theo mẫu…</ErgButton>
+        <ErgButton color="inherit" disabled={!sources.length} onClick={(event) => setMenu({ anchor: event.currentTarget, kind: "copy" })} sx={{ color: color.textSecondary, fontSize: "0.8125rem", fontWeight: "fontWeightRegular", height: 36, minHeight: 36, px: 1 }} variant="text">Sao chép từ trường khác</ErgButton>
         <Box sx={{ flex: 1 }} />
         <ErgTextField compact label="Áp dụng từ" onChange={(event) => setEffectiveFrom(event.target.value)} slotProps={{ inputLabel: { shrink: true } }} sx={{ width: 170 }} type="date" value={effectiveFrom} />
         <ErgButton disabled={Boolean(issue) || !effectiveFrom} loading={saver.pending} onClick={() => saver.save({ effectiveFrom, rows })} sx={{ height: 40, px: 2.5 }} variant="contained">Lưu giờ tiết</ErgButton>

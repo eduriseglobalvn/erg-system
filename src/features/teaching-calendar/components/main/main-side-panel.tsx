@@ -57,7 +57,7 @@ function MiniMonth({ anchor, onPickDay }: { anchor: string; onPickDay: (day: str
           return (
             <ButtonBase
               key={day} onClick={() => onPickDay(day)}
-              sx={{ ...small, bgcolor: isToday ? "primary.main" : inWeek ? color.primarySofter : undefined, borderRadius: "999px", color: isToday ? "primary.contrastText" : inWeek ? scheduleTokens.published.text : inMonth ? undefined : color.textSoft, height: 26, ...(isToday ? { typography: "subtitle2", fontSize: "0.75rem" } : {}) }}
+              sx={[{ bgcolor: isToday ? "primary.main" : inWeek ? color.primarySofter : undefined, borderRadius: "999px", color: isToday ? "primary.contrastText" : inWeek ? scheduleTokens.published.text : inMonth ? undefined : scheduleTokens.disabled, height: 26, ...(isToday ? { typography: "subtitle2" } : {}) }, small]}
             >
               {Number(day.slice(8))}
             </ButtonBase>

@@ -3,6 +3,7 @@ import Box from "@mui/material/Box";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
 import Typography from "@mui/material/Typography";
+import type { Theme } from "@mui/material/styles";
 
 import { ergSegmentedTabsSx } from "@/components/erg-mui/erg-tabs";
 import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
@@ -16,6 +17,12 @@ import { TeacherWeekPanel } from "./teacher-week-panel";
 
 type Props = { schoolName: string; classOptions: ReadonlyArray<ClassOption>; defaultClassId: string };
 
+/** Board tabs: 36px track, 30px 13px segments, only the chosen one semibold. */
+const boardTabsSx = {
+  minHeight: 36,
+  "& .MuiTab-root": { fontSize: t.type.small.fontSize, fontWeight: "fontWeightRegular", height: 30, minHeight: 30, px: "14px" },
+  "& .MuiTab-root.Mui-selected": { fontWeight: (theme: Theme) => theme.typography.subtitle2.fontWeight },
+} as const;
 const tabOrder: ClassLogTab[] = ["class", "teacher", "log"];
 
 /** Sổ đầu bài: three tabs over one week selector kept in the URL. */
@@ -31,7 +38,7 @@ export function ClassLogPage({ schoolName, classOptions, defaultClassId }: Props
           <Typography component="h1" variant="h1">{classLogText.title}</Typography>
           {schoolName ? <Typography sx={{ color: t.color.textMuted, fontSize: t.type.small.fontSize }}>{schoolName}</Typography> : null}
         </Box>
-        <Tabs aria-label="Chế độ xem sổ" onChange={(_, tab: ClassLogTab) => view.update({ tab })} sx={ergSegmentedTabsSx} value={view.tab}>
+        <Tabs aria-label="Chế độ xem sổ" onChange={(_, tab: ClassLogTab) => view.update({ tab })} sx={[ergSegmentedTabsSx, boardTabsSx]} value={view.tab}>
           {tabOrder.map((tab) => <Tab key={tab} label={classLogText.tabs[tab]} value={tab} />)}
         </Tabs>
       </Box>

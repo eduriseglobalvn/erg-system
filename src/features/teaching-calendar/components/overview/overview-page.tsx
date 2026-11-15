@@ -72,7 +72,7 @@ export function OverviewPage() {
             <ButtonBase aria-selected={tab === "schools"} onClick={() => update({ tab: "schools" })} role="tab" sx={tabSx(tab === "schools")}>Theo trường</ButtonBase>
             <ButtonBase aria-selected={tab === "teachers"} onClick={() => update({ tab: "teachers" })} role="tab" sx={tabSx(tab === "teachers")}>Theo giáo viên</ButtonBase>
           </Box>
-          <ErgButton onClick={() => window.print()} sx={{ ...type(14), height: 36, minHeight: 36, minWidth: 0, px: "14px" }} variant="outlined">In</ErgButton>
+          <ErgButton onClick={() => window.print()} sx={{ ...type(14), borderColor: ink.border, height: 36, minHeight: 36, minWidth: 0, px: "14px" }} variant="outlined">In</ErgButton>
           {tab === "schools" ? (
             <ErgButton
               disabled={!data.grid.data?.schools.length} onClick={() => { const grid = data.grid.data; if (grid) void exportSheets(() => overviewSheets(grid), overviewFileName(grid.weekStart)); }}

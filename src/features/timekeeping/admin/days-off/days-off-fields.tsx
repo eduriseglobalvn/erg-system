@@ -15,7 +15,7 @@ export const segmentedSx = (height: number, padding: number, fontSize: string) =
   bgcolor: tokens.color.surfaceSubtle,
   borderRadius: `${tokens.radius.control}px`,
   p: `${padding}px`,
-  "& .MuiToggleButton-root": { border: 0, borderRadius: "8px !important", color: tokens.color.textMuted, flex: 1, fontSize, height, minWidth: 0, px: 0.5, textTransform: "none", whiteSpace: "nowrap" },
+  "& .MuiToggleButton-root": { border: 0, borderRadius: "8px !important", color: tokens.color.textMuted, flex: 1, fontSize, fontWeight: "fontWeightRegular", height, minWidth: 0, px: 0.5, textTransform: "none", whiteSpace: "nowrap" },
   "& .MuiToggleButton-root.Mui-selected": { bgcolor: tokens.color.surface, boxShadow: tokens.shadow.xs, color: tokens.color.text, fontWeight: theme.typography.subtitle2.fontWeight },
 });
 
@@ -49,10 +49,10 @@ export function ChipChoice<T extends string>({ disabled, label, onChange, option
               borderColor: checked ? tokens.color.primary : tokens.color.border,
               borderRadius: `${tokens.radius.chip}px`,
               color: checked ? tokens.schedule.published.text : tokens.color.textSecondary,
-              fontSize: "0.8125rem",
               height: touch ? 36 : 32,
               px: 1.5,
               typography: checked ? "subtitle2" : "body2",
+              fontSize: "0.8125rem",
               "&.Mui-disabled": { opacity: checked ? 1 : 0.5 },
             }}
           >

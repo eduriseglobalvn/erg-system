@@ -6,6 +6,8 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 
 import type { TeachingSlotOptions } from "@/features/teaching-calendar/api/teaching-calendar-slot-options-api";
+import { scheduleTokens } from "../shared/schedule-cell-sx";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 import { adminPath } from "@/platform/workspaces/workspace-paths";
 
 type ClassOption = TeachingSlotOptions["classes"][number];
@@ -42,24 +44,27 @@ export function ClassCombobox({ batchId, classes, grade, onChange, periodNo, sch
     </Typography>
   );
   return (
-    <Autocomplete
-      autoHighlight
-      getOptionLabel={(option) => option.className}
-      groupBy={() => `Lớp của ${schoolName}${grade ? ` · khối ${grade}` : ""}`}
-      isOptionEqualToValue={(option, current) => option.classId === current.classId}
-      onChange={(_event, option) => onChange(option)}
-      options={[...classes]}
-      renderInput={(params) => <TextField {...params} label="Lớp" size="small" />}
-      renderOption={({ key, ...props }, option) => (
-        <Box component="li" key={key} {...props} sx={{ display: "block !important" }}>
-          <Typography sx={{ typography: "body2" }}>{option.className}</Typography>
-          <Typography sx={{ color: option.state === "BUSY" ? "error.main" : "text.secondary", typography: "caption" }}>
-            {describe(option, { batchId, periodNo, weekdayName })}
-          </Typography>
-        </Box>
-      )}
-      slots={{ paper: (paperProps: PaperProps) => <Paper {...paperProps}>{paperProps.children}{footer}</Paper> }}
-      value={selected}
-    />
+    <Box component="label" sx={{ color: "text.primary", display: "flex", flexDirection: "column", gap: "4px" }}>
+      <Typography component="span" sx={[{ color: ergEnterpriseTokens.color.textSecondary, typography: "caption" }, { fontWeight: "fontWeightRegular" }]}>Lớp</Typography>
+      <Autocomplete
+        autoHighlight
+        getOptionLabel={(option) => option.className}
+        groupBy={() => `Lớp của ${schoolName}${grade ? ` · khối ${grade}` : ""}`}
+        isOptionEqualToValue={(option, current) => option.classId === current.classId}
+        onChange={(_event, option) => onChange(option)}
+        options={[...classes]}
+        renderInput={(params) => <TextField {...params} hiddenLabel size="small" sx={{ "& .MuiOutlinedInput-root": { height: 36, minHeight: 36, py: 0 } }} />}
+        renderOption={({ key, ...props }, option) => (
+          <Box component="li" key={key} {...props} sx={{ alignItems: "center", borderTop: 1, borderColor: "divider", display: "flex !important", gap: 1, minHeight: 34, px: "10px !important", py: "4px !important", ...(option.state === "SUGGESTED" ? { bgcolor: scheduleTokens.published.bg, color: scheduleTokens.published.text } : {}), ...(option.state === "BUSY" ? { color: scheduleTokens.disabled } : {}) }}>
+            <Typography component="span" sx={[{ color: "inherit", flex: "0 0 40px" }, { typography: "subtitle2" }, { fontSize: "0.8125rem" }]}>{option.className}</Typography>
+            <Typography component="span" sx={{ color: option.state === "BUSY" ? scheduleTokens.clash.text : option.state === "SUGGESTED" ? scheduleTokens.published.text : "text.secondary", flex: 1, typography: "caption" }}>
+              {describe(option, { batchId, periodNo, weekdayName })}
+            </Typography>
+          </Box>
+        )}
+        slots={{ paper: (paperProps: PaperProps) => <Paper {...paperProps}>{paperProps.children}{footer}</Paper> }}
+        value={selected}
+      />
+    </Box>
   );
 }
