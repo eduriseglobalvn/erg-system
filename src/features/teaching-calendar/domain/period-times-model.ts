@@ -70,7 +70,14 @@ export function toggleRow(rows: readonly PeriodRow[], key: number): PeriodRow[] 
   });
 }
 
-export const setRowTime = (rows: readonly PeriodRow[], key: number, field: "end" | "start", value: string): PeriodRow[] => rows.map((row) => (row.key === key ? { ...row, [field]: value } : row));
+/** Go so 0715 hoac 7:15 thanh 07:15: o gio la o text 24 gio, khong dung type=time (hien AM/PM theo may). */
+export function formatTimeInput(raw: string): string {
+  if (raw.includes(":")) return raw.replace(/[^0-9:]/g, "").slice(0, 5);
+  const digits = raw.replace(/[^0-9]/g, "").slice(0, 4);
+  return digits.length > 2 ? `${digits.slice(0, 2)}:${digits.slice(2)}` : digits;
+}
+
+export const setRowTime = (rows: readonly PeriodRow[], key: number, field: "end" | "start", value: string): PeriodRow[] => rows.map((row) => (row.key === key ? { ...row, [field]: formatTimeInput(value) } : row));
 
 export type PeriodIssue = { code: string; key?: number };
 

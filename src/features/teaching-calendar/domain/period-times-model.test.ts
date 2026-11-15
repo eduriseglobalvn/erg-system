@@ -1,6 +1,6 @@
 import { expect, it } from "vitest";
 
-import { addRow, assignmentForDate, breakBefore, periodIssueMessage, periodLength, removeRow, rowsFromSlots, setRowTime, slotsFromRows, templateName, timedCount, toggleRow, validateRows, type PeriodRow } from "./period-times-model";
+import { addRow, formatTimeInput, assignmentForDate, breakBefore, periodIssueMessage, periodLength, removeRow, rowsFromSlots, setRowTime, slotsFromRows, templateName, timedCount, toggleRow, validateRows, type PeriodRow } from "./period-times-model";
 
 const slot = (periodNo: number, startTime: string | null, endTime: string | null, session: "MORNING" | "AFTERNOON" | "EVENING" = "MORNING") => ({ endTime, periodNo, session, startTime });
 const row = (key: number, start: string, end: string, enabled = true, session: PeriodRow["session"] = "MORNING"): PeriodRow => ({ enabled, end, key, session, start });
@@ -72,4 +72,12 @@ it("assignmentForDate picks the newest table not after the date", () => {
 it("templateName stays within 80 characters", () => {
   expect(templateName("THCS Trương Công Định", "2026-11-01")).toBe("THCS Trương Công Định · từ 01/11/2026");
   expect(templateName("A".repeat(120), "2026-11-01")).toHaveLength(80);
+});
+
+it("formats typed digits as a 24h HH:mm value", () => {
+  expect(formatTimeInput("0715")).toBe("07:15");
+  expect(formatTimeInput("07")).toBe("07");
+  expect(formatTimeInput("8:10")).toBe("8:10");
+  expect(formatTimeInput("123456")).toBe("12:34");
+  expect(formatTimeInput("ab07:15 PM")).toBe("07:15");
 });

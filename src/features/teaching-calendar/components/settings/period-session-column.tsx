@@ -23,7 +23,7 @@ type Props = {
   total: number;
 };
 
-const timeSx = { width: 112, "& input": { fontVariantNumeric: "tabular-nums", py: "6px" } } as const;
+const timeSx = { width: 92, "& input": { fontVariantNumeric: "tabular-nums", py: "6px" } } as const;
 
 /** Mot cot buoi (Sang / Chieu / Toi) cua bang «Giờ tiết của trường»: gio sua duoc, cong tat tiet, ra choi tinh tu gio. */
 export function PeriodSessionColumn({ last, numbers, onAdd, onRemove, onTime, onToggle, rows, session, total }: Props) {
@@ -41,9 +41,9 @@ export function PeriodSessionColumn({ last, numbers, onAdd, onRemove, onTime, on
               <Box component="span" sx={{ width: 56, ...type.smallStrong }}>Tiết {number}</Box>
               {row.enabled ? (
                 <Box sx={{ alignItems: "center", display: "flex", flex: 1, gap: 0.75 }}>
-                  <ErgTextField compact onChange={(event) => onTime(row.key, "start", event.target.value)} slotProps={{ htmlInput: { "aria-label": `Tiết ${number} bắt đầu` } }} sx={timeSx} type="time" value={row.start} />
+                  <ErgTextField compact onChange={(event) => onTime(row.key, "start", event.target.value)} slotProps={{ htmlInput: { "aria-label": `Tiết ${number} bắt đầu`, inputMode: "numeric", maxLength: 5, placeholder: "HH:mm" } }} sx={timeSx} value={row.start} />
                   <span aria-hidden>–</span>
-                  <ErgTextField compact onChange={(event) => onTime(row.key, "end", event.target.value)} slotProps={{ htmlInput: { "aria-label": `Tiết ${number} kết thúc` } }} sx={timeSx} type="time" value={row.end} />
+                  <ErgTextField compact onChange={(event) => onTime(row.key, "end", event.target.value)} slotProps={{ htmlInput: { "aria-label": `Tiết ${number} kết thúc`, inputMode: "numeric", maxLength: 5, placeholder: "HH:mm" } }} sx={timeSx} value={row.end} />
                 </Box>
               ) : (
                 <Box component="span" sx={{ flex: 1, textDecoration: "line-through", typography: "body2" }}>
