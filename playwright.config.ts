@@ -29,6 +29,8 @@ export default defineConfig({
     { name: "guest-redirect-loop", testMatch: /guest-redirect-loop\.spec\.ts/, use: { baseURL: portalHost("lms") } },
     { name: "lcms", testMatch: /admin\.smoke\.spec\.ts/, use: { baseURL: portalHost("lcms") } },
     { name: "admin-teaching-schedule", testMatch: /admin-teaching-schedule[.]spec[.]ts/, use: { baseURL: portalHost("lcms") } },
+    { name: "teacher-schedule-notice", testMatch: /teacher-schedule-notice[.]spec[.]ts/, use: { baseURL: portalHost("lms") } },
+    { name: "admin-calendar-changes", testMatch: /admin-calendar-changes[.]spec[.]ts/, use: { baseURL: portalHost("lcms") } },
     { name: "class-log-teaching-hours", testMatch: /class-log-teaching-hours[.]spec[.]ts/, use: { baseURL: portalHost("lms") } },
     { name: "workspace-responsive", testMatch: /workspace-responsive\.spec\.ts/, use: { baseURL: portalHost("lms") } },
     { name: "teacher-pwa-calendar-home", testMatch: /teacher-pwa-calendar-home\.spec\.ts/, use: { baseURL: portalHost("lms") } },

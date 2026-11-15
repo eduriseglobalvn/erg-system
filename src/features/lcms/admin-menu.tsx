@@ -203,13 +203,18 @@ export const ADMIN_BASE_MENU_GROUPS: MenuGroup[] = [
   },
 ];
 
-/** Drops "Chấm công" entries the session cannot open and shows the pending-approval count on "Duyệt đơn". */
-export function withTimekeepingMenuState(groups: MenuGroup[], canAccess: (path: string) => boolean, pendingApprovals = 0): MenuGroup[] {
+/** Drops "Chấm công" entries the session cannot open and shows the pending-approval count on "Duyệt đơn" and the unconfirmed-teacher count on "Công tiết dạy". */
+export function withTimekeepingMenuState(groups: MenuGroup[], canAccess: (path: string) => boolean, pendingApprovals = 0, unconfirmedTeachers = 0): MenuGroup[] {
+  const badgeOf = (count: number) => (count > 99 ? "99+" : String(count));
   const refine = (menuItem: MenuItem): MenuItem[] => {
     if (menuItem.id !== "timekeeping") return [menuItem];
     const children = (menuItem.children ?? [])
       .filter((child) => !child.path || canAccess(child.path))
-      .map((child) => (child.id === "timekeeping-approvals" && pendingApprovals > 0 ? { ...child, badge: pendingApprovals > 99 ? "99+" : String(pendingApprovals) } : child));
+      .map((child) => {
+        if (child.id === "timekeeping-approvals" && pendingApprovals > 0) return { ...child, badge: badgeOf(pendingApprovals) };
+        if (child.id === "timekeeping-teaching-hours" && unconfirmedTeachers > 0) return { ...child, badge: badgeOf(unconfirmedTeachers) };
+        return child;
+      });
     return children.length ? [{ ...menuItem, children }] : [];
   };
   return groups.map((group) => ({ ...group, items: group.items.flatMap(refine) }));

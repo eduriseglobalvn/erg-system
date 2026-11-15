@@ -19,3 +19,10 @@ it("prunes entries the session cannot open: approvers see only Công tiết dạ
   expect(children(withTimekeepingMenuState(ADMIN_MENU_GROUPS, canAccessWith("timekeeping.approve")))).toEqual(["Công tiết dạy", "Duyệt đơn"]);
   expect(children(withTimekeepingMenuState(ADMIN_MENU_GROUPS, canAccessWith("lms.admin")))).toBeUndefined();
 });
+
+it("badges Công tiết dạy with the number of teachers who have not confirmed", () => {
+  const find = (count?: number) => flattenMenuItems(withTimekeepingMenuState(ADMIN_MENU_GROUPS, () => true, 0, count)).find((item) => item.id === "timekeeping-teaching-hours");
+  expect(find(7)).toMatchObject({ badge: "7" });
+  expect(find(150)).toMatchObject({ badge: "99+" });
+  expect(find(0)?.badge).toBeUndefined();
+});

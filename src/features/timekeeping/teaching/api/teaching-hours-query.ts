@@ -63,6 +63,20 @@ export function useTeachingMonthSheet(month: string, role: TeachingRole, enabled
   });
 }
 
+/** Teachers who have not confirmed the current month yet, for the admin menu badge. Silent on error: the badge just disappears. */
+export function useUnconfirmedTeachersCount(month: string, enabled: boolean) {
+  return useQuery({
+    queryKey: teachingKeys.adminMonth(month, "MAIN"),
+    queryFn: ({ signal }) => timekeepingTeachingApi.adminMonth(month, "MAIN", signal),
+    select: (sheet) => Math.max(0, (sheet.teacherCount ?? 0) - (sheet.confirmedCount ?? 0)),
+    enabled,
+    retry: false,
+    meta: { silent: true },
+    staleTime: QUERY_POLICIES.sensitive.staleTime,
+    gcTime: QUERY_POLICIES.sensitive.gcTime,
+  });
+}
+
 export function useCloseTeachingMonth(month: string) {
   const client = useQueryClient();
   return useMutation({

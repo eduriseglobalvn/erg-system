@@ -4,7 +4,7 @@ import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
 
 import { lagChipText } from "../domain/class-log-copy";
 
-/** «6A6 chậm 2 tiết so với PPCT · Xin dạy bù ›» — the class with the biggest lag this week. Makeup requests are not built yet, so it only informs. */
+/** «6A6 chậm 2 tiết so với PPCT» — the class with the biggest lag this week. */
 export function LagChip({ chip }: { chip: { className: string; lag: number } }) {
   return (
     <Box
@@ -14,7 +14,6 @@ export function LagChip({ chip }: { chip: { className: string; lag: number } }) 
       }}
     >
       <Box component="strong" sx={{ fontWeight: t.type.label.fontWeight }}>{lagChipText(chip)}</Box>
-      <Box component="span" sx={{ fontWeight: t.type.label.fontWeight }}>· Xin dạy bù ›</Box>
     </Box>
   );
 }
