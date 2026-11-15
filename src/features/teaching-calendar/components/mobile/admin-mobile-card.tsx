@@ -9,11 +9,11 @@ type Tag = { bg: string; color: string; label: string };
 
 const color = ergEnterpriseTokens.color;
 
-/** Tag the tiet (6.8, 2.3-2): «Trùng GV» > «Nháp» > «Đã xuất bản» (khong «Đã giao»). Mau theo board: nhap xam, xuat ban xanh nhat, trung nen trang. */
+/** Tag the tiet (6.8, 2.3-2): «Trùng GV» > «Nháp» > «Đã áp dụng» (khong «Đã giao»). Mau theo board: nhap xam, xuat ban xanh nhat, trung nen trang. */
 export function mobileCardTag(event: TeachingCalendarEvent, clash: boolean): Tag {
   if (clash) return { bg: "background.paper", color: scheduleTokens.clash.text, label: "Trùng GV" };
   if (event.status === "DRAFT") return { bg: scheduleTokens.neutral.bg, color: scheduleTokens.neutral.text, label: "Nháp" };
-  return { bg: scheduleTokens.published.bg, color: scheduleTokens.published.text, label: "Đã xuất bản" };
+  return { bg: scheduleTokens.published.bg, color: scheduleTokens.published.text, label: "Đã áp dụng" };
 }
 
 /** Vien/nen the theo board: xuat ban = vien trai 4px primary; nhap = nen nhat + vien net dut; trung = nen hong + vien hong dam. */

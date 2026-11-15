@@ -39,7 +39,7 @@ export function rowNote(cells: readonly OverviewCell[], conflicts: readonly Over
     return [conflictNote(conflict)];
   });
   const drafts = [...new Set(cells.filter((cell) => cell.status === "DRAFT").map((cell) => cell.batchLabel).filter(Boolean))];
-  const draftPart = cells.some((cell) => cell.status === "DRAFT") ? [`Nháp · chưa xuất bản${drafts.length ? ` (${drafts.join(", ")})` : ""}`] : [];
+  const draftPart = cells.some((cell) => cell.status === "DRAFT") ? [`Nháp · chưa áp dụng${drafts.length ? ` (${drafts.join(", ")})` : ""}`] : [];
   const notes = [...new Set(cells.map((cell) => cell.note?.trim()).filter((note): note is string => Boolean(note)))];
   return [...conflictParts, ...draftPart, ...notes].join(" · ");
 }

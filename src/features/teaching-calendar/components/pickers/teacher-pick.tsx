@@ -23,7 +23,7 @@ type Props = {
   mode?: TeacherPickMode;
   /** Giao vien chinh cua tiet: o che do tro giang luon nam o nhom «Không xếp được», khong chon duoc. */
   mainTeacher?: { id?: string; name?: string };
-  /** Trong dialog «Đổi giáo viên»: dòng chọn tô nền, không hiện dòng giải thích «khi xuất bản». */
+  /** Trong dialog «Đổi giáo viên»: dòng chọn tô nền, không hiện dòng giải thích «khi áp dụng». */
   inDialog?: boolean;
   onClose: () => void;
   onSelect: (teacher: { id: string; name: string } | null) => void;
@@ -50,7 +50,7 @@ function subLine(teacher: Teacher, className: string) {
 function reason(teacher: Teacher) {
   if (teacher.state === "BUSY" && teacher.busy) {
     const where = [teacher.busy.className, teacher.busy.roomName, teacher.busy.schoolName].filter(Boolean).join(" · ");
-    return [`Đang dạy ${where}`, [teacher.busy.batchLabel, teacher.busy.batchStatus === "PUBLISHED" ? "đã xuất bản" : "nháp"].filter(Boolean).join(" · ")];
+    return [`Đang dạy ${where}`, [teacher.busy.batchLabel, teacher.busy.batchStatus === "PUBLISHED" ? "đã áp dụng" : "nháp"].filter(Boolean).join(" · ")];
   }
   if (teacher.state === "TRAVEL" && teacher.travel) {
     const gap = teacher.travel;
@@ -123,8 +123,8 @@ export function TeacherPick({ className, inDialog = false, mainTeacher, mode = "
 
   const status = preview && !inDialog
     ? assistant
-      ? `Chọn ${preview.teacherName} làm trợ giảng: khi xuất bản sẽ cấp quyền lớp ${className} (${preview.classAccess === "NEW" ? "mới" : "đã có"}) và gửi lịch cho ${preview.teacherName}. Tiết trợ giảng được tính vào tải tuần.`
-      : `Chọn ${preview.teacherName}: khi xuất bản sẽ cấp quyền lớp ${className} (${preview.classAccess === "NEW" ? "mới" : "đã có"}).`
+      ? `Chọn ${preview.teacherName} làm trợ giảng: khi áp dụng sẽ cấp quyền lớp ${className} (${preview.classAccess === "NEW" ? "mới" : "đã có"}) và gửi lịch cho ${preview.teacherName}. Tiết trợ giảng được tính vào tải tuần.`
+      : `Chọn ${preview.teacherName}: khi áp dụng sẽ cấp quyền lớp ${className} (${preview.classAccess === "NEW" ? "mới" : "đã có"}).`
     : "";
   let index = assistant ? 1 : 0;
 

@@ -103,7 +103,7 @@ export function SlotEditDialog({ canDelete, event, focus, onClose }: Props) {
             <ErgButton disabled={!input || blocked || Boolean(change.previewError) || change.previewLoading} loading={change.saving} onClick={change.submit} variant="contained">Lưu thay đổi</ErgButton>
           </Box>
         )}
-        description={`${event.className} · ${event.schoolName} · Đã xuất bản`}
+        description={`${event.className} · ${event.schoolName} · Đã áp dụng`}
         maxWidth={false} onClose={onClose} open sx={{ "& .MuiDialog-paper": { maxWidth: 480 } }} title="Sửa tiết"
       >
         <Stack spacing={1.75}>
@@ -125,7 +125,7 @@ export function SlotEditDialog({ canDelete, event, focus, onClose }: Props) {
           <Field label="Trợ giảng"><ErgSelect onChange={(e) => set("assistantId", String(e.target.value))} options={assistants} size="small" slotProps={{ htmlInput: { "aria-label": "Trợ giảng" }, select: { displayEmpty: true } }} value={draft.assistantId} /></Field>
           <ChangePreview error={change.previewError} loading={change.previewLoading} state={change.previewState} />
           <ScopeField onChange={setScope} options={scopes} scope={scope} />
-          <Typography sx={{ color: color.textMuted, ...type.note }}>Tiết đã xuất bản: {main?.displayName ?? "giáo viên"} và trường nhận thông báo đổi giờ.</Typography>
+          <Typography sx={{ color: color.textMuted, ...type.note }}>Tiết đã áp dụng: {main?.displayName ?? "giáo viên"} và trường nhận thông báo đổi giờ.</Typography>
           {change.saveError ? <Typography color="error" role="alert" sx={type.note}>{change.saveError}</Typography> : null}
           {remove.isError ? <Typography color="error" role="alert" sx={type.note}>Chưa xoá được tiết. Thử lại sau.</Typography> : null}
         </Stack>

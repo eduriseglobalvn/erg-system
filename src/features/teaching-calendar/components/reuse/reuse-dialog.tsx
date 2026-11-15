@@ -103,7 +103,7 @@ export function ReuseDialog({ onClose, onSchoolChange, open, schoolId, schools, 
         </Stack>
         {data ? <ReusePreviewTable weeks={data.weeks} /> : null}
         <Typography sx={{ color: ergEnterpriseTokens.color.textMuted, ...ergEnterpriseTokens.type.small }}>
-          Lịch được tạo thành bản nháp: giáo viên chưa thấy cho đến khi bạn xuất bản. Tiết trùng không được tạo; mở lưới tuần đó để xử lý.
+          Lịch được tạo thành bản nháp: giáo viên chưa thấy cho đến khi bạn áp dụng. Tiết trùng không được tạo; mở lưới tuần đó để xử lý.
         </Typography>
       </Stack>
     </ErgDialog>

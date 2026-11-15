@@ -87,8 +87,8 @@ export const ROLE_DISPLAY_CATALOG: Record<string, RoleDisplayMeta> = {
   lms_teacher_lead: {
     badgeTone: "success",
     category: "Đội ngũ Giảng dạy & Lớp học",
-    description: "Biên tập và duyệt đề cương, duyệt phân phối chương trình, xuất bản thời khóa biểu khối bộ môn.",
-    keyPermissions: ["Xuất bản thời khóa biểu", "Duyệt đề cương môn học", "Quản lý tổ bộ môn"],
+    description: "Biên tập và duyệt đề cương, duyệt phân phối chương trình, áp dụng thời khóa biểu khối bộ môn.",
+    keyPermissions: ["Áp dụng thời khóa biểu", "Duyệt đề cương môn học", "Quản lý tổ bộ môn"],
     label: "Tổ trưởng chuyên môn",
   },
   lms_homeroom_teacher: {

@@ -26,7 +26,7 @@ export function MyTeachingHeader({ mobile, onPeriod, period }: Props) {
     <Box sx={{ alignItems: "flex-start", display: "flex", gap: 2 }}>
       <Box sx={{ display: "flex", flex: 1, flexDirection: "column", gap: 0.5 }}>
         <Box component="h1" sx={{ color: "text.primary", m: 0, typography: "h1" }}>Công của tôi</Box>
-        <Box component="span" sx={{ ...t.type.small, color: "text.secondary" }}>Ngày công từ chấm công, tiết dạy từ lịch dạy đã xuất bản</Box>
+        <Box component="span" sx={{ ...t.type.small, color: "text.secondary" }}>Ngày công từ chấm công, tiết dạy từ lịch dạy đã áp dụng</Box>
       </Box>
       {stepper}
       <ErgButton onClick={() => window.print()} sx={{ borderColor: "divider", fontWeight: "fontWeightMedium" }} variant="outlined">Tải PDF</ErgButton>

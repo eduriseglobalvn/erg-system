@@ -108,7 +108,7 @@ function Legend() {
   const t = scheduleTokens;
   return (
     <Box aria-label="Chú thích" component="ul" sx={{ ...small, color: color.textMuted, display: "flex", flexDirection: "column", gap: "4px", listStyle: "none", m: 0, mt: "auto", p: 0 }}>
-      <li><Box component="span" sx={{ ...swatch, bgcolor: t.published.bg, borderLeft: `3px solid ${t.draft.edge}` }} />Đã xuất bản</li>
+      <li><Box component="span" sx={{ ...swatch, bgcolor: t.published.bg, borderLeft: `3px solid ${t.draft.edge}` }} />Đã áp dụng</li>
       <li><Box component="span" sx={{ ...swatch, border: `1px dashed ${t.draft.edge}`, boxSizing: "border-box" }} />Nháp (giáo viên chưa thấy)</li>
       <li><Box component="span" sx={{ ...swatch, border: `2px solid ${t.clash.edge}`, boxSizing: "border-box" }} />Trùng lịch</li>
       <li><Box component="span" sx={{ ...swatch, bgcolor: (theme) => alpha(theme.palette.primary.main, 0.06), borderTop: `1px dashed ${t.guide.edge}` }} />Khung giờ tiết của trường (khi kéo)</li>

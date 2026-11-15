@@ -38,7 +38,7 @@ export function DraftCard({ draft, events, shortNames }: Props) {
       </Box>
       <Box sx={{ color: ergEnterpriseTokens.color.textSecondary }}>{[`${own.length} tiết`, weekdays.join(", "), school].filter(Boolean).join(" · ")}</Box>
       {issues ? <Box sx={{ color: scheduleTokens.clash.text }}>{issues}</Box> : null}
-      <Link href={`${adminPath("/calendar/schedule")}?batchId=${draft.batch.id}`} sx={{ typography: "subtitle2", fontSize: "0.8125rem" }} underline="none">Mở để xuất bản →</Link>
+      <Link href={`${adminPath("/calendar/schedule")}?batchId=${draft.batch.id}`} sx={{ typography: "subtitle2", fontSize: "0.8125rem" }} underline="none">Mở để áp dụng →</Link>
     </Box>
   );
 }

@@ -21,7 +21,7 @@ const swatch = { borderRadius: "3px", display: "inline-block", height: 10, verti
 /** Chu thich 6 muc cua tab giao vien (board AdminOverviewTeacher): o 12×10, bo 3, khe 14. */
 export function teacherLegend(minTravelMinutes: number): LegendItem[] {
   return [
-    { label: "Đã xuất bản", sx: { backgroundColor: ink.primarySofter } },
+    { label: "Đã áp dụng", sx: { backgroundColor: ink.primarySofter } },
     { label: "Nháp", sx: { backgroundImage: stripes(3, tone.surface, tone.draft.stripe), boxShadow: `inset 0 0 0 1px ${ink.primary}` } },
     { label: "Trùng", sx: { backgroundColor: tone.clash.bg, boxShadow: `inset 0 0 0 1.5px ${tone.clash.edge}` } },
     { label: `Không kịp di chuyển (< ${minTravelMinutes}′)`, sx: { backgroundColor: tone.clash.bg, outline: `1.5px dashed ${tone.clash.edge}`, outlineOffset: -1.5 } },

@@ -60,7 +60,7 @@ const ERROR_COPY: Record<string, string> = {
   EVENT_ALREADY_STARTED: "Tiết đã bắt đầu nên không đổi được.",
   EVENT_CANCELLED: "Tiết đã bị huỷ.",
   EVENT_IN_THE_PAST: "Tiết đã qua nên không đổi được.",
-  EVENT_NOT_PUBLISHED: "Tiết chưa xuất bản. Sửa trong trang xếp lịch.",
+  EVENT_NOT_PUBLISHED: "Tiết chưa áp dụng. Sửa trong trang xếp lịch.",
   INVALID_WEEKDAY: "Ngày mới phải rơi vào các thứ có lịch của trường.",
   NOTHING_TO_CHANGE: "Chưa có gì thay đổi.",
   NOT_FOUND: "Không tìm thấy tiết. Có thể tiết đã bị xoá.",

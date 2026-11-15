@@ -115,15 +115,15 @@ export function SchedulePage() {
     try {
       const saved = await draft.flush();
       const latest = draft.getMeta();
-      if (!saved) { setPublishError("Chưa lưu được thay đổi nên chưa thể xuất bản. Bấm «Thử lại» rồi xuất bản lại."); return; }
-      if (!latest.batchId || latest.version === undefined) { setPublishError("Chưa có tiết nào được lưu để xuất bản. Xếp ít nhất một tiết rồi thử lại."); return; }
+      if (!saved) { setPublishError("Chưa lưu được thay đổi nên chưa thể áp dụng. Bấm «Thử lại» rồi áp dụng lại."); return; }
+      if (!latest.batchId || latest.version === undefined) { setPublishError("Chưa có tiết nào được lưu để áp dụng. Xếp ít nhất một tiết rồi thử lại."); return; }
       const batch = await publishTeachingScheduleBatchV2(latest.batchId, latest.version);
-      toast.success(`Đã xuất bản ${batch.affectedEventCount} tiết · đã gửi thông báo cho ${draft.accessChanges.length} giáo viên`);
+      toast.success(`Đã áp dụng ${batch.affectedEventCount} tiết · đã gửi thông báo cho ${draft.accessChanges.length} giáo viên`);
       void queryClient.invalidateQueries({ queryKey: teachingCalendarQueryKeys.portalRoot("lcms", getDefaultTenantId()) });
       void navigate({ href: adminPath("/calendar") });
     } catch (error) {
       const code = teachingScheduleErrorCode(error);
-      setPublishError(code === "PUBLISH_BLOCKED_BY_CONFLICTS" ? `Còn ${errors} xung đột cần xử lý trước khi xuất bản.` : code === "STALE_VERSION" ? STALE_VERSION_MESSAGE : "Chưa xuất bản được. Thử lại sau.");
+      setPublishError(code === "PUBLISH_BLOCKED_BY_CONFLICTS" ? `Còn ${errors} xung đột cần xử lý trước khi áp dụng.` : code === "STALE_VERSION" ? STALE_VERSION_MESSAGE : "Chưa áp dụng được. Thử lại sau.");
     } finally {
       setPublishing(false);
     }
@@ -179,9 +179,9 @@ export function SchedulePage() {
         onChange={rename.clearError} onSave={(label) => rename.rename(label, () => setRenameAnchor(null))} pending={rename.pending}
       />
       <ErgConfirmDialog
-        confirmLabel="Xuất bản" description={`${draft.accessChanges.length} giáo viên · ${draft.accessChanges.reduce((sum, item) => sum + item.classes.filter((c) => c.state === "NEW").length, 0)} lớp mới · ${draft.accessChanges.reduce((sum, item) => sum + item.classes.filter((c) => c.state === "REVOKE").length, 0)} thu hồi`}
+        confirmLabel="Áp dụng và gửi" description={`${draft.accessChanges.length} giáo viên · ${draft.accessChanges.reduce((sum, item) => sum + item.classes.filter((c) => c.state === "NEW").length, 0)} lớp mới · ${draft.accessChanges.reduce((sum, item) => sum + item.classes.filter((c) => c.state === "REVOKE").length, 0)} thu hồi`}
         onCancel={() => setConfirmPublish(false)} onConfirm={() => void publish()} open={confirmPublish}
-        title={`Xuất bản ${rows.length * Math.max(weeks, 1)} tiết cho giáo viên?`}
+        title={`Áp dụng ${rows.length * Math.max(weeks, 1)} tiết và thông báo cho giáo viên?`}
       />
       <ErgConfirmDialog
         confirmLabel="Đổi trường" description={`Đổi trường sẽ xoá ${rows.length} tiết nháp đang xếp.`} destructive

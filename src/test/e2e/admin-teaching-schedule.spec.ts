@@ -66,13 +66,13 @@ for (const viewport of [{ height: 900, width: 1440 }, { height: 844, width: 390 
     await page.mouse.click(4, 4); // click ra ngoai dong popover o
     const conflicts = page.getByRole("article").filter({ hasText: "Trùng giáo viên" });
     await expect(conflicts).toBeVisible({ timeout: 15_000 });
-    await expect(page.getByRole("button", { name: "Xuất bản cho giáo viên" })).toBeDisabled();
+    await expect(page.getByRole("button", { name: "Áp dụng & thông báo" })).toBeDisabled();
 
     await conflicts.getByRole("button", { name: /Đổi GV → Q\.Vương/ }).click();
     await expect(conflicts).toBeHidden({ timeout: 15_000 });
 
-    await page.getByRole("button", { name: "Xuất bản cho giáo viên" }).click();
-    await page.getByRole("dialog").getByRole("button", { name: "Xuất bản" }).click();
+    await page.getByRole("button", { name: "Áp dụng & thông báo" }).click();
+    await page.getByRole("dialog").getByRole("button", { name: "Áp dụng và gửi" }).click();
     await expect.poll(() => calls.publish).toBe(1);
   });
 }

@@ -93,11 +93,11 @@ export type SourceSideLike = {
   createdByRole?: string | null;
 };
 
-/** `Đợt HK1·2 · đã xuất bản · xếp bởi Hà (Giáo vụ) 02/11`. */
+/** `Đợt HK1·2 · đã áp dụng · xếp bởi Hà (Giáo vụ) 02/11`. */
 export function sourceLabel(side: SourceSideLike): string {
   const parts: string[] = [];
   if (side.batchLabel) parts.push(side.batchLabel);
-  if (side.batchStatus) parts.push(side.batchStatus === "PUBLISHED" ? "đã xuất bản" : "nháp");
+  if (side.batchStatus) parts.push(side.batchStatus === "PUBLISHED" ? "đã áp dụng" : "nháp");
   if (side.createdByName) {
     const role = side.createdByRole ? ` (${side.createdByRole})` : "";
     const when = side.createdAt ? ` ${formatDateVi(side.createdAt).slice(0, 5)}` : "";

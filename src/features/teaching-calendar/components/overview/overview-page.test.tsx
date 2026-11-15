@@ -62,7 +62,7 @@ it("draws schools as rows and Thứ 2…Thứ 7 as columns with merged time rang
   fireEvent.click(screen.getByText("T.Tuấn"));
   const dialog = await screen.findByRole("dialog", { name: "Chi tiết khung giờ" });
   expect(within(dialog).getByText("Không có")).toBeInTheDocument();
-  expect(within(dialog).getByText("Đã xuất bản · Đợt HK1·2")).toBeInTheDocument();
+  expect(within(dialog).getByText("Đã áp dụng · Đợt HK1·2")).toBeInTheDocument();
   expect(within(dialog).getByRole("button", { name: "Đổi giáo viên" })).toBeInTheDocument();
 });
 

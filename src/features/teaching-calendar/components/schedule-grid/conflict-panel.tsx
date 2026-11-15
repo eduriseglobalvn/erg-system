@@ -27,7 +27,7 @@ export function ConflictPanel({ conflicts, onFix, onGoTo, onRemove, unknownNames
         <Box aria-hidden sx={{ alignItems: "center", bgcolor: count ? scheduleTokens.clash.edge : "primary.main", borderRadius: "999px", color: "common.white", display: "flex", flex: "0 0 28px", height: 28, justifyContent: "center", typography: "subtitle2", width: 28 }}>{count}</Box>
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography component="h2" sx={{ color: tone.text, typography: "subtitle2" }}>{count ? "Xung đột cần xử lý" : "Không có xung đột"}</Typography>
-          <Typography sx={{ color: tone.text, opacity: 0.8, typography: "caption" }}>{count ? "Chưa xuất bản được cho đến khi hết xung đột" : "Sẵn sàng xuất bản"}</Typography>
+          <Typography sx={{ color: tone.text, opacity: 0.8, typography: "caption" }}>{count ? "Chưa áp dụng được cho đến khi hết xung đột" : "Sẵn sàng áp dụng"}</Typography>
         </Box>
       </Box>
       {unknownNames.map((name) => (

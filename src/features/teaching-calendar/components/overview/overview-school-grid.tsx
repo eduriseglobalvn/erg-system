@@ -33,7 +33,7 @@ export function schoolBadge(school: Pick<School, "conflictCount" | "hasDraft" | 
 
 const swatch = { borderRadius: "3px", display: "inline-block", height: 10, verticalAlign: "middle", width: 12 } as const;
 const LEGEND = [
-  { label: "Đã xuất bản", sx: { backgroundColor: ink.surfaceSubtle, boxShadow: `inset 3px 0 0 ${ink.primary}` } },
+  { label: "Đã áp dụng", sx: { backgroundColor: ink.surfaceSubtle, boxShadow: `inset 3px 0 0 ${ink.primary}` } },
   { label: "Nháp", sx: { backgroundImage: stripes(3, tone.surface, tone.draft.stripe), boxShadow: `inset 0 0 0 1px ${ink.primary}` } },
   { label: "Trùng / không kịp di chuyển", sx: { backgroundColor: tone.clash.bg, boxShadow: `inset 0 0 0 1.5px ${tone.clash.edge}` } },
 ] as const;

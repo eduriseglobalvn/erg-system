@@ -16,7 +16,7 @@ it("joins conflict, draft and tiet notes with a dot and dedupes mirrored conflic
     [cell({ batchLabel: "Đợt HK1·3", status: "DRAFT" }), cell({ note: "Thứ 7 học bù" })],
     [clash, mirrored],
   );
-  expect(note).toBe("⚠ Q.Vương trùng giờ: 9A4 (TCĐ) và 8A2 (Nguyễn Du) · Nháp · chưa xuất bản (Đợt HK1·3) · Thứ 7 học bù");
+  expect(note).toBe("⚠ Q.Vương trùng giờ: 9A4 (TCĐ) và 8A2 (Nguyễn Du) · Nháp · chưa áp dụng (Đợt HK1·3) · Thứ 7 học bù");
 });
 
 it("classifies cells for styling", () => {

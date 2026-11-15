@@ -15,7 +15,7 @@ export function reuseWeekDetail(week: Week): string {
   if (holiday && week.skipped > 0) return `${formatDateVi(holiday.date).slice(0, 5)} ${holiday.name} · bỏ ${week.skipped} tiết`;
   const first = week.conflictDetails[0];
   if (first) {
-    const source = first.other?.batchLabel ? ` (${first.other.batchLabel}, ${first.other.batchStatus === "PUBLISHED" ? "đã xuất bản" : "nháp"})` : "";
+    const source = first.other?.batchLabel ? ` (${first.other.batchLabel}, ${first.other.batchStatus === "PUBLISHED" ? "đã áp dụng" : "nháp"})` : "";
     return `${conflictLines(first).otherLine}${source}`;
   }
   return "Như tuần gốc";

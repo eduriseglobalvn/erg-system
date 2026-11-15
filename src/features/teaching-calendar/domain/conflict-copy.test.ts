@@ -14,7 +14,7 @@ it("teacher clash: mine, other and a CHANGE_TEACHER fix", () => {
   expect(lines.when).toBe("Thứ 4 · Tiết 6 · 11:30–12:15 (từ 11/11)");
   expect(lines.mineLine).toBe("T.Tuấn dạy 9A2 · P.201 · TCĐ");
   expect(lines.otherLine).toBe("T.Tuấn đang dạy 9A1 · P.201 · TCĐ");
-  expect(lines.source).toBe("Đợt 1 · đã xuất bản");
+  expect(lines.source).toBe("Đợt 1 · đã áp dụng");
   expect(lines.fixLine).toBe("Đổi GV → Q.Vương (trống)");
 });
 

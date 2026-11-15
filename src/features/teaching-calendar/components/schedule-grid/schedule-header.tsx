@@ -74,7 +74,7 @@ export function ScheduleHeader({ batchLabel, batchStatus, errorCount, onExport, 
               />
             )
           ) : null}
-          {batchLabel ? <Chip label={batchStatus === "PUBLISHED" ? "Đã xuất bản" : batchStatus === "CANCELLED" ? "Đã huỷ" : "Nháp"} size="small" sx={{ bgcolor: scheduleTokens.neutral.bg, color: scheduleTokens.neutral.text }} /> : null}
+          {batchLabel ? <Chip label={batchStatus === "PUBLISHED" ? "Đã áp dụng" : batchStatus === "CANCELLED" ? "Đã huỷ" : "Nháp"} size="small" sx={{ bgcolor: scheduleTokens.neutral.bg, color: scheduleTokens.neutral.text }} /> : null}
         </Stack>
       </Box>
       <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
@@ -83,7 +83,7 @@ export function ScheduleHeader({ batchLabel, batchStatus, errorCount, onExport, 
         {onExport ? <ErgButton onClick={onExport} sx={{ ...buttonSx(radius.control), px: 1.25 }} variant="text">Xuất Excel theo mẫu</ErgButton> : null}
         <Tooltip title={blocked ? `Còn ${errorCount} xung đột cần xử lý` : ""}>
           <span>
-            <ErgButton disabled={disabled} loading={publishing} onClick={onPublish} sx={{ ...buttonSx(radius.control), px: 2.25 }} variant="contained">Xuất bản cho giáo viên</ErgButton>
+            <ErgButton disabled={disabled} loading={publishing} onClick={onPublish} sx={{ ...buttonSx(radius.control), px: 2.25 }} variant="contained">Áp dụng & thông báo</ErgButton>
           </span>
         </Tooltip>
       </Stack>

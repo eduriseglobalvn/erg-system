@@ -11,7 +11,7 @@ const LABELS: Record<ScheduleLegendItem, string> = {
   clash: "Trùng",
   draft: "Nháp",
   off: "Nghỉ",
-  published: "Đã xuất bản",
+  published: "Đã áp dụng",
   travel: "Không kịp di chuyển (< 50′)",
 };
 

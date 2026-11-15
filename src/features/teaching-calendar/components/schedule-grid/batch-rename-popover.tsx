@@ -52,7 +52,7 @@ function RenameForm({ error, label, onCancel, onChange, onSave, pending }: Props
         />
         {error ? <Typography color="error" role="alert" sx={{ typography: "caption" }}>{error}</Typography> : (
           <Typography sx={{ color: "text.secondary", typography: "caption" }}>
-            Tên chỉ để giáo vụ nhận ra đợt trong danh sách và bảng tổng. Giáo viên không thấy tên này, đổi tên không cần xuất bản lại.
+            Tên chỉ để giáo vụ nhận ra đợt trong danh sách và bảng tổng. Giáo viên không thấy tên này, đổi tên không cần áp dụng lại.
           </Typography>
         )}
         <Stack direction="row" spacing={1} sx={{ justifyContent: "flex-end" }}>

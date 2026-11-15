@@ -46,7 +46,7 @@ describe("schedule-copy (KE_HOACH_LICH_DAY 4.6)", () => {
   it("builds the source line", () => {
     expect(sourceLabel({
       batchLabel: "Đợt HK1·2", batchStatus: "PUBLISHED", createdAt: "2026-11-02T03:00:00Z", createdByName: "Hà", createdByRole: "Giáo vụ",
-    })).toBe("Đợt HK1·2 · đã xuất bản · xếp bởi Hà (Giáo vụ) 02/11");
+    })).toBe("Đợt HK1·2 · đã áp dụng · xếp bởi Hà (Giáo vụ) 02/11");
   });
 
   it("formats minutes with the prime sign", () => {

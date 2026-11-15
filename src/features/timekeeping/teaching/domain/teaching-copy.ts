@@ -43,5 +43,5 @@ export function myBanner(state: MyMonthState, data: Pick<MyTeachingMonth, "deadl
     const closed = formatDateViHcm(data.closedAt).slice(0, 5);
     return { tone: "ok", title: closed ? `Đã chốt · ${closed}` : "Đã chốt", hint: "HR đã gửi tính lương" };
   }
-  return { tone: "info", title: `Tháng ${m} chưa kết thúc`, hint: "Số tiết tự tính từ lịch dạy đã xuất bản và còn thay đổi." };
+  return { tone: "info", title: `Tháng ${m} chưa kết thúc`, hint: "Số tiết tự tính từ lịch dạy đã áp dụng và còn thay đổi." };
 }

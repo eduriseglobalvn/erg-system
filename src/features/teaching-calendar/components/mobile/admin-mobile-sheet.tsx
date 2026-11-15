@@ -124,7 +124,7 @@ function AdminMobileSheetBody({ date, events, onClose, open, schoolId, schoolNam
               {swap ? <Link component="button" onClick={() => row && apply(withTeacher(row, { id: swap.teacherId, name: swap.teacherName }).row)} sx={{ alignItems: "center", display: "flex", minHeight: 32, textAlign: "left", typography: "subtitle2", fontSize: "0.8125rem" }} type="button" underline="none">Đổi sang {swap.teacherName} (trống tiết {periodNo}) →</Link> : null}
             </Box>
           ) : null}
-          {row?.className ? <Box sx={{ bgcolor: scheduleTokens.published.bg, borderRadius: `${ergEnterpriseTokens.radius.control}px`, color: scheduleTokens.published.text, fontSize: "0.75rem", px: "10px", py: 1 }}>Khi xuất bản: cấp quyền lớp {row.className} cho giáo viên được chọn.</Box> : null}
+          {row?.className ? <Box sx={{ bgcolor: scheduleTokens.published.bg, borderRadius: `${ergEnterpriseTokens.radius.control}px`, color: scheduleTokens.published.text, fontSize: "0.75rem", px: "10px", py: 1 }}>Khi áp dụng: cấp quyền lớp {row.className} cho giáo viên được chọn.</Box> : null}
           {sunday ? <Typography color="error" role="alert" sx={{ typography: "caption" }}>Chủ nhật không có trong lưới xếp lịch. Chọn ngày từ Thứ 2 đến Thứ 7.</Typography> : null}
           {add.isError ? <Typography color="error" role="alert" sx={{ typography: "caption" }}>Chưa lưu được · Thử lại</Typography> : null}
           <ErgButton disabled={!canAdd} fullWidth sx={{ borderRadius: `${ergEnterpriseTokens.radius.control}px`, fontSize: "0.9375rem", height: 48 }} loading={add.isPending} onClick={() => row && add.mutate({ date, periodTemplateId, row, schoolId })} variant="contained">Thêm vào nháp</ErgButton>

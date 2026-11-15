@@ -66,7 +66,7 @@ export function EventDetails({ canDelete, conflicts, event, onClose, onDelete, o
         {own.map((conflict) => {
           const text = conflict.kind === "TRAVEL_TIME" && conflict.travel
             ? `Không kịp di chuyển: tiết trước ở ${conflict.other?.schoolName ?? conflict.travel.fromSchoolName}, hết ${conflict.travel.previousEndTime} → chỉ ${conflict.travel.gapMinutes}′ (cần ≥ ${conflict.travel.requiredMinutes}′)`
-            : `Trùng: ${popoverConflictLine(conflict)}${conflict.other?.batchLabel ? ` (${conflict.other.batchLabel}, ${conflict.other.batchStatus === "PUBLISHED" ? "đã xuất bản" : "nháp"})` : ""}`;
+            : `Trùng: ${popoverConflictLine(conflict)}${conflict.other?.batchLabel ? ` (${conflict.other.batchLabel}, ${conflict.other.batchStatus === "PUBLISHED" ? "đã áp dụng" : "nháp"})` : ""}`;
           return <Box key={conflict.id} sx={{ bgcolor: scheduleTokens.clash.bg, borderRadius: `${ergEnterpriseTokens.radius.control}px`, color: scheduleTokens.clash.text, px: "10px", py: 1 }}>{text}</Box>;
         })}
         <Box sx={{ alignItems: "center", borderTop: `1px solid ${color.divider}`, display: "flex", gap: 1, pt: 1 }}>

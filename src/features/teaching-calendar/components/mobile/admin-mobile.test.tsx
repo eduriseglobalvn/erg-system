@@ -32,11 +32,11 @@ it("labels the period chips like the board", () => {
   expect(periodChipHint({ periodNo: 3, startTime: "09:15" }, false, false)).toBe("trống");
 });
 
-it("tags cards with Trùng GV, Nháp or Đã xuất bản (never «Đã giao»)", () => {
+it("tags cards with Trùng GV, Nháp or Đã áp dụng (never «Đã giao»)", () => {
   const event = (status: string) => ({ status }) as TeachingCalendarEvent;
   expect(mobileCardTag(event("PUBLISHED"), true).label).toBe("Trùng GV");
   expect(mobileCardTag(event("DRAFT"), false).label).toBe("Nháp");
-  expect(mobileCardTag(event("PUBLISHED"), false).label).toBe("Đã xuất bản");
+  expect(mobileCardTag(event("PUBLISHED"), false).label).toBe("Đã áp dụng");
 });
 
 it("creates a new draft batch when the school has none", async () => {

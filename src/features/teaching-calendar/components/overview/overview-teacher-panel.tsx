@@ -11,7 +11,7 @@ import type { useOverviewParams } from "./use-overview-params";
 
 type Props = { data: ReturnType<typeof useOverviewData>; params: ReturnType<typeof useOverviewParams>; requiredMinutes: number };
 
-const explain = (minutes: number) => `Mỗi ô ngày có 8 ô tiết: hàng trên là buổi sáng (tiết 1–4), hàng dưới là buổi chiều (tiết 6–9). Trong ô là tên lớp; dòng nhỏ bên dưới là trường dạy hôm đó, hiện màu cam khi giáo viên phải chạy 2 trường trong một ngày, kèm thời gian nghỉ giữa 2 nơi. Hai tiết liền nhau ở 2 trường khác nhau phải cách nhau ít nhất ${minutes} phút (chỉnh trong Cài đặt, theo từng cặp trường); thiếu thì ô tiết sau viền đỏ đứt, báo “Không kịp di chuyển” và chặn xuất bản như trùng giờ.`;
+const explain = (minutes: number) => `Mỗi ô ngày có 8 ô tiết: hàng trên là buổi sáng (tiết 1–4), hàng dưới là buổi chiều (tiết 6–9). Trong ô là tên lớp; dòng nhỏ bên dưới là trường dạy hôm đó, hiện màu cam khi giáo viên phải chạy 2 trường trong một ngày, kèm thời gian nghỉ giữa 2 nơi. Hai tiết liền nhau ở 2 trường khác nhau phải cách nhau ít nhất ${minutes} phút (chỉnh trong Cài đặt, theo từng cặp trường); thiếu thì ô tiết sau viền đỏ đứt, báo “Không kịp di chuyển” và chặn áp dụng như trùng giờ.`;
 const TAIL = "Di chuột vào ô để xem chi tiết; bấm đúp để sửa.";
 const ASSISTANT = "Ô viền xanh nét đứt ghi “TG” là tiết người đó làm trợ giảng (giáo viên chính ở lớp khác); tiết trợ giảng tính vào tải tuần và vào luật trùng giờ / di chuyển.";
 

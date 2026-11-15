@@ -5,7 +5,7 @@ import { loadLmsMyTeachingCalendar } from "../../api/teaching-calendar-api";
 import { buildIcs, icsFileName } from "../../domain/ics";
 import { addDaysToDate } from "../../domain/schedule-copy";
 
-/** «Thêm vào lịch điện thoại»: tải 10 tuần lịch đã xuất bản từ hôm nay và lưu file .ics. */
+/** «Thêm vào lịch điện thoại»: tải 10 tuần lịch đã áp dụng từ hôm nay và lưu file .ics. */
 export async function exportTeacherIcs(tenantId: string) {
   try {
     const from = todayInput();

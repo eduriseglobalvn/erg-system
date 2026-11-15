@@ -36,7 +36,7 @@ export function OverviewCellPopover({ anchorEl, chip, conflict, onChangeTeacher,
   const periods = chip ? (chip.firstPeriod === chip.lastPeriod ? `${chip.firstPeriod}` : `${chip.firstPeriod}–${chip.lastPeriod}`) : "";
   const rows: Array<[string, string]> = cell ? [
     ["Lớp", cell.className ?? ""], ["Phòng", cell.roomName ?? ""], ["Giáo viên", cell.teacherName ?? ""], ["Trợ giảng", cell.assistantName || "Không có"],
-    ["Môn", subjectName ?? ""], ["Trạng thái", [cell.status === "DRAFT" ? "Nháp" : "Đã xuất bản", cell.batchLabel].filter(Boolean).join(" · ")],
+    ["Môn", subjectName ?? ""], ["Trạng thái", [cell.status === "DRAFT" ? "Nháp" : "Đã áp dụng", cell.batchLabel].filter(Boolean).join(" · ")],
   ] : [];
   return (
     <Popover

@@ -22,12 +22,12 @@ function Chip({ children, tone, strike, strong }: { children: string; strike?: b
   );
 }
 
-/** «Quyền thay đổi khi xuất bản» (board AdminCreate): the vien 14px p14, moi giao vien mot khoi, truong + lop (dang co / moi / thu hoi). */
+/** «Quyền thay đổi khi áp dụng» (board AdminCreate): the vien 14px p14, moi giao vien mot khoi, truong + lop (dang co / moi / thu hoi). */
 export function AccessPanel({ changes, schoolName }: { changes: readonly Change[]; schoolName: string }) {
   if (!changes.length) return null;
   return (
-    <Stack aria-label="Quyền thay đổi khi xuất bản" component="section" spacing={1.25} sx={{ bgcolor: "background.paper", border: 1, borderColor: "divider", borderRadius: `${ergEnterpriseTokens.radius.card}px`, p: 1.75 }}>
-      <Typography component="h2" sx={{ typography: "subtitle2" }}>Quyền thay đổi khi xuất bản</Typography>
+    <Stack aria-label="Quyền thay đổi khi áp dụng" component="section" spacing={1.25} sx={{ bgcolor: "background.paper", border: 1, borderColor: "divider", borderRadius: `${ergEnterpriseTokens.radius.card}px`, p: 1.75 }}>
+      <Typography component="h2" sx={{ typography: "subtitle2" }}>Quyền thay đổi khi áp dụng</Typography>
       {changes.map((change) => {
         const revokeOnly = change.weeklyPeriods === 0 && change.lastPeriodDate;
         return (
