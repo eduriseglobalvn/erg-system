@@ -50,7 +50,7 @@ describe("G05 day detail on phones", () => {
     expect(await within(dialog).findByText("Không có lượt chấm ra trong 11:30–12:30")).toBeInTheDocument();
     const explain = await within(dialog).findByRole("button", { name: "Giải trình chấm công" });
     expect(explain).toHaveClass("MuiButton-outlined");
-    expect(screen.getByRole("heading", { hidden: true, name: "Bảng công của tôi" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { hidden: true, name: "Công của tôi" })).toBeInTheDocument();
 
     fireEvent.click(explain);
     expect(lastHref().href).toContain("/timekeeping/requests?new=explanation&date=2026-10-14");
@@ -68,7 +68,7 @@ describe("G05 day detail on phones", () => {
     renderWith(<TeacherTimekeepingTimesheetRoute />, { date: "2026-10-14" }, false);
     expect(await screen.findByRole("heading", { level: 1, name: "Thứ Tư, 14/10/2026" })).toBeInTheDocument();
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-    expect(screen.queryByText("Bảng công của tôi")).not.toBeInTheDocument();
+    expect(screen.queryByText("Công của tôi")).not.toBeInTheDocument();
   });
 });
 

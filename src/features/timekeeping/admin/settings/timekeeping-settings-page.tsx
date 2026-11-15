@@ -22,10 +22,10 @@ function Frame({ children, filter }: { children: ReactNode; filter?: ReactNode }
   );
 }
 
-type SchoolSettingsProps = { schoolId: string; schoolName: string; filter: ReactNode };
+type SchoolSettingsProps = { schoolId: string; filter: ReactNode };
 
 /** Loads one school's sites and policy. Remounted per school so the edited site and unsaved values never leak across schools. */
-function SchoolSettings({ filter, schoolId, schoolName }: SchoolSettingsProps) {
+function SchoolSettings({ filter, schoolId }: SchoolSettingsProps) {
   const policy = usePolicy(schoolId);
   const sites = useSites(schoolId);
   const [picked, setPicked] = useState<string | null>(null);
@@ -43,7 +43,6 @@ function SchoolSettings({ filter, schoolId, schoolName }: SchoolSettingsProps) {
       onSelect={(id) => setPicked(id ?? NEW_SITE)}
       schoolFilter={filter}
       schoolId={schoolId}
-      schoolName={schoolName}
       selectedId={selectedId}
       sites={items}
       versions={policy.data}
@@ -64,6 +63,5 @@ export function TimekeepingSettingsPage() {
   if (!schoolId) return <Frame><ErgEmptyState description="Tạo cơ sở trước khi cấu hình chấm công." title="Chưa có cơ sở" /></Frame>;
 
   const filter = <SchoolFilter onChange={(next) => update({ schoolId: next })} schools={schools.data ?? []} value={schoolId} />;
-  const schoolName = schools.data?.find((school) => school.id === schoolId)?.name ?? "";
-  return <SchoolSettings filter={filter} key={schoolId} schoolId={schoolId} schoolName={schoolName} />;
+  return <SchoolSettings filter={filter} key={schoolId} schoolId={schoolId} />;
 }
