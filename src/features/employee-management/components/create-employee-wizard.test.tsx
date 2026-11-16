@@ -5,19 +5,17 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 const hooks = vi.hoisted(() => ({
   useEmployeeCommands: vi.fn(),
   useAssignableRoles: vi.fn(),
-  useEmployeeSchoolOptions: vi.fn(),
 }));
 
 vi.mock("@/features/employee-management/hooks/use-employee-management", () => hooks);
 
 import { initialForm } from "@/features/employee-management/components/create-employee/constants";
-import { RoleScopeStep } from "@/features/employee-management/components/create-employee/role-scope-step";
+import { RoleStep } from "@/features/employee-management/components/create-employee/role-step";
 import { CreateEmployeeWizard } from "@/features/employee-management/components/create-employee-wizard";
 
 describe("CreateEmployeeWizard", () => {
   beforeEach(() => {
     hooks.useAssignableRoles.mockReturnValue({ data: [], isPending: false });
-    hooks.useEmployeeSchoolOptions.mockReturnValue({ schools: [], classes: [], isPending: false });
     hooks.useEmployeeCommands.mockReturnValue({ create: { mutateAsync: vi.fn(), isPending: false } });
   });
 
@@ -44,7 +42,7 @@ describe("CreateEmployeeWizard", () => {
     ];
     function Harness() {
       const [form, setForm] = useState(initialForm);
-      return <><RoleScopeStep dbClasses={[]} dbSchools={[]} form={form} roleOptions={roles} set={vi.fn()} setForm={setForm} tenantId="t" /><output data-testid="chosen">{form.roleNames.join(",")}</output></>;
+      return <><RoleStep form={form} roleOptions={roles} setForm={setForm} /><output data-testid="chosen">{form.roleNames.join(",")}</output></>;
     }
     render(<Harness />);
     fireEvent.mouseDown(screen.getAllByRole("combobox")[0]!);

@@ -18,13 +18,12 @@ import { IdentityStep } from "@/features/employee-management/components/create-e
 import { OneTimePasswordView } from "@/features/employee-management/components/create-employee/one-time-password-view";
 import { ProfileStep } from "@/features/employee-management/components/create-employee/profile-step";
 import { ReviewStep } from "@/features/employee-management/components/create-employee/review-step";
-import { RoleScopeStep } from "@/features/employee-management/components/create-employee/role-scope-step";
+import { RoleStep } from "@/features/employee-management/components/create-employee/role-step";
 import { StepIndicator } from "@/features/employee-management/components/create-employee/step-indicator";
 import { WizardActions } from "@/features/employee-management/components/create-employee/wizard-actions";
 import {
   useEmployeeCommands,
   useAssignableRoles,
-  useEmployeeSchoolOptions,
 } from "@/features/employee-management/hooks/use-employee-management";
 import { assignableRoleValue } from "@/features/rbac/lib/exclusive-roles";
 import { alpha } from "@mui/material/styles";
@@ -46,10 +45,6 @@ export function CreateEmployeeWizard({
   const [oneTimePassword, setOneTimePassword] = useState<string>();
   const [error, setError] = useState<string | null>(null);
 
-  const schoolMgmt = useEmployeeSchoolOptions(form.selectedSchoolForClass || undefined);
-  const dbSchools = schoolMgmt.schools;
-  const dbClasses = schoolMgmt.classes;
-
   const set = (name: keyof typeof form, value: string) => {
     setError(null);
     setForm((current) => {
@@ -63,42 +58,10 @@ export function CreateEmployeeWizard({
 
   const chosenRoles = form.roleNames.length > 0 ? form.roleNames : form.roleName ? [form.roleName] : [];
 
-  const chosenScopeIds =
-    form.scopeType === "SYSTEM" || form.scopeType === "TENANT"
-      ? [tenantId]
-      : form.scopeType === "SCHOOL"
-        ? form.selectedSchoolIds.length > 0
-          ? form.selectedSchoolIds
-          : form.scopeId.trim()
-            ? [form.scopeId.trim()]
-            : []
-        : form.scopeType === "CLASS"
-          ? form.selectedClassIds.length > 0
-            ? form.selectedClassIds
-            : form.scopeId.trim()
-              ? [form.scopeId.trim()]
-              : []
-          : form.scopeType === "CENTER"
-            ? form.selectedCenterIds.length > 0
-              ? form.selectedCenterIds
-              : form.scopeId.trim()
-                ? [form.scopeId.trim()]
-                : []
-            : form.scopeId.trim()
-              ? [form.scopeId.trim()]
-              : [];
-
-  const effectiveScopeId =
-    chosenScopeIds.join(", ") ||
-    (form.scopeType === "TENANT" || form.scopeType === "SYSTEM" ? tenantId : "");
-
   const valid = [
     Boolean(form.fullName.trim() && form.email.trim()),
     Boolean(form.employeeCode.trim() && form.jobTitle.trim()),
-    Boolean(
-      chosenRoles.length > 0 &&
-        (form.scopeType === "TENANT" || form.scopeType === "SYSTEM" || chosenScopeIds.length > 0),
-    ),
+    chosenRoles.length > 0,
     Boolean(form.credentialDelivery),
     true,
   ][step];
@@ -115,24 +78,12 @@ export function CreateEmployeeWizard({
     setError(null);
     try {
       const rolesToSubmit = chosenRoles.length > 0 ? chosenRoles : [form.roleName];
-      const targetScopeIds = chosenScopeIds.length > 0 ? chosenScopeIds : [effectiveScopeId || tenantId];
-
-      const policies = rolesToSubmit.flatMap((role) =>
-        targetScopeIds.map((targetId) => ({
-          roleGroup: role,
-          scopeId: targetId,
-          scopeType: form.scopeType,
-        })),
-      );
-
       const result = await commands.create.mutateAsync({
         credentialDelivery: form.credentialDelivery,
         fullName: form.fullName.trim(),
         phone: form.phone.trim() || undefined,
-        policies:
-          policies.length > 0
-            ? policies
-            : [{ roleGroup: rolesToSubmit[0], scopeId: tenantId, scopeType: form.scopeType }],
+        // Trường và lớp được phân sau khi tạo; tài khoản mới không mang phạm vi nào.
+        policies: [],
         primaryEmail: form.email.trim().toLowerCase(),
         profile: {
           departmentId: form.departmentId.trim() || undefined,
@@ -288,19 +239,11 @@ export function CreateEmployeeWizard({
             {step === 0 ? <IdentityStep form={form} set={set} /> : null}
             {step === 1 ? <ProfileStep form={form} set={set} /> : null}
             {step === 2 ? (
-              <RoleScopeStep
-                dbClasses={dbClasses}
-                dbSchools={dbSchools}
-                form={form}
-                roleOptions={rolesQuery.data}
-                set={set}
-                setForm={setForm}
-                tenantId={tenantId}
-              />
+              <RoleStep form={form} roleOptions={rolesQuery.data} setForm={setForm} />
             ) : null}
             {step === 3 ? <CredentialStep form={form} set={set} /> : null}
             {step === 4 ? (
-              <ReviewStep roleLabels={chosenRoles.map((value) => (rolesQuery.data ?? []).find((role) => assignableRoleValue(role) === value)?.label ?? value)} effectiveScopeId={effectiveScopeId} form={form} />
+              <ReviewStep roleLabels={chosenRoles.map((value) => (rolesQuery.data ?? []).find((role) => assignableRoleValue(role) === value)?.label ?? value)} form={form} />
             ) : null}
           </>
         )}

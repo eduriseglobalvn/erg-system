@@ -291,9 +291,9 @@
     "hex": 0,
     "font": 2
   },
-  "src/features/employee-management/components/create-employee/role-scope-step.tsx": {
+  "src/features/employee-management/components/create-employee/role-step.tsx": {
     "hex": 0,
-    "font": 9
+    "font": 1
   },
   "src/features/employee-management/components/create-employee/step-indicator.tsx": {
     "hex": 2,

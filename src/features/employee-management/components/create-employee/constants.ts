@@ -1,13 +1,6 @@
 import type { CreateEmployeeRequest } from "@/features/employee-management/types/employee-management";
 
-export const steps = ["Định danh", "Thông tin nhân sự", "Vai trò & phạm vi", "Đăng nhập", "Xem lại"];
-
-export const DEFAULT_CENTER_OPTIONS = [
-  { code: "CS-01", id: "CS-QUAN-1", name: "Cơ sở Đào tạo ERG - Quận 1" },
-  { code: "CS-02", id: "CS-TAN-BINH", name: "Cơ sở Đào tạo ERG - Tân Bình" },
-  { code: "CS-03", id: "CS-THU-DUC", name: "Cơ sở Đào tạo ERG - Thủ Đức" },
-  { code: "CTR-01", id: "CENTER-01", name: "Trung tâm Ngoại ngữ & Khảo thí ERG" },
-];
+export const steps = ["Định danh", "Thông tin nhân sự", "Vai trò", "Đăng nhập", "Xem lại"];
 
 export const initialForm = {
   credentialDelivery: "EMAIL_INVITE" as CreateEmployeeRequest["credentialDelivery"],
@@ -27,12 +20,6 @@ export const initialForm = {
   recoveryEmail: "",
   roleName: "",
   roleNames: [] as string[],
-  scopeId: "",
-  scopeType: "TENANT",
-  selectedCenterIds: [] as string[],
-  selectedClassIds: [] as string[],
-  selectedSchoolForClass: "",
-  selectedSchoolIds: [] as string[],
   workLocation: "",
 };
 

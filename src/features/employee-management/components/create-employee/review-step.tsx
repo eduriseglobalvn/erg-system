@@ -2,15 +2,12 @@ import Box from "@mui/material/Box";
 
 import type { EmployeeForm } from "@/features/employee-management/components/create-employee/constants";
 import { ReviewRow } from "@/features/employee-management/components/create-employee/review-row";
-import { getScopeMeta } from "@/platform/auth/permissions/role-display-catalog";
 
 export function ReviewStep({
   roleLabels,
-  effectiveScopeId,
   form,
 }: {
   roleLabels: string[];
-  effectiveScopeId: string;
   form: EmployeeForm;
 }) {
   return (
@@ -21,10 +18,6 @@ export function ReviewStep({
       <ReviewRow
         label="Nhóm quyền đã cấp"
         value={roleLabels.join(", ") || "Chưa chọn quyền"}
-      />
-      <ReviewRow
-        label="Phạm vi áp dụng"
-        value={`${getScopeMeta(form.scopeType).label}: ${effectiveScopeId || "Toàn tổ chức"}`}
       />
       <ReviewRow
         label="Phương thức cấp mật khẩu"
