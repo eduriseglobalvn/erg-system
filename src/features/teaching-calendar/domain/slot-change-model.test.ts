@@ -1,13 +1,13 @@
 import { expect, it } from "vitest";
 
 import type { TeachingCalendarEvent } from "@/features/teaching-calendar/api/teaching-calendar-workspace-types";
-import { editPatch, initialDraft, isChangeable, previewState, scopeInput, scopeReady, slotChangeErrorMessage, swapInput } from "./slot-change-model";
+import { editPatch, initialDraft, isChangeable, previewState, type ScopeState, scopeInput, scopeReady, slotChangeErrorMessage, swapInput } from "./slot-change-model";
 
 const event = {
   date: "2026-11-11", id: "e1", periodStart: 6, roomId: "r1", status: "PUBLISHED", subjectId: "s1",
   teachers: [{ displayName: "Q.Vương", role: "MAIN", userId: "t1" }, { displayName: "H.Anh", role: "ASSISTANT", userId: "t2" }],
 } as unknown as TeachingCalendarEvent;
-const THIS = { dates: [], kind: "THIS_ONLY" } as const;
+const THIS: ScopeState = { dates: [], kind: "THIS_ONLY" };
 
 it("editPatch sends only changed fields and null when nothing changed", () => {
   const draft = initialDraft(event);
