@@ -25,14 +25,14 @@ const TOTALS: Array<{ id: keyof TimesheetRow; header: string }> = [
 
 const codeOf = (row: TimesheetRow, day: number) => row.days?.find((cell) => cell.d === day)?.code ?? "";
 
-/** Weekend or holiday column: a Saturday/Sunday, or a day on which nobody has anything but "L"/"". */
+/** Weekend or holiday column: a Saturday/Sunday, or a day on which nobody has anything but "L"/"KL"/"". */
 export function offColumns(period: string, rows: readonly TimesheetRow[]): Set<number> {
   const [year, month] = period.split("-").map(Number);
   const length = new Date(year, month, 0).getDate();
   const off = new Set<number>();
   for (let day = 1; day <= length; day += 1) {
     const weekday = new Date(year, month - 1, day).getDay();
-    const holiday = rows.length > 0 && rows.some((row) => codeOf(row, day) === "L") && rows.every((row) => ["", "L"].includes(codeOf(row, day)));
+    const holiday = rows.length > 0 && rows.some((row) => ["L", "KL"].includes(codeOf(row, day))) && rows.every((row) => ["", "L", "KL"].includes(codeOf(row, day)));
     if (weekday === 0 || weekday === 6 || holiday) off.add(day);
   }
   return off;

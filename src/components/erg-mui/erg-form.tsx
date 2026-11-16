@@ -17,8 +17,8 @@ export function ErgTextField({ compact = false, size, sx, ...props }: ErgTextFie
           "& .MuiOutlinedInput-root": {
             bgcolor: "#FFFFFF",
             borderRadius: 1.25,
-            fontSize: "0.85rem",
-            fontWeight: 550,
+            fontSize: "0.875rem",
+            fontWeight: "fontWeightRegular",
             transition: "all 0.15s ease",
             "& fieldset": {
               borderColor: "divider",
@@ -36,8 +36,8 @@ export function ErgTextField({ compact = false, size, sx, ...props }: ErgTextFie
           },
           "& .MuiInputLabel-root": {
             color: "text.secondary",
-            fontSize: "0.85rem",
-            fontWeight: 600,
+            fontSize: "0.875rem",
+            fontWeight: "fontWeightRegular",
             "&.Mui-focused": {
               color: "primary.main",
             },

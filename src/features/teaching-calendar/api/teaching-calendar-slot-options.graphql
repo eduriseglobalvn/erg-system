@@ -1,0 +1,16 @@
+query TeachingCalendarSlotOptions($schoolId: ID!, $batchId: ID, $date: Date!, $periodNo: Int!, $classId: ID, $excludeEventId: ID) {
+  lcms {
+    teachingScheduleSlotOptions(schoolId: $schoolId, batchId: $batchId, date: $date, periodNo: $periodNo, classId: $classId, excludeEventId: $excludeEventId) {
+      schoolName grade
+      classes { classId className grade state busy { ...TeachingCalendarSideFields } }
+      teachers {
+        teacherId teacherName initials state weeklyPeriods taughtHereLastWeek classAccess
+        sameSchoolNeighbor { ...TeachingCalendarSideFields }
+        busy { ...TeachingCalendarSideFields }
+        travel { ...TeachingCalendarTravelFields }
+        leave { fromDate toDate part }
+      }
+      rooms { roomId roomName seatCount state usualForClass busy { ...TeachingCalendarSideFields } }
+    }
+  }
+}

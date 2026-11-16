@@ -4,6 +4,17 @@ export type CalendarMode = "month" | "week" | "three-day" | "day" | "schedule";
 export type ErgCalendarTone = "blue" | "green" | "purple" | "orange" | "red" | "teal" | "pink" | "indigo";
 
 export type ErgCalendarEvent = {
+  /** Tiet tro giang cua nguoi dang xem (6.17, 6.18): chip nen trang, vien net dut. */
+  assistant?: boolean;
+  /** Hai dong cua chip (lich giao vien, 6.10); khong co thi dung nhan mac dinh. */
+  chipLines?: [string, string?];
+  /** Dong phu cua the tiet: «Dạy chính: T.Tuấn» / «Trợ giảng: Bảo Ngọc». */
+  subline?: string;
+  /** Thu tu tiet va nhan «còn 25 phút» (chi tiet sap toi trong 60 phut) cua the mobile giao vien (6.11). */
+  periodNo?: number;
+  soonLabel?: string;
+  /** Tag canh ten lop: «Trợ giảng», «Mới». */
+  tags?: string[];
   attendees: string; className?: string; date: string; duration: string; endTime?: string; grade?: string;
   id: string; lane: string; location: string; note?: string; periodCount?: number; roomId?: string;
   school?: string; startTime?: string; subject?: string; teacher?: string; time: string; title: string; tone: ErgCalendarTone;

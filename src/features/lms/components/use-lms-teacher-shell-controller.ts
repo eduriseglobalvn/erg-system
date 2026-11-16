@@ -18,7 +18,7 @@ import { loadLmsDashboardBootstrap } from "@/features/lms/infrastructure/lms-das
 import { getCurrentAcademicYear } from "@/features/lms/learning-resources/api/teacher-resource-dashboard-api";
 import { useLmsMobileBreakpoint } from "@/features/lms/mobile";
 import { fetchUnreadNotificationCount, notificationQueryKeys } from "@/features/notifications/api/notification-api";
-import { isSchedulePublishedNotification, resolveLmsTeacherRuns } from "@/features/lms/components/lms-teacher-shell-utils";
+import { isScheduleNotification, resolveLmsTeacherRuns } from "@/features/lms/components/lms-teacher-shell-utils";
 import {
   LMS_MENU_GROUPS,
   lmsMobileMoreItems,
@@ -201,7 +201,7 @@ export function useLmsTeacherShellController() {
       if (portal !== "lms") return;
 
       void queryClient.invalidateQueries({ queryKey: notificationQueryKeys.root("lms", notificationScope) });
-      if (isSchedulePublishedNotification(event.data.payload)) {
+      if (isScheduleNotification(event.data.payload)) {
         void queryClient.invalidateQueries({ queryKey: teachingCalendarQueryKeys.portalRoot("lms", tenantId) });
       }
     };

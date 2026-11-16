@@ -1,7 +1,7 @@
 import type { DayStatus, LeaveKind } from "../api/timekeeping-types";
 
 export type DayCodeTone = "success" | "warning" | "info" | "error" | "neutral";
-export type DayCodeValue = "X" | "M" | "½" | "P" | "Ô" | "CT" | "KC" | "KP" | "L" | "";
+export type DayCodeValue = "X" | "M" | "½" | "P" | "Ô" | "CT" | "KC" | "KP" | "L" | "KL" | "";
 
 /** Timesheet symbols (plan, "Ký hiệu bảng công"); mirrors the backend's TimesheetService.code so G04/A02 match the exported sheet. */
 export const DAY_CODE: Record<DayStatus, { code: DayCodeValue; label: string; tone: DayCodeTone }> = {
@@ -14,6 +14,7 @@ export const DAY_CODE: Record<DayStatus, { code: DayCodeValue; label: string; to
   MISSING_PUNCH: { code: "KC", label: "Thiếu chấm", tone: "error" },
   ABSENT_UNPAID: { code: "KC", label: "Vắng không lương", tone: "error" },
   HOLIDAY: { code: "L", label: "Ngày lễ", tone: "neutral" },
+  UNPAID_OFF: { code: "KL", label: "Ngày nghỉ không lương", tone: "neutral" },
   OFF: { code: "", label: "Ngày nghỉ", tone: "neutral" },
 };
 

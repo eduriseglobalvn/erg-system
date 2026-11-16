@@ -18,10 +18,12 @@ export const STREAMLINED_ROLE_CATEGORIES: Record<string, string[]> = {
   ],
   "Quản lý Nhà trường & Đào tạo": [
     "school.manager",
+    "school.training_head",
     "pdt_operator",
     "lms.admin",
     "center_manager",
   ],
+  "Hành chính & Nhân sự": ["school.hr"],
   "Tuyển sinh & Quản trị Hệ thống": [
     "seo.staff",
     "seo.manager",

@@ -1,11 +1,9 @@
-import { API_ENDPOINTS } from "@/lib/api/api-endpoints";
-import { apiRequest } from "@/lib/api-client";
 import { graphQlRequest, type GraphQlPortal } from "@/lib/graphql-client";
 
 import type {
   CreateRoomInput, DeleteTeacherScheduleInput, TeachingScheduleBulkInput, TeachingScheduleBulkPayload,
   TeachingScheduleDeletePayload, TeachingScheduleEventDeleteInput, TeachingScheduleEventPayload,
-  TeachingScheduleEventUpdateInput, TeachingScheduleExcelImportInput, TeachingSchedulePreviewPayload,
+  TeachingScheduleEventUpdateInput, TeachingSchedulePreviewPayload,
   TeachingScheduleRoomOption,
 } from "./teaching-calendar-command-types";
 import { bulkPayloadFields, calendarEventFields, previewPayloadFields } from "./teaching-calendar-graphql-fragments";
@@ -63,20 +61,4 @@ export async function createTeachingScheduleRoom(input: CreateRoomInput, portal:
     tenantId: input.tenantId, variables: { input: withDefaultTenant(input) },
   });
   return data.createRoom;
-}
-
-export async function importTeachingScheduleFromExcel(input: TeachingScheduleExcelImportInput, portal: GraphQlPortal = "lcms") {
-  const data = await graphQlRequest<{ importTeachingScheduleFromExcel: TeachingSchedulePreviewPayload }, { input: TeachingScheduleExcelImportInput }>({
-    operationName: "TeachingCalendarImportScheduleFromExcel", portal,
-    query: `mutation TeachingCalendarImportScheduleFromExcel($input: TeachingScheduleExcelImportInput!) { importTeachingScheduleFromExcel(input: $input) { ${previewPayloadFields} } }`,
-    tenantId: input.tenantId, variables: { input: withDefaultTenant(input) },
-  });
-  return data.importTeachingScheduleFromExcel;
-}
-
-export async function uploadTeachingScheduleExcelFile(input: TeachingScheduleExcelImportInput, file: File) {
-  const body = new FormData();
-  body.set("file", file);
-  body.set("metadata", JSON.stringify(withDefaultTenant(input)));
-  return apiRequest<TeachingSchedulePreviewPayload>(API_ENDPOINTS.calendar.importExcel, { body, method: "POST", portal: "lcms" });
 }

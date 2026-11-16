@@ -5,7 +5,6 @@ import Box from "@mui/material/Box";
 import PageHeader from "@/components/shared/PageHeader";
 import { ErgEmptyState } from "@/components/erg-mui/erg-feedback";
 import type { MenuItem as PortalMenuItem } from "@/components/portal/ErgPortalLayout";
-import AdminGoogleCalendarWorkspace from "@/features/lcms/components/admin-google-calendar-workspace";
 import { getMenuItemDescription } from "@/features/lcms/admin-menu";
 import { adminPath } from "@/platform/workspaces/workspace-paths";
 
@@ -19,10 +18,6 @@ const FALLBACK_TITLES: Record<string, string> = {
 };
 
 export function AdminErgPortalWorkspace({ activeItem, pathname }: { activeItem: PortalMenuItem | null; pathname: string }) {
-  if (pathname.startsWith("/calendar")) {
-    return <AdminGoogleCalendarWorkspace activeItem={activeItem} />;
-  }
-
   const fallback = Object.entries(FALLBACK_TITLES).find(([prefix]) => pathname.startsWith(prefix))?.[1] ?? "Dữ liệu";
   const title = activeItem?.label ?? fallback;
 

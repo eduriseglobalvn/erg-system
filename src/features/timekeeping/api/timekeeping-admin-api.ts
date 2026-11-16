@@ -5,6 +5,9 @@ import { withQuery } from "./timekeeping-api";
 import type {
   HolidayCommand,
   HolidayConfig,
+  HolidayImportPreview,
+  HolidayImportResult,
+  HolidayImportRow,
   PeriodLockView,
   PolicyCommand,
   PolicyConfig,
@@ -14,6 +17,8 @@ import type {
   RemindResult,
   RemoteRuleCommand,
   RemoteRuleConfig,
+  SaturdayMode,
+  SaturdayModeView,
   ShiftCommand,
   ShiftConfig,
   SiteCommand,
@@ -53,10 +58,24 @@ export const timekeepingAdminApi = {
   policy: (schoolId: string, signal?: AbortSignal) => client().request<PolicyVersions>(endpoints.policy(schoolId), { signal, cache: "no-store" }),
   savePolicy: (schoolId: string, body: PolicyCommand) =>
     client().request<PolicyConfig>(endpoints.policy(schoolId), { method: "PUT", body: JSON.stringify(body) }),
-  holidays: (params: { schoolId: string; year: number }, signal?: AbortSignal) =>
-    client().request<HolidayConfig[]>(withQuery(endpoints.holidays, params), { signal, cache: "no-store" }),
-  createHoliday: (body: HolidayCommand) => client().request<HolidayConfig>(endpoints.holidays, { method: "POST", body: JSON.stringify(body) }),
+  // Days off apply to the whole system: no schoolId.
+  holidays: (year: number, signal?: AbortSignal) =>
+    client().request<HolidayConfig[]>(withQuery(endpoints.holidays, { year }), { signal, cache: "no-store" }),
+  createHoliday: (body: HolidayCommand) => client().request<HolidayConfig[]>(endpoints.holidays, { method: "POST", body: JSON.stringify(body) }),
+  updateHoliday: (id: string, body: HolidayCommand) => client().request<HolidayConfig>(endpoints.holiday(id), { method: "PUT", body: JSON.stringify(body) }),
   deleteHoliday: (id: string) => client().request<void>(endpoints.holiday(id), { method: "DELETE" }),
+  /** Without `file` the server reads its saved calendar of that year. */
+  holidayImportPreview: (year: number, file?: File) => {
+    const form = new FormData();
+    if (file) form.set("file", file);
+    return client().request<HolidayImportPreview>(withQuery(endpoints.holidaysImportPreview, { year }), { method: "POST", body: form });
+  },
+  importHolidays: (body: { rows: HolidayImportRow[]; confirmPast?: boolean }) =>
+    client().request<HolidayImportResult>(endpoints.holidaysImport, { method: "POST", body: JSON.stringify(body) }),
+  saturdayModes: (month: string, signal?: AbortSignal) =>
+    client().request<SaturdayModeView[]>(withQuery(endpoints.saturdayModes, { month }), { signal, cache: "no-store" }),
+  setSaturdayMode: (date: string, mode: SaturdayMode) =>
+    client().request<SaturdayModeView>(endpoints.saturdayMode(date), { method: "PUT", body: JSON.stringify({ mode }) }),
   remoteRules: (schoolId: string, signal?: AbortSignal) =>
     client().request<RemoteRuleConfig[]>(withQuery(endpoints.remoteRules, { schoolId }), { signal, cache: "no-store" }),
   saveRemoteRule: (id: string | undefined, body: RemoteRuleCommand) =>

@@ -117,3 +117,29 @@ export function AdminGenericRoute() {
   const { activeItem, legacyPathname } = useAdminShellModel();
   return <AdminErgPortalWorkspace activeItem={activeItem ?? null} pathname={legacyPathname} />;
 }
+
+const CalendarMainPage = lazy(() => import("@/features/teaching-calendar/components/main/admin-calendar-main").then((m) => ({ default: m.AdminCalendarMain })));
+const CalendarSchedulePage = lazy(() => import("@/features/teaching-calendar/components/schedule-grid/schedule-page").then((m) => ({ default: m.SchedulePage })));
+const CalendarOverviewPage = lazy(() => import("@/features/teaching-calendar/components/overview/overview-page").then((m) => ({ default: m.OverviewPage })));
+const CalendarTravelPage = lazy(() => import("@/features/teaching-calendar/components/settings/travel-times-page").then((m) => ({ default: m.TravelTimesPage })));
+const CalendarPeriodsPage = lazy(() => import("@/features/teaching-calendar/components/settings/school-periods-page").then((m) => ({ default: m.SchoolPeriodsPage })));
+
+export function AdminCalendarRoute() {
+  return <Suspense fallback={<ContentPendingSkeleton />}><CalendarMainPage /></Suspense>;
+}
+
+export function AdminCalendarScheduleRoute() {
+  return <Suspense fallback={<ContentPendingSkeleton />}><CalendarSchedulePage /></Suspense>;
+}
+
+export function AdminCalendarOverviewRoute() {
+  return <Suspense fallback={<ContentPendingSkeleton />}><CalendarOverviewPage /></Suspense>;
+}
+
+export function AdminCalendarPeriodsRoute() {
+  return <Suspense fallback={<ContentPendingSkeleton />}><CalendarPeriodsPage /></Suspense>;
+}
+
+export function AdminCalendarTravelRoute() {
+  return <Suspense fallback={<ContentPendingSkeleton />}><CalendarTravelPage /></Suspense>;
+}

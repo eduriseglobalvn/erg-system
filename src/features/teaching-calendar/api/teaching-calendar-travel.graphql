@@ -1,0 +1,21 @@
+query TeachingCalendarSchoolTravelTimes($search: String, $page: Int!, $size: Int!) {
+  lcms {
+    schoolTravelTimes(search: $search, page: $page, size: $size) {
+      minutes updatedAt
+      schoolA { ...TeachingCalendarSchoolRowFields }
+      schoolB { ...TeachingCalendarSchoolRowFields }
+    }
+  }
+}
+
+mutation TeachingCalendarUpsertSchoolTravelTime($schoolAId: ID!, $schoolBId: ID!, $minutes: Int!) {
+  upsertSchoolTravelTime(schoolAId: $schoolAId, schoolBId: $schoolBId, minutes: $minutes) {
+    minutes updatedAt
+    schoolA { ...TeachingCalendarSchoolRowFields }
+    schoolB { ...TeachingCalendarSchoolRowFields }
+  }
+}
+
+mutation TeachingCalendarDeleteSchoolTravelTime($schoolAId: ID!, $schoolBId: ID!) {
+  deleteSchoolTravelTime(schoolAId: $schoolAId, schoolBId: $schoolBId)
+}

@@ -1,0 +1,14 @@
+query ClassLogLessonReportMatrix($weekStart: Date!, $schoolId: ID, $subjectId: ID) {
+  lms {
+    lessonReportMatrix(weekStart: $weekStart, schoolId: $schoolId, subjectId: $subjectId) {
+      weekStart
+      days
+      stats { periods teachers schools onTime late missing }
+      rows { teacherId teacherName schoolName cells { date state periods } }
+    }
+  }
+}
+
+mutation ClassLogRemindLessonReport($teacherIds: [ID!]!) {
+  remindLessonReport(teacherIds: $teacherIds)
+}

@@ -90,7 +90,7 @@ export function PunchTodayPage() {
     <Box sx={{ display: "grid", gap: 1.75, gridTemplateColumns: "minmax(0, 1fr)", maxWidth: 480, mx: "auto", px: { xs: 2, sm: 3 }, py: 2 }}>
       <Box sx={{ alignItems: "center", display: "flex", gap: 1 }}>
         <Typography component="h1" sx={{ flex: 1 }} variant="h1">Chấm công</Typography>
-        <ErgIconButton label="Bảng công của tôi" onClick={() => go("/timekeeping/timesheet")} sx={{ border: 1, borderColor: "divider" }}>
+        <ErgIconButton label="Công của tôi" onClick={() => go("/timekeeping/timesheet")} sx={{ border: 1, borderColor: "divider" }}>
           <CalendarViewMonthIcon />
         </ErgIconButton>
       </Box>

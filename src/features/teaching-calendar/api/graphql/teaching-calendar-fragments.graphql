@@ -1,0 +1,49 @@
+fragment TeachingCalendarSideFields on TeachingScheduleSide {
+  eventId teacherId teacherName classId className roomId roomName schoolId schoolName schoolShortName subjectName
+  batchId batchLabel batchStatus createdByName createdByRole createdAt periodNo startTime endTime
+}
+
+fragment TeachingCalendarTravelFields on TeachingScheduleTravelGap {
+  fromSchoolId fromSchoolShortName fromSchoolName toSchoolId toSchoolShortName toSchoolName
+  previousEndTime gapMinutes requiredMinutes
+}
+
+fragment TeachingCalendarConflictFields on TeachingScheduleConflictDetail {
+  id kind severity clientRowId weekday periodNo startTime endTime firstDate affectedWeeks totalWeeks message
+  mine { ...TeachingCalendarSideFields }
+  other { ...TeachingCalendarSideFields }
+  travel { ...TeachingCalendarTravelFields }
+  leave { fromDate toDate part }
+  fix { kind targetEventId targetClientRowId targetClassName teacherId teacherName roomId roomName reason }
+}
+
+fragment TeachingCalendarAccessFields on TeachingAccessChange {
+  teacherId teacherName weeklyPeriods lastPeriodDate schoolId schoolState schoolRevokeOn
+  classes { classId className state revokeOn }
+}
+
+fragment TeachingCalendarDraftResultFields on TeachingScheduleDraftResult {
+  version savedAt
+  batch { id schoolId label status version periodTemplateId applyFrom repeatWeeks publishedAt affectedEventCount }
+  rowIdMap { clientRowId eventId }
+  conflicts { ...TeachingCalendarConflictFields }
+  accessChanges { ...TeachingCalendarAccessFields }
+}
+
+fragment TeachingCalendarSchoolRowFields on TeachingOverviewSchoolRow {
+  schoolId schoolName schoolShortName conflictCount hasDraft periodCount
+}
+
+fragment TeachingCalendarTemplateFields on TeachingPeriodTemplate {
+  id name periodsPerDay slots { periodNo session startTime endTime }
+}
+
+fragment TeachingCalendarSlotChangeFields on TeachingScheduleSlotChangeResult {
+  applied blocking affectedCount
+  events { eventId date periodNo version }
+  conflicts { ...TeachingCalendarConflictFields }
+}
+
+fragment TeachingCalendarAssignmentFields on SchoolPeriodAssignment {
+  schoolId schoolName templateId templateName effectiveFrom current
+}

@@ -64,6 +64,7 @@ export function EventDetailPopover({
             <DetailItem icon={<GroupsRoundedIcon />} label="Lớp" value={event.className ?? event.attendees} />
             <DetailItem icon={<SchoolRoundedIcon />} label="Môn học" value={event.subject ?? event.title} />
             <DetailItem icon={<PersonRoundedIcon />} label="Giáo viên phụ trách" value={event.teacher ?? "Chưa phân công"} />
+            {event.assistant ? <DetailItem icon={<GroupsRoundedIcon />} label="Vai trò" value="Trợ giảng" /> : event.subline ? <DetailItem icon={<GroupsRoundedIcon />} label="Trợ giảng" value={event.subline.replace("Trợ giảng: ", "")} /> : null}
           </Box>
 
           <Divider />

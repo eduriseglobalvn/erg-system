@@ -11,8 +11,6 @@ const auditedQueryOwners = [
   "src/features/lcms/admin-operations/components/user-access-control-workspace.tsx",
   "src/features/lcms/admin-operations/components/learning-resource-authoring-workspace.tsx",
   "src/features/lcms/admin-operations/components/admin-operations-workspace.tsx",
-  "src/features/lcms/components/admin-google-calendar-workspace.tsx",
-  "src/features/teaching-calendar/components/teaching-schedule-batch-panel.tsx",
 ];
 
 describe("Admin query cancellation policy", () => {

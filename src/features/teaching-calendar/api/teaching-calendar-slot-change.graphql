@@ -1,0 +1,7 @@
+mutation TeachingCalendarEditScheduleSlot($input: EditTeachingScheduleSlotInput!) {
+  editTeachingScheduleSlot(input: $input) { ...TeachingCalendarSlotChangeFields }
+}
+
+mutation TeachingCalendarSwapScheduleTeacher($input: SwapTeachingScheduleTeacherInput!) {
+  swapTeachingScheduleTeacher(input: $input) { ...TeachingCalendarSlotChangeFields }
+}

@@ -7,7 +7,7 @@ test("timesheet symbols follow the plan", () => {
   expect(DAY_CODE.HALF.code).toBe("½");
   expect(Object.fromEntries(Object.entries(DAY_CODE).map(([status, { code }]) => [status, code]))).toEqual({
     FULL: "X", LATE_EARLY: "M", HALF: "½", LEAVE: "P", SICK: "Ô", BUSINESS: "CT",
-    MISSING_PUNCH: "KC", ABSENT_UNPAID: "KC", HOLIDAY: "L", OFF: "",
+    MISSING_PUNCH: "KC", ABSENT_UNPAID: "KC", HOLIDAY: "L", UNPAID_OFF: "KL", OFF: "",
   });
 });
 

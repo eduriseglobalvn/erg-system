@@ -8,7 +8,16 @@ import Typography from "@mui/material/Typography";
 import FormatListBulletedRoundedIcon from "@mui/icons-material/FormatListBulletedRounded";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
+import Chip from "@mui/material/Chip";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 import type { CalendarMode, ErgCalendarEvent, ErgCalendarResolvedTone } from "./erg-calendar-types";
+
+const scheduleTone = ergEnterpriseTokens.schedule;
+/** Chip tiet tro giang (6.18): nen trang, vien 1px net dut + vien trai 3px net dut, chu xanh dam. */
+const assistantChipSx = {
+  backgroundColor: scheduleTone.surface, border: `1px dashed ${scheduleTone.draft.edge}`, borderLeft: `3px dashed ${scheduleTone.draft.edge}`,
+  color: scheduleTone.published.text, "&:hover": { backgroundColor: scheduleTone.surface },
+} as const;
 import {
   buildHourRows,
   CALENDAR_SCROLL_TIME,
@@ -379,12 +388,16 @@ function ScheduleView({
                         }
                       }}
                       role="button"
-                      sx={mobileScheduleCardSx(tone)}
+                      sx={[mobileScheduleCardSx(tone), event.assistant ? { borderLeft: `3px dashed ${scheduleTone.draft.edge}` } : {}] as never}
                       tabIndex={0}
                     >
-                      <Typography sx={{ color: tone.text, fontSize: 14, fontWeight: 900, lineHeight: 1.3 }}>{event.title}</Typography>
+                      <Stack direction="row" spacing={0.75} sx={{ alignItems: "center", flexWrap: "wrap" }}>
+                        <Typography sx={{ color: tone.text, fontSize: 14, fontWeight: 900, lineHeight: 1.3 }}>{event.title}</Typography>
+                        {[...(event.tags ?? []), ...(event.soonLabel ? [event.soonLabel] : [])].map((tag) => <Chip key={tag} label={tag} size="small" sx={{ bgcolor: scheduleTone.published.bg, color: scheduleTone.published.text }} />)}
+                      </Stack>
+                      {event.subline ? <Typography sx={{ color: "#6E6E73", fontSize: 12, fontWeight: 600 }}>{event.subline}</Typography> : null}
                       <Typography sx={{ color: "#425466", fontSize: 12.25, fontWeight: 600, lineHeight: 1.45, mt: 0.2 }}>
-                        {formatScheduleTimeRange(event)} · {event.className || event.attendees}
+                        {event.periodNo ? `Tiết ${event.periodNo} ` : ""}{formatScheduleTimeRange(event)} · {event.className || event.attendees}
                       </Typography>
                       {event.location ? <Typography sx={{ color: "#6E6E73", fontSize: 12, fontWeight: 600, mt: 0.1 }}>{event.location}</Typography> : null}
                     </Box>
@@ -492,12 +505,18 @@ function EventChip({
         }
       }}
       role="button"
-      sx={eventChipSx(compact, tone)}
+      sx={[eventChipSx(compact, tone), event.assistant ? assistantChipSx : {}] as never}
       tabIndex={0}
     >
-      <Typography noWrap={compact} sx={{ fontSize: compact ? 11.5 : 13, fontWeight: compact ? 650 : 800, lineHeight: compact ? "18px" : 1.3 }}>
+      {compact && event.chipLines ? (
+        <>
+          <Typography noWrap sx={{ fontSize: 11.5, fontWeight: 650, lineHeight: "16px" }}>{event.chipLines[0]}</Typography>
+          {event.chipLines[1] ? <Typography noWrap sx={{ fontSize: 11, lineHeight: "15px", opacity: 0.85 }}>{event.chipLines[1]}</Typography> : null}
+        </>
+      ) : null}
+      {compact && event.chipLines ? null : <Typography noWrap={compact} sx={{ fontSize: compact ? 11.5 : 13, fontWeight: compact ? 650 : 800, lineHeight: compact ? "18px" : 1.3 }}>
         {compact ? formatCompactEventLabel(event) : event.title}
-      </Typography>
+      </Typography>}
       {compact ? null : (
         <>
           <Typography sx={{ fontSize: 12, fontWeight: 600, mt: 0.5 }}>{event.duration}</Typography>

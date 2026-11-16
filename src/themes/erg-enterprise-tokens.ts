@@ -54,6 +54,12 @@ export const ergEnterpriseTokens = {
     small: { fontSize: 13, fontWeight: 400, lineHeight: 1.45 },
     stat: { fontSize: 26, fontWeight: 700, lineHeight: 1.15, letterSpacing: "-0.02em" },
     label: { fontSize: 12, fontWeight: 600, lineHeight: 1.45 },
+    // Schedule boards (AdminCreate etc.): 11/12/13 px steps that have no theme variant.
+    micro: { fontSize: 11, fontWeight: 400, lineHeight: 1.45 },
+    microStrong: { fontSize: 11, fontWeight: 600, lineHeight: 1.45 },
+    note: { fontSize: 12, fontWeight: 400, lineHeight: 1.45 },
+    noteMedium: { fontSize: 12, fontWeight: 500, lineHeight: 1.45 },
+    smallStrong: { fontSize: 13, fontWeight: 600, lineHeight: 1.45 },
   },
   // Tier name colour (hero title, current ladder step) and hero tint (gradient start + corner glow).
   tierTitle: { go: "#6E4520", sat: "#4A515B", dong: "#8A431A", bac: "#5E6778", vang: "#7A5A00", bk: "#227A72", kc: "#3B52C8", ct: "#7A1FA2" },
@@ -87,6 +93,42 @@ export const ergEnterpriseTokens = {
     error: { bg: "#FFEDEA", color: "#831C1E", dot: "#D92D20" },
     info: { bg: "#EBF4FE", color: "#004A94", dot: "#0071E3" },
     neutral: { bg: "#F1F3F5", color: "#4B5563", dot: "#9CA3AF" },
+  },
+  // So dau bai / diem danh (boards DiemDanh, SoDauBai): four attendance tones (fill, ink, selected edge), lag row and neutral pill.
+  classLog: {
+    present: { bg: "#E8F5EC", color: "#1E6B3A", edge: "#7CC495" },
+    late: { bg: "#FFF4E5", color: "#92400E", edge: "#F5B866" },
+    absentK: { bg: "#FFEDEA", color: "#B42318", edge: "#F2A39A" },
+    absentP: { bg: "#EBF4FE", color: "#004A94", edge: "#9CC7F5" },
+    neutral: { bg: "#EDEDF0", color: "#424245" },
+    rowAbsent: "#FFF8F7",
+    rowLag: "#FFFBF5",
+    rowUnsigned: "#FFF7F5",
+    placeholder: "#AEAEB2",
+  },
+  // Lich day (KE_HOACH_LICH_DAY.md 4.3): o/chip da xuat ban, nhap, trung, khong kip di chuyen, nghi. Dung qua schedule-cell-sx.ts.
+  schedule: {
+    surface: "#FFFFFF",
+    published: { bg: "#EBF4FE", text: "#004A94" },
+    draft: { stripe: "#EBF4FE", edge: "#0071E3" },
+    clash: { bg: "#FFEDEA", text: "#831C1E", edge: "#D92D20", line: "#F5B5AE" },
+    disabled: "#AEAEB2",
+    warn: { bg: "#FFFBEB", text: "#92400E" },
+    neutral: { bg: "#F1F3F5", text: "#4B5563" },
+    off: { stripe: "#F1F3F5", stripeAlt: "#E3E3E8" },
+    // Period-frame guide shown while dragging (board 6.1 legend): faint tint + dashed top edge.
+    guide: { edge: "#B5D4F7" },
+    // Event tones of the shared calendar board (replaces the former Google palette).
+    tones: {
+      blue: { background: "#EBF4FE", border: "#0071E3", text: "#004A94" },
+      green: { background: "#DCFAE5", border: "#12B76A", text: "#04250E" },
+      indigo: { background: "#E8EAFB", border: "#4F5BD5", text: "#2B3485" },
+      purple: { background: "#F0E8FB", border: "#8944D6", text: "#52259A" },
+      orange: { background: "#FFFBEB", border: "#F79009", text: "#92400E" },
+      pink: { background: "#FDE8F1", border: "#D6457F", text: "#8C1F4E" },
+      red: { background: "#FFEDEA", border: "#D92D20", text: "#831C1E" },
+      teal: { background: "#DDF4F2", border: "#0F8B8D", text: "#0B5557" },
+    },
   },
   // Streak / flame accents (design H08-H18): streak chip, sidebar reminder card.
   fireTint: { chip: "#FFEDD5", card: "#FFF7ED", border: "#FED7AA", ink: "#9A3412", icon: "#EA580C" },

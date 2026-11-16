@@ -1,6 +1,7 @@
 import { getDefaultTenantId, graphQlRequest, type GraphQlPortal } from "@/lib/graphql-client";
 import { isNonEmptyString, isObject, validateResponse } from "@/lib/validate-response";
 
+import { cancelTeachingScheduleBatchV2, loadTeachingScheduleDraft, publishTeachingScheduleBatchV2 } from "./teaching-calendar-schedule-api";
 import type {
   TeachingScheduleBatchDetail,
   TeachingScheduleBatchDetailInput,
@@ -9,26 +10,19 @@ import type {
   TeachingScheduleBatchPayload,
 } from "./teaching-calendar-command-types";
 
-export async function publishTeachingScheduleBatch(batchId: string, tenantId = getDefaultTenantId(), portal: GraphQlPortal = "lcms") {
-  const data = await graphQlRequest<{ publishTeachingScheduleBatch: TeachingScheduleBatchPayload }, { batchId: string }>({
-    operationName: "TeachingCalendarPublishScheduleBatch",
-    portal,
-    query: `mutation TeachingCalendarPublishScheduleBatch($batchId: String!) { publishTeachingScheduleBatch(batchId: $batchId) { batchId status affectedEventCount } }`,
-    tenantId,
-    variables: { batchId },
-  });
-  return data.publishTeachingScheduleBatch;
+/** The BE (LD B0) needs expectedVersion; the list rows carry none, so read it first. */
+async function currentBatchVersion(batchId: string) {
+  return (await loadTeachingScheduleDraft(batchId)).version;
 }
 
-export async function cancelTeachingScheduleBatch(batchId: string, tenantId = getDefaultTenantId(), portal: GraphQlPortal = "lcms") {
-  const data = await graphQlRequest<{ cancelTeachingScheduleBatch: TeachingScheduleBatchPayload }, { batchId: string }>({
-    operationName: "TeachingCalendarCancelScheduleBatch",
-    portal,
-    query: `mutation TeachingCalendarCancelScheduleBatch($batchId: String!) { cancelTeachingScheduleBatch(batchId: $batchId) { batchId status affectedEventCount } }`,
-    tenantId,
-    variables: { batchId },
-  });
-  return data.cancelTeachingScheduleBatch;
+export async function publishTeachingScheduleBatch(batchId: string, _tenantId = getDefaultTenantId(), _portal: GraphQlPortal = "lcms"): Promise<TeachingScheduleBatchPayload> {
+  const batch = await publishTeachingScheduleBatchV2(batchId, await currentBatchVersion(batchId));
+  return { affectedEventCount: batch.affectedEventCount, batchId: batch.id, status: batch.status };
+}
+
+export async function cancelTeachingScheduleBatch(batchId: string, _tenantId = getDefaultTenantId(), _portal: GraphQlPortal = "lcms"): Promise<TeachingScheduleBatchPayload> {
+  const batch = await cancelTeachingScheduleBatchV2(batchId, await currentBatchVersion(batchId));
+  return { affectedEventCount: batch.affectedEventCount, batchId: batch.id, status: batch.status };
 }
 
 export async function loadTeachingScheduleBatches(input: TeachingScheduleBatchListInput, signal?: AbortSignal) {

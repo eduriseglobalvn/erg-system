@@ -61,6 +61,7 @@ export function useAssignHomeworkController({
   const [openDatePicker, setOpenDatePicker] = useState<"start" | "end" | null>(null);
   const [targetType, setTargetType] = useState<"grade" | "class" | "group">("class");
   const [attemptLimit, setAttemptLimit] = useState(1);
+  const [supplementary, setSupplementary] = useState(false);
   const [maxDurationMinutes, setMaxDurationMinutes] = useState(45);
   const [assignmentClassId, setAssignmentClassId] = useState(selectedClass?.id ?? defaultClassId);
   const [validationError, setValidationError] = useState("");
@@ -337,6 +338,7 @@ export function useAssignHomeworkController({
     apiBacked,
     createAssignmentMutation,
     attemptLimit,
+    supplementary,
     endDate,
     startDate,
     maxDurationMinutes,
@@ -363,6 +365,8 @@ export function useAssignHomeworkController({
     setTargetType,
     attemptLimit,
     setAttemptLimit,
+    supplementary,
+    setSupplementary,
     maxDurationMinutes,
     setMaxDurationMinutes,
     assignmentClassId,

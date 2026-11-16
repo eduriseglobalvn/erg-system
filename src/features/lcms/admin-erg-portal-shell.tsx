@@ -26,6 +26,8 @@ import {
 } from "@/features/lcms/admin-content/admin-content-route";
 import { usePendingApprovalCount } from "@/features/timekeeping/api/timekeeping-query";
 import { withTimekeepingMenuState } from "@/features/lcms/admin-menu";
+import { useUnconfirmedTeachersCount } from "@/features/timekeeping/teaching/api/teaching-hours-query";
+import { todayInput } from "@/domain/formatters/format-date";
 import { adminPath } from "@/platform/workspaces/workspace-paths";
 import { AdminAllFunctionsSheet } from "@/features/lcms/admin-all-functions-sheet";
 import {
@@ -89,9 +91,11 @@ export default function AdminErgPortalShell() {
   const canAccess = useCallback((path: string) => canNavigateToAdminPath(path, granted, deniedPermissions), [granted, deniedPermissions]);
   const canApprove = canAccess(adminPath("/employees/teacher-absence"));
   const pendingApprovals = usePendingApprovalCount(canApprove && !AUTH_BYPASS_ENABLED && hasApiBase()).data;
+  const canSeeTeachingHours = canAccess(adminPath("/employees/teaching-hours"));
+  const unconfirmedTeachers = useUnconfirmedTeachersCount(todayInput().slice(0, 7), canSeeTeachingHours && !AUTH_BYPASS_ENABLED && hasApiBase()).data;
   const menuGroups = useMemo(
-    () => withTimekeepingMenuState(ADMIN_MENU_GROUPS, canAccess, pendingApprovals),
-    [canAccess, pendingApprovals],
+    () => withTimekeepingMenuState(ADMIN_MENU_GROUPS, canAccess, pendingApprovals, unconfirmedTeachers),
+    [canAccess, pendingApprovals, unconfirmedTeachers],
   );
 
   const mobileDock = useMemo(() => {

@@ -4,7 +4,7 @@ import Typography from "@mui/material/Typography";
 import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
 import { codeMeta } from "../model/day-codes";
 
-const CODES = ["X", "M", "½", "P", "Ô", "CT", "KC", "KP", "L"];
+const CODES = ["X", "M", "½", "P", "Ô", "CT", "KC", "KP", "L", "KL"];
 
 /** "Chú thích ký hiệu": each symbol next to its meaning. */
 export function SymbolLegend() {

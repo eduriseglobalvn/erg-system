@@ -16,6 +16,7 @@ const config: CodegenConfig = {
         enumsAsTypes: true,
         skipTypename: true,
         useTypeImports: true,
+        scalars: { Date: "string", DateTime: "string" },
         preResolveTypes: true,
       },
     },

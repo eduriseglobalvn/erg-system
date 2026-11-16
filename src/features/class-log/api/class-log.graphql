@@ -1,0 +1,63 @@
+fragment ClassLogPeriodFields on LessonLogPeriod {
+  eventId
+  date
+  periodNo
+  classId
+  className
+  subjectName
+  subjectId
+  teacherName
+  ppctPeriod
+  actualPeriod
+  lessonTitle
+  absentees { studentId shortName excused }
+  comment
+  status
+  late
+  happened
+  version
+  curriculumPeriodCount
+}
+
+fragment ClassLogWeekFields on LessonLogWeek {
+  weekStart
+  weekEnd
+  weekNo
+  days { date session periods { ...ClassLogPeriodFields } }
+  stats { taught confirmed pending }
+  lagChip { classId className lag }
+}
+
+query ClassLogTeacherWeek($weekStart: Date!, $session: String, $status: LessonLogStatus) {
+  lms {
+    lessonLogTeacherWeek(weekStart: $weekStart, session: $session, status: $status) { ...ClassLogWeekFields }
+  }
+}
+
+query ClassLogClassWeek($classId: ID!, $weekStart: Date!) {
+  lms {
+    lessonLogClassWeek(classId: $classId, weekStart: $weekStart) { ...ClassLogWeekFields }
+  }
+}
+
+query ClassLogChanges($weekStart: Date!, $classId: ID) {
+  lms {
+    lessonLogChanges(weekStart: $weekStart, classId: $classId) {
+      id at actorId actorName classId className date periodNo field oldValue newValue
+    }
+  }
+}
+
+query ClassLogCurriculum($classId: ID!, $subjectId: ID!) {
+  lms {
+    lessonLogCurriculum(classId: $classId, subjectId: $subjectId) { topic period title }
+  }
+}
+
+mutation ClassLogUpdateEntry($input: UpdateLessonLogEntryInput!) {
+  updateLessonLogEntry(input: $input) { ...ClassLogPeriodFields }
+}
+
+mutation ClassLogConfirmWeek($weekStart: Date!) {
+  confirmLessonLogWeek(weekStart: $weekStart) { taught confirmed pending }
+}

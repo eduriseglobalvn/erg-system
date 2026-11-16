@@ -16,6 +16,8 @@ export type CreateLmsAssignmentInput = {
   attemptLimit?: number | null;
   maxDurationMinutes?: number | null;
   teacherNote?: string | null;
+  /** Extra work: kept out of the main average and overdue lists, its XP capped per week. */
+  supplementary?: boolean;
   idempotencyKey: string;
 };
 
@@ -125,6 +127,7 @@ export async function createLmsAssignment(input: CreateLmsAssignmentInput): Prom
       recipientMode: input.recipientMode,
       startAt: input.startAt,
       studentIds: input.studentIds ?? [],
+      supplementary: input.supplementary,
       teacherNote: input.teacherNote,
       title: input.title,
     }),

@@ -1,0 +1,14 @@
+query TeachingCalendarReusePreview($input: TeachingScheduleReuseInput!) {
+  lcms {
+    previewTeachingScheduleReuse(input: $input) {
+      sourcePeriods totalToCreate
+      perTeacher { teacherId teacherName periods }
+      excludedConflicts { ...TeachingCalendarConflictFields }
+      weeks { weekStart weekEnd toCreate skipped conflicts holidays { date name } conflictDetails { ...TeachingCalendarConflictFields } }
+    }
+  }
+}
+
+mutation TeachingCalendarReuseScheduleWeek($input: TeachingScheduleReuseInput!) {
+  reuseTeachingScheduleWeek(input: $input) { ...TeachingCalendarDraftResultFields }
+}

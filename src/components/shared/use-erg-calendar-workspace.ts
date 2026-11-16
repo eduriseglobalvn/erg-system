@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import dayjs, { type Dayjs } from "dayjs";
 import "dayjs/locale/vi";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 import updateLocale from "dayjs/plugin/updateLocale";
 import type {
   CalendarMode,
@@ -15,16 +16,7 @@ dayjs.extend(updateLocale);
 dayjs.updateLocale("vi", { weekStart: 1 });
 dayjs.locale("vi");
 
-const toneMap: Record<ErgCalendarEvent["tone"], ErgCalendarResolvedTone> = {
-  blue: { background: "#D3E3FD", border: "#1A73E8", text: "#174EA6" },
-  green: { background: "#CEEAD6", border: "#188038", text: "#137333" },
-  indigo: { background: "#E6EAFF", border: "#5B64D8", text: "#3942A0" },
-  purple: { background: "#E8DEF8", border: "#9334E6", text: "#7B1FA2" },
-  orange: { background: "#FEEFC3", border: "#E37400", text: "#B06000" },
-  pink: { background: "#FFE7F1", border: "#D95D91", text: "#9A2456" },
-  red: { background: "#FAD2CF", border: "#D93025", text: "#B3261E" },
-  teal: { background: "#DDF4F2", border: "#0A6B6F", text: "#075D61" },
-};
+const toneMap: Record<ErgCalendarEvent["tone"], ErgCalendarResolvedTone> = ergEnterpriseTokens.schedule.tones;
 
 export function useErgCalendarWorkspace(props: ErgCalendarWorkspaceProps) {
   const {
@@ -64,7 +56,7 @@ export function useErgCalendarWorkspace(props: ErgCalendarWorkspaceProps) {
     if (isAllLane) return "";
     if (scopeSelection.key !== scopeSelectionKey || !scopeSelection.id) return "";
     return scopeOptions.find((summary) => getScopeOptionValue(summary) === scopeSelection.id)
-      ?? { color: "#D9E2EF", count: 0, id: scopeSelection.id, label: scopeSelection.label };
+      ?? { color: ergEnterpriseTokens.color.border, count: 0, id: scopeSelection.id, label: scopeSelection.label };
   }, [isAllLane, scopeOptions, scopeSelection, scopeSelectionKey]);
   const selectedScopeId = typeof selectedScope === "string" ? "" : getScopeOptionValue(selectedScope);
   const selectedScopeLabel = typeof selectedScope === "string" ? "" : selectedScope.label;
@@ -143,5 +135,5 @@ export function useErgCalendarWorkspace(props: ErgCalendarWorkspaceProps) {
 }
 
 function buildMonthMatrix(month: Dayjs) { const start = month.startOf("month").startOf("week"); return Array.from({ length: 6 }, (_, weekIndex) => Array.from({ length: 7 }, (_, dayIndex) => start.add(weekIndex * 7 + dayIndex, "day"))); }
-function buildLaneSummaries(lanes: string[], events: ErgCalendarEvent[]): ErgCalendarLaneSummary[] { return lanes.map((label, index) => ({ color: ["#1A73E8", "#188038", "#9334E6", "#E37400", "#D93025"][index % 5], count: events.filter((event) => event.lane === label).length, label })); }
+function buildLaneSummaries(lanes: string[], events: ErgCalendarEvent[]): ErgCalendarLaneSummary[] { return lanes.map((label, index) => ({ color: Object.values(toneMap)[index % 5].border, count: events.filter((event) => event.lane === label).length, label })); }
 function getScopeOptionValue(summary: ErgCalendarLaneSummary) { return summary.id ?? summary.label; }

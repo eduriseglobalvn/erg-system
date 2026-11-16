@@ -10,6 +10,7 @@ import { ErgButton, ErgIconButton } from "@/components/erg-mui/erg-actions";
 import { ErgErrorState, ErgSkeleton } from "@/components/erg-mui/erg-feedback";
 import { teacherPath } from "@/platform/workspaces/workspace-paths";
 import { useTimekeepingMonth } from "../../api/timekeeping-query";
+import { MyCongTabs } from "../../teaching/components/my-cong-tabs";
 import { PunchCard } from "../punch/punch-card";
 import { exportMyTimesheet } from "./export-timesheet";
 import { MissingDayCard } from "./missing-day-card";
@@ -45,7 +46,7 @@ export function MyTimesheetPage({ period, currentPeriod }: MyTimesheetPageProps)
     <Box sx={{ display: "grid", gap: 1.5, gridTemplateColumns: "minmax(0, 1fr)", maxWidth: 720, mx: "auto", px: { xs: 2, sm: 3 }, py: 2 }}>
       <Box sx={{ alignItems: "center", display: "flex", gap: 1, mx: -1 }}>
         <ErgIconButton label="Quay lại" onClick={() => go("/timekeeping")}><ArrowBackIcon /></ErgIconButton>
-        <Typography component="h1" sx={{ flex: 1, minWidth: 0 }} variant="h4">Bảng công của tôi</Typography>
+        <Typography component="h1" sx={{ flex: 1, minWidth: 0 }} variant="h4">Công của tôi</Typography>
         <ErgIconButton disabled={!data} label="Xuất Excel" onClick={() => data && void exportMyTimesheet(data, period)}>
           <FileDownloadOutlinedIcon />
         </ErgIconButton>
@@ -58,6 +59,7 @@ export function MyTimesheetPage({ period, currentPeriod }: MyTimesheetPageProps)
         </Box>
         <ErgIconButton disabled={period >= currentPeriod} label="Tháng sau" onClick={() => setPeriod(shiftPeriod(period, 1))} sx={bordered}><ChevronRightIcon /></ErgIconButton>
       </Box>
+      <MyCongTabs period={period} tab="days" />
       {isError ? (
         <ErgErrorState action={<ErgButton onClick={() => void refetch()} variant="outlined">Tải lại</ErgButton>} description="Không tải được bảng công." title="Có lỗi xảy ra" />
       ) : isLoading || !data ? (

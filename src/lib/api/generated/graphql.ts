@@ -45,6 +45,20 @@ export type DeleteStudentDiscussionItemInput = {
   readonly tenantId?: string | null | undefined;
 };
 
+export type EditTeachingScheduleSlotInput = {
+  readonly assistantId?: string | number | null | undefined;
+  readonly dryRun?: boolean | null | undefined;
+  readonly eventId: string | number;
+  readonly expectedVersion?: number | null | undefined;
+  readonly newDate?: string | null | undefined;
+  readonly periodNo?: number | null | undefined;
+  readonly reason?: string | null | undefined;
+  readonly removeAssistant?: boolean | null | undefined;
+  readonly roomId?: string | number | null | undefined;
+  readonly scope: TeachingScheduleChangeScopeInput;
+  readonly subjectId?: string | number | null | undefined;
+};
+
 export type FollowStudentDiscussionInput = {
   readonly follow: boolean;
   readonly postId: string;
@@ -58,6 +72,16 @@ export type GradebookWorkspaceInput = {
   readonly tenantId?: string | null | undefined;
 };
 
+export type LessonLogStatus =
+  | 'CONFIRMED'
+  | 'PENDING';
+
+export type LessonReportState =
+  | 'LATE'
+  | 'MISSING'
+  | 'NONE'
+  | 'ON_TIME';
+
 export type MarkStudentAnnouncementReadInput = {
   readonly announcementId: string;
   readonly tenantId?: string | null | undefined;
@@ -70,6 +94,25 @@ export type ReplyStudentDiscussionInput = {
   readonly parentCommentId?: string | null | undefined;
   readonly postId: string;
   readonly tenantId?: string | null | undefined;
+};
+
+export type SaveSchoolPeriodTimesInput = {
+  readonly effectiveFrom: string;
+  readonly name: string;
+  readonly schoolId: string | number;
+  readonly slots: ReadonlyArray<TeachingPeriodSlotInput>;
+};
+
+export type SaveTeachingScheduleDraftInput = {
+  readonly applyFrom: string;
+  readonly batchId?: string | number | null | undefined;
+  readonly expectedVersion?: number | null | undefined;
+  readonly levelId?: string | number | null | undefined;
+  readonly periodTemplateId: string | number;
+  readonly repeatUntil: string;
+  readonly rows: ReadonlyArray<TeachingScheduleDraftRowInput>;
+  readonly schoolId: string | number;
+  readonly subjectId?: string | number | null | undefined;
 };
 
 export type SendQuestionThreadMessageInput = {
@@ -136,6 +179,117 @@ export type StudentDiscussionModerationFeedInput = {
   readonly tenantId?: string | null | undefined;
 };
 
+export type SwapTeachingScheduleTeacherInput = {
+  readonly dryRun?: boolean | null | undefined;
+  readonly eventId: string | number;
+  readonly expectedVersion?: number | null | undefined;
+  readonly newTeacherId: string | number;
+  readonly note?: string | null | undefined;
+  readonly reason?: TeachingScheduleSwapReason | null | undefined;
+  readonly scope: TeachingScheduleChangeScopeInput;
+};
+
+export type TeachingAccessState =
+  | 'EXISTING'
+  | 'NEW'
+  | 'REVOKE';
+
+export type TeachingHolidayKind =
+  | 'COMPANY'
+  | 'COMPENSATORY'
+  | 'STATE';
+
+export type TeachingPeriodSlotInput = {
+  readonly endTime?: string | null | undefined;
+  readonly periodNo: number;
+  readonly session: TeachingSession;
+  readonly startTime?: string | null | undefined;
+};
+
+export type TeachingScheduleChangeScopeInput = {
+  readonly dates?: ReadonlyArray<string> | null | undefined;
+  readonly kind: TeachingScheduleChangeScopeKind;
+};
+
+export type TeachingScheduleChangeScopeKind =
+  | 'FROM_DATE_TO_END'
+  | 'SELECTED_DATES'
+  | 'THIS_ONLY';
+
+export type TeachingScheduleConflictKind =
+  | 'CLASS_TIME'
+  | 'ROOM_TIME'
+  | 'TEACHER_ON_LEAVE'
+  | 'TEACHER_TIME'
+  | 'TRAVEL_TIME';
+
+export type TeachingScheduleDraftRowInput = {
+  readonly assistantId?: string | number | null | undefined;
+  readonly classId: string | number;
+  readonly clientRowId: string;
+  readonly eventId?: string | number | null | undefined;
+  readonly newRoomName?: string | null | undefined;
+  readonly note?: string | null | undefined;
+  readonly periodNo: number;
+  readonly roomId?: string | number | null | undefined;
+  readonly teacherId?: string | number | null | undefined;
+  readonly weekday: number;
+};
+
+export type TeachingScheduleFixKind =
+  | 'CHANGE_PREVIOUS_TEACHER'
+  | 'CHANGE_ROOM'
+  | 'CHANGE_TEACHER';
+
+export type TeachingScheduleReuseInput = {
+  readonly keepRoomAndAssistant: boolean;
+  readonly mode: string;
+  readonly repeatUntil?: string | null | undefined;
+  readonly skipHolidays: boolean;
+  readonly sourceSchoolId: string | number;
+  readonly sourceWeekStart: string;
+  readonly weekStarts?: ReadonlyArray<string> | null | undefined;
+};
+
+export type TeachingScheduleRole =
+  | 'ASSISTANT'
+  | 'MAIN';
+
+export type TeachingScheduleSeverity =
+  | 'ERROR'
+  | 'WARNING';
+
+export type TeachingScheduleStatus =
+  | 'CANCELLED'
+  | 'DRAFT'
+  | 'PUBLISHED';
+
+export type TeachingScheduleSwapReason =
+  | 'REASSIGNMENT'
+  | 'TEACHER_ON_LEAVE'
+  | 'TIME_CONFLICT';
+
+export type TeachingSession =
+  | 'AFTERNOON'
+  | 'EVENING'
+  | 'MORNING';
+
+export type TeachingSlotOptionState =
+  | 'BUSY'
+  | 'FREE'
+  | 'LEAVE'
+  | 'SUGGESTED'
+  | 'TRAVEL';
+
+export type UpdateLessonLogEntryInput = {
+  readonly actualPeriod: number;
+  readonly comment?: string | null | undefined;
+  readonly date: string;
+  readonly eventId: string | number;
+  readonly expectedVersion?: number | null | undefined;
+  readonly periodNo: number;
+};
+
 export type UpsertAttendanceInput = {
   readonly attendanceDate: string;
   readonly classId: string;
@@ -166,6 +320,73 @@ export type UpsertGradebookScoreInput = {
   readonly subjectId: string;
   readonly tenantId?: string | null | undefined;
 };
+
+export type ClassLogPeriodFieldsFragment = { readonly eventId: string, readonly date: string, readonly periodNo: number, readonly classId: string, readonly className: string, readonly subjectName: string, readonly subjectId: string | null, readonly teacherName: string | null, readonly ppctPeriod: number, readonly actualPeriod: number, readonly lessonTitle: string | null, readonly comment: string | null, readonly status: LessonLogStatus, readonly late: boolean, readonly happened: boolean, readonly version: number, readonly curriculumPeriodCount: number | null, readonly absentees: ReadonlyArray<{ readonly studentId: string, readonly shortName: string, readonly excused: boolean }> };
+
+export type ClassLogWeekFieldsFragment = { readonly weekStart: string, readonly weekEnd: string, readonly weekNo: number, readonly days: ReadonlyArray<{ readonly date: string, readonly session: string | null, readonly periods: ReadonlyArray<{ readonly eventId: string, readonly date: string, readonly periodNo: number, readonly classId: string, readonly className: string, readonly subjectName: string, readonly subjectId: string | null, readonly teacherName: string | null, readonly ppctPeriod: number, readonly actualPeriod: number, readonly lessonTitle: string | null, readonly comment: string | null, readonly status: LessonLogStatus, readonly late: boolean, readonly happened: boolean, readonly version: number, readonly curriculumPeriodCount: number | null, readonly absentees: ReadonlyArray<{ readonly studentId: string, readonly shortName: string, readonly excused: boolean }> }> }>, readonly stats: { readonly taught: number, readonly confirmed: number, readonly pending: number }, readonly lagChip: { readonly classId: string, readonly className: string, readonly lag: number } | null };
+
+export type ClassLogTeacherWeekQueryVariables = Exact<{
+  weekStart: string;
+  session?: string | null | undefined;
+  status?: LessonLogStatus | null | undefined;
+}>;
+
+
+export type ClassLogTeacherWeekQuery = { readonly lms: { readonly lessonLogTeacherWeek: { readonly weekStart: string, readonly weekEnd: string, readonly weekNo: number, readonly days: ReadonlyArray<{ readonly date: string, readonly session: string | null, readonly periods: ReadonlyArray<{ readonly eventId: string, readonly date: string, readonly periodNo: number, readonly classId: string, readonly className: string, readonly subjectName: string, readonly subjectId: string | null, readonly teacherName: string | null, readonly ppctPeriod: number, readonly actualPeriod: number, readonly lessonTitle: string | null, readonly comment: string | null, readonly status: LessonLogStatus, readonly late: boolean, readonly happened: boolean, readonly version: number, readonly curriculumPeriodCount: number | null, readonly absentees: ReadonlyArray<{ readonly studentId: string, readonly shortName: string, readonly excused: boolean }> }> }>, readonly stats: { readonly taught: number, readonly confirmed: number, readonly pending: number }, readonly lagChip: { readonly classId: string, readonly className: string, readonly lag: number } | null } } };
+
+export type ClassLogClassWeekQueryVariables = Exact<{
+  classId: string | number;
+  weekStart: string;
+}>;
+
+
+export type ClassLogClassWeekQuery = { readonly lms: { readonly lessonLogClassWeek: { readonly weekStart: string, readonly weekEnd: string, readonly weekNo: number, readonly days: ReadonlyArray<{ readonly date: string, readonly session: string | null, readonly periods: ReadonlyArray<{ readonly eventId: string, readonly date: string, readonly periodNo: number, readonly classId: string, readonly className: string, readonly subjectName: string, readonly subjectId: string | null, readonly teacherName: string | null, readonly ppctPeriod: number, readonly actualPeriod: number, readonly lessonTitle: string | null, readonly comment: string | null, readonly status: LessonLogStatus, readonly late: boolean, readonly happened: boolean, readonly version: number, readonly curriculumPeriodCount: number | null, readonly absentees: ReadonlyArray<{ readonly studentId: string, readonly shortName: string, readonly excused: boolean }> }> }>, readonly stats: { readonly taught: number, readonly confirmed: number, readonly pending: number }, readonly lagChip: { readonly classId: string, readonly className: string, readonly lag: number } | null } } };
+
+export type ClassLogChangesQueryVariables = Exact<{
+  weekStart: string;
+  classId?: string | number | null | undefined;
+}>;
+
+
+export type ClassLogChangesQuery = { readonly lms: { readonly lessonLogChanges: ReadonlyArray<{ readonly id: string, readonly at: string, readonly actorId: string, readonly actorName: string | null, readonly classId: string, readonly className: string, readonly date: string, readonly periodNo: number, readonly field: string, readonly oldValue: string | null, readonly newValue: string | null }> } };
+
+export type ClassLogCurriculumQueryVariables = Exact<{
+  classId: string | number;
+  subjectId: string | number;
+}>;
+
+
+export type ClassLogCurriculumQuery = { readonly lms: { readonly lessonLogCurriculum: ReadonlyArray<{ readonly topic: string | null, readonly period: number, readonly title: string }> } };
+
+export type ClassLogUpdateEntryMutationVariables = Exact<{
+  input: UpdateLessonLogEntryInput;
+}>;
+
+
+export type ClassLogUpdateEntryMutation = { readonly updateLessonLogEntry: { readonly eventId: string, readonly date: string, readonly periodNo: number, readonly classId: string, readonly className: string, readonly subjectName: string, readonly subjectId: string | null, readonly teacherName: string | null, readonly ppctPeriod: number, readonly actualPeriod: number, readonly lessonTitle: string | null, readonly comment: string | null, readonly status: LessonLogStatus, readonly late: boolean, readonly happened: boolean, readonly version: number, readonly curriculumPeriodCount: number | null, readonly absentees: ReadonlyArray<{ readonly studentId: string, readonly shortName: string, readonly excused: boolean }> } };
+
+export type ClassLogConfirmWeekMutationVariables = Exact<{
+  weekStart: string;
+}>;
+
+
+export type ClassLogConfirmWeekMutation = { readonly confirmLessonLogWeek: { readonly taught: number, readonly confirmed: number, readonly pending: number } };
+
+export type ClassLogLessonReportMatrixQueryVariables = Exact<{
+  weekStart: string;
+  schoolId?: string | number | null | undefined;
+  subjectId?: string | number | null | undefined;
+}>;
+
+
+export type ClassLogLessonReportMatrixQuery = { readonly lms: { readonly lessonReportMatrix: { readonly weekStart: string, readonly days: ReadonlyArray<string>, readonly stats: { readonly periods: number, readonly teachers: number, readonly schools: number, readonly onTime: number, readonly late: number, readonly missing: number }, readonly rows: ReadonlyArray<{ readonly teacherId: string, readonly teacherName: string, readonly schoolName: string, readonly cells: ReadonlyArray<{ readonly date: string, readonly state: LessonReportState, readonly periods: number }> }> } } };
+
+export type ClassLogRemindLessonReportMutationVariables = Exact<{
+  teacherIds: ReadonlyArray<string | number> | string | number;
+}>;
+
+
+export type ClassLogRemindLessonReportMutation = { readonly remindLessonReport: number };
 
 export type ElearningStudentClassLeaderboardQueryVariables = Exact<{
   input?: StudentClassLeaderboardInput | null | undefined;
@@ -378,3 +599,197 @@ export type LmsUpsertGradebookScoreMutationVariables = Exact<{
 
 
 export type LmsUpsertGradebookScoreMutation = { readonly upsertGradebookScore: { readonly studentId: string, readonly columnId: string, readonly score: number, readonly maxScore: number, readonly version: number, readonly updatedAt: string } };
+
+export type TeachingCalendarSideFieldsFragment = { readonly eventId: string | null, readonly teacherId: string | null, readonly teacherName: string | null, readonly classId: string | null, readonly className: string | null, readonly roomId: string | null, readonly roomName: string | null, readonly schoolId: string, readonly schoolName: string, readonly schoolShortName: string, readonly subjectName: string | null, readonly batchId: string | null, readonly batchLabel: string | null, readonly batchStatus: string | null, readonly createdByName: string | null, readonly createdByRole: string | null, readonly createdAt: string | null, readonly periodNo: number | null, readonly startTime: string | null, readonly endTime: string | null };
+
+export type TeachingCalendarTravelFieldsFragment = { readonly fromSchoolId: string, readonly fromSchoolShortName: string, readonly fromSchoolName: string, readonly toSchoolId: string, readonly toSchoolShortName: string, readonly toSchoolName: string, readonly previousEndTime: string, readonly gapMinutes: number, readonly requiredMinutes: number };
+
+export type TeachingCalendarConflictFieldsFragment = { readonly id: string, readonly kind: TeachingScheduleConflictKind, readonly severity: TeachingScheduleSeverity, readonly clientRowId: string | null, readonly weekday: number, readonly periodNo: number, readonly startTime: string | null, readonly endTime: string | null, readonly firstDate: string, readonly affectedWeeks: number, readonly totalWeeks: number, readonly message: string, readonly mine: { readonly eventId: string | null, readonly teacherId: string | null, readonly teacherName: string | null, readonly classId: string | null, readonly className: string | null, readonly roomId: string | null, readonly roomName: string | null, readonly schoolId: string, readonly schoolName: string, readonly schoolShortName: string, readonly subjectName: string | null, readonly batchId: string | null, readonly batchLabel: string | null, readonly batchStatus: string | null, readonly createdByName: string | null, readonly createdByRole: string | null, readonly createdAt: string | null, readonly periodNo: number | null, readonly startTime: string | null, readonly endTime: string | null }, readonly other: { readonly eventId: string | null, readonly teacherId: string | null, readonly teacherName: string | null, readonly classId: string | null, readonly className: string | null, readonly roomId: string | null, readonly roomName: string | null, readonly schoolId: string, readonly schoolName: string, readonly schoolShortName: string, readonly subjectName: string | null, readonly batchId: string | null, readonly batchLabel: string | null, readonly batchStatus: string | null, readonly createdByName: string | null, readonly createdByRole: string | null, readonly createdAt: string | null, readonly periodNo: number | null, readonly startTime: string | null, readonly endTime: string | null } | null, readonly travel: { readonly fromSchoolId: string, readonly fromSchoolShortName: string, readonly fromSchoolName: string, readonly toSchoolId: string, readonly toSchoolShortName: string, readonly toSchoolName: string, readonly previousEndTime: string, readonly gapMinutes: number, readonly requiredMinutes: number } | null, readonly leave: { readonly fromDate: string, readonly toDate: string, readonly part: string } | null, readonly fix: { readonly kind: TeachingScheduleFixKind, readonly targetEventId: string | null, readonly targetClientRowId: string | null, readonly targetClassName: string | null, readonly teacherId: string | null, readonly teacherName: string | null, readonly roomId: string | null, readonly roomName: string | null, readonly reason: string } | null };
+
+export type TeachingCalendarAccessFieldsFragment = { readonly teacherId: string, readonly teacherName: string, readonly weeklyPeriods: number, readonly lastPeriodDate: string | null, readonly schoolId: string, readonly schoolState: TeachingAccessState, readonly schoolRevokeOn: string | null, readonly classes: ReadonlyArray<{ readonly classId: string, readonly className: string, readonly state: TeachingAccessState, readonly revokeOn: string | null }> };
+
+export type TeachingCalendarDraftResultFieldsFragment = { readonly version: number, readonly savedAt: string, readonly batch: { readonly id: string, readonly schoolId: string, readonly label: string, readonly status: TeachingScheduleStatus, readonly version: number, readonly periodTemplateId: string | null, readonly applyFrom: string | null, readonly repeatWeeks: number | null, readonly publishedAt: string | null, readonly affectedEventCount: number }, readonly rowIdMap: ReadonlyArray<{ readonly clientRowId: string, readonly eventId: string }>, readonly conflicts: ReadonlyArray<{ readonly id: string, readonly kind: TeachingScheduleConflictKind, readonly severity: TeachingScheduleSeverity, readonly clientRowId: string | null, readonly weekday: number, readonly periodNo: number, readonly startTime: string | null, readonly endTime: string | null, readonly firstDate: string, readonly affectedWeeks: number, readonly totalWeeks: number, readonly message: string, readonly mine: { readonly eventId: string | null, readonly teacherId: string | null, readonly teacherName: string | null, readonly classId: string | null, readonly className: string | null, readonly roomId: string | null, readonly roomName: string | null, readonly schoolId: string, readonly schoolName: string, readonly schoolShortName: string, readonly subjectName: string | null, readonly batchId: string | null, readonly batchLabel: string | null, readonly batchStatus: string | null, readonly createdByName: string | null, readonly createdByRole: string | null, readonly createdAt: string | null, readonly periodNo: number | null, readonly startTime: string | null, readonly endTime: string | null }, readonly other: { readonly eventId: string | null, readonly teacherId: string | null, readonly teacherName: string | null, readonly classId: string | null, readonly className: string | null, readonly roomId: string | null, readonly roomName: string | null, readonly schoolId: string, readonly schoolName: string, readonly schoolShortName: string, readonly subjectName: string | null, readonly batchId: string | null, readonly batchLabel: string | null, readonly batchStatus: string | null, readonly createdByName: string | null, readonly createdByRole: string | null, readonly createdAt: string | null, readonly periodNo: number | null, readonly startTime: string | null, readonly endTime: string | null } | null, readonly travel: { readonly fromSchoolId: string, readonly fromSchoolShortName: string, readonly fromSchoolName: string, readonly toSchoolId: string, readonly toSchoolShortName: string, readonly toSchoolName: string, readonly previousEndTime: string, readonly gapMinutes: number, readonly requiredMinutes: number } | null, readonly leave: { readonly fromDate: string, readonly toDate: string, readonly part: string } | null, readonly fix: { readonly kind: TeachingScheduleFixKind, readonly targetEventId: string | null, readonly targetClientRowId: string | null, readonly targetClassName: string | null, readonly teacherId: string | null, readonly teacherName: string | null, readonly roomId: string | null, readonly roomName: string | null, readonly reason: string } | null }>, readonly accessChanges: ReadonlyArray<{ readonly teacherId: string, readonly teacherName: string, readonly weeklyPeriods: number, readonly lastPeriodDate: string | null, readonly schoolId: string, readonly schoolState: TeachingAccessState, readonly schoolRevokeOn: string | null, readonly classes: ReadonlyArray<{ readonly classId: string, readonly className: string, readonly state: TeachingAccessState, readonly revokeOn: string | null }> }> };
+
+export type TeachingCalendarSchoolRowFieldsFragment = { readonly schoolId: string, readonly schoolName: string, readonly schoolShortName: string, readonly conflictCount: number, readonly hasDraft: boolean, readonly periodCount: number };
+
+export type TeachingCalendarTemplateFieldsFragment = { readonly id: string, readonly name: string, readonly periodsPerDay: number, readonly slots: ReadonlyArray<{ readonly periodNo: number, readonly session: TeachingSession, readonly startTime: string | null, readonly endTime: string | null }> };
+
+export type TeachingCalendarSlotChangeFieldsFragment = { readonly applied: boolean, readonly blocking: boolean, readonly affectedCount: number, readonly events: ReadonlyArray<{ readonly eventId: string, readonly date: string, readonly periodNo: number, readonly version: number | null }>, readonly conflicts: ReadonlyArray<{ readonly id: string, readonly kind: TeachingScheduleConflictKind, readonly severity: TeachingScheduleSeverity, readonly clientRowId: string | null, readonly weekday: number, readonly periodNo: number, readonly startTime: string | null, readonly endTime: string | null, readonly firstDate: string, readonly affectedWeeks: number, readonly totalWeeks: number, readonly message: string, readonly mine: { readonly eventId: string | null, readonly teacherId: string | null, readonly teacherName: string | null, readonly classId: string | null, readonly className: string | null, readonly roomId: string | null, readonly roomName: string | null, readonly schoolId: string, readonly schoolName: string, readonly schoolShortName: string, readonly subjectName: string | null, readonly batchId: string | null, readonly batchLabel: string | null, readonly batchStatus: string | null, readonly createdByName: string | null, readonly createdByRole: string | null, readonly createdAt: string | null, readonly periodNo: number | null, readonly startTime: string | null, readonly endTime: string | null }, readonly other: { readonly eventId: string | null, readonly teacherId: string | null, readonly teacherName: string | null, readonly classId: string | null, readonly className: string | null, readonly roomId: string | null, readonly roomName: string | null, readonly schoolId: string, readonly schoolName: string, readonly schoolShortName: string, readonly subjectName: string | null, readonly batchId: string | null, readonly batchLabel: string | null, readonly batchStatus: string | null, readonly createdByName: string | null, readonly createdByRole: string | null, readonly createdAt: string | null, readonly periodNo: number | null, readonly startTime: string | null, readonly endTime: string | null } | null, readonly travel: { readonly fromSchoolId: string, readonly fromSchoolShortName: string, readonly fromSchoolName: string, readonly toSchoolId: string, readonly toSchoolShortName: string, readonly toSchoolName: string, readonly previousEndTime: string, readonly gapMinutes: number, readonly requiredMinutes: number } | null, readonly leave: { readonly fromDate: string, readonly toDate: string, readonly part: string } | null, readonly fix: { readonly kind: TeachingScheduleFixKind, readonly targetEventId: string | null, readonly targetClientRowId: string | null, readonly targetClassName: string | null, readonly teacherId: string | null, readonly teacherName: string | null, readonly roomId: string | null, readonly roomName: string | null, readonly reason: string } | null }> };
+
+export type TeachingCalendarAssignmentFieldsFragment = { readonly schoolId: string, readonly schoolName: string, readonly templateId: string, readonly templateName: string, readonly effectiveFrom: string | null, readonly current: boolean };
+
+export type TeachingCalendarDayLoadsQueryVariables = Exact<{
+  from: string;
+  to: string;
+}>;
+
+
+export type TeachingCalendarDayLoadsQuery = { readonly lcms: { readonly teachingScheduleDayLoads: ReadonlyArray<{ readonly date: string, readonly periods: number, readonly schools: number }> } };
+
+export type TeachingCalendarOverviewSchoolsQueryVariables = Exact<{
+  weekStart: string;
+  search?: string | null | undefined;
+  quick?: string | null | undefined;
+  page: number;
+  size: number;
+}>;
+
+
+export type TeachingCalendarOverviewSchoolsQuery = { readonly lcms: { readonly teachingScheduleOverviewSchools: { readonly total: number, readonly items: ReadonlyArray<{ readonly schoolId: string, readonly schoolName: string, readonly schoolShortName: string, readonly conflictCount: number, readonly hasDraft: boolean, readonly periodCount: number }>, readonly quickCounts: { readonly conflicts: number, readonly travel: number, readonly drafts: number, readonly empty: number } } } };
+
+export type TeachingCalendarOverviewGridQueryVariables = Exact<{
+  weekStart: string;
+  schoolIds: ReadonlyArray<string | number> | string | number;
+}>;
+
+
+export type TeachingCalendarOverviewGridQuery = { readonly lcms: { readonly teachingScheduleOverviewGrid: { readonly weekStart: string, readonly template: { readonly id: string, readonly name: string, readonly periodsPerDay: number, readonly slots: ReadonlyArray<{ readonly periodNo: number, readonly session: TeachingSession, readonly startTime: string | null, readonly endTime: string | null }> }, readonly schools: ReadonlyArray<{ readonly schoolId: string, readonly schoolName: string, readonly schoolShortName: string, readonly conflictCount: number, readonly hasDraft: boolean, readonly periodCount: number }>, readonly cells: ReadonlyArray<{ readonly schoolId: string, readonly weekday: number, readonly periodNo: number, readonly eventId: string | null, readonly className: string | null, readonly roomName: string | null, readonly teacherName: string | null, readonly assistantName: string | null, readonly status: string | null, readonly conflictKinds: ReadonlyArray<TeachingScheduleConflictKind>, readonly note: string | null, readonly batchLabel: string | null }>, readonly holidays: ReadonlyArray<{ readonly date: string, readonly name: string, readonly kind: TeachingHolidayKind }>, readonly conflicts: ReadonlyArray<{ readonly id: string, readonly kind: TeachingScheduleConflictKind, readonly severity: TeachingScheduleSeverity, readonly clientRowId: string | null, readonly weekday: number, readonly periodNo: number, readonly startTime: string | null, readonly endTime: string | null, readonly firstDate: string, readonly affectedWeeks: number, readonly totalWeeks: number, readonly message: string, readonly mine: { readonly eventId: string | null, readonly teacherId: string | null, readonly teacherName: string | null, readonly classId: string | null, readonly className: string | null, readonly roomId: string | null, readonly roomName: string | null, readonly schoolId: string, readonly schoolName: string, readonly schoolShortName: string, readonly subjectName: string | null, readonly batchId: string | null, readonly batchLabel: string | null, readonly batchStatus: string | null, readonly createdByName: string | null, readonly createdByRole: string | null, readonly createdAt: string | null, readonly periodNo: number | null, readonly startTime: string | null, readonly endTime: string | null }, readonly other: { readonly eventId: string | null, readonly teacherId: string | null, readonly teacherName: string | null, readonly classId: string | null, readonly className: string | null, readonly roomId: string | null, readonly roomName: string | null, readonly schoolId: string, readonly schoolName: string, readonly schoolShortName: string, readonly subjectName: string | null, readonly batchId: string | null, readonly batchLabel: string | null, readonly batchStatus: string | null, readonly createdByName: string | null, readonly createdByRole: string | null, readonly createdAt: string | null, readonly periodNo: number | null, readonly startTime: string | null, readonly endTime: string | null } | null, readonly travel: { readonly fromSchoolId: string, readonly fromSchoolShortName: string, readonly fromSchoolName: string, readonly toSchoolId: string, readonly toSchoolShortName: string, readonly toSchoolName: string, readonly previousEndTime: string, readonly gapMinutes: number, readonly requiredMinutes: number } | null, readonly leave: { readonly fromDate: string, readonly toDate: string, readonly part: string } | null, readonly fix: { readonly kind: TeachingScheduleFixKind, readonly targetEventId: string | null, readonly targetClientRowId: string | null, readonly targetClassName: string | null, readonly teacherId: string | null, readonly teacherName: string | null, readonly roomId: string | null, readonly roomName: string | null, readonly reason: string } | null }> } } };
+
+export type TeachingCalendarOverviewTeachersQueryVariables = Exact<{
+  weekStart: string;
+  search?: string | null | undefined;
+  quick?: string | null | undefined;
+  sort?: string | null | undefined;
+  page: number;
+  size: number;
+}>;
+
+
+export type TeachingCalendarOverviewTeachersQuery = { readonly lcms: { readonly teachingScheduleOverviewTeachers: { readonly total: number, readonly quickCounts: { readonly conflicts: number, readonly travel: number, readonly multiSchool: number, readonly overload: number, readonly empty: number }, readonly items: ReadonlyArray<{ readonly teacherId: string, readonly teacherName: string, readonly initials: string, readonly schoolCount: number, readonly conflictCount: number, readonly weeklyPeriods: number, readonly maxPeriods: number, readonly leave: { readonly fromDate: string, readonly toDate: string, readonly part: string } | null, readonly revokeNotice: { readonly teacherId: string, readonly teacherName: string, readonly weeklyPeriods: number, readonly lastPeriodDate: string | null, readonly schoolId: string, readonly schoolState: TeachingAccessState, readonly schoolRevokeOn: string | null, readonly classes: ReadonlyArray<{ readonly classId: string, readonly className: string, readonly state: TeachingAccessState, readonly revokeOn: string | null }> } | null, readonly days: ReadonlyArray<{ readonly weekday: number, readonly schoolShortNames: ReadonlyArray<string>, readonly multiSchoolSameSession: boolean, readonly onLeave: boolean, readonly travel: { readonly fromSchoolId: string, readonly fromSchoolShortName: string, readonly fromSchoolName: string, readonly toSchoolId: string, readonly toSchoolShortName: string, readonly toSchoolName: string, readonly previousEndTime: string, readonly gapMinutes: number, readonly requiredMinutes: number } | null }>, readonly slots: ReadonlyArray<{ readonly weekday: number, readonly periodNo: number, readonly eventIds: ReadonlyArray<string>, readonly classNames: ReadonlyArray<string>, readonly schoolShortNames: ReadonlyArray<string>, readonly conflict: boolean, readonly travel: boolean, readonly onLeave: boolean, readonly status: string | null, readonly roles: ReadonlyArray<TeachingScheduleRole> }> }> } } };
+
+export type TeachingCalendarScheduleLoadSettingsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type TeachingCalendarScheduleLoadSettingsQuery = { readonly lcms: { readonly teachingScheduleLoadSettings: { readonly loadWarn: number, readonly loadMax: number, readonly updatedAt: string | null } } };
+
+export type TeachingCalendarUpdateScheduleLoadSettingsMutationVariables = Exact<{
+  loadWarn: number;
+  loadMax: number;
+}>;
+
+
+export type TeachingCalendarUpdateScheduleLoadSettingsMutation = { readonly updateTeachingScheduleLoadSettings: { readonly loadWarn: number, readonly loadMax: number, readonly updatedAt: string | null } };
+
+export type TeachingCalendarSchoolPeriodAssignmentsQueryVariables = Exact<{
+  schoolIds?: ReadonlyArray<string | number> | string | number | null | undefined;
+}>;
+
+
+export type TeachingCalendarSchoolPeriodAssignmentsQuery = { readonly lcms: { readonly schoolPeriodAssignments: ReadonlyArray<{ readonly schoolId: string, readonly schoolName: string, readonly templateId: string, readonly templateName: string, readonly effectiveFrom: string | null, readonly current: boolean }> } };
+
+export type TeachingCalendarSaveSchoolPeriodTimesMutationVariables = Exact<{
+  input: SaveSchoolPeriodTimesInput;
+}>;
+
+
+export type TeachingCalendarSaveSchoolPeriodTimesMutation = { readonly saveSchoolPeriodTimes: { readonly schoolId: string, readonly schoolName: string, readonly templateId: string, readonly templateName: string, readonly effectiveFrom: string | null, readonly current: boolean } };
+
+export type TeachingCalendarReusePreviewQueryVariables = Exact<{
+  input: TeachingScheduleReuseInput;
+}>;
+
+
+export type TeachingCalendarReusePreviewQuery = { readonly lcms: { readonly previewTeachingScheduleReuse: { readonly sourcePeriods: number, readonly totalToCreate: number, readonly perTeacher: ReadonlyArray<{ readonly teacherId: string, readonly teacherName: string, readonly periods: number }>, readonly excludedConflicts: ReadonlyArray<{ readonly id: string, readonly kind: TeachingScheduleConflictKind, readonly severity: TeachingScheduleSeverity, readonly clientRowId: string | null, readonly weekday: number, readonly periodNo: number, readonly startTime: string | null, readonly endTime: string | null, readonly firstDate: string, readonly affectedWeeks: number, readonly totalWeeks: number, readonly message: string, readonly mine: { readonly eventId: string | null, readonly teacherId: string | null, readonly teacherName: string | null, readonly classId: string | null, readonly className: string | null, readonly roomId: string | null, readonly roomName: string | null, readonly schoolId: string, readonly schoolName: string, readonly schoolShortName: string, readonly subjectName: string | null, readonly batchId: string | null, readonly batchLabel: string | null, readonly batchStatus: string | null, readonly createdByName: string | null, readonly createdByRole: string | null, readonly createdAt: string | null, readonly periodNo: number | null, readonly startTime: string | null, readonly endTime: string | null }, readonly other: { readonly eventId: string | null, readonly teacherId: string | null, readonly teacherName: string | null, readonly classId: string | null, readonly className: string | null, readonly roomId: string | null, readonly roomName: string | null, readonly schoolId: string, readonly schoolName: string, readonly schoolShortName: string, readonly subjectName: string | null, readonly batchId: string | null, readonly batchLabel: string | null, readonly batchStatus: string | null, readonly createdByName: string | null, readonly createdByRole: string | null, readonly createdAt: string | null, readonly periodNo: number | null, readonly startTime: string | null, readonly endTime: string | null } | null, readonly travel: { readonly fromSchoolId: string, readonly fromSchoolShortName: string, readonly fromSchoolName: string, readonly toSchoolId: string, readonly toSchoolShortName: string, readonly toSchoolName: string, readonly previousEndTime: string, readonly gapMinutes: number, readonly requiredMinutes: number } | null, readonly leave: { readonly fromDate: string, readonly toDate: string, readonly part: string } | null, readonly fix: { readonly kind: TeachingScheduleFixKind, readonly targetEventId: string | null, readonly targetClientRowId: string | null, readonly targetClassName: string | null, readonly teacherId: string | null, readonly teacherName: string | null, readonly roomId: string | null, readonly roomName: string | null, readonly reason: string } | null }>, readonly weeks: ReadonlyArray<{ readonly weekStart: string, readonly weekEnd: string, readonly toCreate: number, readonly skipped: number, readonly conflicts: number, readonly holidays: ReadonlyArray<{ readonly date: string, readonly name: string }>, readonly conflictDetails: ReadonlyArray<{ readonly id: string, readonly kind: TeachingScheduleConflictKind, readonly severity: TeachingScheduleSeverity, readonly clientRowId: string | null, readonly weekday: number, readonly periodNo: number, readonly startTime: string | null, readonly endTime: string | null, readonly firstDate: string, readonly affectedWeeks: number, readonly totalWeeks: number, readonly message: string, readonly mine: { readonly eventId: string | null, readonly teacherId: string | null, readonly teacherName: string | null, readonly classId: string | null, readonly className: string | null, readonly roomId: string | null, readonly roomName: string | null, readonly schoolId: string, readonly schoolName: string, readonly schoolShortName: string, readonly subjectName: string | null, readonly batchId: string | null, readonly batchLabel: string | null, readonly batchStatus: string | null, readonly createdByName: string | null, readonly createdByRole: string | null, readonly createdAt: string | null, readonly periodNo: number | null, readonly startTime: string | null, readonly endTime: string | null }, readonly other: { readonly eventId: string | null, readonly teacherId: string | null, readonly teacherName: string | null, readonly classId: string | null, readonly className: string | null, readonly roomId: string | null, readonly roomName: string | null, readonly schoolId: string, readonly schoolName: string, readonly schoolShortName: string, readonly subjectName: string | null, readonly batchId: string | null, readonly batchLabel: string | null, readonly batchStatus: string | null, readonly createdByName: string | null, readonly createdByRole: string | null, readonly createdAt: string | null, readonly periodNo: number | null, readonly startTime: string | null, readonly endTime: string | null } | null, readonly travel: { readonly fromSchoolId: string, readonly fromSchoolShortName: string, readonly fromSchoolName: string, readonly toSchoolId: string, readonly toSchoolShortName: string, readonly toSchoolName: string, readonly previousEndTime: string, readonly gapMinutes: number, readonly requiredMinutes: number } | null, readonly leave: { readonly fromDate: string, readonly toDate: string, readonly part: string } | null, readonly fix: { readonly kind: TeachingScheduleFixKind, readonly targetEventId: string | null, readonly targetClientRowId: string | null, readonly targetClassName: string | null, readonly teacherId: string | null, readonly teacherName: string | null, readonly roomId: string | null, readonly roomName: string | null, readonly reason: string } | null }> }> } } };
+
+export type TeachingCalendarReuseScheduleWeekMutationVariables = Exact<{
+  input: TeachingScheduleReuseInput;
+}>;
+
+
+export type TeachingCalendarReuseScheduleWeekMutation = { readonly reuseTeachingScheduleWeek: { readonly version: number, readonly savedAt: string, readonly batch: { readonly id: string, readonly schoolId: string, readonly label: string, readonly status: TeachingScheduleStatus, readonly version: number, readonly periodTemplateId: string | null, readonly applyFrom: string | null, readonly repeatWeeks: number | null, readonly publishedAt: string | null, readonly affectedEventCount: number }, readonly rowIdMap: ReadonlyArray<{ readonly clientRowId: string, readonly eventId: string }>, readonly conflicts: ReadonlyArray<{ readonly id: string, readonly kind: TeachingScheduleConflictKind, readonly severity: TeachingScheduleSeverity, readonly clientRowId: string | null, readonly weekday: number, readonly periodNo: number, readonly startTime: string | null, readonly endTime: string | null, readonly firstDate: string, readonly affectedWeeks: number, readonly totalWeeks: number, readonly message: string, readonly mine: { readonly eventId: string | null, readonly teacherId: string | null, readonly teacherName: string | null, readonly classId: string | null, readonly className: string | null, readonly roomId: string | null, readonly roomName: string | null, readonly schoolId: string, readonly schoolName: string, readonly schoolShortName: string, readonly subjectName: string | null, readonly batchId: string | null, readonly batchLabel: string | null, readonly batchStatus: string | null, readonly createdByName: string | null, readonly createdByRole: string | null, readonly createdAt: string | null, readonly periodNo: number | null, readonly startTime: string | null, readonly endTime: string | null }, readonly other: { readonly eventId: string | null, readonly teacherId: string | null, readonly teacherName: string | null, readonly classId: string | null, readonly className: string | null, readonly roomId: string | null, readonly roomName: string | null, readonly schoolId: string, readonly schoolName: string, readonly schoolShortName: string, readonly subjectName: string | null, readonly batchId: string | null, readonly batchLabel: string | null, readonly batchStatus: string | null, readonly createdByName: string | null, readonly createdByRole: string | null, readonly createdAt: string | null, readonly periodNo: number | null, readonly startTime: string | null, readonly endTime: string | null } | null, readonly travel: { readonly fromSchoolId: string, readonly fromSchoolShortName: string, readonly fromSchoolName: string, readonly toSchoolId: string, readonly toSchoolShortName: string, readonly toSchoolName: string, readonly previousEndTime: string, readonly gapMinutes: number, readonly requiredMinutes: number } | null, readonly leave: { readonly fromDate: string, readonly toDate: string, readonly part: string } | null, readonly fix: { readonly kind: TeachingScheduleFixKind, readonly targetEventId: string | null, readonly targetClientRowId: string | null, readonly targetClassName: string | null, readonly teacherId: string | null, readonly teacherName: string | null, readonly roomId: string | null, readonly roomName: string | null, readonly reason: string } | null }>, readonly accessChanges: ReadonlyArray<{ readonly teacherId: string, readonly teacherName: string, readonly weeklyPeriods: number, readonly lastPeriodDate: string | null, readonly schoolId: string, readonly schoolState: TeachingAccessState, readonly schoolRevokeOn: string | null, readonly classes: ReadonlyArray<{ readonly classId: string, readonly className: string, readonly state: TeachingAccessState, readonly revokeOn: string | null }> }> } };
+
+export type TeachingCalendarPeriodTemplatesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type TeachingCalendarPeriodTemplatesQuery = { readonly lcms: { readonly teachingPeriodTemplates: ReadonlyArray<{ readonly id: string, readonly name: string, readonly periodsPerDay: number, readonly slots: ReadonlyArray<{ readonly periodNo: number, readonly session: TeachingSession, readonly startTime: string | null, readonly endTime: string | null }> }> } };
+
+export type TeachingCalendarScheduleDraftQueryVariables = Exact<{
+  batchId: string | number;
+}>;
+
+
+export type TeachingCalendarScheduleDraftQuery = { readonly lcms: { readonly teachingScheduleDraft: { readonly version: number, readonly savedAt: string, readonly batch: { readonly id: string, readonly schoolId: string, readonly label: string, readonly status: TeachingScheduleStatus, readonly version: number, readonly periodTemplateId: string | null, readonly applyFrom: string | null, readonly repeatWeeks: number | null, readonly publishedAt: string | null, readonly affectedEventCount: number }, readonly rowIdMap: ReadonlyArray<{ readonly clientRowId: string, readonly eventId: string }>, readonly conflicts: ReadonlyArray<{ readonly id: string, readonly kind: TeachingScheduleConflictKind, readonly severity: TeachingScheduleSeverity, readonly clientRowId: string | null, readonly weekday: number, readonly periodNo: number, readonly startTime: string | null, readonly endTime: string | null, readonly firstDate: string, readonly affectedWeeks: number, readonly totalWeeks: number, readonly message: string, readonly mine: { readonly eventId: string | null, readonly teacherId: string | null, readonly teacherName: string | null, readonly classId: string | null, readonly className: string | null, readonly roomId: string | null, readonly roomName: string | null, readonly schoolId: string, readonly schoolName: string, readonly schoolShortName: string, readonly subjectName: string | null, readonly batchId: string | null, readonly batchLabel: string | null, readonly batchStatus: string | null, readonly createdByName: string | null, readonly createdByRole: string | null, readonly createdAt: string | null, readonly periodNo: number | null, readonly startTime: string | null, readonly endTime: string | null }, readonly other: { readonly eventId: string | null, readonly teacherId: string | null, readonly teacherName: string | null, readonly classId: string | null, readonly className: string | null, readonly roomId: string | null, readonly roomName: string | null, readonly schoolId: string, readonly schoolName: string, readonly schoolShortName: string, readonly subjectName: string | null, readonly batchId: string | null, readonly batchLabel: string | null, readonly batchStatus: string | null, readonly createdByName: string | null, readonly createdByRole: string | null, readonly createdAt: string | null, readonly periodNo: number | null, readonly startTime: string | null, readonly endTime: string | null } | null, readonly travel: { readonly fromSchoolId: string, readonly fromSchoolShortName: string, readonly fromSchoolName: string, readonly toSchoolId: string, readonly toSchoolShortName: string, readonly toSchoolName: string, readonly previousEndTime: string, readonly gapMinutes: number, readonly requiredMinutes: number } | null, readonly leave: { readonly fromDate: string, readonly toDate: string, readonly part: string } | null, readonly fix: { readonly kind: TeachingScheduleFixKind, readonly targetEventId: string | null, readonly targetClientRowId: string | null, readonly targetClassName: string | null, readonly teacherId: string | null, readonly teacherName: string | null, readonly roomId: string | null, readonly roomName: string | null, readonly reason: string } | null }>, readonly accessChanges: ReadonlyArray<{ readonly teacherId: string, readonly teacherName: string, readonly weeklyPeriods: number, readonly lastPeriodDate: string | null, readonly schoolId: string, readonly schoolState: TeachingAccessState, readonly schoolRevokeOn: string | null, readonly classes: ReadonlyArray<{ readonly classId: string, readonly className: string, readonly state: TeachingAccessState, readonly revokeOn: string | null }> }> } } };
+
+export type TeachingCalendarSaveScheduleDraftMutationVariables = Exact<{
+  input: SaveTeachingScheduleDraftInput;
+}>;
+
+
+export type TeachingCalendarSaveScheduleDraftMutation = { readonly saveTeachingScheduleDraft: { readonly version: number, readonly savedAt: string, readonly batch: { readonly id: string, readonly schoolId: string, readonly label: string, readonly status: TeachingScheduleStatus, readonly version: number, readonly periodTemplateId: string | null, readonly applyFrom: string | null, readonly repeatWeeks: number | null, readonly publishedAt: string | null, readonly affectedEventCount: number }, readonly rowIdMap: ReadonlyArray<{ readonly clientRowId: string, readonly eventId: string }>, readonly conflicts: ReadonlyArray<{ readonly id: string, readonly kind: TeachingScheduleConflictKind, readonly severity: TeachingScheduleSeverity, readonly clientRowId: string | null, readonly weekday: number, readonly periodNo: number, readonly startTime: string | null, readonly endTime: string | null, readonly firstDate: string, readonly affectedWeeks: number, readonly totalWeeks: number, readonly message: string, readonly mine: { readonly eventId: string | null, readonly teacherId: string | null, readonly teacherName: string | null, readonly classId: string | null, readonly className: string | null, readonly roomId: string | null, readonly roomName: string | null, readonly schoolId: string, readonly schoolName: string, readonly schoolShortName: string, readonly subjectName: string | null, readonly batchId: string | null, readonly batchLabel: string | null, readonly batchStatus: string | null, readonly createdByName: string | null, readonly createdByRole: string | null, readonly createdAt: string | null, readonly periodNo: number | null, readonly startTime: string | null, readonly endTime: string | null }, readonly other: { readonly eventId: string | null, readonly teacherId: string | null, readonly teacherName: string | null, readonly classId: string | null, readonly className: string | null, readonly roomId: string | null, readonly roomName: string | null, readonly schoolId: string, readonly schoolName: string, readonly schoolShortName: string, readonly subjectName: string | null, readonly batchId: string | null, readonly batchLabel: string | null, readonly batchStatus: string | null, readonly createdByName: string | null, readonly createdByRole: string | null, readonly createdAt: string | null, readonly periodNo: number | null, readonly startTime: string | null, readonly endTime: string | null } | null, readonly travel: { readonly fromSchoolId: string, readonly fromSchoolShortName: string, readonly fromSchoolName: string, readonly toSchoolId: string, readonly toSchoolShortName: string, readonly toSchoolName: string, readonly previousEndTime: string, readonly gapMinutes: number, readonly requiredMinutes: number } | null, readonly leave: { readonly fromDate: string, readonly toDate: string, readonly part: string } | null, readonly fix: { readonly kind: TeachingScheduleFixKind, readonly targetEventId: string | null, readonly targetClientRowId: string | null, readonly targetClassName: string | null, readonly teacherId: string | null, readonly teacherName: string | null, readonly roomId: string | null, readonly roomName: string | null, readonly reason: string } | null }>, readonly accessChanges: ReadonlyArray<{ readonly teacherId: string, readonly teacherName: string, readonly weeklyPeriods: number, readonly lastPeriodDate: string | null, readonly schoolId: string, readonly schoolState: TeachingAccessState, readonly schoolRevokeOn: string | null, readonly classes: ReadonlyArray<{ readonly classId: string, readonly className: string, readonly state: TeachingAccessState, readonly revokeOn: string | null }> }> } };
+
+export type TeachingCalendarPublishScheduleBatchV2MutationVariables = Exact<{
+  batchId: string | number;
+  expectedVersion: number;
+}>;
+
+
+export type TeachingCalendarPublishScheduleBatchV2Mutation = { readonly publishTeachingScheduleBatch: { readonly id: string, readonly schoolId: string, readonly label: string, readonly status: TeachingScheduleStatus, readonly version: number, readonly periodTemplateId: string | null, readonly applyFrom: string | null, readonly repeatWeeks: number | null, readonly publishedAt: string | null, readonly affectedEventCount: number } };
+
+export type TeachingCalendarCancelScheduleBatchV2MutationVariables = Exact<{
+  batchId: string | number;
+  expectedVersion: number;
+}>;
+
+
+export type TeachingCalendarCancelScheduleBatchV2Mutation = { readonly cancelTeachingScheduleBatch: { readonly id: string, readonly schoolId: string, readonly label: string, readonly status: TeachingScheduleStatus, readonly version: number, readonly periodTemplateId: string | null, readonly applyFrom: string | null, readonly repeatWeeks: number | null, readonly publishedAt: string | null, readonly affectedEventCount: number } };
+
+export type TeachingCalendarRenameScheduleBatchMutationVariables = Exact<{
+  batchId: string | number;
+  label: string;
+  expectedVersion: number;
+}>;
+
+
+export type TeachingCalendarRenameScheduleBatchMutation = { readonly renameTeachingScheduleBatch: { readonly id: string, readonly schoolId: string, readonly label: string, readonly status: TeachingScheduleStatus, readonly version: number, readonly periodTemplateId: string | null, readonly applyFrom: string | null, readonly repeatWeeks: number | null, readonly publishedAt: string | null, readonly affectedEventCount: number } };
+
+export type TeachingCalendarEditScheduleSlotMutationVariables = Exact<{
+  input: EditTeachingScheduleSlotInput;
+}>;
+
+
+export type TeachingCalendarEditScheduleSlotMutation = { readonly editTeachingScheduleSlot: { readonly applied: boolean, readonly blocking: boolean, readonly affectedCount: number, readonly events: ReadonlyArray<{ readonly eventId: string, readonly date: string, readonly periodNo: number, readonly version: number | null }>, readonly conflicts: ReadonlyArray<{ readonly id: string, readonly kind: TeachingScheduleConflictKind, readonly severity: TeachingScheduleSeverity, readonly clientRowId: string | null, readonly weekday: number, readonly periodNo: number, readonly startTime: string | null, readonly endTime: string | null, readonly firstDate: string, readonly affectedWeeks: number, readonly totalWeeks: number, readonly message: string, readonly mine: { readonly eventId: string | null, readonly teacherId: string | null, readonly teacherName: string | null, readonly classId: string | null, readonly className: string | null, readonly roomId: string | null, readonly roomName: string | null, readonly schoolId: string, readonly schoolName: string, readonly schoolShortName: string, readonly subjectName: string | null, readonly batchId: string | null, readonly batchLabel: string | null, readonly batchStatus: string | null, readonly createdByName: string | null, readonly createdByRole: string | null, readonly createdAt: string | null, readonly periodNo: number | null, readonly startTime: string | null, readonly endTime: string | null }, readonly other: { readonly eventId: string | null, readonly teacherId: string | null, readonly teacherName: string | null, readonly classId: string | null, readonly className: string | null, readonly roomId: string | null, readonly roomName: string | null, readonly schoolId: string, readonly schoolName: string, readonly schoolShortName: string, readonly subjectName: string | null, readonly batchId: string | null, readonly batchLabel: string | null, readonly batchStatus: string | null, readonly createdByName: string | null, readonly createdByRole: string | null, readonly createdAt: string | null, readonly periodNo: number | null, readonly startTime: string | null, readonly endTime: string | null } | null, readonly travel: { readonly fromSchoolId: string, readonly fromSchoolShortName: string, readonly fromSchoolName: string, readonly toSchoolId: string, readonly toSchoolShortName: string, readonly toSchoolName: string, readonly previousEndTime: string, readonly gapMinutes: number, readonly requiredMinutes: number } | null, readonly leave: { readonly fromDate: string, readonly toDate: string, readonly part: string } | null, readonly fix: { readonly kind: TeachingScheduleFixKind, readonly targetEventId: string | null, readonly targetClientRowId: string | null, readonly targetClassName: string | null, readonly teacherId: string | null, readonly teacherName: string | null, readonly roomId: string | null, readonly roomName: string | null, readonly reason: string } | null }> } };
+
+export type TeachingCalendarSwapScheduleTeacherMutationVariables = Exact<{
+  input: SwapTeachingScheduleTeacherInput;
+}>;
+
+
+export type TeachingCalendarSwapScheduleTeacherMutation = { readonly swapTeachingScheduleTeacher: { readonly applied: boolean, readonly blocking: boolean, readonly affectedCount: number, readonly events: ReadonlyArray<{ readonly eventId: string, readonly date: string, readonly periodNo: number, readonly version: number | null }>, readonly conflicts: ReadonlyArray<{ readonly id: string, readonly kind: TeachingScheduleConflictKind, readonly severity: TeachingScheduleSeverity, readonly clientRowId: string | null, readonly weekday: number, readonly periodNo: number, readonly startTime: string | null, readonly endTime: string | null, readonly firstDate: string, readonly affectedWeeks: number, readonly totalWeeks: number, readonly message: string, readonly mine: { readonly eventId: string | null, readonly teacherId: string | null, readonly teacherName: string | null, readonly classId: string | null, readonly className: string | null, readonly roomId: string | null, readonly roomName: string | null, readonly schoolId: string, readonly schoolName: string, readonly schoolShortName: string, readonly subjectName: string | null, readonly batchId: string | null, readonly batchLabel: string | null, readonly batchStatus: string | null, readonly createdByName: string | null, readonly createdByRole: string | null, readonly createdAt: string | null, readonly periodNo: number | null, readonly startTime: string | null, readonly endTime: string | null }, readonly other: { readonly eventId: string | null, readonly teacherId: string | null, readonly teacherName: string | null, readonly classId: string | null, readonly className: string | null, readonly roomId: string | null, readonly roomName: string | null, readonly schoolId: string, readonly schoolName: string, readonly schoolShortName: string, readonly subjectName: string | null, readonly batchId: string | null, readonly batchLabel: string | null, readonly batchStatus: string | null, readonly createdByName: string | null, readonly createdByRole: string | null, readonly createdAt: string | null, readonly periodNo: number | null, readonly startTime: string | null, readonly endTime: string | null } | null, readonly travel: { readonly fromSchoolId: string, readonly fromSchoolShortName: string, readonly fromSchoolName: string, readonly toSchoolId: string, readonly toSchoolShortName: string, readonly toSchoolName: string, readonly previousEndTime: string, readonly gapMinutes: number, readonly requiredMinutes: number } | null, readonly leave: { readonly fromDate: string, readonly toDate: string, readonly part: string } | null, readonly fix: { readonly kind: TeachingScheduleFixKind, readonly targetEventId: string | null, readonly targetClientRowId: string | null, readonly targetClassName: string | null, readonly teacherId: string | null, readonly teacherName: string | null, readonly roomId: string | null, readonly roomName: string | null, readonly reason: string } | null }> } };
+
+export type TeachingCalendarSlotOptionsQueryVariables = Exact<{
+  schoolId: string | number;
+  batchId?: string | number | null | undefined;
+  date: string;
+  periodNo: number;
+  classId?: string | number | null | undefined;
+  excludeEventId?: string | number | null | undefined;
+}>;
+
+
+export type TeachingCalendarSlotOptionsQuery = { readonly lcms: { readonly teachingScheduleSlotOptions: { readonly schoolName: string, readonly grade: number | null, readonly classes: ReadonlyArray<{ readonly classId: string, readonly className: string, readonly grade: number | null, readonly state: TeachingSlotOptionState, readonly busy: { readonly eventId: string | null, readonly teacherId: string | null, readonly teacherName: string | null, readonly classId: string | null, readonly className: string | null, readonly roomId: string | null, readonly roomName: string | null, readonly schoolId: string, readonly schoolName: string, readonly schoolShortName: string, readonly subjectName: string | null, readonly batchId: string | null, readonly batchLabel: string | null, readonly batchStatus: string | null, readonly createdByName: string | null, readonly createdByRole: string | null, readonly createdAt: string | null, readonly periodNo: number | null, readonly startTime: string | null, readonly endTime: string | null } | null }>, readonly teachers: ReadonlyArray<{ readonly teacherId: string, readonly teacherName: string, readonly initials: string, readonly state: TeachingSlotOptionState, readonly weeklyPeriods: number, readonly taughtHereLastWeek: boolean, readonly classAccess: TeachingAccessState, readonly sameSchoolNeighbor: { readonly eventId: string | null, readonly teacherId: string | null, readonly teacherName: string | null, readonly classId: string | null, readonly className: string | null, readonly roomId: string | null, readonly roomName: string | null, readonly schoolId: string, readonly schoolName: string, readonly schoolShortName: string, readonly subjectName: string | null, readonly batchId: string | null, readonly batchLabel: string | null, readonly batchStatus: string | null, readonly createdByName: string | null, readonly createdByRole: string | null, readonly createdAt: string | null, readonly periodNo: number | null, readonly startTime: string | null, readonly endTime: string | null } | null, readonly busy: { readonly eventId: string | null, readonly teacherId: string | null, readonly teacherName: string | null, readonly classId: string | null, readonly className: string | null, readonly roomId: string | null, readonly roomName: string | null, readonly schoolId: string, readonly schoolName: string, readonly schoolShortName: string, readonly subjectName: string | null, readonly batchId: string | null, readonly batchLabel: string | null, readonly batchStatus: string | null, readonly createdByName: string | null, readonly createdByRole: string | null, readonly createdAt: string | null, readonly periodNo: number | null, readonly startTime: string | null, readonly endTime: string | null } | null, readonly travel: { readonly fromSchoolId: string, readonly fromSchoolShortName: string, readonly fromSchoolName: string, readonly toSchoolId: string, readonly toSchoolShortName: string, readonly toSchoolName: string, readonly previousEndTime: string, readonly gapMinutes: number, readonly requiredMinutes: number } | null, readonly leave: { readonly fromDate: string, readonly toDate: string, readonly part: string } | null }>, readonly rooms: ReadonlyArray<{ readonly roomId: string, readonly roomName: string, readonly seatCount: number | null, readonly state: TeachingSlotOptionState, readonly usualForClass: boolean, readonly busy: { readonly eventId: string | null, readonly teacherId: string | null, readonly teacherName: string | null, readonly classId: string | null, readonly className: string | null, readonly roomId: string | null, readonly roomName: string | null, readonly schoolId: string, readonly schoolName: string, readonly schoolShortName: string, readonly subjectName: string | null, readonly batchId: string | null, readonly batchLabel: string | null, readonly batchStatus: string | null, readonly createdByName: string | null, readonly createdByRole: string | null, readonly createdAt: string | null, readonly periodNo: number | null, readonly startTime: string | null, readonly endTime: string | null } | null }> } } };
+
+export type TeachingCalendarSchoolTravelTimesQueryVariables = Exact<{
+  search?: string | null | undefined;
+  page: number;
+  size: number;
+}>;
+
+
+export type TeachingCalendarSchoolTravelTimesQuery = { readonly lcms: { readonly schoolTravelTimes: ReadonlyArray<{ readonly minutes: number, readonly updatedAt: string | null, readonly schoolA: { readonly schoolId: string, readonly schoolName: string, readonly schoolShortName: string, readonly conflictCount: number, readonly hasDraft: boolean, readonly periodCount: number }, readonly schoolB: { readonly schoolId: string, readonly schoolName: string, readonly schoolShortName: string, readonly conflictCount: number, readonly hasDraft: boolean, readonly periodCount: number } }> } };
+
+export type TeachingCalendarUpsertSchoolTravelTimeMutationVariables = Exact<{
+  schoolAId: string | number;
+  schoolBId: string | number;
+  minutes: number;
+}>;
+
+
+export type TeachingCalendarUpsertSchoolTravelTimeMutation = { readonly upsertSchoolTravelTime: { readonly minutes: number, readonly updatedAt: string | null, readonly schoolA: { readonly schoolId: string, readonly schoolName: string, readonly schoolShortName: string, readonly conflictCount: number, readonly hasDraft: boolean, readonly periodCount: number }, readonly schoolB: { readonly schoolId: string, readonly schoolName: string, readonly schoolShortName: string, readonly conflictCount: number, readonly hasDraft: boolean, readonly periodCount: number } } };
+
+export type TeachingCalendarDeleteSchoolTravelTimeMutationVariables = Exact<{
+  schoolAId: string | number;
+  schoolBId: string | number;
+}>;
+
+
+export type TeachingCalendarDeleteSchoolTravelTimeMutation = { readonly deleteSchoolTravelTime: boolean };

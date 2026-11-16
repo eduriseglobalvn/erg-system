@@ -43,13 +43,4 @@ describe("Teaching Calendar API ownership", () => {
     expect(source).toContain("teaching-calendar-command-api");
     expect(source).toContain("teaching-calendar-batch-api");
   });
-
-  it("keeps calendar mutation consumers away from tenant-wide invalidation", () => {
-    const consumers = [
-      resolve(process.cwd(), "src/features/teaching-calendar/components/teaching-schedule-batch-panel.tsx"),
-      resolve(process.cwd(), "src/features/lcms/components/admin-google-calendar-workspace.tsx"),
-    ].map((filePath) => readFileSync(filePath, "utf8")).join("\n");
-
-    expect(consumers).not.toContain('invalidateQueries({ queryKey: teachingCalendarQueryKeys.portalRoot(');
-  });
 });

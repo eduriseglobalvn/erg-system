@@ -3,14 +3,17 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { QUERY_POLICIES } from "@/lib/query-policy";
 import { timekeepingAdminApi as api } from "./timekeeping-admin-api";
 import { timekeepingKeys } from "./timekeeping-query";
-import type { HolidayCommand, PolicyCommand, RemoteRuleCommand, ShiftCommand, SiteCommand } from "./timekeeping-types";
+import { teachingCalendarQueryKeys } from "@/features/teaching-calendar/api/teaching-calendar-query-keys";
+import type { HolidayCommand, HolidayImportRow, PolicyCommand, RemoteRuleCommand, SaturdayMode, ShiftCommand, SiteCommand } from "./timekeeping-types";
 
 const configRoot = [...timekeepingKeys.root, "admin", "config"] as const;
 const keys = {
   sites: (schoolId: string) => [...configRoot, "sites", schoolId] as const,
   shifts: (schoolId: string) => [...configRoot, "shifts", schoolId] as const,
   policy: (schoolId: string) => [...configRoot, "policy", schoolId] as const,
-  holidays: (schoolId: string, year: number) => [...configRoot, "holidays", schoolId, year] as const,
+  holidays: (year: number) => [...configRoot, "holidays", year] as const,
+  holidayImport: (year: number) => [...configRoot, "holiday-import", year] as const,
+  saturdayModes: (month: string) => [...configRoot, "saturday-modes", month] as const,
   remote: (schoolId: string) => [...configRoot, "remote", schoolId] as const,
 };
 
@@ -23,8 +26,13 @@ export const useShifts = (schoolId: string) =>
   useQuery({ queryKey: keys.shifts(schoolId), queryFn: ({ signal }) => api.shifts(schoolId, signal), enabled: Boolean(schoolId), ...fresh });
 export const usePolicy = (schoolId: string) =>
   useQuery({ queryKey: keys.policy(schoolId), queryFn: ({ signal }) => api.policy(schoolId, signal), enabled: Boolean(schoolId), ...fresh });
-export const useHolidays = (schoolId: string, year: number) =>
-  useQuery({ queryKey: keys.holidays(schoolId, year), queryFn: ({ signal }) => api.holidays({ schoolId, year }, signal), enabled: Boolean(schoolId), ...fresh });
+export const useHolidays = (year: number) =>
+  useQuery({ queryKey: keys.holidays(year), queryFn: ({ signal }) => api.holidays(year, signal), ...fresh });
+export const useSaturdayModes = (month: string) =>
+  useQuery({ queryKey: keys.saturdayModes(month), queryFn: ({ signal }) => api.saturdayModes(month, signal), ...fresh });
+/** Preview of the yearly import; `file` is an .ics the user picked (it is part of the key, so a new file re-runs it). */
+export const useHolidayImportPreview = (year: number, file: File | undefined, enabled: boolean) =>
+  useQuery({ queryKey: [...keys.holidayImport(year), file?.name ?? "", file?.size ?? 0, file?.lastModified ?? 0], queryFn: () => api.holidayImportPreview(year, file), enabled, ...fresh });
 export const useRemoteRules = (schoolId: string) =>
   useQuery({ queryKey: keys.remote(schoolId), queryFn: ({ signal }) => api.remoteRules(schoolId, signal), enabled: Boolean(schoolId), ...fresh });
 
@@ -41,7 +49,25 @@ export const useDeleteSite = () => useConfigMutation((id: string) => api.deleteS
 export const useSaveShift = () => useConfigMutation(({ id, body }: WithId<ShiftCommand>) => api.saveShift(id, body));
 export const useDeleteShift = () => useConfigMutation((id: string) => api.deleteShift(id));
 export const useSavePolicy = () => useConfigMutation(({ schoolId, body }: { schoolId: string; body: PolicyCommand }) => api.savePolicy(schoolId, body));
-export const useCreateHoliday = () => useConfigMutation((body: HolidayCommand) => api.createHoliday(body));
-export const useDeleteHoliday = () => useConfigMutation((id: string) => api.deleteHoliday(id));
+
+/** A day off changes the teaching periods and the timesheet, so those lists are refetched too. */
+function useHolidayMutation<TVars, TResult>(mutationFn: (vars: TVars) => Promise<TResult>) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    meta: { silent: true },
+    mutationFn,
+    onSuccess: () => Promise.all([
+      queryClient.invalidateQueries({ queryKey: configRoot }),
+      queryClient.invalidateQueries({ queryKey: teachingCalendarQueryKeys.root }),
+      queryClient.invalidateQueries({ queryKey: timekeepingKeys.root }),
+    ]),
+  });
+}
+
+export const useCreateHoliday = () => useHolidayMutation((body: HolidayCommand) => api.createHoliday(body));
+export const useUpdateHoliday = () => useHolidayMutation(({ id, body }: { id: string; body: HolidayCommand }) => api.updateHoliday(id, body));
+export const useDeleteHoliday = () => useHolidayMutation((id: string) => api.deleteHoliday(id));
+export const useImportHolidays = () => useHolidayMutation((body: { rows: HolidayImportRow[]; confirmPast?: boolean }) => api.importHolidays(body));
+export const useSetSaturdayMode = () => useHolidayMutation(({ date, mode }: { date: string; mode: SaturdayMode }) => api.setSaturdayMode(date, mode));
 export const useSaveRemoteRule = () => useConfigMutation(({ id, body }: WithId<RemoteRuleCommand>) => api.saveRemoteRule(id, body));
 export const useDeleteRemoteRule = () => useConfigMutation((id: string) => api.deleteRemoteRule(id));

@@ -1,11 +1,10 @@
-import { Suspense } from "react";
+import { lazy, Suspense } from "react";
 import Box from "@mui/material/Box";
 
 import { HomeworkPanel } from "@/features/lms/components/homework-panel";
 import { ReportsPanel } from "@/features/lms/components/reports-panel";
 import {
   AssignHomeworkPage,
-  AttendanceSheetPanel,
   ClassManagementPage,
   ExerciseBankPage,
   HomeworkProgressPage,
@@ -15,7 +14,7 @@ import {
   ScoreSheetPanel,
   StudentGroupsPage,
   TeachingSchedulePanel,
-  WeeklyClassLogPage,
+  ClassLogPage,
 } from "@/features/lms/components/lms-teacher-shell-pages";
 import { getClassStudents, TeacherWorkspaceFrame } from "@/features/lms/components/lms-teacher-shell-frame";
 import { useLmsTeacherShellModel } from "@/features/lms/components/lms-teacher-shell-context";
@@ -25,6 +24,13 @@ import { classroomStudents } from "@/features/lms/classroom/api/classroom-defaul
 import { LearningResourceDashboardScopeProvider } from "@/features/lms/learning-resources/hooks/use-learning-resource-dashboard-scope";
 import { canNavigateToLmsPath } from "@/features/lms/navigation/lms-navigation";
 import { teacherPath } from "@/platform/workspaces/workspace-paths";
+
+const LessonReportMobileGate = lazy(() =>
+  import("@/features/class-log/reports/lesson-report-mobile").then((module) => ({ default: module.LessonReportMobileGate })),
+);
+const PeriodAttendancePage = lazy(() =>
+  import("@/features/class-log/attendance/components/period-attendance-page").then((module) => ({ default: module.PeriodAttendancePage })),
+);
 
 /**
  * One component per Teacher child route. Each reads the shell state from context and owns its
@@ -179,7 +185,7 @@ export function TeacherClassLogRoute() {
   const m = useLmsTeacherShellModel();
   return (
     <Suspense fallback={null}>
-      <WeeklyClassLogPage selectedClass={m.selectedClass} selectedSchoolName={m.selectedSchoolName} teacherName={m.teacherName} />
+      <LessonReportMobileGate><ClassLogPage classOptions={m.selectedClassOptions.map((c) => ({ id: c.id, label: c.className }))} defaultClassId={m.selectedClass?.id ?? ""} schoolName={m.selectedSchoolName} /></LessonReportMobileGate>
     </Suspense>
   );
 }
@@ -194,10 +200,9 @@ export function TeacherScoreRoute() {
 }
 
 export function TeacherAttendanceRoute() {
-  const m = useLmsTeacherShellModel();
   return (
     <Suspense fallback={null}>
-      <AttendanceSheetPanel selectedClass={m.selectedClass} selectedSchoolName={m.selectedSchoolName} students={getClassStudents(m.selectedClass?.id)} />
+      <PeriodAttendancePage />
     </Suspense>
   );
 }

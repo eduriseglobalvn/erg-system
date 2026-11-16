@@ -46,6 +46,15 @@ export type PolicyCommand = Schemas["PolicyCommand"];
 export type PolicyVersions = Schemas["PolicyVersions"];
 export type HolidayConfig = Schemas["HolidayConfig"];
 export type HolidayCommand = Schemas["HolidayCommand"];
+export type HolidayKind = NonNullable<HolidayConfig["kind"]>;
+export type HolidayPayMode = NonNullable<HolidayConfig["payMode"]>;
+export type HolidayTeachingAction = NonNullable<HolidayConfig["teachingAction"]>;
+export type HolidayImportPreview = Schemas["HolidayImportPreview"];
+export type HolidayImportPreviewRow = Schemas["HolidayImportPreviewRow"];
+export type HolidayImportRow = Schemas["HolidayImportRow"];
+export type HolidayImportResult = Schemas["HolidayImportResult"];
+export type SaturdayModeView = Schemas["SaturdayModeView"];
+export type SaturdayMode = NonNullable<SaturdayModeView["mode"]>;
 export type RemoteRuleConfig = Schemas["RemoteRuleConfig"];
 export type RemoteRuleCommand = Schemas["RemoteRuleCommand"];
 

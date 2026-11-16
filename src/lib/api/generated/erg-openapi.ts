@@ -654,22 +654,6 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
-    readonly "/api/v1/calendar/import-excel": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["importExcel"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
     readonly "/api/v1/calendar/my-calendar": {
         readonly parameters: {
             readonly query?: never;
@@ -3430,9 +3414,41 @@ export interface paths {
             readonly cookie?: never;
         };
         readonly get?: never;
-        readonly put?: never;
+        readonly put: operations["updateHoliday"];
         readonly post?: never;
         readonly delete: operations["deleteHoliday"];
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/timekeeping/admin/holidays/import": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post: operations["importHolidays"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/timekeeping/admin/holidays/import-preview": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post: operations["holidayImportPreview"];
+        readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
         readonly patch?: never;
@@ -3550,6 +3566,38 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
+    readonly "/api/v1/timekeeping/admin/saturday-modes": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["saturdayModes"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/timekeeping/admin/saturday-modes/{date}": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put: operations["setSaturdayMode"];
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
     readonly "/api/v1/timekeeping/admin/shifts": {
         readonly parameters: {
             readonly query?: never;
@@ -3609,6 +3657,70 @@ export interface paths {
         readonly put: operations["updateSite"];
         readonly post?: never;
         readonly delete: operations["deleteSite"];
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/timekeeping/admin/teaching/export": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["teachingExport"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/timekeeping/admin/teaching/months/{month}": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["monthSheet"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/timekeeping/admin/teaching/months/{month}/close": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post: operations["close"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/timekeeping/admin/teaching/periods": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["periods"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
         readonly patch?: never;
@@ -3800,6 +3912,70 @@ export interface paths {
         readonly get?: never;
         readonly put?: never;
         readonly post: operations["punch"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/timekeeping/me/teaching/{month}": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["myMonth"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/timekeeping/me/teaching/{month}/confirm": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post: operations["confirm"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/timekeeping/me/teaching/{month}/issue": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post: operations["reportIssue"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/timekeeping/me/teaching/{month}/periods": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["myPeriods"];
+        readonly put?: never;
+        readonly post?: never;
         readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
@@ -5531,6 +5707,28 @@ export interface components {
             /** Format: date-time */
             readonly timestamp?: string;
         };
+        readonly ApiResponseHolidayImportPreview: {
+            readonly data?: components["schemas"]["HolidayImportPreview"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApiResponseHolidayImportResult: {
+            readonly data?: components["schemas"]["HolidayImportResult"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
         readonly ApiResponseImportedAttemptResponse: {
             readonly data?: components["schemas"]["ImportedAttemptResponse"];
             readonly errors?: unknown;
@@ -5828,6 +6026,17 @@ export interface components {
             /** Format: date-time */
             readonly timestamp?: string;
         };
+        readonly ApiResponseListSaturdayModeView: {
+            readonly data?: readonly components["schemas"]["SaturdayModeView"][];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
         readonly ApiResponseListShiftConfig: {
             readonly data?: readonly components["schemas"]["ShiftConfig"][];
             readonly errors?: unknown;
@@ -5957,6 +6166,17 @@ export interface components {
         };
         readonly ApiResponseMonthView: {
             readonly data?: components["schemas"]["MonthView"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApiResponseMyTeachingMonth: {
+            readonly data?: components["schemas"]["MyTeachingMonth"];
             readonly errors?: unknown;
             readonly message?: string;
             readonly path?: string;
@@ -6362,6 +6582,17 @@ export interface components {
             /** Format: date-time */
             readonly timestamp?: string;
         };
+        readonly ApiResponseSaturdayModeView: {
+            readonly data?: components["schemas"]["SaturdayModeView"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
         readonly ApiResponseSaveDraftResponse: {
             readonly data?: components["schemas"]["SaveDraftResponse"];
             readonly errors?: unknown;
@@ -6551,6 +6782,50 @@ export interface components {
         };
         readonly ApiResponseSyncRunResponse: {
             readonly data?: components["schemas"]["SyncRunResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApiResponseTeachingConfirmationView: {
+            readonly data?: components["schemas"]["TeachingConfirmationView"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApiResponseTeachingExport: {
+            readonly data?: components["schemas"]["TeachingExport"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApiResponseTeachingMonthSheet: {
+            readonly data?: components["schemas"]["TeachingMonthSheet"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApiResponseTeachingPeriodPage: {
+            readonly data?: components["schemas"]["TeachingPeriodPage"];
             readonly errors?: unknown;
             readonly message?: string;
             readonly path?: string;
@@ -7241,6 +7516,7 @@ export interface components {
             readonly event?: components["schemas"]["CalendarEventResponse"];
         };
         readonly CalendarEventResponse: {
+            readonly assistantName?: string;
             readonly batchId?: string;
             readonly classId?: string;
             readonly className?: string;
@@ -7251,6 +7527,8 @@ export interface components {
             readonly id?: string;
             readonly levelId?: string;
             readonly levelName?: string;
+            readonly mainTeacherName?: string;
+            readonly myRole?: string;
             readonly note?: string;
             /** Format: int32 */
             readonly periodCount?: number;
@@ -7270,6 +7548,8 @@ export interface components {
         };
         readonly CalendarEventUpdateRequest: {
             readonly eventId?: string;
+            /** Format: int32 */
+            readonly expectedVersion?: number;
             readonly note?: string;
             readonly roomId?: string;
             readonly roomName?: string;
@@ -7461,6 +7741,16 @@ export interface components {
              */
             readonly unackedTotal?: number;
         };
+        readonly CancelledPeriod: {
+            readonly className?: string;
+            /** Format: date */
+            readonly date?: string;
+            readonly eventId?: string;
+            /** Format: int32 */
+            readonly periodCount?: number;
+            /** Format: int32 */
+            readonly periodStart?: number;
+        };
         readonly CertificateResponse: {
             readonly certificateNumber?: string;
             readonly evidenceRef?: string;
@@ -7553,6 +7843,14 @@ export interface components {
             readonly requiredNodeCount?: number;
             readonly status?: string;
             readonly tenantId?: string;
+        };
+        readonly ConfirmTeachingCommand: {
+            /** Format: int32 */
+            readonly assistantTotal?: number;
+            /** Format: int64 */
+            readonly expectedVersion?: number;
+            /** Format: int32 */
+            readonly total?: number;
         };
         readonly ConnectorResponse: {
             readonly adapterKey?: string;
@@ -8129,7 +8427,7 @@ export interface components {
             readonly remote?: boolean;
             readonly shift?: components["schemas"]["ShiftView"];
             /** @enum {string} */
-            readonly status?: "FULL" | "LATE_EARLY" | "HALF" | "LEAVE" | "SICK" | "BUSINESS" | "MISSING_PUNCH" | "ABSENT_UNPAID" | "HOLIDAY" | "OFF";
+            readonly status?: "FULL" | "LATE_EARLY" | "HALF" | "LEAVE" | "SICK" | "BUSINESS" | "MISSING_PUNCH" | "ABSENT_UNPAID" | "HOLIDAY" | "UNPAID_OFF" | "OFF";
             readonly suggestedOut?: string;
             readonly units?: number;
         };
@@ -8410,17 +8708,68 @@ export interface components {
             readonly registrationToken?: string;
         };
         readonly HolidayCommand: {
+            readonly confirmPast?: boolean;
             /** Format: date */
-            readonly date?: string;
+            readonly from?: string;
+            /** @enum {string} */
+            readonly kind?: "STATE" | "COMPANY" | "COMPENSATORY";
             readonly name?: string;
-            readonly schoolId?: string;
+            /** @enum {string} */
+            readonly payMode?: "PAID" | "ANNUAL_LEAVE" | "UNPAID";
+            /** @enum {string} */
+            readonly teachingAction?: "CANCEL" | "KEEP";
+            /** Format: date */
+            readonly to?: string;
         };
         readonly HolidayConfig: {
+            /** Format: int32 */
+            readonly affectedPeriods?: number;
+            /** Format: int32 */
+            readonly affectedSchools?: number;
+            readonly createdByName?: string;
             /** Format: date */
             readonly date?: string;
             readonly id?: string;
+            /** @enum {string} */
+            readonly kind?: "STATE" | "COMPANY" | "COMPENSATORY";
             readonly name?: string;
+            /** @enum {string} */
+            readonly payMode?: "PAID" | "ANNUAL_LEAVE" | "UNPAID";
             readonly schoolId?: string;
+            /** @enum {string} */
+            readonly teachingAction?: "CANCEL" | "KEEP";
+        };
+        readonly HolidayImportCommand: {
+            readonly confirmPast?: boolean;
+            readonly rows?: readonly components["schemas"]["HolidayImportRow"][];
+        };
+        readonly HolidayImportPreview: {
+            readonly rows?: readonly components["schemas"]["HolidayImportPreviewRow"][];
+            /** Format: date */
+            readonly savedOn?: string;
+            readonly source?: string;
+        };
+        readonly HolidayImportPreviewRow: {
+            /** Format: date */
+            readonly date?: string;
+            /** @enum {string} */
+            readonly kind?: "STATE" | "COMPANY" | "COMPENSATORY";
+            readonly lunarDate?: string;
+            readonly name?: string;
+            readonly status?: string;
+        };
+        readonly HolidayImportResult: {
+            /** Format: int32 */
+            readonly imported?: number;
+            /** Format: int32 */
+            readonly skipped?: number;
+        };
+        readonly HolidayImportRow: {
+            /** Format: date */
+            readonly date?: string;
+            /** @enum {string} */
+            readonly kind?: "STATE" | "COMPANY" | "COMPENSATORY";
+            readonly name?: string;
         };
         readonly ImportedAttemptResponse: {
             readonly assignmentId?: string;
@@ -8729,6 +9078,18 @@ export interface components {
             /** Format: int64 */
             readonly totalPages?: number;
         };
+        readonly MissingReport: {
+            readonly className?: string;
+            /** Format: date */
+            readonly date?: string;
+            readonly eventId?: string;
+            readonly from?: string;
+            /** Format: int32 */
+            readonly periodCount?: number;
+            /** Format: int32 */
+            readonly periodStart?: number;
+            readonly to?: string;
+        };
         readonly MonthContext: {
             /** Format: int32 */
             readonly approvedExplanations?: number;
@@ -8742,7 +9103,7 @@ export interface components {
             /** @enum {string} */
             readonly leaveKind?: "ANNUAL" | "SICK" | "PAID_PERSONAL" | "UNPAID";
             /** @enum {string} */
-            readonly status?: "FULL" | "LATE_EARLY" | "HALF" | "LEAVE" | "SICK" | "BUSINESS" | "MISSING_PUNCH" | "ABSENT_UNPAID" | "HOLIDAY" | "OFF";
+            readonly status?: "FULL" | "LATE_EARLY" | "HALF" | "LEAVE" | "SICK" | "BUSINESS" | "MISSING_PUNCH" | "ABSENT_UNPAID" | "HOLIDAY" | "UNPAID_OFF" | "OFF";
             readonly units?: number;
         };
         readonly MonthView: {
@@ -8762,6 +9123,24 @@ export interface components {
             /** Format: date */
             readonly reviewUntil?: string;
             readonly standardUnits?: number;
+        };
+        readonly MyTeachingMonth: {
+            readonly assistantRows?: readonly components["schemas"]["TeachingRow"][];
+            /** Format: int32 */
+            readonly assistantTotal?: number;
+            readonly cancelled?: readonly components["schemas"]["CancelledPeriod"][];
+            /** Format: date-time */
+            readonly closedAt?: string;
+            readonly confirmation?: components["schemas"]["TeachingConfirmationView"];
+            /** Format: date */
+            readonly deadline?: string;
+            readonly missingReports?: readonly components["schemas"]["MissingReport"][];
+            readonly month?: string;
+            readonly rows?: readonly components["schemas"]["TeachingRow"][];
+            readonly status?: string;
+            /** Format: int32 */
+            readonly total?: number;
+            readonly weeks?: readonly components["schemas"]["TeachingWeek"][];
         };
         readonly NotificationItemResponse: {
             /** Format: date-time */
@@ -9393,6 +9772,9 @@ export interface components {
             };
             readonly status?: string;
         };
+        readonly ReportTeachingIssueCommand: {
+            readonly note?: string;
+        };
         readonly RequestCommand: {
             /** @enum {string} */
             readonly explanationReason?: "FORGOT" | "DEVICE" | "OUTSIDE" | "BUSINESS_TRIP";
@@ -9538,6 +9920,16 @@ export interface components {
             readonly cursor?: string;
             /** Format: int64 */
             readonly expectedVersion: number;
+        };
+        readonly SaturdayModeCommand: {
+            /** @enum {string} */
+            readonly mode?: "OFFICE" | "WFH" | "PAID_OFF" | "UNPAID_OFF";
+        };
+        readonly SaturdayModeView: {
+            /** Format: date */
+            readonly date?: string;
+            /** @enum {string} */
+            readonly mode?: "OFFICE" | "WFH" | "PAID_OFF" | "UNPAID_OFF";
         };
         readonly SaveAnswerRequest: {
             readonly answer?: unknown;
@@ -10056,6 +10448,93 @@ export interface components {
             readonly updated?: number;
             /** Format: date-time */
             readonly updatedAt?: string;
+        };
+        readonly TeachingConfirmationView: {
+            /** Format: int32 */
+            readonly confirmedAssistantTotal?: number;
+            /** Format: date-time */
+            readonly confirmedAt?: string;
+            /** Format: int32 */
+            readonly confirmedTotal?: number;
+            readonly issueNote?: string;
+            readonly status?: string;
+            /** Format: int64 */
+            readonly version?: number;
+        };
+        readonly TeachingExport: {
+            readonly assistantMonths?: readonly components["schemas"]["TeachingMonthSheet"][];
+            readonly assistantPeriods?: readonly components["schemas"]["TeachingPeriodRow"][];
+            readonly mainMonths?: readonly components["schemas"]["TeachingMonthSheet"][];
+            readonly mainPeriods?: readonly components["schemas"]["TeachingPeriodRow"][];
+            /** Format: int32 */
+            readonly year?: number;
+        };
+        readonly TeachingMonthRow: {
+            readonly classNames?: string;
+            readonly confirmation?: components["schemas"]["TeachingConfirmationView"];
+            readonly note?: string;
+            readonly schoolName?: string;
+            readonly subjectName?: string;
+            readonly teacherId?: string;
+            readonly teacherName?: string;
+            /** Format: int32 */
+            readonly total?: number;
+            readonly weekTotals?: readonly number[];
+        };
+        readonly TeachingMonthSheet: {
+            /** Format: date-time */
+            readonly closedAt?: string;
+            /** Format: int32 */
+            readonly confirmedCount?: number;
+            readonly month?: string;
+            readonly rows?: readonly components["schemas"]["TeachingMonthRow"][];
+            readonly status?: string;
+            /** Format: int32 */
+            readonly teacherCount?: number;
+            readonly weeks?: readonly components["schemas"]["TeachingWeek"][];
+        };
+        readonly TeachingPeriodPage: {
+            /** Format: int32 */
+            readonly page?: number;
+            readonly rows?: readonly components["schemas"]["TeachingPeriodRow"][];
+            /** Format: int32 */
+            readonly size?: number;
+            /** Format: int32 */
+            readonly total?: number;
+        };
+        readonly TeachingPeriodRow: {
+            readonly className?: string;
+            /** Format: date */
+            readonly date?: string;
+            readonly from?: string;
+            readonly lessonContent?: string;
+            readonly level?: string;
+            /** Format: int32 */
+            readonly periodNo?: number;
+            readonly schoolName?: string;
+            readonly subjectName?: string;
+            readonly teacherName?: string;
+            readonly to?: string;
+            /** Format: int32 */
+            readonly weekday?: number;
+        };
+        readonly TeachingRow: {
+            readonly className?: string;
+            readonly level?: string;
+            readonly schoolName?: string;
+            readonly subjectName?: string;
+            /** Format: int32 */
+            readonly total?: number;
+            readonly weekTotals?: readonly number[];
+        };
+        readonly TeachingWeek: {
+            /** Format: date */
+            readonly from?: string;
+            /** Format: int32 */
+            readonly index?: number;
+            readonly label?: string;
+            /** Format: date */
+            readonly to?: string;
         };
         readonly TeammateLeave: {
             /** Format: date */
@@ -11593,34 +12072,6 @@ export interface operations {
                 };
                 content: {
                     readonly "*/*": components["schemas"]["ApiResponseCalendarDeletePayload"];
-                };
-            };
-        };
-    };
-    readonly importExcel: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "multipart/form-data": {
-                    /** Format: binary */
-                    readonly file: string;
-                    readonly metadata: string;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseCalendarPreviewPayload"];
                 };
             };
         };
@@ -16725,6 +17176,32 @@ export interface operations {
                     readonly [name: string]: unknown;
                 };
                 content: {
+                    readonly "*/*": components["schemas"]["ApiResponseListHolidayConfig"];
+                };
+            };
+        };
+    };
+    readonly updateHoliday: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly id: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["HolidayCommand"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
                     readonly "*/*": components["schemas"]["ApiResponseHolidayConfig"];
                 };
             };
@@ -16747,6 +17224,59 @@ export interface operations {
                     readonly [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    readonly importHolidays: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["HolidayImportCommand"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseHolidayImportResult"];
+                };
+            };
+        };
+    };
+    readonly holidayImportPreview: {
+        readonly parameters: {
+            readonly query: {
+                readonly year: number;
+            };
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody?: {
+            readonly content: {
+                readonly "multipart/form-data": {
+                    /** Format: binary */
+                    readonly file?: string;
+                };
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseHolidayImportPreview"];
+                };
             };
         };
     };
@@ -16992,6 +17522,54 @@ export interface operations {
             };
         };
     };
+    readonly saturdayModes: {
+        readonly parameters: {
+            readonly query: {
+                readonly month: string;
+            };
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseListSaturdayModeView"];
+                };
+            };
+        };
+    };
+    readonly setSaturdayMode: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly date: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["SaturdayModeCommand"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseSaturdayModeView"];
+                };
+            };
+        };
+    };
     readonly shifts: {
         readonly parameters: {
             readonly query?: {
@@ -17173,6 +17751,102 @@ export interface operations {
                     readonly [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    readonly teachingExport: {
+        readonly parameters: {
+            readonly query: {
+                readonly year: number;
+            };
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseTeachingExport"];
+                };
+            };
+        };
+    };
+    readonly monthSheet: {
+        readonly parameters: {
+            readonly query?: {
+                readonly role?: string;
+            };
+            readonly header?: never;
+            readonly path: {
+                readonly month: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseTeachingMonthSheet"];
+                };
+            };
+        };
+    };
+    readonly close: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly month: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseTeachingMonthSheet"];
+                };
+            };
+        };
+    };
+    readonly periods: {
+        readonly parameters: {
+            readonly query?: {
+                readonly from?: string;
+                readonly page?: number;
+                readonly q?: string;
+                readonly role?: string;
+                readonly schoolId?: string;
+                readonly teacherId?: string;
+                readonly to?: string;
+            };
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseTeachingPeriodPage"];
+                };
             };
         };
     };
@@ -17468,6 +18142,105 @@ export interface operations {
                 };
                 content: {
                     readonly "*/*": components["schemas"]["ApiResponsePunchResult"];
+                };
+            };
+        };
+    };
+    readonly myMonth: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly month: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseMyTeachingMonth"];
+                };
+            };
+        };
+    };
+    readonly confirm: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly month: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["ConfirmTeachingCommand"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseTeachingConfirmationView"];
+                };
+            };
+        };
+    };
+    readonly reportIssue: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly month: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["ReportTeachingIssueCommand"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseTeachingConfirmationView"];
+                };
+            };
+        };
+    };
+    readonly myPeriods: {
+        readonly parameters: {
+            readonly query?: {
+                readonly page?: number;
+                readonly role?: string;
+            };
+            readonly header?: never;
+            readonly path: {
+                readonly month: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseTeachingPeriodPage"];
                 };
             };
         };

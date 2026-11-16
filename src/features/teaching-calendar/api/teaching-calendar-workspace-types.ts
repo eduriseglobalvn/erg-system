@@ -43,6 +43,10 @@ export type TeachingCalendarEvent = {
   id: string;
   levelId?: string | null;
   levelName?: string | null;
+  mainTeacherName?: string | null;
+  assistantName?: string | null;
+  /** Vai tro cua nguoi dang xem lich (lich giao vien): MAIN hoac ASSISTANT. */
+  myRole?: "MAIN" | "ASSISTANT" | null;
   note?: string | null;
   periodCount: number;
   periodStart: number;
@@ -57,6 +61,8 @@ export type TeachingCalendarEvent = {
   subjectName?: string | null;
   teachers: TeachingScheduleTeacherAssignment[];
   title: string;
+  /** record_version cua tiet: gui lai la expectedVersion khi sua/doi giao vien de BE bao STALE_VERSION. */
+  version: number;
 };
 
 export type TeachingScheduleTeacherAssignment = {

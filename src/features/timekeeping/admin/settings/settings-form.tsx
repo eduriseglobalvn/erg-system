@@ -1,4 +1,4 @@
-import { useBlocker } from "@tanstack/react-router";
+import { useBlocker, useNavigate } from "@tanstack/react-router";
 import { useForm, useStore } from "@tanstack/react-form";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
@@ -10,10 +10,10 @@ import { useMemo, useState, type ReactNode } from "react";
 import { ErgButton } from "@/components/erg-mui/erg-actions";
 import { ErgConfirmDialog } from "@/components/erg-mui/erg-confirm-dialog";
 import { ErgPageHeader } from "@/components/erg-mui/erg-page-header";
+import { adminPath } from "@/platform/workspaces/workspace-paths";
 import { formatDateVi } from "@/domain/formatters/format-date";
 import type { PolicyVersions, SiteConfig } from "../../api/timekeeping-types";
 import { ApprovalChainsPanel } from "./approval-chains-panel";
-import { HolidaysPanel } from "./holidays-panel";
 import { LocationsTab } from "./locations-tab";
 import { PolicyPanel } from "./policy-panel";
 import { policySummaryLines } from "./policy-summary";
@@ -21,12 +21,11 @@ import { policyToForm, siteSignature, siteToForm, validatePolicy, validateSite, 
 import { ShiftsPanel } from "./shifts-panel";
 import { useSettingsSave } from "./use-settings-save";
 
-const TABS = ["Địa điểm & phương thức", "Ca làm việc", "Chính sách công", "Loại đơn & quy trình duyệt", "Ngày lễ"];
+const TABS = ["Địa điểm & phương thức", "Ca làm việc", "Chính sách công", "Loại đơn & quy trình duyệt", "Ngày nghỉ & thứ 7"];
 const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
 
 type SettingsFormProps = {
   schoolId: string;
-  schoolName: string;
   versions: PolicyVersions;
   sites: readonly SiteConfig[];
   /** Id of the site being edited, undefined for "Thêm" (a new one). Kept by the page so it survives reloads. */
@@ -39,7 +38,7 @@ type SettingsFormProps = {
  * A04 body. One form holds the selected site and the policy; the header "Lưu thay đổi" / "Huỷ" act on it
  * (disabled while nothing changed). Shifts, holidays and remote rules save themselves in their own dialogs.
  */
-export function SettingsForm({ onSelect, schoolFilter, schoolId, schoolName, selectedId, sites, versions }: SettingsFormProps) {
+export function SettingsForm({ onSelect, schoolFilter, schoolId, selectedId, sites, versions }: SettingsFormProps) {
   const { current, next: scheduled } = versions;
   const baseline = useMemo(() => ({ policy: policyToForm(scheduled ?? current), site: siteToForm(sites.find((s) => s.id === selectedId)) }), [current, scheduled, selectedId, sites]);
   const form = useForm({ defaultValues: baseline });
@@ -109,7 +108,7 @@ export function SettingsForm({ onSelect, schoolFilter, schoolId, schoolName, sel
         {tab === 1 ? <ShiftsPanel schoolId={schoolId} /> : null}
         {tab === 2 ? <PolicyPanel errors={policyErrors} onChange={setPolicy} summary={policySummaryLines(policyToForm(current))} value={values.policy} /> : null}
         {tab === 3 ? <ApprovalChainsPanel chains={values.policy.chains} errors={policyErrors.chains} onChange={(chains) => setPolicy({ chains })} /> : null}
-        {tab === 4 ? <HolidaysPanel schoolId={schoolId} schoolName={schoolName} /> : null}
+        {tab === 4 ? <DaysOffLink /> : null}
       </Box>
       <ErgConfirmDialog
         confirmLabel="Rời trang"
@@ -120,6 +119,17 @@ export function SettingsForm({ onSelect, schoolFilter, schoolId, schoolName, sel
         open={blocker.status === "blocked"}
         title="Rời trang khi chưa lưu?"
       />
+    </Box>
+  );
+}
+
+/** Days off and Saturday modes moved to their own screen under the teaching calendar; this tab is only the shortcut. */
+function DaysOffLink() {
+  const navigate = useNavigate();
+  return (
+    <Box sx={{ display: "grid", gap: 1.5, justifyItems: "start" }}>
+      <Typography color="text.secondary" variant="body2">Ngày nghỉ lễ, nghỉ công ty và chế độ làm việc các ngày thứ 7 áp cho toàn hệ thống, nên được quản lý ở một màn riêng.</Typography>
+      <ErgButton onClick={() => void navigate({ href: adminPath("/calendar/days-off") })} variant="outlined">Ngày nghỉ & thứ 7</ErgButton>
     </Box>
   );
 }

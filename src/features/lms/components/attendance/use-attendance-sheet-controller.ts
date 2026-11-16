@@ -26,7 +26,6 @@ import {
   clampInputDateToToday,
   countLessonsThroughDate,
   createAttendanceStudentDraft,
-  curriculumProgram,
   curriculumProgramFromTree,
   getCurriculumTopicSpans,
   getMockAttendanceStatus,
@@ -83,8 +82,7 @@ export function useAttendanceSheetController({ selectedClass, students }: Attend
       period: row.period,
       title: row.title,
     }));
-    const resolved = curriculumProgramFromTree(canonicalSubject);
-    return resolved.length ? resolved : curriculumProgram;
+    return curriculumProgramFromTree(canonicalSubject);
   }, [canonicalSubject, curriculumProgramQuery.data]);
   useEffect(() => {
     if (canonicalSubject && canonicalSubject.subject.name !== selectedSubject) setSelectedSubject(canonicalSubject.subject.name);

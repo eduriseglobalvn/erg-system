@@ -61,6 +61,20 @@ export const ROLE_DISPLAY_CATALOG: Record<string, RoleDisplayMeta> = {
     keyPermissions: ["Sắp xếp thời khóa biểu", "Kiểm duyệt sổ đầu bài", "Quản lý danh sách lớp"],
     label: "Chuyên viên Phòng Đào tạo (PĐT)",
   },
+  "school.training_head": {
+    badgeTone: "info",
+    category: "Quản lý Nhà trường & Đào tạo",
+    description: "Toàn bộ quyền của Phòng Đào tạo, thêm duyệt công tiết dạy và đơn chấm công của giáo viên.",
+    keyPermissions: ["Sắp xếp thời khóa biểu", "Duyệt công tiết dạy", "Duyệt đơn chấm công"],
+    label: "Trưởng phòng Đào tạo",
+  },
+  "school.hr": {
+    badgeTone: "info",
+    category: "Hành chính & Nhân sự",
+    description: "Duyệt công và đơn chấm công, xem bảng công toàn trường và chốt công cuối tháng.",
+    keyPermissions: ["Duyệt công", "Xem bảng công", "Chốt công tháng"],
+    label: "Nhân sự (HR)",
+  },
   "lms.admin": {
     badgeTone: "info",
     category: "Quản lý Nhà trường & Đào tạo",
@@ -73,8 +87,8 @@ export const ROLE_DISPLAY_CATALOG: Record<string, RoleDisplayMeta> = {
   lms_teacher_lead: {
     badgeTone: "success",
     category: "Đội ngũ Giảng dạy & Lớp học",
-    description: "Biên tập và duyệt đề cương, duyệt phân phối chương trình, xuất bản thời khóa biểu khối bộ môn.",
-    keyPermissions: ["Xuất bản thời khóa biểu", "Duyệt đề cương môn học", "Quản lý tổ bộ môn"],
+    description: "Biên tập và duyệt đề cương, duyệt phân phối chương trình, áp dụng thời khóa biểu khối bộ môn.",
+    keyPermissions: ["Áp dụng thời khóa biểu", "Duyệt đề cương môn học", "Quản lý tổ bộ môn"],
     label: "Tổ trưởng chuyên môn",
   },
   lms_homeroom_teacher: {

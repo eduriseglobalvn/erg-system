@@ -123,6 +123,13 @@ export const ADMIN_BASE_MENU_GROUPS: MenuGroup[] = [
         section: "Giảng dạy",
       }),
       item({
+        id: "admin-lesson-reports",
+        label: "Báo giảng",
+        icon: <ArticleRoundedIcon />,
+        path: "/training/lesson-reports",
+        description: "Theo dõi giáo viên đã và chưa báo giảng theo tuần.",
+      }),
+      item({
         id: "admin-discussion",
         label: "Thảo luận",
         icon: <ForumRoundedIcon />,
@@ -166,6 +173,7 @@ export const ADMIN_BASE_MENU_GROUPS: MenuGroup[] = [
         children: [
           { id: "timekeeping-today", label: "Hôm nay", path: "/employees/timekeeping", description: "Ai đã chấm, ai chưa chấm và các trường hợp cần xử lý." },
           { id: "timekeeping-timesheet", label: "Bảng công", path: "/employees/timesheet", description: "Bảng công tháng của nhân sự, chốt kỳ và xuất Excel." },
+          { id: "timekeeping-teaching-hours", label: "Công tiết dạy", path: "/employees/teaching-hours", description: "Bảng công tiết dạy theo tháng, theo dõi giáo viên đã xác nhận và chốt tháng." },
           { id: "timekeeping-approvals", label: "Duyệt đơn", path: "/employees/teacher-absence", description: "Duyệt đơn nghỉ phép, giải trình, làm việc tại nhà và công tác." },
           { id: "timekeeping-settings", label: "Cấu hình chấm công", path: "/employees/timekeeping-settings", description: "Địa điểm, ca làm, chính sách và ngày lễ." },
         ],
@@ -195,13 +203,18 @@ export const ADMIN_BASE_MENU_GROUPS: MenuGroup[] = [
   },
 ];
 
-/** Drops "Chấm công" entries the session cannot open and shows the pending-approval count on "Duyệt đơn". */
-export function withTimekeepingMenuState(groups: MenuGroup[], canAccess: (path: string) => boolean, pendingApprovals = 0): MenuGroup[] {
+/** Drops "Chấm công" entries the session cannot open and shows the pending-approval count on "Duyệt đơn" and the unconfirmed-teacher count on "Công tiết dạy". */
+export function withTimekeepingMenuState(groups: MenuGroup[], canAccess: (path: string) => boolean, pendingApprovals = 0, unconfirmedTeachers = 0): MenuGroup[] {
+  const badgeOf = (count: number) => (count > 99 ? "99+" : String(count));
   const refine = (menuItem: MenuItem): MenuItem[] => {
     if (menuItem.id !== "timekeeping") return [menuItem];
     const children = (menuItem.children ?? [])
       .filter((child) => !child.path || canAccess(child.path))
-      .map((child) => (child.id === "timekeeping-approvals" && pendingApprovals > 0 ? { ...child, badge: pendingApprovals > 99 ? "99+" : String(pendingApprovals) } : child));
+      .map((child) => {
+        if (child.id === "timekeeping-approvals" && pendingApprovals > 0) return { ...child, badge: badgeOf(pendingApprovals) };
+        if (child.id === "timekeeping-teaching-hours" && unconfirmedTeachers > 0) return { ...child, badge: badgeOf(unconfirmedTeachers) };
+        return child;
+      });
     return children.length ? [{ ...menuItem, children }] : [];
   };
   return groups.map((group) => ({ ...group, items: group.items.flatMap(refine) }));

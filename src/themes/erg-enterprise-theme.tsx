@@ -115,6 +115,19 @@ export const ergEnterpriseTheme = createTheme({
         },
       },
     },
+    // MUI v9 Typography only maps palette keys («error», «textSecondary»); the dotted paths used across the app («text.secondary») were silently ignored.
+    MuiTypography: {
+      variants: Object.entries({
+        "error.main": t.color.danger,
+        "info.main": t.color.info,
+        "primary.main": t.color.primary,
+        "success.main": t.color.success,
+        "text.disabled": t.color.textSoft,
+        "text.primary": t.color.text,
+        "text.secondary": t.color.textMuted,
+        "warning.main": t.color.warning,
+      }).map(([path, color]) => ({ props: { color: path }, style: { color } })),
+    },
     MuiButtonBase: {
       defaultProps: {
         disableRipple: false,

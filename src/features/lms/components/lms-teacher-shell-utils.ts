@@ -1,4 +1,4 @@
-﻿import type { AssignmentRun } from "@/domain/school/classroom-types";
+import type { AssignmentRun } from "@/domain/school/classroom-types";
 
 export function resolveLmsTeacherRuns({
   apiBacked,
@@ -15,11 +15,14 @@ export function resolveLmsTeacherRuns({
   return [...createdRuns, ...(workspaceRuns.length ? workspaceRuns : fallbackRuns)];
 }
 
-export function isSchedulePublishedNotification(payload: unknown) {
+const SCHEDULE_NOTIFICATION_KINDS = new Set(["SCHEDULE_PUBLISHED", "SCHEDULE_CHANGED", "SCHEDULE_CANCELLED"]);
+
+/** Moi thong bao lich day (cong bo, doi tiet, huy/nghi) deu phai lam moi lich cua giao vien. */
+export function isScheduleNotification(payload: unknown) {
   if (!payload || typeof payload !== "object") return false;
   const record = payload as Record<string, unknown>;
-  if (record.eventType === "SCHEDULE_PUBLISHED") return true;
+  const isKind = (value: unknown) => typeof value === "string" && SCHEDULE_NOTIFICATION_KINDS.has(value);
+  if (isKind(record.eventType)) return true;
   const data = record.data;
-  return Boolean(data && typeof data === "object"
-    && (data as Record<string, unknown>).eventType === "SCHEDULE_PUBLISHED");
+  return Boolean(data && typeof data === "object" && isKind((data as Record<string, unknown>).eventType));
 }

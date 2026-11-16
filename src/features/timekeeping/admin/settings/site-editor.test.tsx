@@ -33,7 +33,7 @@ function Harness({ initial = siteToForm(SITE) }: { initial?: SiteForm }) {
 }
 
 const renderForm = () =>
-  render(<SettingsForm onSelect={vi.fn()} schoolFilter={null} schoolId="sc1" schoolName="Cầu Giấy" selectedId="s1" sites={[SITE]} versions={VERSIONS} />);
+  render(<SettingsForm onSelect={vi.fn()} schoolFilter={null} schoolId="sc1" selectedId="s1" sites={[SITE]} versions={VERSIONS} />);
 const saveButton = () => screen.getByRole("button", { name: "Lưu thay đổi" });
 
 describe("SiteEditor", () => {
