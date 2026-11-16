@@ -50,6 +50,7 @@ const REDIRECT_ONLY_SEGMENTS = ["setting/setting-center-role", "employees/face-d
 function adminPageFor(wPath: string) {
   if (wPath === "settings/permissions") return page("AdminPermissionsRoute");
   if (wPath === "settings/roles") return page("AdminRolesRoute");
+  if (wPath === "settings/audit-log") return page("AdminAuditLogRoute");
   if (wPath === "employees") return page("AdminEmployeesRoute");
   if (wPath === "employees/access-logs") return page("AdminEmployeeAccessLogsRoute");
   if (wPath === "employees/timekeeping") return timekeepingPage("AdminTimekeepingTodayRoute");

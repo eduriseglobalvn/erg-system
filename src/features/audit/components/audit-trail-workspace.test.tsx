@@ -15,6 +15,12 @@ vi.mock("@/lib/api-client", async (importOriginal) => ({
   isBffAuthEnabled: () => true,
 }));
 
+const auth = vi.hoisted(() => ({ permissions: [] as string[] }));
+vi.mock("@/platform/auth/api/auth-storage", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/platform/auth/api/auth-storage")>()),
+  getAuthScope: () => ({ session: { permissions: auth.permissions, deniedPermissions: [] } }),
+}));
+
 const UUID = "01a171e6-1111-4222-8333-444455556666";
 
 function renderWorkspace() {
@@ -22,7 +28,7 @@ function renderWorkspace() {
   return render(<QueryClientProvider client={client}><AuditTrailWorkspace /></QueryClientProvider>);
 }
 
-afterEach(() => vi.clearAllMocks());
+afterEach(() => { vi.clearAllMocks(); auth.permissions = []; });
 
 test("shows an inline error with retry instead of a skeleton when the API fails", async () => {
   vi.mocked(listAuditEvents).mockRejectedValueOnce(new Error("HTTP 500"));
@@ -57,4 +63,19 @@ test("filter bar has Áp dụng as the contained button and Đặt lại as text
   expect(screen.getByRole("button", { name: "Áp dụng" }).className).toContain("MuiButton-contained");
   expect(screen.getByRole("button", { name: "Đặt lại" }).className).toContain("MuiButton-text");
   expect(document.querySelector('input[type="date"]')).toBeNull();
+});
+
+test("audit page filters and hides export without audit.export", async () => {
+  vi.mocked(listAuditEvents).mockResolvedValue({ hasNext: false, items: [], page: 0, size: 25, totalElements: 0, totalPages: 0 });
+  const { unmount } = renderWorkspace();
+  expect(screen.getByLabelText("Người thực hiện")).toBeTruthy();
+  expect(screen.getByLabelText("Chức năng")).toBeTruthy();
+  expect(screen.getByLabelText("Kết quả")).toBeTruthy();
+  expect(screen.getAllByLabelText("Từ ngày")).toBeTruthy();
+  expect(screen.queryByRole("button", { name: /Xuất/ })).toBeNull();
+  unmount();
+
+  auth.permissions = ["audit.export"];
+  renderWorkspace();
+  expect(screen.getByRole("button", { name: /Xuất/ })).toBeTruthy();
 });

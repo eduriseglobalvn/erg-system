@@ -138,7 +138,7 @@ export const authApi = {
         phone: "",
         avatarUrl: "",
         bio: "",
-        role: mapRole(session.roles),
+        role: mapRole(session.permissions),
         provider: "password",
         department: session.accountType ?? "ERG",
         title: session.accessLevel === "admin" ? "Quản trị viên" : "Người dùng ERG",
@@ -329,11 +329,11 @@ function mapProfileToAccount(profile?: BackendProfileResponseDTO): AuthAccountRe
     phone: profile?.phone ?? "",
     avatarUrl: profile?.avatarUrl ?? profile?.avatar_url ?? "",
     bio: profile?.bio ?? "",
-    role: mapRole(profile?.roles),
+    role: "teacher", // the profile carries no permissions; admin-ness is read from the session permissions
     provider: mapProvider(profile?.provider),
     roles: profile.roles,
     department: profile?.accountType ?? profile?.account_type ?? "ERG",
-    title: profile?.jobTitle ?? profile?.job_title ?? (mapRole(profile?.roles) === "admin" ? "Quản trị viên" : "Giáo viên"),
+    title: profile?.jobTitle ?? profile?.job_title ?? "Giáo viên",
     features: ["LMS", "Kho học liệu", "Quiz bank", "Báo cáo"],
     lifecycle: profile.lifecycle,
     isProfileCompleted: profile.lifecycle?.isProfileCompleted ?? profile.isProfileCompleted ?? profile.is_profile_completed,
@@ -343,13 +343,8 @@ function mapProfileToAccount(profile?: BackendProfileResponseDTO): AuthAccountRe
   };
 }
 
-function mapRole(roles?: string[]): AccountRole {
-  const normalized = (roles ?? []).map((role) => role.toLowerCase());
-  if (hasAdminLikeClaims(normalized)) {
-    return "admin";
-  }
-  if (normalized.some((role) => ["coordinator", "manager", "center_manager"].includes(role))) return "coordinator";
-  return "teacher";
+function mapRole(permissions?: readonly string[]): AccountRole {
+  return hasAdminLikeClaims(permissions) ? "admin" : "teacher";
 }
 
 function mapProvider(provider?: string): AuthProvider {

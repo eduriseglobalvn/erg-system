@@ -3,7 +3,7 @@ import { evaluatePermission } from "@/platform/auth/permissions/permission-evalu
 import type { TeacherAccountLifecycle } from "@/platform/auth/types/account-lifecycle";
 import type { TeacherAccount } from "@/platform/auth/types/auth-types";
 import { workspaceFromLegacyPortal } from "@/platform/workspaces/legacy-portal-compat";
-import { PLATFORM_ROOT_ADMIN_EMAIL, projectVerifiedWorkspaces } from "@/platform/auth/permissions/workspace-capability-projection";
+import { projectVerifiedWorkspaces } from "@/platform/auth/permissions/workspace-capability-projection";
 import type { Workspace } from "@/platform/workspaces/workspace-domain";
 import { AUTH_BYPASS_ENABLED } from "@/platform/auth/config/auth-bypass";
 
@@ -57,12 +57,9 @@ export function createAuthRouteState({
   }
 
   const deniedPermissions = [...(session?.deniedPermissions ?? [])];
-  const isRootAdmin = (account?.email ?? session?.accountEmail)?.trim().toLowerCase() === PLATFORM_ROOT_ADMIN_EMAIL;
-  const permissions = isRootAdmin && !deniedPermissions.includes("*")
-    ? Array.from(new Set([...(session?.permissions ?? []), "*"]))
-    : [...(session?.permissions ?? [])];
+  const permissions = [...(session?.permissions ?? [])];
   const lifecycle = account?.lifecycle ?? (!apiBacked && account ? legacyLifecycle(account) : null);
-  const workspaces = canonicalWorkspaces(session, account?.email);
+  const workspaces = canonicalWorkspaces(session);
 
   return {
     authenticated: Boolean(account),
@@ -96,9 +93,8 @@ export function resolveAuthRouteAccess(
   return "allow";
 }
 
-function canonicalWorkspaces(session: AuthRouteSession | null, accountEmail?: string): Workspace[] {
+function canonicalWorkspaces(session: AuthRouteSession | null): Workspace[] {
   return projectVerifiedWorkspaces({
-    accountEmail: accountEmail ?? session?.accountEmail,
     workspaces: session?.workspaces,
     roles: session?.roles,
     permissions: session?.permissions,

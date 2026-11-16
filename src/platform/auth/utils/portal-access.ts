@@ -2,7 +2,6 @@ import type { StoredAuthSession } from "@/platform/auth/api/auth-token-storage";
 import type { StudentSession } from "@/platform/auth/api/student-auth-storage";
 import type { TeacherAccount } from "@/platform/auth/types/auth-types";
 import { evaluatePermission } from "@/platform/auth/permissions/permission-evaluator";
-import { PLATFORM_ROOT_ADMIN_EMAIL } from "@/platform/auth/permissions/workspace-capability-projection";
 import { workspaceFromLegacyPortal } from "@/platform/workspaces/legacy-portal-compat";
 import type { Workspace } from "@/platform/workspaces/workspace-domain";
 import { AUTH_BYPASS_ENABLED } from "@/platform/auth/config/auth-bypass";
@@ -16,7 +15,7 @@ type PortalAccessInput = {
   requiredWorkspace?: Workspace;
 };
 
-export function canAccessPortal({ portal, studentSession, teacherAccount, teacherSession, requiredPermission, requiredWorkspace }: PortalAccessInput) {
+export function canAccessPortal({ portal, studentSession, teacherSession, requiredPermission, requiredWorkspace }: PortalAccessInput) {
   if (AUTH_BYPASS_ENABLED) return true;
 
   const workspace = requiredWorkspace ?? workspaceFromLegacyPortal(portal);
@@ -25,11 +24,11 @@ export function canAccessPortal({ portal, studentSession, teacherAccount, teache
       return true;
     }
 
-    return Boolean(teacherSession && hasExplicitPortalAccess(teacherSession, portal, workspace, requiredPermission, isRootAdmin(teacherAccount)));
+    return Boolean(teacherSession && hasExplicitPortalAccess(teacherSession, portal, workspace, requiredPermission));
   }
 
   if (!teacherSession) return false;
-  return hasExplicitPortalAccess(teacherSession, portal, workspace, requiredPermission, isRootAdmin(teacherAccount));
+  return hasExplicitPortalAccess(teacherSession, portal, workspace, requiredPermission);
 }
 
 function hasExplicitPortalAccess(
@@ -37,24 +36,19 @@ function hasExplicitPortalAccess(
   portal: NonNullable<StoredAuthSession["portal"]>,
   workspace: Workspace | undefined,
   requiredPermission?: string,
-  rootAdmin = false,
 ) {
   const workspaces = session.workspaces?.length
     ? session.workspaces
     : (session.portals ?? []).filter((value) => value !== "*").map(workspaceFromLegacyPortal).filter((value): value is Workspace => Boolean(value));
-  if (workspace && !rootAdmin && !workspaces.includes(workspace)) return false;
+  if (workspace && !workspaces.includes(workspace)) return false;
 
-  if (requiredPermission && !rootAdmin && !evaluatePermission({
+  if (requiredPermission && !evaluatePermission({
     permission: requiredPermission,
     grantedPermissions: session.permissions,
     deniedPermissions: session.deniedPermissions,
   })) return false;
 
-  return rootAdmin || session.portals?.includes(portal) === true || Boolean(workspace && workspaces.includes(workspace));
-}
-
-function isRootAdmin(account?: TeacherAccount | null) {
-  return account?.email.trim().toLowerCase() === PLATFORM_ROOT_ADMIN_EMAIL;
+  return session.portals?.includes(portal) === true || Boolean(workspace && workspaces.includes(workspace));
 }
 
 function hasStudentPermission(session: StudentSession, permission: string) {

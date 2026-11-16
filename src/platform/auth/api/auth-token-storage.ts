@@ -1,4 +1,5 @@
 import { getPersistedJsonValue, removePersistedJsonValue, setPersistedJsonValue } from "@/stores/persisted-store";
+import { hasAdminLikeClaims } from "@/platform/auth/permissions/admin-like";
 import type { Workspace } from "@/platform/workspaces/workspace-domain";
 import { AUTH_BYPASS_ENABLED, DEFAULT_BYPASS_SESSION } from "@/platform/auth/config/auth-bypass";
 
@@ -227,12 +228,11 @@ function sessionMatchesRequestedPortal(session: StoredAuthSession, portal: Exclu
   if (sessionMatchesPortal(session, portal)) return true;
 
   const portals = session.portals ?? [];
-  const roles = (session.roles ?? []).map((r) => r.toLowerCase());
   const hasBackOfficeEntitlement =
     portals.includes("*") ||
     portals.includes("admin") ||
     portals.includes("lcms") ||
-    roles.some((r) => r.includes("admin") || r.includes("super"));
+    hasAdminLikeClaims(session.permissions);
 
   if (hasBackOfficeEntitlement && (portal === "admin" || portal === "lcms")) {
     return true;

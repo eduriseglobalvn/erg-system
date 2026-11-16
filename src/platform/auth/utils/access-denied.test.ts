@@ -37,11 +37,11 @@ describe("access-denied workspace recovery", () => {
     ).toEqual([]);
   });
 
-  it("keeps the legacy login response usable while still requiring the Admin permission", () => {
+  it("uses the workspaces claim and still requires the Admin permission", () => {
     expect(
       resolveAccessDeniedTargets({
         requestedPortal: "lms",
-        portals: ["admin", "lms"],
+        workspaces: ["ADMIN", "TEACHER"],
         permissions: ["lms.admin"],
       }),
     ).toEqual([
@@ -50,7 +50,7 @@ describe("access-denied workspace recovery", () => {
     expect(
       resolveWorkspaceLandingTarget({
         preferredWorkspace: "TEACHER",
-        portals: ["admin", "lms"],
+        workspaces: ["ADMIN", "TEACHER"],
         permissions: ["lms.admin"],
       }),
     ).toMatchObject({ workspace: "ADMIN", path: "/admin" });

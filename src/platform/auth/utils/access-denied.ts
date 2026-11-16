@@ -50,7 +50,7 @@ const WORKSPACE_TARGETS: readonly AccessDeniedWorkspaceTarget[] = [
     path: "/",
     label: "CRM Workspace",
     description: "Điều hành cơ hội và hoạt động trung tâm",
-    permission: "seo.manage",
+    permission: "crm.workspace.access",
   },
 ] as const;
 
@@ -136,10 +136,9 @@ export function goBackFromAccessDenied(goHome: () => void) {
   goHome();
 }
 
-function resolveClaimedWorkspaces({ workspaces, portals, roles, permissions, deniedPermissions }: AccessDeniedClaims): Workspace[] {
+function resolveClaimedWorkspaces({ workspaces, portals, permissions, deniedPermissions }: AccessDeniedClaims): Workspace[] {
   return projectVerifiedWorkspaces({
     workspaces,
-    roles,
     permissions,
     deniedPermissions,
     portals,

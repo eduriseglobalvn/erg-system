@@ -3,18 +3,16 @@ import Box from "@mui/material/Box";
 import Checkbox from "@mui/material/Checkbox";
 import Chip from "@mui/material/Chip";
 import ListItemText from "@mui/material/ListItemText";
-import ListSubheader from "@mui/material/ListSubheader";
 import MenuItem from "@mui/material/MenuItem";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 
 import { appleCleanInputSx, appleDesign, AppleFormField } from "@/features/employee-management/components/apple-ui-tokens";
-import {
-  DEFAULT_CENTER_OPTIONS,
-  STREAMLINED_ROLE_CATEGORIES,
-} from "@/features/employee-management/components/create-employee/constants";
+import { DEFAULT_CENTER_OPTIONS } from "@/features/employee-management/components/create-employee/constants";
 import type { EmployeeForm, SetEmployeeField, SetEmployeeForm } from "@/features/employee-management/components/create-employee/constants";
-import { getRoleMeta, SCOPE_DISPLAY_CATALOG } from "@/platform/auth/permissions/role-display-catalog";
+import { SCOPE_DISPLAY_CATALOG } from "@/platform/auth/permissions/role-display-catalog";
+import { applyRoleSelection, assignableRoleValue } from "@/features/rbac/lib/exclusive-roles";
+import type { AssignableRole } from "@/features/rbac/api/rbac-api";
 import { alpha } from "@mui/material/styles";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
@@ -23,30 +21,36 @@ export function RoleScopeStep({
   dbSchools,
   form,
   roleOptions,
-  set,
   setForm,
+  set,
   tenantId,
 }: {
   dbClasses: unknown[];
   dbSchools: unknown[];
   form: EmployeeForm;
-  roleOptions: Array<{ id: string; name: string }> | undefined;
+  roleOptions: AssignableRole[] | undefined;
   set: SetEmployeeField;
   setForm: SetEmployeeForm;
   tenantId: string;
 }) {
+  const roleById = (value: string) => (roleOptions ?? []).find((role) => assignableRoleValue(role) === value);
+  const labelOf = (value: string) => roleById(value)?.label ?? value;
+  const isExclusive = (value: string) => roleById(value)?.exclusive ?? false;
+
   return (
     <Box sx={{ display: "grid", gap: 2.5 }}>
-      {/* 1. Nhóm quyền hạn (Multi-select Dropdown, Compact, Less text) */}
-      <AppleFormField label="Nhóm quyền hạn nhân sự (Có thể chọn nhiều quyền)" required>
+      {/* 1. Vai trò: chỉ những vai trò người thao tác được phép gán; Giám đốc / Vận hành đứng một mình. */}
+      <AppleFormField label="Vai trò (chọn một hoặc nhiều)" required>
         <TextField
           select
           fullWidth
           value={form.roleNames}
           onChange={(event) => {
-            const val = typeof event.target.value === "string" ? event.target.value.split(",") : event.target.value;
+            const picked = typeof event.target.value === "string" ? event.target.value.split(",") : event.target.value;
+            const val = applyRoleSelection(form.roleNames, picked, isExclusive);
             setForm((f) => ({ ...f, roleName: val[0] || "", roleNames: val }));
           }}
+          helperText="Giám đốc và Vận hành không kết hợp với vai trò khác: chọn một trong hai sẽ bỏ các vai trò còn lại."
           slotProps={{
             select: {
               displayEmpty: true,
@@ -56,7 +60,7 @@ export function RoleScopeStep({
                 if (!arr.length) {
                   return (
                     <Typography sx={{ color: appleDesign.colors.textTertiary, fontSize: "0.85rem" }}>
-                      Chọn một hoặc nhiều nhóm quyền...
+                      Chọn vai trò...
                     </Typography>
                   );
                 }
@@ -66,7 +70,7 @@ export function RoleScopeStep({
                       <Chip
                         key={roleKey}
                         size="small"
-                        label={getRoleMeta(roleKey).label}
+                        label={labelOf(roleKey)}
                         sx={{
                           bgcolor: alpha(ergEnterpriseTokens.color.primary, 0.08),
                           borderRadius: "6px",
@@ -84,78 +88,17 @@ export function RoleScopeStep({
           }}
           sx={appleCleanInputSx}
         >
-          {Object.entries(STREAMLINED_ROLE_CATEGORIES).map(([category, roles]) => [
-            <ListSubheader
-              key={`sub-${category}`}
-              sx={{
-                bgcolor: "background.default",
-                color: appleDesign.colors.textSecondary,
-                fontSize: "0.72rem",
-                fontWeight: 600,
-                letterSpacing: "0.04em",
-                lineHeight: "28px",
-                textTransform: "uppercase",
-              }}
-            >
-              {category}
-            </ListSubheader>,
-            ...roles.map((roleKey) => {
-              const meta = getRoleMeta(roleKey);
-              const isChecked = form.roleNames.includes(roleKey);
-              return (
-                <MenuItem key={roleKey} value={roleKey} sx={{ py: 0.5 }}>
-                  <Checkbox size="small" checked={isChecked} sx={{ mr: 1, p: 0.5 }} />
-                  <ListItemText
-                    primary={
-                      <Box sx={{ alignItems: "center", display: "flex", gap: 1, width: "100%" }}>
-                        <Typography sx={{ color: appleDesign.colors.textPrimary, fontSize: "0.85rem", fontWeight: isChecked ? 700 : 550 }}>
-                          {meta.label}
-                        </Typography>
-                        <Typography
-                          sx={{
-                            bgcolor: "rgba(0, 0, 0, 0.04)",
-                            borderRadius: "4px",
-                            color: appleDesign.colors.textSecondary,
-                            fontFamily: '"SF Mono", "JetBrains Mono", Menlo, Consolas, monospace',
-                            fontSize: "0.7rem",
-                            fontWeight: 600,
-                            ml: "auto",
-                            px: 0.6,
-                            py: 0.1,
-                          }}
-                        >
-                          {roleKey}
-                        </Typography>
-                      </Box>
-                    }
-                  />
-                </MenuItem>
-              );
-            }),
-          ])}
+          {(roleOptions ?? []).map((role) => {
+            const value = assignableRoleValue(role);
+            return (
+              <MenuItem key={role.id} value={value} sx={{ py: 0.5 }}>
+                <Checkbox size="small" checked={form.roleNames.includes(value)} sx={{ mr: 1, p: 0.5 }} />
+                <ListItemText primary={role.label} />
+              </MenuItem>
+            );
+          })}
         </TextField>
       </AppleFormField>
-
-      {/* Compatibility Select for Automated Testing */}
-      <TextField
-        select
-        label="Nhóm quyền"
-        value={form.roleName || (roleOptions?.[0]?.name ?? "")}
-        onChange={(event) => {
-          const val = event.target.value;
-          set("roleName", val);
-          if (!form.roleNames.includes(val)) {
-            setForm((f) => ({ ...f, roleName: val, roleNames: [...f.roleNames, val] }));
-          }
-        }}
-        sx={{ display: "none" }}
-      >
-        {(roleOptions ?? []).map((role) => (
-          <MenuItem key={role.id} value={role.name}>
-            {role.name}
-          </MenuItem>
-        ))}
-      </TextField>
 
       {/* 2. Phạm vi tác vụ (Scope Dropdown) */}
       <AppleFormField label="Phạm vi tác vụ (Scope)" required>

@@ -2,13 +2,12 @@ import { expect, test } from "vitest";
 
 import { hasAdminLikeClaims } from "@/platform/auth/permissions/admin-like";
 
-test("admin-like by role (case/space-insensitive) or by lms.admin / * permission", () => {
-  expect(hasAdminLikeClaims([" Super_Admin "])).toBe(true);
-  expect(hasAdminLikeClaims(["teacher"], ["LMS.ADMIN"])).toBe(true);
-  expect(hasAdminLikeClaims([], ["*"])).toBe(true);
+test("admin-like uses admin.workspace.access", () => {
+  expect(hasAdminLikeClaims(["lms.class.read", " Admin.Workspace.Access "])).toBe(true);
 });
 
-test("teacher and look-alike roles are not admin-like", () => {
-  expect(hasAdminLikeClaims(["teacher", "administrator", "center_admin"], ["lms.teacher"])).toBe(false);
+test("role names, wildcard and look-alike permissions are not admin-like", () => {
+  expect(hasAdminLikeClaims(["*", "lms.admin", "teacher.workspace.access"])).toBe(false);
   expect(hasAdminLikeClaims([])).toBe(false);
+  expect(hasAdminLikeClaims(undefined)).toBe(false);
 });

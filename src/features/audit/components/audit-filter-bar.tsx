@@ -39,14 +39,14 @@ export function AuditFilterBar({ filters, onApply, onReset }: {
         sx={{ alignItems: "center", display: "flex", flexWrap: "wrap", gap: 1.25, p: 2 }}
       >
         <TextField
-          label="Mã người thực hiện"
+          label="Người thực hiện"
           size="small"
           value={draft.actorId ?? ""}
           onChange={(event) => set({ actorId: event.target.value || undefined })}
           sx={{ minWidth: { xs: "100%", sm: 190 } }}
         />
         <TextField
-          label="Loại tài nguyên"
+          label="Chức năng"
           size="small"
           value={draft.resourceType ?? ""}
           onChange={(event) => set({ resourceType: event.target.value || undefined })}

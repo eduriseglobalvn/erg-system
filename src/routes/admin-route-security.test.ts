@@ -12,6 +12,6 @@ test("guards permission role and employee routes before loading the Admin shell"
   expect(matrix.ROUTE_PERMISSION_MATRIX).toEqual(expect.arrayContaining([
     expect.objectContaining({ path: "/admin/settings/permissions", permission: "rbac.permission.read" }),
     expect.objectContaining({ path: "/admin/employees", permission: "users.manage" }),
-    expect.objectContaining({ path: "/admin/employees/access-logs", permission: "users.manage" }),
+    expect.objectContaining({ path: "/admin/employees/access-logs", permission: "users.activity.read" }),
   ]));
 });

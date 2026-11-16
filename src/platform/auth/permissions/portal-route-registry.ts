@@ -26,6 +26,7 @@ export const lcmsWorkspacePaths = [
   "settings",
   "settings/permissions",
   "settings/roles",
+  "settings/audit-log",
   "customers",
   "center-tasks",
   "employees",

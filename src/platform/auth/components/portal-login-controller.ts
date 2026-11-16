@@ -8,7 +8,7 @@ import { isAuthOnlyRedirect, sanitizeLocalRedirect } from "@/platform/auth/utils
 import { hasAdminLikeClaims } from "@/platform/auth/permissions/admin-like";
 import { evaluatePermission } from "@/platform/auth/permissions/permission-evaluator";
 import { routeAcceptedPermissions, routePermissionForPath } from "@/platform/auth/permissions/route-permission-matrix";
-import { PLATFORM_ROOT_ADMIN_EMAIL, projectVerifiedWorkspaces } from "@/platform/auth/permissions/workspace-capability-projection";
+import { projectVerifiedWorkspaces } from "@/platform/auth/permissions/workspace-capability-projection";
 import { resolveWorkspaceLandingTarget } from "@/platform/auth/utils/access-denied";
 import { canAccessPortal } from "@/platform/auth/utils/portal-access";
 import { ApiClientError } from "@/lib/api-client";
@@ -180,7 +180,6 @@ export function resolveDefaultPostLoginRedirect(
 
   const preferredWorkspace = preferredWorkspaceForLogin(portal, account, session);
   const workspaces = projectVerifiedWorkspaces({
-    accountEmail: account?.email ?? session?.accountEmail,
     workspaces: session?.workspaces,
     roles: session?.roles,
     permissions: session?.permissions,
@@ -211,15 +210,11 @@ function preferredWorkspaceForLogin(
   if (portal === "lcms" || portal === "admin") return "ADMIN";
   if (portal === "elearning") return "STUDENT";
 
-  const roles = [...(account?.roles ?? []), ...(session?.roles ?? [])].map((role) => role.trim().toLowerCase());
-  const adminLike = account?.role === "admin"
-    || account?.email.trim().toLowerCase() === PLATFORM_ROOT_ADMIN_EMAIL
-    || hasAdminLikeClaims(roles, session?.permissions);
+  const adminLike = account?.role === "admin" || hasAdminLikeClaims(session?.permissions);
 
   if (adminLike) return "ADMIN";
 
   const workspaces = projectVerifiedWorkspaces({
-    accountEmail: account?.email ?? session?.accountEmail,
     workspaces: session?.workspaces,
     roles: session?.roles,
     permissions: session?.permissions,

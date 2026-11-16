@@ -183,14 +183,6 @@
     "hex": 21,
     "font": 0
   },
-  "src/features/access-management/components/permission-detail-drawer.tsx": {
-    "hex": 6,
-    "font": 15
-  },
-  "src/features/access-management/components/role-editor-drawer.tsx": {
-    "hex": 7,
-    "font": 12
-  },
   "src/features/audit/components/audit-table.tsx": {
     "hex": 0,
     "font": 3
@@ -301,7 +293,7 @@
   },
   "src/features/employee-management/components/create-employee/role-scope-step.tsx": {
     "hex": 0,
-    "font": 11
+    "font": 9
   },
   "src/features/employee-management/components/create-employee/step-indicator.tsx": {
     "hex": 2,
@@ -344,8 +336,8 @@
     "font": 4
   },
   "src/features/employee-management/components/employee-list/role-assign-dialog.tsx": {
-    "hex": 2,
-    "font": 9
+    "hex": 1,
+    "font": 5
   },
   "src/features/employee-management/components/employee-security-timeline.tsx": {
     "hex": 1,

@@ -23,9 +23,10 @@ import { StepIndicator } from "@/features/employee-management/components/create-
 import { WizardActions } from "@/features/employee-management/components/create-employee/wizard-actions";
 import {
   useEmployeeCommands,
-  useEmployeeRoleOptions,
+  useAssignableRoles,
   useEmployeeSchoolOptions,
 } from "@/features/employee-management/hooks/use-employee-management";
+import { assignableRoleValue } from "@/features/rbac/lib/exclusive-roles";
 import { alpha } from "@mui/material/styles";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
@@ -39,7 +40,7 @@ export function CreateEmployeeWizard({
   tenantId: string;
 }) {
   const commands = useEmployeeCommands(tenantId);
-  const rolesQuery = useEmployeeRoleOptions(tenantId);
+  const rolesQuery = useAssignableRoles();
   const [step, setStep] = useState(0);
   const [form, setForm] = useState(initialForm);
   const [oneTimePassword, setOneTimePassword] = useState<string>();
@@ -299,7 +300,7 @@ export function CreateEmployeeWizard({
             ) : null}
             {step === 3 ? <CredentialStep form={form} set={set} /> : null}
             {step === 4 ? (
-              <ReviewStep chosenRoles={chosenRoles} effectiveScopeId={effectiveScopeId} form={form} />
+              <ReviewStep roleLabels={chosenRoles.map((value) => (rolesQuery.data ?? []).find((role) => assignableRoleValue(role) === value)?.label ?? value)} effectiveScopeId={effectiveScopeId} form={form} />
             ) : null}
           </>
         )}

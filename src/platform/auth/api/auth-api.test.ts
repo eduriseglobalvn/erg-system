@@ -232,7 +232,7 @@ test("persists nested token fields from backend login responses", async () => {
   expect(getStoredAccessToken("lms")).toBe("nested-token");
 });
 
-test("projects a legacy super-admin login into canonical workspaces", () => {
+test("keeps the workspaces claim of a login response", () => {
   const session = normalizeAuthSession({
     user: {
       id: "usr-super-admin",
@@ -245,6 +245,7 @@ test("projects a legacy super-admin login into canonical workspaces", () => {
     expiresIn: 3600,
     permissions: ["*"],
     portals: ["*"],
+    workspaces: ["ADMIN", "TEACHER", "STUDENT", "CRM"],
   });
 
   expect(session.roles).toEqual(["system.super_admin"]);
@@ -256,8 +257,7 @@ test("projects a legacy super-admin login into canonical workspaces", () => {
   });
 });
 
-test("projects the root admin legacy account into student and keeps the token on the shared host", () => {
-  Object.assign(window.location, { hostname: "lms.erg.edu.local", pathname: "/student" });
+test("an admin email does not widen the workspaces claim", () => {
   const session = normalizeAuthSession({
     user: {
       id: "usr-root-admin",
@@ -269,18 +269,13 @@ test("projects the root admin legacy account into student and keeps the token on
     refreshToken: "root-admin-refresh",
     expiresIn: 3600,
     portals: ["lcms"],
+    workspaces: ["ADMIN"],
   });
 
   saveServerAuthSession(session, true, "lcms");
 
-  expect(resolveCurrentPortal()).toBe("lms");
-  expect(readStoredAuthSession("lms")).toMatchObject({
-    accountEmail: "admin@erg.edu.vn",
-    portal: "lcms",
-    workspaces: ["ADMIN", "TEACHER", "STUDENT", "CRM"],
-    permissions: ["*"],
-  });
-  expect(getStoredAccessToken("elearning")).toBe("root-admin-token");
+  expect(readStoredAuthSession("lcms")).toMatchObject({ workspaces: ["ADMIN"] });
+  expect(readStoredAuthSession("lcms")?.permissions ?? []).not.toContain("*");
 });
 
 test("selects the LCMS session for the admin route on the shared LMS host", () => {

@@ -184,11 +184,11 @@ export const ADMIN_BASE_MENU_GROUPS: MenuGroup[] = [
     label: "",
     items: [
       item({
-        label: "Quyền & nhóm quyền",
+        label: "Quyền & nhật ký",
         icon: <SettingsRoundedIcon sx={{ fontSize: 24 }} />,
         children: [
-          { label: "Quyền hệ thống", path: "/settings/permissions" },
-          { label: "Nhóm quyền", path: "/settings/roles" },
+          { label: "Vai trò & quyền", path: "/settings/roles" },
+          { label: "Nhật ký hệ thống", path: "/settings/audit-log" },
         ],
       }),
       item({

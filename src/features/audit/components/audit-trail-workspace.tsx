@@ -23,7 +23,8 @@ export function AuditTrailWorkspace({ scopeId }: { scopeId?: string }) {
   const tenantId = getDefaultTenantId();
   const accountId = getCurrentAccount("lcms")?.id?.trim() || "bff-session";
   const session = getAuthScope("lcms").session;
-  const canRead = isBffAuthEnabled() || evaluatePermission({ permission: "lms.school.read", grantedPermissions: session?.permissions ?? [], deniedPermissions: session?.deniedPermissions ?? [] });
+  const canRead = isBffAuthEnabled() || evaluatePermission({ permission: "audit.read", grantedPermissions: session?.permissions ?? [], deniedPermissions: session?.deniedPermissions ?? [] });
+  const canExport = evaluatePermission({ permission: "audit.export", grantedPermissions: session?.permissions ?? [], deniedPermissions: session?.deniedPermissions ?? [] });
   const eventsQuery = useQuery({
     queryKey: auditQueryKeys.events(tenantId, accountId, "ADMIN", scopeId, filters),
     queryFn: ({ signal }) => listAuditEvents(filters, signal),
@@ -44,17 +45,19 @@ export function AuditTrailWorkspace({ scopeId }: { scopeId?: string }) {
     <Paper variant="outlined" sx={{ overflow: "hidden" }}>
       <Box sx={{ alignItems: { xs: "flex-start", md: "center" }, display: "flex", flexWrap: "wrap", gap: 1, justifyContent: "space-between", p: 2 }}>
         <Box>
-          <Typography sx={{ fontWeight: 850 }}>Nhật ký theo scope backend</Typography>
+          <Typography sx={{ fontWeight: 850 }}>Nhật ký thao tác</Typography>
           <Typography color="text.secondary" variant="body2">Bộ lọc được gửi lên backend; mã định danh nhạy cảm luôn được rút gọn ở giao diện và file xuất.</Typography>
         </Box>
-        <Button
-          disabled={exportMutation.isPending}
-          startIcon={<DownloadRoundedIcon />}
-          variant="outlined"
-          onClick={() => exportMutation.mutate(normalizedFilters, { onSuccess: (blob) => downloadBlob(blob, `erg-audit-page-${normalizedFilters.page ?? 0}.csv`) })}
-        >
-          {exportMutation.isPending ? "Đang xuất..." : "Xuất trang hiện tại"}
-        </Button>
+        {canExport ? (
+          <Button
+            disabled={exportMutation.isPending}
+            startIcon={<DownloadRoundedIcon />}
+            variant="outlined"
+            onClick={() => exportMutation.mutate(normalizedFilters, { onSuccess: (blob) => downloadBlob(blob, `erg-audit-page-${normalizedFilters.page ?? 0}.csv`) })}
+          >
+            {exportMutation.isPending ? "Đang xuất..." : "Xuất trang hiện tại"}
+          </Button>
+        ) : null}
       </Box>
       {exportMutation.error ? <Alert severity="error" sx={{ borderRadius: 0 }}>Không thể xuất nhật ký: {getAuditErrorMessage(exportMutation.error)}</Alert> : null}
       <AuditFilterBar filters={filters} onApply={setFilters} onReset={() => setFilters({ page: 0, size: AUDIT_PAGE_SIZE })} />

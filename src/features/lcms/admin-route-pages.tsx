@@ -10,8 +10,8 @@ import { AdminContentOverview } from "@/features/lcms/admin-content/components/a
 import { useAdminShellModel } from "@/features/lcms/admin-shell-context";
 import { AdminErgPortalWorkspace } from "@/features/lcms/pages/admin-erg-workspaces";
 
-const PermissionCatalogPage = lazy(() => import("@/features/access-management/components/permission-catalog-workspace").then((m) => ({ default: m.PermissionCatalogWorkspace })));
-const RoleManagementPage = lazy(() => import("@/features/access-management/components/role-management-workspace").then((m) => ({ default: m.RoleManagementWorkspace })));
+const RolePermissionPage = lazy(() => import("@/features/rbac/components/role-permission-workspace").then((m) => ({ default: m.RolePermissionWorkspace })));
+const AuditLogPage = lazy(() => import("@/features/audit/components/audit-log-page").then((m) => ({ default: m.AuditLogPage })));
 const EmployeeManagementPage = lazy(() => import("@/features/employee-management/components/employee-list-workspace").then((m) => ({ default: m.EmployeeListWorkspace })));
 const EmployeeAccessLogPage = lazy(() => import("@/features/employee-management/components/employee-access-log-workspace").then((m) => ({ default: m.EmployeeAccessLogWorkspace })));
 const LearningStandardsPage = lazy(() => import("@/features/lcms/integrations/learning-standards/components/learning-standards-workspace"));
@@ -35,14 +35,17 @@ export function AdminHomeRoute() {
   return <Suspense fallback={<ContentPendingSkeleton />}><AdminHomePage tenantId={tenantId} /></Suspense>;
 }
 
+// settings/permissions is an alias of settings/roles: one merged screen.
 export function AdminPermissionsRoute() {
-  const { tenantId } = useAdminShellModel();
-  return <Suspense fallback={<ContentPendingSkeleton />}><PermissionCatalogPage tenantId={tenantId} /></Suspense>;
+  return <AdminRolesRoute />;
 }
 
 export function AdminRolesRoute() {
-  const { tenantId } = useAdminShellModel();
-  return <Suspense fallback={<ContentPendingSkeleton />}><RoleManagementPage tenantId={tenantId} /></Suspense>;
+  return <Suspense fallback={<ContentPendingSkeleton />}><RolePermissionPage /></Suspense>;
+}
+
+export function AdminAuditLogRoute() {
+  return <Suspense fallback={<ContentPendingSkeleton />}><AuditLogPage /></Suspense>;
 }
 
 export function AdminEmployeesRoute() {

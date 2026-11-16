@@ -53,12 +53,11 @@ function PortalIndexPage() {
   // The student host serves the dashboard at "/" and its guard sends "/student" back here, so navigating would loop.
   if (studentSession && activePortal !== "elearning") return <Navigate to="/student" replace />;
   if (activePortal === "lcms") return <Navigate to="/admin" replace />;
-  if (activePortal === "crm") return withPortalAuth("crm", <CrmPage />, "seo.manage");
+  if (activePortal === "crm") return withPortalAuth("crm", <CrmPage />, "crm.workspace.access");
   if (activePortal === "lms" || activePortal === null) {
     if (auth.isHydratingProfile) return <RoutePendingSkeleton />;
-    const roles = [...(auth.session?.roles ?? []), ...(auth.account?.roles ?? [])].map((r) => r.trim().toLowerCase());
     const isPlatformAdmin = auth.account?.role === "admin"
-      || hasAdminLikeClaims(roles, auth.session?.permissions);
+      || hasAdminLikeClaims(auth.session?.permissions);
     const storedWorkspace = typeof window !== "undefined" ? window.localStorage?.getItem("erg_last_workspace") : null;
     const preferredWorkspace = storedWorkspace === "ADMIN" && isPlatformAdmin
       ? "ADMIN"

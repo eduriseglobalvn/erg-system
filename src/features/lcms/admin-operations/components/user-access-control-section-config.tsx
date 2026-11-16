@@ -7,24 +7,6 @@ export const scopeLabels: Record<AccessScopeType | "none", string> = {
   none: "Chưa cấp",
 };
 
-export const roleOptions = [
-  { id: "erg_super_admin", label: "Super Admin", hint: "Toàn quyền cấu hình và vận hành hệ thống" },
-  { id: "admin", label: "Quản trị viên", hint: "Quản trị nghiệp vụ nội dung & nhân sự" },
-  { id: "center_admin", label: "Quản trị trung tâm", hint: "Quản lý trường, lớp thuộc cụm trung tâm" },
-  { id: "school_admin", label: "Quản trị trường", hint: "Theo dõi, quản lý lớp & học sinh trực thuộc" },
-  { id: "teacher", label: "Giáo viên", hint: "Giao bài, chấm điểm và báo cáo tiến độ lớp học" },
-  { id: "media_manager", label: "Media Manager", hint: "Quản lý tài nguyên media, video học liệu" },
-];
-
-export const roleAliases: Record<string, string[]> = {
-  erg_super_admin: ["SUPER_ADMIN", "system.super_admin", "erg_super_admin"],
-  admin: ["admin"],
-  center_admin: ["center_admin"],
-  school_admin: ["school_admin"],
-  teacher: ["teacher"],
-  media_manager: ["media_manager"],
-};
-
 export const panelSx = {
   border: 1,
   borderColor: "divider",

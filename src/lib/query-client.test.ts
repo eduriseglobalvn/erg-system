@@ -12,6 +12,20 @@ it("toasts a failed mutation nobody handles", () => {
   expect(error).toHaveBeenCalledWith("boom");
 });
 
+it("403 shows Vietnamese toast and refetches session", () => {
+  const refresh = vi.fn();
+  window.addEventListener("erg-auth-session-refresh-requested", refresh);
+  reportUnhandledMutationError(Object.assign(new Error("Forbidden"), { status: 403 }), {});
+  expect(error).toHaveBeenCalledWith("Bạn không có quyền thực hiện thao tác này", { id: "forbidden" });
+  expect(refresh).toHaveBeenCalledTimes(1);
+  // A mutation with its own onError still refreshes the session but gets no global toast.
+  error.mockClear();
+  reportUnhandledMutationError(Object.assign(new Error("Forbidden"), { status: 403 }), { onError: () => {} });
+  expect(error).not.toHaveBeenCalled();
+  expect(refresh).toHaveBeenCalledTimes(2);
+  window.removeEventListener("erg-auth-session-refresh-requested", refresh);
+});
+
 it("stays quiet when the mutation handles its own error or is silent", () => {
   reportUnhandledMutationError(new Error("x"), { onError: () => {} });
   reportUnhandledMutationError(new Error("x"), { meta: { silent: true } });

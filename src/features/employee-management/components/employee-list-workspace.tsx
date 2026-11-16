@@ -8,6 +8,7 @@ import { ErgButton } from "@/components/erg-mui/erg-actions";
 import { ErgConfirmDialog } from "@/components/erg-mui/erg-confirm-dialog";
 import { ErgEmptyState, ErgErrorState, ErgLoadingSkeleton } from "@/components/erg-mui/erg-feedback";
 import { ErgContentBand, ErgPageSurface } from "@/components/erg-mui/erg-layout";
+import { can } from "@/features/rbac/lib/can";
 import { ErgPageHeader } from "@/components/erg-mui/erg-page-header";
 import { ErgDataTableShell } from "@/components/erg-mui/erg-table";
 import { CreateEmployeeWizard } from "@/features/employee-management/components/create-employee-wizard";
@@ -19,6 +20,7 @@ import { EmployeeListToolbar } from "@/features/employee-management/components/e
 import { RoleAssignDialog } from "@/features/employee-management/components/employee-list/role-assign-dialog";
 import {
   useEmployeeCommands,
+  useAssignableRoles,
   useEmployeeRoleOptions,
   useEmployees,
   useEmployeeSchoolOptions,
@@ -43,6 +45,7 @@ export function EmployeeListWorkspace({ tenantId }: { tenantId: string }) {
 
   const commands = useEmployeeCommands(tenantId);
   const rolesQuery = useEmployeeRoleOptions(tenantId);
+  const assignableQuery = useAssignableRoles();
   const { schools } = useEmployeeSchoolOptions();
   const schoolNames = useMemo(() => new Map(schools.map((school) => [school.id, school.name])), [schools]);
 
@@ -93,9 +96,11 @@ export function EmployeeListWorkspace({ tenantId }: { tenantId: string }) {
       <ErgPageHeader
         description="Quản lý hồ sơ, vai trò, phạm vi, trạng thái và phiên đăng nhập của nhân sự."
         primaryAction={
-          <ErgButton onClick={() => setCreateOpen(true)} startIcon={<AddRoundedIcon />} variant="contained">
-            Tạo tài khoản
-          </ErgButton>
+          can("users.manage") ? (
+            <ErgButton onClick={() => setCreateOpen(true)} startIcon={<AddRoundedIcon />} variant="contained">
+              Tạo tài khoản
+            </ErgButton>
+          ) : undefined
         }
         title="Tài khoản nhân sự"
       />
@@ -186,7 +191,7 @@ export function EmployeeListWorkspace({ tenantId }: { tenantId: string }) {
         open={roleDialogOpen}
         pending={commands.roles.isPending}
         roleName={roleName}
-        roles={rolesQuery.data}
+        roles={assignableQuery.data}
       />
 
       <EmployeeDetailDrawer

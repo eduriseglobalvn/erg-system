@@ -34,7 +34,7 @@ test("allows teacher sessions to enter elearning only with explicit entitlement"
   ).toBe(true);
 });
 
-test("allows the configured root admin to enter elearning from a shared session", () => {
+test("an admin email alone does not grant elearning access", () => {
   const adminAccount: TeacherAccount = {
     ...teacherAccount,
     email: "admin@erg.edu.vn",
@@ -52,7 +52,7 @@ test("allows the configured root admin to enter elearning from a shared session"
       teacherAccount: adminAccount,
       teacherSession,
     }),
-  ).toBe(true);
+  ).toBe(false);
 });
 
 test("allows elearning when a student session exists", () => {

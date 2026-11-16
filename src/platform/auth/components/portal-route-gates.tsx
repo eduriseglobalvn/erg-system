@@ -58,7 +58,7 @@ function EnforcedPortalAuthGate({ children, portal, requiredPermission }: Portal
   const teacherSession = isBffAuthEnabled()
     ? auth.session
     : auth.session ?? storedTeacherSession;
-  const workspaces = projectVerifiedWorkspaces({ ...teacherSession, accountEmail: normalizedTeacherAccount?.email ?? teacherSession?.accountEmail });
+  const workspaces = projectVerifiedWorkspaces({ ...teacherSession });
 
   if (canAccessPortal({ portal, studentSession, teacherAccount: normalizedTeacherAccount, teacherSession, requiredPermission })) {
     // Onboarding is a staff flow; a learner-only account is never sent there (STU-01).

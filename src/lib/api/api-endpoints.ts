@@ -43,6 +43,10 @@ export const API_ENDPOINTS = {
     refresh: "/api/v1/auth/refresh" satisfies ContractPath,
     session: path("/api/v1/auth/session"),
   },
+  rbac: {
+    assignableRoles: path("/api/v1/rbac/assignable-roles"),
+    catalog: path("/api/v1/rbac/catalog"),
+  },
   audit: {
     events: "/api/v1/audit/events" satisfies ContractPath,
     export: "/api/v1/audit/export" satisfies ContractPath,

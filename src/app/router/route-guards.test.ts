@@ -75,7 +75,7 @@ describe("authedBeforeLoad (single guard for converted workspaces)", () => {
   it("requires the CRM host for CRM paths and never redirects them", () => {
     const crm = createAuthRouteState({
       account,
-      session: { permissions: ["seo.manage"], portals: ["crm"], workspaces: ["CRM"] },
+      session: { permissions: ["crm.workspace.access"], portals: ["crm"], workspaces: ["CRM"] },
       apiBacked: true,
     });
     // jsdom host (localhost) is not the CRM host.

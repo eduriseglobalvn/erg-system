@@ -7,6 +7,7 @@ const hooks = vi.hoisted(() => ({
   useEmployeeSecurityEvents: vi.fn(),
   useEmployeeSecurityFeed: vi.fn(),
   useEmployeeRoleOptions: vi.fn(),
+  useAssignableRoles: vi.fn(),
   useEmployeeCommands: vi.fn(),
   useEmployeeSchoolOptions: vi.fn(),
 }));
@@ -26,6 +27,7 @@ describe("employee management workspace", () => {
     hooks.useEmployeeSecurityEvents.mockReturnValue({ data: { items: [] }, isPending: false, isError: false, refetch: vi.fn() });
     hooks.useEmployeeSecurityFeed.mockReturnValue({ data: { items: [], page: 1, limit: 50, total: 0, totalPages: 0 }, isPending: false, isError: false, refetch: vi.fn() });
     hooks.useEmployeeRoleOptions.mockReturnValue({ data: [{ id: "role-it", name: "it_operator" }], isPending: false, isError: false });
+    hooks.useAssignableRoles.mockReturnValue({ data: [{ id: "role_pdt_operator", label: "Phòng đào tạo", code: "pdt_operator" }], isPending: false, isError: false });
     hooks.useEmployeeSchoolOptions.mockReturnValue({ schools: [], classes: [], isPending: false });
     const command = { mutateAsync: vi.fn(), isPending: false };
     hooks.useEmployeeCommands.mockReturnValue({ create: command, update: command, status: command, roles: command, resetCredential: command, revokeSession: command });
@@ -75,10 +77,10 @@ describe("employee management workspace", () => {
     fireEvent.click(screen.getByRole("button", { name: "Thao tác cho Teacher One" }));
     fireEvent.click(screen.getByText("Gán nhóm quyền"));
     fireEvent.mouseDown(screen.getByLabelText("Nhóm quyền"));
-    fireEvent.click(screen.getByText("it_operator"));
+    fireEvent.click(screen.getByText("Phòng đào tạo"));
     fireEvent.click(screen.getByRole("button", { name: "Xác nhận gán quyền" }));
 
-    await waitFor(() => expect(roles).toHaveBeenCalledWith({ userId: "user-1", roles: ["lms_teacher", "it_operator"] }));
+    await waitFor(() => expect(roles).toHaveBeenCalledWith({ userId: "user-1", roles: ["lms_teacher", "pdt_operator"] }));
   });
 
   test("renders security warning with platform and risk code", () => {

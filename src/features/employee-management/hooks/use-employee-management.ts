@@ -12,6 +12,7 @@ import {
   updateEmployeeStatus,
 } from "@/features/employee-management/api/employee-management-api";
 import type { CreateEmployeeRequest, EmployeeListFilters, EmployeeStatusInput, SecurityFeedFilters, UpdateEmployeeRequest } from "@/features/employee-management/types/employee-management";
+import { listAssignableRoles, rbacQueryKeys } from "@/features/rbac/api/rbac-api";
 import { listRoles } from "@/features/access-management/api/access-management-api";
 import {
   getSchoolDirectory,
@@ -55,6 +56,11 @@ export function useEmployeeRoleOptions(tenantId: string) {
     queryFn: ({ signal }) => listRoles(signal),
     staleTime: QUERY_POLICIES.reference.staleTime,
   });
+}
+
+/** Roles the signed-in person may grant (backend decides; the wizard and the quick-assign dialog list only these). */
+export function useAssignableRoles() {
+  return useQuery({ queryKey: rbacQueryKeys.assignableRoles, queryFn: ({ signal }) => listAssignableRoles(signal), staleTime: QUERY_POLICIES.reference.staleTime });
 }
 
 export function useEmployeeSchoolOptions(selectedSchoolId?: string) {

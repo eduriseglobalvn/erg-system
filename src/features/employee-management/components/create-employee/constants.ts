@@ -9,29 +9,6 @@ export const DEFAULT_CENTER_OPTIONS = [
   { code: "CTR-01", id: "CENTER-01", name: "Trung tâm Ngoại ngữ & Khảo thí ERG" },
 ];
 
-export const STREAMLINED_ROLE_CATEGORIES: Record<string, string[]> = {
-  "Đội ngũ Giảng dạy & Lớp học": [
-    "lms_subject_teacher",
-    "lms_homeroom_teacher",
-    "lms_teacher_lead",
-    "lms_teacher_assistant",
-  ],
-  "Quản lý Nhà trường & Đào tạo": [
-    "school.manager",
-    "school.training_head",
-    "pdt_operator",
-    "lms.admin",
-    "center_manager",
-  ],
-  "Hành chính & Nhân sự": ["school.hr"],
-  "Tuyển sinh & Quản trị Hệ thống": [
-    "seo.staff",
-    "seo.manager",
-    "it_operator",
-    "system.admin",
-  ],
-};
-
 export const initialForm = {
   credentialDelivery: "EMAIL_INVITE" as CreateEmployeeRequest["credentialDelivery"],
   departmentId: "",
@@ -48,8 +25,8 @@ export const initialForm = {
   managerId: "",
   phone: "",
   recoveryEmail: "",
-  roleName: "lms_subject_teacher",
-  roleNames: ["lms_subject_teacher"],
+  roleName: "",
+  roleNames: [] as string[],
   scopeId: "",
   scopeType: "TENANT",
   selectedCenterIds: [] as string[],

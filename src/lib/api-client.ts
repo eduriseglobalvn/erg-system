@@ -54,6 +54,7 @@ export {
   AUTH_SESSION_REPLACED_EVENT,
   AUTHORIZATION_CHANGED_EVENT,
   AUTHZ_VERSION_CHANGED,
+  SESSION_REFRESH_REQUESTED_EVENT,
 } from "@/lib/api-client/errors";
 export { getApiResponseRequestId, inheritApiResponseRequestId, type ApiRequestOptions } from "@/lib/api-client/response";
 export { isBffAuthEnabled };

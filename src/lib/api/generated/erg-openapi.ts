@@ -3230,6 +3230,38 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
+    readonly "/api/v1/rbac/assignable-roles": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["assignableRoles"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/rbac/catalog": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["catalog"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
     readonly "/api/v1/ready": {
         readonly parameters: {
             readonly query?: never;
@@ -3319,7 +3351,7 @@ export interface paths {
         };
         readonly get: operations["listRoles"];
         readonly put?: never;
-        readonly post: operations["createRole"];
+        readonly post?: never;
         readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
@@ -3334,12 +3366,12 @@ export interface paths {
             readonly cookie?: never;
         };
         readonly get: operations["getRole"];
-        readonly put: operations["updateRole"];
+        readonly put?: never;
         readonly post?: never;
-        readonly delete: operations["deleteRole"];
+        readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
-        readonly patch: operations["updateRole_1"];
+        readonly patch?: never;
         readonly trace?: never;
     };
     readonly "/api/v1/session/current": {
@@ -4238,54 +4270,6 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
-    readonly "/api/v1/users/{userId}/permission-overrides": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["permissionOverrides"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/users/{userId}/permissions": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["assignPermissions"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/users/{userId}/permissions/{overrideId}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete: operations["deletePermissionOverride"];
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
     readonly "/api/v1/users/{userId}/preview": {
         readonly parameters: {
             readonly query?: never;
@@ -4328,6 +4312,22 @@ export interface paths {
         readonly get?: never;
         readonly put?: never;
         readonly post: operations["resetCredential"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/users/{userId}/restore": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post: operations["restoreUser"];
         readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
@@ -4749,12 +4749,6 @@ export interface components {
             readonly required?: boolean;
             /** Format: int32 */
             readonly sortOrder: number;
-        };
-        readonly AdminAssignPermissionsRequest: {
-            readonly expires_at?: string;
-            readonly grant_type: string;
-            readonly permissions: readonly string[];
-            readonly reason?: string;
         };
         readonly AdminAssignRolesRequest: {
             readonly roles: readonly string[];
@@ -5971,17 +5965,6 @@ export interface components {
             /** Format: date-time */
             readonly timestamp?: string;
         };
-        readonly ApiResponseListPermissionOverrideResponse: {
-            readonly data?: readonly components["schemas"]["PermissionOverrideResponse"][];
-            readonly errors?: unknown;
-            readonly message?: string;
-            readonly path?: string;
-            readonly request_id?: string;
-            /** Format: int32 */
-            readonly statusCode?: number;
-            /** Format: date-time */
-            readonly timestamp?: string;
-        };
         readonly ApiResponseListPermissionResponse: {
             readonly data?: readonly components["schemas"]["PermissionResponse"][];
             readonly errors?: unknown;
@@ -6320,17 +6303,6 @@ export interface components {
         };
         readonly ApiResponsePeriodLockView: {
             readonly data?: components["schemas"]["PeriodLockView"];
-            readonly errors?: unknown;
-            readonly message?: string;
-            readonly path?: string;
-            readonly request_id?: string;
-            /** Format: int32 */
-            readonly statusCode?: number;
-            /** Format: date-time */
-            readonly timestamp?: string;
-        };
-        readonly ApiResponsePermissionOverrideResponse: {
-            readonly data?: components["schemas"]["PermissionOverrideResponse"];
             readonly errors?: unknown;
             readonly message?: string;
             readonly path?: string;
@@ -7052,6 +7024,12 @@ export interface components {
         readonly ArchiveResponse: {
             readonly archived?: boolean;
         };
+        readonly AssignableRole: {
+            readonly code?: string;
+            readonly exclusive?: boolean;
+            readonly id?: string;
+            readonly label?: string;
+        };
         readonly AssignmentProgressJobRequest: {
             readonly assignmentId: string;
             readonly classId?: string;
@@ -7545,6 +7523,8 @@ export interface components {
             readonly subjectName?: string;
             readonly teachers?: readonly components["schemas"]["CalendarTeacherAssignmentResponse"][];
             readonly title?: string;
+            /** Format: int32 */
+            readonly version?: number;
         };
         readonly CalendarEventUpdateRequest: {
             readonly eventId?: string;
@@ -8117,11 +8097,6 @@ export interface components {
             readonly docVersion?: number;
             readonly draftId?: string;
             readonly quizId?: string;
-        };
-        readonly CreateRoleRequest: {
-            readonly description?: string;
-            readonly name: string;
-            readonly permissions?: readonly string[];
         };
         readonly CreateRoomRequest: {
             readonly roomName?: string;
@@ -9362,11 +9337,6 @@ export interface components {
             /** Format: int32 */
             readonly order?: number;
             readonly permissions?: readonly components["schemas"]["PermissionResponse"][];
-        };
-        readonly PermissionOverrideResponse: {
-            readonly grantType?: string;
-            readonly permissions?: readonly string[];
-            readonly userId?: string;
         };
         readonly PermissionPageResponse: {
             readonly items?: readonly components["schemas"]["PermissionResponse"][];
@@ -10796,11 +10766,6 @@ export interface components {
             readonly groupId?: string;
             readonly recipientMode?: string;
             readonly studentIds?: readonly string[];
-        };
-        readonly UpdateRoleRequest: {
-            readonly description?: string;
-            readonly name?: string;
-            readonly permissions?: readonly string[];
         };
         readonly UpdateSchoolRequest: {
             readonly address?: string;
@@ -16814,6 +16779,46 @@ export interface operations {
             };
         };
     };
+    readonly assignableRoles: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": readonly components["schemas"]["AssignableRole"][];
+                };
+            };
+        };
+    };
+    readonly catalog: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
+                };
+            };
+        };
+    };
     readonly ready: {
         readonly parameters: {
             readonly query?: never;
@@ -16954,30 +16959,6 @@ export interface operations {
             };
         };
     };
-    readonly createRole: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody: {
-            readonly content: {
-                readonly "application/json": components["schemas"]["CreateRoleRequest"];
-            };
-        };
-        readonly responses: {
-            /** @description Created */
-            readonly 201: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseRoleResponse"];
-                };
-            };
-        };
-    };
     readonly getRole: {
         readonly parameters: {
             readonly query?: never;
@@ -16988,80 +16969,6 @@ export interface operations {
             readonly cookie?: never;
         };
         readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseRoleResponse"];
-                };
-            };
-        };
-    };
-    readonly updateRole: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly roleId: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody: {
-            readonly content: {
-                readonly "application/json": components["schemas"]["UpdateRoleRequest"];
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseRoleResponse"];
-                };
-            };
-        };
-    };
-    readonly deleteRole: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly roleId: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseVoid"];
-                };
-            };
-        };
-    };
-    readonly updateRole_1: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly roleId: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody: {
-            readonly content: {
-                readonly "application/json": components["schemas"]["UpdateRoleRequest"];
-            };
-        };
         readonly responses: {
             /** @description OK */
             readonly 200: {
@@ -18687,77 +18594,6 @@ export interface operations {
             };
         };
     };
-    readonly permissionOverrides: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly userId: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseListPermissionOverrideResponse"];
-                };
-            };
-        };
-    };
-    readonly assignPermissions: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly userId: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody: {
-            readonly content: {
-                readonly "application/json": components["schemas"]["AdminAssignPermissionsRequest"];
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponsePermissionOverrideResponse"];
-                };
-            };
-        };
-    };
-    readonly deletePermissionOverride: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly overrideId: string;
-                readonly userId: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseVoid"];
-                };
-            };
-        };
-    };
     readonly previewChanges: {
         readonly parameters: {
             readonly query?: never;
@@ -18828,6 +18664,28 @@ export interface operations {
                 };
                 content: {
                     readonly "*/*": components["schemas"]["ApiResponseCredentialDeliveryResponse"];
+                };
+            };
+        };
+    };
+    readonly restoreUser: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly userId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseUserResponse"];
                 };
             };
         };

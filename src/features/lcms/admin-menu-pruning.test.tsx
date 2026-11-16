@@ -47,8 +47,8 @@ describe("Admin pruned navigation contract", () => {
       "/quiz-editor",
       "/resources",
       "/employees",
-      "/settings/permissions",
       "/settings/roles",
+      "/settings/audit-log",
     ]));
     // Không có API thật: báo cáo, tổng đài, Zalo, API key không được xuất hiện trong menu.
     expect(paths.filter((path) => path.startsWith("/report") || path.startsWith("/integration/setting-"))).toEqual([]);

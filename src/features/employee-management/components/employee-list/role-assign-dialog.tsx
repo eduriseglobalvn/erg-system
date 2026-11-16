@@ -1,4 +1,3 @@
-import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
@@ -11,10 +10,9 @@ import Typography from "@mui/material/Typography";
 import {
   appleDesign,
   appleInputSx,
-  AppleStatusBadge,
 } from "@/features/employee-management/components/apple-ui-tokens";
-import { getRoleMeta } from "@/platform/auth/permissions/role-display-catalog";
-import type { useEmployeeRoleOptions } from "@/features/employee-management/hooks/use-employee-management";
+import { assignableRoleValue } from "@/features/rbac/lib/exclusive-roles";
+import type { AssignableRole } from "@/features/rbac/api/rbac-api";
 import { alpha } from "@mui/material/styles";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
@@ -33,7 +31,7 @@ export function RoleAssignDialog({
   open: boolean;
   pending: boolean;
   roleName: string;
-  roles: ReturnType<typeof useEmployeeRoleOptions>["data"];
+  roles: AssignableRole[] | undefined;
 }) {
   return (
     <Dialog
@@ -76,135 +74,26 @@ export function RoleAssignDialog({
                     </Typography>
                   );
                 }
-                const meta = getRoleMeta(String(selected));
                 return (
-                  <Box sx={{ alignItems: "center", display: "flex", gap: 1 }}>
-                    <Typography sx={{ color: appleDesign.colors.textPrimary, fontSize: "0.875rem", fontWeight: 600 }}>
-                      {meta.label}
-                    </Typography>
-                    <Typography
-                      sx={{
-                        bgcolor: "rgba(0, 0, 0, 0.05)",
-                        borderRadius: "4px",
-                        color: appleDesign.colors.textSecondary,
-                        fontFamily: '"SF Mono", "JetBrains Mono", Menlo, Consolas, monospace',
-                        fontSize: "0.72rem",
-                        fontWeight: 600,
-                        px: 0.6,
-                        py: 0.1,
-                      }}
-                    >
-                      {String(selected)}
-                    </Typography>
-                  </Box>
+                  <Typography sx={{ color: appleDesign.colors.textPrimary, fontSize: "0.875rem", fontWeight: 600 }}>
+                    {(roles ?? []).find((role) => assignableRoleValue(role) === String(selected))?.label ?? String(selected)}
+                  </Typography>
                 );
               },
             },
           }}
           sx={appleInputSx}
         >
-          {(roles ?? []).map((role) => {
-            const meta = getRoleMeta(role.name);
-            return (
-              <MenuItem
-                key={role.id}
-                value={role.name}
-                sx={{
-                  alignItems: "flex-start",
-                  borderRadius: "8px",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 0.3,
-                  mx: 0.5,
-                  my: 0.35,
-                  py: 1,
-                  "&.Mui-selected": {
-                    bgcolor: `${alpha(ergEnterpriseTokens.color.primary, 0.08)} !important`,
-                  },
-                }}
-              >
-                <Box sx={{ alignItems: "center", display: "flex", gap: 1, width: "100%" }}>
-                  <Typography sx={{ color: appleDesign.colors.textPrimary, fontSize: "0.85rem", fontWeight: 600 }}>
-                    {meta.label}
-                  </Typography>
-                  <Typography
-                    sx={{
-                      bgcolor: "rgba(0, 0, 0, 0.05)",
-                      borderRadius: "4px",
-                      color: appleDesign.colors.textSecondary,
-                      fontFamily: '"SF Mono", "JetBrains Mono", Menlo, Consolas, monospace',
-                      fontSize: "0.7rem",
-                      fontWeight: 600,
-                      ml: "auto",
-                      px: 0.5,
-                      py: 0.1,
-                    }}
-                  >
-                    {role.name}
-                  </Typography>
-                </Box>
-                <Typography
-                  sx={{
-                    color: appleDesign.colors.textSecondary,
-                    fontSize: "0.74rem",
-                    lineHeight: 1.35,
-                    whiteSpace: "normal",
-                  }}
-                >
-                  {meta.description}
-                </Typography>
-              </MenuItem>
-            );
-          })}
-        </TextField>
-
-        {roleName ? (() => {
-          const meta = getRoleMeta(roleName);
-          return (
-            <Box
-              sx={{
-                bgcolor: "rgba(0, 0, 0, 0.02)",
-                border: `1px solid ${appleDesign.colors.border}`,
-                borderRadius: "14px",
-                mt: 2,
-                p: 2,
-              }}
+          {(roles ?? []).map((role) => (
+            <MenuItem
+              key={role.id}
+              value={assignableRoleValue(role)}
+              sx={{ borderRadius: "8px", mx: 0.5, my: 0.35, py: 1, "&.Mui-selected": { bgcolor: `${alpha(ergEnterpriseTokens.color.primary, 0.08)} !important` } }}
             >
-              <Box sx={{ alignItems: "center", display: "flex", gap: 1, mb: 1 }}>
-                <AppleStatusBadge label={meta.category} tone={meta.badgeTone} />
-                <Typography sx={{ color: appleDesign.colors.textPrimary, fontSize: "0.875rem", fontWeight: 600 }}>
-                  {meta.label}
-                </Typography>
-              </Box>
-              <Typography sx={{ color: appleDesign.colors.textSecondary, fontSize: "0.78rem", lineHeight: 1.45, mb: 1.25 }}>
-                {meta.description}
-              </Typography>
-              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.6 }}>
-                {meta.keyPermissions.map((perm) => (
-                  <Box
-                    key={perm}
-                    sx={{
-                      alignItems: "center",
-                      bgcolor: "#FFFFFF",
-                      border: `1px solid ${appleDesign.colors.borderSubtle}`,
-                      borderRadius: "6px",
-                      color: appleDesign.colors.textPrimary,
-                      display: "inline-flex",
-                      fontSize: "0.72rem",
-                      fontWeight: 600,
-                      gap: 0.5,
-                      px: 0.85,
-                      py: 0.3,
-                    }}
-                  >
-                    <Box sx={{ bgcolor: appleDesign.colors.green, borderRadius: "50%", height: 5, width: 5 }} />
-                    {perm}
-                  </Box>
-                ))}
-              </Box>
-            </Box>
-          );
-        })() : null}
+              <Typography sx={{ color: appleDesign.colors.textPrimary, fontSize: "0.85rem", fontWeight: 600 }}>{role.label}</Typography>
+            </MenuItem>
+          ))}
+        </TextField>
       </DialogContent>
       <DialogActions sx={{ px: 3, py: 2 }}>
         <Button

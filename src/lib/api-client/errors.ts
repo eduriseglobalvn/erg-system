@@ -6,6 +6,9 @@ export const ACCOUNT_DISABLED = "ACCOUNT_DISABLED";
 export const ACCOUNT_DISABLED_EVENT = "erg-auth-account-disabled";
 export const AUTHZ_VERSION_CHANGED = "AUTHZ_VERSION_CHANGED";
 export const AUTHORIZATION_CHANGED_EVENT = "erg-auth-authorization-changed";
+/** Fired after an API call returns 403: the session hook re-reads permissions and workspaces from the server. */
+export const SESSION_REFRESH_REQUESTED_EVENT = "erg-auth-session-refresh-requested";
+export const FORBIDDEN_MESSAGE = "Bạn không có quyền thực hiện thao tác này";
 
 export class ApiClientError extends Error {
   code: string;
@@ -33,6 +36,10 @@ export function withRetryAfter(details: unknown, response: Response): unknown {
 
 /** Longest Retry-After (seconds) the client waits out by itself before retrying a read once. */
 export const RATE_LIMIT_AUTO_RETRY_MAX_SECONDS = 10;
+
+export function isForbiddenError(error: unknown): boolean {
+  return (error as { status?: number } | null)?.status === 403;
+}
 
 /** User-facing text for a 429 the client did not absorb; undefined for any other error. */
 export function rateLimitMessage(error: unknown): string | undefined {

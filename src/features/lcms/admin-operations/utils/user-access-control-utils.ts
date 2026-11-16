@@ -2,8 +2,6 @@ import type { AccessManagedUser } from "@/features/lcms/admin-operations/api/acc
 import type { AdminUserDetail } from "@/features/lcms/admin-operations/api/user-admin-api";
 import type { ProfileDraft } from "@/features/lcms/admin-operations/types/user-access-control";
 
-export const ROOT_ADMIN_EMAIL = "admin@erg.edu.vn";
-
 export function mergeUser(listUser?: AccessManagedUser, detail?: AdminUserDetail | null) {
   return {
     id: detail?.id ?? listUser?.id ?? "",
@@ -45,12 +43,7 @@ export function sortUsers(items: AccessManagedUser[]) {
 }
 
 export function isSuperAdmin(user?: Pick<AccessManagedUser, "email" | "roles"> | MergedAccessUser | null) {
-  const roles = user?.roles?.map((role) => role.toLowerCase()) ?? [];
-  return isRootAdmin(user) || roles.some((role) => role === "super_admin" || role === "super-admin" || role === "system.super_admin" || role === "erg_super_admin");
-}
-
-export function isRootAdmin(user?: Pick<AccessManagedUser, "email"> | MergedAccessUser | null) {
-  return user?.email?.trim().toLowerCase() === ROOT_ADMIN_EMAIL;
+  return user?.roles?.some((role) => role.trim().toLowerCase() === "system.super_admin") ?? false;
 }
 
 export function statusLabel(status: string) {

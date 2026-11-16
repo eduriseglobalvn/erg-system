@@ -18,6 +18,7 @@ import {
   AUTH_REAUTH_REQUIRED_EVENT,
   AUTH_SESSION_INVALID_EVENT,
   AUTH_SESSION_REPLACED_EVENT,
+  SESSION_REFRESH_REQUESTED_EVENT,
   hasApiBase,
   isBffAuthEnabled,
 } from "@/lib/api-client";
@@ -69,6 +70,9 @@ function createProfileForm(account: TeacherAccount | null): ProfileFormState {
     title: account.title,
   };
 }
+
+// Shared across hook instances so one 403 burst costs one session request.
+let bffSessionRefresh: Promise<Awaited<ReturnType<typeof authApi.bffSession>>> | null = null;
 
 export function useAuthSession(portal: StoredAuthSession["portal"] = resolveCurrentPortal()) {
   const { t } = useI18n();
@@ -223,19 +227,38 @@ export function useAuthSession(portal: StoredAuthSession["portal"] = resolveCurr
       pushNotice({ tone: "info", message: "Quyền truy cập vừa thay đổi. Vui lòng đăng nhập lại để đồng bộ quyền mới." });
     }
 
+    function handleSessionRefreshRequested() {
+      if (!isBffAuthEnabled()) return;
+      bffSessionRefresh ??= authApi.bffSession().finally(() => { bffSessionRefresh = null; });
+      bffSessionRefresh.then(applyBffSession, () => undefined);
+    }
+
+    function applyBffSession(bffSession: Awaited<ReturnType<typeof authApi.bffSession>>) {
+      setSession({
+        permissions: bffSession.permissions,
+        deniedPermissions: bffSession.deniedPermissions,
+        roles: bffSession.roles,
+        portals: bffSession.portals,
+        workspaces: bffSession.workspaces,
+        portal,
+      });
+    }
+
+    window.addEventListener(SESSION_REFRESH_REQUESTED_EVENT, handleSessionRefreshRequested);
     window.addEventListener(AUTH_SESSION_REPLACED_EVENT, handleSessionReplaced);
     window.addEventListener(AUTH_SESSION_INVALID_EVENT, handleSessionInvalid);
     window.addEventListener(AUTH_REAUTH_REQUIRED_EVENT, handleReauthRequired);
     window.addEventListener(ACCOUNT_DISABLED_EVENT, handleAccountDisabled);
     window.addEventListener(AUTHORIZATION_CHANGED_EVENT, handleAuthorizationChanged);
     return () => {
+      window.removeEventListener(SESSION_REFRESH_REQUESTED_EVENT, handleSessionRefreshRequested);
       window.removeEventListener(AUTH_SESSION_REPLACED_EVENT, handleSessionReplaced);
       window.removeEventListener(AUTH_SESSION_INVALID_EVENT, handleSessionInvalid);
       window.removeEventListener(AUTH_REAUTH_REQUIRED_EVENT, handleReauthRequired);
       window.removeEventListener(ACCOUNT_DISABLED_EVENT, handleAccountDisabled);
       window.removeEventListener(AUTHORIZATION_CHANGED_EVENT, handleAuthorizationChanged);
     };
-  }, []);
+  }, [portal]);
 
   const accountCapabilities = useMemo(
     () =>

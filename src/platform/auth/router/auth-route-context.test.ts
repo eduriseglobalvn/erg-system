@@ -44,24 +44,24 @@ describe("auth route context", () => {
 
     const restricted = createAuthRouteState({
       account: account("FIRST_LOGIN_RESTRICTED"),
-      session: { permissions: ["lms.dashboard.read"], portals: ["lms"] },
+      session: { permissions: ["lms.dashboard.read"], portals: ["lms"], workspaces: ["TEACHER"] },
       apiBacked: true,
     });
     expect(resolveAuthRouteAccess(restricted, { portal: "lms", permission: "lms.dashboard.read" })).toBe("allow");
 
     const wrongPortal = createAuthRouteState({
       account: account(),
-      session: { permissions: ["lms.dashboard.read"], portals: ["lcms"] },
+      session: { permissions: ["lms.dashboard.read"], portals: ["lcms"], workspaces: ["ADMIN"] },
       apiBacked: true,
     });
     expect(resolveAuthRouteAccess(wrongPortal, { portal: "lms", permission: "lms.dashboard.read" })).toBe("access-denied");
 
-    const denied = createAuthRouteState({ account: account(), session: { permissions: [], portals: ["lms"] }, apiBacked: true });
+    const denied = createAuthRouteState({ account: account(), session: { permissions: [], portals: ["lms"], workspaces: ["TEACHER"] }, apiBacked: true });
     expect(resolveAuthRouteAccess(denied, { portal: "lms", permission: "lms.dashboard.read" })).toBe("access-denied");
 
     const granted = createAuthRouteState({
       account: account(),
-      session: { permissions: ["lms.dashboard.read"], portals: ["lms"] },
+      session: { permissions: ["lms.dashboard.read"], portals: ["lms"], workspaces: ["TEACHER"] },
       apiBacked: true,
     });
     expect(resolveAuthRouteAccess(granted, { portal: "lms", permission: "lms.dashboard.read" })).toBe("allow");
@@ -70,7 +70,7 @@ describe("auth route context", () => {
   test("does not block an entitled account when a legacy backend response has no lifecycle", () => {
     const state = createAuthRouteState({
       account: { ...account(), lifecycle: undefined },
-      session: { permissions: ["lms.dashboard.read"], portals: ["lms"] },
+      session: { permissions: ["lms.dashboard.read"], portals: ["lms"], workspaces: ["TEACHER"] },
       apiBacked: true,
     });
 
@@ -98,49 +98,31 @@ describe("auth route context", () => {
     expect(resolveAuthRouteAccess(state, { portal: "lms", permission: "lms.dashboard.read" })).toBe("allow");
   });
 
-  test("projects the legacy system-super-admin response into every canonical workspace", () => {
+  test("takes workspaces from the claim only, never from role names, portals or the account email", () => {
     const state = createAuthRouteState({
-      account: account(),
+      account: { ...account(), email: "admin@erg.edu.vn", role: "admin" },
       session: {
         roles: ["system.super_admin"],
         permissions: ["*"],
         portals: ["*"],
+        workspaces: ["TEACHER"],
       },
       apiBacked: true,
     });
 
-    expect(state.workspaces).toEqual(["ADMIN", "TEACHER", "STUDENT", "CRM"]);
-    expect(resolveAuthRouteAccess(state, { workspace: "ADMIN", permission: "lms.admin" })).toBe("allow");
+    expect(state.workspaces).toEqual(["TEACHER"]);
+    expect(resolveAuthRouteAccess(state, { workspace: "ADMIN", permission: "lms.admin" })).toBe("access-denied");
     expect(resolveAuthRouteAccess(state, { workspace: "TEACHER", permission: "lms.dashboard.read" })).toBe("allow");
-    expect(resolveAuthRouteAccess(state, { workspace: "STUDENT", permission: "elearning.assignment.read_self" })).toBe("allow");
   });
 
-  test("allows the canonical super_admin alias to enter the student workspace", () => {
+  test("a session without a workspaces claim reaches no workspace", () => {
     const state = createAuthRouteState({
       account: account(),
-      session: {
-        roles: ["super_admin"],
-        permissions: ["*"],
-        portals: ["lms"],
-      },
+      session: { roles: ["system.super_admin"], permissions: ["*"], portals: ["lms"] },
       apiBacked: true,
     });
 
-    expect(resolveAuthRouteAccess(state, { workspace: "STUDENT", permission: "elearning.assignment.read_self" })).toBe("allow");
-  });
-
-  test("allows the configured root admin into student with the legacy admin/lcms session", () => {
-    const state = createAuthRouteState({
-      account: { ...account(), email: "admin@erg.edu.vn", role: "admin" },
-      session: {
-        roles: ["admin"],
-        permissions: [],
-        portals: ["lcms"],
-      },
-      apiBacked: true,
-    });
-
-    expect(state.workspaces).toEqual(["ADMIN", "TEACHER", "STUDENT", "CRM"]);
-    expect(resolveAuthRouteAccess(state, { workspace: "STUDENT", permission: "elearning.assignment.read_self" })).toBe("allow");
+    expect(state.workspaces).toEqual([]);
+    expect(resolveAuthRouteAccess(state, { workspace: "STUDENT", permission: "elearning.assignment.read_self" })).toBe("access-denied");
   });
 });

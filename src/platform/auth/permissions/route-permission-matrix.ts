@@ -37,10 +37,13 @@ export type RoutePermission =
   | "rbac.permission.read"
   | "rbac.role.read"
   | "rbac.role.assign"
+  | "audit.read"
   | "crm.school.read"
   | "crm.analytics.read"
   | "crm.deal.manage"
   | "seo.manage"
+  | "crm.workspace.access"
+  | "users.activity.read"
   | "elearning.assignment.read_self"
   | "elearning.student.preview"
   | "learning.outcomes.read"
@@ -83,9 +86,10 @@ const ADMIN_EXTRA_PERMISSIONS: Record<string, Pick<RoutePermissionEntry, "resour
   "question-types": { resource: "quiz", action: "read", permission: "lms.quiz.read" },
   "settings/permissions": { resource: "permission", action: "read", permission: "rbac.permission.read" },
   "settings/roles": { resource: "role", action: "read", permission: "rbac.role.read" },
+  "settings/audit-log": { resource: "audit", action: "read", permission: "audit.read" },
   users: { resource: "user", action: "manage", permission: "users.manage" },
   employees: { resource: "user", action: "manage", permission: "users.manage" },
-  "employees/access-logs": { resource: "user.audit", action: "read", permission: "users.manage" },
+  "employees/access-logs": { resource: "user.audit", action: "read", permission: "users.activity.read" },
   "report/dashboard-report": { resource: "report", action: "read", permission: "lms.report.read" },
   "report/crm-report": { resource: "report", action: "read", permission: "crm.analytics.read" },
   "report/student-report": { resource: "report", action: "read", permission: "lms.report.read" },
@@ -157,19 +161,12 @@ function teacherEntry(path: string): RoutePermissionEntry {
 }
 
 function crmEntry(path: string): RoutePermissionEntry {
-  const permission = path === "seo"
-    ? "seo.manage"
-    : path === "seo/schools"
-      ? "crm.school.read"
-      : path === "seo/pnl"
-        ? "crm.analytics.read"
-        : "crm.deal.manage";
   return {
     path: `/${path}`,
     workspace: "CRM",
-    resource: permission === "seo.manage" ? "seo" : permission.replace("crm.", "").replace(".manage", "").replace(".read", ""),
-    action: permission.endsWith("read") ? "read" : "manage",
-    permission,
+    resource: "crm",
+    action: "read",
+    permission: "crm.workspace.access",
   };
 }
 

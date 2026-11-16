@@ -1,16 +1,21 @@
 import { MutationCache, QueryCache, QueryClient, type Query } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-import { rateLimitMessage } from "@/lib/api-client/errors";
+import { FORBIDDEN_MESSAGE, isForbiddenError, rateLimitMessage, SESSION_REFRESH_REQUESTED_EVENT } from "@/lib/api-client/errors";
 import { QUERY_POLICIES, shouldRetryQuery } from "@/lib/query-policy";
 
 // One toast however many requests hit the rate limit at once.
 const RATE_LIMIT_TOAST_ID = "rate-limited";
+const FORBIDDEN_TOAST_ID = "forbidden";
 
 // Failures nobody handled must not vanish: mutations without their own onError
 // (and not flagged meta.silent) surface a toast instead of an unhandled rejection.
 export function reportUnhandledMutationError(error: unknown, options: { onError?: unknown; meta?: Record<string, unknown> }) {
+  const forbidden = isForbiddenError(error);
+  // A 403 usually means the role changed under us: pull fresh permissions whoever handles the error.
+  if (forbidden && typeof window !== "undefined") window.dispatchEvent(new Event(SESSION_REFRESH_REQUESTED_EVENT));
   if (options.onError || options.meta?.silent) return;
+  if (forbidden) return void toast.error(FORBIDDEN_MESSAGE, { id: FORBIDDEN_TOAST_ID });
   const busy = rateLimitMessage(error);
   if (busy) return void toast.error(busy, { id: RATE_LIMIT_TOAST_ID });
   toast.error(error instanceof Error && error.message ? error.message : "Thao tác không thành công. Vui lòng thử lại.");

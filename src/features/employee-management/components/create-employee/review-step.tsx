@@ -2,14 +2,14 @@ import Box from "@mui/material/Box";
 
 import type { EmployeeForm } from "@/features/employee-management/components/create-employee/constants";
 import { ReviewRow } from "@/features/employee-management/components/create-employee/review-row";
-import { getRoleMeta, getScopeMeta } from "@/platform/auth/permissions/role-display-catalog";
+import { getScopeMeta } from "@/platform/auth/permissions/role-display-catalog";
 
 export function ReviewStep({
-  chosenRoles,
+  roleLabels,
   effectiveScopeId,
   form,
 }: {
-  chosenRoles: string[];
+  roleLabels: string[];
   effectiveScopeId: string;
   form: EmployeeForm;
 }) {
@@ -20,7 +20,7 @@ export function ReviewStep({
       <ReviewRow label="Nghề nghiệp" value={`${form.jobTitle}${form.departmentId ? ` · ${form.departmentId}` : ""}`} />
       <ReviewRow
         label="Nhóm quyền đã cấp"
-        value={chosenRoles.map((r) => getRoleMeta(r).label).join(", ") || "Chưa chọn quyền"}
+        value={roleLabels.join(", ") || "Chưa chọn quyền"}
       />
       <ReviewRow
         label="Phạm vi áp dụng"

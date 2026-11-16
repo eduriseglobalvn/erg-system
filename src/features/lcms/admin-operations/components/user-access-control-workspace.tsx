@@ -27,7 +27,6 @@ import { getAdminUser, type AdminUserDetail } from "@/features/lcms/admin-operat
 import type { ProfileDraft, WorkspaceSection } from "@/features/lcms/admin-operations/types/user-access-control";
 import {
   EMPTY_PROFILE_DRAFT,
-  isRootAdmin,
   isSuperAdmin,
   mergeDetailIntoUsers,
   mergeUser,
@@ -155,7 +154,7 @@ export function UserAccessControlWorkspace({
   const selectedListUser = users.find((user) => user.id === selectedUserId);
   const selectedUser = selectedUserId ? mergeUser(selectedListUser, selectedUserDetail) : null;
   const superAdmin = isSuperAdmin(selectedUser);
-  const rootAdmin = isRootAdmin(selectedUser);
+  const rootAdmin = superAdmin; // a Quản trị account is not edited from this screen
   const hasLoadError = Boolean(error && !loadingUsers && users.length === 0);
 
   const {

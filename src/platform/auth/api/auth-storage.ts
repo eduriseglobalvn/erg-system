@@ -15,7 +15,7 @@ import {
 import { tr } from "@/platform/i18n";
 import { getApiBase } from "@/lib/platform";
 import { hasAdminLikeClaims } from "@/platform/auth/permissions/admin-like";
-import { PLATFORM_ROOT_ADMIN_EMAIL, projectVerifiedWorkspaces } from "@/platform/auth/permissions/workspace-capability-projection";
+import { projectVerifiedWorkspaces } from "@/platform/auth/permissions/workspace-capability-projection";
 import { AUTH_BYPASS_ENABLED, DEFAULT_BYPASS_ACCOUNT } from "@/platform/auth/config/auth-bypass";
 import {
   getPersistedJsonValue,
@@ -142,14 +142,9 @@ export function saveServerAuthSession(result: AuthSessionResponseDTO, rememberMe
       : undefined;
   const portals = result.portals ?? jwtPortals ?? (isNewAuthSession ? [portal] : previousSession?.portals ?? [portal]);
   const deniedPermissions = result.deniedPermissions ?? (isNewAuthSession ? [] : previousSession?.deniedPermissions ?? []);
-  const basePermissions = result.permissions ?? jwtPermissions ?? (isNewAuthSession ? [] : previousSession?.permissions ?? []);
-  const isRootAdmin = result.account.email.trim().toLowerCase() === PLATFORM_ROOT_ADMIN_EMAIL;
-  const permissions = isRootAdmin && !deniedPermissions.includes("*")
-    ? Array.from(new Set([...basePermissions, "*"]))
-    : basePermissions;
+  const permissions = result.permissions ?? jwtPermissions ?? (isNewAuthSession ? [] : previousSession?.permissions ?? []);
   const roles = result.roles ?? result.account.roles ?? (isNewAuthSession ? [] : previousSession?.roles ?? []);
   const projectedWorkspaces = projectVerifiedWorkspaces({
-    accountEmail: result.account.email,
     workspaces: result.workspaces,
     roles,
     permissions,
@@ -194,7 +189,7 @@ function accountFromSession(session: AccountSession): TeacherAccount | null {
   if (!email) return null;
 
   const roles = Array.isArray(claims?.roles) ? claims.roles.filter((role): role is string => typeof role === "string") : [];
-  const role = mapRoleFromRoles(roles);
+  const role = mapRoleFromPermissions(session.permissions);
   const fullName =
     (typeof claims?.fullName === "string" ? claims.fullName : "") ||
     (typeof claims?.full_name === "string" ? claims.full_name : "") ||
@@ -216,13 +211,8 @@ function accountFromSession(session: AccountSession): TeacherAccount | null {
   };
 }
 
-function mapRoleFromRoles(roles: string[]): AccountRole {
-  const normalized = roles.map((role) => role.toLowerCase());
-  if (hasAdminLikeClaims(normalized)) {
-    return "admin";
-  }
-  if (normalized.some((role) => ["coordinator", "manager", "center_manager"].includes(role))) return "coordinator";
-  return "teacher";
+function mapRoleFromPermissions(permissions?: readonly string[]): AccountRole {
+  return hasAdminLikeClaims(permissions) ? "admin" : "teacher";
 }
 
 function portalsFromJwtClaims(payload: JwtPayload | null): StoredAuthSession["portals"] {

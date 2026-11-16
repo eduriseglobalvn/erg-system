@@ -58,7 +58,7 @@ export function useAttendanceSheetController({ selectedClass, students }: Attend
 
   const isAdmin = useMemo(() => {
     const scope = getAuthScope();
-    return hasAdminLikeClaims(scope.roles, scope.permissions);
+    return hasAdminLikeClaims(scope.permissions);
   }, []);
   const todayInputDate = getTodayInputDate();
   const curriculumTreeQuery = useCurriculumTreeQuery();
