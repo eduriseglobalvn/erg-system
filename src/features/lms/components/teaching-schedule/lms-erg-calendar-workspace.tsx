@@ -9,6 +9,7 @@ import { useLocation, useNavigate } from "@tanstack/react-router";
 import { ErgSkeleton } from "@/components/erg-mui/erg-feedback";
 import { formatDateVi, todayInput } from "@/domain/formatters/format-date";
 import type { ClassroomSnapshot } from "@/domain/school/classroom-types";
+import { getDefaultTenantId } from "@/lib/graphql-client";
 import { loadLmsMyTeachingCalendar, teachingCalendarQueryKeys } from "@/features/teaching-calendar/api/teaching-calendar-api";
 import type { TeachingCalendarEvent } from "@/features/teaching-calendar/api/teaching-calendar-workspace-types";
 import { t } from "@/features/teaching-calendar/components/teacher/teacher-board-styles";
@@ -35,7 +36,7 @@ const rangeTitle = (view: TeacherView, anchor: string) => (view === "week" ? wee
 export function LmsErgCalendarWorkspace({ isBootstrapLoading = false }: { isBootstrapLoading?: boolean; selectedClass?: ClassroomSnapshot; teacherName: string }) {
   const { session } = useAuthSession("lms");
   const isMobile = useLmsMobileBreakpoint();
-  const tenantId = session?.tenantId ?? "";
+  const tenantId = session?.tenantId || getDefaultTenantId();
   const today = todayInput();
   const [view, setView] = useState<TeacherView>("week");
   const [anchor, setAnchor] = useState(today);
