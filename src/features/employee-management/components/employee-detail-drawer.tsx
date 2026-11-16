@@ -278,7 +278,7 @@ export function EmployeeDetailDrawer({
               {tab === 0 ? <EmployeeInfoTab account={account} profile={profile} /> : null}
 
               {/* Tab 1: Roles & Scope */}
-              {tab === 1 ? <EmployeeRolesTab account={account} profile={profile} tenantId={tenantId} /> : null}
+              {tab === 1 && userId ? <EmployeeRolesTab account={account} profile={profile} tenantId={tenantId} userId={userId} /> : null}
 
               {/* Tab 2: Sessions */}
               {tab === 2 ? (

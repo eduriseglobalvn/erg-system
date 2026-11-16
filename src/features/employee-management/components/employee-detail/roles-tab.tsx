@@ -1,4 +1,11 @@
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import BusinessRoundedIcon from "@mui/icons-material/BusinessRounded";
+import { useState } from "react";
+import { ErgButton } from "@/components/erg-mui/erg-actions";
+import { RoleAssignDialog } from "@/features/employee-management/components/employee-list/role-assign-dialog";
+import { useAssignableRoles, useEmployeeCommands } from "@/features/employee-management/hooks/use-employee-management";
+import { can } from "@/features/rbac/lib/can";
+import { assignableRoleValue } from "@/features/rbac/lib/exclusive-roles";
 import SecurityRoundedIcon from "@mui/icons-material/SecurityRounded";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -16,11 +23,30 @@ export function EmployeeRolesTab({
   account,
   profile,
   tenantId,
+  userId,
 }: {
   account: EmployeeAccount;
   profile: EmployeeProfile;
   tenantId: string;
+  userId: string;
 }) {
+  const commands = useEmployeeCommands(tenantId);
+  const assignableQuery = useAssignableRoles();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [roleName, setRoleName] = useState("");
+  const currentRoles = account?.roles ?? [];
+  const unassignedRoles = assignableQuery.data?.filter((role) => !currentRoles.includes(assignableRoleValue(role)));
+
+  const assignRole = async () => {
+    if (!roleName) return;
+    try {
+      await commands.roles.mutateAsync({ roles: [...new Set([...currentRoles, roleName])], userId });
+    } catch {
+      return; // global handler already toasted; keep the dialog open
+    }
+    setDialogOpen(false);
+  };
+
   return (
     <Box sx={{ display: "grid", gap: 1.75 }}>
       <AppleFieldCard
@@ -29,18 +55,29 @@ export function EmployeeRolesTab({
         value={profile?.tenantId || tenantId}
       />
 
-      <Typography
-        sx={{
-          color: appleDesign.colors.textSecondary,
-          fontSize: "0.75rem",
-          fontWeight: 600,
-          letterSpacing: "0.06em",
-          mt: 1,
-          textTransform: "uppercase",
-        }}
-      >
-        Danh sách nhóm quyền đã cấp ({account?.roles?.length ?? 0})
-      </Typography>
+      <Box sx={{ alignItems: "center", display: "flex", gap: 1, justifyContent: "space-between", mt: 1 }}>
+        <Typography
+          sx={{
+            color: appleDesign.colors.textSecondary,
+            fontSize: "0.75rem",
+            fontWeight: 600,
+            letterSpacing: "0.06em",
+            textTransform: "uppercase",
+          }}
+        >
+          Danh sách nhóm quyền đã cấp ({account?.roles?.length ?? 0})
+        </Typography>
+        {can("rbac.role.assign") ? (
+          <ErgButton
+            onClick={() => { setRoleName(""); setDialogOpen(true); }}
+            size="small"
+            startIcon={<AddRoundedIcon />}
+            variant="outlined"
+          >
+            Gán nhóm quyền
+          </ErgButton>
+        ) : null}
+      </Box>
 
       {account?.roles?.length ? (
         account.roles.map((role) => {
@@ -153,6 +190,16 @@ export function EmployeeRolesTab({
           </Typography>
         </Box>
       </Box>
+
+      <RoleAssignDialog
+        onClose={() => setDialogOpen(false)}
+        onConfirm={assignRole}
+        onRoleNameChange={setRoleName}
+        open={dialogOpen}
+        pending={commands.roles.isPending}
+        roleName={roleName}
+        roles={unassignedRoles}
+      />
     </Box>
   );
 }
