@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useQueries, useQuery } from "@tanstack/react-query";
 
 import { loadTeachingScheduleBatches } from "@/features/teaching-calendar/api/teaching-calendar-batch-api";
-import { loadTeachingOverviewSchools } from "@/features/teaching-calendar/api/teaching-calendar-overview-api";
+import { loadTeachingOverviewSchools, loadTeachingOverviewTeachers } from "@/features/teaching-calendar/api/teaching-calendar-overview-api";
 import { teachingCalendarQueryKeys } from "@/features/teaching-calendar/api/teaching-calendar-query-keys";
 import { loadTeachingScheduleDraft } from "@/features/teaching-calendar/api/teaching-calendar-schedule-api";
 import { loadLcmsTeachingCalendarWorkspace } from "@/features/teaching-calendar/api/teaching-calendar-workspace-query-api";
@@ -41,6 +41,12 @@ export function useCalendarMain() {
     queryKey: teachingCalendarQueryKeys.overview(tenantId, "schools", { page: 0, size: 200, weekStart }),
     staleTime: 60_000,
   });
+  // Moi tai khoan giao vien trong pham vi (ten that), ke ca nguoi chua co tiet nao trong khoang dang xem.
+  const accounts = useQuery({
+    queryFn: ({ signal }) => loadTeachingOverviewTeachers({ page: 0, size: 200, weekStart }, signal),
+    queryKey: teachingCalendarQueryKeys.overview(tenantId, "teachers", { page: 0, size: 200, weekStart }),
+    staleTime: 60_000,
+  });
   const batches = useQuery({
     queryFn: ({ signal }) => loadTeachingScheduleBatches({ page: 0, size: 20, status: "DRAFT", tenantId }, signal),
     queryKey: teachingCalendarQueryKeys.batches("lcms", { page: 0, size: 20, status: "DRAFT", tenantId }),
@@ -66,12 +72,13 @@ export function useCalendarMain() {
   };
   const teacherCounts = useMemo(() => {
     const counts = new Map<string, { count: number; id: string; name: string }>();
+    for (const account of accounts.data?.items ?? []) counts.set(account.teacherId, { count: 0, id: account.teacherId, name: account.teacherName });
     for (const event of all ?? []) for (const teacher of event.teachers) {
       const entry = counts.get(teacher.userId) ?? { count: 0, id: teacher.userId, name: teacher.displayName };
       counts.set(teacher.userId, { ...entry, count: entry.count + 1 });
     }
     return [...counts.values()].sort((a, b) => a.name.localeCompare(b.name, "vi"));
-  }, [all]);
+  }, [accounts.data, all]);
 
   // Danh sach rong = tat ca; bo chon 1 muc khi dang «tat ca» -> chon moi muc con lai (chuc nang cua hop kiem).
   const toggle = (setter: typeof setSchoolIds, all: readonly string[]) => (id: string) => setter((current) => {
