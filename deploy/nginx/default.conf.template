@@ -15,6 +15,10 @@ server {
 
     # Same-origin API gateway. BACKEND_UPSTREAM is substituted at container start.
     location /api/ {
+        # Uploads up to 30 MB (plus multipart overhead); keep equal to the API nginx. nginx's default is 1 MB.
+        client_max_body_size 32m;
+        # Stream the body straight to the API nginx: this container's temp dir is a RAM tmpfs.
+        proxy_request_buffering off;
         proxy_pass ${BACKEND_UPSTREAM};
         proxy_http_version 1.1;
         proxy_set_header Host $host;

@@ -1,0 +1,13 @@
+# Server-only override, used by deploy/docker/deploy.sh on the ERG server.
+# The API nginx of the backend stack only listens on the host's 127.0.0.1, which a container cannot
+# reach, so the frontend joins the backend's "edge" network and calls it by service name.
+services:
+  erg-fe:
+    networks:
+      - edge
+    mem_limit: 256m
+
+networks:
+  edge:
+    external: true
+    name: erg_edge
