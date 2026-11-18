@@ -5,13 +5,16 @@ import Typography from "@mui/material/Typography";
 import { ERG_ASSETS } from "@/config/seo";
 import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
 
-/** Single backdrop for every auth screen: flat page colour from tokens (mockup chung-dang-nhap). */
+/** Single backdrop for every auth screen: the ERG brand artwork (owner asked for it back on 18/11), page colour while it loads. */
 export function AuthPageBackdrop({ children }: { children: ReactNode }) {
   return (
     <Box
       component="main"
       sx={{
-        bgcolor: t.color.surfaceSubtle,
+        backgroundColor: t.color.surfaceSubtle,
+        backgroundImage: "url('https://media.erg.edu.vn/logo/bg.jpg')",
+        backgroundPosition: "center",
+        backgroundSize: "cover",
         display: "grid",
         minHeight: "100svh",
         overflowX: "hidden",
