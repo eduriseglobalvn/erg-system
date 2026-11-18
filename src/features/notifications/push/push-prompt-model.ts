@@ -1,36 +1,39 @@
-const STORAGE_PREFIX = "erg-push-prompt:";
-const SNOOZE_MS = 7 * 24 * 60 * 60_000;
+const DENIED_HINT_PREFIX = "erg-push-denied-hint:";
 
-/** Per-account prompt memory: app loads seen, and each «Để sau» / × (at most two, 7 days apart). */
-export type PushPromptRecord = { visits: number; snoozedAt: number[] };
-
-/** Mockup rule: ask from the second visit; after «Để sau» ask once more 7 days later, then never. */
-export function shouldOfferPushPrompt(record: PushPromptRecord, now: number) {
-  if (record.visits < 2 || record.snoozedAt.length >= 2) return false;
-  const lastSnooze = record.snoozedAt.at(-1);
-  return lastSnooze === undefined || now - lastSnooze >= SNOOZE_MS;
+/** Server push is usable: FCM, or Web Push with a VAPID public key. */
+export function pushServerReady(config: { enabled?: boolean; provider?: string | null; publicKey?: string | null } | null | undefined) {
+  return Boolean(config?.enabled && (config.provider === "fcm" || config.publicKey));
 }
 
-export function readPushPromptRecord(accountId: string): PushPromptRecord {
+export type PushPromptInput = {
+  serverReady: boolean;
+  /** null while the browser's push subscription is still being read. */
+  subscriptionMissing: boolean | null;
+  /** usePwaNotifications state: "default" = not asked yet, or granted without a subscription. */
+  state: string;
+  dismissed: boolean;
+  quizActive: boolean;
+};
+
+/** Asked on every app open until this browser is subscribed; «Để sau» only hides it for this app open. */
+export function shouldOfferPushPrompt(input: PushPromptInput) {
+  return input.serverReady && input.subscriptionMissing === true && input.state === "default" && !input.dismissed && !input.quizActive;
+}
+
+/** Permission denied: the how-to-re-enable hint is shown once per account, never repeated. */
+export function readDeniedHintSeen(accountId: string) {
   try {
-    const parsed: unknown = JSON.parse(window.localStorage.getItem(STORAGE_PREFIX + accountId) ?? "null");
-    if (parsed && typeof parsed === "object") {
-      const { visits, snoozedAt } = parsed as Partial<PushPromptRecord>;
-      return {
-        visits: typeof visits === "number" ? visits : 0,
-        snoozedAt: Array.isArray(snoozedAt) ? snoozedAt.filter((value) => typeof value === "number") : [],
-      };
-    }
+    return window.localStorage.getItem(DENIED_HINT_PREFIX + accountId) === "1";
   } catch {
-    // Private mode / blocked storage: behave as a first visit (no prompt).
+    // Blocked storage: treat as seen so the hint cannot nag on every load.
+    return true;
   }
-  return { visits: 0, snoozedAt: [] };
 }
 
-export function writePushPromptRecord(accountId: string, record: PushPromptRecord) {
+export function markDeniedHintSeen(accountId: string) {
   try {
-    window.localStorage.setItem(STORAGE_PREFIX + accountId, JSON.stringify(record));
+    window.localStorage.setItem(DENIED_HINT_PREFIX + accountId, "1");
   } catch {
-    // Storage unavailable: the prompt simply is not remembered.
+    // Storage unavailable: nothing to remember.
   }
 }

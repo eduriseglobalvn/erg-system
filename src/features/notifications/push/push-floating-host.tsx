@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 
@@ -18,6 +19,7 @@ const TOAST_KIND = { URGENT: toast.error, IMPORTANT: toast.warning, INFO: toast.
  */
 export function PushFloatingHost() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const openIdsRef = useRef<Array<string | number>>([]);
 
   useEffect(() => {
@@ -44,6 +46,8 @@ export function PushFloatingHost() {
     const handleMessage = (event: MessageEvent) => {
       const message = readPushMessage(event.data, window.location.origin);
       if (!message) return;
+      // Badge and inbox lists pick the new message up now, not on the next poll.
+      void queryClient.invalidateQueries({ queryKey: ["notifications"] });
       // A learner in a quiz is not interrupted; the cards come once the quiz closes.
       if (root.hasAttribute(QUIZ_ACTIVE_ATTRIBUTE)) queued.push(message);
       else show(message);
@@ -79,7 +83,7 @@ export function PushFloatingHost() {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener(AUTH_ACCOUNT_CHANGED_EVENT, handleAccountChanged);
     };
-  }, [navigate]);
+  }, [navigate, queryClient]);
 
   return null;
 }

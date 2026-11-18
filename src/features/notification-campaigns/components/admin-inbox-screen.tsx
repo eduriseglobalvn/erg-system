@@ -119,7 +119,7 @@ export function AdminInboxScreen() {
 
   return (
     // Phones: room under the last row for the floating "Gửi thông báo" button.
-    <Box sx={{ display: "grid", gap: 1.5, maxWidth: table ? 1120 : 860, mx: "auto", px: { xs: 2, sm: 3 }, pt: 3, pb: canSend && !desktop ? 10 : 3, width: "100%" }}>
+    <Box sx={{ display: "grid", gap: 1.5, maxWidth: 1440, mx: "auto", px: { xs: 2, sm: 3 }, pt: 3, pb: canSend && !desktop ? 10 : 3, width: "100%" }}>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
         <Typography variant="h1" sx={{ flex: 1 }}>Hộp thư</Typography>
         <MarkAllReadButton portal={ADMIN_NOTIFICATION_PORTAL} />
@@ -137,10 +137,11 @@ export function AdminInboxScreen() {
         </Tabs>
       ) : null}
       {tab === "INBOX" ? (
-        <>
+        // Wide screens: the list takes the room, the latest send sits beside it instead of under it.
+        <Box sx={{ display: "grid", gap: 1.5, alignItems: "start", gridTemplateColumns: { lg: canSend ? "minmax(0, 1fr) 360px" : "minmax(0, 1fr)" } }}>
           <InboxList portal={ADMIN_NOTIFICATION_PORTAL} workspace="ADMIN" onOpen={(item) => void navigate({ href: `${adminPath("/notifications")}/${encodeURIComponent(item.id)}` })} />
-          {canSend ? <LatestSentCard /> : null}
-        </>
+          {canSend ? <Box sx={{ position: { lg: "sticky" }, top: { lg: 24 } }}><LatestSentCard /></Box> : null}
+        </Box>
       ) : table ? (
         <SentCampaignsDesktop onOpen={open} />
       ) : (

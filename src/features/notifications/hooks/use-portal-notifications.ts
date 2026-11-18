@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { fetchNotificationFeed, markNotificationRead, notificationQueryKeys, resolveNotificationQueryScope } from "../api/notification-api";
 import type { NotificationFeedItem, NotificationPortal } from "../api/notification-types";
 import { priorityLabel, needsAck } from "../components/inbox-filters";
+import { useNewNotificationToast } from "./use-new-notification-toast";
 import { useUnreadNotificationCount } from "./use-unread-notification-count";
 import { QUERY_POLICIES } from "@/lib/query-policy";
 
@@ -29,6 +30,7 @@ export function usePortalNotifications(portal: NotificationPortal, feedEnabled: 
   const queryClient = useQueryClient();
   const scope = resolveNotificationQueryScope(portal);
   const unreadCount = useUnreadNotificationCount(portal);
+  useNewNotificationToast(portal, unreadCount);
   const feed = useQuery({
     enabled: feedEnabled,
     queryKey: notificationQueryKeys.inbox(portal, "all", 0, PORTAL_NOTIFICATION_LIMIT, scope),
