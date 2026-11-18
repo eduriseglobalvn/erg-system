@@ -25,11 +25,12 @@ import {
   legacyAdminWorkspacePath,
 } from "@/features/lcms/admin-content/admin-content-route";
 import { usePendingApprovalCount } from "@/features/timekeeping/api/timekeeping-query";
-import { withTimekeepingMenuState } from "@/features/lcms/admin-menu";
+import { withNotificationBadge, withTimekeepingMenuState } from "@/features/lcms/admin-menu";
 import { filterAdminMenuGroups } from "@/features/lcms/admin-mobile-dock-config";
 import { useUnconfirmedTeachersCount } from "@/features/timekeeping/teaching/api/teaching-hours-query";
 import { todayInput } from "@/domain/formatters/format-date";
 import { adminPath } from "@/platform/workspaces/workspace-paths";
+import { useUnreadNotificationCount } from "@/features/notifications/hooks/use-unread-notification-count";
 import { AdminAllFunctionsSheet } from "@/features/lcms/admin-all-functions-sheet";
 import {
   canNavigateToAdminPath,
@@ -94,10 +95,16 @@ export default function AdminErgPortalShell() {
   const pendingApprovals = usePendingApprovalCount(canApprove && !AUTH_BYPASS_ENABLED && hasApiBase()).data;
   const canSeeTeachingHours = canAccess(adminPath("/employees/teaching-hours"));
   const unconfirmedTeachers = useUnconfirmedTeachersCount(todayInput().slice(0, 7), canSeeTeachingHours && !AUTH_BYPASS_ENABLED && hasApiBase()).data;
+  // Same cache key as the header bell (admin inbox = lcms), so this adds no request.
+  const unreadNotifications = useUnreadNotificationCount("lcms", !AUTH_BYPASS_ENABLED && hasApiBase());
   const menuGroups = useMemo(
     // Same pruning as the mobile sheet: an item the role cannot open is not listed (BUG-X-002).
-    () => withTimekeepingMenuState(filterAdminMenuGroups(ADMIN_MENU_GROUPS, canAccess), canAccess, pendingApprovals, unconfirmedTeachers),
-    [canAccess, pendingApprovals, unconfirmedTeachers],
+    () =>
+      withNotificationBadge(
+        withTimekeepingMenuState(filterAdminMenuGroups(ADMIN_MENU_GROUPS, canAccess), canAccess, pendingApprovals, unconfirmedTeachers),
+        unreadNotifications,
+      ),
+    [canAccess, pendingApprovals, unconfirmedTeachers, unreadNotifications],
   );
 
   const mobileDock = useMemo(() => {

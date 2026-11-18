@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import NotificationsActiveRoundedIcon from "@mui/icons-material/NotificationsActiveRounded";
 import Box from "@mui/material/Box";
@@ -11,89 +11,154 @@ import { ergMobileDockAnchor } from "@/components/portal/erg-mobile-dock";
 import { fetchWebPushConfig } from "@/features/notifications/api/notification-device-api";
 import { usePwaNotifications } from "@/features/lms/mobile/hooks/use-pwa-notifications";
 import { QUIZ_ACTIVE_ATTRIBUTE } from "@/features/notifications/push/push-floating-model";
-import {
-  readPushPromptRecord,
-  shouldOfferPushPrompt,
-  writePushPromptRecord,
-} from "@/features/notifications/push/push-prompt-model";
+import { markDeniedHintSeen, pushServerReady, readDeniedHintSeen, shouldOfferPushPrompt } from "@/features/notifications/push/push-prompt-model";
 import { getAuthScope } from "@/platform/auth/api/auth-storage";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 type PushPortal = "lms" | "elearning";
 
 const { color, radius, shadow } = ergEnterpriseTokens;
-const countedAccounts = new Set<string>();
+/** «Để sau» lasts for this app open only (a full reload asks again). */
+const dismissedThisOpen = new Set<string>();
 
+// iOS < 16.4, and iOS Safari outside an installed home-screen PWA, have no PushManager: nothing renders, nothing throws.
 const pushSupported = () =>
   typeof window !== "undefined" && "Notification" in window && "serviceWorker" in navigator && "PushManager" in window;
 
-/**
- * Mockup permission card. Renders only when the server reports push enabled (FCM, or Web Push with a VAPID key),
- * the browser can push (not iOS 15) and has not been asked yet; it never opens on page load.
- */
-export function PushPermissionPrompt({ portal }: { portal?: PushPortal }) {
-  const granted = Boolean(portal) && pushSupported() && Notification.permission === "granted";
-  const askable = Boolean(portal) && pushSupported() && Notification.permission === "default";
-  const config = useQuery({
-    enabled: askable,
+function useWebPushConfig(portal: PushPortal) {
+  return useQuery({
     queryFn: ({ signal }) => fetchWebPushConfig(portal, signal),
     queryKey: ["notifications", "web-push-config", portal],
     retry: false,
     staleTime: Number.POSITIVE_INFINITY,
-  });
-  const data = config.data;
-  if (granted && portal) return <PushDeviceKeeper key={portal} portal={portal} />;
-  if (!askable || !portal || !data?.enabled || (data.provider !== "fcm" && !data.publicKey)) return null;
-  return <PushPermissionCard key={portal} portal={portal} />;
+  }).data;
 }
 
-/** Permission already granted: keeps this browser's device registered (heartbeat, re-subscribe) on every screen size. */
-function PushDeviceKeeper({ portal }: { portal: PushPortal }) {
-  usePwaNotifications(portal);
-  return null;
+/**
+ * Push permission card. Signed in and the server can push: asks on every app open until this browser holds a
+ * subscription; when permission is denied, shows a one-time hint on how to turn it back on.
+ */
+export function PushPermissionPrompt({ portal }: { portal?: PushPortal }) {
+  if (!portal || !pushSupported()) return null;
+  const accountId = getAuthScope(portal).accountId;
+  if (!accountId) return null;
+  if (Notification.permission === "denied") return <PushDeniedHint key={portal} accountId={accountId} portal={portal} />;
+  return <PushPermissionCard key={portal} accountId={accountId} portal={portal} />;
 }
 
-function PushPermissionCard({ portal }: { portal: PushPortal }) {
+function hasPushSubscription() {
+  return navigator.serviceWorker.getRegistration().then((registration) => registration?.pushManager.getSubscription() ?? null);
+}
+
+function useQuizActive() {
+  const read = () => document.documentElement.hasAttribute(QUIZ_ACTIVE_ATTRIBUTE);
+  const [active, setActive] = useState(read);
+  useEffect(() => {
+    const observer = new MutationObserver(() => setActive(read()));
+    observer.observe(document.documentElement, { attributeFilter: [QUIZ_ACTIVE_ATTRIBUTE], attributes: true });
+    return () => observer.disconnect();
+  }, []);
+  return active;
+}
+
+function PushPermissionCard({ accountId, portal }: { accountId: string; portal: PushPortal }) {
+  // Also keeps an already-subscribed device registered (heartbeat, re-subscribe).
   const notifications = usePwaNotifications(portal);
-  const [accountId] = useState(() => getAuthScope(portal).accountId ?? "");
-  const [open, setOpen] = useState(false);
+  const config = useWebPushConfig(portal);
+  const quizActive = useQuizActive();
+  const dismissKey = `${portal}:${accountId}`;
+  const [dismissed, setDismissed] = useState(() => dismissedThisOpen.has(dismissKey));
+  const [subscriptionMissing, setSubscriptionMissing] = useState<boolean | null>(null);
   const [unsupported, setUnsupported] = useState(false);
 
   useEffect(() => {
-    if (!accountId) return undefined;
-    if (!countedAccounts.has(accountId)) {
-      countedAccounts.add(accountId);
-      const record = readPushPromptRecord(accountId);
-      writePushPromptRecord(accountId, { ...record, visits: record.visits + 1 });
-    }
-    // Ask only after the user has done something on the page, never on load.
-    const offer = () => {
-      if (document.documentElement.hasAttribute(QUIZ_ACTIVE_ATTRIBUTE)) return;
-      if (!shouldOfferPushPrompt(readPushPromptRecord(accountId), Date.now())) return;
-      setOpen(true);
-      stop();
+    let alive = true;
+    hasPushSubscription().then(
+      (subscription) => alive && setSubscriptionMissing(!subscription),
+      () => alive && setSubscriptionMissing(false),
+    );
+    return () => {
+      alive = false;
     };
-    const stop = () => {
-      window.removeEventListener("pointerdown", offer);
-      window.removeEventListener("keydown", offer);
-    };
-    window.addEventListener("pointerdown", offer);
-    window.addEventListener("keydown", offer);
-    return stop;
-  }, [accountId]);
+  }, []);
+
+  const offer = shouldOfferPushPrompt({
+    dismissed,
+    quizActive,
+    serverReady: pushServerReady(config),
+    state: notifications.state,
+    subscriptionMissing,
+  });
 
   const snooze = () => {
-    const record = readPushPromptRecord(accountId);
-    writePushPromptRecord(accountId, { ...record, snoozedAt: [...record.snoozedAt, Date.now()] });
-    setOpen(false);
+    dismissedThisOpen.add(dismissKey);
+    setDismissed(true);
   };
   const enable = async () => {
+    // Called from the button click: iOS only grants inside a user gesture.
     const outcome = await notifications.enableNotifications();
-    // Firebase cannot push on this browser: keep the card with one explanation line instead of the button.
     if (outcome === "unsupported") setUnsupported(true);
-    else setOpen(false);
+    else if (outcome !== "granted") snooze();
   };
 
+  return (
+    <PushCard
+      actions={
+        unsupported ? (
+          <Typography color="text.secondary" component="p" sx={{ mt: 1.5 }} variant="caption">
+            Máy này chưa nhận được thông báo đẩy. Thông báo mới vẫn hiện ở biểu tượng chuông khi mở ERG.
+          </Typography>
+        ) : (
+          <Box sx={{ display: "flex", gap: 1, mt: 1.5 }}>
+            <ErgButton disabled={notifications.busy} onClick={() => void enable()} size="small" variant="outlined">
+              Bật thông báo
+            </ErgButton>
+            <ErgButton onClick={snooze} size="small" variant="text">
+              Để sau
+            </ErgButton>
+          </Box>
+        )
+      }
+      onClose={snooze}
+      open={offer || (unsupported && !dismissed)}
+      title="Nhận thông báo từ ERG?"
+    >
+      {portal === "elearning"
+        ? "Em sẽ biết ngay khi có bài mới, sắp hết hạn nộp và khi có điểm. Tắt được bất cứ lúc nào trong mục Tôi."
+        : "Nhận ngay thông báo mới và việc cần làm, kể cả khi không mở ERG. Tắt được bất cứ lúc nào trong trình duyệt."}
+    </PushCard>
+  );
+}
+
+function PushDeniedHint({ accountId, portal }: { accountId: string; portal: PushPortal }) {
+  const config = useWebPushConfig(portal);
+  const [seen] = useState(() => readDeniedHintSeen(accountId));
+  const [open, setOpen] = useState(true);
+  const show = !seen && open && pushServerReady(config);
+
+  useEffect(() => {
+    if (show) markDeniedHintSeen(accountId);
+  }, [accountId, show]);
+
+  return (
+    <PushCard
+      actions={
+        <Box sx={{ display: "flex", mt: 1.5 }}>
+          <ErgButton onClick={() => setOpen(false)} size="small" variant="text">
+            Đã hiểu
+          </ErgButton>
+        </Box>
+      }
+      onClose={() => setOpen(false)}
+      open={show}
+      title="Thông báo đang bị chặn"
+    >
+      Muốn nhận lại: bấm biểu tượng ổ khóa cạnh địa chỉ trang → Thông báo → Cho phép. Trên iPhone: Cài đặt → Thông báo → ERG.
+    </PushCard>
+  );
+}
+
+function PushCard({ actions, children, onClose, open, title }: { actions: ReactNode; children: ReactNode; onClose: () => void; open: boolean; title: string }) {
   return (
     <Snackbar
       anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
@@ -140,29 +205,14 @@ function PushPermissionCard({ portal }: { portal: PushPortal }) {
         </Box>
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography id="erg-push-prompt-title" variant="subtitle2">
-            Nhận thông báo từ ERG?
+            {title}
           </Typography>
           <Typography color="text.secondary" component="p" variant="caption">
-            {portal === "elearning"
-              ? "Em sẽ biết ngay khi có bài mới, sắp hết hạn nộp và khi có điểm. Tắt được bất cứ lúc nào trong mục Tôi."
-              : "Nhận ngay thông báo mới và việc cần làm, kể cả khi không mở ERG. Tắt được bất cứ lúc nào trong trình duyệt."}
+            {children}
           </Typography>
-          {unsupported ? (
-            <Typography color="text.secondary" component="p" sx={{ mt: 1.5 }} variant="caption">
-              Máy này chưa nhận được thông báo đẩy. Thông báo mới vẫn hiện ở biểu tượng chuông khi em mở ERG.
-            </Typography>
-          ) : (
-            <Box sx={{ display: "flex", gap: 1, mt: 1.5 }}>
-              <ErgButton disabled={notifications.busy} onClick={() => void enable()} size="small" variant="outlined">
-                Bật thông báo
-              </ErgButton>
-              <ErgButton onClick={snooze} size="small" variant="text">
-                Để sau
-              </ErgButton>
-            </Box>
-          )}
+          {actions}
         </Box>
-        <ErgIconButton label="Đóng" onClick={snooze} size="small" sx={{ alignSelf: "flex-start" }}>
+        <ErgIconButton label="Đóng" onClick={onClose} size="small" sx={{ alignSelf: "flex-start" }}>
           <CloseRoundedIcon fontSize="small" />
         </ErgIconButton>
       </Box>

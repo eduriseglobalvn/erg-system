@@ -9,6 +9,7 @@ import FolderRoundedIcon from "@mui/icons-material/FolderRounded";
 import ForumRoundedIcon from "@mui/icons-material/ForumRounded";
 import HowToRegRoundedIcon from "@mui/icons-material/HowToRegRounded";
 import LeaderboardRoundedIcon from "@mui/icons-material/LeaderboardRounded";
+import NotificationsRoundedIcon from "@mui/icons-material/NotificationsRounded";
 import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
 import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
 import { ADMIN_ENTERPRISE_CONNECTORS_PATH, ADMIN_LEARNING_STANDARDS_PATH } from "@/app/portal-route-registry";
@@ -69,6 +70,13 @@ export const ADMIN_BASE_MENU_GROUPS: MenuGroup[] = [
         label: "Lịch giảng dạy",
         icon: <EventAvailableRoundedIcon sx={{ fontSize: 24 }} />,
         path: "/calendar",
+      }),
+      item({
+        id: "admin-notifications",
+        label: "Thông báo",
+        icon: <NotificationsRoundedIcon />,
+        path: "/notifications",
+        description: "Hộp thư thông báo; soạn và gửi thông báo, thông báo đẩy cho giáo viên, học viên.",
       }),
     ],
   },
@@ -217,6 +225,13 @@ export function withTimekeepingMenuState(groups: MenuGroup[], canAccess: (path: 
     return children.length ? [{ ...menuItem, children }] : [];
   };
   return groups.map((group) => ({ ...group, items: group.items.flatMap(refine) }));
+}
+
+/** Shows the unread inbox count on the top-level "Thông báo" item. */
+export function withNotificationBadge(groups: MenuGroup[], unread = 0): MenuGroup[] {
+  if (unread <= 0) return groups;
+  const badge = unread > 99 ? "99+" : String(unread);
+  return groups.map((group) => ({ ...group, items: group.items.map((menuItem) => (menuItem.id === "admin-notifications" ? { ...menuItem, badge } : menuItem)) }));
 }
 
 // Báo cáo (7 màn), Tổng đài, Zalo và API key bị ẩn: backend chưa có API đọc/ghi tương ứng (KE_HOACH 7.6). Chỉ thêm lại khi có endpoint thật.

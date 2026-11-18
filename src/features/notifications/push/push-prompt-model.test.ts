@@ -1,17 +1,39 @@
-import { expect, test } from "vitest";
+import { afterEach, expect, test } from "vitest";
 
-import { shouldOfferPushPrompt } from "./push-prompt-model";
+import { markDeniedHintSeen, pushServerReady, readDeniedHintSeen, shouldOfferPushPrompt, type PushPromptInput } from "./push-prompt-model";
 
-const DAY = 24 * 60 * 60_000;
-const NOW = 100 * DAY;
+const ready: PushPromptInput = { serverReady: true, subscriptionMissing: true, state: "default", dismissed: false, quizActive: false };
 
-test("never on the first visit, offered from the second", () => {
-  expect(shouldOfferPushPrompt({ visits: 1, snoozedAt: [] }, NOW)).toBe(false);
-  expect(shouldOfferPushPrompt({ visits: 2, snoozedAt: [] }, NOW)).toBe(true);
+afterEach(() => window.localStorage.clear());
+
+test("offered on every app open while this browser has no subscription", () => {
+  expect(shouldOfferPushPrompt(ready)).toBe(true);
 });
 
-test("after «Để sau» it waits 7 days, and stops after the second snooze", () => {
-  expect(shouldOfferPushPrompt({ visits: 5, snoozedAt: [NOW - 6 * DAY] }, NOW)).toBe(false);
-  expect(shouldOfferPushPrompt({ visits: 5, snoozedAt: [NOW - 7 * DAY] }, NOW)).toBe(true);
-  expect(shouldOfferPushPrompt({ visits: 9, snoozedAt: [NOW - 30 * DAY, NOW - 20 * DAY] }, NOW)).toBe(false);
+test("not offered once subscribed, while still checking, or when the server has push off", () => {
+  expect(shouldOfferPushPrompt({ ...ready, subscriptionMissing: false })).toBe(false);
+  expect(shouldOfferPushPrompt({ ...ready, subscriptionMissing: null })).toBe(false);
+  expect(shouldOfferPushPrompt({ ...ready, state: "enabled" })).toBe(false);
+  expect(shouldOfferPushPrompt({ ...ready, state: "unsupported" })).toBe(false);
+  expect(shouldOfferPushPrompt({ ...ready, serverReady: false })).toBe(false);
+});
+
+test("«Để sau» and an open quiz hide it for now", () => {
+  expect(shouldOfferPushPrompt({ ...ready, dismissed: true })).toBe(false);
+  expect(shouldOfferPushPrompt({ ...ready, quizActive: true })).toBe(false);
+});
+
+test("server readiness needs FCM or a VAPID key", () => {
+  expect(pushServerReady({ enabled: true, provider: "fcm" })).toBe(true);
+  expect(pushServerReady({ enabled: true, provider: "webpush", publicKey: "BPk" })).toBe(true);
+  expect(pushServerReady({ enabled: true, provider: "webpush", publicKey: null })).toBe(false);
+  expect(pushServerReady({ enabled: false, provider: "fcm" })).toBe(false);
+  expect(pushServerReady(undefined)).toBe(false);
+});
+
+test("the denied hint is remembered per account", () => {
+  expect(readDeniedHintSeen("a1")).toBe(false);
+  markDeniedHintSeen("a1");
+  expect(readDeniedHintSeen("a1")).toBe(true);
+  expect(readDeniedHintSeen("a2")).toBe(false);
 });
