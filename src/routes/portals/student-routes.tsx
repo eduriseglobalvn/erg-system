@@ -1,6 +1,5 @@
-import { createRoute } from "@tanstack/react-router";
+import { createRoute, redirect } from "@tanstack/react-router";
 
-import { enforcePermissionRoute } from "@/app/router/route-guards";
 import { studentPath } from "@/platform/workspaces/workspace-paths";
 import {
   authedRoute,
@@ -9,7 +8,6 @@ import {
   LearningOutcomesPage,
   permissionStaticData,
   PortableExamPage,
-  ProfileBody,
   StudentPage,
 } from "@/routes/portals/route-shared";
 
@@ -27,8 +25,10 @@ const studentRedirectRoute = createRoute({
 const studentProfileRoute = createRoute({
   getParentRoute: () => authedRoute,
   path: studentPath("/profile"),
-  beforeLoad: ({ context, location }) => enforcePermissionRoute(context.auth, location, "account.self.read"),
-  component: ProfileBody,
+  // Students have no account.self.read (owner rule 11/11); their profile is the dashboard's account tab.
+  beforeLoad: () => {
+    throw redirect({ href: "/student?tab=account", replace: true });
+  },
 });
 
 const studentPortableExamRoute = createRoute({
