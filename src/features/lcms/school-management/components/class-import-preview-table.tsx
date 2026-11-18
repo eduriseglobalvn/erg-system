@@ -86,6 +86,7 @@ export function PreviewTable({
               <TableCell>Dòng</TableCell>
               <TableCell>Tên lớp</TableCell>
               {usesGrades ? <TableCell>Khối</TableCell> : null}
+              <TableCell>Giáo viên phụ trách</TableCell>
               <TableCell align="right">Sĩ số & Danh sách</TableCell>
               <TableCell>Kiểm tra</TableCell>
             </TableRow>
@@ -115,6 +116,7 @@ export function PreviewTable({
                   <TableCell>{row.sourceRow}</TableCell>
                   <TableCell sx={{ fontWeight: 600 }}>{row.name || "—"}</TableCell>
                   {usesGrades ? <TableCell>{row.grade || "—"}</TableCell> : null}
+                  <TableCell>{row.homeroomTeacher || "Chưa gán"}</TableCell>
                   <TableCell align="right">
                     <Box sx={{ alignItems: "center", display: "flex", gap: 1, justifyContent: "flex-end" }}>
                       <Typography sx={{ fontWeight: 600 }}>{row.studentCount}</Typography>

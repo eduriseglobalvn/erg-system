@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   extractClassesFromSchoolSheets,
   extractStudentsFromRosterMatrix,
+  extractTeacherFromHeader,
   findRosterHeaderMapping,
   isSchoolRosterMatrix,
   parseClassNameAndGrade,
@@ -36,6 +37,11 @@ describe("vietnamese-school-sheet-parser", () => {
   it("detects school attendance sheet correctly", () => {
     expect(isSchoolRosterMatrix(mock9A1SheetMatrix)).toBe(true);
     expect(isSchoolRosterMatrix([["A", "B"], ["1", "2"]])).toBe(false);
+  });
+
+  it("extracts teacher name from header", () => {
+    expect(extractTeacherFromHeader(mock9A1SheetMatrix)).toBe("Trần Tường Tuấn");
+    expect(extractTeacherFromHeader(mock9A2SheetMatrix)).toBe("Trần Tường Tuấn");
   });
 
   it("finds header mapping and splits Họ đệm + Tên", () => {
@@ -79,12 +85,14 @@ describe("vietnamese-school-sheet-parser", () => {
     expect(classes[0]).toEqual(expect.objectContaining({
       name: "9A1",
       grade: "9",
+      homeroomTeacher: "Trần Tường Tuấn",
       studentCount: 5,
       valid: true,
     }));
     expect(classes[1]).toEqual(expect.objectContaining({
       name: "9A2",
       grade: "9",
+      homeroomTeacher: "Trần Tường Tuấn",
       studentCount: 3,
       valid: true,
     }));
@@ -104,6 +112,7 @@ describe("vietnamese-school-sheet-parser", () => {
     ];
 
     expect(isSchoolRosterMatrix(realSheetMatrix)).toBe(true);
+    expect(extractTeacherFromHeader(realSheetMatrix)).toBe("Trần Tướng Tuấn");
 
     const students = extractStudentsFromRosterMatrix(realSheetMatrix);
     expect(students).toHaveLength(3);

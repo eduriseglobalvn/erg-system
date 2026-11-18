@@ -1,10 +1,11 @@
 import type { SchoolClass, StudentImportRow } from "@/features/lcms/school-management/types/school-management-types";
 import {
   extractStudentsFromRosterMatrix,
+  extractTeacherFromHeader,
   isSchoolRosterMatrix,
 } from "@/features/lcms/school-management/utils/vietnamese-school-sheet-parser";
 
-export type ClassImportPreviewRow = Omit<SchoolClass, "id" | "homeroomTeacher"> & {
+export type ClassImportPreviewRow = Omit<SchoolClass, "id"> & {
   issues: string[];
   sourceRow: number;
   valid: boolean;
@@ -23,6 +24,7 @@ export function buildClassImportPreview(matrix: Array<Array<string | number>>, o
   // Smart Detection: If the matrix is a Vietnamese school roster / attendance sheet
   if (isSchoolRosterMatrix(matrix)) {
     const students = extractStudentsFromRosterMatrix(matrix, { usesGrades: options.usesGrades });
+    const teacher = extractTeacherFromHeader(matrix);
     const classMap = new Map<string, { count: number; grade: string; students: StudentImportRow[] }>();
 
     for (const student of students) {
@@ -48,6 +50,7 @@ export function buildClassImportPreview(matrix: Array<Array<string | number>>, o
 
         return {
           grade,
+          homeroomTeacher: teacher || "Chưa gán",
           name,
           studentCount: count,
           sourceRow: index + 1,
@@ -72,6 +75,7 @@ export function buildClassImportPreview(matrix: Array<Array<string | number>>, o
     .map((cells, index): ClassImportPreviewRow => {
       const name = readCell(cells, columns.name);
       const grade = options.usesGrades ? readCell(cells, columns.grade) : "";
+      const homeroomTeacher = readCell(cells, columns.teacher);
       const countText = readCell(cells, columns.studentCount);
       const studentCount = countText ? Number(countText) : 0;
       const issues: string[] = [];
@@ -87,6 +91,7 @@ export function buildClassImportPreview(matrix: Array<Array<string | number>>, o
 
       return {
         grade,
+        homeroomTeacher,
         issues,
         name,
         sourceRow: index + (hasHeader ? 2 : 1),
@@ -120,10 +125,12 @@ function resolveColumns(headers: string[], usesGrades: boolean) {
   const find = (...needles: string[]) => headers.findIndex((header) => needles.some((needle) => header.includes(needle)));
   const name = find("tenlop", "classname", "lop");
   const grade = find("khoi", "grade");
+  const teacher = find("giaovien", "gvcn", "teacher", "phutrach");
   const studentCount = find("siso", "studentcount", "soluong");
   return {
     name: name >= 0 ? name : 0,
     grade: usesGrades ? (grade >= 0 ? grade : 1) : -1,
+    teacher: teacher >= 0 ? teacher : usesGrades ? 2 : 1,
     studentCount: studentCount >= 0 ? studentCount : usesGrades ? 3 : 2,
   };
 }

@@ -16,6 +16,13 @@ export type RosterColumnMapping = {
   isSplitNameColumns: boolean;
 };
 
+export type ExtractedClassInfo = {
+  name: string;
+  grade: string;
+  homeroomTeacher: string;
+  studentCount: number;
+};
+
 /**
  * Normalizes text for keyword matching: removes accents, lowers case, strips punctuation.
  */
@@ -80,6 +87,37 @@ export function parseClassNameAndGrade(rawName: string): { name: string; grade: 
   const match = name.match(/^(\d+)/);
   const grade = match ? match[1] : "";
   return { name, grade };
+}
+
+/**
+ * Extracts homeroom or subject teacher name from header rows (rows 0-7).
+ */
+export function extractTeacherFromHeader(matrix: Array<Array<string | number>>): string {
+  const limit = Math.min(matrix.length, 8);
+
+  for (let rowIndex = 0; rowIndex < limit; rowIndex += 1) {
+    const row = matrix[rowIndex];
+    if (!row) continue;
+
+    for (let colIndex = 0; colIndex < row.length; colIndex += 1) {
+      const cell = String(row[colIndex] ?? "").trim();
+      const nextCell = String(row[colIndex + 1] ?? "").trim();
+
+      // Case 1: "Gv phụ trách: Trần Tường Tuấn" in one cell
+      const singleCellMatch = cell.match(/(?:gv ph[uụ] tr[aá]ch|gi[aá]o vi[eê]n ch[uủ] nhi[eệ]m|gvcn)\s*:\s*([^;,\n]+)/i);
+      if (singleCellMatch && singleCellMatch[1].trim()) {
+        return singleCellMatch[1].trim();
+      }
+
+      // Case 2: cell ends with label (e.g. "... Gv phụ trách: "), name is in nextCell
+      const endsWithLabel = /(?:gv ph[uụ] tr[aá]ch|gi[aá]o vi[eê]n ch[uủ] nhi[eệ]m|gvcn)\s*:?\s*$/i.test(cell);
+      if (endsWithLabel && nextCell && nextCell.length > 2 && !nextCell.match(/^\d+$/)) {
+        return nextCell;
+      }
+    }
+  }
+
+  return "";
 }
 
 /**
@@ -268,6 +306,7 @@ export function extractClassesFromSchoolSheets(
 
   for (let index = 0; index < sheets.length; index += 1) {
     const sheet = sheets[index];
+    const teacher = extractTeacherFromHeader(sheet.matrix);
     const students = extractStudentsFromRosterMatrix(sheet.matrix, {
       defaultClassName: sheet.name,
       usesGrades,
@@ -301,6 +340,7 @@ export function extractClassesFromSchoolSheets(
     results.push({
       name: className,
       grade,
+      homeroomTeacher: teacher || "Chưa gán",
       studentCount: students.length,
       sourceRow: index + 1,
       issues,

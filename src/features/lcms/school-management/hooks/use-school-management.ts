@@ -159,7 +159,7 @@ export function useSchoolManagement(initialSchoolId?: string | null) {
     await refreshSchoolData(selectedSchoolId);
   }, [gradeUpdateMutation, refreshSchoolData, selectedSchoolId]);
 
-  const addClasses = useCallback(async (rows: Array<Omit<SchoolClass, "id" | "homeroomTeacher">>) => {
+  const addClasses = useCallback(async (rows: Array<Omit<SchoolClass, "id">>) => {
     if (!selectedSchoolId) return [];
     const created: OperationalClassRecord[] = [];
     for (const row of rows) {

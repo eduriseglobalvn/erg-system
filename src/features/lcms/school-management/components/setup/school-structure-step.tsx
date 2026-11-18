@@ -31,7 +31,7 @@ export function SchoolStructureStep() {
   const usesGrades = schoolTypeUsesGrades(selectedSchool.schoolType);
   const unassignedCount = usesGrades ? selectedSchool.classes.filter((classroom) => !selectedSchool.grades.includes(classroom.grade)).length : 0;
 
-  async function handleImport(classes: Array<Omit<SchoolClass, "id" | "homeroomTeacher">>, students?: StudentImportRow[]) {
+  async function handleImport(classes: Array<Omit<SchoolClass, "id">>, students?: StudentImportRow[]) {
     let createdClasses: Array<{ id: string; name: string }> = [];
     if (classes.length > 0) {
       createdClasses = (await addClasses(classes)) ?? [];
