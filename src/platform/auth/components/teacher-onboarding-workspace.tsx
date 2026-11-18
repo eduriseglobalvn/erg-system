@@ -14,6 +14,7 @@ import { ERG_ASSETS } from "@/config/seo";
 import type { PasswordChangeResult } from "@/platform/auth/api/account-security-api";
 import { requiresTeacherOnboarding, type TeacherAccountLifecycle } from "@/platform/auth/types/account-lifecycle";
 import { describeOnboardingError } from "@/platform/auth/components/teacher-onboarding/onboarding-helpers";
+import { EmailStep, type EmailStepProps } from "@/platform/auth/components/teacher-onboarding/email-step";
 import { PasswordStep } from "@/platform/auth/components/teacher-onboarding/password-step";
 import { alpha } from "@mui/material/styles";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
@@ -22,6 +23,8 @@ type TeacherOnboardingWorkspaceProps = {
   onChangePassword: (input: { currentPassword: string; newPassword: string }) => Promise<PasswordChangeResult>;
   onComplete: (lifecycle: TeacherAccountLifecycle) => void;
   onLogout: () => void;
+  /** Present while the account still has to verify an email; the password step shows once it is done. */
+  emailStep?: Omit<EmailStepProps, "onVerified">;
 };
 
 export function TeacherOnboardingWorkspace(props: TeacherOnboardingWorkspaceProps) {
@@ -31,6 +34,7 @@ export function TeacherOnboardingWorkspace(props: TeacherOnboardingWorkspaceProp
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [emailVerified, setEmailVerified] = useState(!props.emailStep);
 
   async function run(action: () => Promise<void>) {
     setBusy(true);
@@ -187,7 +191,7 @@ export function TeacherOnboardingWorkspace(props: TeacherOnboardingWorkspaceProp
                   mx: "auto",
                 }}
               >
-                Đặt mật khẩu mới để bắt đầu sử dụng.
+                {emailVerified ? "Đặt mật khẩu mới để bắt đầu sử dụng." : "Bước 1/2: xác thực email, sau đó đặt mật khẩu mới."}
               </Typography>
             </Box>
 
@@ -208,6 +212,9 @@ export function TeacherOnboardingWorkspace(props: TeacherOnboardingWorkspaceProp
               </Alert>
             ) : null}
 
+            {!emailVerified && props.emailStep ? (
+              <EmailStep {...props.emailStep} onVerified={() => setEmailVerified(true)} />
+            ) : (
             <PasswordStep
               busy={busy}
               changePassword={changePassword}
@@ -219,6 +226,7 @@ export function TeacherOnboardingWorkspace(props: TeacherOnboardingWorkspaceProp
               setCurrentPassword={setCurrentPassword}
               setNewPassword={setNewPassword}
             />
+            )}
 
             {/* Logout Button */}
             <Button variant="text"

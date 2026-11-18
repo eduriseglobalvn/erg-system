@@ -1,5 +1,5 @@
-import type { ReactNode } from "react";
-import { Navigate, useLocation } from "@tanstack/react-router";
+import { useEffect, type ReactNode } from "react";
+import { Navigate, useLocation, useNavigate } from "@tanstack/react-router";
 
 import { getAuthScope, getCurrentAccount } from "@/platform/auth/api/auth-storage";
 import type { StoredAuthSession } from "@/platform/auth/api/auth-token-storage";
@@ -63,7 +63,7 @@ function EnforcedPortalAuthGate({ children, portal, requiredPermission }: Portal
   if (canAccessPortal({ portal, studentSession, teacherAccount: normalizedTeacherAccount, teacherSession, requiredPermission })) {
     // Onboarding is a staff flow; a learner-only account is never sent there (STU-01).
     if (needsOnboarding(normalizedTeacherAccount) && !isStudentOnlySession(workspaces)) {
-      return <Navigate replace search={{ redirect }} to="/onboarding" />;
+      return <NavigateOnce href={`/onboarding?${new URLSearchParams({ redirect }).toString()}`} />;
     }
 
     return (
@@ -86,6 +86,18 @@ function EnforcedPortalAuthGate({ children, portal, requiredPermission }: Portal
 
   const loginTarget = buildLoginRedirectTarget(location.pathname, location.searchStr, location.hash);
   return loginTarget ? <Navigate replace to={loginTarget} /> : null;
+}
+
+/**
+ * Navigates once per target. <Navigate> re-fires on every render of the gate, and each call cancels the one before
+ * it while the lazy first-login page is still loading: the tab froze on /teacher and the page never opened.
+ */
+export function NavigateOnce({ href }: { href: string }) {
+  const navigate = useNavigate();
+  useEffect(() => {
+    void navigate({ href, replace: true });
+  }, [navigate, href]);
+  return null;
 }
 
 export function AuthenticatedAccountGate({ children }: { children: ReactNode }) {

@@ -4,14 +4,15 @@ import Button from "@mui/material/Button";
 import Skeleton from "@mui/material/Skeleton";
 import Stack from "@mui/material/Stack";
 
-import { changeMyPassword } from "@/platform/auth/api/account-security-api";
+import { changeMyPassword, requestRecoveryEmailChallenge, verifyRecoveryEmailChallenge } from "@/platform/auth/api/account-security-api";
 import { saveCurrentAccount } from "@/platform/auth/api/auth-storage";
+import { NavigateOnce } from "@/platform/auth/components/portal-route-gates";
 import { TeacherOnboardingWorkspace } from "@/platform/auth/components/teacher-onboarding-workspace";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
 import { sanitizeLocalRedirect } from "@/platform/auth/utils/auth-redirects";
 import { requiresTeacherOnboarding, type TeacherAccountLifecycle } from "@/platform/auth/types/account-lifecycle";
 import { teacherPath } from "@/platform/workspaces/workspace-paths";
-import { Navigate, useLocation, useNavigate } from "@tanstack/react-router";
+import { useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 
 import { isBffAuthEnabled } from "@/lib/api-client";
@@ -88,7 +89,8 @@ export function TeacherOnboardingPage() {
     );
   }
 
-  if (!requiresTeacherOnboarding(auth.account.lifecycle)) return <Navigate replace to={redirect} />;
+  // Also the way out after the last step: saving the new lifecycle re-renders into this line.
+  if (!requiresTeacherOnboarding(auth.account.lifecycle)) return <NavigateOnce href={redirect} />;
 
   function persistLifecycle(lifecycle: TeacherAccountLifecycle) {
     if (!auth.account) return;
@@ -102,11 +104,17 @@ export function TeacherOnboardingPage() {
         if (result.lifecycle) persistLifecycle(result.lifecycle);
         return result;
       }}
-      onComplete={(lifecycle) => {
-        persistLifecycle(lifecycle);
-        void navigate({ href: redirect, replace: true });
-      }}
+      onComplete={persistLifecycle}
       onLogout={signOut}
+      emailStep={auth.account.lifecycle.nextSteps.includes("VERIFY_RECOVERY_EMAIL") ? {
+        accountEmail: auth.account.email ?? "",
+        onRequestCode: requestRecoveryEmailChallenge,
+        onVerifyCode: async (input) => {
+          const result = await verifyRecoveryEmailChallenge(input);
+          if (result.lifecycle) persistLifecycle(result.lifecycle);
+          return result;
+        },
+      } : undefined}
     />
   );
 }

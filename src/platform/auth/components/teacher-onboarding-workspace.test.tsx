@@ -45,3 +45,26 @@ describe("teacher onboarding workspace", () => {
     await waitFor(() => expect(onComplete).toHaveBeenCalled());
   });
 });
+
+describe("teacher onboarding workspace with an unverified email", () => {
+  test("verifies the email by code before it offers the password step", async () => {
+    const onRequestCode = vi.fn().mockResolvedValue({ challengeId: "c1", maskedEmail: "a***@erg.edu.vn", expiresAt: "2026-11-18T10:00:00+07:00", retryAfterSeconds: 60 });
+    const onVerifyCode = vi.fn().mockResolvedValue({ verified: true });
+    render(
+      <TeacherOnboardingWorkspace
+        onChangePassword={vi.fn()} onComplete={vi.fn()} onLogout={vi.fn()}
+        emailStep={{ accountEmail: "admin@erg.edu.vn", onRequestCode, onVerifyCode }}
+      />,
+    );
+
+    expect(screen.queryByRole("heading", { name: "Đổi mật khẩu lần đầu" })).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Email nhận mã")).toHaveValue("admin@erg.edu.vn");
+    fireEvent.click(screen.getByRole("button", { name: "Gửi mã xác minh" }));
+    await waitFor(() => expect(onRequestCode).toHaveBeenCalledWith("admin@erg.edu.vn"));
+
+    fireEvent.change(await screen.findByLabelText("Mã xác minh"), { target: { value: "12a3456" } });
+    fireEvent.click(screen.getByRole("button", { name: "Xác thực email" }));
+    await waitFor(() => expect(onVerifyCode).toHaveBeenCalledWith({ challengeId: "c1", otp: "123456" }));
+    expect(await screen.findByRole("heading", { name: "Đổi mật khẩu lần đầu" })).toBeInTheDocument();
+  });
+});

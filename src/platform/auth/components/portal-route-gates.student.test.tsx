@@ -6,7 +6,9 @@ const { auth, pathname } = vi.hoisted(() => ({
   pathname: { value: "/teacher/home" },
 }));
 
+const navigate = vi.hoisted(() => vi.fn());
 vi.mock("@tanstack/react-router", () => ({
+  useNavigate: () => navigate,
   Navigate: ({ to }: { to: string }) => <div data-testid="navigate">{to}</div>,
   useLocation: () => ({ pathname: pathname.value, searchStr: "", hash: "" }),
 }));
@@ -56,7 +58,8 @@ describe("PortalAuthGate with a learner-only session", () => {
   it("still sends a teacher with pending onboarding to /onboarding", () => {
     signIn(pendingOnboarding, ["TEACHER"], ["lms"]);
     render(<PortalAuthGate portal="lms"><p>teacher page</p></PortalAuthGate>);
-    expect(screen.getByTestId("navigate").textContent).toBe("/onboarding");
+    // once, by effect: <Navigate> re-fired on every render and the lazy page never opened
+    expect(navigate).toHaveBeenCalledWith({ href: "/onboarding?redirect=%2Fteacher%2Fhome", replace: true });
   });
 
   it("keeps a blocked student on access denied", () => {
