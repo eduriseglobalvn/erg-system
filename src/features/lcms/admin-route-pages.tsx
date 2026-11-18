@@ -8,7 +8,6 @@ import type { ContentScope, ManagementScope } from "@/types/scope-types";
 import { adminContentPathForSection } from "@/features/lcms/admin-content/admin-content-route";
 import { AdminContentOverview } from "@/features/lcms/admin-content/components/admin-content-overview";
 import { useAdminShellModel } from "@/features/lcms/admin-shell-context";
-import { AdminErgPortalWorkspace } from "@/features/lcms/pages/admin-erg-workspaces";
 
 const RolePermissionPage = lazy(() => import("@/features/rbac/components/role-permission-workspace").then((m) => ({ default: m.RolePermissionWorkspace })));
 const AuditLogPage = lazy(() => import("@/features/audit/components/audit-log-page").then((m) => ({ default: m.AuditLogPage })));
@@ -92,7 +91,7 @@ export function AdminSchoolsRoute() {
 export function AdminContentWorkspaceRoute() {
   const navigate = useNavigate();
   const model = useAdminShellModel();
-  if (!model.isPreservedWorkspace || !model.activeLeaf) return <AdminGenericRoute />;
+  if (!model.isPreservedWorkspace || !model.activeLeaf) return null;
   return (
     <Box sx={{ height: "100%", minHeight: 0, overflow: "hidden" }}>
       <DashboardContent
@@ -113,11 +112,6 @@ export function AdminContentWorkspaceRoute() {
       />
     </Box>
   );
-}
-
-/** Admin paths without a screen of their own (old links: customers, reports, settings ...) say "not found". */
-export function AdminGenericRoute() {
-  return <AdminErgPortalWorkspace />;
 }
 
 const CalendarMainPage = lazy(() => import("@/features/teaching-calendar/components/main/admin-calendar-main").then((m) => ({ default: m.AdminCalendarMain })));

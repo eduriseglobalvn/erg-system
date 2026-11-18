@@ -1,6 +1,6 @@
 import { expect, it } from "vitest";
 
-import { latestDraftId } from "./schedule-grid-model";
+import { classesOverWeeklyLimit, latestDraftId } from "./schedule-grid-model";
 
 it("picks the newest DRAFT batch, ignoring other statuses", () => {
   const items = [
@@ -11,4 +11,10 @@ it("picks the newest DRAFT batch, ignoring other statuses", () => {
   expect(latestDraftId(items)).toBe("new");
   expect(latestDraftId([])).toBeUndefined();
   expect(latestDraftId(undefined)).toBeUndefined();
+});
+
+it("warns only for classes with more than 2 periods in the week", () => {
+  const row = (classId: string) => ({ classId, className: classId.toUpperCase() });
+  expect(classesOverWeeklyLimit([row("a"), row("a"), row("b")])).toEqual([]);
+  expect(classesOverWeeklyLimit([row("a"), row("a"), row("a"), row("b"), row("")])).toEqual([{ className: "A", count: 3 }]);
 });

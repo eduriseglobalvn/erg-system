@@ -46,7 +46,7 @@ const CONTENT_REDIRECTED_SEGMENTS = ["questions", "quiz-bank", "quiz-editor"];
 // Redirect aliases of a renamed screen: they get no page of their own.
 const REDIRECT_ONLY_SEGMENTS = ["setting/setting-center-role", "employees/face-detection"];
 
-/** Component of the Admin menu entries that have their own screen; every other entry uses the generic host. */
+/** Component of each Admin menu entry; legacy entries without a real screen were removed (owner decision 18/11/2026). */
 function adminPageFor(wPath: string) {
   if (wPath === "settings/permissions") return page("AdminPermissionsRoute");
   if (wPath === "settings/roles") return page("AdminRolesRoute");
@@ -71,7 +71,7 @@ function adminPageFor(wPath: string) {
   if (wPath === "discussion") return discussionPage;
   if (wPath === "leaderboard") return leaderboardPage;
   if (wPath === "schools" || wPath.startsWith("schools/")) return page("AdminSchoolsRoute");
-  return page("AdminGenericRoute");
+  throw new Error(`Admin route /${wPath} has no page`);
 }
 
 // Pathless layout: the shell (menu, breadcrumb, quiz-import state) renders the pages below in its <Outlet />.

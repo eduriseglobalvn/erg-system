@@ -11,7 +11,7 @@ describe("legacy route redirects", () => {
   });
 
   it("does not redirect unknown paths", () => {
-    expect(resolveLegacyRouteRedirect("settings")).toEqual({ target: "lms", path: "/admin/settings" });
+    expect(resolveLegacyRouteRedirect("settings")).toBeUndefined();
   });
 
   it("keeps alias telemetry payload free of credentials", () => {

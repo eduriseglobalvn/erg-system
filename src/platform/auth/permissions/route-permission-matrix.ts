@@ -87,15 +87,8 @@ const ADMIN_EXTRA_PERMISSIONS: Record<string, Pick<RoutePermissionEntry, "resour
   "settings/permissions": { resource: "permission", action: "read", permission: "rbac.permission.read" },
   "settings/roles": { resource: "role", action: "read", permission: "rbac.role.read" },
   "settings/audit-log": { resource: "audit", action: "read", permission: "audit.read" },
-  users: { resource: "user", action: "manage", permission: "users.manage" },
   employees: { resource: "user", action: "manage", permission: "users.manage" },
   "employees/access-logs": { resource: "user.audit", action: "read", permission: "users.activity.read" },
-  "report/dashboard-report": { resource: "report", action: "read", permission: "lms.report.read" },
-  "report/crm-report": { resource: "report", action: "read", permission: "crm.analytics.read" },
-  "report/student-report": { resource: "report", action: "read", permission: "lms.report.read" },
-  "report/task-report": { resource: "report", action: "read", permission: "lms.report.read" },
-  "report/cash-flow-report": { resource: "report", action: "read", permission: "operations.manage" },
-  "report/pnl-report": { resource: "report", action: "read", permission: "crm.analytics.read" },
   "learning-outcomes": { resource: "learning-outcomes", action: "manage", permission: "learning.outcomes.manage" },
   // Own inbox (children: $notificationId). Senders without lms.admin land here after composing, so the send permission opens it too.
   notifications: { resource: "notification", action: "read", permission: "lms.admin", alternatePermissions: ["notification.campaign.send"], matchChildren: true },
@@ -134,17 +127,11 @@ function adminEntry(path: string): RoutePermissionEntry {
     const action = legacyPath.includes("imports") || legacyPath.includes("reviews") ? "update" : "read";
     return { path: normalizedPath, workspace: "ADMIN", resource: "school", action, permission: action === "update" ? "lms.school.update" : "lms.school.read" };
   }
-  if (legacyPath === "questions" || legacyPath === "quiz-bank" || legacyPath === "quiz-editor" || legacyPath === "rubrics" || legacyPath === "session-templates" || legacyPath === "report-templates") {
+  if (legacyPath === "questions" || legacyPath === "quiz-bank" || legacyPath === "quiz-editor") {
     return { path: normalizedPath, workspace: "ADMIN", resource: "quiz", action: legacyPath === "quiz-editor" ? "create" : "read", permission: legacyPath === "quiz-editor" ? "lms.quiz.create" : "lms.quiz.read" };
   }
-  if (legacyPath === "legal" || legacyPath.startsWith("settings") || legacyPath.startsWith("setting/")) {
+  if (legacyPath.startsWith("setting/")) {
     return { path: normalizedPath, workspace: "ADMIN", resource: "platform", action: "read", permission: "platform.read" };
-  }
-  if (legacyPath === "customers" || legacyPath === "center-tasks" || legacyPath.startsWith("integration/")) {
-    return { path: normalizedPath, workspace: "ADMIN", resource: "operations", action: "manage", permission: "operations.manage" };
-  }
-  if (legacyPath.startsWith("report/")) {
-    return { path: normalizedPath, workspace: "ADMIN", resource: "report", action: "read", permission: "lms.report.read" };
   }
   return { path: normalizedPath, workspace: "ADMIN", resource: "admin", action: "manage", permission: "lms.admin" };
 }
