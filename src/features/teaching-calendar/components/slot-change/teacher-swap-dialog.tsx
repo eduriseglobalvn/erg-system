@@ -21,10 +21,11 @@ import { ChangePreview } from "./change-preview";
 import { ScopeField, type ScopeOption } from "./scope-field";
 import { useFreshEvent, useSlotOptions } from "./use-slot-dialog-data";
 import { useSlotChange } from "./use-slot-change";
+import { nameInitials } from "@/domain/formatters/format-initials";
 
 const { color, radius, type } = ergEnterpriseTokens;
 const dd = (date: string) => formatDateVi(date).slice(0, 5);
-const initialsOf = (name: string) => name.split(/[\s.]+/).filter(Boolean).slice(-2).map((word) => word[0]?.toLocaleUpperCase("vi")).join("");
+const initialsOf = (name: string) => nameInitials(name.replace(/\./g, " "));
 
 type Props = { event: TeachingCalendarEvent; onClose: () => void };
 

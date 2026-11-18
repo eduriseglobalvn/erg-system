@@ -68,7 +68,7 @@ export function handleStudentLoginSubmit(event: FormEvent<HTMLFormElement>, auth
   void (async () => {
     try {
       const session = await loginStudent({ email: auth.loginForm.email, password: auth.loginForm.password, rememberMe: auth.rememberMe });
-      setNotice({ tone: "success", message: `Chào ${session.name}, đang chuyển vào Student Workspace.` });
+      setNotice({ tone: "success", message: `Chào ${session.name}, đang chuyển vào trang học sinh.` });
       navigateTo(redirect);
     } catch (error) {
       setNotice({ tone: "error", message: getFriendlyAuthErrorMessage(error, "Không thể đăng nhập tài khoản học sinh này.") });
@@ -134,7 +134,7 @@ export function getFriendlyAuthErrorMessage(error: unknown, fallback: string) {
     }
     // Any other 429 is load (nginx limit, AUTH_PASSWORD_HASH_BUSY), not this account's attempts.
     if (error.status === 429) return rateLimitMessage(error) ?? fallback;
-    if (error.status === 401) return "Email hoặc mật khẩu chưa đúng. Vui lòng kiểm tra lại thông tin đăng nhập.";
+    if (error.status === 401) return "Email, mã học sinh hoặc mật khẩu chưa đúng. Kiểm tra lại rồi thử lần nữa.";
     if (error.code === "AUTH_LOGIN_IN_PROGRESS") return "Một tab khác đang xử lý đăng nhập cho tài khoản này. Vui lòng chờ một chút rồi thử lại.";
     return error.message || fallback;
   }

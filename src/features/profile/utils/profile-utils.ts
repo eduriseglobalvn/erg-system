@@ -1,8 +1,5 @@
 export function getProfileInitials(value: string) {
-  const parts = value.trim().split(/\s+/).filter(Boolean);
-  const first = parts.at(0)?.charAt(0) ?? "E";
-  const last = parts.length > 1 ? parts.at(-1)?.charAt(0) : "";
-  return `${first}${last}`.toUpperCase();
+  return nameInitials(value) || "E";
 }
 export function getPasswordScore(value: string) {
   if (!value) return 0;
@@ -25,4 +22,5 @@ export function validatePasswordChange(form: PasswordFormState) {
   return null;
 }
 import type { PasswordFormState } from "@/features/profile/types/profile-types";
+import { nameInitials } from "@/domain/formatters/format-initials";
 

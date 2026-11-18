@@ -9,96 +9,54 @@ import Typography from "@mui/material/Typography";
 
 import { canonicalCrmWorkspaceHostForRuntime } from "@/platform/workspaces/workspace-route";
 import type { AccessDeniedWorkspaceTarget } from "@/platform/auth/utils/access-denied";
-import { alpha } from "@mui/material/styles";
-import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
+import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
 
 export function AccessDeniedWorkspaceTargetCard({ target }: { target: AccessDeniedWorkspaceTarget }) {
+  const tone = workspaceTone(target.workspace);
   return (
     <Box
       component="a"
       href={workspaceHref(target)}
       sx={{
         alignItems: "center",
-        bgcolor: "#FFFFFF",
-        border: "1px solid",
-        borderColor: "divider",
-        borderRadius: "16px",
+        bgcolor: "background.paper",
+        border: 1,
+        borderColor: t.color.border,
+        borderRadius: `${t.radius.card}px`,
         color: "text.primary",
         display: "flex",
-        gap: 1.75,
-        minHeight: 76,
-        p: 2,
+        gap: 1.5,
+        minHeight: 64,
+        p: 1.5,
         textDecoration: "none",
-        transition: "all 200ms cubic-bezier(0.16, 1, 0.3, 1)",
-        boxShadow: "0 2px 6px rgba(0, 0, 0, 0.02)",
-        "&:hover": {
-          borderColor: "primary.main",
-          bgcolor: "rgba(240, 247, 255, 0.5)",
-          boxShadow: `0 8px 24px ${alpha(ergEnterpriseTokens.color.primary, 0.1)}`,
-          transform: "translateY(-1px)",
-          "& .target-arrow": {
-            transform: "translateX(3px)",
-            color: "primary.main",
-          },
-        },
-        "&:focus-visible": {
-          boxShadow: `0 0 0 3px ${alpha(ergEnterpriseTokens.color.primary, 0.25)}`,
-          outline: "none",
-        },
+        transition: (theme) => theme.transitions.create(["border-color", "background-color"]),
+        "&:hover": { bgcolor: t.color.primarySofter, borderColor: "primary.main", "& .target-arrow": { color: "primary.main" } },
+        "&:focus-visible": { outline: `2px solid ${t.color.primary}`, outlineOffset: 2 },
       }}
     >
-      <Avatar
-        sx={{
-          bgcolor: workspaceBgColor(target.workspace),
-          color: workspaceIconColor(target.workspace),
-          height: 42,
-          width: 42,
-          borderRadius: "12px",
-          border: `1px solid ${ergEnterpriseTokens.color.border}`,
-        }}
-      >
+      <Avatar sx={{ bgcolor: tone.background, borderRadius: `${t.radius.control}px`, color: tone.color, height: 40, width: 40 }}>
         <WorkspaceTargetIcon workspace={target.workspace} />
       </Avatar>
       <Box sx={{ minWidth: 0 }}>
-        <Typography sx={{ fontSize: 14, fontWeight: 600, color: "text.primary", letterSpacing: "-0.01em" }}>
-          {target.label}
-        </Typography>
-        <Typography sx={{ color: "text.secondary", fontSize: 12, lineHeight: 1.45, mt: 0.25 }}>
-          {target.description}
-        </Typography>
+        <Typography component="p" variant="subtitle2">{target.label}</Typography>
+        <Typography color="text.secondary" component="p" variant="caption">{target.description}</Typography>
       </Box>
-      <ArrowForwardRoundedIcon
-        className="target-arrow"
-        sx={{
-          color: "text.disabled",
-          fontSize: 18,
-          ml: "auto",
-          transition: "transform 180ms ease, color 180ms ease",
-        }}
-      />
+      <ArrowForwardRoundedIcon className="target-arrow" fontSize="small" sx={{ color: "text.disabled", ml: "auto" }} />
     </Box>
   );
 }
 
-function workspaceBgColor(workspace: AccessDeniedWorkspaceTarget["workspace"]) {
-  if (workspace === "ADMIN") return "rgba(105, 108, 255, 0.1)";
-  if (workspace === "TEACHER") return alpha(ergEnterpriseTokens.color.primary, 0.1);
-  if (workspace === "STUDENT") return alpha(ergEnterpriseTokens.color.success, 0.12);
-  return alpha(ergEnterpriseTokens.color.warning, 0.12);
-}
-
-function workspaceIconColor(workspace: AccessDeniedWorkspaceTarget["workspace"]) {
-  if (workspace === "ADMIN") return "#0071E3";
-  if (workspace === "TEACHER") return ergEnterpriseTokens.color.primary;
-  if (workspace === "STUDENT") return ergEnterpriseTokens.statusTint.success.color;
-  return "#D97706";
+function workspaceTone(workspace: AccessDeniedWorkspaceTarget["workspace"]) {
+  if (workspace === "STUDENT") return { background: t.color.successSoft, color: t.color.success };
+  if (workspace === "CRM") return { background: t.color.warningSoft, color: t.color.warning };
+  return { background: t.color.primarySofter, color: t.color.primary };
 }
 
 function WorkspaceTargetIcon({ workspace }: { workspace: AccessDeniedWorkspaceTarget["workspace"] }) {
-  if (workspace === "ADMIN") return <AdminPanelSettingsRoundedIcon sx={{ fontSize: 20 }} />;
-  if (workspace === "TEACHER") return <SchoolRoundedIcon sx={{ fontSize: 20 }} />;
-  if (workspace === "STUDENT") return <PersonRoundedIcon sx={{ fontSize: 20 }} />;
-  return <BusinessRoundedIcon sx={{ fontSize: 20 }} />;
+  if (workspace === "ADMIN") return <AdminPanelSettingsRoundedIcon fontSize="small" />;
+  if (workspace === "TEACHER") return <SchoolRoundedIcon fontSize="small" />;
+  if (workspace === "STUDENT") return <PersonRoundedIcon fontSize="small" />;
+  return <BusinessRoundedIcon fontSize="small" />;
 }
 
 function workspaceHref(target: AccessDeniedWorkspaceTarget) {

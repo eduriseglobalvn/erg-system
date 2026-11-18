@@ -14,6 +14,7 @@ import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
 
 import { loadQuestionThread, questionThreadKeys, sendQuestionThreadMessage, type QuestionThread } from "../api/student-question-thread-api";
 import { Composer, MessageList, QuestionCard } from "./student-question-thread-parts";
+import { nameInitials } from "@/domain/formatters/format-initials";
 
 export const THANKS_MESSAGE = "Em cảm ơn cô ạ!";
 
@@ -27,7 +28,7 @@ type ThreadPaneProps = {
   onOpenAssignment?: (assignmentId: string) => void;
 };
 
-const teacherInitials = (name: string | null) => (name ?? "Giáo viên").split(/\s+/).filter(Boolean).slice(-2).map((word) => word[0]).join("").toUpperCase();
+const teacherInitials = (name: string | null) => nameInitials(name) || "GV";
 
 /** Right column of H12 / screen H12m: one question thread with the teacher. */
 export function StudentQuestionThreadPane({ accountId, threadId, mobile, practice, onBack, onOpenAssignment }: ThreadPaneProps) {

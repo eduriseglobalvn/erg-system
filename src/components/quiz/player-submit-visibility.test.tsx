@@ -152,7 +152,21 @@ describe("submit is always available", () => {
   it("mobile testing mode puts Nộp bài in the dock on the last question", () => {
     render(mobile({ isFirstQuestion: false, isLastQuestion: true }));
     expect(within(screen.getByTestId("mobile-player-footer")).getByRole("button", { name: "Nộp bài" })).toBeEnabled();
-    expect(screen.queryByRole("button", { name: "Câu tiếp" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Sau" })).toBeNull();
+  });
+
+  it("mobile dock has Trước (outlined), the list button and Sau (the one contained), each at least 44px", () => {
+    const onPrev = vi.fn();
+    render(mobile({ isFirstQuestion: false, onPrev }));
+    const dock = within(screen.getByTestId("mobile-player-footer"));
+    const prev = dock.getByRole("button", { name: "Trước" });
+    expect(prev.className).toContain("MuiButton-outlined");
+    fireEvent.click(prev);
+    expect(onPrev).toHaveBeenCalledOnce();
+    expect(dock.getByRole("button", { name: "Mở danh sách câu, 0/20 đã làm" })).toBeTruthy();
+    const next = dock.getByRole("button", { name: "Sau" });
+    expect(next.className).toContain("MuiButton-contained");
+    for (const button of dock.getAllByRole("button")) expect(getComputedStyle(button).minHeight).toBe("44px");
   });
 
   it("practice mode shows only Kết quả before the answer is checked, and Câu tiếp after", () => {
@@ -181,7 +195,7 @@ describe("submit is always available", () => {
     expect(document.querySelectorAll(".MuiButton-contained")).toHaveLength(1);
   });
 
-  it("mobile practice mode swaps the single button from Kết quả to Câu tiếp", () => {
+  it("mobile practice mode swaps the primary button from Kết quả to Sau, and hands in from the last question", () => {
     const onNext = vi.fn();
     const onSubmitCurrentQuestion = vi.fn();
     const props = { isTestingMode: false, isTrainingMode: true, currentAnswerComplete: true, onNext, onSubmitCurrentQuestion };
@@ -192,8 +206,14 @@ describe("submit is always available", () => {
 
     rerender(mobile({ ...props, currentQuestionSubmitted: true }));
     expect(screen.queryByRole("button", { name: "Kết quả" })).toBeNull();
-    fireEvent.click(screen.getByRole("button", { name: "Câu tiếp" }));
+    fireEvent.click(screen.getByRole("button", { name: "Sau" }));
     expect(onNext).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole("button", { name: "Trước" })).toBeTruthy();
+
+    const onRequestSubmit = vi.fn();
+    rerender(mobile({ ...props, currentQuestionSubmitted: true, isFirstQuestion: false, isLastQuestion: true, onRequestSubmit }));
+    fireEvent.click(within(screen.getByTestId("mobile-player-footer")).getByRole("button", { name: "Nộp bài" }));
+    expect(onRequestSubmit).toHaveBeenCalledOnce();
   });
 
   it("mobile bookmark target is at least 44px", () => {

@@ -38,8 +38,8 @@ describe("parseBirthdayForApi", () => {
 });
 
 describe("getInitials", () => {
-  it("uses first and last word", () => {
-    expect(getInitials("Nguyễn Văn An")).toBe("NA");
+  it("uses the shared initials of the last two words", () => {
+    expect(getInitials("Nguyễn Văn An")).toBe("VA");
     expect(getInitials("An")).toBe("A");
     expect(getInitials("")).toBe("H");
   });

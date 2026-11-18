@@ -14,6 +14,7 @@ import { ContentPendingSkeleton } from "@/routes/route-feedback";
 import { StudentTabReplaced } from "@/features/elearning/student-dashboard/components/student-tab-replaced";
 import { useSingleStudentTab } from "@/features/elearning/student-dashboard/hooks/use-single-student-tab";
 import { useStudentPushRefresh } from "@/features/elearning/student-dashboard/hooks/use-student-push-refresh";
+import { usePageTitle } from "@/components/seo/app-seo";
 import { useStudentViewState } from "@/features/elearning/student-dashboard/hooks/use-student-view-state";
 import { useStudentDashboardQuery } from "@/features/elearning/student-dashboard/hooks/use-student-dashboard-query";
 import {
@@ -38,6 +39,7 @@ import type {
   StudentDockPageKey,
   StudentPageKey,
 } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
+import { STUDENT_PAGE_TITLES } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
 import { getDiscussionOverviewPreview } from "@/features/elearning/student-dashboard/utils/discussion-overview";
 import {
   ANNOUNCEMENT_POPUP_SNOOZE_MS,
@@ -120,6 +122,8 @@ export function StudentDashboardWorkspaceRuntime() {
     ? localeCopy
     : { ...localeCopy, navItems: localeCopy.navItems.filter((item) => item.key !== "ranking") }), [leaderboardEnabled, localeCopy]);
   const sidebarData = useStudentSidebarData({ accountId: account?.id, classId: dashboardProfile.classId ?? "", leaderboardEnabled });
+  // The class board names the class; the session's className is a job title («Giáo viên») for students signed in through the shared login.
+  const boardClass = sidebarData.className && !/^lớp\s/i.test(sidebarData.className) ? `Lớp ${sidebarData.className}` : sidebarData.className;
   const assignments = useMemo(
     () => studentDashboardQuery.data?.assignments ?? [],
     [studentDashboardQuery.data?.assignments],
@@ -160,7 +164,6 @@ export function StudentDashboardWorkspaceRuntime() {
   const openAssignments = assignments.filter((assignment) => assignment.status !== "submitted");
   const overdueAssignments = assignments.filter((assignment) => assignment.status === "overdue");
   const completedAssignments = assignments.filter((assignment) => assignment.status === "submitted");
-  const averageAssignmentScore = dashboardProfile.averageScore;
   const priorityAssignment = openAssignments[0] ?? assignments[0];
   const pinnedAnnouncement = teacherAnnouncements.find((announcement) => announcement.isPinned) ?? teacherAnnouncements[0];
   const latestAnnouncement = teacherAnnouncements[0];
@@ -256,6 +259,9 @@ export function StudentDashboardWorkspaceRuntime() {
 
   const backToDashboard = () => setViewState({ type: "dashboard" });
 
+  // A ?tab=ranking link or a switched-off leaderboard falls back to the overview.
+  const shownPage: StudentPageKey = activePage === "ranking" && !leaderboardEnabled ? "overview" : activePage;
+  usePageTitle(viewState.type === "quiz" ? "Làm bài" : STUDENT_PAGE_TITLES[shownPage]);
   if (studentTab.replaced) return <StudentTabReplaced onUseHere={studentTab.claim} />;
 
   if (viewState.type === "quiz" && !currentAssignment) {
@@ -274,8 +280,7 @@ export function StudentDashboardWorkspaceRuntime() {
   const openTierView = (view: TierView) => { setTierView(view); setActivePage("ranking"); setViewState({ type: "dashboard" }); };
   const handlePageChange = (page: StudentPageKey) => {
     setTierView(null);
-    const targetPage = page === "scores" ? "assignments" : page;
-    setActivePage(targetPage);
+    setActivePage(page);
     setViewState({ type: "dashboard" });
   };
   const announcementToast = latestAnnouncement ? (
@@ -284,8 +289,6 @@ export function StudentDashboardWorkspaceRuntime() {
       onClose={() => setAnnouncementPopupOpen(false)} onOpenDetail={openAnnouncementDetail} onSnooze={snoozeAnnouncementPopup}
     />
   ) : null;
-  // A ?tab=ranking link or a switched-off leaderboard falls back to the overview.
-  const shownPage: StudentPageKey = activePage === "ranking" && !leaderboardEnabled ? "overview" : activePage;
   const dashboardViews = (
     <>
       {studentDashboardQuery.isError ? (
@@ -296,7 +299,7 @@ export function StudentDashboardWorkspaceRuntime() {
           announcement={pinnedAnnouncement} assignmentsFailed={studentDashboardQuery.isError && openAssignments.length === 0} assignmentsLoading={studentDashboardQuery.isLoading && openAssignments.length === 0}
           completedAssignments={completedAssignments} copy={copy} discussionPreview={discussionPreview}
           openAssignments={openAssignments} overdueAssignments={overdueAssignments} priorityAssignment={priorityAssignment}
-          profile={dashboardProfile} surface={surface} onOpenAssignment={openAssignment}
+          profile={boardClass ? { ...dashboardProfile, className: boardClass } : dashboardProfile} surface={surface} onOpenAssignment={openAssignment}
           onPageChange={(page, filter) => { setAssignmentsFilter(filter ?? "todo"); setActivePage(page); }}
         />
       ) : null}
@@ -307,7 +310,7 @@ export function StudentDashboardWorkspaceRuntime() {
           hasMore={studentDashboardQuery.data?.assignmentsHasMore === true} loadingMore={studentDashboardQuery.isPlaceholderData} onLoadMore={loadMoreAssignments}
         />
       ) : null}
-      {shownPage === "scores" ? <ScoresView assignments={assignments} copy={copy} /> : null}
+      {shownPage === "scores" ? <ScoresView assignments={assignments} mobile={surface === "mobile-web"} onOpenAssignment={openAssignment} /> : null}
       {shownPage === "discussion" ? (
         <DiscussionView
           copy={copy}
@@ -334,11 +337,10 @@ export function StudentDashboardWorkspaceRuntime() {
       {shownPage === "account" ? (
         <AccountView
           account={account}
-          averageAssignmentScore={averageAssignmentScore}
+          className={boardClass}
           copy={copy}
-          openAssignments={openAssignments}
           profile={dashboardProfile}
-          onHelpOpen={openHelp} onSignIn={handleSignIn} onTierOpen={sidebarData.tier ? () => openTierView("tier") : undefined}
+          onHelpOpen={openHelp} onScoresOpen={surface === "mobile-web" ? () => handlePageChange("scores") : undefined} onSignIn={handleSignIn} onTierOpen={sidebarData.tier ? () => openTierView("tier") : undefined}
           onSignOut={handleSignOut}
         />
       ) : null}

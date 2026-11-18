@@ -63,11 +63,10 @@ export function MobilePlayerIntro({ playerCardStyle, answeredCount = 0, question
     <Box sx={{ display: { md: "none" } }}>
       <Box
         component="section"
-        sx={{ ...playerCardStyle, backgroundImage: `linear-gradient(165deg, ${tk.color.primarySoft} 0%, transparent 72%)`, borderColor: "transparent", minHeight: "100vh", pb: 16 }}
+        sx={{ ...playerCardStyle, borderColor: "transparent", minHeight: "100vh", pb: 16 }}
       >
         <Box sx={{ display: "grid", gap: 1.5, px: 2, pt: 2 }}>
           <Box sx={{ bgcolor: tk.color.surface, border: `1px solid ${tk.color.border}`, borderRadius: `var(--quiz-radius, ${tk.radius.card}px)`, display: "grid", gap: 1.5, overflow: "hidden", p: 2.5, position: "relative" }}>
-            <Box aria-hidden sx={{ bgcolor: tk.color.primarySofter, borderRadius: "50%", height: 116, position: "absolute", right: -18, top: -40, width: 116 }} />
             <Box sx={{ alignItems: "center", display: "flex", gap: 1, position: "relative" }}>
               <Box aria-hidden sx={{ bgcolor: `var(--quiz-accent, ${tk.color.primary})`, borderRadius: `${tk.radius.card}px`, color: `var(--quiz-accent-contrast, ${tk.color.surface})`, display: "grid", flexShrink: 0, height: 48, placeItems: "center", width: 48 }}>
                 <QuizRoundedIcon />

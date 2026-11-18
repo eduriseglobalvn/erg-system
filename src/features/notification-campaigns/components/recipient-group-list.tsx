@@ -9,11 +9,12 @@ import { ErgButton, ErgIconButton } from "@/components/erg-mui";
 import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
 
 import type { RecipientCard } from "../api/campaign-types";
+import { nameInitials } from "@/domain/formatters/format-initials";
 
 const FIRST_PAGE = 5;
 const MORE_STEP = 100;
 
-const initials = (name = "") => name.trim().split(/\s+/).slice(-2).map((word) => word.charAt(0)).join("").toUpperCase();
+const initials = (name = "") => nameInitials(name);
 
 type RecipientGroup = { cards: RecipientCard[]; isClass: boolean; key: string };
 type Props = { groups: RecipientGroup[]; onRemove: (userId: string) => void; onRemoveGroup: (key: string) => void };

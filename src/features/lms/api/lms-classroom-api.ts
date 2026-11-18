@@ -13,6 +13,7 @@ import {
 } from "@/features/lms/api/lms-graphql-shared";
 import { isObject, validateResponse } from "@/lib/validate-response";
 import { formatShortDateTimeVi } from "@/features/lms/api/lms-date-label";
+import { nameInitials } from "@/domain/formatters/format-initials";
 
 export type LmsClassWorkspaceInput = {
   tenantId?: string;
@@ -216,13 +217,7 @@ function gradeLabelFor(value?: string | number | null, fallback?: string) {
 }
 
 function initials(value: string) {
-  return value
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(-2)
-    .map((part) => part[0])
-    .join("")
-    .toUpperCase();
+  return nameInitials(value);
 }
 
 function mapStudentStatus(status: string | null | undefined, index: number): StudentStatus {

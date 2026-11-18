@@ -155,7 +155,7 @@ export function PlayerReadyView({
 
     return (
       <QuizThemeSurface quiz={readyQuiz} className="quiz-player-shell" style={{ height: "100%" }}>
-        <PlayerWebPage alignTop hero backLabel="Bài tập" meta={quizMeta} title={readyQuiz.title} onBack={exit}>
+        <PlayerWebPage alignTop backLabel="Bài tập" meta={quizMeta} title={readyQuiz.title} onBack={exit}>
           <QuizWelcomeScreen
             answeredCount={answeredCount} canvasStyle={canvasStyle} isTrainingMode={isTrainingMode}
             onStart={handleStartQuiz} playerCardStyle={playerCardStyle}

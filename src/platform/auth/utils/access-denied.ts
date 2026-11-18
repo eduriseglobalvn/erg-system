@@ -27,38 +27,38 @@ const WORKSPACE_TARGETS: readonly AccessDeniedWorkspaceTarget[] = [
   {
     workspace: "ADMIN",
     path: "/admin",
-    label: "Admin Workspace",
+    label: "Cổng quản trị",
     description: "Quản trị LMS, nội dung và phân quyền",
     permission: "lms.admin",
   },
   {
     workspace: "TEACHER",
     path: "/teacher",
-    label: "Teacher Workspace",
+    label: "Cổng giáo viên",
     description: "Lớp học, bài tập, điểm và lịch dạy",
     permission: "lms.dashboard.read",
   },
   {
     workspace: "STUDENT",
     path: "/student",
-    label: "Student Workspace",
+    label: "Cổng học sinh",
     description: "Khóa học, bài tập và kết quả cá nhân",
     permission: "elearning.assignment.read_self",
   },
   {
     workspace: "CRM",
     path: "/",
-    label: "CRM Workspace",
+    label: "Cổng điều hành trung tâm",
     description: "Điều hành cơ hội và hoạt động trung tâm",
     permission: "crm.workspace.access",
   },
 ] as const;
 
 const WORKSPACE_LABELS: Record<Workspace, string> = {
-  ADMIN: "Admin Workspace",
-  TEACHER: "Teacher Workspace",
-  STUDENT: "Student Workspace",
-  CRM: "CRM Workspace",
+  ADMIN: "Cổng quản trị",
+  TEACHER: "Cổng giáo viên",
+  STUDENT: "Cổng học sinh",
+  CRM: "Cổng điều hành trung tâm",
 };
 
 export function workspaceFromAccessDeniedPortal(value: string | null | undefined): Workspace | undefined {
@@ -69,7 +69,7 @@ export function workspaceFromAccessDeniedPortal(value: string | null | undefined
 
 export function accessDeniedWorkspaceLabel(value: string | null | undefined) {
   const workspace = workspaceFromAccessDeniedPortal(value);
-  return workspace ? WORKSPACE_LABELS[workspace] : "workspace này";
+  return workspace ? WORKSPACE_LABELS[workspace] : "khu vực này";
 }
 
 export function resolveAccessDeniedTargets(claims: AccessDeniedClaims): AccessDeniedWorkspaceTarget[] {
@@ -118,14 +118,6 @@ export function portalKeyFromAccessDeniedValue(value: string): NonNullable<Store
   if (value === "admin" || value === "crm" || value === "lcms" || value === "lms" || value === "elearning") return value;
   const workspace = workspaceFromAccessDeniedPortal(value);
   return workspace ? legacyPortalFromWorkspace(workspace) : undefined;
-}
-
-export function accessDeniedPathLabel(value: string) {
-  try {
-    return new URL(value, "https://erg.local").pathname;
-  } catch {
-    return "/";
-  }
 }
 
 export function goBackFromAccessDenied(goHome: () => void) {

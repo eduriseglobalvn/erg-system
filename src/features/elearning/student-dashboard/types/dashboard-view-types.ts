@@ -11,6 +11,17 @@ export type StudentViewState =
 
 export type StudentPageKey = "overview" | "assignments" | "scores" | "discussion" | "ranking" | "announcements" | "account";
 
+// Same words as the sidebar: the views switch without a URL change, so the browser tab title follows them.
+export const STUDENT_PAGE_TITLES: Record<StudentPageKey, string> = {
+  overview: "Tổng quan",
+  assignments: "Bài tập",
+  scores: "Điểm số",
+  ranking: "Thi đua",
+  discussion: "Thảo luận",
+  announcements: "Hộp thư",
+  account: "Tài khoản",
+};
+
 export type StudentDockPageKey = "overview" | "assignments" | "scores" | "discussion" | "ranking" | "announcements" | "account";
 
 export type DiscussionScrollTarget = {

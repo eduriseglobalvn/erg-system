@@ -1,52 +1,52 @@
 import type { ReactNode } from "react";
 import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 
 import { ERG_ASSETS } from "@/config/seo";
+import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
 
-/** Single login backdrop for every auth screen: the ERG brand artwork (same look as before the 7.5 pass). */
+/** Single backdrop for every auth screen: flat page colour from tokens (mockup chung-dang-nhap). */
 export function AuthPageBackdrop({ children }: { children: ReactNode }) {
   return (
     <Box
       component="main"
       sx={{
-        backgroundColor: "primary.light",
-        backgroundImage: "url('https://media.erg.edu.vn/logo/bg.jpg')",
-        backgroundPosition: "center",
-        backgroundSize: "cover",
+        bgcolor: t.color.surfaceSubtle,
         display: "grid",
         minHeight: "100svh",
         overflowX: "hidden",
-        position: "relative",
         px: 2,
         py: 3,
       }}
     >
-      <Box aria-hidden sx={{ bgcolor: "rgba(255,255,255,0.1)", inset: 0, pointerEvents: "none", position: "absolute" }} />
-      <Box sx={{ display: "grid", position: "relative", zIndex: 1 }}>{children}</Box>
+      {children}
     </Box>
   );
 }
 
-/** Frosted login card with the ERG logo (restored glass look); fields inside stay solid for legibility. */
+/** Login card: 1px border only, no shadow (card rule in CLAUDE.md). */
 export function AuthCard({ children }: { children: ReactNode }) {
   return (
     <Box
       component="section"
       sx={{
         alignSelf: "center",
-        backdropFilter: "blur(24px)",
-        bgcolor: "rgba(255,255,255,0.55)",
-        border: "1px solid rgba(255,255,255,0.7)",
-        borderRadius: 3,
-        boxShadow: "0 30px 90px rgba(72,81,156,0.2)",
+        bgcolor: "background.paper",
+        border: 1,
+        borderColor: t.color.border,
+        borderRadius: `${t.radius.shell}px`,
         justifySelf: "center",
-        maxWidth: 440,
+        maxWidth: 420,
         p: { xs: 3, sm: 4 },
         width: "100%",
       }}
     >
-      <Box sx={{ display: "grid", justifyItems: "center", mb: 3 }}>
-        <Box alt="ERG" component="img" src={ERG_ASSETS.logo} sx={{ filter: "drop-shadow(0 12px 26px rgba(72,81,156,0.16))", height: "auto", objectFit: "contain", width: 112 }} />
+      <Box sx={{ alignItems: "center", display: "flex", gap: 1.5, mb: 3 }}>
+        <Box alt="" component="img" src={ERG_ASSETS.logo} sx={{ height: 40, objectFit: "contain", width: 40 }} />
+        <Box>
+          <Typography component="p" variant="subtitle2">ERG EduRise Global</Typography>
+          <Typography color="text.secondary" component="p" variant="caption">Hệ thống học tập và giảng dạy</Typography>
+        </Box>
       </Box>
       {children}
     </Box>

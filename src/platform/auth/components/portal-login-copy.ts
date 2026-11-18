@@ -39,7 +39,7 @@ export function getPortalLoginCopy(portal: PortalKey): PortalLoginCopy {
     return {
       badge: "CRM Portal", mobileLabel: "Quản trị ERG", title: "Quản trị hệ thống ERG",
       description: "Đăng nhập tài khoản quản trị để quản lý dữ liệu nguồn, trường/trung tâm, tài khoản, câu hỏi, quiz bank và học liệu xuất bản.",
-      formTitle: "Đăng nhập CRM",
+      formTitle: "Đăng nhập",
       visualKicker: "System back office", visualTitle: "Một nơi quản lý dữ liệu nguồn, phân quyền và xuất bản học liệu cho toàn hệ thống.",
       visualDescription: "CRM tách khỏi workflow giáo viên để tránh lẫn thao tác dạy học hằng ngày với quản trị dữ liệu nguồn.",
       trustItems: [
@@ -58,7 +58,7 @@ export function getPortalLoginCopy(portal: PortalKey): PortalLoginCopy {
     return {
       badge: "Student Workspace", mobileLabel: "Cổng học sinh ERG", title: "Cổng bài tập học sinh",
       description: "Đăng nhập bằng tài khoản học sinh được ERG cấp để làm bài, xem tiến độ và tiếp tục lớp học trực tuyến.",
-      formTitle: "Đăng nhập Student Workspace",
+      formTitle: "Đăng nhập",
       visualKicker: "Student workspace", visualTitle: "Một nơi để học sinh nhận bài, làm bài và theo dõi tiến độ.",
       visualDescription: "Student Workspace tập trung vào trải nghiệm học sinh: ít thao tác, vào lớp nhanh và không lẫn với khu quản trị giáo viên.",
       trustItems: [
@@ -77,7 +77,7 @@ export function getPortalLoginCopy(portal: PortalKey): PortalLoginCopy {
     return {
       badge: "Admin", mobileLabel: "Admin ERG", title: "Quản trị nội dung học tập",
       description: "Đăng nhập tài khoản được cấp quyền để quản lý ngân hàng câu hỏi, quiz bank, học liệu, taxonomy và xuất bản nội dung cho LMS.",
-      formTitle: "Đăng nhập Admin",
+      formTitle: "Đăng nhập",
       visualKicker: "Learning content management", visualTitle: "Một nơi quản trị nội dung nguồn trước khi đưa sang lớp học.",
       visualDescription: "Admin tập trung vào biên soạn, phân loại, kiểm duyệt và xuất bản nội dung học tập; không phải CRM và cũng không phải kho mở tài liệu của giáo viên.",
       trustItems: [
@@ -95,7 +95,7 @@ export function getPortalLoginCopy(portal: PortalKey): PortalLoginCopy {
   return {
     badge: "LMS Portal", mobileLabel: "LMS giáo viên ERG", title: "Quản lý lớp học ERG",
     description: "Đăng nhập tài khoản giáo viên để quản lý lớp, theo dõi học sinh, xem báo cáo và điều phối hoạt động học tập.",
-    formTitle: "Đăng nhập LMS",
+    formTitle: "Đăng nhập",
     visualKicker: "Teacher operations", visualTitle: "Một bảng điều khiển cho lớp học, học sinh và báo cáo vận hành.",
     visualDescription: "LMS là khu làm việc của giáo viên: quản lý lớp, theo dõi tiến độ, xem dữ liệu học tập và phối hợp với trường.",
     trustItems: [

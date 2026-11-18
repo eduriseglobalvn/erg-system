@@ -32,19 +32,17 @@ type PlayerWebPageProps = {
   actions?: ReactNode;
   /** 0–1; the 4px line under the bar. Omitted = no line. */
   progress?: number;
-  /** WL1 only: soft accent wash behind the intro. */
-  hero?: boolean;
   alignTop?: boolean;
   /** Playing: one row that fills the screen; cards stretch to the bottom and scroll inside. */
   fill?: boolean;
   children: ReactNode;
 };
 
-export function PlayerWebPage({ backLabel, onBack, title, meta, actions, progress, hero = false, alignTop = false, fill = false, children }: PlayerWebPageProps) {
+export function PlayerWebPage({ backLabel, onBack, title, meta, actions, progress, alignTop = false, fill = false, children }: PlayerWebPageProps) {
   return (
     <Box
       sx={{
-        background: hero ? `linear-gradient(165deg, ${tk.color.primarySoft} 0%, ${tk.color.surface} 72%)` : `var(--quiz-page-bg, ${tk.color.surfaceSubtle})`,
+        background: `var(--quiz-page-bg, ${tk.color.surfaceSubtle})`,
         display: "flex",
         flexDirection: "column",
         height: "100%",

@@ -200,7 +200,13 @@ export const ergEnterpriseTheme = createTheme({
     },
     MuiToggleButton: {
       styleOverrides: {
-        root: phoneTarget,
+        // Explicit so a page-level font or uppercase rule never leaks into segmented controls.
+        root: ({ theme }) => ({
+          ...phoneTarget,
+          fontFamily: t.font.body,
+          fontWeight: theme.typography.button.fontWeight,
+          textTransform: "none",
+        }),
       },
     },
     MuiIconButton: {
@@ -389,6 +395,15 @@ export const ergEnterpriseTheme = createTheme({
           borderRadius: t.radius.xs,
           height: 2,
         },
+      },
+    },
+    MuiTab: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          fontFamily: t.font.body,
+          fontWeight: theme.typography.button.fontWeight,
+          textTransform: "none",
+        }),
       },
     },
     MuiTableCell: {

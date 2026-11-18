@@ -39,6 +39,7 @@ import {
   NAV_TILE_SIZE,
 } from "./portal-sidebar-styles";
 import { notificationPortalFromPath, usePortalNotifications } from "./use-portal-notifications";
+import { nameInitials } from "@/domain/formatters/format-initials";
 
 function profilePath(pathname: string) {
   if (pathname === "/admin" || pathname.startsWith("/admin/")) return adminPath("/profile");
@@ -66,7 +67,7 @@ export function SidebarBottom({
 
   const userName = portalInfo?.userName || "Người dùng";
   const userEmail = portalInfo?.userEmail || "Tài khoản ERG";
-  const initial = userName.charAt(0).toUpperCase() || "E";
+  const initial = nameInitials(userName) || "E";
   const profile = profilePath(pathname);
 
   const notifications = usePortalNotifications(notificationPortalFromPath(pathname), Boolean(notificationAnchor));

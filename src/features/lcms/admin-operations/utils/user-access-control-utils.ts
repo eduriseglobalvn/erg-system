@@ -1,6 +1,7 @@
 import type { AccessManagedUser } from "@/features/lcms/admin-operations/api/access-management-api";
 import type { AdminUserDetail } from "@/features/lcms/admin-operations/api/user-admin-api";
 import type { ProfileDraft } from "@/features/lcms/admin-operations/types/user-access-control";
+import { nameInitials } from "@/domain/formatters/format-initials";
 
 export function mergeUser(listUser?: AccessManagedUser, detail?: AdminUserDetail | null) {
   return {
@@ -72,12 +73,7 @@ export function formatDateTime(value?: string) {
 }
 
 export function initials(value: string) {
-  return value
-    .split(/\s|@/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("");
+  return nameInitials(value.split("@")[0]);
 }
 
 export const EMPTY_PROFILE_DRAFT: ProfileDraft = {

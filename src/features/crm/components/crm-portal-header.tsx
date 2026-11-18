@@ -10,15 +10,10 @@ import NotificationsNoneRoundedIcon from '@mui/icons-material/NotificationsNoneR
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import WifiRoundedIcon from '@mui/icons-material/WifiRounded';
+import { nameInitials } from '@/domain/formatters/format-initials';
 
 function getInitials(value: string): string {
-  return value
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(-2)
-    .map((part) => part[0])
-    .join('')
-    .toUpperCase();
+  return nameInitials(value) || 'CRM';
 }
 
 const headerIconButtonSx = {

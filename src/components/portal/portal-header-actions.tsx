@@ -34,6 +34,7 @@ import { logoutStudentSession } from "@/platform/auth/api/student-auth-storage";
 import type { Workspace } from "@/platform/workspaces/workspace-domain";
 import { workspaceCapabilities, workspacesFromLegacyPortals } from "@/platform/workspaces/workspace-switcher";
 import { HEADER_ICON_BUTTON_SX } from "./portal-header-styles";
+import { nameInitials } from "@/domain/formatters/format-initials";
 
 function workspaceFromPath(pathname: string): Workspace {
   const segment = pathname.split("/").filter(Boolean)[0];
@@ -84,7 +85,7 @@ export function PortalHeaderActions({
   const isOnline = useOnlineStatus();
   const location = useLocation();
   const studentPreview = useIsStudentPreview();
-  const initial = userName?.charAt(0).toUpperCase() || "E";
+  const initial = nameInitials(userName) || "E";
   const { canInstall, installed, promptInstall } = useInstallPrompt();
   const [installInfoOpen, setInstallInfoOpen] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);

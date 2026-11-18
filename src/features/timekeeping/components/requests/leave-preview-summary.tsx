@@ -8,6 +8,7 @@ import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 import type { LeavePreview } from "../../api/timekeeping-types";
 import { unitsVi } from "../my-timesheet/timesheet-summary";
 import { CardRow, PunchCard } from "../punch/punch-card";
+import { nameInitials } from "@/domain/formatters/format-initials";
 
 const { statusTint } = ergEnterpriseTokens;
 
@@ -63,11 +64,7 @@ export function AffectedPeriods({ periods }: { periods: LeavePreview["affectedPe
   );
 }
 
-/** "Nguyễn Văn Minh" → "NM": first and last word. */
-const initials = (name: string) => {
-  const words = name.trim().split(/\s+/).filter(Boolean);
-  return words.length ? `${words[0][0]}${words.length > 1 ? words[words.length - 1][0] : ""}`.toUpperCase() : "";
-};
+const initials = nameInitials;
 
 const avatar = { alignItems: "center", bgcolor: statusTint.info.bg, borderRadius: "50%", color: statusTint.info.color, display: "flex", flexShrink: 0, justifyContent: "center", typography: "caption" } as const;
 

@@ -22,7 +22,7 @@ import { StudentSidebar } from "@/features/elearning/student-dashboard/component
 import type { StudentSidebarData } from "@/features/elearning/student-dashboard/hooks/use-student-sidebar-data";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
-const TITLED_BY_PAGE = new Set<StudentPageKey>(["assignments", "ranking", "discussion", "announcements"]);
+const TITLED_BY_PAGE = new Set<StudentPageKey>(["overview", "assignments", "scores", "ranking", "discussion", "announcements", "account"]);
 
 /** Canvas ".desk": 16px padding and gap around a 232px floating sidebar card (spec 7.0). */
 const DESK_GAP = 16;
@@ -116,7 +116,7 @@ export function TopMenuShell({
       >
         <Box sx={{ px: 2, py: 1.5 }}>
           <Typography variant="subtitle2">{copy.notificationTitle}</Typography>
-          <Typography variant="caption" color="text.secondary">{totalUnread ? `${totalUnread} cập nhật chưa đọc` : copy.notificationEmpty}</Typography>
+          {totalUnread && notifications.length ? <Typography variant="caption" color="text.secondary">{`${totalUnread} cập nhật chưa đọc`}</Typography> : null}
         </Box>
         <Divider />
         {notifications.length ? (
@@ -134,10 +134,6 @@ export function TopMenuShell({
         ) : (
           <MenuItem disabled>{copy.notificationEmpty}</MenuItem>
         )}
-        <Divider />
-        <MenuItem onClick={account ? onSignOut : onAccountOpen}>
-          <Typography variant="subtitle2" sx={{ color: account ? "error.main" : "primary.main" }}>{account ? copy.signOut : copy.signIn}</Typography>
-        </MenuItem>
       </Menu>
     </Box>
   );

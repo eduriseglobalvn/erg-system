@@ -17,6 +17,7 @@ import {
 } from "@/components/portal/erg-mobile-sheet-parts";
 import { filterAdminMenuGroups } from "@/features/lcms/admin-mobile-dock-config";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
+import { nameInitials } from "@/domain/formatters/format-initials";
 
 const { radius, size } = ergEnterpriseTokens;
 
@@ -136,6 +137,5 @@ export function AdminAllFunctionsSheet({
 }
 
 function initials(name: string) {
-  const words = name.trim().split(/\s+/).filter(Boolean);
-  return (words.length > 1 ? words[0][0] + words[words.length - 1][0] : words[0]?.slice(0, 2) ?? "A").toUpperCase();
+  return nameInitials(name) || "A";
 }

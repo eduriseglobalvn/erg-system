@@ -1,6 +1,5 @@
 import FlagRoundedIcon from "@mui/icons-material/FlagRounded";
 import OutlinedFlagRoundedIcon from "@mui/icons-material/OutlinedFlagRounded";
-import TimerOutlinedIcon from "@mui/icons-material/TimerOutlined";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
@@ -72,9 +71,6 @@ const KIND_LABEL: Record<QuestionKind, string> = {
   essay: "Tự luận",
 };
 
-// The warning caption stays for screen readers; the pill has room for the clock only.
-const visuallyHidden = { clip: "rect(0 0 0 0)", height: 1, overflow: "hidden", position: "absolute", whiteSpace: "nowrap", width: 1 } as const;
-
 export function MobilePlayerShell(props: MobilePlayerShellProps) {
   const {
     answeredCount, attemptCompleted, cells, isBookmarked, isTrainingMode, playerCardStyle, question, questions, quiz,
@@ -92,12 +88,12 @@ export function MobilePlayerShell(props: MobilePlayerShellProps) {
   const showTimer = !attemptCompleted && timer;
   return (
     <Box sx={{ display: { md: "none" } }}>
-      <Box component="section" sx={{ ...playerCardStyle, borderColor: "transparent", minHeight: "100svh", pb: 14 }}>
+      <Box component="section" sx={{ ...playerCardStyle, borderColor: "transparent", minHeight: "100svh", pb: "calc(112px + env(safe-area-inset-bottom, 0px))" }}>
         <Box sx={{ bgcolor: tk.color.surface, position: "sticky", top: 0, zIndex: 30 }}>
-          <Box sx={{ alignItems: "center", display: "grid", gap: 1, gridTemplateColumns: "1fr auto 1fr", minHeight: 56, pb: 1, pt: 1.5, px: 1.5 }}>
-            <span />
-            <Box sx={{ alignItems: "center", display: "flex", flexDirection: "column", gap: 0.25, minWidth: 0 }}>
-              {showResult ? null : (
+          {/* One flex row: the title takes what is left (minWidth 0), so a long name truncates instead of widening the page. */}
+          <Box sx={{ alignItems: "center", display: "flex", gap: 1, minHeight: 56, pb: 1, pt: 1.5, px: 1.5 }}>
+            {showResult ? null : (
+              <Box sx={{ flexShrink: 0 }}>
                 <MobileQuestionSheet
                   cells={cells}
                   open={listOpen}
@@ -105,18 +101,11 @@ export function MobilePlayerShell(props: MobilePlayerShellProps) {
                   onJumpToQuestion={onJumpToQuestion}
                   onRequestSubmit={isTrainingMode || attemptCompleted ? undefined : onRequestSubmit}
                 />
-              )}
-              <Typography noWrap sx={{ color: tk.color.textMuted, maxWidth: "100%" }} variant="caption">{quiz.title}</Typography>
-            </Box>
-            <Box sx={{ display: "flex", justifyContent: "flex-end", minWidth: 0 }}>
-              {showTimer ? (
-                // The countdown renders nothing until the server clock is known; `:empty` then drops the pill and its icon.
-                <Box sx={{ alignItems: "center", display: "inline-flex", flexShrink: 0, position: "relative", "& [role=status]": visuallyHidden, "& > div:empty, & > div:empty + svg": { display: "none" } }}>
-                  <Box sx={{ alignItems: "center", bgcolor: tk.statusTint.neutral.bg, borderRadius: `${tk.radius.chip}px`, display: "inline-flex", height: 36, pl: 4.25, pr: 1.5 }}>{timer}</Box>
-                  <TimerOutlinedIcon aria-hidden sx={{ color: tk.color.textSecondary, fontSize: tk.size.iconSm, left: 12, position: "absolute" }} />
-                </Box>
-              ) : null}
-            </Box>
+              </Box>
+            )}
+            <Typography noWrap sx={{ color: tk.color.textMuted, flex: 1, minWidth: 0 }} variant="caption">{quiz.title}</Typography>
+            {/* PlayerTimerText is already a pill with its own icon; no second wrapper. */}
+            {showTimer ? <Box sx={{ display: "flex", flexShrink: 0 }}>{timer}</Box> : null}
           </Box>
           {showResult ? null : (
             <Box aria-hidden sx={{ bgcolor: tk.color.divider, height: 4 }}>

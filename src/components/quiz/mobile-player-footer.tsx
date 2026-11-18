@@ -1,11 +1,9 @@
 import ChevronLeftRoundedIcon from "@mui/icons-material/ChevronLeftRounded";
 import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
-import FactCheckRoundedIcon from "@mui/icons-material/FactCheckRounded";
 import GridViewRoundedIcon from "@mui/icons-material/GridViewRounded";
 import SendRoundedIcon from "@mui/icons-material/SendRounded";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import IconButton from "@mui/material/IconButton";
 
 import { ergEnterpriseTokens as tk } from "@/themes/erg-enterprise-tokens";
 
@@ -37,7 +35,7 @@ const accentSx = {
   "&:hover": { bgcolor: `var(--quiz-accent, ${tk.color.primaryHover})`, filter: "brightness(0.92)" },
 } as const;
 
-/** L02/L03 dock: ‹ · n/N đã làm (opens the list) · Câu tiếp, or one Kết quả / Câu tiếp button in practice. */
+/** Dock: Trước · n/N đã làm (opens the list) · Sau (Kết quả before a practice answer is checked; Nộp bài on the last question). */
 export function MobilePlayerFooter({
   attemptCompleted,
   currentAnswerComplete,
@@ -69,35 +67,23 @@ export function MobilePlayerFooter({
     >
       {showResultOnly ? (
         <Button fullWidth size="large" type="button" variant="outlined" onClick={onReview}>Xem lại bài làm</Button>
-      ) : isTrainingMode ? (
-        <Button
-          disabled={currentQuestionSubmitted ? isLastQuestion : submitting || !currentAnswerComplete}
-          fullWidth
-          size="large"
-          startIcon={currentQuestionSubmitted ? undefined : <FactCheckRoundedIcon />}
-          endIcon={currentQuestionSubmitted ? <ChevronRightRoundedIcon /> : undefined}
-          sx={{ ...accentSx, minHeight: 52 }}
-          type="button"
-          variant="contained"
-          onClick={currentQuestionSubmitted ? onNext : onSubmitCurrentQuestion}
-        >
-          {currentQuestionSubmitted ? "Câu tiếp" : submitting ? "Đang chấm…" : "Kết quả"}
-        </Button>
       ) : (
         <>
-          <IconButton
-            aria-label="Câu trước"
+          <Button
             disabled={isFirstQuestion || submitting}
-            sx={{ border: `1px solid ${tk.color.border}`, color: tk.color.textSecondary, flexShrink: 0, height: 44, width: 44 }}
+            startIcon={<ChevronLeftRoundedIcon />}
+            sx={{ borderColor: tk.color.borderStrong, color: tk.color.text, flexShrink: 0, minHeight: 44, minWidth: 0, px: 1.5 }}
+            type="button"
+            variant="outlined"
             onClick={onPrev}
           >
-            <ChevronLeftRoundedIcon />
-          </IconButton>
+            Trước
+          </Button>
           {onOpenList && total ? (
             <Button
               aria-label={`Mở danh sách câu, ${answeredCount ?? 0}/${total} đã làm`}
               startIcon={<GridViewRoundedIcon />}
-              sx={{ borderColor: tk.color.borderStrong, color: tk.color.text, flex: 1, minHeight: 44, minWidth: 0 }}
+              sx={{ borderColor: tk.color.borderStrong, color: tk.color.text, flex: 1, minHeight: 44, minWidth: 0, overflow: "hidden", whiteSpace: "nowrap" }}
               type="button"
               variant="outlined"
               onClick={onOpenList}
@@ -105,7 +91,29 @@ export function MobilePlayerFooter({
               {`${answeredCount ?? 0}/${total} đã làm`}
             </Button>
           ) : null}
-          {submitInPrimary ? (
+          {isTrainingMode && !currentQuestionSubmitted ? (
+            // Practice never advances by itself: "Kết quả" reveals the answer first.
+            <Button
+              disabled={submitting || !currentAnswerComplete}
+              sx={{ ...accentSx, flex: 1, minHeight: 44 }}
+              type="button"
+              variant="contained"
+              onClick={onSubmitCurrentQuestion}
+            >
+              {submitting ? "Đang chấm…" : "Kết quả"}
+            </Button>
+          ) : isTrainingMode && !(isLastQuestion && !attemptCompleted) ? (
+            <Button
+              disabled={isLastQuestion}
+              endIcon={<ChevronRightRoundedIcon />}
+              sx={{ ...accentSx, flex: 1, minHeight: 44 }}
+              type="button"
+              variant="contained"
+              onClick={onNext}
+            >
+              Sau
+            </Button>
+          ) : submitInPrimary ? (
             <Button
               disabled={submitting}
               startIcon={<SendRoundedIcon />}
@@ -125,7 +133,7 @@ export function MobilePlayerFooter({
               variant="contained"
               onClick={onNext}
             >
-              Câu tiếp
+              Sau
             </Button>
           )}
         </>

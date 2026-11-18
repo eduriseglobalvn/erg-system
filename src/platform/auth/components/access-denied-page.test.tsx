@@ -38,18 +38,18 @@ describe("AccessDeniedPage", () => {
   it("explains the denied Teacher request and offers the entitled Admin workspace", () => {
     render(<AccessDeniedPage />);
 
-    expect(screen.getByRole("heading", { name: /Không thể vào Teacher Workspace/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /Bạn chưa có quyền vào Cổng giáo viên/i })).toBeInTheDocument();
     expect(screen.getByText("admin@erg.edu.vn")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Admin Workspace/i })).toHaveAttribute("href", "/admin");
-    expect(screen.getByText(/session hiện tại chưa có quyền/i)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Cổng quản trị/i })).toHaveAttribute("href", "/admin");
+    expect(screen.getByText(/chưa được cấp quyền/i)).toBeInTheDocument();
   });
 
   it("keeps the recovery surface explicit when no workspace capability is available", () => {
     sessionState.value = { workspaces: ["ADMIN"], permissions: [], deniedPermissions: [], portals: ["lcms"] };
     render(<AccessDeniedPage />);
 
-    expect(screen.getByText("Chưa tìm thấy workspace khả dụng")).toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: /Admin Workspace/i })).not.toBeInTheDocument();
+    expect(screen.getByText("Tài khoản chưa có cổng nào dùng được")).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Cổng quản trị/i })).not.toBeInTheDocument();
   });
 
   it("clears the current session when the user chooses another account", () => {

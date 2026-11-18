@@ -5,7 +5,6 @@ import Card from "@mui/material/Card";
 import CardActionArea from "@mui/material/CardActionArea";
 import CardContent from "@mui/material/CardContent";
 import Chip from "@mui/material/Chip";
-import LinearProgress from "@mui/material/LinearProgress";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import { alpha } from "@mui/material/styles";
@@ -51,29 +50,13 @@ export function PageHeader({ description, icon, title }: { description: string; 
 
 export function SectionCard({ action, children, title }: { action?: ReactNode; children: ReactNode; title: string }) {
   return (
-    <Card sx={elevatedCardSx}>
+    <Card sx={{ ...elevatedCardSx, borderColor: ergEnterpriseTokens.color.border, borderRadius: `${ergEnterpriseTokens.radius.card}px`, boxShadow: "none" }}>
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ borderBottom: `1px solid ${MUI_DIVIDER}`, px: 2.5, py: 1.75 }}>
         <Typography variant="subtitle1" sx={{ color: MUI_TEXT, fontWeight: 600 }}>{title}</Typography>
         {action}
       </Stack>
       <CardContent sx={{ p: { xs: 2, md: 2.5 } }}>{children}</CardContent>
     </Card>
-  );
-}
-
-export function PriorityPanel({ assignment, copy, onOpenAssignment }: { assignment: StudentDashboardAssignment; copy: DashboardCopy; onOpenAssignment: (assignmentId: string) => void }) {
-  return (
-    <Paper sx={{ alignSelf: "stretch", bgcolor: "primary.main", border: "1px solid", borderColor: "primary.dark", borderRadius: 3, boxShadow: "none", color: "common.white", minWidth: { md: 360 }, overflow: "hidden", p: 2.2, position: "relative" }}>
-      <Chip label={copy.priority.title} size="small" sx={{ bgcolor: (theme) => alpha(theme.palette.common.white, 0.2), color: "common.white", fontWeight: 600 }} />
-      <Typography variant="subtitle1" sx={{ mt: 1.5, color: "common.white", fontWeight: 600 }}>{assignment.title}</Typography>
-      <Typography variant="body2" sx={{ mt: 0.75, color: (theme) => alpha(theme.palette.common.white, 0.82), lineHeight: 1.55 }}>{copy.priority.detail(assignment.dueLabel)}</Typography>
-      {assignment.progressRate === null ? (
-        <Typography variant="caption" sx={{ color: (theme) => alpha(theme.palette.common.white, 0.82), display: "block", mt: 2 }}>Chưa có dữ liệu tiến độ</Typography>
-      ) : (
-        <LinearProgress value={assignment.progressRate} variant="determinate" sx={{ height: 10, mt: 2, bgcolor: (theme) => alpha(theme.palette.common.white, 0.25), borderRadius: 99, "& .MuiLinearProgress-bar": { bgcolor: "common.white", borderRadius: 99 } }} />
-      )}
-      <Button fullWidth variant="outlined" disabled={!assignment.quizId} onClick={() => { if (assignment.quizId) onOpenAssignment(assignment.id); }} sx={{ bgcolor: "common.white", borderColor: "common.white", color: "primary.main", mt: 2, "&:hover": { bgcolor: "primary.light", borderColor: "primary.light", color: "primary.dark" }, "&.Mui-disabled": { bgcolor: (theme) => alpha(theme.palette.common.white, 0.4), borderColor: "transparent", color: (theme) => alpha(theme.palette.common.white, 0.8) } }}>{copy.priority.action}</Button>
-    </Paper>
   );
 }
 

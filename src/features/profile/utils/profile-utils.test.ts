@@ -4,7 +4,8 @@ import { getPasswordScore, getProfileInitials, validatePasswordChange } from "@/
 
 describe("profile utilities", () => {
   test("derives stable initials from a display name", () => {
-    expect(getProfileInitials("Nguyễn Văn An")).toBe("NA");
+    expect(getProfileInitials("Nguyễn Văn An")).toBe("VA");
+    expect(getProfileInitials("[TEST] Giáo viên 3")).toBe("GV");
     expect(getProfileInitials("ERG")).toBe("E");
   });
 

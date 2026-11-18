@@ -16,11 +16,10 @@ describe("getInitials", () => {
     expect(getInitials(null)).toBe("HS");
     expect(getInitials(undefined)).toBe("HS");
   });
-  it("uses first two letters for a single word", () => {
-    expect(getInitials("an")).toBe("AN");
-  });
-  it("uses first and last word initials", () => {
-    expect(getInitials("Nguyen Van An")).toBe("NA");
+  it("uses the shared initials of the last two words", () => {
+    expect(getInitials("an")).toBe("A");
+    expect(getInitials("Nguyen Van An")).toBe("VA");
+    expect(getInitials("[TEST] Học sinh 01")).toBe("HS");
   });
 });
 

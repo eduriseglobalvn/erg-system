@@ -7,7 +7,7 @@ describe("Admin login presentation", () => {
     const copy = getPortalLoginCopy("lcms");
     expect(copy.badge).toBe("Admin");
     expect(copy.mobileLabel).toBe("Admin ERG");
-    expect(copy.formTitle).toBe("Đăng nhập Admin");
+    expect(copy.formTitle).toBe("Đăng nhập");
     expect(copy.formTitle).not.toContain("LCMS");
   });
 });

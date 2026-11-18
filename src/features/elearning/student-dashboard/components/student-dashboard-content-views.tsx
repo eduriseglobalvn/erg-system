@@ -1,70 +1,70 @@
+import GradeIcon from "@mui/icons-material/GradeOutlined";
 import HelpIcon from "@mui/icons-material/HelpOutlineRounded";
-import KeyIcon from "@mui/icons-material/KeyRounded";
 import StairsIcon from "@mui/icons-material/StairsRounded";
 import Bell from "@mui/icons-material/NotificationsNoneRounded";
 import LogIn from "@mui/icons-material/LoginRounded";
 import LogOut from "@mui/icons-material/LogoutRounded";
-import User from "@mui/icons-material/PersonOutlineRounded";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
-import Chip from "@mui/material/Chip";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import { useState } from "react";
+import { formatDateTimeVi } from "@/domain/formatters/format-date";
 import { nameInitials, nameWithoutTags } from "@/domain/formatters/format-initials";
-import { StudentPasswordDialog } from "@/features/elearning/student-dashboard/components/student-password-dialog";
-import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
+import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
 import { type ElearningViewerSession } from "@/platform/auth/api/elearning-viewer-session";
 import type { DashboardCopy, StudentPageKey } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
 import type { StudentDashboardAssignment, StudentDashboardProfile, StudentTeacherAnnouncement } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
 import { getDiscussionOverviewPreview } from "@/features/elearning/student-dashboard/utils/discussion-overview";
-import { MUI_PRIMARY, MUI_TEXT, MUI_MUTED, MUI_DIVIDER, elevatedCardSx, primaryButtonSx, Stack } from "@/features/elearning/student-dashboard/components/student-dashboard-workspace-styles";
+import { score10, submittedStats, todoHeadline } from "@/features/elearning/student-dashboard/utils/assignment-board";
+import { elevatedCardSx, Stack } from "@/features/elearning/student-dashboard/components/student-dashboard-workspace-styles";
 import type { AssignmentFilter } from "@/features/elearning/student-dashboard/components/student-dashboard-assignments-view";
-import { OverviewHeroActions, OverviewMetrics } from "@/features/elearning/student-dashboard/components/student-dashboard-overview-shared";
-import { PageHeader, SectionCard, PriorityPanel, AssignmentListItem, AnnouncementCard, EmptyPanel, SkeletonRow } from "@/features/elearning/student-dashboard/components/student-dashboard-view-primitives";
-import { formatAverageScore, resolveOverviewHero } from "@/features/elearning/student-dashboard/utils/student-overview-hero";
+import { PageHeader, SectionCard, MetricCard, AssignmentListItem, AnnouncementCard, EmptyPanel, SkeletonRow } from "@/features/elearning/student-dashboard/components/student-dashboard-view-primitives";
 
-export function OverviewView({ announcement, assignmentsFailed, assignmentsLoading, completedAssignments, copy, discussionPreview, openAssignments, overdueAssignments, priorityAssignment, profile, onOpenAssignment, onPageChange }: { announcement: StudentTeacherAnnouncement | undefined; assignmentsFailed: boolean; assignmentsLoading: boolean; completedAssignments: StudentDashboardAssignment[]; copy: DashboardCopy; discussionPreview: ReturnType<typeof getDiscussionOverviewPreview>; openAssignments: StudentDashboardAssignment[]; overdueAssignments: StudentDashboardAssignment[]; priorityAssignment?: StudentDashboardAssignment; profile: StudentDashboardProfile; onOpenAssignment: (assignmentId: string) => void; onPageChange: (page: StudentPageKey, assignmentFilter?: AssignmentFilter) => void; }) {
-  const hero = resolveOverviewHero(priorityAssignment, copy);
+/** Desktop overview (mockup hoc-sinh-tong-quan): to-do first, border-only cards, one contained button (the most urgent row). */
+export function OverviewView({ announcement, assignmentsFailed, assignmentsLoading, completedAssignments, copy, discussionPreview, openAssignments, profile, onOpenAssignment, onPageChange }: { announcement: StudentTeacherAnnouncement | undefined; assignmentsFailed: boolean; assignmentsLoading: boolean; completedAssignments: StudentDashboardAssignment[]; copy: DashboardCopy; discussionPreview: ReturnType<typeof getDiscussionOverviewPreview>; openAssignments: StudentDashboardAssignment[]; overdueAssignments: StudentDashboardAssignment[]; priorityAssignment?: StudentDashboardAssignment; profile: StudentDashboardProfile; onOpenAssignment: (assignmentId: string) => void; onPageChange: (page: StudentPageKey, assignmentFilter?: AssignmentFilter) => void; }) {
+  const todo = [...openAssignments].sort((a, b) => Number(b.status === "overdue") - Number(a.status === "overdue")).slice(0, 4);
+  const [now] = useState(() => Date.now());
+  const average = submittedStats(completedAssignments).averageTen;
+  const recentScores = completedAssignments.filter((a) => score10(a)).sort((a, b) => (b.submittedAt ?? "").localeCompare(a.submittedAt ?? "")).slice(0, 3);
+  const subtitle = [profile.className, todoHeadline([], now)].filter(Boolean).join(" · ");
+  const show = (value: string | number) => (assignmentsFailed ? "—" : value);
   return (
     <Stack spacing={2.5}>
-      <Card sx={{ ...elevatedCardSx, background: "#fff", overflow: "hidden", position: "relative" }}>
-        <CardContent sx={{ p: { xs: 2.4, md: 3 } }}>
-          <Stack direction={{ xs: "column", md: "row" }} spacing={2.5} justifyContent="space-between">
-            <Box sx={{ minWidth: 0, maxWidth: 840 }}>
-              <Chip label={copy.heroEyebrow} size="small" sx={{ bgcolor: "rgba(0, 113, 227,0.08)", border: "1px solid rgba(0, 113, 227,0.16)", color: MUI_PRIMARY, fontWeight: 600 }} />
-              <Typography variant="h4" sx={{ mt: 1.25, color: MUI_TEXT, fontWeight: 600, lineHeight: 1.15, fontSize: { xs: 24, md: 30 } }}>{copy.heroTitle(nameWithoutTags(profile.name))}</Typography>
-              <Typography variant="body1" sx={{ mt: 1.25, color: MUI_MUTED, lineHeight: 1.65 }}>{hero.description}</Typography>
-              <Box sx={{ mt: 2.5 }}>
-                <OverviewHeroActions copy={copy} hero={hero} onOpenAssignment={onOpenAssignment} onPageChange={onPageChange} />
-              </Box>
-            </Box>
-            {priorityAssignment && hero.primaryAssignmentId ? <PriorityPanel assignment={priorityAssignment} copy={copy} onOpenAssignment={onOpenAssignment} /> : null}
-          </Stack>
-        </CardContent>
-      </Card>
-      <OverviewMetrics
-        unavailable={assignmentsFailed}
-        columns={{ xs: "1fr", sm: "repeat(2, minmax(0, 1fr))", lg: "repeat(4, minmax(0, 1fr))" }}
-        completedAssignments={completedAssignments}
-        copy={copy}
-        onOpenFilter={(filter) => onPageChange("assignments", filter)}
-        openAssignments={openAssignments}
-        overdueAssignments={overdueAssignments}
-      />
+      <Box>
+        <Typography component="h1" variant="h1" sx={t.type.pageTitle}>Việc cần làm hôm nay</Typography>
+        <Typography color="text.secondary" sx={{ ...t.type.pageLead, mt: 0.5 }}>{subtitle}</Typography>
+      </Box>
+      <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", sm: "repeat(3, minmax(0, 1fr))" } }}>
+        <MetricCard label="Cần làm" onClick={() => onPageChange("assignments", "todo")} value={show(openAssignments.length)} />
+        <MetricCard label="Đã nộp" onClick={() => onPageChange("assignments", "submitted")} value={show(completedAssignments.length)} />
+        <MetricCard label="Điểm trung bình (thang 10)" onClick={() => onPageChange("scores")} value={show(average || "—")} />
+      </Box>
       <Box sx={{ display: "grid", gap: 2.5, gridTemplateColumns: { xs: "1fr", lg: "1.7fr 1fr" }, alignItems: "start" }}>
-        <SectionCard action={<Button variant="text" onClick={() => onPageChange("assignments")} size="small">Xem tất cả</Button>} title={copy.todayTitle}>
+        <SectionCard action={<Button variant="text" onClick={() => onPageChange("assignments")} size="small">Tất cả bài tập</Button>} title="Bài sắp hết hạn">
           <Stack spacing={1.25}>
-            {assignmentsLoading ? Array.from({ length: 3 }).map((_, i) => <SkeletonRow key={i} />) : [...openAssignments].sort((a, b) => Number(b.status === "overdue") - Number(a.status === "overdue")).slice(0, 3).map((assignment) => <AssignmentListItem key={assignment.id} assignment={assignment} copy={copy} onOpenAssignment={onOpenAssignment} />)}
+            {assignmentsLoading ? Array.from({ length: 3 }).map((_, i) => <SkeletonRow key={i} />) : todo.map((assignment, index) => <AssignmentListItem key={assignment.id} assignment={assignment} copy={copy} primary={index === 0} onOpenAssignment={onOpenAssignment} />)}
+            {assignmentsFailed ? <EmptyPanel description="Tải lại trang sau ít phút. Nếu vẫn lỗi thì báo giáo viên." title="Chưa tải được bài tập" /> : null}
             {!assignmentsLoading && !assignmentsFailed && openAssignments.length === 0 ? (completedAssignments.length > 0
               ? <EmptyPanel description={copy.todayDoneDescription} title={copy.heroAllDone} />
               : <EmptyPanel description={copy.todayEmptyDescription} title={copy.heroEmpty} />) : null}
           </Stack>
         </SectionCard>
         <Stack spacing={2.5}>
+          <SectionCard action={<Button variant="text" onClick={() => onPageChange("scores")} size="small">Xem điểm số</Button>} title="Điểm mới">
+            <Stack spacing={1}>
+              {recentScores.length === 0 ? <EmptyPanel description="Nộp bài xong, điểm sẽ hiện ở đây." title="Chưa có điểm" /> : null}
+              {recentScores.map((a) => (
+                <Stack key={a.id} direction="row" spacing={1.5} alignItems="center" justifyContent="space-between">
+                  <Typography variant="body2" noWrap sx={{ minWidth: 0 }}>{a.title}</Typography>
+                  <Typography variant="subtitle2" sx={{ flexShrink: 0 }}>{score10(a)}/10</Typography>
+                </Stack>
+              ))}
+            </Stack>
+          </SectionCard>
           {announcement ? (
             <SectionCard action={<Button variant="text" onClick={() => onPageChange("announcements")} size="small">Xem thêm</Button>} title={copy.announcementTitle}>
               <AnnouncementCard announcement={announcement} selected={false} />
@@ -74,16 +74,16 @@ export function OverviewView({ announcement, assignmentsFailed, assignmentsLoadi
             <Stack spacing={1}>
               {discussionPreview.length === 0 ? <EmptyPanel description={copy.discussionEmptyDescription} title={copy.discussionEmptyTitle} /> : null}
               {discussionPreview.map((post) => (
-                <Paper key={post.id} sx={{ bgcolor: "#FAFAFC", border: `1px solid ${MUI_DIVIDER}`, borderRadius: "12px", p: 1.4 }}>
+                <Box key={post.id} sx={{ bgcolor: t.color.surfaceMuted, border: `1px solid ${t.color.divider}`, borderRadius: `${t.radius.control}px`, p: 1.4 }}>
                   <Stack direction="row" spacing={1} alignItems="center">
-                    <Avatar sx={{ bgcolor: MUI_PRIMARY, height: 28, width: 28, fontSize: 11, fontWeight: 600 }}>{nameInitials(post.authorName)}</Avatar>
+                    <Avatar sx={{ bgcolor: "primary.main", height: 28, width: 28, typography: "caption" }}>{nameInitials(post.authorName)}</Avatar>
                     <Box sx={{ minWidth: 0, flex: 1 }}>
-                      <Typography noWrap variant="body2" sx={{ fontWeight: 600 }}>{post.authorName}</Typography>
+                      <Typography noWrap variant="subtitle2">{post.authorName}</Typography>
                       <Typography noWrap variant="caption" color="text.secondary">{copy.discussionRepliesLabel(post.commentCount)}</Typography>
                     </Box>
                   </Stack>
-                  <Typography variant="body2" sx={{ mt: 1, color: MUI_MUTED, lineHeight: 1.55 }}>{post.content}</Typography>
-                </Paper>
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1, lineHeight: 1.55 }}>{post.content}</Typography>
+                </Box>
               ))}
             </Stack>
           </SectionCard>
@@ -110,59 +110,65 @@ export function AnnouncementsView({ announcements, copy, selectedAnnouncementId 
   );
 }
 
-export function AccountView({ account, averageAssignmentScore, copy, openAssignments, profile, onHelpOpen, onSignIn, onSignOut, onTierOpen }: { account: ElearningViewerSession | null; averageAssignmentScore: number | null; copy: DashboardCopy; openAssignments: StudentDashboardAssignment[]; profile: StudentDashboardProfile; /** Phones reach the help guide from here (the bottom nav stays as it is). */ onHelpOpen?: () => void; onSignIn: () => void; onSignOut: () => void; /** Phones reach the tier page (H15m) from here. */ onTierOpen?: () => void; }) {
+const accountCardSx = { border: `1px solid ${t.color.border}`, borderRadius: `${t.radius.card}px`, boxShadow: "none", p: { xs: 2, md: 3 } };
+
+/** Student account (mockup hoc-sinh-tai-khoan): one narrow column, school-issued facts only; students never change their own password. */
+export function AccountView({ account, className, copy, profile, onHelpOpen, onScoresOpen, onSignIn, onSignOut, onTierOpen }: { account: ElearningViewerSession | null; /** Class from the class board; the session's own class is a job title for accounts that sign in through the staff login. */ className: string; copy: DashboardCopy; profile: StudentDashboardProfile; /** Phones reach the help guide from here (the bottom nav stays as it is). */ onHelpOpen?: () => void; /** Phones reach "Điểm số" from here (no dock slot). */ onScoresOpen?: () => void; onSignIn: () => void; onSignOut: () => void; /** Phones reach the tier page (H15m) from here. */ onTierOpen?: () => void; }) {
   const isGuest = !account;
-  const [passwordOpen, setPasswordOpen] = useState(false);
+  const name = nameWithoutTags(account?.name ?? profile.name);
+  const isStudentSession = account?.viewerKind === "student";
+  const classLine = [className ||(isStudentSession ? profile.className : ""), isStudentSession ? account?.schoolName : ""].filter(Boolean).join(" · ");
+  const lastLogin = account ? formatDateTimeVi(account.loggedInAt) : "";
+  const facts = [
+    { label: "Mã đăng nhập", value: account?.email ?? "" },
+    { label: "Giáo viên chủ nhiệm", value: account?.viewerKind === "student" ? profile.homeroomTeacher : "" },
+    { label: "Đăng nhập gần nhất", value: lastLogin },
+  ].filter((fact) => fact.value);
   return (
-    <Stack spacing={2.5}>
-      <PageHeader description={copy.accountDescription} icon={<User sx={{ fontSize: 20 }} />} title={copy.accountTitle} />
-      <Box sx={{ display: "grid", gap: 2.5, gridTemplateColumns: { xs: "1fr", md: "1.2fr 1fr" } }}>
-        <Card sx={elevatedCardSx}>
-          <CardContent sx={{ p: 2.5 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>{copy.learningProfileTitle}</Typography>
-            <Stack direction="row" spacing={2} alignItems="center" sx={{ mt: 2 }}>
-              <Avatar sx={{ bgcolor: MUI_PRIMARY, height: 56, width: 56, fontSize: 20, fontWeight: 600 }}>{nameInitials(account?.name ?? profile.name) || "HS"}</Avatar>
-              <Box>
-                <Typography variant="h6" sx={{ fontWeight: 600 }}>{account?.name ?? profile.name}</Typography>
-                <Typography variant="body2" color="text.secondary">{account?.email ?? profile.className}</Typography>
-              </Box>
-            </Stack>
-            <Divider sx={{ my: 2 }} />
-            <Box sx={{ display: "grid", gap: 1.5, gridTemplateColumns: "repeat(2, 1fr)" }}>
-              <Paper sx={{ p: 1.5, bgcolor: "#FAFAFC", border: `1px solid ${MUI_DIVIDER}`, borderRadius: "12px" }}>
-                <Typography variant="caption" color="text.secondary">{copy.stats.average}</Typography>
-                <Typography variant="h6" sx={{ fontWeight: 600 }}>{formatAverageScore(averageAssignmentScore, profile.completedAssignments)}</Typography>
-              </Paper>
-              <Paper sx={{ p: 1.5, bgcolor: "#FAFAFC", border: `1px solid ${MUI_DIVIDER}`, borderRadius: "12px" }}>
-                <Typography variant="caption" color="text.secondary">{copy.stats.open}</Typography>
-                <Typography variant="h6" sx={{ fontWeight: 600 }}>{openAssignments.length}</Typography>
-              </Paper>
-            </Box>
-          </CardContent>
-        </Card>
-        <Card sx={elevatedCardSx}>
-          <CardContent sx={{ p: 2.5 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>{copy.accountActionsTitle}</Typography>
-            <Stack spacing={1.5} sx={{ mt: 2 }}>
-              {isGuest ? (
-                <Button fullWidth variant="contained" startIcon={<LogIn />} onClick={onSignIn} sx={{ ...primaryButtonSx, borderRadius: 2 }}>{copy.signIn}</Button>
-              ) : (
-                <>
-                  {onTierOpen ? <Button fullWidth variant="outlined" startIcon={<StairsIcon />} onClick={onTierOpen} sx={{ borderRadius: `${ergEnterpriseTokens.radius.control}px`, fontWeight: "fontWeightBold" }}>Bậc của tôi</Button> : null}
-                  <Button fullWidth variant="outlined" startIcon={<KeyIcon />} onClick={() => setPasswordOpen(true)} sx={{ borderRadius: `${ergEnterpriseTokens.radius.control}px`, fontWeight: "fontWeightBold" }}>Đổi mật khẩu</Button>
-                  {onHelpOpen ? <Button fullWidth variant="outlined" startIcon={<HelpIcon />} onClick={onHelpOpen} sx={{ borderRadius: `${ergEnterpriseTokens.radius.control}px`, fontWeight: "fontWeightBold" }}>Hướng dẫn sử dụng</Button> : null}
-                  <Button fullWidth variant="outlined" color="error" startIcon={<LogOut />} onClick={onSignOut} sx={{ borderRadius: `${ergEnterpriseTokens.radius.control}px`, fontWeight: "fontWeightBold" }}>{copy.signOut}</Button>
-                </>
-              )}
-            </Stack>
-          </CardContent>
-        </Card>
+    <Stack spacing={2.5} sx={{ maxWidth: 760, mx: "auto", width: "100%" }}>
+      <Box>
+        <Typography component="h1" variant="h1" sx={t.type.pageTitle}>{copy.accountTitle}</Typography>
+        <Typography color="text.secondary" sx={{ ...t.type.pageLead, mt: 0.5 }}>Thông tin do nhà trường cấp. Sai thông tin thì báo giáo viên.</Typography>
       </Box>
-      {isGuest ? null : <StudentPasswordDialog open={passwordOpen} onClose={() => setPasswordOpen(false)} />}
+      <Paper sx={accountCardSx}>
+        <Stack direction="row" spacing={2} alignItems="center">
+          <Avatar sx={{ bgcolor: "primary.main", height: 56, width: 56 }}>{nameInitials(account?.name ?? profile.name) || "HS"}</Avatar>
+          <Box sx={{ minWidth: 0 }}>
+            <Typography variant="h6" noWrap>{name}</Typography>
+            {classLine ? <Typography variant="body2" color="text.secondary">{classLine}</Typography> : null}
+          </Box>
+        </Stack>
+        {facts.length ? (
+          <Box component="dl" sx={{ m: 0, mt: 2.5, borderTop: `1px solid ${t.color.divider}` }}>
+            {facts.map((fact) => (
+              <Stack key={fact.label} direction="row" justifyContent="space-between" spacing={2} sx={{ borderBottom: `1px solid ${t.color.divider}`, py: 1.5 }}>
+                <Typography component="dt" variant="body2" color="text.secondary">{fact.label}</Typography>
+                <Typography component="dd" variant="body2" sx={{ m: 0, textAlign: "right", wordBreak: "break-word" }}>{fact.value}</Typography>
+              </Stack>
+            ))}
+          </Box>
+        ) : null}
+      </Paper>
+      {isGuest ? null : (
+        <Paper sx={accountCardSx}>
+          <Typography variant="subtitle1">Mật khẩu</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.75 }}>Em không tự đổi mật khẩu được. Quên mật khẩu thì báo giáo viên để được cấp lại.</Typography>
+        </Paper>
+      )}
+      <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} sx={{ flexWrap: "wrap" }}>
+        {isGuest ? (
+          <Button variant="contained" startIcon={<LogIn />} onClick={onSignIn}>{copy.signIn}</Button>
+        ) : (
+          <>
+            {onScoresOpen ? <Button variant="outlined" startIcon={<GradeIcon />} onClick={onScoresOpen}>Điểm số</Button> : null}
+            {onTierOpen ? <Button variant="outlined" startIcon={<StairsIcon />} onClick={onTierOpen}>Bậc của tôi</Button> : null}
+            {onHelpOpen ? <Button variant="outlined" startIcon={<HelpIcon />} onClick={onHelpOpen}>Hướng dẫn sử dụng</Button> : null}
+            {/* The theme paints every outlined button in text colour; sign-out keeps the danger colour. */}
+            <Button variant="outlined" color="error" startIcon={<LogOut />} onClick={onSignOut} sx={{ borderColor: "error.main", color: "error.main" }}>{copy.signOut}</Button>
+          </>
+        )}
+      </Stack>
     </Stack>
   );
 }
 
-function Divider({ sx }: { sx?: unknown }) {
-  return <Box sx={[{ height: 1, bgcolor: MUI_DIVIDER }, sx] as never} />;
-}

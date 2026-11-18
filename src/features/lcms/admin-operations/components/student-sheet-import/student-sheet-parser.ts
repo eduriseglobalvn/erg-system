@@ -3,6 +3,7 @@ import type {
   GoogleVisualizationCell as GvizCell,
   GoogleVisualizationResponse as GvizResponse,
 } from "@/features/lcms/imports/google-sheets-csv-adapter";
+import { nameInitials } from "@/domain/formatters/format-initials";
 
 export type ParsedStudentRow = {
   id: string;
@@ -203,10 +204,7 @@ function columnNameToIndex(columnName: string) {
 }
 
 export function getInitials(value: string) {
-  const parts = value.trim().split(/\s+/).filter(Boolean);
-  const first = parts.at(0)?.charAt(0) ?? "H";
-  const last = parts.length > 1 ? parts.at(-1)?.charAt(0) : "";
-  return `${first}${last}`.toUpperCase();
+  return nameInitials(value) || "H";
 }
 
 export function parseBirthdayForApi(value: string) {

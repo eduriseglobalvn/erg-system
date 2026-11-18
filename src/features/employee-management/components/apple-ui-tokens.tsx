@@ -9,6 +9,7 @@ import Typography from "@mui/material/Typography";
 import type { ReactNode } from "react";
 import { alpha } from "@mui/material/styles";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
+import { nameInitials } from "@/domain/formatters/format-initials";
 
 export const appleDesign = {
   colors: {
@@ -232,12 +233,7 @@ const AVATAR_GRADIENTS = [
 ];
 
 export function getInitials(name?: string | null) {
-  if (!name) return "ERG";
-  const trimmed = name.trim();
-  if (!trimmed) return "ERG";
-  const words = trimmed.split(/\s+/).filter(Boolean);
-  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
-  return (words[0][0] + words[words.length - 1][0]).toUpperCase();
+  return nameInitials(name) || "ERG";
 }
 
 export function getAvatarColorStyle(name?: string | null) {

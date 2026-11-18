@@ -51,7 +51,7 @@ describe("AccessDeniedPage auto-redirect", () => {
     session.value = { workspaces: ["TEACHER"], permissions: ["lms.dashboard.read"], deniedPermissions: [], portals: ["lms"], roles: [] };
     search.value = "?portal=lms&email=&redirect=%2Fadmin";
     const { container } = render(<AccessDeniedPage />);
-    expect(container.querySelector("h1")?.textContent).toBe("Không thể vào Admin Workspace");
+    expect(container.querySelector("h1")?.textContent).toBe("Bạn chưa có quyền vào Cổng quản trị");
     expect(navigate).not.toHaveBeenCalled();
   });
 });

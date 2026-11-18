@@ -10,17 +10,22 @@ import { QuestionNavigator, type QuestionCell } from "@/components/quiz/question
 import { ergEnterpriseTokens as tk } from "@/themes/erg-enterprise-tokens";
 
 // Segmented filter (".seg"): grey track, the chosen tab is a white raised pill.
+// One row that scrolls inside its own track on a narrow phone instead of wrapping or widening the page.
 const segSx = {
   bgcolor: tk.color.divider,
   borderRadius: `${tk.radius.control}px`,
-  flexWrap: "wrap",
+  flexWrap: "nowrap",
   gap: "2px",
+  maxWidth: "100%",
+  overflowX: "auto",
   p: "3px",
   "& .MuiToggleButtonGroup-grouped": {
     border: 0,
     borderRadius: `${tk.radius.sm}px !important`,
     color: tk.color.textSecondary,
-    flex: "1 1 auto",
+    // fullWidth gives each tab width 100%; with no shrink that would make every tab as wide as the track.
+    flex: "1 0 auto",
+    width: "auto",
     fontWeight: "fontWeightMedium",
     height: 32,
     m: 0,

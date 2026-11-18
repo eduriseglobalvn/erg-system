@@ -10,13 +10,12 @@ import type { ActionItem, ApprovalItem, RecentPunch } from "../api/timekeeping-t
 import { PunchCard } from "../components/punch/punch-card";
 import { requestTimeText, requestTitle } from "../components/requests/request-model";
 import { PUNCH_STATUS, punchTimeText, verifyText } from "./punch-status";
+import { nameInitials } from "@/domain/formatters/format-initials";
 
 type Handlers = { busy: boolean; onDetail: () => void };
 
-/** "Phạm Quốc Bảo" → "PB": first and last word. */
 function initials(name: string) {
-  const words = name.trim().split(/\s+/).filter(Boolean);
-  return words.length ? `${words[0][0]}${words.length > 1 ? words[words.length - 1][0] : ""}`.toUpperCase() : "?";
+  return nameInitials(name) || "?";
 }
 
 /** Canvas A05 card: avatar, name and kind, status chip, detail line, then the actions spread across the card. */

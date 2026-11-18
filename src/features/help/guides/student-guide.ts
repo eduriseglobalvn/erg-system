@@ -54,9 +54,8 @@ const studentGuide: HelpGuide = {
       title: "Tài khoản của em",
       steps: [
         { text: "Trên máy tính: nhấn «Tài khoản & cài đặt». Trên điện thoại: nhấn «Hồ sơ» ở thanh dưới cùng." },
-        { text: "Muốn đổi mật khẩu (không bắt buộc): nhấn «Đổi mật khẩu»." },
-        { text: "Nhập «Mật khẩu hiện tại», «Mật khẩu mới», rồi «Nhập lại mật khẩu mới». Sau đó lưu lại." },
-        { text: "Chọn mật khẩu em nhớ được nhưng người khác khó đoán.", note: "Quên mật khẩu thì nhờ giáo viên đặt lại." },
+        { text: "Ở đây em xem tên, lớp và mã đăng nhập. Sai thông tin thì báo giáo viên." },
+        { text: "Em không tự đổi mật khẩu được. Quên mật khẩu thì báo giáo viên để được cấp lại." },
         { text: "Dùng máy của trường hoặc máy người khác thì nhớ đăng xuất khi học xong." },
       ],
     },

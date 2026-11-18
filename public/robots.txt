@@ -1,0 +1,13 @@
+# Only the sign-in page is public; the workspaces need an account.
+User-agent: *
+Allow: /$
+Allow: /login
+Disallow: /admin
+Disallow: /teacher
+Disallow: /student
+Disallow: /profile
+Disallow: /onboarding
+Disallow: /access-denied
+Disallow: /mock/
+
+Sitemap: https://lms.erg.edu.vn/sitemap.xml

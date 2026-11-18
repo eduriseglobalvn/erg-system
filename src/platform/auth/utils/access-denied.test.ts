@@ -13,7 +13,7 @@ describe("access-denied workspace recovery", () => {
     expect(workspaceFromAccessDeniedPortal("lms")).toBe("TEACHER");
     expect(workspaceFromAccessDeniedPortal("lcms")).toBe("ADMIN");
     expect(workspaceFromAccessDeniedPortal("STUDENT")).toBe("STUDENT");
-    expect(accessDeniedWorkspaceLabel("lms")).toBe("Teacher Workspace");
+    expect(accessDeniedWorkspaceLabel("lms")).toBe("Cổng giáo viên");
   });
 
   it("offers Admin only when the session has both the workspace and permission", () => {

@@ -27,6 +27,7 @@ import {
 import { saveCurrentAccount } from "@/platform/auth/api/auth-storage";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
 import { evaluatePermission } from "@/platform/auth/permissions/permission-evaluator";
+import { nameInitials } from "@/domain/formatters/format-initials";
 
 type AccountDialog = "phone" | "recovery" | "password" | null;
 
@@ -294,5 +295,5 @@ function dialogTitle(dialog: AccountDialog) {
 }
 
 function initials(value: string) {
-  return value.split(/\s+/).filter(Boolean).slice(-2).map((part) => part[0]?.toUpperCase()).join("");
+  return nameInitials(value);
 }

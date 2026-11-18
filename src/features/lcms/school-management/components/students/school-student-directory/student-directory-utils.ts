@@ -1,6 +1,7 @@
 import type { SchoolStudent } from "@/features/lcms/school-management/types/school-management-types";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 import { alpha } from "@mui/material/styles";
+import { nameInitials } from "@/domain/formatters/format-initials";
 
 const AVATAR_GRADIENTS = [
   { bg: "linear-gradient(135deg, #E0E7FF 0%, #C7D2FE 100%)", color: "#3730A3" },
@@ -13,10 +14,7 @@ const AVATAR_GRADIENTS = [
 ];
 
 export function getInitials(name?: string | null) {
-  if (!name) return "HS";
-  const words = name.trim().split(/\s+/).filter(Boolean);
-  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
-  return (words[0][0] + words[words.length - 1][0]).toUpperCase();
+  return nameInitials(name) || "HS";
 }
 
 export function getAvatarStyle(name?: string | null) {
