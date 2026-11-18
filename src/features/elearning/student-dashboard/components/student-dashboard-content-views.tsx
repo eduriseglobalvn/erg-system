@@ -14,6 +14,7 @@ import Chip from "@mui/material/Chip";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import { useState } from "react";
+import { nameWithoutTags } from "@/domain/formatters/format-initials";
 import { StudentPasswordDialog } from "@/features/elearning/student-dashboard/components/student-password-dialog";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 import { type ElearningViewerSession } from "@/platform/auth/api/elearning-viewer-session";
@@ -35,7 +36,7 @@ export function OverviewView({ announcement, assignmentsFailed, assignmentsLoadi
           <Stack direction={{ xs: "column", md: "row" }} spacing={2.5} justifyContent="space-between">
             <Box sx={{ minWidth: 0, maxWidth: 840 }}>
               <Chip label={copy.heroEyebrow} size="small" sx={{ bgcolor: "rgba(0, 113, 227,0.08)", border: "1px solid rgba(0, 113, 227,0.16)", color: MUI_PRIMARY, fontWeight: 600 }} />
-              <Typography variant="h4" sx={{ mt: 1.25, color: MUI_TEXT, fontWeight: 600, lineHeight: 1.15, fontSize: { xs: 24, md: 30 } }}>{copy.heroTitle(profile.name)}</Typography>
+              <Typography variant="h4" sx={{ mt: 1.25, color: MUI_TEXT, fontWeight: 600, lineHeight: 1.15, fontSize: { xs: 24, md: 30 } }}>{copy.heroTitle(nameWithoutTags(profile.name))}</Typography>
               <Typography variant="body1" sx={{ mt: 1.25, color: MUI_MUTED, lineHeight: 1.65 }}>{hero.description}</Typography>
               <Box sx={{ mt: 2.5 }}>
                 <OverviewHeroActions copy={copy} hero={hero} onOpenAssignment={onOpenAssignment} onPageChange={onPageChange} />

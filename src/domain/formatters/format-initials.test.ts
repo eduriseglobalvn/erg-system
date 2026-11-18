@@ -9,10 +9,11 @@ describe("nameInitials", () => {
   });
 
   it("ignores a bracketed tag and stray punctuation", () => {
-    expect(nameInitials("[TEST] Giáo viên 3")).toBe("V3");
+    expect(nameInitials("[TEST] Giáo viên 3")).toBe("GV");
     expect(nameInitials("[TEST] Nhóm U")).toBe("NU");
     expect(nameInitials("- Trần  Bình")).toBe("TB");
-    expect(nameInitials("[TEST] Học sinh 01")).toBe("S0");
+    expect(nameInitials("[TEST] Học sinh 01")).toBe("HS");
+    expect(nameInitials("7 12")).toBe("71");
   });
 
   it("drops the tag from a display name", () => {
