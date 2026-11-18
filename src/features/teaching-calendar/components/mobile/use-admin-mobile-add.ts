@@ -12,7 +12,7 @@ import { getDefaultTenantId } from "@/lib/graphql-client";
 /** Mac dinh nhu trang xep lich: lap 10 tuan (69 ngay sau tuan dau). */
 const DEFAULT_SPAN_DAYS = 69;
 
-type AddInput = { date: string; periodTemplateId: string; row: GridRow; schoolId: string };
+type AddInput = { date: string; levelId: string; periodTemplateId: string; row: GridRow; schoolId: string; subjectId: string };
 
 /**
  * «Thêm vào nháp» (6.9): them MOT dong vao dot nhap hien tai cua truong qua `saveTeachingScheduleDraft`;
@@ -22,21 +22,24 @@ export function useAdminMobileAdd(onDone: () => void) {
   const queryClient = useQueryClient();
   const tenantId = getDefaultTenantId();
   return useMutation({
-    mutationFn: async ({ date, periodTemplateId, row, schoolId }: AddInput) => {
+    mutationFn: async ({ date, levelId, periodTemplateId, row, schoolId, subjectId }: AddInput) => {
       if (weekdayIndex(date) === 0) throw new Error("Lưới thời khoá biểu chỉ xếp Thứ 2 – Thứ 7.");
       const added = { ...row, weekday: weekdayIndex(date) };
       const batches = await loadTeachingScheduleBatches({ page: 0, schoolId, size: 1, status: "DRAFT", tenantId });
       const batch = batches.items[0];
       if (!batch) {
         const applyFrom = weekStartOf(date);
-        return saveTeachingScheduleDraft({ applyFrom, batchId: null, expectedVersion: null, periodTemplateId, repeatUntil: addDaysToDate(applyFrom, DEFAULT_SPAN_DAYS), rows: toDraftRowInputs([added]), schoolId });
+        return saveTeachingScheduleDraft({ applyFrom, batchId: null, expectedVersion: null, periodTemplateId, repeatUntil: addDaysToDate(applyFrom, DEFAULT_SPAN_DAYS), rows: toDraftRowInputs([added]), schoolId, subjectId, levelId });
       }
       const draft = await loadTeachingScheduleDraft(batch.id);
       const workspace = await loadLcmsTeachingCalendarWorkspace({ from: weekStartOf(batch.applyFrom), schoolIds: [schoolId], statuses: ["DRAFT"], tenantId, to: addDaysToDate(weekStartOf(batch.applyFrom), 7) });
+      // BE gan mon cua input cho MOI tiet trong dot -> giu mon dot dang co, chi dung mon vua chon khi dot con trong.
+      const first = workspace.events.find((event) => event.batchId === batch.id && event.subjectId);
       const rows = [...eventsToRows(workspace.events, batch.id).filter((existing) => !(existing.weekday === added.weekday && existing.periodNo === added.periodNo)), added];
       return saveTeachingScheduleDraft({
         applyFrom: batch.applyFrom, batchId: batch.id, expectedVersion: draft.version, periodTemplateId: draft.batch.periodTemplateId ?? periodTemplateId,
         repeatUntil: addDaysToDate(batch.applyFrom, batch.repeatWeeks * 7 - 1), rows: toDraftRowInputs(rows), schoolId,
+        levelId: first ? first.levelId : levelId, subjectId: first?.subjectId ?? subjectId,
       });
     },
     onSuccess: (result) => {

@@ -38,6 +38,7 @@ const buttonSx = (radius: number) => ({ borderRadius: `${radius}px`, height: 40 
 function saveText(status: DraftStatus, savedAt: string | null, onRetry: () => void, draft: boolean) {
   if (status === "saving") return "Đang lưu…";
   if (status === "error") return <>Chưa lưu được · <Link component="button" onClick={onRetry} type="button" underline="hover">Thử lại</Link></>;
+  if (status === "needsSubject") return "Chọn Môn · Chương trình để lưu";
   if (status === "dirty") return "Đang chờ lưu…";
   if (!draft) return "";
   return savedAt ? `Tự lưu nháp · ${formatTimeVi(savedAt)}` : "Tự lưu nháp";
@@ -78,7 +79,7 @@ export function ScheduleHeader({ batchLabel, batchStatus, errorCount, onExport, 
         </Stack>
       </Box>
       <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-        <Typography aria-live="polite" sx={{ color: status === "error" ? "error.main" : color.textMuted, mr: 0.75, ...type.note }}>{saveText(status, savedAt, onRetry, batchStatus === "DRAFT")}</Typography>
+        <Typography aria-live="polite" sx={{ color: status === "error" || status === "needsSubject" ? "error.main" : color.textMuted, mr: 0.75, ...type.note }}>{saveText(status, savedAt, onRetry, batchStatus === "DRAFT")}</Typography>
         {onReusePrevious ? <ErgButton onClick={onReusePrevious} sx={buttonSx(radius.control)} variant="outlined">Dùng lại tuần trước</ErgButton> : null}
         {onExport ? <ErgButton onClick={onExport} sx={{ ...buttonSx(radius.control), px: 1.25 }} variant="text">Xuất Excel theo mẫu</ErgButton> : null}
         <Tooltip title={blocked ? `Còn ${errorCount} xung đột cần xử lý` : ""}>

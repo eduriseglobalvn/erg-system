@@ -15,7 +15,7 @@ export type DraftMeta = {
   version?: number;
 };
 
-export type DraftStatus = "idle" | "dirty" | "saving" | "error" | "stale";
+export type DraftStatus = "idle" | "dirty" | "saving" | "error" | "stale" | "needsSubject";
 type AccessChanges = TeachingScheduleDraftResult["accessChanges"];
 
 type Options = {
@@ -55,6 +55,8 @@ export function useScheduleDraft({ debounceMs = 1500, save }: Options) {
       const current = metaRef.current;
       if (!current.schoolId || !current.periodTemplateId || !current.applyFrom || !current.repeatUntil) return;
       if (!rowsRef.current.length && !current.batchId) { setStatus("idle"); return; }
+      // BE tu choi luu tiet khi chua co mon (SUBJECT_REQUIRED): bao ro thay vi gui request hong.
+      if (rowsRef.current.length && !current.subjectId) { setStatus("needsSubject"); return; }
       queued.current = false;
       setStatus("saving");
       try {

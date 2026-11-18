@@ -126,7 +126,7 @@ export function AdminMobileDay() {
       </MobileBottomSheet>
       {slotDialogs.element}
       <AdminMobileSheet
-        date={nearestGridDay(main.anchor)} events={main.events} onClose={() => setAdding(false)} open={adding}
+        catalog={main.catalog} date={nearestGridDay(main.anchor)} events={main.events} onClose={() => setAdding(false)} open={adding}
         schoolId={schoolId} schoolName={school?.schoolName ?? ""}
       />
       <AdminMobileFilterSheet
