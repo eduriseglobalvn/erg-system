@@ -40,7 +40,7 @@ export default function SchoolClassesScreen() {
   const totalStudents = selectedSchool.classes.reduce((sum, c) => sum + (c.studentCount || 0), 0);
   const assignedTeachers = selectedSchool.classes.filter((c) => Boolean(c.homeroomTeacher)).length;
 
-  async function handleImport(classList: Array<Omit<SchoolClass, "id">>, students?: StudentImportRow[]) {
+  async function handleImport(classList: Array<Omit<SchoolClass, "id" | "homeroomTeacher">>, students?: StudentImportRow[]) {
     // The class list in memory is not refreshed yet, so the new classes are matched by the ids just returned.
     const created = new Map(((await addClasses(classList)) ?? []).map((c) => [c.name.trim().toLowerCase(), c.id]));
     if (students && students.length > 0) {
