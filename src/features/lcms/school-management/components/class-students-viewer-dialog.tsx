@@ -94,7 +94,7 @@ export function ClassStudentsViewerDialog({
               Danh sách học sinh lớp {classRow.name}
             </Typography>
             <Typography color="text.secondary" variant="body2">
-              Khối {classRow.grade || "—"} · Tổng {allStudents.length} học sinh trong sheet
+              Khối {classRow.grade || "—"} · Giáo viên phụ trách: {classRow.homeroomTeacher || "Chưa gán"} · Tổng {allStudents.length} học sinh trong sheet
             </Typography>
           </Box>
           <Chip
