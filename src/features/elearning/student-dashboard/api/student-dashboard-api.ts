@@ -133,7 +133,8 @@ function mergeProfileSession(
     name: session.name ?? baseProfile.name,
     className: session.className || baseProfile.className,
     schoolName: session.schoolName || baseProfile.schoolName,
-    gradeLabel: isTeacherViewer ? session.title || session.className || "Giáo viên" : gradeLabelFromClassName(session.className),
+    // Only ever the grade scope of the ranking: a job title here became the «Giáo viên» scope tab (BUG-G-018). Empty lets the board name the grade.
+    gradeLabel: gradeLabelFromClassName(session.className),
     homeroomTeacher: isTeacherViewer ? "Tự truy cập Elearning" : baseProfile.homeroomTeacher,
   };
 }
