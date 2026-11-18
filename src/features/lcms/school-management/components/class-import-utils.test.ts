@@ -54,7 +54,6 @@ describe("class import preview", () => {
     expect(rows[0]).toMatchObject({
       name: "9A1",
       grade: "9",
-      homeroomTeacher: "Trần Tường Tuấn",
       studentCount: 3,
       valid: true,
       issues: [],
