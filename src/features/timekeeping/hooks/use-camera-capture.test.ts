@@ -1,7 +1,7 @@
 import { renderHook } from "@testing-library/react";
 import { afterEach, expect, test, vi } from "vitest";
 
-import { useCameraCapture } from "./use-camera-capture";
+import { encodeSmallJpeg, TARGET_PHOTO_BYTES, useCameraCapture } from "./use-camera-capture";
 
 afterEach(() => Reflect.deleteProperty(navigator, "mediaDevices"));
 
@@ -50,4 +50,24 @@ test("a superseded start() (camera switch) stops its own stream and keeps the ne
   await first;
   expect(oldTrack.stop).toHaveBeenCalledTimes(1);
   expect(newTrack.stop).not.toHaveBeenCalled();
+});
+
+test("encodeSmallJpeg keeps shrinking until the photo is under 5 KB", async () => {
+  const tried: Array<[number, number]> = [];
+  const original = document.createElement.bind(document);
+  const spy = vi.spyOn(document, "createElement").mockImplementation(((tag: string) => {
+    if (tag !== "canvas") return original(tag);
+    const canvas = { width: 0, height: 0, getContext: () => ({ drawImage: () => undefined }) } as unknown as HTMLCanvasElement;
+    // Fake encoder: bytes grow with pixels and quality, like a real JPEG.
+    canvas.toBlob = (done, _type, quality = 1) => {
+      tried.push([canvas.width, quality]);
+      done(new Blob([new Uint8Array(Math.round(canvas.width * canvas.height * quality * 0.4))]));
+    };
+    return canvas;
+  }) as typeof document.createElement);
+  const blob = await encodeSmallJpeg({} as CanvasImageSource, 1280, 960);
+  spy.mockRestore();
+  expect(blob?.size).toBeLessThanOrEqual(TARGET_PHOTO_BYTES);
+  expect(tried[0]).toEqual([240, 0.5]);
+  expect(tried.length).toBeGreaterThan(1);
 });

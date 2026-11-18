@@ -41,7 +41,7 @@ beforeEach(() => {
   ];
 });
 
-test("teacher inbox: role tabs, Gửi lớp action, urgent first with a text badge", async () => {
+test("teacher inbox: role tabs, Soạn thông báo action, urgent first with a text badge", async () => {
   const onCompose = vi.fn();
   wrap(<InboxList portal="lms" workspace="TEACHER" title="Hộp thư" onCompose={onCompose} onOpen={vi.fn()} />);
 
@@ -53,7 +53,7 @@ test("teacher inbox: role tabs, Gửi lớp action, urgent first with a text bad
   expect(rows[1]).not.toHaveAccessibleName(/Chưa đọc/);
   expect(feed.calls[0]).toMatchObject({ portal: "lms", status: "all" });
 
-  fireEvent.click(screen.getByRole("button", { name: "Gửi lớp" }));
+  fireEvent.click(screen.getByRole("button", { name: "Soạn thông báo" }));
   expect(onCompose).toHaveBeenCalledOnce();
 });
 
@@ -75,7 +75,7 @@ test("Chưa đọc asks the server (status=unread) and shows what it returns", a
   feed.unread = [item("old")];
   wrap(<InboxList portal="elearning" workspace="STUDENT" onOpen={vi.fn()} />);
   await screen.findByRole("list", { name: "Danh sách thông báo" });
-  expect(screen.queryByRole("button", { name: "Gửi lớp" })).toBeNull();
+  expect(screen.queryByRole("button", { name: "Soạn thông báo" })).toBeNull();
 
   fireEvent.click(screen.getByRole("tab", { name: "Chưa đọc" }));
   expect(await screen.findByRole("button", { name: /Tin old/ })).toBeInTheDocument();

@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { expect, test, vi } from "vitest";
 
 import { RolePermissionWorkspace } from "@/features/rbac/components/role-permission-workspace";
@@ -10,7 +10,7 @@ vi.mock("@/features/rbac/api/rbac-api", async (importOriginal) => ({
   getRbacCatalog: vi.fn(),
 }));
 
-test("renders role matrix from catalog", async () => {
+test("lists roles and shows the picked role's functions", async () => {
   vi.mocked(getRbacCatalog).mockResolvedValue({
     functions: [{ code: "SCHOOL", label: "Trường học" }, { code: "AUDIT", label: "Nhật ký" }],
     roles: [
@@ -26,7 +26,9 @@ test("renders role matrix from catalog", async () => {
 
   expect(await screen.findAllByText("Phòng đào tạo")).not.toHaveLength(0);
   expect(screen.getAllByText("Điều phối đào tạo")).not.toHaveLength(0);
-  const table = screen.getByRole("table", { hidden: true });
-  const rows = Array.from(table.querySelectorAll("tbody tr")).map((row) => Array.from(row.querySelectorAll("td")).map((cell) => cell.textContent));
-  expect(rows).toEqual([["Trường học", "Sửa", "Xem"], ["Nhật ký", "—", "Xem"]]);
+  const rows = () => Array.from(screen.getByRole("table").querySelectorAll("tbody tr")).map((row) => Array.from(row.querySelectorAll("td")).map((cell) => cell.textContent));
+  // First role is picked by default: SUA = view + edit, NONE = neither.
+  expect(rows()).toEqual([["Trường học", "Có", "Có"], ["Nhật ký", "—", "—"]]);
+  fireEvent.click(screen.getByRole("button", { name: /Giám đốc/ }));
+  expect(rows()).toEqual([["Trường học", "Có", "—"], ["Nhật ký", "Có", "—"]]);
 });

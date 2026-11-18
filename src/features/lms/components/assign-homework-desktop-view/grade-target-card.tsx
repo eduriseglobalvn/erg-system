@@ -20,6 +20,7 @@ import {
   TargetPreviewPanel,
 } from "@/features/lms/components/assign-homework-desktop-view/target-card-layout";
 import type { AssignHomeworkController } from "@/features/lms/components/use-assign-homework-controller";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 export function GradeTargetCard({ model }: { model: AssignHomeworkController }) {
   const {
@@ -105,7 +106,7 @@ export function GradeTargetCard({ model }: { model: AssignHomeworkController }) 
                 <TableRow
                   key={classroom.id}
                   onClick={() => toggleGradeClass(classroom.id)}
-                  sx={{ cursor: "pointer", userSelect: "none", bgcolor: isChecked ? "info.light" : "background.paper" }}
+                  sx={{ cursor: "pointer", userSelect: "none", bgcolor: isChecked ? ergEnterpriseTokens.color.primarySofter : "background.paper" }}
                 >
                   <TableCell align="center" sx={{ px: 2.5 }}>
                     <AssignmentCheckbox checked={isChecked} onChange={() => toggleGradeClass(classroom.id)} label={`Chọn lớp ${classroom.className}`} />
@@ -125,7 +126,7 @@ export function GradeTargetCard({ model }: { model: AssignHomeworkController }) 
                   <TableCell sx={{ color: "text.secondary", fontWeight: "fontWeightMedium" }}>{classroom.schoolName}</TableCell>
                   <TableCell sx={{ fontWeight: "fontWeightMedium" }}>{classroom.studentCount} học sinh</TableCell>
                   <TableCell>
-                    <Typography component="span" variant="body2" sx={{ display: "inline-flex", borderRadius: 1, bgcolor: "info.light", px: 1.25, py: 0.5, fontWeight: "fontWeightBold", color: "primary.main" }}>
+                    <Typography component="span" variant="body2" sx={{ display: "inline-flex", borderRadius: 1, bgcolor: ergEnterpriseTokens.color.primarySofter, px: 1.25, py: 0.5, fontWeight: "fontWeightBold", color: "primary.main" }}>
                       {selectedStudentCount}/{classStudents.length} HS
                     </Typography>
                   </TableCell>

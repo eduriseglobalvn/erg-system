@@ -310,7 +310,7 @@ export function StudentDashboardWorkspaceRuntime() {
           hasMore={studentDashboardQuery.data?.assignmentsHasMore === true} loadingMore={studentDashboardQuery.isPlaceholderData} onLoadMore={loadMoreAssignments}
         />
       ) : null}
-      {shownPage === "scores" ? <ScoresView assignments={assignments} mobile={surface === "mobile-web"} onOpenAssignment={openAssignment} /> : null}
+      {shownPage === "scores" ? <ScoresView assignments={assignments} failed={studentDashboardQuery.isError} hasMore={studentDashboardQuery.data?.assignmentsHasMore === true} loading={studentDashboardQuery.isLoading} loadingMore={studentDashboardQuery.isPlaceholderData} mobile={surface === "mobile-web"} profile={dashboardProfile} onLoadMore={loadMoreAssignments} onOpenAssignment={openAssignment} /> : null}
       {shownPage === "discussion" ? (
         <DiscussionView
           copy={copy}

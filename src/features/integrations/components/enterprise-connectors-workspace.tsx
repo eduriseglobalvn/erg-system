@@ -43,7 +43,7 @@ export function EnterpriseConnectorsWorkspace() {
   const [lastRun, setLastRun] = useState<EnterpriseConnectorSyncRun | null>(null);
 
   if (!canRead) {
-    return <ErgContentBand><ErgEmptyState icon={<HubRoundedIcon fontSize="large" />} title="Không có quyền Enterprise Connectors" description="Tài khoản cần enterprise.connectors.read hoặc enterprise.connectors.manage." /></ErgContentBand>;
+    return <ErgContentBand><ErgEmptyState icon={<HubRoundedIcon fontSize="large" />} title="Không có quyền xem kết nối hệ thống ngoài" description="Tài khoản cần enterprise.connectors.read hoặc enterprise.connectors.manage." /></ErgContentBand>;
   }
 
   async function dryRun(connector: EnterpriseConnector) {
@@ -80,9 +80,9 @@ export function EnterpriseConnectorsWorkspace() {
   return (
     <ErgContentBand>
       <ErgSectionHeader
-        eyebrow="Admin / Enterprise Integration"
-        title="Enterprise Connectors"
-        description="SIS, HRIS và SCIM theo tenant; secrets chỉ đi qua secret manager reference, không đi qua FE storage."
+        eyebrow="Quản trị / Tích hợp"
+        title="Kết nối hệ thống ngoài"
+        description="Kết nối SIS, HRIS và SCIM. Khoá bí mật chỉ nằm ở kho bí mật của máy chủ, không lưu trên trình duyệt."
         action={canManage ? <Button startIcon={<AddRoundedIcon />} onClick={() => setRegisterOpen(true)} variant="contained">Đăng ký connector</Button> : null}
       />
       {notice ? <Alert onClose={() => setNotice(null)} severity="info" sx={{ mb: 2 }}>{notice}</Alert> : null}

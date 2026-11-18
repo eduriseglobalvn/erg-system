@@ -18,6 +18,7 @@ import { useState, type ReactNode } from "react";
 import { ErgEmptyState, ErgErrorState, ErgLoadingSkeleton } from "@/components/erg-mui/erg-feedback";
 import { ergChipTabsSx } from "@/components/erg-mui/erg-tabs";
 import { formatDateTimeVi } from "@/domain/formatters/format-date";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 import {
   attemptMinutes, awaitsGrading, buildTopicBoard, loadClassScoreBoard, scoreText,
   type ClassScoreBoard as Board, type ScoreBoardAttempt, type ScoreBoardStudent,
@@ -26,8 +27,9 @@ import {
 type View = "topic" | "all" | "manual";
 
 const studentName = (student: ScoreBoardStudent) => student.fullName || student.studentCode || "Học sinh";
-const containerSx = { border: 1, borderColor: "divider", borderRadius: 2, bgcolor: "background.paper", maxHeight: "70vh" } as const;
-const stickySx = { position: "sticky", left: 0, bgcolor: "background.paper", zIndex: 1, minWidth: 180 } as const;
+const containerSx = { border: 1, borderColor: "divider", borderRadius: `${ergEnterpriseTokens.radius.card}px`, bgcolor: "background.paper", maxHeight: "70vh" } as const;
+// Pinned name column; narrower on the phone so the score columns get room to scroll.
+const stickySx = { position: "sticky", left: 0, bgcolor: "background.paper", zIndex: 1, minWidth: { sm: 180, xs: 128 } } as const;
 const minutesText = (attempt: ScoreBoardAttempt) => {
   const seconds = attempt.durationSeconds;
   if (seconds === null || seconds === undefined) return "";
@@ -56,7 +58,7 @@ function TopicBoard({ board }: { board: Board }) {
             {model.columns.map((column) => (
               <TableCell key={column.key} align="center" colSpan={2} sx={{ borderLeft: 1, borderLeftColor: "divider", minWidth: 150 }}>
                 {column.title}
-                {column.maxScore === null ? null : <Typography component="span" variant="caption" sx={{ color: "text.secondary" }}> /{scoreText(column.maxScore)}</Typography>}
+                {column.maxScore === null ? null : <Typography component="span" variant="caption" sx={{ color: "text.secondary" }}> · tối đa {scoreText(column.maxScore)} điểm</Typography>}
               </TableCell>
             ))}
           </TableRow>

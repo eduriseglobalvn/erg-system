@@ -8,7 +8,7 @@ import {
   LmsHeaderClassControl,
   LmsHeaderSchoolControl,
 } from "@/features/lms/components/lms-teacher-shell-presentation";
-import { knownStudentCount } from "@/features/lms/components/lms-teacher-shell-utils";
+import { headerClassPickerApplies, knownStudentCount } from "@/features/lms/components/lms-teacher-shell-utils";
 import { LmsTeacherShellContext } from "@/features/lms/components/lms-teacher-shell-context";
 import { useLmsTeacherShellController } from "@/features/lms/components/use-lms-teacher-shell-controller";
 import { LmsMobileShell } from "@/features/lms/mobile";
@@ -66,7 +66,7 @@ function LmsTeacherShellFrame({ model }: { model: ReturnType<typeof useLmsTeache
         />
       }
       headerTrailingControls={
-        model.selectedClassOptions.length ? (
+        model.selectedClassOptions.length && headerClassPickerApplies(model.pathname) ? (
           <LmsHeaderClassControl
             classes={model.selectedClassOptions}
             selectedClassId={model.selectedClass?.id ?? ""}

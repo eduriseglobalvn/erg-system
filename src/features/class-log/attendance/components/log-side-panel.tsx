@@ -102,7 +102,7 @@ export function LogSidePanel({
         </Box>
         <Box sx={{ display: "flex", gap: 1 }}>
           <Box sx={{ flex: "none", width: 120 }}><Field label="Tiết thực tế" source="GV sửa được">{actualField}</Field></Box>
-          <Box sx={{ flex: 1, minWidth: 0 }}><Field label="Bài dạy · tra KCT"><ReadOnly>{lesson}</ReadOnly></Field></Box>
+          <Box sx={{ flex: 1, minWidth: 0 }}><Field label="Bài dạy"><ReadOnly>{lesson}</ReadOnly></Field></Box>
         </Box>
         {commentField}
         <ErgButton loading={saving} onClick={onSave} sx={{ minHeight: 46 }} variant="contained">{attendanceCopy.save}</ErgButton>
@@ -116,9 +116,9 @@ export function LogSidePanel({
         <Typography variant="subtitle1">Ghi vào sổ đầu bài</Typography>
         <Typography color="text.secondary" variant="caption">{period.className} · {shortDateLabel(period.date)}</Typography>
       </Box>
-      <Field label="Tiết theo PPCT" source="KCT tự nhảy"><ReadOnly>Tiết {period.ppctPeriod}</ReadOnly></Field>
+      <Field label="Tiết theo PPCT" source="tự lấy từ khung chương trình"><ReadOnly>Tiết {period.ppctPeriod}</ReadOnly></Field>
       <Field label="Tiết thực tế" source="GV sửa được">{actualField}</Field>
-      <Field label="Bài dạy" source="tra KCT theo tiết thực tế"><ReadOnly>{lesson}</ReadOnly></Field>
+      <Field label="Bài dạy" source="theo tiết thực tế"><ReadOnly>{lesson}</ReadOnly></Field>
       <Field label="Học sinh vắng" source="từ điểm danh bên trái">
         <ReadOnly tone={absentLabel.length ? "danger" : undefined}>
           {absentLabel.length || late.length ? [absentLabel.join(", "), late.length ? `${late.join(", ")} muộn` : ""].filter(Boolean).join(" · ") : "Không có"}
@@ -129,7 +129,7 @@ export function LogSidePanel({
         sx={{ bgcolor: ergEnterpriseTokens.classLog.late.bg, borderRadius: `${ergEnterpriseTokens.radius.control}px`, color: ergEnterpriseTokens.classLog.late.color, p: 1.25 }}
         variant="caption"
       >
-        Bài dạy đổi theo Tiết thực tế. Nếu dạy chậm/nhanh hơn PPCT, sửa Tiết thực tế: hệ thống tra lại tên bài từ KCT.
+        Bài dạy đổi theo Tiết thực tế. Nếu dạy chậm/nhanh hơn PPCT, sửa Tiết thực tế: hệ thống tra lại tên bài từ khung chương trình.
       </Typography>
       {draftAt ? (
         <Typography color="success.main" variant="caption">

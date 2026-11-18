@@ -31,10 +31,11 @@ export function ClassLogToolbar(p: Props) {
   return (
     <Box sx={{ alignItems: "center", borderBottom: `1px solid ${t.color.divider}`, display: "flex", flexWrap: "wrap", gap: 1, px: 2, py: 1.75 }}>
       <WeekStepper onStep={p.onWeekStep} rangeLabel={p.rangeLabel} weekNo={p.weekNo} />
-      <ErgSelect onChange={(e) => p.onSession(e.target.value)} options={sessionOptions.map((o) => ({ ...o }))} size="small" slotProps={{ htmlInput: { "aria-label": "Buổi" } }} sx={{ ...selectSx, width: 140 }} value={p.session} />
-      <ErgSelect onChange={(e) => p.onStatus(e.target.value)} options={statusOptions.map((o) => ({ ...o }))} size="small" slotProps={{ htmlInput: { "aria-label": "Trạng thái" } }} sx={{ ...selectSx, width: 180 }} value={p.status} />
+      <ErgSelect onChange={(e) => p.onSession(e.target.value)} options={sessionOptions.map((o) => ({ ...o }))} size="small" slotProps={{ htmlInput: { "aria-label": "Buổi" }, select: { displayEmpty: true } }} sx={{ ...selectSx, width: 140 }} value={p.session} />
+      <ErgSelect onChange={(e) => p.onStatus(e.target.value)} options={statusOptions.map((o) => ({ ...o }))} size="small" slotProps={{ htmlInput: { "aria-label": "Trạng thái" }, select: { displayEmpty: true } }} sx={{ ...selectSx, width: 180 }} value={p.status} />
       <Box sx={{ flex: 1 }} />
       <ErgButton onClick={p.onOpenCurriculum} sx={{ ...buttonSx, color: t.color.text }} variant="outlined">{classLogText.curriculumButton}</ErgButton>
+      {p.pending === 0 ? <Box component="span" sx={{ color: t.color.textMuted, fontSize: t.type.small.fontSize }}>Không có tiết chờ xác nhận</Box> : null}
       <ErgButton disabled={p.pending === 0} loading={p.confirming} onClick={p.onConfirm} sx={{ ...buttonSx, px: 2 }} variant="contained">{confirmLabel(p.pending)}</ErgButton>
     </Box>
   );

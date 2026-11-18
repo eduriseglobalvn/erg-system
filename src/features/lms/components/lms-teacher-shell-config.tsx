@@ -42,7 +42,7 @@ export const lmsNavItems: NavItem[] = [
   { id: "homework", label: "Hoạt động học tập", path: teacherPath("/homework"), icon: AssignmentRoundedIcon },
   { id: "score", label: "Bảng điểm", path: teacherPath("/score"), icon: BarChartRoundedIcon },
   { id: "attendance", label: "Điểm danh & KCT", path: teacherPath("/attendance"), icon: EventAvailableRoundedIcon },
-  { id: "schedule", label: "Lịch làm việc", path: teacherPath("/calendar"), icon: CalendarMonthRoundedIcon },
+  { id: "schedule", label: "Lịch dạy", path: teacherPath("/calendar"), icon: CalendarMonthRoundedIcon },
   { id: "classLog", label: "Sổ đầu bài", path: teacherPath("/class-log"), icon: MenuBookRoundedIcon },
   { id: "discussion", label: "Thảo luận", path: teacherPath("/discussion"), icon: ForumRoundedIcon },
   { id: "resources", label: LEARNING_RESOURCE_WORKSPACE_LABEL, path: teacherPath("/resources"), icon: FolderRoundedIcon },
@@ -94,7 +94,7 @@ export const LMS_MENU_GROUPS: MenuGroup[] = [
       },
       {
         id: "schedule",
-        label: "Lịch làm việc",
+        label: "Lịch dạy",
         icon: <CalendarMonthRoundedIcon sx={{ fontSize: 24 }} />,
         path: teacherPath("/calendar"),
       },
@@ -177,7 +177,7 @@ export type LmsMobileMoreItem = ErgSheetTileItem & { group: "Giảng dạy" | "C
 
 /** Account-sheet tiles (design N2), grouped; keeps screens off the dock reachable on mobile. */
 export const lmsMobileMoreItems: LmsMobileMoreItem[] = [
-  { group: "Giảng dạy", icon: <CalendarMonthRoundedIcon />, label: "Lịch làm việc", path: teacherPath("/calendar") },
+  { group: "Giảng dạy", icon: <CalendarMonthRoundedIcon />, label: "Lịch dạy", path: teacherPath("/calendar") },
   { group: "Giảng dạy", icon: <EventAvailableRoundedIcon />, label: "Điểm danh", path: teacherPath("/attendance") },
   { group: "Giảng dạy", icon: <MenuBookRoundedIcon />, label: "Sổ đầu bài", path: teacherPath("/class-log") },
   { group: "Giảng dạy", icon: <BarChartRoundedIcon />, label: "Báo cáo lớp học", path: teacherPath("/reports") },

@@ -21,6 +21,7 @@ import {
   TargetPreviewPanel,
 } from "@/features/lms/components/assign-homework-desktop-view/target-card-layout";
 import type { AssignHomeworkController } from "@/features/lms/components/use-assign-homework-controller";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 export function GroupTargetCard({ model }: { model: AssignHomeworkController }) {
   const {
@@ -105,7 +106,7 @@ export function GroupTargetCard({ model }: { model: AssignHomeworkController }) 
                     cursor: "pointer",
                     userSelect: "none",
                     // group.color is per-group data, not a theme token; it only marks the left edge so row text keeps contrast.
-                    bgcolor: isChecked ? "info.light" : "background.paper",
+                    bgcolor: isChecked ? ergEnterpriseTokens.color.primarySofter : "background.paper",
                     borderLeft: `4px solid ${group.color}`,
                   }}
                 >
@@ -138,7 +139,7 @@ export function GroupTargetCard({ model }: { model: AssignHomeworkController }) 
                         fontWeight: "fontWeightBold",
                         ...(isChecked
                           ? { border: 1, borderColor: "primary.main", color: "primary.main" }
-                          : { bgcolor: "info.light", color: "primary.main" }),
+                          : { bgcolor: ergEnterpriseTokens.color.primarySofter, color: "primary.main" }),
                       }}
                     >
                       {selectedStudentCount}/{group.studentIds.length} HS

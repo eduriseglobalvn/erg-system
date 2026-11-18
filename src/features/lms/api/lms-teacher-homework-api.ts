@@ -246,7 +246,8 @@ function primaryAssignmentResource(assignment: LmsAssignment): LmsAssignmentReso
 }
 
 function subjectLabel(subjectId?: string | null) {
-  if (!subjectId) return "LMS";
+  // No subject on the assignment: show nothing rather than the internal "LMS" source name.
+  if (!subjectId) return "";
   return subjectId
     .split(/[-_]/)
     .filter(Boolean)

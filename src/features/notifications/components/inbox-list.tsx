@@ -28,7 +28,7 @@ const EMPTY_LABEL: Partial<Record<InboxFilter, string>> = {
   ACTION: "Không có thông báo cần xử lý trong các tin gần đây.",
 };
 
-const COMPOSE_LABEL: Record<InboxWorkspace, string> = { ADMIN: "Gửi thông báo", TEACHER: "Gửi lớp", STUDENT: "" };
+const COMPOSE_LABEL: Record<InboxWorkspace, string> = { ADMIN: "Gửi thông báo", TEACHER: "Soạn thông báo", STUDENT: "" };
 
 type InboxListProps = {
   portal: NotificationPortal;
@@ -36,7 +36,7 @@ type InboxListProps = {
   onOpen: (item: InboxItemData) => void;
   /** Renders the page heading; leave out when the page has its own. */
   title?: string;
-  /** Shows the primary send action ("Gửi lớp" / "Gửi thông báo"). Pass it only when the session may send. */
+  /** Shows the primary send action ("Soạn thông báo" / "Gửi thông báo"). Pass it only when the session may send. */
   onCompose?: () => void;
 };
 

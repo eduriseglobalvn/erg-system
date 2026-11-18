@@ -24,7 +24,7 @@ describe("Student PWA mobile UI policy", () => {
     expect(runtime).toContain("StudentDashboardOverviewSurface");
     expect(surface).toContain("StudentDashboardMobileOverview");
     expect(overview).toContain("priorityAssignment");
-    expect(overview).toContain("greetingLead");
+    expect(overview).toContain("Việc cần làm");
   });
 
   it("has no top bar: notifications and profile live in the floating dock", () => {

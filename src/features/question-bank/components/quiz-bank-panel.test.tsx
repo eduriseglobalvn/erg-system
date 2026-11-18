@@ -42,3 +42,9 @@ it("does not offer Publish for a published quiz", () => {
   expect(screen.queryByRole("menuitem", { name: enCopy.publishQuiz })).toBeNull();
   expect(screen.getByRole("menuitem", { name: enCopy.exportPortableAction })).toBeTruthy();
 });
+
+it("flags a quiz with no questions instead of showing it as ready", () => {
+  renderPanel([{ ...quiz("c", "ready"), questionCount: 0 }]);
+  expect(screen.getByText(enCopy.quizNoQuestions)).toBeTruthy();
+  expect(screen.queryByText(enCopy.quizStatus.ready)).toBeNull();
+});

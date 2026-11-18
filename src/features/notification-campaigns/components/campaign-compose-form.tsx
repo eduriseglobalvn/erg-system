@@ -169,7 +169,7 @@ export function CampaignComposeForm({ campaignId, initial, portalKind }: Props) 
             {blockedReason}
           </Typography>
         ) : null}
-        <ErgButton disabled={!canSave} onClick={() => void saveDraft()} variant="outlined">Lưu nháp</ErgButton>
+        <ErgButton disabled={!canSave} onClick={() => void saveDraft()} variant="text">Lưu nháp</ErgButton>
         <ErgButton aria-describedby={blockedReason ? "campaign-blocked-reason" : undefined} disabled={!canSend} loading={submitting} sx={{ flex: { xs: 1, sm: "none" } }} type="submit" variant="contained">
           {primaryLabel}
         </ErgButton>

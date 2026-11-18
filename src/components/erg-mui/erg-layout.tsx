@@ -103,11 +103,8 @@ export function ErgContentBand({ sx, ...props }: BoxProps) {
   return (
     <Box
       sx={[
-        {
-          bgcolor: "background.default",
-          minHeight: "100%",
-          p: { xs: 2.5, md: 3.5 },
-        },
+        // No own grey frame or padding: the shell <main> already gives every screen the same edge.
+        { minHeight: "100%" },
         ...(Array.isArray(sx) ? sx : [sx]),
       ]}
       {...props}

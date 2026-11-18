@@ -20,7 +20,7 @@ import { bodyCellSx, ConfirmPill, headCellSx, LagNote } from "./class-log-ui";
 const columns: ReadonlyArray<{ label: string; width: number; center?: boolean }> = [
   { label: "Tiết", width: 56, center: true }, { label: "Lớp", width: 64 }, { label: "Môn học", width: 110 },
   { label: "Học sinh vắng", width: 150 }, { label: "PPCT", width: 64, center: true }, { label: "Tiết thực tế", width: 110 },
-  { label: "Bài dạy (tự tra KCT)", width: 0 }, { label: "Nhận xét", width: 180 }, { label: "Xác nhận", width: 140 },
+  { label: "Bài dạy", width: 0 }, { label: "Nhận xét", width: 180 }, { label: "Xác nhận", width: 140 },
 ];
 
 type Props = {
@@ -95,7 +95,7 @@ const PeriodRowView = memo(function PeriodRowView({ period, draft, onEdit }: { p
           value={comment}
         />
       </TableCell>
-      <TableCell sx={cell}><ConfirmPill confirmed={period.status === "CONFIRMED"} late={period.late} /></TableCell>
+      <TableCell sx={cell}><ConfirmPill confirmed={period.status === "CONFIRMED"} happened={period.happened} late={period.late} /></TableCell>
     </TableRow>
   );
 });

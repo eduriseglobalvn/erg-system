@@ -15,7 +15,6 @@ import {
   NAV_HOVER_BG,
   NAV_ICON_SIZE,
   NAV_ON_PRIMARY,
-  NAV_PADDING,
   NAV_PRIMARY,
   navRowSx,
   raisedCardSx,
@@ -24,8 +23,6 @@ import { isChildBranchActive, pathMatches } from "./portal-sidebar-utils";
 import { useCollapsedFlyout } from "./use-collapsed-flyout";
 
 const COMPACT_SIZE = 44;
-// Button is centred in the 54px nav content box, so the card edge is 5px further out.
-const COMPACT_BAR_OFFSET = NAV_PADDING + 5;
 
 interface SidebarCompactItemProps {
   item: MenuItem;
@@ -59,7 +56,7 @@ export function SidebarCompactItem({ item, currentPath, onNavigate }: SidebarCom
           onMouseEnter={(event) => hasChildren && flyout.open(event.currentTarget)}
           onMouseLeave={() => hasChildren && flyout.scheduleClose()}
           sx={{
-            ...navRowSx(active, { bar: COMPACT_BAR_OFFSET, height: COMPACT_SIZE }),
+            ...navRowSx(active, { height: COMPACT_SIZE }),
             ...(flyoutOpen && !active ? { bgcolor: NAV_HOVER_BG, color: NAV_PRIMARY } : {}),
             flexGrow: 0, // ListItemButton grows by default; keep the 44px square
             justifyContent: "center",

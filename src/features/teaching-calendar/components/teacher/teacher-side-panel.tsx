@@ -56,7 +56,8 @@ export function TeacherSidePanel({ events, leave, now, today, weekTitle }: Props
           <Typography component="h2" sx={{ typography: "subtitle2" }}>{weekTitle}</Typography>
           {hasAssistant ? <Row label="Tổng" value={`${live.length} tiết`} /> : null}
           {rows.map((row) => <Row key={row.label} label={row.label} value={`${row.count} tiết`} />)}
-          <Box sx={{ borderTop: `1px solid ${t.color.divider}`, color: t.color.textMuted, display: "flex", flexDirection: hasAssistant ? "column" : "row", fontSize: SIZE.title, gap: hasAssistant ? "4px" : 1.5, flexWrap: "wrap", pt: 1 }}>
+          {/* One school needs no colour key: the row above already names it. */}
+          {hasAssistant || order.length > 1 ? <Box sx={{ borderTop: `1px solid ${t.color.divider}`, color: t.color.textMuted, display: "flex", flexDirection: hasAssistant ? "column" : "row", fontSize: SIZE.title, gap: hasAssistant ? "4px" : 1.5, flexWrap: "wrap", pt: 1 }}>
             {hasAssistant ? (
               <>
                 <span><Box component="span" sx={{ bgcolor: t.color.textSoft, borderRadius: "3px", display: "inline-block", height: 10, mr: 0.5, verticalAlign: "middle", width: 10 }} /> Dạy chính</span>
@@ -66,7 +67,7 @@ export function TeacherSidePanel({ events, leave, now, today, weekTitle }: Props
             ) : order.map((id, index) => (
               <span key={id}><Box component="span" sx={{ bgcolor: index === 0 ? t.color.primary : t.color.textSoft, borderRadius: "3px", display: "inline-block", height: 10, mr: 0.5, verticalAlign: "middle", width: 10 }} /> {schoolPlainName(live.find((event) => event.schoolId === id)?.schoolName ?? "")}</span>
             ))}
-          </Box>
+          </Box> : null}
         </Box>
       ) : null}
       <Box aria-label="Ngày nghỉ" component="section" sx={{ ...cardSx, fontSize: SIZE.panel, gap: "10px" }}>

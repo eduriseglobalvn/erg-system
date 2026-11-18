@@ -69,10 +69,10 @@ test("'Hẹn giờ' switches the primary label", () => {
   expect(primary()).toHaveTextContent("Hẹn gửi 1.336 người");
 });
 
-test("exactly one contained button; 'Lưu nháp' is outlined", () => {
+test("exactly one contained button; 'Lưu nháp' is text", () => {
   const { container } = render(<CampaignComposeForm portalKind="admin" />);
   expect(container.querySelectorAll(".MuiButton-contained")).toHaveLength(1);
-  expect(screen.getByRole("button", { name: "Lưu nháp" })).toHaveClass("MuiButton-outlined");
+  expect(screen.getByRole("button", { name: "Lưu nháp" })).toHaveClass("MuiButton-text");
 });
 
 test("a disabled primary shows why: no recipients", () => {
@@ -137,7 +137,7 @@ test("teacher: only class / group / people scopes, and the scope note", () => {
   const scopes = screen.getByRole("radiogroup", { name: "Gửi đến" });
   for (const name of ["Toàn hệ thống", "Trường", "Khối", "Vai trò"]) expect(within(scopes).queryByRole("radio", { name })).toBeNull();
   expect(within(scopes).getByRole("radio", { name: "Lớp" })).toBeInTheDocument();
-  expect(screen.getByText(/Giáo viên.*chỉ chọn được lớp mình dạy/)).toBeInTheDocument();
+  expect(screen.getByText(/Bạn chỉ gửi được cho lớp mình dạy/)).toBeInTheDocument();
 });
 
 test("no Email row, no attachment button, no parent chip", () => {

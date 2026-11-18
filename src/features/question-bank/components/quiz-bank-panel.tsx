@@ -92,21 +92,14 @@ export function QuizBankPanel({
   const [owner, setOwner] = useState<"system" | "teacher">("system");
   const teacherCount = allQuizzes.filter(isTeacherQuiz).length;
   const quizzes = allQuizzes.filter((quiz) => isTeacherQuiz(quiz) === (owner === "teacher"));
+  // A column where every row reads «—» is noise; it returns once the server sends update times.
+  const showUpdated = isLoading || quizzes.some((quiz) => formatDateTimeVi(quiz.updatedAt));
+  const columnCount = showUpdated ? 8 : 7;
   return (
     <Stack spacing={2}>
       <QuestionBankPageHeader
         title={title}
         meta={[activeSubject.label, activeLevel.label, isLoading ? "" : copy.quizBankMeta(kindCounts.all)].filter(Boolean).join(" · ")}
-        controls={
-          <QuestionBankScopeControls
-            activeLevel={activeLevel}
-            activeSubject={activeSubject}
-            copy={copy}
-            onLevelChange={onLevelChange}
-            onSubjectChange={onSubjectChange}
-            subjects={subjects}
-          />
-        }
         actions={
           <ErgButton startIcon={<AddRoundedIcon />} onClick={onCreateQuiz}>
             {copy.createQuizFromBank}
@@ -117,7 +110,7 @@ export function QuizBankPanel({
         sx={{ borderRadius: `${t.radius.card}px` }}
         footer={
           <Typography variant="caption" component="p" sx={{ color: t.color.textMuted, px: 2, py: 1.5 }}>
-            {copy.quizBankRowHint}
+            {isLoading ? copy.quizBankRowHint : `${copy.quizBankMeta(quizzes.length)} · ${copy.quizBankRowHint}`}
           </Typography>
         }
         toolbar={
@@ -139,11 +132,20 @@ export function QuizBankPanel({
                       ),
                     },
                   }}
-                  sx={{ width: { xs: "100%", sm: 280 }, "& .MuiOutlinedInput-root": { bgcolor: t.color.surfaceMuted } }}
+                  sx={{ width: { xs: "100%", sm: 200 } }}
+                />
+                <QuestionBankScopeControls
+                  activeLevel={activeLevel}
+                  activeSubject={activeSubject}
+                  copy={copy}
+                  onLevelChange={onLevelChange}
+                  onSubjectChange={onSubjectChange}
+                  subjects={subjects}
                 />
                 <ToggleButtonGroup
                   exclusive
                   size="small"
+                  sx={segmentSx}
                   value={quizKind}
                   aria-label={copy.quizTable.kind}
                   onChange={(_, value) => {
@@ -158,6 +160,7 @@ export function QuizBankPanel({
                   <ToggleButtonGroup
                     exclusive
                     size="small"
+                    sx={segmentSx}
                     value={owner}
                     aria-label={copy.quizOwnerFilter.label}
                     onChange={(_, value) => {
@@ -182,7 +185,7 @@ export function QuizBankPanel({
               <TableCell sx={{ ...wideOnly, width: 96 }}>{copy.quizTable.duration}</TableCell>
               <TableCell sx={{ ...wideOnly, width: 130 }}>{copy.quizTable.source}</TableCell>
               <TableCell sx={{ width: 130 }}>{copy.quizTable.status}</TableCell>
-              <TableCell sx={{ ...wideOnly, width: 120 }}>{copy.quizTable.updated}</TableCell>
+              {showUpdated ? <TableCell sx={{ ...wideOnly, width: 120 }}>{copy.quizTable.updated}</TableCell> : null}
               <TableCell align="right" sx={{ width: 44 }}>
                 <Box component="span" sx={visuallyHidden}>{copy.quizTable.actions}</Box>
               </TableCell>
@@ -193,7 +196,7 @@ export function QuizBankPanel({
               <SkeletonRows />
             ) : quizzes.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} sx={{ py: 6 }}>
+                <TableCell colSpan={columnCount} sx={{ py: 6 }}>
                   <ErgEmptyState title={copy.noQuizzes} description={copy.noQuizzesHint} />
                 </TableCell>
               </TableRow>
@@ -228,11 +231,17 @@ export function QuizBankPanel({
                   <TableCell sx={{ ...wideOnly, color: t.color.textSecondary }}>{quiz.durationLabel}</TableCell>
                   <TableCell sx={{ ...wideOnly, color: t.color.textSecondary }}>{copy.sourceMode[quiz.sourceMode]}</TableCell>
                   <TableCell>
-                    <QuizStatusText label={copy.quizStatus[quiz.status]} status={quiz.status} />
+                    {quiz.questionCount === 0 ? (
+                      <ErgStatusChip label={copy.quizNoQuestions} tone="warning" />
+                    ) : (
+                      <QuizStatusText label={copy.quizStatus[quiz.status]} status={quiz.status} />
+                    )}
                   </TableCell>
-                  <TableCell sx={{ ...wideOnly, color: t.color.textSecondary, whiteSpace: "nowrap" }}>
-                    {formatDateTimeVi(quiz.updatedAt) || "—"}
-                  </TableCell>
+                  {showUpdated ? (
+                    <TableCell sx={{ ...wideOnly, color: t.color.textSecondary, whiteSpace: "nowrap" }}>
+                      {formatDateTimeVi(quiz.updatedAt) || "—"}
+                    </TableCell>
+                  ) : null}
                   <TableCell align="right">
                     <RowActionsMenu
                       label={copy.moreActions(quiz.title)}
@@ -265,6 +274,12 @@ function QuizStatusText({ label, status }: { label: string; status: QuizBankStat
     </Box>
   );
 }
+
+/** Sentence-case segments on a white field, matching the selects beside them. */
+const segmentSx = {
+  "& .MuiToggleButton-root": { bgcolor: t.color.surface, textTransform: "none" },
+  "& .MuiToggleButton-root.Mui-selected": { bgcolor: t.color.primarySofter, color: "primary.main" },
+} as const;
 
 const visuallyHidden = {
   border: 0,

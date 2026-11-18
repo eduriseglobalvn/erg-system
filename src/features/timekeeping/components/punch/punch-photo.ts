@@ -1,5 +1,5 @@
-const MAX_EDGE_PX = 1024;
-const JPEG_QUALITY = 0.8;
+import { encodeSmallJpeg } from "../../hooks/use-camera-capture";
+
 export const MAX_PHOTO_BYTES = 2 * 1024 * 1024;
 export const PHOTO_TOO_LARGE = "Ảnh tối đa 2 MB";
 
@@ -13,16 +13,11 @@ function decode(file: File): Promise<HTMLImageElement> {
   });
 }
 
-/** Camera fallback: same resize as the live camera (<= 1024 px JPEG 0.8). Falls back to the raw file only when it is <= 2 MB. */
+/** Camera fallback: same encoding as the live camera (under 5 KB). Falls back to the raw file only when it cannot be decoded and is <= 2 MB. */
 export async function resizePhotoFile(file: File): Promise<Blob> {
   try {
     const img = await decode(file);
-    const scale = Math.min(1, MAX_EDGE_PX / Math.max(img.naturalWidth, img.naturalHeight));
-    const canvas = document.createElement("canvas");
-    canvas.width = Math.round(img.naturalWidth * scale);
-    canvas.height = Math.round(img.naturalHeight * scale);
-    canvas.getContext("2d")?.drawImage(img, 0, 0, canvas.width, canvas.height);
-    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", JPEG_QUALITY));
+    const blob = await encodeSmallJpeg(img, img.naturalWidth, img.naturalHeight);
     if (blob) return blob;
   } catch {
     // fall through to the size check below

@@ -115,7 +115,7 @@ test.describe("GV: so dau bai tuan", () => {
     });
     await page.goto("/teacher/class-log", { timeout: 20_000, waitUntil: "domcontentloaded" });
 
-    await expect(page.getByRole("heading", { name: "Báo giảng" })).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByRole("heading", { name: "Sổ đầu bài" })).toBeVisible({ timeout: 30_000 });
     await expect(page.getByText("T10 · Bài 7: Hành vi bất hợp pháp")).toBeVisible();
     await noHorizontalScroll(page, PHONE.width);
 
@@ -147,7 +147,7 @@ test("GV: diem danh theo tiet roi luu vao so dau bai (1440)", async ({ page }) =
   await page.goto("/teacher/attendance", { timeout: 20_000, waitUntil: "domcontentloaded" });
 
   await expect(page.getByRole("heading", { name: "Điểm danh" })).toBeVisible({ timeout: 30_000 });
-  await expect(page.getByRole("navigation", { name: "Tiết hôm nay theo TKB" })).toContainText("6A4");
+  await expect(page.getByRole("navigation", { name: "Tiết trong ngày" })).toContainText("6A4");
   await expect(page.getByRole("group", { name: "Danh sách học sinh" })).toContainText("Trần Bảo", { timeout: 15_000 });
 
   await page.getByRole("radio", { name: "Trần Bảo: Vắng K" }).click();

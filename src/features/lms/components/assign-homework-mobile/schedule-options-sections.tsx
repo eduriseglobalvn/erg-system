@@ -77,7 +77,7 @@ export function OptionsSection({ model: m }: { model: AssignHomeworkController }
           />
         </Box>
         <Box sx={{ ...mobileRowSx, borderTop: 1, borderColor: "divider" }}>
-          <MobileRowText meta="Không tính điểm TB chính, XP tối đa 50/tuần" title="Bài bổ sung" />
+          <MobileRowText meta="Không tính vào điểm trung bình chính; tối đa 50 XP/tuần" title="Bài bổ sung" />
           <Switch checked={m.supplementary} onChange={(event) => m.setSupplementary(event.target.checked)} slotProps={{ input: { "aria-label": "Bài bổ sung" } }} />
         </Box>
       </Box>

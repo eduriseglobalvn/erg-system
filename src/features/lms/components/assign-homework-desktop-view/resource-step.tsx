@@ -8,6 +8,7 @@ import {
 } from "@/features/lms/components/assign-homework-parts";
 import { AssignQuizThemeSlot } from "@/features/lms/components/assign-quiz-theme-slot";
 import type { AssignHomeworkController } from "@/features/lms/components/use-assign-homework-controller";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 const pillSx = { borderRadius: 1, px: 1.5, py: 0.5, fontWeight: "fontWeightMedium", color: "primary.main" } as const;
 
@@ -29,17 +30,17 @@ export function ResourceSelectionStep({ model }: { model: AssignHomeworkControll
     toggleResourceSelection,
   } = model;
   return (
-    <Box component="section" sx={{ display: "flex", minHeight: 0, flex: 1, flexDirection: "column", overflow: "hidden", borderRadius: 1, border: 1, borderColor: "divider", bgcolor: "background.paper", boxShadow: 1 }}>
+    <Box component="section" sx={{ display: "flex", minHeight: 0, flex: 1, flexDirection: "column", overflow: "hidden", borderRadius: 1, border: 1, borderColor: "divider", bgcolor: "background.paper" }}>
       <Box sx={{ flexShrink: 0, borderBottom: 1, borderColor: "divider", px: 2.5, py: 1.5 }}>
         <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 1.5 }}>
           <Box>
             <Typography component="h2" variant="subtitle2" sx={{ fontWeight: "fontWeightMedium" }}>Chọn bài tập</Typography>
             <Typography variant="body2" sx={{ mt: 0.25, color: "text.secondary", fontWeight: "fontWeightMedium" }}>
-              {selectedSubject?.label ?? "Môn học"} · {selectedLevel?.label ?? "Level"} · {selectedResourceLabel}
+              {selectedSubject?.label ?? "Môn học"} · {selectedLevel?.label ?? "Cấp độ"} · {selectedResourceLabel}
             </Typography>
           </Box>
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-            <Typography component="span" variant="body2" sx={{ ...pillSx, bgcolor: "info.light" }}>{attemptLimit} lần làm</Typography>
+            <Typography component="span" variant="body2" sx={{ ...pillSx, bgcolor: ergEnterpriseTokens.color.primarySofter }}>{attemptLimit} lần làm</Typography>
             <Typography component="span" variant="body2" sx={{ ...pillSx, border: 1, borderColor: "primary.main" }}>{maxDurationMinutes} phút tối đa</Typography>
           </Box>
         </Box>
@@ -56,7 +57,7 @@ export function ResourceSelectionStep({ model }: { model: AssignHomeworkControll
               options={availableSubjects.map((item) => ({ label: item.label, value: item.id }))}
             />
             <Box sx={{ display: "grid", gap: 1 }}>
-              <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: "fontWeightBold" }}>Level</Typography>
+              <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: "fontWeightBold" }}>Cấp độ</Typography>
               {selectedSubject?.levels.map((level) => {
                 const active = level.id === selectedLevel?.id;
                 return (
@@ -75,7 +76,7 @@ export function ResourceSelectionStep({ model }: { model: AssignHomeworkControll
                       textAlign: "left",
                       transition: "background-color 150ms, border-color 150ms",
                       ...(active
-                        ? { borderColor: "primary.main", bgcolor: "info.light", boxShadow: 1 }
+                        ? { borderColor: "primary.main", bgcolor: ergEnterpriseTokens.color.primarySofter }
                         : { borderColor: "divider", bgcolor: "background.paper", "&:hover": { borderColor: "primary.main", bgcolor: "action.hover" } }),
                     }}
                   >
@@ -96,7 +97,7 @@ export function ResourceSelectionStep({ model }: { model: AssignHomeworkControll
           <Box sx={{ flexShrink: 0, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 2, py: 1.5 }}>
             <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 1.5 }}>
               <ErgSearchField
-                placeholder="Tìm bài trong level đang chọn..."
+                placeholder="Tìm bài trong cấp độ đang chọn..."
                 value={resourceSearch}
                 onChange={(event) => setResourceSearch(event.target.value)}
                 sx={{ minWidth: 320, flex: 1 }}
@@ -110,7 +111,7 @@ export function ResourceSelectionStep({ model }: { model: AssignHomeworkControll
             <Box sx={{ mb: 1.5, "&:empty": { display: "none" } }}><AssignQuizThemeSlot selectedQuizIds={selectedResourceIds} /></Box>
             <Box sx={{ display: "grid", gap: 1.5 }}>
               {filteredResourceTopics.map((topic) => (
-                <Box component="section" key={topic.id} sx={{ overflow: "hidden", borderRadius: 1, border: 1, borderColor: "divider", bgcolor: "background.paper", boxShadow: 1 }}>
+                <Box component="section" key={topic.id} sx={{ overflow: "hidden", borderRadius: 1, border: 1, borderColor: "divider", bgcolor: "background.paper" }}>
                   <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1.5, borderBottom: 1, borderColor: "divider", bgcolor: "background.default", px: 2, py: 1.5 }}>
                     <Box>
                       <Typography component="h3" variant="subtitle2" sx={{ fontWeight: "fontWeightBold" }}>{topic.label}</Typography>
@@ -139,7 +140,7 @@ export function ResourceSelectionStep({ model }: { model: AssignHomeworkControll
                             py: 1.5,
                             textAlign: "left",
                             transition: "background-color 150ms",
-                            bgcolor: checked ? "info.light" : "background.paper",
+                            bgcolor: checked ? ergEnterpriseTokens.color.primarySofter : "background.paper",
                             "&:hover": checked ? undefined : { bgcolor: "action.hover" },
                           }}
                         >
@@ -158,7 +159,7 @@ export function ResourceSelectionStep({ model }: { model: AssignHomeworkControll
                           </Box>
                           <ErgStatusChip
                             dot={false}
-                            label={item.kind === "test" ? "Test" : "Train"}
+                            label={item.kind === "test" ? "Kiểm tra" : "Luyện tập"}
                             tone={item.kind === "test" ? "warning" : "info"}
                           />
                         </ButtonBase>
@@ -171,7 +172,7 @@ export function ResourceSelectionStep({ model }: { model: AssignHomeworkControll
             {filteredResourceTopics.length === 0 ? (
               <Box sx={{ display: "flex", height: "100%", minHeight: 240, alignItems: "center", justifyContent: "center", borderRadius: 1, border: 1, borderStyle: "dashed", borderColor: "divider", bgcolor: "background.paper", textAlign: "center" }}>
                 <Typography variant="body2" sx={{ color: "text.secondary", fontWeight: "fontWeightMedium" }}>
-                  Không tìm thấy bài phù hợp trong level đang chọn.
+                  Không tìm thấy bài phù hợp trong cấp độ đang chọn.
                 </Typography>
               </Box>
             ) : null}

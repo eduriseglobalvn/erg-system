@@ -2,8 +2,27 @@ import { useCallback, useEffect, useRef, type InputHTMLAttributes, type RefObjec
 
 export type CameraFacing = "user" | "environment";
 
-const MAX_EDGE_PX = 1024;
-const JPEG_QUALITY = 0.8;
+/** Owner's rule (18/11/2026): a punch photo is stored under 5 KB. It proves presence; it is not a portrait. */
+export const TARGET_PHOTO_BYTES = 5 * 1024;
+// Longest edge and JPEG quality, tried in order until the photo fits. JPEG only: Safari 15 cannot encode WebP.
+const ENCODE_STEPS = [[240, 0.5], [240, 0.35], [200, 0.35], [160, 0.35], [160, 0.25], [128, 0.25], [96, 0.2]] as const;
+
+/** Smallest-needed downscale of a camera frame or picked image; null when the browser cannot encode at all. */
+export async function encodeSmallJpeg(source: CanvasImageSource, width: number, height: number): Promise<Blob | null> {
+  let smallest: Blob | null = null;
+  for (const [edge, quality] of ENCODE_STEPS) {
+    const scale = Math.min(1, edge / Math.max(width, height));
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(width * scale);
+    canvas.height = Math.round(height * scale);
+    canvas.getContext("2d")?.drawImage(source, 0, 0, canvas.width, canvas.height);
+    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", quality));
+    if (!blob) break;
+    smallest = blob;
+    if (blob.size <= TARGET_PHOTO_BYTES) break;
+  }
+  return smallest;
+}
 
 /** Front-camera selfie. Where getUserMedia is missing, render `<input {...fallbackInputProps} />` instead. */
 export function useCameraCapture(): {
@@ -53,14 +72,9 @@ export function useCameraCapture(): {
   const capture = useCallback(async () => {
     const video = videoRef.current;
     if (!video || !video.videoWidth || !video.videoHeight) throw new Error("Camera chưa sẵn sàng");
-    const scale = Math.min(1, MAX_EDGE_PX / Math.max(video.videoWidth, video.videoHeight));
-    const canvas = document.createElement("canvas");
-    canvas.width = Math.round(video.videoWidth * scale);
-    canvas.height = Math.round(video.videoHeight * scale);
-    canvas.getContext("2d")?.drawImage(video, 0, 0, canvas.width, canvas.height);
-    return new Promise<Blob>((resolve, reject) => {
-      canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error("Không chụp được ảnh"))), "image/jpeg", JPEG_QUALITY);
-    });
+    const blob = await encodeSmallJpeg(video, video.videoWidth, video.videoHeight);
+    if (!blob) throw new Error("Không chụp được ảnh");
+    return blob;
   }, []);
 
   useEffect(() => {

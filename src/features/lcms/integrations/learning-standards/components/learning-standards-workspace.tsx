@@ -31,7 +31,7 @@ export function LearningStandardsWorkspace() {
   const [notice, setNotice] = useState<string | null>(null);
 
   if (!canRead) {
-    return <ErgContentBand><ErgEmptyState icon={<HubRoundedIcon fontSize="large" />} title="Không có quyền Learning Standards" description="Tài khoản cần learning.standards.read hoặc learning.standards.manage để vào khu vực tích hợp." /></ErgContentBand>;
+    return <ErgContentBand><ErgEmptyState icon={<HubRoundedIcon fontSize="large" />} title="Không có quyền xem chuẩn học liệu" description="Tài khoản cần learning.standards.read hoặc learning.standards.manage để vào khu vực tích hợp." /></ErgContentBand>;
   }
 
   async function launch(value: LearningStandardPackage) {
@@ -46,15 +46,15 @@ export function LearningStandardsWorkspace() {
   return (
     <ErgContentBand>
       <ErgSectionHeader
-        eyebrow="Admin / Integrations"
-        title="Learning Standards"
-        description="Quản trị SCORM package, LTI 1.3 và xAPI theo tenant; mọi trạng thái đều do backend xác nhận."
+        eyebrow="Quản trị / Tích hợp"
+        title="Chuẩn học liệu"
+        description="Quản lý gói SCORM, kết nối LTI 1.3 và xAPI của hệ thống. Mọi trạng thái do máy chủ xác nhận."
         action={canManage ? <Button startIcon={<AddRoundedIcon />} onClick={() => setCreateOpen(true)} variant="contained">Đăng ký SCORM</Button> : null}
       />
       {notice ? <Alert onClose={() => setNotice(null)} severity="info" sx={{ mb: 2 }}>{notice}</Alert> : null}
       <ErgPageSurface sx={{ mb: 2, p: 0 }}>
-        <Tabs onChange={(_, nextTab: number) => setTab(nextTab)} value={tab} variant="scrollable">
-          <Tab label="SCORM packages" />
+        <Tabs onChange={(_, nextTab: number) => setTab(nextTab)} sx={{ "& .MuiTab-root": { textTransform: "none" } }} value={tab} variant="scrollable">
+          <Tab label="Gói SCORM" />
           <Tab label="LTI & xAPI" />
         </Tabs>
       </ErgPageSurface>

@@ -32,7 +32,7 @@ export function ClassLogPage({ schoolName, classOptions, defaultClassId }: Props
   const setWeek = (week: string) => view.update({ week });
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 2, height: "100%", minHeight: 0, p: { xs: 1, sm: 2 } }}>
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 2, height: "100%", minHeight: 0, pb: 3, pt: { md: 3, xs: 2 }, px: { md: 4, xs: 2 } }}>
       <Box sx={{ alignItems: "center", display: "flex", flexWrap: "wrap", gap: 1.5 }}>
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography component="h1" variant="h1">{classLogText.title}</Typography>

@@ -1,4 +1,5 @@
 import type { AssignmentRun } from "@/domain/school/classroom-types";
+import { teacherPath } from "@/platform/workspaces/workspace-paths";
 
 export function resolveLmsTeacherRuns({
   apiBacked,
@@ -30,4 +31,10 @@ export function isScheduleNotification(payload: unknown) {
   if (isKind(record.eventType)) return true;
   const data = record.data;
   return Boolean(data && typeof data === "object" && isKind((data as Record<string, unknown>).eventType));
+}
+
+/** Attendance follows the timetable period, not the header class (BUG-UI-004), so the header class picker is hidden there. */
+export function headerClassPickerApplies(pathname: string) {
+  const attendance = teacherPath("/attendance");
+  return pathname !== attendance && !pathname.startsWith(`${attendance}/`);
 }

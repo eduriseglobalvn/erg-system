@@ -18,7 +18,7 @@ export function TeacherCalendarHeader({ children, label, onExport, onShift, onTo
   const unit = view === "day" ? "ngày" : view === "week" ? "tuần" : "tháng";
   return (
     <Box component="header" sx={{ alignItems: "center", display: "flex", gap: "10px" }}>
-      <Typography component="h1" sx={{ mr: 1, typography: "h1" }}>Lịch dạy của tôi</Typography>
+      <Typography component="h1" sx={{ mr: 1, typography: "h1" }}>Lịch dạy</Typography>
       <ErgButton onClick={onToday} sx={{ bgcolor: t.color.surface, borderColor: t.color.border, color: t.color.text, fontWeight: "fontWeightRegular", height: 36, minHeight: 36, px: "14px" }} variant="outlined">Hôm nay</ErgButton>
       <ButtonBase aria-label={`Trước (${unit})`} onClick={() => onShift(-1)} sx={arrowSx}><ChevronLeftIcon /></ButtonBase>
       <ButtonBase aria-label={`Sau (${unit})`} onClick={() => onShift(1)} sx={arrowSx}><ChevronRightIcon /></ButtonBase>
@@ -33,7 +33,7 @@ export function TeacherCalendarHeader({ children, label, onExport, onShift, onTo
             >{text}</ButtonBase>
           ))}
         </Box>
-        <ErgButton onClick={onExport} sx={{ height: 36, minHeight: 36, px: 2 }} variant="contained">Thêm vào lịch điện thoại</ErgButton>
+        <ErgButton onClick={onExport} sx={{ height: 36, minHeight: 36, px: 2 }} variant="outlined">Thêm vào lịch điện thoại</ErgButton>
       </Box>
     </Box>
   );

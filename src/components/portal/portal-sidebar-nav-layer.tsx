@@ -22,7 +22,7 @@ function SidebarItem({
 }) {
   if (collapsed) return <SidebarCompactItem currentPath={currentPath} item={item} onNavigate={onNavigate} />;
   if (item.children?.length) return <SidebarBranchItem currentPath={currentPath} item={item} onNavigate={onNavigate} />;
-  return <SidebarLeafItem accentBar currentPath={currentPath} item={item} onNavigate={onNavigate} />;
+  return <SidebarLeafItem currentPath={currentPath} item={item} onNavigate={onNavigate} />;
 }
 
 /** Scrollable menu groups plus the pinned bottom (search + user card). */

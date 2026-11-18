@@ -18,6 +18,7 @@ import {
 } from "@/features/lms/components/assign-homework-student-utils";
 import type { AssignmentCatalogItem } from "@/features/lms/classroom/components/class-students-workspace.types";
 import type { ClassroomSnapshot, ClassroomStudent } from "@/domain/school/classroom-types";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 export type AssignmentGroupItem = AssignHomeworkGroupOption;
 
@@ -28,8 +29,7 @@ const selectableCardSx = (checked: boolean) => ({
   border: 1,
   borderColor: checked ? "primary.main" : "divider",
   borderRadius: 2,
-  bgcolor: checked ? "info.light" : "background.paper",
-  boxShadow: 1,
+  bgcolor: checked ? ergEnterpriseTokens.color.primarySofter : "background.paper",
 });
 
 export function AssignmentCheckbox({ checked, onChange, label }: { checked: boolean; onChange: () => void; label: string }) {
@@ -107,12 +107,12 @@ export const StudentSelectionTableRow = memo(function StudentSelectionTableRow({
         userSelect: "none",
         "& td": {
           bgcolor: "background.paper",
-          backgroundImage: isChecked ? tint(theme.palette.info.light) : "none",
+          backgroundImage: isChecked ? tint(ergEnterpriseTokens.color.primarySofter) : "none",
           transition: "background-color 100ms",
         },
         "&:hover td": {
           bgcolor: "background.paper",
-          backgroundImage: tint(isChecked ? theme.palette.info.light : theme.palette.action.hover),
+          backgroundImage: tint(isChecked ? ergEnterpriseTokens.color.primarySofter : theme.palette.action.hover),
         },
       })}
     >
@@ -122,7 +122,7 @@ export const StudentSelectionTableRow = memo(function StudentSelectionTableRow({
       <TableCell align="center" sx={{ ...stickyCol(48), color: "text.secondary", fontWeight: "fontWeightMedium" }}>
         {index + 1}
       </TableCell>
-      <TableCell sx={{ ...stickyCol(104), color: "primary.main", fontWeight: "fontWeightBold", "&:hover": { textDecoration: "underline" } }}>
+      <TableCell sx={{ ...stickyCol(104), fontWeight: "fontWeightMedium" }}>
         {student.name}
       </TableCell>
       <TableCell sx={{ ...cellSx, fontWeight: "fontWeightMedium" }}>{student.className}</TableCell>
@@ -221,7 +221,7 @@ export function MobileAssignProgress({
         <Typography
           component="span"
           variant="caption"
-          sx={{ flexShrink: 0, borderRadius: 999, border: 1, borderColor: "primary.main", bgcolor: "info.light", px: 1.25, py: 0.5, fontWeight: "fontWeightBold", color: "primary.main" }}
+          sx={{ flexShrink: 0, borderRadius: 999, border: 1, borderColor: "primary.main", bgcolor: ergEnterpriseTokens.color.primarySofter, px: 1.25, py: 0.5, fontWeight: "fontWeightBold", color: "primary.main" }}
         >
           Bước {step}/2
         </Typography>
@@ -278,7 +278,6 @@ export function MobileStudentSelectionList({
           bgcolor: "background.paper",
           px: 1.5,
           textAlign: "left",
-          boxShadow: 1,
         }}
       >
         <Typography noWrap component="span" variant="caption" sx={{ minWidth: 0, fontWeight: "fontWeightBold" }}>
@@ -289,7 +288,7 @@ export function MobileStudentSelectionList({
       <Box sx={{ display: "grid", maxHeight: 330, gap: 0.75, overflowY: "auto", p: 1 }}>
         {isLoading && students.length === 0 ? (
           Array.from({ length: 5 }).map((_, i) => (
-            <Box key={i} sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1.5, borderRadius: 2, bgcolor: "background.paper", p: 1.5, boxShadow: 1 }}>
+            <Box key={i} sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1.5, borderRadius: 2, bgcolor: "background.paper", p: 1.5, border: 1, borderColor: "divider" }}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                 <Skeleton variant="rounded" width={18} height={18} sx={{ borderRadius: 0.5 }} />
                 <Box sx={{ display: "grid", gap: 0.5 }}>

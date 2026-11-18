@@ -24,7 +24,7 @@ type Props = { group: PeriodGroup | null; onClose: () => void };
 /** «Đổi»: pick the lesson(s) really taught from the framework (2.8-4); the title follows from the framework after saving. */
 export function LessonReportPeriodSheet({ group, onClose }: Props) {
   return (
-    <MobileBottomSheet onOpenChange={(open) => { if (!open) onClose(); }} open={Boolean(group)} title={group ? `Báo giảng ${group.className}` : "Báo giảng"}>
+    <MobileBottomSheet onOpenChange={(open) => { if (!open) onClose(); }} open={Boolean(group)} title={group ? `Sổ đầu bài ${group.className}` : "Sổ đầu bài"}>
       {group ? <SheetBody group={group} key={group.key} onClose={onClose} /> : null}
     </MobileBottomSheet>
   );

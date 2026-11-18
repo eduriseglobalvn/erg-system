@@ -40,7 +40,7 @@ export function ClassBookPanel({ classId, classOptions, weekStart, onClass, onWe
           onChange={(event) => onClass(event.target.value)}
           options={classOptions.map((o) => ({ value: o.id, label: o.label }))}
           size="small"
-          slotProps={{ htmlInput: { "aria-label": "Lớp" } }}
+          slotProps={{ htmlInput: { "aria-label": "Lớp" }, select: { displayEmpty: true } }}
           sx={{ width: 160 }}
           value={classOptions.some((o) => o.id === classId) ? classId : ""}
         />

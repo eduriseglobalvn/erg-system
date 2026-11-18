@@ -4,11 +4,11 @@ import type { AttendanceMark } from "./attendance-model";
 
 export const attendanceCopy = {
   commentPlaceholder: "Nhận xét tiết học…",
-  empty: "Hôm nay bạn không có tiết nào theo thời khoá biểu.",
+  empty: "Bạn không có tiết nào theo thời khoá biểu trong ngày này. Đổi ngày ở ô phía trên để mở tiết khác.",
   loadError: "Không tải được dữ liệu.",
   noCurriculum: "Chưa có trong KCT",
   offlinePending: "Offline · chờ đồng bộ",
-  railNote: "Chỉ hiện tiết có trong TKB của bạn.",
+  railNote: "Chỉ hiện tiết có trong thời khoá biểu của bạn.",
   save: "Lưu điểm danh & ghi sổ",
   shortcuts: "Phím tắt: 1 Có mặt · 2 Muộn · 3 Vắng K · 4 Vắng P",
   subtitle: "Theo từng tiết trong thời khoá biểu · lưu xong tự ghi cột «Học sinh vắng» của sổ đầu bài",

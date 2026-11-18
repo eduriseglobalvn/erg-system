@@ -39,16 +39,11 @@ export type StudentDiscussionNotification = DiscussionScrollTarget & {
 
 export type DashboardCopy = {
   navItems: Array<{ key: StudentPageKey; label: string; icon: ReactNode }>;
-  heroEyebrow: string;
-  learnerFallbackName: string;
   heroTitle: (name: string) => string;
   heroDescription: (taskTitle: string, dueDate: string) => string;
   heroAllDone: string;
   heroEmpty: string;
-  greetingLead: (name: string) => string;
   greetingOpen: (count: number) => string;
-  upcomingTitle: string;
-  upcomingAllAction: string;
   todayEmptyDescription: string;
   todayDoneDescription: string;
   primaryAction: string;
@@ -56,20 +51,13 @@ export type DashboardCopy = {
   stats: {
     open: string;
     overdue: string;
-    average: string;
     dueDone: string;
     nextDue: string;
     completed: string;
   };
-  priority: {
-    title: string;
-    action: string;
-    detail: (dueLabel: string) => string;
-  };
   todayTitle: string;
   assignmentsTitle: string;
   assignmentsDescription: string;
-  scoresTitle: string;
   scoresDescription: string;
   bestScoreLabel: string;
   recentResultsTitle: string;
@@ -112,10 +100,7 @@ export type DashboardCopy = {
   notificationNewReply: (authorName: string) => string;
   notificationTopicContext: (title: string) => string;
   accountTitle: string;
-  accountDescription: string;
-  learningProfileTitle: string;
   loginStateTitle: string;
-  accountActionsTitle: string;
   progressLabel: string;
   questionCountLabel: string;
   scoreLabel: string;

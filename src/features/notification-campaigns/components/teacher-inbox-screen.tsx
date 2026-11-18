@@ -3,9 +3,8 @@ import { useLocation, useNavigate } from "@tanstack/react-router";
 import Box from "@mui/material/Box";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
-import Typography from "@mui/material/Typography";
 
-import { ErgButton, ergSegmentedTabsSx } from "@/components/erg-mui";
+import { ErgButton, ErgPageHeader, ergSegmentedTabsSx } from "@/components/erg-mui";
 import { InboxList } from "@/features/notifications/components/inbox-list";
 import { MarkAllReadButton } from "@/features/notifications/components/mark-all-read-button";
 import { TEACHER_NOTIFICATION_PORTAL } from "@/platform/workspaces/workspace-notification-portal";
@@ -40,10 +39,16 @@ export function TeacherInboxScreen() {
 
   return (
     <Box sx={{ display: "grid", gap: 1.5 }}>
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-        <Typography variant="h1" sx={{ flex: 1 }}>Hộp thư</Typography>
-        <MarkAllReadButton portal={TEACHER_NOTIFICATION_PORTAL} />
-        <ErgButton variant="contained" size="small" startIcon={<CampaignRoundedIcon />} onClick={() => void navigate({ href: notificationComposePath("teacher") })}>Gửi lớp</ErgButton>
+      <Box sx={{ mb: -1.5 }}>
+        <ErgPageHeader
+          primaryAction={
+            <>
+              <MarkAllReadButton portal={TEACHER_NOTIFICATION_PORTAL} />
+              <ErgButton variant="contained" startIcon={<CampaignRoundedIcon />} onClick={() => void navigate({ href: notificationComposePath("teacher") })}>Soạn thông báo</ErgButton>
+            </>
+          }
+          title="Hộp thư"
+        />
       </Box>
       <Tabs
         aria-label="Hộp thư và thông báo của tôi"

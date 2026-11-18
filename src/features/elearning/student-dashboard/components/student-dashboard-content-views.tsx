@@ -20,6 +20,7 @@ import type { DashboardCopy, StudentPageKey } from "@/features/elearning/student
 import type { StudentDashboardAssignment, StudentDashboardProfile, StudentTeacherAnnouncement } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
 import { getDiscussionOverviewPreview } from "@/features/elearning/student-dashboard/utils/discussion-overview";
 import { score10, submittedStats, todoHeadline } from "@/features/elearning/student-dashboard/utils/assignment-board";
+import { serverAverageTen } from "@/features/elearning/student-dashboard/utils/student-overview-hero";
 import { elevatedCardSx, Stack } from "@/features/elearning/student-dashboard/components/student-dashboard-workspace-styles";
 import type { AssignmentFilter } from "@/features/elearning/student-dashboard/components/student-dashboard-assignments-view";
 import { PageHeader, SectionCard, MetricCard, AssignmentListItem, AnnouncementCard, EmptyPanel, SkeletonRow } from "@/features/elearning/student-dashboard/components/student-dashboard-view-primitives";
@@ -28,7 +29,9 @@ import { PageHeader, SectionCard, MetricCard, AssignmentListItem, AnnouncementCa
 export function OverviewView({ announcement, assignmentsFailed, assignmentsLoading, completedAssignments, copy, discussionPreview, openAssignments, profile, onOpenAssignment, onPageChange }: { announcement: StudentTeacherAnnouncement | undefined; assignmentsFailed: boolean; assignmentsLoading: boolean; completedAssignments: StudentDashboardAssignment[]; copy: DashboardCopy; discussionPreview: ReturnType<typeof getDiscussionOverviewPreview>; openAssignments: StudentDashboardAssignment[]; overdueAssignments: StudentDashboardAssignment[]; priorityAssignment?: StudentDashboardAssignment; profile: StudentDashboardProfile; onOpenAssignment: (assignmentId: string) => void; onPageChange: (page: StudentPageKey, assignmentFilter?: AssignmentFilter) => void; }) {
   const todo = [...openAssignments].sort((a, b) => Number(b.status === "overdue") - Number(a.status === "overdue")).slice(0, 4);
   const [now] = useState(() => Date.now());
-  const average = submittedStats(completedAssignments).averageTen;
+  // The server's average covers every assignment; the loaded page is only the fallback.
+  const loadedStats = submittedStats(completedAssignments);
+  const average = (loadedStats.count > 0 ? serverAverageTen(profile)?.averageTen : undefined) ?? loadedStats.averageTen;
   const recentScores = completedAssignments.filter((a) => score10(a)).sort((a, b) => (b.submittedAt ?? "").localeCompare(a.submittedAt ?? "")).slice(0, 3);
   const subtitle = [profile.className, todoHeadline([], now)].filter(Boolean).join(" · ");
   const show = (value: string | number) => (assignmentsFailed ? "—" : value);

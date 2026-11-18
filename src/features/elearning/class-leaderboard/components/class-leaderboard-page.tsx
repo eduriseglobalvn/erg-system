@@ -41,8 +41,11 @@ export function ClassLeaderboardPage({ portal }: { portal: GraphQlPortal }) {
   const queryClient = useQueryClient();
   const shell = useContext(LmsTeacherShellContext);
   const schoolId = shell?.selectedSchoolId ?? "";
-  const [picked, setPicked] = useState({ schoolId, classId: "" });
-  const pickedClassId = picked.schoolId === schoolId ? picked.classId : "";
+  // Starts on the class picked in the top bar; a new school or class there restarts the pick.
+  const shellClassId = shell?.selectedClass?.id ?? "";
+  const scopeKey = `${schoolId}|${shellClassId}`;
+  const [picked, setPicked] = useState({ scopeKey, classId: "" });
+  const pickedClassId = picked.scopeKey === scopeKey ? picked.classId : "";
   const [period, setPeriod] = useState<LeaderboardPeriod>("WEEK");
 
   const allClasses = useQuery({
@@ -51,7 +54,8 @@ export function ClassLeaderboardPage({ portal }: { portal: GraphQlPortal }) {
   });
   const inSchool = schoolId && shell ? new Set(shell.classes.filter((item) => item.schoolId === schoolId).map((item) => item.id)) : null;
   const classes = inSchool ? allClasses.data?.filter((item) => inSchool.has(item.id)) : allClasses.data;
-  const classId = classes?.some((item) => item.id === pickedClassId) ? pickedClassId : classes?.[0]?.id || "";
+  const preferredClassId = pickedClassId || shellClassId;
+  const classId = classes?.some((item) => item.id === preferredClassId) ? preferredClassId : classes?.[0]?.id || "";
   const board = useQuery({
     enabled: Boolean(classId),
     queryKey: classLeaderboardKeys.board(portal, classId, period, schoolId),
@@ -88,7 +92,7 @@ export function ClassLeaderboardPage({ portal }: { portal: GraphQlPortal }) {
           <Stack direction={{ xs: "column", md: "row" }} spacing={2} sx={{ alignItems: { md: "center" } }}>
             <ErgSelect
               label="Lớp"
-              onChange={(event) => setPicked({ schoolId, classId: String(event.target.value) })}
+              onChange={(event) => setPicked({ scopeKey, classId: String(event.target.value) })}
               options={classes.map((item) => ({ label: item.name || item.id, value: item.id }))}
               size="small"
               sx={{ maxWidth: 320, width: "100%" }}

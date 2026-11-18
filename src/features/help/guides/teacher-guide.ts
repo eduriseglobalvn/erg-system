@@ -21,9 +21,9 @@ const teacherGuide: HelpGuide = {
     },
     {
       id: "lich",
-      title: "Xem lịch làm việc",
+      title: "Xem lịch dạy",
       steps: [
-        { text: "Vào «Lịch làm việc». Lịch hiện các tiết bạn được xếp dạy." },
+        { text: "Vào «Lịch dạy». Lịch hiện các tiết bạn được xếp dạy." },
         { text: "Nhấn «Hôm nay» để quay về ngày hiện tại. Dùng nút trước/sau để đổi tuần." },
         { text: "Nhấn vào một tiết để xem lớp, phòng và giờ học." },
         { text: "Thấy lịch sai (thiếu tiết, sai lớp)? Báo phòng đào tạo sửa, vì giáo viên không tự đổi lịch được." },

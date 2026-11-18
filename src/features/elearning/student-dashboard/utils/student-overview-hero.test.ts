@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { viCopy } from "@/features/elearning/student-dashboard/components/student-dashboard-workspace.copy";
 import type { StudentDashboardAssignment } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
-import { averageOfScored, resolveOverviewHero } from "@/features/elearning/student-dashboard/utils/student-overview-hero";
+import { averageOfScored, resolveOverviewHero, serverAverageTen } from "@/features/elearning/student-dashboard/utils/student-overview-hero";
 
 function assignment(overrides: Partial<StudentDashboardAssignment> = {}): StudentDashboardAssignment {
   return {
@@ -56,5 +56,12 @@ describe("the explained average", () => {
       assignment({ id: "c" }),
     ])).toEqual({ count: 2, percent: 53 });
     expect(averageOfScored([assignment()])).toBeNull();
+  });
+
+  it("puts the server's percent average on the 10-point scale", () => {
+    expect(serverAverageTen({ averageScore: 76, completedAssignments: 63 })).toEqual({ averageTen: "7,6", count: 63 });
+    expect(serverAverageTen({ averageScore: 80, completedAssignments: 2 })).toEqual({ averageTen: "8", count: 2 });
+    expect(serverAverageTen({ averageScore: null, completedAssignments: 2 })).toBeNull();
+    expect(serverAverageTen({ averageScore: 80, completedAssignments: 0 })).toBeNull();
   });
 });

@@ -1,19 +1,22 @@
-import { useState, type ReactNode } from "react";
+import { useState } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import ButtonBase from "@mui/material/ButtonBase";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
-import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import AssignmentRoundedIcon from "@mui/icons-material/AssignmentRounded";
 
 import { ErgEmptyState } from "@/components/erg-mui/erg-feedback";
+import { ErgMetricStrip } from "@/components/erg-mui/erg-metric-card";
 import type { AssignmentRun, ClassroomSnapshot } from "@/domain/school/classroom-types";
 import { TodayLessonsPanel } from "@/features/lms/components/lms-home-today-lessons";
 import { knownStudentCount } from "@/features/lms/components/lms-teacher-shell-utils";
-import { formatDateVi, todayInput } from "@/domain/formatters/format-date";
-import { greetingFor, LmsHomeMobile } from "@/features/lms/components/lms-home-mobile";
+import { LmsHomeMobile } from "@/features/lms/components/lms-home-mobile";
+import { TeacherPageFrame } from "@/features/lms/components/teacher-page-frame";
+import { weekdayDateVi } from "@/features/timekeeping/components/punch/punch-format";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
+
+const { radius } = ergEnterpriseTokens;
 
 export function LmsHomeDashboard({
   canPunch = false,
@@ -59,7 +62,7 @@ export function LmsHomeDashboard({
     ? Math.round(activeRuns.reduce((sum, run) => sum + run.completionRate, 0) / activeRuns.length)
     : null;
   const supportCount = selectedClass?.riskStudents ?? activeRuns.reduce((sum, run) => sum + run.needsReviewCount, 0);
-  const today = formatDateVi(todayInput());
+  const today = weekdayDateVi(new Date());
 
   if (mobile && onNavigate) {
     return (
@@ -79,129 +82,85 @@ export function LmsHomeDashboard({
     );
   }
 
+  const classLabel = selectedClass?.className;
+  const scope = [today, selectedSchoolName, classLabel ?? "Chưa chọn lớp", knownStudentCount(selectedClass) === undefined ? "" : `${knownStudentCount(selectedClass)} học sinh`].filter(Boolean).join(" · ");
+
   return (
-    <Box sx={{ bgcolor: "background.default", minHeight: "100%", px: { xs: 2, md: 4 }, py: { xs: 2, md: 3 } }}>
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5, maxWidth: 1440, mx: "auto" }}>
-        <Box sx={{ alignItems: "center", display: "flex", flexWrap: "wrap", gap: 2, justifyContent: "space-between" }}>
-          <Box>
-            <Typography component="h1" variant="h5">
-              {greetingFor(new Date().getHours())}, {teacherName}
-            </Typography>
-            <Typography color="text.secondary" variant="body2" sx={{ mt: 0.5 }}>
-              {today ? `Hôm nay, ${today} · ` : ""}
-              {[selectedSchoolName, selectedClass?.className ?? "Chưa chọn lớp", knownStudentCount(selectedClass) === undefined ? "" : `${knownStudentCount(selectedClass)} học sinh`].filter(Boolean).join(" · ")}
-            </Typography>
-          </Box>
-          <Stack direction={{ xs: "column", sm: "row" }} spacing={1} sx={{ width: { xs: "100%", sm: "auto" } }}>
-            {!selectedClass && onClassChange ? (
-              <>
-                <Button
-                  disabled={classes.length === 0}
-                  onClick={(event) => setClassMenuAnchor(event.currentTarget)}
-                  sx={{ minHeight: 44 }}
-                  variant="outlined"
-                >
-                  Chọn lớp
-                </Button>
-                <Menu anchorEl={classMenuAnchor} open={Boolean(classMenuAnchor)} onClose={() => setClassMenuAnchor(null)}>
-                  {classes.map((classroom) => (
-                    <MenuItem
-                      key={classroom.id}
-                      onClick={() => {
-                        setClassMenuAnchor(null);
-                        onClassChange(classroom.id);
-                      }}
-                      sx={{ minHeight: 44 }}
-                    >
-                      {classroom.className}
-                    </MenuItem>
-                  ))}
-                </Menu>
-              </>
-            ) : null}
-            <Button onClick={onOpenSchedule} sx={{ minHeight: 44 }} variant="outlined">
-              Xem lịch
-            </Button>
-            <Button onClick={onAssign} sx={{ minHeight: 44 }} variant="contained">
-              Giao bài tập
-            </Button>
-          </Stack>
-        </Box>
-
-        <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "repeat(2, minmax(0, 1fr))", md: "repeat(4, minmax(0, 1fr))" } }}>
-          <HomeMetricCard empty={runs.length === 0} emptyHint="Giao bài đầu tiên" label="Hoạt động đang mở" onClick={onOpenHomework} tone="primary" value={String(runs.length)} />
-          <HomeMetricCard empty={completionAverage === null} emptyHint="Chưa có dữ liệu" label="Hoàn thành trung bình" onClick={onOpenProgress ?? onOpenHomework} tone="success" value={completionAverage === null ? "—" : `${completionAverage}%`} />
-          <HomeMetricCard empty={supportCount === 0} emptyHint="Chưa có học sinh cần hỗ trợ" label="Cần hỗ trợ" onClick={onOpenProgress ?? onOpenHomework} tone="warning" value={String(supportCount)} />
-          <HomeMetricCard empty={unreadNotificationCount === 0} emptyHint="Không có thông báo mới" label="Thông báo mới" onClick={onOpenNotifications} tone="error" value={String(unreadNotificationCount)} />
-        </Box>
-
-        <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", xl: "minmax(0, 1.35fr) minmax(360px, 0.65fr)" } }}>
-          <Panel>
-            <Box sx={{ alignItems: "center", display: "flex", justifyContent: "space-between", mb: 1.5 }}>
-              <Typography component="h2" variant="subtitle1">Bài tập cần theo dõi</Typography>
-              <Button onClick={onOpenHomework} size="small" sx={{ minHeight: 44 }} variant="text">
-                Xem tất cả
+    <TeacherPageFrame
+      actions={
+        <>
+          {!selectedClass && onClassChange ? (
+            <>
+              <Button disabled={classes.length === 0} onClick={(event) => setClassMenuAnchor(event.currentTarget)} variant="outlined">
+                Chọn lớp
               </Button>
-            </Box>
-            {activeRuns.length === 0 ? (
-              <ErgEmptyState
-                action={<Button onClick={onAssign} variant="outlined">Giao bài</Button>}
-                description="Giao bài cho lớp để theo dõi tiến độ nộp bài tại đây."
-                icon={<AssignmentRoundedIcon />}
-                title="Chưa có bài tập đang mở"
-              />
-            ) : (
-              <Stack spacing={1}>
-                {activeRuns.map((run) => (
-                  <Box key={run.id} sx={{ alignItems: { xs: "stretch", sm: "center" }, bgcolor: "background.paper", border: 1, borderColor: "divider", borderRadius: 2, display: "grid", gap: { xs: 1, sm: 2 }, gridTemplateColumns: { xs: "1fr", sm: "minmax(0, 1fr) 150px 110px" }, px: 2, py: 1.5 }}>
-                    <Box sx={{ minWidth: 0 }}>
-                      <Typography noWrap variant="subtitle2">{run.title}</Typography>
-                      <Typography color="text.secondary" noWrap variant="caption">{run.subjectLabel} · {run.targetLevel}</Typography>
-                    </Box>
-                    <Box>
-                      <Typography color="text.secondary" variant="caption">{run.completionRate}% hoàn thành</Typography>
-                      <Box sx={{ bgcolor: "action.hover", borderRadius: 4, height: 6, mt: 0.75, overflow: "hidden" }}>
-                        <Box sx={{ bgcolor: "success.main", height: "100%", width: `${run.completionRate}%` }} />
-                      </Box>
-                    </Box>
-                    <Typography color={run.needsReviewCount ? "warning.dark" : "text.secondary"} variant="caption" sx={{ textAlign: { xs: "left", sm: "right" } }}>
-                      {run.needsReviewCount} cần xem
-                    </Typography>
-                  </Box>
+              <Menu anchorEl={classMenuAnchor} open={Boolean(classMenuAnchor)} onClose={() => setClassMenuAnchor(null)}>
+                {classes.map((classroom) => (
+                  <MenuItem
+                    key={classroom.id}
+                    onClick={() => {
+                      setClassMenuAnchor(null);
+                      onClassChange(classroom.id);
+                    }}
+                    sx={{ minHeight: 44 }}
+                  >
+                    {classroom.className}
+                  </MenuItem>
                 ))}
-              </Stack>
-            )}
-          </Panel>
-
-          <TodayLessonsPanel noSchool={!selectedSchoolName} onOpenSchedule={onOpenSchedule} />
-        </Box>
-      </Box>
-    </Box>
-  );
-}
-
-function Panel({ children }: { children: ReactNode }) {
-  return <Box sx={{ bgcolor: "background.paper", border: 1, borderColor: "divider", borderRadius: 2, minWidth: 0, p: 2 }}>{children}</Box>;
-}
-
-function HomeMetricCard({ empty, emptyHint, label, onClick, tone, value }: {
-  empty: boolean;
-  emptyHint: string;
-  label: string;
-  onClick?: () => void;
-  tone: "primary" | "success" | "warning" | "error";
-  value: string;
-}) {
-  return (
-    <ButtonBase
-      aria-label={`${label}: ${value}`}
-      disabled={!onClick}
-      onClick={onClick}
-      sx={{ alignItems: "flex-start", bgcolor: "background.paper", border: 1, borderColor: "divider", borderRadius: 2, display: "flex", flexDirection: "column", minHeight: 44, p: 2, textAlign: "left", "&:hover": { bgcolor: "action.hover" } }}
+              </Menu>
+            </>
+          ) : null}
+          <Button onClick={onOpenSchedule} variant="outlined">Xem lịch dạy</Button>
+          <Button onClick={onAssign} variant="contained">Giao bài</Button>
+        </>
+      }
+      description={scope}
+      title={classLabel ? `Hôm nay của lớp ${classLabel}` : "Hôm nay"}
     >
-      <Typography color="text.secondary" variant="caption">{label}</Typography>
-      <Typography color={`${tone}.dark`} component="span" variant="h5" sx={{ mt: 0.5 }}>{value}</Typography>
-      {empty ? <Typography color="text.secondary" variant="caption" sx={{ mt: 0.5 }}>{emptyHint}</Typography> : null}
-    </ButtonBase>
+      <TodayLessonsPanel noSchool={!selectedSchoolName} onOpenSchedule={onOpenSchedule} />
+
+      <ErgMetricStrip
+        items={[
+          { label: "Bài đang mở", onClick: onOpenHomework, value: runs.length },
+          { label: "Hoàn thành trung bình", onClick: onOpenProgress ?? onOpenHomework, value: completionAverage === null ? null : `${completionAverage}%` },
+          { label: "Học sinh cần hỗ trợ", onClick: onOpenProgress ?? onOpenHomework, value: supportCount },
+          { label: "Tin chưa đọc", onClick: onOpenNotifications, value: unreadNotificationCount },
+        ]}
+      />
+
+      <Box sx={{ bgcolor: "background.paper", border: 1, borderColor: "divider", borderRadius: `${radius.card}px`, minWidth: 0 }}>
+        <Box sx={{ alignItems: "center", display: "flex", justifyContent: "space-between", px: 2.5, py: 1.5 }}>
+          <Typography component="h2" variant="subtitle1">Bài đang mở</Typography>
+          <Button onClick={onOpenHomework} size="small" variant="text">Xem tất cả</Button>
+        </Box>
+        {activeRuns.length === 0 ? (
+          <Box sx={{ pb: 2.5, px: 2.5 }}>
+            <ErgEmptyState
+              action={<Button onClick={onAssign} variant="outlined">Giao bài</Button>}
+              description="Giao bài cho lớp để theo dõi tiến độ nộp bài tại đây."
+              icon={<AssignmentRoundedIcon />}
+              title={classLabel ? `Lớp ${classLabel} chưa có bài đang mở` : "Chưa có bài đang mở"}
+            />
+          </Box>
+        ) : (
+          activeRuns.map((run) => (
+            <Box key={run.id} sx={{ alignItems: "center", borderTop: 1, borderTopColor: "divider", display: "grid", gap: 2, gridTemplateColumns: "minmax(0, 1fr) 160px 48px", px: 2.5, py: 1.5 }}>
+              <Box sx={{ minWidth: 0 }}>
+                <Typography noWrap variant="subtitle2">{run.title}</Typography>
+                <Typography color="text.secondary" component="div" noWrap variant="caption">
+                  {[run.subjectLabel, run.dueLabel, run.needsReviewCount ? `${run.needsReviewCount} cần xem` : ""].filter(Boolean).join(" · ")}
+                </Typography>
+              </Box>
+              <Box aria-hidden sx={{ bgcolor: "action.hover", borderRadius: 4, height: 6, overflow: "hidden" }}>
+                <Box sx={{ bgcolor: run.completionRate >= 100 ? "success.main" : "primary.main", height: "100%", width: `${run.completionRate}%` }} />
+              </Box>
+              <Typography color="text.secondary" sx={{ fontVariantNumeric: "tabular-nums", textAlign: "right" }} variant="caption">
+                {run.completionRate}%
+              </Typography>
+            </Box>
+          ))
+        )}
+      </Box>
+    </TeacherPageFrame>
   );
 }

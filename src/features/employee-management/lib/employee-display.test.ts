@@ -1,7 +1,12 @@
 import { describe, expect, test } from "vitest";
-import { employeeStatusView, scopeLabel, summarize } from "@/features/employee-management/lib/employee-display";
+import { employeeRoleLabel, employeeStatusView, scopeLabel, summarize } from "@/features/employee-management/lib/employee-display";
 
 describe("employee display mapping", () => {
+  test("the plain user role reads in Vietnamese", () => {
+    expect(employeeRoleLabel("user")).toBe("Người dùng");
+    expect(employeeRoleLabel("USER")).toBe("Người dùng");
+  });
+
   test("an invited account reads as waiting for activation", () => {
     expect(employeeStatusView("INVITED").label).toBe("Chờ kích hoạt");
   });

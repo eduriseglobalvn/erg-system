@@ -22,8 +22,11 @@ export function employeeStatusView(status: string) {
   return STATUS_VIEW[status as EmployeeStatus] ?? STATUS_VIEW.UNKNOWN;
 }
 
+// Mã "user" chưa có trong catalog vai trò nên getRoleMeta trả "User"; bảng nhân sự cần tiếng Việt.
+const EXTRA_ROLE_LABEL: Record<string, string> = { user: "Người dùng" };
+
 export function employeeRoleLabel(roleCode: string) {
-  return getRoleMeta(roleCode).label;
+  return EXTRA_ROLE_LABEL[roleCode.toLowerCase()] ?? getRoleMeta(roleCode).label;
 }
 
 const SCOPE_TYPE_LABEL: Record<string, string> = {

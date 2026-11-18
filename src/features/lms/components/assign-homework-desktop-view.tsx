@@ -32,7 +32,7 @@ export function AssignHomeworkDesktopView({ model }: AssignHomeworkDesktopViewPr
   } = model;
   const errorBanner = validationError ? (
     <Box
-      sx={{ flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "space-between", borderRadius: 1, border: 1, borderColor: "error.main", bgcolor: "error.light", px: 2, py: 1.5, color: "error.main", boxShadow: 1 }}
+      sx={{ flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "space-between", borderRadius: 1, border: 1, borderColor: "error.main", bgcolor: "error.light", px: 2, py: 1.5, color: "error.main" }}
     >
       <Typography component="span" variant="body2" sx={{ fontWeight: "fontWeightMedium" }}>{validationError}</Typography>
       <ErgIconButton label="Đóng thông báo" size="small" onClick={() => setValidationError("")} sx={{ ml: 1.5, color: "error.main" }}>

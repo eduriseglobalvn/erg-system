@@ -23,13 +23,13 @@ type PackageTableProps = {
 
 export function LearningStandardsPackageTable({ packages, isLoading, isError, canManage, onValidate, onLaunch, onRetry }: PackageTableProps) {
   return (
-    <ErgDataTableShell toolbar={<ErgTableToolbar title="SCORM packages" meta={`${packages.length} gói trong tenant hiện tại`} />}>
+    <ErgDataTableShell toolbar={<ErgTableToolbar title="Gói SCORM" meta={`${packages.length} gói trong hệ thống`} />}>
       {isLoading ? (
         <ErgLoadingSkeleton rows={6} />
       ) : isError ? (
         <ErgEmptyState title="Không tải được package" description="Kiểm tra quyền learning.standards.read hoặc thử lại sau." action={<Button variant="contained" onClick={onRetry}>Thử lại</Button>} />
       ) : packages.length === 0 ? (
-        <ErgEmptyState title="Chưa có SCORM package" description="Đăng ký metadata trước, sau đó upload artifact qua pipeline storage của backend." />
+        <ErgEmptyState title="Chưa có gói SCORM" description="Bấm «Đăng ký SCORM» để khai báo gói, sau đó tải tệp gói lên." />
       ) : (
         <ErgTable aria-label="Learning standard packages">
           <TableHead>

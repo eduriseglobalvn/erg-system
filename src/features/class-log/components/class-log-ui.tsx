@@ -8,9 +8,13 @@ import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
 
 import { classLogText } from "../domain/class-log-copy";
 
-/** Status pill of a period: green once confirmed ("muộn" when it was after the day), blue while waiting. */
-export function ConfirmPill({ confirmed, late }: { confirmed: boolean; late: boolean }) {
-  const tone = confirmed ? t.classLog.present : t.classLog.absentP;
+/**
+ * Status pill of a period: green once confirmed ("muộn" when it was after the day), blue while waiting, grey before it
+ * was taught (the server counts only taught periods as waiting, so the week summary and the pills agree).
+ */
+export function ConfirmPill({ confirmed, happened = true, late }: { confirmed: boolean; happened?: boolean; late: boolean }) {
+  const waiting = !confirmed && happened;
+  const tone = confirmed ? t.classLog.present : waiting ? t.classLog.absentP : t.classLog.neutral;
   return (
     <Box
       component="span"
@@ -19,7 +23,7 @@ export function ConfirmPill({ confirmed, late }: { confirmed: boolean; late: boo
         ...t.type.label, height: 24, px: 1.25, whiteSpace: "nowrap",
       }}
     >
-      {confirmed ? `${classLogText.confirmed}${late ? " · muộn" : ""}` : classLogText.pending}
+      {confirmed ? `${classLogText.confirmed}${late ? " · muộn" : ""}` : waiting ? classLogText.pending : classLogText.notTaught}
     </Box>
   );
 }

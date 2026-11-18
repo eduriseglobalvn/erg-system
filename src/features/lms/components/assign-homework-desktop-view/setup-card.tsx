@@ -13,7 +13,7 @@ import { parseAssignDateTime } from "@/features/lms/components/assign-homework-r
 import type { AssignHomeworkController } from "@/features/lms/components/use-assign-homework-controller";
 
 const ASSIGN_DATE_FORMAT = "DD/MM/YYYY HH:mm:ss";
-const SUPPLEMENTARY_LABEL = "Bài bổ sung (không tính vào điểm TB chính và danh sách nợ bài, XP tối đa 50/tuần)";
+const SUPPLEMENTARY_LABEL = "Bài bổ sung (không tính vào điểm trung bình chính và danh sách nợ bài; tối đa 50 XP/tuần)";
 
 function toPickerValue(value: string): Dayjs | null {
   const iso = parseAssignDateTime(value);

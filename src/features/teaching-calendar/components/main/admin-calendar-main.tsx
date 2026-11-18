@@ -46,7 +46,7 @@ const arrowSx = { borderRadius: "999px", color: color.textSecondary, height: 36,
 const segmentedSx = {
   bgcolor: "background.paper", border: `1px solid ${color.border}`, borderRadius: `${ergEnterpriseTokens.radius.control}px`, minHeight: 0, p: "3px",
   "& .MuiTabs-indicator": { display: "none" },
-  "& .MuiTab-root": { borderRadius: "7px", color: color.textSecondary, fontSize: "0.8125rem", fontWeight: "fontWeightRegular", height: 28, minHeight: 28, minWidth: 0, px: "12px" },
+  "& .MuiTab-root": { borderRadius: "7px", color: color.textSecondary, fontSize: "0.8125rem", fontWeight: "fontWeightRegular", height: 28, minHeight: 28, minWidth: 0, px: "12px", textTransform: "none" },
   "& .MuiTab-root.Mui-selected": { bgcolor: color.primarySofter, color: scheduleTokens.published.text, typography: "subtitle2", fontSize: "0.8125rem" },
 } as const;
 

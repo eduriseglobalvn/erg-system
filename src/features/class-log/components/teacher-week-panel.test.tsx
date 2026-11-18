@@ -80,5 +80,8 @@ describe("teacher week panel", () => {
     api.loadTeacherWeek.mockResolvedValue(week([period({ happened: false })], { taught: 0, confirmed: 0, pending: 0 }));
     renderPanel();
     expect(await screen.findByRole("button", { name: /Xác nhận/ })).toBeDisabled();
+    // The row agrees with the «0 chờ xác nhận» summary: an untaught period is not waiting yet.
+    expect(screen.getByText("Chưa dạy")).toBeInTheDocument();
+    expect(screen.queryByText("Chờ xác nhận")).toBeNull();
   });
 });

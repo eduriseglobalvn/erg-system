@@ -10,7 +10,6 @@ export const NAV_BORDER = ergEnterpriseTokens.color.border;
 export const NAV_ACTIVE_BG = NAV_PRIMARY;
 export const NAV_HOVER_BG = ergEnterpriseTokens.color.primarySofter;
 export const NAV_TEXT = ergEnterpriseTokens.color.navText;
-export const NAV_GROUP_BG = ergEnterpriseTokens.color.surfaceMuted;
 export const NAV_CARD_SHADOW = ergEnterpriseTokens.shadow.float;
 export const NAV_RAISED_SHADOW = "0 6px 16px rgba(15, 23, 42, 0.08)";
 
@@ -22,8 +21,6 @@ export const NAV_CHILD_HEIGHT = 40;
 export const NAV_TILE_SIZE = 40;
 export const NAV_ICON_SIZE = 20;
 export const NAV_CHILD_ICON_SIZE = 16;
-// Open branch card = 1px border + 6px padding around its rows.
-export const NAV_BRANCH_INSET = 7;
 export const NAV_PADDING = 12;
 // Typography scale of the sidebar (px); weights follow the theme (500 / 600).
 export const NAV_FS = { caption: 12, label: 14, title: 16 } as const;
@@ -56,12 +53,11 @@ export const raisedCardSx = {
 } as const;
 
 /**
- * Shared row/button look: solid primary pill when active, soft primary tint on hover.
- * `bar` (px) adds the 4px accent bar on the card's far-left edge for an active row.
+ * Shared row/button look: solid primary pill when active (the only active marker), soft primary tint on hover.
  */
 export function navRowSx(
   active: boolean,
-  { bar, height = NAV_ITEM_HEIGHT, open = false }: { bar?: number; height?: number; open?: boolean } = {},
+  { height = NAV_ITEM_HEIGHT, open = false }: { height?: number; open?: boolean } = {},
 ) {
   const tinted = { bgcolor: NAV_HOVER_BG, color: "text.primary" };
   return {
@@ -82,20 +78,6 @@ export function navRowSx(
     "@media (hover: hover)": { "&:hover": active ? { background: ergEnterpriseTokens.color.primaryHover } : tinted },
     "&.Mui-focusVisible": { outline: `2px solid ${alpha(NAV_PRIMARY, 0.5)}`, outlineOffset: 2 },
     "& .MuiSvgIcon-root": { color: "currentColor" },
-    ...(active && bar !== undefined
-      ? {
-          "&::before": {
-            background: NAV_PRIMARY,
-            borderRadius: "0 4px 4px 0",
-            content: '""',
-            height: 24,
-            left: -bar,
-            position: "absolute",
-            top: (height - 24) / 2,
-            width: 4,
-          },
-        }
-      : {}),
     ...REDUCED_MOTION,
   } as const;
 }

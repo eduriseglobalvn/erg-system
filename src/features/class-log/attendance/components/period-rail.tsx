@@ -10,13 +10,13 @@ import { periodRangeLabel, ppctLag, type RailGroup } from "../attendance-model";
 
 type Props = { dirty: boolean; groups: RailGroup[]; onSelect: (key: string) => void; selectedKey: string | null };
 
-/** Left rail on desktop, horizontal scroller on the phone ("Tiết hôm nay theo TKB"). */
+/** Left rail on desktop, horizontal scroller on the phone ("Tiết trong ngày"). */
 export function PeriodRail({ dirty, groups, onSelect, selectedKey }: Props) {
   const { color, radius } = ergEnterpriseTokens;
   return (
-    <Box component="nav" aria-label="Tiết hôm nay theo TKB" sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+    <Box component="nav" aria-label="Tiết trong ngày" sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
       <Typography color="text.secondary" sx={{ display: { md: "block", xs: "none" } }} variant="caption">
-        Tiết hôm nay theo TKB
+        Tiết trong ngày
       </Typography>
       <Box
         sx={{

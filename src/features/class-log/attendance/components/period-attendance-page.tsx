@@ -1,11 +1,14 @@
 import { useNavigate } from "@tanstack/react-router";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { useTheme } from "@mui/material/styles";
 
 import { ErgButton } from "@/components/erg-mui/erg-actions";
-import { ErgEmptyState, ErgErrorState, ErgStatusChip } from "@/components/erg-mui/erg-feedback";
+import { ErgEmptyState, ErgErrorState, ErgLoadingSkeleton, ErgStatusChip } from "@/components/erg-mui/erg-feedback";
 import { ErgSearchField } from "@/components/erg-mui/erg-form";
 import { ErgPageHeader } from "@/components/erg-mui/erg-page-header";
+import { inputDateToVi } from "@/domain/formatters/format-date";
 import { AttendanceDateField } from "@/features/lms/components/attendance/attendance-date-field";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { teacherPath } from "@/platform/workspaces/workspace-paths";
@@ -25,6 +28,8 @@ const cardSx = { bgcolor: color.surface, border: `1px solid ${color.border}`, bo
 export function PeriodAttendancePage() {
   const m = usePeriodAttendance();
   const isMobile = useIsMobile();
+  // 768–1535px: three columns crush the student-name column to 0px (measured at 1280), so the log panel goes under the list, compact and pinned to the bottom so «Lưu» stays in view.
+  const midWidth = useMediaQuery(useTheme().breakpoints.down("xl"), { noSsr: true }) && !isMobile;
   const navigate = useNavigate();
   const openLog = () => void navigate({ href: teacherPath("/class-log") });
 
@@ -36,7 +41,7 @@ export function PeriodAttendancePage() {
     <LogSidePanel
       actualPeriod={m.actualPeriod}
       comment={m.comment}
-      compact={isMobile}
+      compact={isMobile || midWidth}
       curriculumRows={m.curriculumRows}
       draftAt={m.draftAt}
       lessonTitle={m.lessonTitle}
@@ -53,14 +58,17 @@ export function PeriodAttendancePage() {
 
   const counts = (
     <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75 }}>
-      {ATTENDANCE_MARKS.map((mark) => (
+      {ATTENDANCE_MARKS.map((mark) => {
+        // Tint only a count that needs attention; a zero stays neutral.
+        const tint = m.counts[mark] > 0 && (isMobile || mark !== "absentExcused") ? MARK_TINT[mark] : classLog.neutral;
+        return (
         <Box
           key={mark}
           sx={{
             alignItems: "center",
-            bgcolor: !isMobile && mark === "absentExcused" ? classLog.neutral.bg : MARK_TINT[mark].bg,
+            bgcolor: tint.bg,
             borderRadius: `${radius.chip}px`,
-            color: !isMobile && mark === "absentExcused" ? classLog.neutral.color : MARK_TINT[mark].color,
+            color: tint.color,
             display: "flex",
             flex: { md: "none", xs: 1 },
             flexDirection: { md: "row", xs: "column" },
@@ -73,16 +81,17 @@ export function PeriodAttendancePage() {
           <Typography component="strong" variant="subtitle2">{m.counts[mark]}</Typography>
           <Typography variant="caption">{isMobile ? markLabels[mark] : countLabel(markLabels[mark])}</Typography>
         </Box>
-      ))}
+        );
+      })}
     </Box>
   );
 
   let body;
-  if (m.dayQuery.isPending) body = <Box aria-busy="true" sx={{ minHeight: 240 }} />;
+  if (m.dayQuery.isPending) body = <Box aria-busy="true"><ErgLoadingSkeleton /></Box>;
   else if (m.dayQuery.isError) body = retry(m.dayQuery.refetch);
-  else if (!m.group || !m.period) body = <ErgEmptyState description={attendanceCopy.empty} title="Không có tiết" />;
+  else if (!m.group || !m.period) body = <ErgEmptyState description={attendanceCopy.empty} title="Không có tiết trong ngày này" />;
   else {
-    const roster = m.rosterQuery.isError ? retry(m.rosterQuery.refetch) : m.rosterQuery.isPending ? <Box aria-busy="true" sx={{ minHeight: 240 }} /> : (
+    const roster = m.rosterQuery.isError ? retry(m.rosterQuery.refetch) : m.rosterQuery.isPending ? <Box aria-busy="true" sx={{ p: 2 }}><ErgLoadingSkeleton rows={4} /></Box> : (
       <StudentAttendanceList
         activeStudentId={m.activeStudentId}
         marks={m.marks}
@@ -93,7 +102,7 @@ export function PeriodAttendancePage() {
       />
     );
     body = (
-      <Box sx={{ alignItems: "start", display: "grid", gap: 2, gridTemplateColumns: { lg: "260px minmax(0, 1fr) 340px", md: "240px minmax(0, 1fr)", xs: "minmax(0, 1fr)" } }}>
+      <Box sx={{ alignItems: "start", display: "grid", gap: 2, gridTemplateColumns: { xl: "260px minmax(0, 1fr) 340px", md: "240px minmax(0, 1fr)", xs: "minmax(0, 1fr)" } }}>
         <PeriodRail dirty={m.dirty} groups={m.groups} onSelect={m.selectGroup} selectedKey={m.group.key} />
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, minWidth: 0 }}>
           {isMobile ? counts : null}
@@ -132,7 +141,9 @@ export function PeriodAttendancePage() {
             <Box sx={{ ...cardSx, borderRadius: `${radius.shell}px`, boxShadow: ergEnterpriseTokens.shadow.float, p: 1.5 }}>{panel}</Box>
           ) : null}
         </Box>
-        {isMobile ? null : <Box sx={{ minWidth: 0, position: "sticky", top: 16 }}>{panel}</Box>}
+        {isMobile ? null : midWidth ? (
+          <Box sx={{ ...cardSx, borderRadius: `${radius.shell}px`, bottom: 16, boxShadow: ergEnterpriseTokens.shadow.float, gridColumn: { md: 2 }, minWidth: 0, p: 1.5, position: "sticky" }}>{panel}</Box>
+        ) : <Box sx={{ minWidth: 0, position: "sticky", top: 16 }}>{panel}</Box>}
       </Box>
     );
   }
@@ -141,7 +152,10 @@ export function PeriodAttendancePage() {
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2, p: { md: 3, xs: 2 } }}>
       <Box sx={{ alignItems: "center", display: "flex", flexWrap: "wrap", gap: 1.5 }}>
         <Box sx={{ flex: "1 1 280px" }}>
-          <ErgPageHeader description={attendanceCopy.subtitle} title={attendanceCopy.title} />
+          <ErgPageHeader
+            description={m.group && m.period ? [periodRangeLabel(m.group.periods), inputDateToVi(m.date), m.group.subjectName, `${m.students.length} học sinh`].join(" · ") : attendanceCopy.subtitle}
+            title={m.group ? `${attendanceCopy.title} lớp ${m.group.className}` : attendanceCopy.title}
+          />
         </Box>
         {m.pendingCount > 0 ? <ErgStatusChip label={`${attendanceCopy.offlinePending} (${m.pendingCount})`} tone="warning" /> : null}
         <AttendanceDateField onChange={m.setDate} value={m.date} />

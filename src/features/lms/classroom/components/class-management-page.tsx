@@ -21,6 +21,7 @@ import type { SxProps, Theme } from "@mui/material/styles";
 import { ErgEmptyState, ErgErrorState } from "@/components/erg-mui/erg-feedback";
 import { ErgSearchField, ErgSelect } from "@/components/erg-mui/erg-form";
 import { ErgTable } from "@/components/erg-mui/erg-table";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 import { lmsAssignmentReadQueryKeys, lmsReadPersistMeta } from "@/features/lms/api/lms-assignment-command-query";
 import { loadLmsClassWorkspace, mapClassWorkspaceToStudents } from "@/features/lms/api/lms-classroom-api";
 import type { ClassroomSnapshot, ClassroomStudent } from "@/domain/school/classroom-types";
@@ -181,16 +182,16 @@ export function ClassManagementPage({ classes, selectedClass, selectedSchoolName
   return (
     <Box
       component="section"
-      sx={{ bgcolor: "background.default", display: "flex", flexDirection: "column", gap: 1, height: { lg: "100%" }, minHeight: { xs: "100%", lg: 0 }, p: { xs: 1, lg: 1.5 } }}
+      sx={{ bgcolor: "background.default", display: "flex", flexDirection: "column", gap: 2, height: { lg: "100%" }, minHeight: { xs: "100%", lg: 0 }, pb: 3, pt: { xs: 2, md: 3 }, px: { xs: 2, md: 4 } }}
     >
+      <Box sx={{ flexShrink: 0 }}>
+        <Typography component="h1" variant="h1">{`Theo dõi học sinh · ${scopeLabel}`}</Typography>
+        <Typography variant="body2" color="text.secondary">
+          {[selectedSchoolName, `${visibleStudents.length}/${scopeStudents.length} học sinh`].filter(Boolean).join(" · ")}
+        </Typography>
+      </Box>
       <Paper variant="outlined" sx={{ borderRadius: 1, flexShrink: 0, px: 1.25, py: 1 }}>
         <Stack direction="row" useFlexGap sx={{ alignItems: "center", flexWrap: "wrap", gap: 0.75 }}>
-          <Box sx={{ minWidth: 220, mr: "auto" }}>
-            <Typography variant="subtitle2">{scopeLabel}</Typography>
-            <Typography variant="caption" color="text.secondary" sx={{ display: "block", fontWeight: "fontWeightBold" }}>
-              {[selectedSchoolName, `${visibleStudents.length}/${scopeStudents.length} học sinh`].filter(Boolean).join(" · ")}
-            </Typography>
-          </Box>
           <FilterSelect
             ariaLabel="Kiểu xem"
             options={scopeModeOptions}
@@ -440,9 +441,12 @@ function stickyBodySx(left: number, width: number) {
 
 type Tone = "success" | "warning" | "error" | "info" | "primary";
 
+// Soft tint with the full-strength colour as text: the palette `.light` fills made red/orange cells unreadable.
+const SOFT_FILL = { error: ergEnterpriseTokens.color.dangerSoft, info: "action.selected", success: ergEnterpriseTokens.color.successSoft, warning: ergEnterpriseTokens.color.warningSoft } as const;
+
 function toneSx(tone: Tone) {
   if (tone === "primary") return { bgcolor: "action.selected", borderColor: "primary.main", color: "primary.main" };
-  return { bgcolor: `${tone}.light`, borderColor: `${tone}.main`, color: `${tone}.main` } as const;
+  return { bgcolor: SOFT_FILL[tone], borderColor: `${tone}.main`, color: `${tone}.main` } as const;
 }
 
 function getStudentClassification(student: ClassroomStudent, manual: Record<string, Classification>): Classification {
@@ -454,7 +458,7 @@ function classificationSx(classification: Classification) {
   if (classification === "A") return toneSx("success");
   if (classification === "B") return toneSx("primary");
   if (classification === "C") return toneSx("warning");
-  if (classification === "D") return { bgcolor: "warning.light", borderColor: "warning.dark", color: "warning.dark" };
+  if (classification === "D") return { bgcolor: SOFT_FILL.warning, borderColor: "warning.dark", color: "warning.dark" };
   return toneSx("error");
 }
 
@@ -466,8 +470,8 @@ function progressColor(progress: number): "success" | "primary" | "warning" | "i
 }
 
 function scoreSx(score: number) {
-  if (score >= 85) return { bgcolor: "success.light", color: "success.main" };
-  if (score < 60) return { bgcolor: "error.light", color: "error.main" };
+  if (score >= 85) return { bgcolor: SOFT_FILL.success, color: "success.main" };
+  if (score < 60) return { bgcolor: SOFT_FILL.error, color: "error.main" };
   return { color: "text.primary" };
 }
 

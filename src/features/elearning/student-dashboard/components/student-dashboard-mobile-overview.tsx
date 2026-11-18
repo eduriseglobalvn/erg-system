@@ -1,12 +1,11 @@
 import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
-import ScheduleRoundedIcon from "@mui/icons-material/ScheduleRounded";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import ButtonBase from "@mui/material/ButtonBase";
-import LinearProgress from "@mui/material/LinearProgress";
 import Skeleton from "@mui/material/Skeleton";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import { useState } from "react";
 
 import { OverviewHeroActions } from "@/features/elearning/student-dashboard/components/student-dashboard-overview-shared";
 import type { DashboardCopy, StudentPageKey } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
@@ -15,8 +14,8 @@ import type {
   StudentDashboardProfile,
   StudentTeacherAnnouncement,
 } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
-import { nameWithoutTags } from "@/domain/formatters/format-initials";
 import { resolveOverviewHero } from "@/features/elearning/student-dashboard/utils/student-overview-hero";
+import { todoHeadline } from "@/features/elearning/student-dashboard/utils/assignment-board";
 import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
 
 const panelSx = {
@@ -61,7 +60,7 @@ function SubjectTile({ label, size = 40 }: { label?: string; size?: number }) {
   );
 }
 
-/** Phone overview (design canvas): greeting, the one task to continue, then what is due next. */
+/** Phone overview (mockup hoc-sinh-tong-quan, phone frame): to-do title, the due list, then one contained button. */
 export function StudentDashboardMobileOverview({
   announcement,
   assignmentsFailed,
@@ -87,93 +86,41 @@ export function StudentDashboardMobileOverview({
   onPageChange: (page: StudentPageKey) => void;
 }) {
   const hero = resolveOverviewHero(priorityAssignment, copy);
-  const activeAssignment = priorityAssignment && priorityAssignment.status !== "submitted" ? priorityAssignment : undefined;
-  const upcoming = openAssignments.filter((assignment) => assignment.id !== activeAssignment?.id).slice(0, 3);
+  const [now] = useState(() => Date.now());
+  // The priority task is the first row; the contained button below opens it.
+  const upcoming = openAssignments.slice(0, 3);
   // Nothing assigned yet is not the same as "all handed in".
   const greetingLine = assignmentsLoading || assignmentsFailed
     ? hero.description
     : openAssignments.length === 0 && completedAssignments.length === 0
       ? copy.todayEmptyDescription
       : copy.greetingOpen(openAssignments.length);
-  const nameWords = nameWithoutTags(profile.name).split(/\s+/).filter(Boolean);
-  // Tên 3 từ trở xuống gọi đủ; dài hơn thì gọi hai từ cuối.
-  const name = nameWords.slice(nameWords.length > 3 ? -2 : 0).join(" ") || copy.learnerFallbackName;
+  const empty = !assignmentsLoading && !assignmentsFailed && openAssignments.length === 0;
 
   return (
     <Stack spacing={2.5}>
-      {/* Canvas H01: page title, then one plain line under it. */}
       <Stack spacing={0.5}>
-        <Typography variant="h1">{copy.greetingLead(name)}</Typography>
-        <Typography color="textSecondary" variant="body1">{greetingLine}</Typography>
+        <Typography component="h1" variant="h1">Việc cần làm</Typography>
+        <Typography color="textSecondary" variant="body2">{[profile.className, todoHeadline([], now)].filter(Boolean).join(" · ")}</Typography>
+        <Typography color="textSecondary" variant="body2">{greetingLine}</Typography>
       </Stack>
 
-      <Stack component="section" aria-label={copy.heroEyebrow} spacing={1.75} sx={{ ...panelSx, p: 2 }}>
-        {activeAssignment ? (
-          <>
-            <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
-              <SubjectTile label={activeAssignment.subjectLabel} />
-              <Box sx={{ flex: 1, minWidth: 0 }}>
-                <Typography sx={{ ...clampSx, typography: "subtitle1" }}>{activeAssignment.title}</Typography>
-                <Typography color="textSecondary" noWrap variant="caption" component="p">
-                  {[activeAssignment.subjectLabel, activeAssignment.teacherName].filter(Boolean).join(" · ") || activeAssignment.statusLabel}
-                </Typography>
-              </Box>
-            </Stack>
-            {activeAssignment.dueLabel ? (
-              <Box
-                sx={{
-                  alignItems: "center",
-                  alignSelf: "flex-start",
-                  bgcolor: t.statusTint.warning.bg,
-                  borderRadius: `${t.radius.chip}px`,
-                  color: t.statusTint.warning.color,
-                  display: "inline-flex",
-                  gap: 0.75,
-                  px: 1.25,
-                  py: 0.25,
-                  typography: "caption",
-                }}
-              >
-                <ScheduleRoundedIcon fontSize="inherit" />
-                {activeAssignment.dueLabel}
-              </Box>
-            ) : null}
-            {activeAssignment.progressRate !== null ? (
-              <Stack spacing={0.75}>
-                <Stack direction="row" sx={{ justifyContent: "space-between" }}>
-                  <Typography color="textSecondary" variant="caption">{activeAssignment.statusLabel}</Typography>
-                  <Typography variant="caption">{Math.round(activeAssignment.progressRate)}%</Typography>
-                </Stack>
-                <LinearProgress
-                  aria-label={activeAssignment.statusLabel}
-                  value={activeAssignment.progressRate}
-                  variant="determinate"
-                  sx={{ bgcolor: t.color.divider, borderRadius: 99, height: 6, "& .MuiLinearProgress-bar": { borderRadius: 99 } }}
-                />
-              </Stack>
-            ) : null}
-          </>
-        ) : (
-          <Typography sx={{ typography: "subtitle1" }}>{hero.description}</Typography>
-        )}
-        <OverviewHeroActions copy={copy} fullWidth hero={hero} onOpenAssignment={onOpenAssignment} onPageChange={onPageChange} />
+      <Stack component="section" aria-labelledby="student-upcoming" spacing={1.5}>
+        <Typography component="h2" id="student-upcoming" variant="h6">Bài sắp hết hạn</Typography>
+        <Box sx={panelSx}>
+          {assignmentsLoading
+            ? Array.from({ length: 2 }).map((_, index) => <Skeleton height={56} key={index} sx={{ mx: 2, my: 1 }} variant="rounded" />)
+            : upcoming.map((assignment, index) => (
+              <UpcomingRow assignment={assignment} divider={index > 0} key={assignment.id} onOpenAssignment={onOpenAssignment} />
+            ))}
+          {assignmentsFailed ? <PanelNote description="Tải lại trang sau ít phút. Nếu vẫn lỗi thì báo giáo viên." title="Chưa tải được bài tập" /> : null}
+          {empty ? (completedAssignments.length > 0
+            ? <PanelNote description={copy.todayDoneDescription} title={copy.heroAllDone} />
+            : <PanelNote description={copy.todayEmptyDescription} title={copy.heroEmpty} />) : null}
+        </Box>
       </Stack>
 
-      {assignmentsLoading || upcoming.length > 0 ? (
-        <Stack component="section" aria-labelledby="student-upcoming" spacing={1.5}>
-          <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between" }}>
-            <Typography component="h2" id="student-upcoming" variant="h6">{copy.upcomingTitle}</Typography>
-            <Button onClick={() => onPageChange("assignments")} size="small" sx={{ color: "primary.main" }} variant="text">{copy.upcomingAllAction}</Button>
-          </Stack>
-          <Box sx={panelSx}>
-            {assignmentsLoading
-              ? Array.from({ length: 2 }).map((_, index) => <Skeleton height={56} key={index} sx={{ mx: 2, my: 1 }} variant="rounded" />)
-              : upcoming.map((assignment, index) => (
-                <UpcomingRow assignment={assignment} divider={index > 0} key={assignment.id} onOpenAssignment={onOpenAssignment} />
-              ))}
-          </Box>
-        </Stack>
-      ) : null}
+      <OverviewHeroActions copy={copy} fullWidth hero={hero} onOpenAssignment={onOpenAssignment} onPageChange={onPageChange} />
 
       {announcement ? (
         <Box component="section" aria-label={copy.announcementTitle} sx={{ ...panelSx, p: 2 }}>
@@ -186,6 +133,15 @@ export function StudentDashboardMobileOverview({
       {/* The phone dock has no discussion tab: this is its entry point. */}
       <Button onClick={() => onPageChange("discussion")} size="small" sx={{ alignSelf: "flex-start" }} variant="text">Mở diễn đàn</Button>
     </Stack>
+  );
+}
+
+function PanelNote({ description, title }: { description: string; title: string }) {
+  return (
+    <Box sx={{ px: 2, py: 1.5 }}>
+      <Typography variant="subtitle2">{title}</Typography>
+      <Typography color="textSecondary" variant="body2" sx={{ mt: 0.5 }}>{description}</Typography>
+    </Box>
   );
 }
 

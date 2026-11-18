@@ -24,6 +24,7 @@ export const classLogText = {
   retry: "Thử lại",
   confirmed: "Đã xác nhận",
   pending: "Chờ xác nhận",
+  notTaught: "Chưa dạy",
   unsigned: "Chưa kí",
   noAbsent: "—",
 } as const;

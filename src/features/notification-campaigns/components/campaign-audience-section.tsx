@@ -1,4 +1,3 @@
-import Alert from "@mui/material/Alert";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { useState } from "react";
@@ -37,9 +36,9 @@ export function CampaignAudienceSection({ draft, estimate, kind, onChange }: Pro
       )}
       <AudienceEstimateView breakdown={estimate.breakdown} error={estimate.error} loading={estimate.loading} />
       {kind === "teacher" ? (
-        <Alert role="note" severity="info" variant="outlined">
-          Giáo viên dùng cùng màn này nhưng chỉ chọn được lớp mình dạy (và học sinh của các lớp đó).
-        </Alert>
+        <Typography color="text.secondary" variant="caption">
+          Bạn chỉ gửi được cho lớp mình dạy và học sinh của các lớp đó.
+        </Typography>
       ) : null}
       <RecipientsSheet draft={draft} onChange={onChange} onClose={() => setSheetOpen(false)} open={sheetOpen} />
     </Stack>

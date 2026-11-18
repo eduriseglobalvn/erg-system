@@ -24,6 +24,8 @@ const ROOT_WORKSPACE_PATHS = new Set([
   "/crm",
 ]);
 
+const TEACHER_HOME_ALIASES: Record<string, string> = { "/teacher": "/teacher/home", "/teacher/dashboard": "/teacher/home" };
+
 export function pathMatches(
   path: string | undefined,
   currentPath: string,
@@ -36,7 +38,8 @@ export function pathMatches(
       ? currentPath.slice(0, -1)
       : currentPath;
 
-  if (normalizedPath === normalizedCurrent) return true;
+  // The teacher lands on /teacher (and /teacher/dashboard) but «Trang chủ» links to /teacher/home: same page.
+  if (normalizedPath === normalizedCurrent || normalizedPath === TEACHER_HOME_ALIASES[normalizedCurrent]) return true;
   if (!allowPrefix || ROOT_WORKSPACE_PATHS.has(normalizedPath)) return false;
   return normalizedCurrent.startsWith(`${normalizedPath}/`);
 }

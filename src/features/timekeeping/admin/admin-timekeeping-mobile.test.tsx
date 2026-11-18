@@ -50,7 +50,7 @@ describe("AdminTimekeepingMobile (A05)", () => {
     for (const [label, value] of [["Có mặt", "112"], ["Muộn", "9"], ["Chưa chấm", "8"], ["Nghỉ", "6"]]) {
       expect(within(screen.getByText(label, { selector: "p, span" }).parentElement as HTMLElement).getByText(value)).toBeInTheDocument();
     }
-    expect(screen.getByText("Chấm công · Tất cả cơ sở")).toBeInTheDocument();
+    expect(screen.getByText("Chấm công · Toàn hệ thống")).toBeInTheDocument();
   });
 
   it("Duyệt on a request calls approve; the page has no contained button", async () => {

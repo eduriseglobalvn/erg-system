@@ -25,7 +25,7 @@ import { LessonReportPeriodSheet } from "./lesson-report-period-sheet";
 const dots: Record<DayDot, string> = { ok: t.classLog.present.color, late: t.classLog.late.color, miss: t.statusTint.error.dot, none: "transparent" };
 const DAYS_SHOWN = 6;
 
-/** Phone «Báo giảng» (6.11): the week's unconfirmed periods first, with «Đổi» (lesson sheet) and «Xác nhận». */
+/** Phone «Sổ đầu bài» (6.11): the week's unconfirmed periods first, with «Đổi» (lesson sheet) and «Xác nhận». */
 export function LessonReportMobile() {
   const [weekStart, setWeekStart] = useState(currentWeekStart);
   const [day, setDay] = useState("");
@@ -46,7 +46,7 @@ export function LessonReportMobile() {
     <Box sx={{ bgcolor: t.color.surfaceSubtle, display: "flex", flexDirection: "column", minHeight: "100%" }}>
       <Box component="header" sx={{ bgcolor: "background.paper", borderBottom: `1px solid ${t.color.border}`, display: "flex", flexDirection: "column", gap: 1.25, px: 2, py: 1.5 }}>
         <Box sx={{ alignItems: "center", display: "flex", gap: 0.5 }}>
-          <Typography component="h1" sx={{ flex: 1, fontSize: t.type.pageLead.fontSize + 5, fontWeight: t.type.label.fontWeight }}>Báo giảng</Typography>
+          <Typography component="h1" sx={{ flex: 1, fontSize: t.type.pageLead.fontSize + 5, fontWeight: t.type.label.fontWeight }}>Sổ đầu bài</Typography>
           <ErgIconButton label="Tuần trước" onClick={() => step(-7)} size="small"><ChevronLeftIcon /></ErgIconButton>
           <Typography sx={{ color: t.color.textMuted, fontSize: t.type.small.fontSize }}>{`${weekStart.slice(8, 10)} – ${shortDateVi(addDays(weekStart, 4))}`}</Typography>
           <ErgIconButton label="Tuần sau" onClick={() => step(7)} size="small"><ChevronRightIcon /></ErgIconButton>

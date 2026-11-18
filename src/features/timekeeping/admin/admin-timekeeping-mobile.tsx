@@ -18,6 +18,7 @@ import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 import { useAdminToday, usePunchReview, useRemind, useTimekeepingSchools } from "../api/timekeeping-admin-query";
 import { useApprovalDecision, useApprovals } from "../api/timekeeping-approval-query";
 import type { ActionItem } from "../api/timekeeping-types";
+import { ALL_SCHOOLS_LABEL } from "./school-filter";
 import { PunchCard } from "../components/punch/punch-card";
 import { requestErrorText } from "../components/requests/request-model";
 import { ApprovalCard, MissingCard, OutOfZoneCard } from "./admin-mobile-cards";
@@ -76,7 +77,7 @@ export function AdminTimekeepingMobile() {
   const items = data?.actionItems ?? [];
   const outside = items.filter((i) => i.kind === "PUNCH_REVIEW");
   const missing = items.filter((i) => i.kind === "NOT_PUNCHED_PERIOD_SOON");
-  const school = schools.data?.find((s) => s.id === schoolId)?.name ?? "Tất cả cơ sở";
+  const school = schools.data?.find((s) => s.id === schoolId)?.name ?? ALL_SCHOOLS_LABEL;
   const updated = today.dataUpdatedAt ? formatTimeVi(new Date(today.dataUpdatedAt)) : "";
 
   const approve = (id: string, code: string) => decision.mutate({ id, decision: "approve", comment: "" }, { onSuccess: () => toast.success(`Đã duyệt đơn ${code}`), onError });
@@ -131,7 +132,7 @@ export function AdminTimekeepingMobile() {
         <ErgIconButton aria-haspopup="menu" label="Chọn cơ sở" onClick={(event) => setSchoolMenu(event.currentTarget)}><ExpandMoreIcon /></ErgIconButton>
       </Box>
       <Menu anchorEl={schoolMenu} onClose={() => setSchoolMenu(null)} open={Boolean(schoolMenu)}>
-        {[{ id: "", name: "Tất cả cơ sở" }, ...(schools.data ?? [])].map((option) => (
+        {[{ id: "", name: ALL_SCHOOLS_LABEL }, ...(schools.data ?? [])].map((option) => (
           <MenuItem key={option.id || "all"} onClick={() => { update({ schoolId: option.id }); setSchoolMenu(null); }} selected={option.id === schoolId}>{option.name}</MenuItem>
         ))}
       </Menu>

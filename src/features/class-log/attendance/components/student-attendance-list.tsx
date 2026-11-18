@@ -80,7 +80,7 @@ export function StudentAttendanceList({ activeStudentId, marks, onActive, onKeyD
                       borderRadius: `${radius.sm}px`,
                       color: on ? tint.color : color.textMuted,
                       flex: 1,
-                      height: { md: 30, xs: 32 },
+                      height: { md: 32, xs: 44 },
                     }}
                   >
                     <Typography variant={on ? "subtitle2" : "caption"}>{markLabels[mark]}</Typography>

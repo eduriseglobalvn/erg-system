@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import Box from "@mui/material/Box";
+import ButtonBase from "@mui/material/ButtonBase";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -7,6 +8,7 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
 import AddIcon from "@mui/icons-material/Add";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
 import { ErgButton } from "@/components/erg-mui/erg-actions";
 import { ErgEmptyState, ErgStatusChip } from "@/components/erg-mui/erg-feedback";
@@ -14,6 +16,7 @@ import { ErgSearchField, ErgSelect } from "@/components/erg-mui/erg-form";
 import { ErgPageHeader } from "@/components/erg-mui/erg-page-header";
 import { ErgDataTableShell } from "@/components/erg-mui/erg-table";
 import { formatShortDateTimeVi } from "@/features/lms/api/lms-date-label";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 import type { ClassroomSnapshot, AssignmentRun } from "@/domain/school/classroom-types";
 
 interface HomeworkPanelProps {
@@ -33,6 +36,9 @@ export function getRunStatus(run: AssignmentRun): RunStatus {
   if (run.needsReviewCount > 0) return "review";
   return run.completionRate >= 100 ? "done" : "open";
 }
+
+const completionLabel = (run: AssignmentRun) =>
+  (run.recipientCount ?? 0) + run.submittedCount + run.inProgressCount > 0 ? `${Math.round(run.completionRate)}%` : "—";
 
 export function HomeworkPanel({ selectedClass, runs, onAssign, onViewProgress }: HomeworkPanelProps) {
   const [query, setQuery] = useState("");
@@ -104,7 +110,39 @@ export function HomeworkPanel({ selectedClass, runs, onAssign, onViewProgress }:
           title={hasFilter ? "Không có hoạt động phù hợp" : "Chưa có hoạt động nào"}
         />
       ) : (
-        <ErgDataTableShell>
+        <>
+        {/* Phone: one row per activity instead of a squeezed table. */}
+        <Box component="ul" sx={{ bgcolor: "background.paper", border: 1, borderColor: "divider", borderRadius: `${ergEnterpriseTokens.radius.card}px`, display: { md: "none", xs: "block" }, listStyle: "none", m: 0, overflow: "hidden", p: 0 }}>
+          {filtered.map((run) => {
+            const runStatus = getRunStatus(run);
+            const due = formatShortDateTimeVi(run.dueLabel) || run.dueLabel;
+            return (
+              <Box component="li" key={run.id} sx={{ "& + &": { borderTop: 1, borderColor: "divider" } }}>
+                <ButtonBase
+                  onClick={() => onViewProgress(run.id)}
+                  sx={{ alignItems: "center", display: "flex", gap: 1.5, minHeight: 60, px: 2, py: 1.5, textAlign: "left", width: "100%" }}
+                >
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography sx={{ fontWeight: "fontWeightMedium" }} variant="body2">
+                      {run.title}
+                    </Typography>
+                    <Typography color="text.secondary" variant="caption">
+                      {[run.targetLevel || selectedClass?.className || "Cả lớp", due && !/^Hạn/.test(due) ? `Hạn ${due}` : due].filter(Boolean).join(" · ")}
+                    </Typography>
+                    <Box sx={{ alignItems: "center", display: "flex", gap: 1, mt: 0.75 }}>
+                      <ErgStatusChip label={STATUS_LABEL[runStatus]} tone={STATUS_TONE[runStatus]} />
+                      <Typography color="text.secondary" sx={{ fontVariantNumeric: "tabular-nums" }} variant="caption">
+                        Hoàn thành {completionLabel(run)}
+                      </Typography>
+                    </Box>
+                  </Box>
+                  <ChevronRightIcon fontSize="small" sx={{ color: "text.secondary" }} />
+                </ButtonBase>
+              </Box>
+            );
+          })}
+        </Box>
+        <ErgDataTableShell sx={{ display: { md: "flex", xs: "none" } }}>
           <Box sx={{ overflowX: "auto" }}>
             <Table size="small">
               <TableHead>
@@ -123,14 +161,14 @@ export function HomeworkPanel({ selectedClass, runs, onAssign, onViewProgress }:
                   return (
                     <TableRow hover key={run.id} onClick={() => onViewProgress(run.id)} sx={{ cursor: "pointer" }}>
                       <TableCell>
-                        <Typography sx={{ color: "primary.main" }} variant="body2">
+                        <Typography sx={{ fontWeight: "fontWeightMedium" }} variant="body2">
                           {run.title}
                         </Typography>
                       </TableCell>
-                      <TableCell>{run.subjectLabel}</TableCell>
+                      <TableCell>{run.subjectLabel || "—"}</TableCell>
                       <TableCell>{run.targetLevel || selectedClass?.className || "Cả lớp"}</TableCell>
                       <TableCell>{formatShortDateTimeVi(run.dueLabel) || run.dueLabel}</TableCell>
-                      <TableCell>{(run.recipientCount ?? 0) + run.submittedCount + run.inProgressCount > 0 ? `${Math.round(run.completionRate)}%` : "—"}</TableCell>
+                      <TableCell>{completionLabel(run)}</TableCell>
                       <TableCell>
                         <ErgStatusChip label={STATUS_LABEL[runStatus]} tone={STATUS_TONE[runStatus]} />
                       </TableCell>
@@ -141,6 +179,7 @@ export function HomeworkPanel({ selectedClass, runs, onAssign, onViewProgress }:
             </Table>
           </Box>
         </ErgDataTableShell>
+        </>
       )}
     </>
   );

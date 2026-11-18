@@ -26,6 +26,14 @@ describe("ClassLeaderboardPage school scope", () => {
     expect(await screen.findByText("Chưa có học sinh nào được xếp bậc — bậc được cập nhật mỗi thứ Hai.")).toBeTruthy();
   });
 
+  it("opens on the class picked in the top bar (BUG-UI-004)", async () => {
+    const value = { selectedSchoolId: "", selectedClass: { id: "b1" }, classes: [] } as unknown as LmsTeacherShellController;
+    renderWithQuery(<LmsTeacherShellContext.Provider value={value}><ClassLeaderboardPage portal="lms" /></LmsTeacherShellContext.Provider>);
+    expect(await screen.findByText("Lớp 8B")).toBeTruthy();
+    expect(api.board).toHaveBeenCalledWith("lms", "b1", "WEEK", expect.anything());
+    expect(api.board).not.toHaveBeenCalledWith("lms", "a1", "WEEK", expect.anything());
+  });
+
   it("keeps every class without a shell (admin)", async () => {
     renderWithQuery(<ClassLeaderboardPage portal="lcms" />);
     expect(await screen.findByText("Lớp 7A")).toBeTruthy();

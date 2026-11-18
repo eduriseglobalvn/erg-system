@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import ForumRoundedIcon from "@mui/icons-material/ForumRounded";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
@@ -9,6 +9,7 @@ import { ErgConfirmDialog } from "@/components/erg-mui/erg-confirm-dialog";
 import { ErgEmptyState, ErgSkeleton } from "@/components/erg-mui/erg-feedback";
 import { ErgSelect } from "@/components/erg-mui/erg-form";
 import { ErgPageHeader } from "@/components/erg-mui/erg-page-header";
+import { LmsTeacherShellContext } from "@/features/lms/components/lms-teacher-shell-context";
 import type { GraphQlPortal } from "@/lib/graphql-client";
 import {
   deleteDiscussionItem,
@@ -28,14 +29,18 @@ const DONE_MESSAGE: Record<ModerationAction["kind"], string> = {
 /** "Thảo luận" for Teacher (classes they teach) and Admin (every class of the tenant): view, hide, show again, delete. */
 export function DiscussionModerationPage({ portal }: { portal: GraphQlPortal }) {
   const queryClient = useQueryClient();
-  const [pickedClassId, setPickedClassId] = useState("");
+  // Starts on the class picked in the teacher top bar; a new class there restarts the pick.
+  const shellClassId = useContext(LmsTeacherShellContext)?.selectedClass?.id ?? "";
+  const [picked, setPicked] = useState({ shellClassId, classId: "" });
+  const pickedClassId = picked.shellClassId === shellClassId ? picked.classId : "";
   const [pendingDelete, setPendingDelete] = useState<ModerationAction | null>(null);
 
   const classes = useQuery({
     queryKey: discussionModerationKeys.classes(portal),
     queryFn: ({ signal }) => loadModerationClasses(portal, signal),
   });
-  const classId = pickedClassId || classes.data?.[0]?.id || "";
+  const preferredClassId = pickedClassId || shellClassId;
+  const classId = (classes.data?.some((item) => item.id === preferredClassId) ? preferredClassId : classes.data?.[0]?.id) || "";
   const feed = useQuery({
     enabled: Boolean(classId),
     queryKey: discussionModerationKeys.feed(portal, classId),
@@ -68,7 +73,7 @@ export function DiscussionModerationPage({ portal }: { portal: GraphQlPortal }) 
       {classes.data?.length ? (
         <ErgSelect
           label="Lớp"
-          onChange={(event) => setPickedClassId(String(event.target.value))}
+          onChange={(event) => setPicked({ shellClassId, classId: String(event.target.value) })}
           options={classes.data.map((item) => ({ label: item.name || item.id, value: item.id }))}
           size="small"
           sx={{ maxWidth: 360, mb: 2 }}

@@ -28,6 +28,8 @@ describe("TodayLessonsList", () => {
 
     const onNavigate = vi.fn();
     render(<TodayLessonsList events={[lesson]} onNavigate={onNavigate} onOpenSchedule={vi.fn()} />);
+    // The card lists every lesson of the teacher, so each row names its class.
+    expect(screen.getByText("Lớp 9A1 · 08:00 - 09:00")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Điểm danh" }));
     expect(onNavigate).toHaveBeenCalledWith(links.attendance);
     fireEvent.click(screen.getByRole("button", { name: "Sổ đầu bài" }));

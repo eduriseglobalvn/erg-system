@@ -35,7 +35,10 @@ export function CampaignComposeScreen({ campaignId, portalKind }: Props) {
   } else body = <CampaignComposeForm campaignId={campaignId} initial={fromCampaign(campaign.data)} key={campaignId} portalKind={portalKind} />;
 
   return (
-    <Box sx={{ maxWidth: 760, mx: "auto", px: { xs: 2, sm: 3 }, py: 3, width: "100%" }}>
+    // Teacher: the shared Teacher page edge (TeacherPageFrame), not a centred column.
+    <Box sx={portalKind === "teacher"
+      ? { boxSizing: "border-box", maxWidth: 824, pb: 3, pt: { md: 3, xs: 2 }, px: { md: 4, xs: 2 }, width: "100%" }
+      : { maxWidth: 760, mx: "auto", px: { xs: 2, sm: 3 }, py: 3, width: "100%" }}>
       <ErgPageHeader title={campaignId ? "Sửa thông báo" : "Soạn thông báo"} />
       {body}
     </Box>

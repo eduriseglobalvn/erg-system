@@ -2,6 +2,7 @@ import Box from "@mui/material/Box";
 import InputAdornment from "@mui/material/InputAdornment";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import { ALL_SCHOOLS_LABEL } from "@/features/timekeeping/admin/school-filter";
 
 import { ErgSearchField, ErgSelect } from "@/components/erg-mui/erg-form";
 import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
@@ -48,7 +49,7 @@ export function TeachingToolbar({ count, months, onChange, onQuery, q, schools, 
       <RoleSwitch onChange={(role) => onChange({ role })} value={search.role} />
       <ErgSelect slotProps={chip("Năm")} onChange={(event) => onChange({ year: Number(event.target.value), month: undefined })} options={years.map((y) => ({ label: String(y), value: y }))} size="small" sx={{ ...field, width: { xs: "100%", sm: 150 } }} value={search.year} />
       <ErgSelect slotProps={chip("Tháng")} onChange={(event) => onChange({ month: event.target.value })} options={[all, ...months.map((m) => ({ label: m.slice(5), value: m }))]} size="small" sx={{ ...field, width: { xs: "100%", sm: 170 } }} value={search.month && months.includes(search.month) ? search.month : ""} />
-      <ErgSelect slotProps={chip("Trường")} onChange={(event) => onChange({ schoolId: event.target.value })} options={[all, ...schools]} size="small" sx={{ ...field, width: { xs: "100%", sm: 220 } }} value={search.schoolId ?? ""} />
+      <ErgSelect slotProps={chip("Trường")} onChange={(event) => onChange({ schoolId: event.target.value })} options={[{ label: ALL_SCHOOLS_LABEL, value: "" }, ...schools]} size="small" sx={{ ...field, width: { xs: "100%", sm: 220 } }} value={search.schoolId ?? ""} />
       <ErgSelect slotProps={chip("Giáo viên")} onChange={(event) => onChange({ teacherId: event.target.value })} options={[all, ...teachers]} size="small" sx={{ ...field, width: { xs: "100%", sm: 220 } }} value={search.teacherId ?? ""} />
       <ErgSearchField onChange={(event) => onQuery(event.target.value)} placeholder="Tìm lớp, nội dung…" slotProps={{ htmlInput: { "aria-label": "Tìm lớp, nội dung" } }} sx={{ ...field, width: { xs: "100%", sm: 220 } }} value={q} />
       <Box component="span" sx={{ ...t.type.small, color: "text.secondary", ml: { sm: "auto" } }}>{count}</Box>

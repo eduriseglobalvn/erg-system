@@ -1,6 +1,7 @@
 import { formatDateVi } from "@/domain/formatters/format-date";
 import type { DashboardCopy } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
-import type { StudentDashboardAssignment } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
+import { formatViNumber } from "@/domain/student-tier/tiers";
+import type { StudentDashboardAssignment, StudentDashboardProfile } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
 
 export type OverviewHero = {
   description: string;
@@ -26,6 +27,12 @@ export function resolveOverviewHero(
     primaryAssignmentId: canStart ? assignment.id : null,
     secondaryVariant: canStart ? "outlined" : "contained",
   };
+}
+
+/** The server's average (percent over every handed-in assignment, not only the loaded page) on the 10-point scale. */
+export function serverAverageTen(profile: Pick<StudentDashboardProfile, "averageScore" | "completedAssignments">): { averageTen: string; count: number } | null {
+  if (profile.averageScore === null || !profile.completedAssignments) return null;
+  return { averageTen: formatViNumber(profile.averageScore / 10), count: profile.completedAssignments };
 }
 
 /** Mean of each handed-in assignment's own percent: the same "latest handed-in attempt per assignment" the server averages. */

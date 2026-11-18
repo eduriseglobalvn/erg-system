@@ -19,6 +19,7 @@ import { formatDateVi, todayInput } from "@/domain/formatters/format-date";
 import { getDefaultTenantId } from "@/lib/graphql-client";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
 import { teacherPath } from "@/platform/workspaces/workspace-paths";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 type LessonLinks = { attendance: string; classLog: string; assign: string };
 
@@ -64,26 +65,26 @@ export function TodayLessonsList({
   const scheduleAction = <Button onClick={onOpenSchedule} variant="outlined">Xem lịch</Button>;
   if (isLoading) return <ErgSkeleton height={96} variant="rounded" />;
   if (error) {
-    return <ErgErrorState action={scheduleAction} description="Không tải được lịch dạy hôm nay. Mở Lịch làm việc để thử lại." title="Chưa tải được tiết dạy" />;
+    return <ErgErrorState action={scheduleAction} description="Không tải được lịch dạy hôm nay. Mở Lịch dạy để thử lại." title="Chưa tải được tiết dạy" />;
   }
   const lessons = sortTodayLessons([...events]);
   if (lessons.length === 0) {
     return (
       <ErgEmptyState
         action={scheduleAction}
-        description={noSchool ? "Bạn chưa được xếp lịch dạy ở trường nào. Phòng Đào tạo sẽ xếp lịch cho bạn, trường và lớp sẽ tự hiện ở đây." : "Hôm nay bạn không có tiết nào được xếp lịch. Mở Lịch làm việc để xem các ngày khác."}
+        description={noSchool ? "Bạn chưa được xếp lịch dạy ở trường nào. Phòng Đào tạo sẽ xếp lịch cho bạn, trường và lớp sẽ tự hiện ở đây." : "Hôm nay bạn không có tiết nào được xếp lịch. Mở Lịch dạy để xem các ngày khác."}
         icon={<EventNoteRoundedIcon />}
         title="Hôm nay không có tiết dạy"
       />
     );
   }
   return (
-    <Stack spacing={1.5}>
-      {lessons.map((event) => {
+    <Box>
+      {lessons.map((event, index) => {
         const links = buildLessonLinks(event);
         return (
-          <Box key={event.id} data-testid="today-lesson-card" sx={{ border: 1, borderColor: "divider", borderRadius: 2, p: 2 }}>
-            <Typography variant="subtitle2">{event.startTime} - {event.endTime} · {event.className}</Typography>
+          <Box key={event.id} data-testid="today-lesson-card" sx={{ borderColor: "divider", borderTop: index ? 1 : 0, py: 1.5 }}>
+            <Typography variant="subtitle2">Lớp {event.className} · {event.startTime} - {event.endTime}</Typography>
             <Typography color="text.secondary" variant="caption">
               {[event.subjectName ?? event.title, event.roomName].filter(Boolean).join(" · ")}
             </Typography>
@@ -95,7 +96,7 @@ export function TodayLessonsList({
           </Box>
         );
       })}
-    </Stack>
+    </Box>
   );
 }
 
@@ -128,8 +129,8 @@ export function TodayLessonsPanel({ noSchool, onOpenSchedule }: { noSchool?: boo
   const today = formatDateVi(lessons.date);
 
   return (
-    <Box sx={{ bgcolor: "background.paper", border: 1, borderColor: "divider", borderRadius: 2, minWidth: 0, p: 2 }}>
-      <Typography component="h2" sx={{ mb: 1.5 }} variant="subtitle1">Hôm nay{today ? ` · ${today}` : ""}</Typography>
+    <Box sx={{ bgcolor: "background.paper", border: 1, borderColor: "divider", borderRadius: `${ergEnterpriseTokens.radius.card}px`, minWidth: 0, px: 2.5, py: 2 }}>
+      <Typography component="h2" sx={{ mb: 0.5 }} variant="subtitle1">Tiết dạy hôm nay của bạn{today ? ` · ${today}` : ""}</Typography>
       <TodayLessonsList
         error={lessons.isError}
         events={lessons.events}

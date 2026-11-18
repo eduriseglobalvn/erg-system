@@ -30,13 +30,15 @@ export function EmployeeTable({
   onSelect: (userId: string) => void;
   schoolNames: SchoolNames;
 }) {
+  // Cột Phạm vi toàn "—" thì ẩn hẳn.
+  const showScope = employees.some((employee) => employee.scopes?.length);
   return (
     <ErgTable aria-label="Danh sách nhân sự" sx={{ "& .MuiTableCell-head": { whiteSpace: "nowrap" } }}>
       <TableHead>
         <TableRow>
           <TableCell>Nhân sự</TableCell>
           <TableCell>Vai trò</TableCell>
-          <TableCell>Phạm vi</TableCell>
+          {showScope ? <TableCell>Phạm vi</TableCell> : null}
           <TableCell>Trạng thái</TableCell>
           <TableCell>Đăng nhập cuối</TableCell>
           <TableCell align="right" sx={{ width: 56 }}>
@@ -49,9 +51,11 @@ export function EmployeeTable({
           <TableRow hover key={employee.id} onClick={() => onSelect(employee.id)} sx={{ cursor: "pointer" }}>
             <TableCell sx={{ maxWidth: 280 }}><EmployeeIdentity employee={employee} /></TableCell>
             <TableCell sx={{ maxWidth: 220 }}><EmployeeRoleSummary roles={employee.roles} /></TableCell>
-            <TableCell sx={{ maxWidth: 220 }}>
-              <EmployeeScopeSummary schoolNames={schoolNames} scopes={employee.scopes} />
-            </TableCell>
+            {showScope ? (
+              <TableCell sx={{ maxWidth: 220 }}>
+                <EmployeeScopeSummary schoolNames={schoolNames} scopes={employee.scopes} />
+              </TableCell>
+            ) : null}
             <TableCell><EmployeeStatusChip status={employee.status} /></TableCell>
             <TableCell sx={{ whiteSpace: "nowrap" }}>
               <Typography color={employee.last_login_at ? "text.primary" : "text.secondary"} variant="body2">

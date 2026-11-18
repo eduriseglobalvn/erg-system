@@ -20,6 +20,15 @@ describe("pathMatches", () => {
     expect(pathMatches("/", "/report", true)).toBe(false);
   });
 
+  it("lights teacher «Trang chủ» on the teacher landing page", () => {
+    expect(pathMatches("/teacher/home", "/teacher", true)).toBe(true);
+    expect(pathMatches("/teacher/home", "/teacher/", true)).toBe(true);
+    expect(pathMatches("/teacher/home", "/teacher/dashboard", true)).toBe(true);
+    expect(pathMatches("/teacher/homework", "/teacher", true)).toBe(false);
+    // Admin «Trang chủ» keeps its own rule.
+    expect(pathMatches("/admin", "/teacher", true)).toBe(false);
+  });
+
   it("allows prefix matching for nested non-root branches", () => {
     expect(pathMatches("/admin/content", "/admin/content/resources", true)).toBe(true);
     expect(pathMatches("/admin/content", "/admin/content/quiz-bank", true)).toBe(true);

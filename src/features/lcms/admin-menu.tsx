@@ -66,10 +66,9 @@ export const ADMIN_BASE_MENU_GROUPS: MenuGroup[] = [
         variant: "admin-overview",
       }),
       item({
-        label: "Lịch trung tâm",
+        label: "Lịch giảng dạy",
         icon: <EventAvailableRoundedIcon sx={{ fontSize: 24 }} />,
         path: "/calendar",
-        badge: "beta",
       }),
     ],
   },
@@ -102,7 +101,7 @@ export const ADMIN_BASE_MENU_GROUPS: MenuGroup[] = [
       }),
       item({
         id: "course-modules",
-        label: "Tạo Quiz",
+        label: "Soạn bài tập",
         icon: <ArticleRoundedIcon sx={{ fontSize: 24 }} />,
         path: "/quiz-editor",
         description: "Tạo hoặc chỉnh sửa quiz nguồn từ câu hỏi, slide và cấu hình player.",
@@ -195,8 +194,8 @@ export const ADMIN_BASE_MENU_GROUPS: MenuGroup[] = [
         label: "Tích hợp",
         icon: <ExtensionRoundedIcon sx={{ fontSize: 24 }} />,
         children: [
-          { label: "Learning Standards", path: ADMIN_LEARNING_STANDARDS_PATH, description: "SCORM, LTI 1.3 và xAPI theo tenant; trạng thái do backend xác nhận." },
-          { label: "Enterprise Connectors", path: ADMIN_ENTERPRISE_CONNECTORS_PATH, description: "Kết nối SIS, HRIS, SCIM; dry-run, sync và deprovision có version guard." },
+          { label: "Chuẩn học liệu", path: ADMIN_LEARNING_STANDARDS_PATH, description: "Gói SCORM, LTI 1.3 và xAPI; trạng thái do máy chủ xác nhận." },
+          { label: "Kết nối hệ thống ngoài", path: ADMIN_ENTERPRISE_CONNECTORS_PATH, description: "Kết nối SIS, HRIS, SCIM: chạy thử, đồng bộ và thu hồi tài khoản." },
         ],
       }),
     ],

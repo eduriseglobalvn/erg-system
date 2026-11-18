@@ -1,5 +1,8 @@
 import { ErgSelect } from "@/components/erg-mui/erg-form";
 
+/** Label of the every-school option (owner decision 18/11: PĐT sees «Toàn hệ thống»). */
+export const ALL_SCHOOLS_LABEL = "Toàn hệ thống";
+
 export type SchoolOption = { id: string; name: string };
 
 type SchoolFilterProps = {
@@ -12,7 +15,7 @@ type SchoolFilterProps = {
 
 /** "Cơ sở" filter. `schoolId` is the school id on the timekeeping admin endpoints. */
 export function SchoolFilter({ allowAll = false, onChange, schools, value }: SchoolFilterProps) {
-  const options = [...(allowAll ? [{ label: "Tất cả cơ sở", value: "" }] : []), ...schools.map((s) => ({ label: s.name, value: s.id }))];
+  const options = [...(allowAll ? [{ label: ALL_SCHOOLS_LABEL, value: "" }] : []), ...schools.map((s) => ({ label: s.name, value: s.id }))];
   return (
     <ErgSelect
       onChange={(event) => onChange(event.target.value)}

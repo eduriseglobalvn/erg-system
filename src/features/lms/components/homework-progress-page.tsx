@@ -19,7 +19,6 @@ import TableCell from "@mui/material/TableCell";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
-import Chip from "@mui/material/Chip";
 import Tooltip from "@mui/material/Tooltip";
 import {
   loadLmsAssignmentProgressWorkspace,
@@ -48,6 +47,7 @@ import { ManualGradingDialog } from "@/features/lms/components/manual-grading-di
 import { scoreLabel } from "@/features/lms/components/assignment-progress-mobile/progress-student-row";
 import { useLmsMobileBreakpoint } from "@/features/lms/mobile/hooks/use-lms-mobile-breakpoint";
 import { AssignmentProgressExportControl } from "@/features/reporting/components/assignment-progress-export-control";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 type ProgressStatus = "completed" | "inprogress" | "notstarted";
 
@@ -209,17 +209,11 @@ export function HomeworkProgressPage({
       : "";
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100%", flexDirection: "column", gap: 1.5, px: { xs: 1.5, lg: 3 }, py: { xs: 1.5, lg: 2 }, height: { lg: "100%" }, overflow: { lg: "hidden" } }}>
+    // The page title comes from TeacherPageFrame (route); this strip keeps the numbers and actions.
+    <Box sx={{ display: "flex", minHeight: "100%", flexDirection: "column", gap: 1.5, minWidth: 0 }}>
       <Paper component="section" variant="outlined" sx={{ ...panelSx, flexShrink: 0, px: 1.5, py: 1.25 }}>
-        <Box sx={{ display: "grid", alignItems: "center", gap: 1.5, gridTemplateColumns: { lg: "minmax(280px, 1fr) auto auto" } }}>
+        <Box sx={{ display: "grid", alignItems: "center", gap: 1.5, gridTemplateColumns: { xl: "minmax(0, 1fr) auto" } }}>
           <Box sx={{ minWidth: 0 }}>
-            <Stack direction="row" spacing={1} sx={{ alignItems: "center", color: "text.secondary" }}>
-              <TaskOutlinedIcon fontSize="inherit" sx={{ color: "primary.main" }} />
-              <Typography variant="body2" sx={{ fontWeight: "fontWeightMedium" }}>
-                Bài tập / <Box component="span" sx={{ color: "text.primary" }}>Theo dõi bài tập</Box>
-              </Typography>
-            </Stack>
-            <Typography variant="h3" component="h1" sx={{ mt: 0.5 }}>Theo dõi bài tập</Typography>
             {grading ? (
               <ManualGradingDialog
                 attemptId={grading.attemptId}
@@ -229,15 +223,12 @@ export function HomeworkProgressPage({
                 studentName={grading.studentName}
               />
             ) : null}
-            <Typography variant="body2" noWrap sx={{ mt: 0.5, color: "text.secondary", fontWeight: "fontWeightMedium" }}>
-              Kiểm tra tiến độ làm bài, trạng thái nộp và điểm của học sinh trong {selectedClass?.className ?? "lớp hiện tại"}.
-            </Typography>
-          </Box>
-          <Box sx={{ display: "grid", gap: 1, gridTemplateColumns: { xs: "repeat(2, minmax(0, 1fr))", sm: "repeat(4, minmax(0, 1fr))" }, minWidth: { lg: 520 } }}>
-            <ProgressStat icon={GroupsOutlinedIcon} label="Tổng HS" value={String(total)} />
-            <ProgressStat icon={CheckCircleOutlineIcon} label="Đã nộp" value={`${completedPct}%`} />
-            <ProgressStat icon={ScheduleOutlinedIcon} label="Đang làm" value={String(inProgress)} />
-            <ProgressStat icon={TaskOutlinedIcon} label="Chưa mở" value={String(notStarted)} />
+            <Box sx={{ display: "grid", gap: 1, gridTemplateColumns: { xs: "repeat(2, minmax(0, 1fr))", sm: "repeat(4, minmax(0, 1fr))" } }}>
+              <ProgressStat icon={GroupsOutlinedIcon} label="Tổng số học sinh" value={String(total)} />
+              <ProgressStat icon={CheckCircleOutlineIcon} label="Đã nộp" value={`${completedPct}%`} />
+              <ProgressStat icon={ScheduleOutlinedIcon} label="Đang làm" value={String(inProgress)} />
+              <ProgressStat icon={TaskOutlinedIcon} label="Chưa mở" value={String(notStarted)} />
+            </Box>
           </Box>
           <Box sx={{ display: "flex", flexShrink: 0, flexWrap: "wrap", alignItems: "center", justifyContent: { xs: "flex-start", lg: "flex-end" }, gap: 1 }}>
             <Tooltip title={exportDisabledReason} disableHoverListener={!exportDisabledReason}>
@@ -278,7 +269,7 @@ export function HomeworkProgressPage({
                     border: 1,
                     borderColor: selected ? "primary.main" : "divider",
                     borderRadius: 1,
-                    bgcolor: selected ? "info.light" : "background.paper",
+                    bgcolor: selected ? ergEnterpriseTokens.color.primarySofter : "background.paper",
                     color: selected ? "primary.main" : "text.primary",
                     px: 1.5,
                     py: 1.25,
@@ -291,7 +282,7 @@ export function HomeworkProgressPage({
                 >
                   <Box component="span" sx={truncateSx}>{run.title}</Box>
                   <Box component="span" sx={{ ...truncateSx, mt: 0.5, color: "text.secondary", fontWeight: "fontWeightMedium" }}>
-                    {run.subjectLabel} - {run.targetLevel}
+                    {[run.subjectLabel, run.targetLevel].filter(Boolean).join(" · ")}
                   </Box>
                 </ButtonBase>
               );
@@ -299,7 +290,7 @@ export function HomeworkProgressPage({
           </Stack>
         </Paper>
 
-        <Box sx={{ display: "grid", gap: 1.5, gridTemplateColumns: { xl: "minmax(0, 1fr) 320px" }, minHeight: { lg: 0 }, overflow: { lg: "hidden" } }}>
+        <Box sx={{ display: "grid", gap: 1.5, gridTemplateColumns: { xs: "minmax(0, 1fr)", xl: "minmax(0, 1fr) 320px" }, minHeight: { lg: 0 }, minWidth: 0, overflow: { lg: "hidden" } }}>
           <Paper variant="outlined" sx={{ ...panelSx, display: "flex", minHeight: 0, flexDirection: "column" }}>
             <Box sx={{ flexShrink: 0, borderBottom: 1, borderColor: "divider", p: 1.5 }}>
               <Box sx={{ mb: 1.5, display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 1.5 }}>
@@ -307,7 +298,7 @@ export function HomeworkProgressPage({
                   <Typography variant="subtitle2" component="h2" noWrap>{selectedRun?.title ?? "Chưa có bài đã giao"}</Typography>
                   <Typography variant="body2" sx={{ mt: 0.5, color: "text.secondary", fontWeight: "fontWeightMedium" }}>Danh sách học sinh và trạng thái làm bài.</Typography>
                 </Box>
-                <Chip label={`${filteredRows.length} học sinh`} size="small" color="secondary" sx={{ flexShrink: 0, textTransform: "none", letterSpacing: "normal" }} />
+                <ErgStatusChip dot={false} label={`${filteredRows.length} học sinh`} sx={{ flexShrink: 0 }} tone="info" />
               </Box>
               <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
                 <ErgSearchField
@@ -582,7 +573,7 @@ export function formatProgressTimestamp(value?: string | null) {
   return formatShortDateTimeVi(value) || "—";
 }
 
-const panelSx = { borderRadius: 1, bgcolor: "background.paper", boxShadow: 1 } as const;
+const panelSx = { borderRadius: 1, bgcolor: "background.paper" } as const;
 const truncateSx = { display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } as const;
 const headDividerSx = { borderRight: 1, borderRightColor: "divider" } as const;
 
@@ -618,7 +609,7 @@ function StatusTab({
         height: 40,
         px: 1.5,
         borderColor: active ? "primary.main" : "divider",
-        bgcolor: active ? "info.light" : "background.paper",
+        bgcolor: active ? ergEnterpriseTokens.color.primarySofter : "background.paper",
         color: active ? "primary.main" : "text.secondary",
       }}
     >

@@ -92,7 +92,7 @@ export function EmployeeListWorkspace({ tenantId }: { tenantId: string }) {
   const showContent = !query.isPending && !query.isError;
 
   return (
-    <ErgContentBand sx={{ bgcolor: "background.default", py: { md: 4, xs: 2.5 } }}>
+    <ErgContentBand>
       <ErgPageHeader
         description="Quản lý hồ sơ, vai trò, phạm vi, trạng thái và phiên đăng nhập của nhân sự."
         primaryAction={

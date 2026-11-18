@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 export function TargetCardShell({ children, clip = false }: { children: ReactNode; clip?: boolean }) {
   return (
@@ -32,7 +33,7 @@ export function TargetCardHeader({ aside, select, selectedLabel }: { aside: Reac
     <Box sx={{ px: 3, py: 1.75, borderBottom: 1, borderColor: "divider", display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 2, flexShrink: 0 }}>
       <Box sx={{ display: "flex", minWidth: 0, flexWrap: "wrap", alignItems: "flex-end", gap: 1.5 }}>
         {select}
-        <Box sx={{ borderRadius: 1, border: 1, borderColor: "primary.main", bgcolor: "info.light", px: 1.5, py: 1, color: "primary.main" }}>
+        <Box sx={{ borderRadius: 1, border: 1, borderColor: "primary.main", bgcolor: ergEnterpriseTokens.color.primarySofter, px: 1.5, py: 1, color: "primary.main" }}>
           <Typography variant="body2" sx={{ fontWeight: "fontWeightBold" }}>Đã chọn</Typography>
           <Typography variant="body2" sx={{ mt: 0.25, fontWeight: "fontWeightMedium" }}>{selectedLabel}</Typography>
         </Box>

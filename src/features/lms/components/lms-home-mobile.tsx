@@ -75,7 +75,7 @@ export function LmsHomeMobile({
 
       <Box sx={{ display: "grid", gap: 1.5, gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
         <StatTile icon={<AssignmentRoundedIcon />} label="Hoạt động đang mở" onClick={onOpenHomework} tone="warning" value={runsOpen} />
-        <StatTile icon={<SupportRoundedIcon />} label="HS cần hỗ trợ" onClick={onOpenProgress} tone="error" value={supportCount} />
+        <StatTile icon={<SupportRoundedIcon />} label="Học sinh cần hỗ trợ" onClick={onOpenProgress} tone="error" value={supportCount} />
       </Box>
 
       <Box sx={{ display: "flex", gap: 1.5 }}>
@@ -141,15 +141,15 @@ function TodayLessonsCard({ error, isLoading, lessons, nowHHmm, onNavigate, onOp
               <Typography color="text.secondary" variant="caption">{periodLabel(lesson)}</Typography>
             </Box>
             <Box sx={{ flex: 1, minWidth: 0 }}>
-              <Typography noWrap variant="subtitle2">{lesson.className} · {lesson.subjectName ?? lesson.title}</Typography>
+              <Typography noWrap variant="subtitle2">Lớp {lesson.className} · {lesson.subjectName ?? lesson.title}</Typography>
               <Typography color="text.secondary" component="div" noWrap variant="caption">{[lesson.roomName, `${lesson.startTime.slice(0, 5)} – ${lesson.endTime.slice(0, 5)}`].filter(Boolean).join(" · ")}</Typography>
             </Box>
             {open ? <ErgStatusChip label={state.label} tone={state.tone} /> : <ChevronRightRoundedIcon sx={{ color: "text.secondary", fontSize: size.iconMd }} />}
           </ButtonBase>
           {open ? (
             <Box sx={{ display: "flex", gap: 1, pb: 1.75, pl: 9.25, pr: 2 }}>
-              <Button onClick={() => onNavigate(links.attendance)} size="small" startIcon={<HowToRegRoundedIcon />} sx={{ minHeight: 36 }} variant="outlined">Điểm danh</Button>
-              <Button onClick={() => onNavigate(links.classLog)} size="small" sx={{ minHeight: 36 }} variant="text">Sổ đầu bài</Button>
+              <Button onClick={() => onNavigate(links.attendance)} startIcon={<HowToRegRoundedIcon />} sx={{ minHeight: 44 }} variant="outlined">Điểm danh</Button>
+              <Button onClick={() => onNavigate(links.classLog)} sx={{ minHeight: 44 }} variant="text">Ghi sổ</Button>
             </Box>
           ) : null}
         </Box>
@@ -159,8 +159,8 @@ function TodayLessonsCard({ error, isLoading, lessons, nowHHmm, onNavigate, onOp
   return (
     <Box sx={{ ...cardSx, overflow: "hidden" }}>
       <Box sx={{ alignItems: "center", display: "flex", justifyContent: "space-between", pb: 0.75, pt: 1.75, px: 2 }}>
-        <Typography component="h2" variant="h6">Buổi dạy hôm nay</Typography>
-        <Button endIcon={<ChevronRightRoundedIcon />} onClick={onOpenSchedule} size="small" sx={{ minHeight: 36, mr: -1 }} variant="text">Lịch tuần</Button>
+        <Typography component="h2" variant="h6">Tiết dạy hôm nay của bạn</Typography>
+        <Button endIcon={<ChevronRightRoundedIcon />} onClick={onOpenSchedule} size="small" sx={{ minHeight: 44, mr: -1 }} variant="text">Lịch tuần</Button>
       </Box>
       {body}
     </Box>

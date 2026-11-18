@@ -53,8 +53,11 @@ function Kpi({ title, children, note }: { title: string; children: ReactNode; no
 const Big = ({ children, color }: { children: ReactNode; color?: string }) => <Typography component="span" sx={{ ...t.type.stat, color, fontVariantNumeric: "tabular-nums" }}>{children}</Typography>;
 const Unit = ({ children }: { children: ReactNode }) => <Typography color="textSecondary" component="span" sx={t.type.pageLead}>{children}</Typography>;
 
-function WebKpis({ items }: { items: StudentDashboardAssignment[] }) {
+type BoardAverage = { averageTen: string; count: number } | null | undefined;
+
+function WebKpis({ average, items }: { average: BoardAverage; items: StudentDashboardAssignment[] }) {
   const s = submittedStats(items);
+  const avg = average ?? s;
   if (!s.count) return null;
   const correctPct = s.correct ? Math.round((s.correct.right / s.correct.total) * 100) : 0;
   const best = s.best;
@@ -62,11 +65,11 @@ function WebKpis({ items }: { items: StudentDashboardAssignment[] }) {
   return (
     <Box data-design="submitted-kpis" sx={{ alignItems: "stretch", display: "grid", gap: 2, gridTemplateColumns: { xs: "repeat(2, minmax(0, 1fr))", lg: "repeat(4, minmax(0, 1fr))" } }}>
       <Box sx={{ ...boardCardSx, alignItems: "center", display: "flex", gap: 1.5, p: 2 }}>
-        <Ring label={s.averageTen} size={52} value={Number(s.averageTen.replace(",", "."))} />
+        <Ring label={avg.averageTen} size={52} value={Number(avg.averageTen.replace(",", "."))} />
         <Box sx={{ display: "grid", gap: 0.5, minWidth: 0 }}>
           <Typography color="textSecondary" variant="caption">Điểm trung bình</Typography>
-          <Box sx={{ alignItems: "baseline", display: "flex", gap: 0.25 }}><Big>{s.averageTen}</Big><Unit>/10</Unit></Box>
-          <Typography color="textSecondary" variant="caption">{`${s.count} bài · lần nộp gần nhất`}</Typography>
+          <Box sx={{ alignItems: "baseline", display: "flex", gap: 0.25 }}><Big>{avg.averageTen}</Big><Unit>/10</Unit></Box>
+          <Typography color="textSecondary" variant="caption">{`${avg.count} bài · lần nộp gần nhất`}</Typography>
         </Box>
       </Box>
       {s.correct ? (
@@ -167,19 +170,20 @@ function MobileCard({ a, onOpen }: { a: StudentDashboardAssignment; onOpen: (id:
   );
 }
 
-/** Đã nộp (H09 web / H02b mobile). */
-export function SubmittedBoard({ items, mobile, onOpen }: { items: StudentDashboardAssignment[]; mobile: boolean; onOpen: (id: string) => void }) {
+/** Đã nộp (H09 web / H02b mobile). `average` (the server's, over every assignment) replaces the loaded-page average when given. */
+export function SubmittedBoard({ average, items, mobile, onOpen }: { average?: BoardAverage; items: StudentDashboardAssignment[]; mobile: boolean; onOpen: (id: string) => void }) {
   const s = submittedStats(items);
+  const avg = average ?? s;
   if (mobile) {
     return (
       <>
         {s.count ? (
           <Box data-design="submitted-summary" sx={{ ...boardCardSx, alignItems: "center", display: "flex", gap: 2, p: 2 }}>
-            <Ring label={s.averageTen} size={60} value={Number(s.averageTen.replace(",", "."))} />
+            <Ring label={avg.averageTen} size={60} value={Number(avg.averageTen.replace(",", "."))} />
             <Box>
-              <Typography color="textSecondary" variant="body2">{`Điểm trung bình · ${s.count} bài`}</Typography>
+              <Typography color="textSecondary" variant="body2">{`Điểm trung bình · ${avg.count} bài`}</Typography>
               <Box sx={{ alignItems: "center", display: "flex", gap: 1 }}>
-                <Box sx={{ alignItems: "baseline", display: "flex", gap: 0.25 }}><Big>{s.averageTen}</Big><Unit>/10</Unit></Box>
+                <Box sx={{ alignItems: "baseline", display: "flex", gap: 0.25 }}><Big>{avg.averageTen}</Big><Unit>/10</Unit></Box>
                 {s.correct ? <Box component="span" sx={{ bgcolor: t.statusTint.success.bg, borderRadius: `${t.radius.chip}px`, color: t.statusTint.success.color, px: 1.25, py: 0.25, typography: "subtitle2" }}>{`Đúng ${formatViNumber(s.correct.right)}/${formatViNumber(s.correct.total)} câu`}</Box> : null}
               </Box>
               <Typography color="textSecondary" variant="body2">Mỗi bài lấy lần nộp gần nhất</Typography>
@@ -192,7 +196,7 @@ export function SubmittedBoard({ items, mobile, onOpen }: { items: StudentDashbo
   }
   return (
     <>
-      <WebKpis items={items} />
+      <WebKpis average={average} items={items} />
       <Box sx={boardCardSx}>
         <Box sx={{ ...tableHeadSx, gridTemplateColumns: WEB_COLUMNS, px: 2, py: 1.5 }}>
           {["Bài", "Nộp lúc", "Câu đúng", "Điểm", "Lần làm", ""].map((label, index) => <Typography color="textSecondary" key={index} sx={{ pr: index === 3 ? 2 : 0, textAlign: index === 3 ? "right" : "left" }} variant="caption">{label}</Typography>)}

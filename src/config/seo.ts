@@ -57,7 +57,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/teacher/account/login-logs": "Nhật ký đăng nhập",
 
   "/admin": "Quản trị",
-  "/admin/calendar": "Lịch trung tâm",
+  "/admin/calendar": "Lịch giảng dạy",
   "/admin/schools": "Quản lý trường học",
   "/admin/schools/list": "Danh sách trường",
   "/admin/schools/students": "Người học theo khối/lớp",
@@ -68,7 +68,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/admin/content": "Nội dung",
   "/admin/content/quiz-bank": "Ngân hàng bài tập",
   "/admin/content/questions": "Ngân hàng câu hỏi",
-  "/admin/content/quiz-editor": "Tạo Quiz",
+  "/admin/content/quiz-editor": "Soạn bài tập",
   "/admin/content/resources": "Tài nguyên",
   "/admin/training/lesson-reports": "Báo giảng",
   "/admin/employees": "Tài khoản nhân sự",

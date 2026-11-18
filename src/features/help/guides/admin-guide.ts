@@ -58,9 +58,9 @@ const adminGuide: HelpGuide = {
     },
     {
       id: "lich-giang-day",
-      title: "Lịch trung tâm và báo giảng",
+      title: "Lịch giảng dạy và báo giảng",
       steps: [
-        { text: "Vào «Lịch trung tâm» để xem lịch dạy của tất cả giáo viên." },
+        { text: "Vào «Lịch giảng dạy» để xem lịch dạy của tất cả giáo viên." },
         { text: "Dùng ô lọc giáo viên để chỉ xem lịch của một người." },
         { text: "Khi hai tiết bị trùng giờ hoặc trùng giáo viên, lịch sẽ báo. Sửa tiết đó trước khi lưu." },
         { text: "Ở thanh bên trái, bấm «Báo giảng» để xem giáo viên đã báo giảng và ghi sổ đầu bài chưa." },

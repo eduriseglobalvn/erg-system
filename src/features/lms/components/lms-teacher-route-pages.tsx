@@ -17,6 +17,8 @@ import {
   ClassLogPage,
 } from "@/features/lms/components/lms-teacher-shell-pages";
 import { TeacherWorkspaceFrame } from "@/features/lms/components/lms-teacher-shell-frame";
+import { knownStudentCount } from "@/features/lms/components/lms-teacher-shell-utils";
+import { TeacherPageFrame } from "@/features/lms/components/teacher-page-frame";
 import { ClassScoreBoard } from "@/features/lms/components/score/class-score-board";
 import { TeacherClassRoster } from "@/features/lms/components/teacher-class-roster";
 import { useLmsTeacherShellModel } from "@/features/lms/components/lms-teacher-shell-context";
@@ -25,6 +27,7 @@ import { LmsHomeDashboard } from "@/features/lms/components/lms-home-dashboard";
 import { classroomStudents } from "@/features/lms/classroom/api/classroom-defaults";
 import { LearningResourceDashboardScopeProvider } from "@/features/lms/learning-resources/hooks/use-learning-resource-dashboard-scope";
 import { canNavigateToLmsPath } from "@/features/lms/navigation/lms-navigation";
+import { useLmsMobileBreakpoint } from "@/features/lms/mobile/hooks/use-lms-mobile-breakpoint";
 import { teacherPath } from "@/platform/workspaces/workspace-paths";
 
 const LessonReportMobileGate = lazy(() =>
@@ -33,6 +36,12 @@ const LessonReportMobileGate = lazy(() =>
 const PeriodAttendancePage = lazy(() =>
   import("@/features/class-log/attendance/components/period-attendance-page").then((module) => ({ default: module.PeriodAttendancePage })),
 );
+
+/** "THCS Vân Đồn · 32 học sinh": the scope line under a Teacher page title. */
+const classScopeLine = (schoolName: string, selectedClass?: Parameters<typeof knownStudentCount>[0]) => {
+  const count = knownStudentCount(selectedClass);
+  return [schoolName, count === undefined ? "" : `${count} học sinh`].filter(Boolean).join(" · ");
+};
 
 /**
  * One component per Teacher child route. Each reads the shell state from context and owns its
@@ -114,7 +123,9 @@ export function TeacherExerciseBankRoute() {
 
 export function TeacherHomeworkProgressRoute() {
   const m = useLmsTeacherShellModel();
-  return (
+  // Same 767px line as HomeworkProgressPage: between 768 and 1279 the shell is "mobile" but the page is the desktop one.
+  const phone = useLmsMobileBreakpoint("(max-width: 767px)");
+  const page = (
     <Suspense fallback={null}>
       <HomeworkProgressPage
         initialRunId={m.progressAssignmentId}
@@ -124,6 +135,12 @@ export function TeacherHomeworkProgressRoute() {
         students={classroomStudents.filter((student) => student.schoolId === m.selectedSchoolId)}
       />
     </Suspense>
+  );
+  // The phone view has its own top bar and header.
+  return phone ? page : (
+    <TeacherPageFrame description={classScopeLine(m.selectedSchoolName, m.selectedClass)} title={m.selectedClass ? `Tiến độ học tập lớp ${m.selectedClass.className}` : "Tiến độ học tập"}>
+      {page}
+    </TeacherPageFrame>
   );
 }
 
@@ -183,7 +200,7 @@ export function TeacherCalendarRoute() {
       />
     </Suspense>
   );
-  return m.isMobile ? panel : <Box sx={{ height: "100%", minHeight: 720 }}>{panel}</Box>;
+  return m.isMobile ? panel : <Box sx={{ boxSizing: "border-box", height: "100%", minHeight: 720, pb: 3, pt: 3, px: 4 }}>{panel}</Box>;
 }
 
 export function TeacherClassLogRoute() {
@@ -198,11 +215,13 @@ export function TeacherClassLogRoute() {
 export function TeacherScoreRoute() {
   const m = useLmsTeacherShellModel();
   return (
-    <Suspense fallback={null}>
-      <TeacherClassRoster selectedClass={m.selectedClass}>
-        {(students) => <ClassScoreBoard classId={m.selectedClass?.id} manual={<ScoreSheetPanel selectedClass={m.selectedClass} selectedSchoolName={m.selectedSchoolName} students={students} />} />}
-      </TeacherClassRoster>
-    </Suspense>
+    <TeacherPageFrame description={classScopeLine(m.selectedSchoolName, m.selectedClass)} title={m.selectedClass ? `Bảng điểm lớp ${m.selectedClass.className}` : "Bảng điểm"}>
+      <Suspense fallback={null}>
+        <TeacherClassRoster selectedClass={m.selectedClass}>
+          {(students) => <ClassScoreBoard classId={m.selectedClass?.id} manual={<ScoreSheetPanel selectedClass={m.selectedClass} selectedSchoolName={m.selectedSchoolName} students={students} />} />}
+        </TeacherClassRoster>
+      </Suspense>
+    </TeacherPageFrame>
   );
 }
 

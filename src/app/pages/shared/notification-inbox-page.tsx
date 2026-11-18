@@ -10,6 +10,8 @@ import { ADMIN_NOTIFICATION_PORTAL, TEACHER_NOTIFICATION_PORTAL } from "@/platfo
 import { adminPath, teacherPath } from "@/platform/workspaces/workspace-paths";
 
 const pageSx = { maxWidth: 860, mx: "auto", px: { xs: 2, sm: 3 }, py: 3, width: "100%" } as const;
+// Same left edge and top as the other Teacher screens (TeacherPageFrame); the list reads better wide.
+const teacherListSx = { boxSizing: "border-box", maxWidth: 1200, pb: 3, pt: { md: 3, xs: 2 }, px: { md: 4, xs: 2 }, width: "100%" } as const;
 
 /** /admin/notifications */
 export function AdminNotificationsPage() {
@@ -46,7 +48,7 @@ export const TeacherCampaignDetailPage = () => <CampaignDetailRoutePage kind="te
 /** /teacher/notifications (N12), plus the sender's own campaigns */
 export function TeacherNotificationsPage() {
   return (
-    <Box sx={pageSx}>
+    <Box sx={teacherListSx}>
       <TeacherInboxScreen />
     </Box>
   );

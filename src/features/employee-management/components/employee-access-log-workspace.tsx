@@ -43,7 +43,7 @@ export function EmployeeAccessLogWorkspace({ tenantId }: { tenantId: string }) {
   const clientFiltered = Boolean(filters.from || filters.to || filters.result);
 
   return (
-    <ErgContentBand sx={{ bgcolor: "background.default", py: { md: 4, xs: 2.5 } }}>
+    <ErgContentBand>
       <ErgPageHeader
         description="Đăng nhập, phiên làm việc, cảnh báo bảo mật và thay đổi quyền của toàn bộ nhân sự."
         title="Nhật ký truy cập"
