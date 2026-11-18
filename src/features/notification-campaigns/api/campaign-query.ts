@@ -38,13 +38,13 @@ const realtime = { staleTime: QUERY_POLICIES.realtime.staleTime, gcTime: QUERY_P
 
 const ID_LISTS = ["classIds", "groupIds", "gradeIds", "schoolIds", "userIds", "roles"] as const;
 
-/** Canonical audience: sorted, de-duplicated lists, empty lists and a false wholeTenant dropped, fixed key order. Used for cache keys and the request body. */
+/** Canonical audience: sorted, de-duplicated lists, empty lists dropped, fixed key order. wholeTenant is always sent: the backend field is a primitive and rejects a body without it (BUG-B-016). Used for cache keys and the request body. */
 export function normalizeAudience(audience: CampaignAudience): CampaignAudience {
   return {
     ...Object.fromEntries(
       ID_LISTS.flatMap((name) => (audience[name]?.length ? [[name, [...new Set(audience[name])].sort()]] : [])),
     ),
-    ...(audience.wholeTenant ? { wholeTenant: true } : {}),
+    wholeTenant: Boolean(audience.wholeTenant),
   };
 }
 

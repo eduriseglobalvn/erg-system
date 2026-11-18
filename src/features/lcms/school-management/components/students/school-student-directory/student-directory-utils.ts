@@ -70,3 +70,8 @@ export function filterSchoolStudents(
     return matchesScope && matchesStatus && matchesSearch;
   });
 }
+
+/** Học sinh chưa xếp lớp (className trống) không thuộc lớp nào được gán môn nên không tính là «đã gán môn». */
+export function countAssignedStudents(students: SchoolStudent[]) {
+  return students.filter((student) => student.className && student.subjectIds.length > 0).length;
+}

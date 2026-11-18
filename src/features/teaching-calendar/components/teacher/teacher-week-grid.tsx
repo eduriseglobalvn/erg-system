@@ -78,7 +78,7 @@ export function TeacherWeekGrid({ days, events, hasAssistant, leave, newBatchIds
               const assistant = event.myRole === "ASSISTANT";
               const isNew = Boolean(event.batchId && newBatchIds.has(event.batchId));
               const box = eventBox(event, start);
-              const sub = cancelled ? `Huỷ${leave.has(day) ? " · nghỉ phép" : ""}` : assistant ? `Dạy chính: ${event.mainTeacherName ?? "—"}` : [event.roomName, schoolPlainName(event.schoolName)].filter(Boolean).join(" · ");
+              const sub = cancelled ? `Huỷ${leave.has(day) ? " · nghỉ phép" : ""}` : assistant ? `Dạy chính: ${event.mainTeacherName ?? "—"}` : [event.subjectName, event.roomName, schoolPlainName(event.schoolName)].filter(Boolean).join(" · ");
               return (
                 <ButtonBase
                   aria-label={`${assistant ? "TG " : ""}${event.className}, tiết ${event.periodStart}`} key={event.id}

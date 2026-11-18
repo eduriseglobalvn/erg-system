@@ -1,4 +1,5 @@
-import { getBackOfficePortal } from "@/lib/api-client";
+// The current portal, not the back office: a teacher on /teacher has no admin session.
+import { resolveCurrentPortal } from "@/platform/auth/api/auth-token-storage";
 import { API_ENDPOINTS } from "@/lib/api/api-endpoints";
 import { createApiClient } from "@/lib/api/create-api-client";
 import type { ContractRequestPath } from "@/lib/api/contract-types";
@@ -22,7 +23,7 @@ import type {
   TodayView,
 } from "./timekeeping-types";
 
-const client = () => createApiClient({ portal: getBackOfficePortal(), auth: "required" });
+const client = () => createApiClient({ portal: resolveCurrentPortal(), auth: "required" });
 const endpoints = API_ENDPOINTS.timekeeping;
 
 export function withQuery(path: string, params: Record<string, string | number | boolean | undefined>) {

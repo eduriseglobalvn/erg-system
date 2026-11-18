@@ -1,7 +1,5 @@
 import type { CreateEmployeeRequest } from "@/features/employee-management/types/employee-management";
 
-export const steps = ["Định danh", "Thông tin nhân sự", "Vai trò", "Đăng nhập", "Xem lại"];
-
 export const initialForm = {
   credentialDelivery: "EMAIL_INVITE" as CreateEmployeeRequest["credentialDelivery"],
   departmentId: "",

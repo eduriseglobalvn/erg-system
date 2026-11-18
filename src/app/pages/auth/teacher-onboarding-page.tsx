@@ -4,25 +4,36 @@ import Button from "@mui/material/Button";
 import Skeleton from "@mui/material/Skeleton";
 import Stack from "@mui/material/Stack";
 
-import {
-  changeMyPassword,
-  requestRecoveryEmailChallenge,
-  updateMyTeacherProfile,
-  verifyRecoveryEmailChallenge,
-} from "@/platform/auth/api/account-security-api";
+import { changeMyPassword } from "@/platform/auth/api/account-security-api";
 import { saveCurrentAccount } from "@/platform/auth/api/auth-storage";
 import { TeacherOnboardingWorkspace } from "@/platform/auth/components/teacher-onboarding-workspace";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
 import { sanitizeLocalRedirect } from "@/platform/auth/utils/auth-redirects";
-import type { TeacherAccountLifecycle } from "@/platform/auth/types/account-lifecycle";
+import { requiresTeacherOnboarding, type TeacherAccountLifecycle } from "@/platform/auth/types/account-lifecycle";
 import { teacherPath } from "@/platform/workspaces/workspace-paths";
-import { useLocation, useNavigate } from "@tanstack/react-router";
+import { Navigate, useLocation, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
+
+import { isBffAuthEnabled } from "@/lib/api-client";
+import { authApi } from "@/platform/auth/api/auth-api";
 
 export function TeacherOnboardingPage() {
   const auth = useAuthSession("lms");
   const location = useLocation();
   const navigate = useNavigate();
   const redirect = sanitizeRedirect(new URLSearchParams(location.searchStr).get("redirect"));
+
+  // The stored account keeps the lifecycle from login time; re-read it so a step finished elsewhere shows after a reload.
+  const accountId = auth.account?.id;
+  useEffect(() => {
+    if (!accountId || isBffAuthEnabled()) return;
+    void authApi.profile().then(saveCurrentAccount).catch(() => undefined);
+  }, [accountId]);
+
+  function signOut() {
+    auth.actions.signOut();
+    void navigate({ to: "/login", replace: true });
+  }
 
   if (auth.isHydratingProfile) {
     return (
@@ -61,7 +72,7 @@ export function TeacherOnboardingPage() {
       >
         <Box sx={{ maxWidth: 540, width: "100%" }}>
           <Alert
-            action={<Button variant="contained" color="inherit" onClick={auth.actions.signOut} sx={{ fontWeight: 600, borderRadius: "980px" }}>Đăng xuất</Button>}
+            action={<Button variant="contained" color="inherit" onClick={signOut} sx={{ fontWeight: 600, borderRadius: "980px" }}>Đăng xuất</Button>}
             severity="warning"
             sx={{
               borderRadius: "18px",
@@ -77,6 +88,8 @@ export function TeacherOnboardingPage() {
     );
   }
 
+  if (!requiresTeacherOnboarding(auth.account.lifecycle)) return <Navigate replace to={redirect} />;
+
   function persistLifecycle(lifecycle: TeacherAccountLifecycle) {
     if (!auth.account) return;
     saveCurrentAccount({ ...auth.account, lifecycle, isProfileCompleted: lifecycle.isProfileCompleted });
@@ -84,19 +97,6 @@ export function TeacherOnboardingPage() {
 
   return (
     <TeacherOnboardingWorkspace
-      account={auth.account}
-      lifecycle={auth.account.lifecycle}
-      onUpdateProfile={async (input) => {
-        const updated = await updateMyTeacherProfile(input);
-        saveCurrentAccount(updated);
-        return updated;
-      }}
-      onRequestRecovery={requestRecoveryEmailChallenge}
-      onVerifyRecovery={async (input) => {
-        const result = await verifyRecoveryEmailChallenge(input);
-        if (result.lifecycle) persistLifecycle(result.lifecycle);
-        return result;
-      }}
       onChangePassword={async (input) => {
         const result = await changeMyPassword(input);
         if (result.lifecycle) persistLifecycle(result.lifecycle);
@@ -106,7 +106,7 @@ export function TeacherOnboardingPage() {
         persistLifecycle(lifecycle);
         void navigate({ href: redirect, replace: true });
       }}
-      onLogout={auth.actions.signOut}
+      onLogout={signOut}
     />
   );
 }

@@ -1,5 +1,7 @@
+import { nameInitials } from "@/domain/formatters/format-initials";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 
 import { ErgStatusChip } from "@/components/erg-mui/erg-feedback";
@@ -13,6 +15,8 @@ export type ProgressMobileRow = {
   name: string;
   userId?: string;
   score: number | null;
+  /** Top of the scale `score` is on; absent means 100 (a percentage). */
+  scoreMax?: number;
   status: ProgressRowStatus;
   timestamp: string;
 };
@@ -23,24 +27,26 @@ const badge: Record<ProgressRowStatus, { label: string; tone: "success" | "info"
   notstarted: { label: "Chưa nộp", tone: "warning" },
 };
 
+/** "800/1000": the score on the scale the server graded it, so teacher and student read the same figure. */
+export function scoreLabel(row: Pick<ProgressMobileRow, "score" | "scoreMax">, empty = "-") {
+  return row.score === null ? empty : `${row.score}/${row.scoreMax ?? 100}`;
+}
+
 export function initialsOf(name: string) {
-  const words = name.trim().split(/\s+/).filter(Boolean);
-  if (!words.length) return "?";
-  const pick = words.length > 1 ? [words[words.length - 2], words[words.length - 1]] : [words[0]];
-  return pick.map((word) => word[0]).join("").toUpperCase();
+  return nameInitials(name) || "?";
 }
 
 function noteOf(row: ProgressMobileRow) {
   const time = row.timestamp && row.timestamp !== "—" ? row.timestamp : "";
   if (row.status === "completed") {
-    return [row.score !== null ? `${row.score}/100 điểm` : "Chưa có điểm", time && `nộp ${time}`].filter(Boolean).join(" · ");
+    return [row.score !== null ? `${scoreLabel(row)} điểm` : "Chưa có điểm", time && `nộp ${time}`].filter(Boolean).join(" · ");
   }
   if (row.status === "inprogress") return time ? `Đang làm · cập nhật ${time}` : "Đang làm bài";
   return "Chưa mở bài";
 }
 
 /** Canvas `.li`: avatar initials, name, one-line note, status pill. */
-export function ProgressStudentRow({ row }: { row: ProgressMobileRow }) {
+export function ProgressStudentRow({ onGrade, row }: { onGrade?: () => void; row: ProgressMobileRow }) {
   const { label, tone } = badge[row.status];
   return (
     <Box component="li" sx={{ alignItems: "center", display: "flex", gap: 1.5, minHeight: 56, px: 2, py: 1, "& + &": { borderTop: 1, borderColor: "divider" } }}>
@@ -51,7 +57,11 @@ export function ProgressStudentRow({ row }: { row: ProgressMobileRow }) {
         <Typography noWrap sx={{ fontWeight: "fontWeightMedium" }} variant="body2">{row.name}</Typography>
         <Typography color="text.secondary" noWrap variant="caption" component="p">{noteOf(row)}</Typography>
       </Box>
-      <ErgStatusChip dot={false} label={label} sx={{ flexShrink: 0 }} tone={tone} />
+      {onGrade ? (
+        <Button onClick={onGrade} sx={{ flexShrink: 0, minHeight: 44 }} variant="outlined">Chấm bài</Button>
+      ) : (
+        <ErgStatusChip dot={false} label={label} sx={{ flexShrink: 0 }} tone={tone} />
+      )}
     </Box>
   );
 }

@@ -19,7 +19,6 @@ export const classLogText = {
   noLesson: "Chưa có trong KCT",
   commentPlaceholder: "Thêm nhận xét…",
   emptyWeek: "Tuần này bạn không có tiết nào theo thời khoá biểu.",
-  nothingHappened: "Tuần này chưa có tiết nào diễn ra nên chưa thể xác nhận.",
   noDay: "Không có tiết theo TKB",
   loadError: "Không tải được dữ liệu. Thử lại",
   retry: "Thử lại",
@@ -99,7 +98,7 @@ const errorTexts: Record<LessonLogErrorKind, string> = {
   MONTH_CLOSED: "Tháng đã chốt, không sửa được.",
   NOT_TEACHER_OF_PERIOD: "Bạn không dạy tiết này nên không sửa được.",
   ACTUAL_PERIOD_OUT_OF_RANGE: "Tiết thực tế nằm ngoài khung chương trình.",
-  PERIOD_NOT_HAPPENED: classLogText.nothingHappened,
+  PERIOD_NOT_HAPPENED: "Tiết này chưa diễn ra nên chưa điểm danh được.",
 };
 
 export function lessonLogErrorText(error: unknown) {

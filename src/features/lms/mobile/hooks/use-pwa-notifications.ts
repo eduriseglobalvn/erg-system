@@ -11,17 +11,26 @@ import {
   type NotificationPermissionState,
   type NotificationPortal,
 } from "@/features/notifications/api/notification-api";
+import {
+  getFcmRegistrationToken,
+  needsChannelSwitch,
+  readFirebaseWebConfig,
+  resolvePushChannel,
+  type PushChannel,
+} from "@/features/notifications/push/fcm-registration";
 import { getDefaultTenantId } from "@/lib/graphql-client";
 import { readStoredAuthSession } from "@/platform/auth/api/auth-token-storage";
 
 type NotificationState = "unsupported" | "blocked" | "default" | "enabled" | "unconfigured";
 
 type BrowserPushRegistration = {
+  channel: PushChannel;
   registration: ServiceWorkerRegistration;
   subscription: PushSubscription;
 };
 
 type StoredPwaNotificationDevice = {
+  channel?: PushChannel;
   deviceRegistrationId: string;
   endpoint?: string;
   firebaseInstallationId?: string;
@@ -43,6 +52,8 @@ export function usePwaNotifications(portal: PwaNotificationPortal = DEFAULT_NOTI
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const syncInFlightRef = useRef<Promise<NotificationState> | null>(null);
+  // Server channel, read once per app open; undefined when unknown or push is off (then nothing moves).
+  const wantedChannelRef = useRef<Promise<PushChannel | undefined> | null>(null);
 
   const syncDeviceRegistration = useCallback(async () => {
     if (syncInFlightRef.current) {
@@ -63,11 +74,25 @@ export function usePwaNotifications(portal: PwaNotificationPortal = DEFAULT_NOTI
         return nextState;
       }
 
-      const currentRegistration = await readCurrentBrowserPushRegistration();
+      let currentRegistration = await readCurrentBrowserPushRegistration(portal);
       if (!currentRegistration) {
-        clearStoredDeviceRegistration(portal);
-        setState("default");
-        return "default";
+        if (!readStoredDeviceRegistration(portal)) {
+          setState("default");
+          return "default";
+        }
+        // The browser dropped its subscription but this user turned push on here: subscribe again, no prompt needed.
+        currentRegistration = await ensureBrowserPushRegistration(portal);
+      }
+
+      wantedChannelRef.current ??= fetchWebPushConfig(portal).then(
+        (config) => (config?.enabled ? resolvePushChannel(config.provider) : undefined),
+        () => undefined,
+      );
+      const wantedChannel = await wantedChannelRef.current;
+      if (wantedChannel && needsChannelSwitch(currentRegistration.channel, wantedChannel)) {
+        // Permission is already granted: move this browser to the server's channel without asking again.
+        await releaseBrowserPushRegistration(currentRegistration, portal);
+        currentRegistration = await subscribeOnChannel(currentRegistration.registration, wantedChannel, portal);
       }
 
       await syncRegistrationWithApi(currentRegistration, portal);
@@ -91,8 +116,8 @@ export function usePwaNotifications(portal: PwaNotificationPortal = DEFAULT_NOTI
       return;
     }
 
-    void syncDeviceRegistration().catch(() => {
-      setState(resolvePermissionOnlyState(Notification.permission));
+    void syncDeviceRegistration().catch((caught: unknown) => {
+      setState(failureState(caught));
     });
   }, [syncDeviceRegistration]);
 
@@ -145,6 +170,10 @@ export function usePwaNotifications(portal: PwaNotificationPortal = DEFAULT_NOTI
       setState("enabled");
       return "granted" as const;
     } catch (caught) {
+      if (caught instanceof PushUnsupportedError) {
+        setState("unsupported");
+        return "unsupported" as const;
+      }
       if (caught instanceof PushConfigurationError) {
         setState("unconfigured");
         setError(caught.message);
@@ -171,28 +200,7 @@ export function usePwaNotifications(portal: PwaNotificationPortal = DEFAULT_NOTI
     setError(null);
 
     try {
-      const currentRegistration = await readCurrentBrowserPushRegistration();
-      const storedDevice = readStoredDeviceRegistration(portal);
-      const registrationToken = currentRegistration?.subscription.endpoint ?? storedDevice?.registrationToken;
-      const firebaseInstallationId = storedDevice?.firebaseInstallationId;
-
-      if (registrationToken || firebaseInstallationId) {
-        await unregisterNotificationDevice({
-          portal,
-          firebaseInstallationId,
-          registrationToken,
-        });
-      }
-
-      if (storedDevice?.deviceRegistrationId) {
-        await revokeNotificationDevice(storedDevice.deviceRegistrationId, portal).catch(() => undefined);
-      }
-
-      if (currentRegistration?.subscription) {
-        await currentRegistration.subscription.unsubscribe();
-      }
-
-      clearStoredDeviceRegistration(portal);
+      await releaseBrowserPushRegistration(await readCurrentBrowserPushRegistration(portal), portal);
       setState(resolvePermissionOnlyState(Notification.permission));
       return true;
     } catch (caught) {
@@ -213,14 +221,11 @@ export function usePwaNotifications(portal: PwaNotificationPortal = DEFAULT_NOTI
   };
 }
 
-async function syncRegistrationWithApi(
-  { registration, subscription }: BrowserPushRegistration,
-  portal: PwaNotificationPortal,
-) {
-  const input = await buildDeviceRegistrationInput(registration, subscription, portal);
+async function syncRegistrationWithApi(current: BrowserPushRegistration, portal: PwaNotificationPortal) {
+  const input = await buildDeviceRegistrationInput(current, portal);
   const storedDevice = readStoredDeviceRegistration(portal);
 
-  if (storedDevice && deviceIdentityMatches(input, storedDevice)) {
+  if (storedDevice && storedDevice.channel === current.channel && deviceIdentityMatches(input, storedDevice)) {
     await heartbeatNotificationDevice({
       portal,
       deviceRegistrationId: storedDevice.deviceRegistrationId,
@@ -241,6 +246,7 @@ async function syncRegistrationWithApi(
 
   const response = await registerNotificationDevice(input);
   writeStoredDeviceRegistration({
+    channel: current.channel,
     deviceRegistrationId: response.id,
     endpoint: input.endpoint,
     firebaseInstallationId: input.firebaseInstallationId,
@@ -253,11 +259,11 @@ async function syncRegistrationWithApi(
 }
 
 async function buildDeviceRegistrationInput(
-  registration: ServiceWorkerRegistration,
-  subscription: PushSubscription,
+  current: BrowserPushRegistration,
   portal: PwaNotificationPortal,
 ): Promise<NotificationDeviceRegistrationInput> {
-  const pushRegistration = await resolvePushRegistrationAdapter(subscription);
+  const { registration } = current;
+  const pushRegistration = await resolvePushRegistrationAdapter(current);
 
   return {
     portal,
@@ -275,20 +281,25 @@ async function buildDeviceRegistrationInput(
   };
 }
 
-// Adapter boundary: future Firebase/Tauri providers can replace this without coupling the hook to an SDK import.
-async function resolvePushRegistrationAdapter(subscription: PushSubscription) {
+// Adapter boundary: the hook never imports the Firebase SDK; fcm-registration loads it on demand.
+async function resolvePushRegistrationAdapter({ channel, registration, subscription }: BrowserPushRegistration) {
+  if (channel === "fcm") {
+    // getToken returns the cached token, or a refreshed one when Firebase rotated it.
+    const token = await getFcmRegistrationToken(registration);
+    if (!token) throw new PushUnsupportedError();
+    return { endpoint: undefined, firebaseInstallationId: undefined, keys: undefined, registrationToken: token, transport: "FCM" as const };
+  }
   const keys = subscription.toJSON().keys;
   return {
     endpoint: subscription.endpoint,
     firebaseInstallationId: undefined,
-    // Browser subscriptions are VAPID Web Push; FCM stays for the native apps.
     keys: keys ? { auth: keys.auth, p256dh: keys.p256dh } : undefined,
     registrationToken: subscription.endpoint,
     transport: "WEB_PUSH" as const,
   };
 }
 
-async function readCurrentBrowserPushRegistration(): Promise<BrowserPushRegistration | null> {
+async function readCurrentBrowserPushRegistration(portal: PwaNotificationPortal): Promise<BrowserPushRegistration | null> {
   if (!isNotificationSupported()) {
     return null;
   }
@@ -299,19 +310,50 @@ async function readCurrentBrowserPushRegistration(): Promise<BrowserPushRegistra
     return null;
   }
 
-  return { registration, subscription };
+  return { channel: subscriptionChannel(subscription, readStoredDeviceRegistration(portal)), registration, subscription };
+}
+
+/** Which channel created this subscription: Firebase subscribes with its own VAPID key, ours uses the server key. */
+function subscriptionChannel(subscription: PushSubscription, storedDevice: StoredPwaNotificationDevice | null): PushChannel {
+  const key = subscription.options?.applicationServerKey;
+  const firebaseKey = readFirebaseWebConfig()?.vapidKey;
+  if (key && firebaseKey) return arrayBufferToBase64Url(key) === firebaseKey ? "fcm" : "webpush";
+  return storedDevice?.channel ?? "webpush";
 }
 
 async function ensureBrowserPushRegistration(portal: PwaNotificationPortal): Promise<BrowserPushRegistration> {
-  const registration = await navigator.serviceWorker.ready;
-  const existingSubscription = await registration.pushManager.getSubscription();
-  if (existingSubscription) {
-    return { registration, subscription: existingSubscription };
+  const config = await fetchWebPushConfig(portal);
+  if (!config.enabled) {
+    throw new PushConfigurationError("Máy chủ chưa bật thông báo đẩy.");
+  }
+  const channel = resolvePushChannel(config.provider);
+  const current = await readCurrentBrowserPushRegistration(portal);
+  if (current && !needsChannelSwitch(current.channel, channel)) {
+    return current;
+  }
+  if (current) {
+    await releaseBrowserPushRegistration(current, portal);
+  }
+  return subscribeOnChannel(await navigator.serviceWorker.ready, channel, portal, config.publicKey);
+}
+
+async function subscribeOnChannel(
+  registration: ServiceWorkerRegistration,
+  channel: PushChannel,
+  portal: PwaNotificationPortal,
+  knownPublicKey?: string,
+): Promise<BrowserPushRegistration> {
+  if (channel === "fcm") {
+    if (!readFirebaseWebConfig()) throw new PushConfigurationError("Thiếu cấu hình Firebase cho thông báo đẩy.");
+    // Firebase subscribes the push manager of ERG's own service worker (no firebase-messaging-sw.js).
+    const token = await getFcmRegistrationToken(registration);
+    const subscription = token ? await registration.pushManager.getSubscription() : null;
+    if (!subscription) throw new PushUnsupportedError();
+    return { channel, registration, subscription };
   }
 
   // The VAPID key comes from the server; without it there is nothing to subscribe to.
-  const config = await fetchWebPushConfig(portal);
-  const publicKey = config.enabled ? config.publicKey?.trim() : undefined;
+  const publicKey = (knownPublicKey ?? (await fetchWebPushConfig(portal)).publicKey)?.trim();
   if (!publicKey) {
     throw new PushConfigurationError("Máy chủ chưa bật Web Push.");
   }
@@ -321,7 +363,33 @@ async function ensureBrowserPushRegistration(portal: PwaNotificationPortal): Pro
     userVisibleOnly: true,
   });
 
-  return { registration, subscription };
+  return { channel, registration, subscription };
+}
+
+/** Unregisters this browser's device on the server and drops its push subscription (logout of push, or channel move). */
+async function releaseBrowserPushRegistration(current: BrowserPushRegistration | null, portal: PwaNotificationPortal) {
+  const storedDevice = readStoredDeviceRegistration(portal);
+  // An FCM device is keyed by its token, which only the stored record knows; Web Push by the endpoint.
+  const registrationToken =
+    current?.channel === "fcm" ? storedDevice?.registrationToken : current?.subscription.endpoint ?? storedDevice?.registrationToken;
+  const firebaseInstallationId = storedDevice?.firebaseInstallationId;
+
+  if (registrationToken || firebaseInstallationId) {
+    await unregisterNotificationDevice({ portal, firebaseInstallationId, registrationToken });
+  }
+  if (storedDevice?.deviceRegistrationId) {
+    await revokeNotificationDevice(storedDevice.deviceRegistrationId, portal).catch(() => undefined);
+  }
+  if (current?.subscription) {
+    await current.subscription.unsubscribe();
+  }
+  clearStoredDeviceRegistration(portal);
+}
+
+function arrayBufferToBase64Url(buffer: ArrayBuffer) {
+  let binary = "";
+  for (const byte of new Uint8Array(buffer)) binary += String.fromCharCode(byte);
+  return window.btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
 function getInitialNotificationState(portal: PwaNotificationPortal): NotificationState {
@@ -482,4 +550,18 @@ class PushConfigurationError extends Error {
     super(message);
     this.name = "PushConfigurationError";
   }
+}
+
+/** Firebase cannot push on this browser (isSupported() is false); the in-app bell still works. */
+class PushUnsupportedError extends Error {
+  constructor() {
+    super("Trình duyệt này chưa nhận được thông báo đẩy.");
+    this.name = "PushUnsupportedError";
+  }
+}
+
+function failureState(caught: unknown): NotificationState {
+  if (caught instanceof PushUnsupportedError) return "unsupported";
+  if (caught instanceof PushConfigurationError) return "unconfigured";
+  return resolvePermissionOnlyState(Notification.permission);
 }

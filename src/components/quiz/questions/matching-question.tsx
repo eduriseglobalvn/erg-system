@@ -1,4 +1,5 @@
 import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 
 import { dropPiece, readBoard } from "@/components/quiz/questions/matching-question/matching-board";
 import { pieceName } from "@/components/quiz/questions/matching-question/matching-helpers";
@@ -59,6 +60,11 @@ export function MatchingQuestion({ question, value, submitted = false, reviewMod
 
   return (
     <QuestionBodyWithImage question={question}>
+      {submitted || reviewMode ? null : (
+        <Typography color="text.secondary" sx={{ mb: 1.5 }} variant="body2">
+          Các mảnh bên phải chưa được ghép với hàng nào. Kéo từng mảnh vào hàng bên trái cần ghép; mảnh ghi «Chưa ghép» là chưa có cặp.
+        </Typography>
+      )}
       <MatchingPuzzle
         mode="learner"
         locked={submitted}

@@ -41,6 +41,10 @@ import {
   StudentDataTable,
   StudentDetailCard,
 } from "./class-students-workspace.parts";
+import {
+  StudentPasswordResetFlow,
+  type StudentPasswordResetTarget,
+} from "@/features/lms/student-credentials/student-password-reset-flow";
 import { StudentProfileDetailDrawer, type StudentProfileDetailDraft } from "./student-profile-detail-drawer";
 import { assignmentCatalog, assignmentSubjects } from "./class-students-workspace.constants";
 import { enCopy, viCopy } from "./class-students-workspace.copy";
@@ -83,6 +87,7 @@ export function ClassStudentsWorkspace({
   const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([]);
   const [focusedStudentId, setFocusedStudentId] = useState<string | null>(null);
   const [detailStudentId, setDetailStudentId] = useState<string | null>(null);
+  const [resetTarget, setResetTarget] = useState<StudentPasswordResetTarget | null>(null);
   const [studentDrafts, setStudentDrafts] = useState<Record<string, StudentProfileDetailDraft>>({});
   const [studentStatusDrafts, setStudentStatusDrafts] = useState<Record<string, "ahead" | "steady" | "support">>({});
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
@@ -374,6 +379,7 @@ export function ClassStudentsWorkspace({
             copy={copy}
             focusedStudentId={focusedStudent?.id ?? null}
             onFocusStudent={openStudentDetail}
+            onResetPassword={(student) => setResetTarget({ classId: student.classId, studentId: student.id, studentName: student.name })}
             onToggleStudent={toggleStudent}
             selectedIds={selectedVisibleIds}
             students={visibleStudents}
@@ -433,6 +439,7 @@ export function ClassStudentsWorkspace({
         subjects={assignmentSubjects}
         topics={selectedLevel?.topics ?? []}
       />
+      <StudentPasswordResetFlow onClose={() => setResetTarget(null)} portal="lms" target={resetTarget} />
       {detailStudent ? (
         <StudentProfileDetailDrawer
           draft={studentDrafts[detailStudent.id] ?? createStudentProfileDraft(detailStudent)}
@@ -470,7 +477,7 @@ function mapClassWorkspaceToSnapshot(
     schoolName: fallback?.schoolName || classInfo.schoolId || "ERG Learning",
     clusterId: fallback?.clusterId ?? "central",
     className: classInfo.name || fallback?.className || classInfo.id || "Lop hoc",
-    gradeLabel: grade ? `Khoi ${grade}` : fallback?.gradeLabel ?? "ERG",
+    gradeLabel: grade ? `Khối ${grade}` : fallback?.gradeLabel ?? "Toàn hệ thống",
     homeroomTeacher: fallback?.homeroomTeacher || classInfo.homeroomTeacherId || "Giao vien chu nhiem",
     studentCount,
     activeAssignments,

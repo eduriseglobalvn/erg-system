@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { useMutation, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 
 import {
+  deleteGradebookScore,
   loadAttendanceWorkspace,
   loadGradebookWorkspace,
   upsertAttendance,
@@ -11,7 +12,7 @@ import {
   type GradebookScore,
   type GradebookWorkspace,
 } from "@/features/lms/api/lms-academic-record-api";
-import type { UpsertAttendanceInput, UpsertGradebookScoreInput } from "@/lib/api/generated/graphql";
+import type { DeleteGradebookScoreInput, UpsertAttendanceInput, UpsertGradebookScoreInput } from "@/lib/api/generated/graphql";
 import { getDefaultTenantId } from "@/lib/graphql-client";
 import { persistedQueryMeta, QUERY_POLICIES } from "@/lib/query-policy";
 import { getAuthScope } from "@/platform/auth/api/auth-storage";
@@ -200,6 +201,23 @@ export function useUpsertGradebookScoreMutation(scope: AcademicRecordScope, opti
     onSettled: (result) => {
       if (!isPendingResult(result)) void queryClient.invalidateQueries({ exact: true, queryKey });
     },
+  });
+}
+
+/** Online only: an offline queue for "clear a cell" is not worth its conflict rules yet. */
+export function useDeleteGradebookScoreMutation(scope: AcademicRecordScope) {
+  const queryClient = useQueryClient();
+  const queryKey = lmsAcademicRecordQueryKeys.gradebook(normalizeScope(scope));
+  return useMutation({
+    mutationFn: (input: DeleteGradebookScoreInput) => deleteGradebookScore(input),
+    mutationKey: ["lms", "mutation", "gradebook-score-delete"] as const,
+    onSuccess: (_deleted, input) => {
+      queryClient.setQueryData<GradebookWorkspace>(queryKey, (current) => current ? {
+        ...current,
+        scores: current.scores.filter((item) => item.studentId !== input.studentId || item.columnId !== input.columnId),
+      } : current);
+    },
+    onSettled: () => void queryClient.invalidateQueries({ exact: true, queryKey }),
   });
 }
 

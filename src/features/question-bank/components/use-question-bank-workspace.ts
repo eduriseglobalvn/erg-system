@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import { useI18n } from "@/platform/i18n";
+import { buildAuthoredQuestionInput } from "@/features/question-bank/api/question-bank-authored-input";
+import { readSlideQuestion } from "@/features/lcms/quiz/quiz-editor/components/question-authoring/slide-question";
 import type { CreateQuizFromBankOptions } from "@/features/lcms/create-quiz-from-bank";
 import { createQuestionBankPlayerTemplate } from "@/features/question-bank/api/question-bank-to-quiz";
 import {
@@ -13,7 +16,7 @@ import { ApiClientError } from "@/lib/api-client/errors";
 import type { QuizEditorSlide } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import type { QuestionBankApiData, QuestionBankSaveQuestionInput } from "@/features/question-bank/api/question-bank-api";
-import type { QuestionBankChoice, QuestionBankQuestion, QuestionBankSubject, QuestionBankSubjectId, QuizBankItem, QuizBankKind } from "@/features/question-bank/types/question-bank-types";
+import type { QuestionBankQuestion, QuestionBankSubject, QuestionBankSubjectId, QuizBankItem, QuizBankKind } from "@/features/question-bank/types/question-bank-types";
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
 import type { ContentScope } from "@/types/scope-types";
 import type { QuestionBankCopy } from "./question-bank-copy";
@@ -25,7 +28,7 @@ import { useQuizPackageEdit } from "./use-quiz-package-edit";
 
 type QuizKindFilter = "all" | QuizBankKind;
 
-const EMPTY_QUESTION_DRAFT: QuestionFormDraft = { stem: "", objective: "", type: "multiple-choice", difficulty: "core", status: "ready", tagsText: "", choiceA: "", choiceB: "", choiceC: "", choiceD: "", answer: "a" };
+const EMPTY_QUESTION_DRAFT: QuestionFormDraft = { slide: null, objective: "", difficulty: "core", status: "ready", tagsText: "" };
 const NEW_QUIZ_SETTINGS = { passingRate: 80, pointsMode: "equal", questionPoints: {}, acceptPartial: false, shuffleAnswers: true } satisfies Partial<QuizCreateDraft>;
 const EMPTY_QUESTION_BANK_DATA: QuestionBankApiData = { questions: [], quizzes: [], subjects: [], questionPage: { page: 0, size: 50, totalItems: 0, totalPages: 0, hasNext: false, hasPrevious: false } };
 
@@ -35,6 +38,7 @@ export function useQuestionBankWorkspaceController({ activeLeaf, contentScope, c
   copy: QuestionBankCopy;
   onCreateQuiz: (questions: QuestionBankQuestion[], options?: CreateQuizFromBankOptions) => void;
 }) {
+  const { t } = useI18n();
   const view = activeLeaf.variant === "quiz-bank" ? "quizzes" : "questions";
   const [subjectId, setSubjectId] = useState<QuestionBankSubjectId>("");
   const [levelId, setLevelId] = useState("");
@@ -140,14 +144,16 @@ export function useQuestionBankWorkspaceController({ activeLeaf, contentScope, c
   };
   const openEditQuestionForm = (question: QuestionBankQuestion) => onCreateQuiz([question], { kind: "train", title: `${question.subjectLabel} - ${question.levelLabel} - ${question.categoryLabel}`, passingScoreMode: "percent", passingScorePoints: 1000, passingRate: 100, shuffleAnswers: false, shuffleQuestions: false, timeLimitMinutes: 0 });
   const submitQuestionForm = async (draft: QuestionFormDraft) => {
+    const authored = draft.slide ? readSlideQuestion(draft.slide, t) : null;
+    if (!authored) return;
     const targetTopicId = topicId === "all" ? levelTopics[0]?.id : topicId;
     if (!activeSubject.id || !activeLevel.id || !targetTopicId) { toast.error(copy.questionSaveMissingTaxonomy); return; }
-    const payload: QuestionBankSaveQuestionInput = { questionId: questionForm?.question?.id, scopeType: contentScope.type === "global" ? "global" : "center", scopeId: contentScope.type === "center" ? contentScope.centerId : undefined, subjectId: activeSubject.id, levelId: activeLevel.id, topicId: targetTopicId, categoryId: targetTopicId, type: draft.type, stem: draft.stem.trim(), objective: draft.objective.trim(), difficulty: draft.difficulty, status: draft.status, tags: draft.tagsText.split(",").map((tag) => tag.trim()).filter(Boolean), choices: buildQuestionChoices(draft), answer: draft.answer.trim() };
+    const payload: QuestionBankSaveQuestionInput = { questionId: questionForm?.question?.id, scopeType: contentScope.type === "global" ? "global" : "center", scopeId: contentScope.type === "center" ? contentScope.centerId : undefined, subjectId: activeSubject.id, levelId: activeLevel.id, topicId: targetTopicId, categoryId: targetTopicId, ...buildAuthoredQuestionInput(authored), objective: draft.objective.trim(), difficulty: draft.difficulty, status: draft.status, tags: draft.tagsText.split(",").map((tag) => tag.trim()).filter(Boolean) };
     if (!payload.stem) { toast.error(copy.questionSaveMissingStem); return; }
     try { if (questionForm?.mode === "edit") { await updateQuestionMutation.mutateAsync(payload); toast.success(copy.updateQuestionSuccess); } else { await createQuestionMutation.mutateAsync(payload); toast.success(copy.createQuestionSuccess); } setQuestionForm(null); } catch (error) { toast.error(error instanceof Error ? error.message : copy.saveQuestionError); }
   };
-  // The quick view asks with its own dialog (confirmed = true); the row icon still uses window.confirm.
-  const deleteQuiz = async (quiz: QuizBankItem, confirmed = false) => { if (!confirmed && !window.confirm(copy.confirmDeleteQuiz(quiz.title))) return; try { await deleteQuizMutation.mutateAsync(quiz.id); toast.success(copy.deleteQuizSuccess); setQuickViewQuiz((current) => (current?.id === quiz.id ? null : current)); } catch (error) { toast.error(error instanceof Error ? error.message : copy.deleteQuizError); } };
+  // Callers ask first with ErgConfirmDialog (a browser confirm() is blocked in embedded views).
+  const deleteQuiz = async (quiz: QuizBankItem) => { try { await deleteQuizMutation.mutateAsync(quiz.id); toast.success(copy.deleteQuizSuccess); setQuickViewQuiz((current) => (current?.id === quiz.id ? null : current)); } catch (error) { toast.error(error instanceof Error ? error.message : copy.deleteQuizError); } };
 
   // Publishes the server draft as it stands; the server checks every question and refuses with the reasons.
   const publishQuiz = async (quiz: QuizBankItem) => {
@@ -193,7 +199,4 @@ function createQuizPackageQuestionFallback(quiz: QuizBankItem, questionId: strin
 function findQuestionBankSubject(subjects: QuestionBankSubject[], subjectId: QuestionBankSubjectId) { return subjects.find((subject) => subject.id === subjectId) ?? subjects[0] ?? { id: "", label: "", description: "", companyScopeLabel: "", levels: [], categories: [] }; }
 function findQuestionBankLevel(subject: QuestionBankSubject, levelId: string) { return subject.levels.find((level) => level.id === levelId) ?? subject.levels[0] ?? { id: "", label: "", description: "", categoryIds: [] }; }
 function getDefaultAutoTopicIds(subjects: QuestionBankSubject[], subjectId: QuestionBankSubjectId, levelId: string) { return (subjects.find((subject) => subject.id === subjectId)?.categories ?? []).filter((category) => category.levelId === levelId).slice(0, 2).map((category) => category.id); }
-function buildQuestionChoices(draft: QuestionFormDraft): QuestionBankChoice[] {
-  const answer = draft.answer.trim().toLowerCase();
-  return [["a", draft.choiceA], ["b", draft.choiceB], ["c", draft.choiceC], ["d", draft.choiceD]].filter(([, label]) => label.trim()).map(([id, label]) => ({ id, label: label.trim(), correct: id === answer }));
-}
+

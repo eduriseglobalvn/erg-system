@@ -8,7 +8,8 @@ vi.mock("@/lib/api-client", async (importOriginal) => ({
   hasApiBase: () => true,
 }));
 
-vi.mock("@/lib/platform", () => ({
+vi.mock("@/lib/platform", async (importOriginal) => ({
+  ...await importOriginal<typeof import("@/lib/platform")>(),
   getApiBase: () => "https://api.example.test",
 }));
 

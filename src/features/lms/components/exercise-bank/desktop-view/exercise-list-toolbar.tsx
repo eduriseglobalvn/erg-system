@@ -116,13 +116,13 @@ export function ExerciseListToolbar({ controller }: { controller: ExerciseBankCo
           value={controller.subjectFilter}
           onChange={controller.setSubjectFilter}
           label="Môn học: Tất cả"
-          values={uniqueExerciseValues("subject")}
+          values={uniqueExerciseValues(controller.items, "subject")}
         />
         <FilterSelect
           value={controller.levelFilter}
           onChange={controller.setLevelFilter}
           label="Cấp độ: Tất cả"
-          values={uniqueExerciseValues("level")}
+          values={uniqueExerciseValues(controller.items, "level")}
         />
         <FilterSelect
           value={controller.typeFilter}

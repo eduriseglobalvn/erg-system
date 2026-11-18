@@ -66,12 +66,13 @@ it("draws schools as rows and Thứ 2…Thứ 7 as columns with merged time rang
   expect(within(dialog).getByRole("button", { name: "Đổi giáo viên" })).toBeInTheDocument();
 });
 
-it("caps side-by-side schools at four", async () => {
+it("pages the grid by schools instead of capping the selection", async () => {
   mocks.schools.mockResolvedValue({ ...SCHOOLS, items: [...SCHOOLS.items, school("s5", "THCS Bạch Đằng")], total: 5 });
-  renderPage("?week=2026-11-09&schools=s1,s2,s3,s4");
-  fireEvent.click(await screen.findByRole("button", { name: "Trường: 4 / 5 ▾" }));
-  fireEvent.click(await screen.findByRole("checkbox", { name: "THCS Bạch Đằng" }));
-  expect(mocks.navigate).not.toHaveBeenCalled();
+  renderPage("?week=2026-11-09&schools=s1,s2,s3,s4,s5");
+  expect(await screen.findByText("Trường 1–4 trong 5")).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Các trường sau" }));
+  expect(await screen.findByText("Trường 5–5 trong 5")).toBeInTheDocument();
+  expect(mocks.grid).toHaveBeenLastCalledWith({ schoolIds: ["s5"], weekStart: "2026-11-09" }, expect.anything());
 });
 
 it("filters the teacher tab with quick chips through the URL", async () => {

@@ -327,6 +327,7 @@ export function useAssignHomeworkController({
     setValidationError,
     setIsSubmitting,
     assignmentClass,
+    classStudentIds: students.map((student) => student.id),
     selectedAssignmentGroupIds,
     selectedGradeClassIds,
     gradeStudentIdsByClass,

@@ -8,7 +8,7 @@ import CheckCircle from "@mui/icons-material/CheckCircle";
 import People from "@mui/icons-material/People";
 import FileText from "@mui/icons-material/Description";
 
-import { classroomStudents } from "@/features/lms/classroom/api/classroom-defaults";
+import { knownStudentCount } from "@/features/lms/components/lms-teacher-shell-utils";
 import type { ClassroomSnapshot } from "@/domain/school/classroom-types";
 
 export function TeacherWorkspaceFrame({
@@ -39,7 +39,7 @@ export function TeacherWorkspaceFrame({
               {selectedClass?.className ?? "Lớp học"}
             </Typography>
             <Typography sx={{ mt: 0.5, fontSize: 14, color: "text.secondary" }}>
-              {selectedSchoolName} - {selectedClass?.studentCount ?? 0} học sinh
+              {[selectedSchoolName, knownStudentCount(selectedClass) === undefined ? "" : `${knownStudentCount(selectedClass)} học sinh`].filter(Boolean).join(" - ")}
             </Typography>
           </Box>
           <Button
@@ -106,7 +106,3 @@ const ClassStat = memo(function ClassStat({ icon: Icon, label, value }: { icon: 
     </Box>
   );
 });
-
-export function getClassStudents(classId?: string) {
-  return classroomStudents.filter((student) => !classId || student.classId === classId);
-}

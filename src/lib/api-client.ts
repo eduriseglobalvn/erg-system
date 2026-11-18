@@ -232,7 +232,7 @@ async function executeApiRequest<T>(
         const retryErrorBody = getErrorBody(retryBody);
 
         if (retryResponse.ok && !retryErrorBody) {
-          if (isApiEnvelope<T>(retryBody) && "data" in retryBody) {
+          if (init?.unwrapEnvelope !== false && isApiEnvelope<T>(retryBody) && "data" in retryBody) {
             return inheritApiResponseRequestId(retryBody.data as T, retryBody);
           }
 

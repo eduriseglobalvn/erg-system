@@ -56,13 +56,6 @@ export type SchoolStudentInput = {
 /** Import row that also asks for a login account. Sent over REST only: GraphQL variables must not carry passwords. */
 export type SchoolStudentAccountInput = SchoolStudentInput & { password: string };
 
-export type SchoolSubjectInput = {
-  name: string;
-  code: string;
-  schoolId?: string | null;
-  status?: string | null;
-};
-
 export type SchoolEnrollmentItem = {
   studentId: string;
   classId: string;
@@ -102,17 +95,6 @@ export type OperationalStudentRecord = {
   parentRelationship?: string | null;
   enrollmentDate?: string | null;
   note?: string | null;
-  status: string;
-  version: number;
-  updatedAt?: string | null;
-};
-
-export type OperationalSubjectRecord = {
-  id: string;
-  tenantId: string;
-  schoolId?: string | null;
-  name: string;
-  code: string;
   status: string;
   version: number;
   updatedAt?: string | null;

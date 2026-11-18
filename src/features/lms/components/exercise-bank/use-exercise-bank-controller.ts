@@ -1,20 +1,19 @@
 import { useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
-import { useQuestionBankWorkspaceQuery } from "@/features/question-bank/api/question-bank-query";
-import { todayInput, viDateToInput } from "@/domain/formatters/format-date";
+import { questionBankQueryKeys, useQuestionBankWorkspaceQuery } from "@/features/question-bank/api/question-bank-query";
+import { viDateToInput } from "@/domain/formatters/format-date";
 import type { QuizBankItem } from "@/features/question-bank/types/question-bank-types";
-import { getPersistedJsonValue, setPersistedJsonValue } from "@/stores/persisted-store";
 import {
   allExerciseFilter,
-  exercises,
   filterExercises,
   summarizeExercises,
   type Exercise,
   type ExerciseSource,
   type ExerciseStatus,
 } from "./exercise-bank-model";
-
-const TEACHER_EXERCISES_STORAGE_KEY = "erg:teacher-created-exercises:v1";
+import { copyQuizAsTeacherExercise, deleteTeacherExercise, saveTeacherExercise } from "./teacher-exercise-api";
 
 export function quizToExercise(quiz: QuizBankItem): Exercise {
   return {
@@ -32,7 +31,8 @@ export function quizToExercise(quiz: QuizBankItem): Exercise {
     updatedAt: viDateToInput(quiz.updatedAt),
     assignedCount: 0,
     tags: [quiz.subjectLabel, quiz.levelLabel, ...(quiz.topicLabels || [])].filter(Boolean),
-    source: quiz.ownerLabel === "Giáo viên" ? "teacher" : "system",
+    // The server labels a quiz a teacher built as «Giáo viên»; a teacher only ever receives their own.
+    source: quiz.scopeLabel === "Giáo viên" ? "teacher" : "system",
     authorName: quiz.ownerLabel || "Hệ thống ERG",
     questionIds: quiz.questionIds,
   };
@@ -41,21 +41,11 @@ export function quizToExercise(quiz: QuizBankItem): Exercise {
 export function useExerciseBankController() {
   const { data: qbData } = useQuestionBankWorkspaceQuery();
 
-  const [customItems, setCustomItems] = useState<Exercise[]>(() =>
-    getPersistedJsonValue<Exercise[]>(TEACHER_EXERCISES_STORAGE_KEY, [])
-  );
+  const queryClient = useQueryClient();
+  const [saving, setSaving] = useState(false);
+  const [exerciseToDelete, setExerciseToDelete] = useState<Exercise | null>(null);
 
-  const baseExercises = useMemo(() => {
-    if (qbData?.quizzes && qbData.quizzes.length > 0) {
-      return qbData.quizzes.map(quizToExercise);
-    }
-    return exercises;
-  }, [qbData?.quizzes]);
-
-  const items = useMemo(() => {
-    const customIds = new Set(customItems.map((e) => e.id));
-    return [...customItems, ...baseExercises.filter((e) => !customIds.has(e.id))];
-  }, [customItems, baseExercises]);
+  const items = useMemo(() => (qbData?.quizzes ?? []).map(quizToExercise), [qbData?.quizzes]);
 
   const [selectedExerciseId, setSelectedExerciseId] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -115,97 +105,107 @@ export function useExerciseBankController() {
     setSourceFilter("all");
   }
 
-  function addExercise(newExercise: Omit<Exercise, "id" | "updatedAt" | "assignedCount">) {
-    const created: Exercise = {
-      ...newExercise,
-      id: `ex-${Date.now()}`,
-      updatedAt: todayInput(),
-      assignedCount: 0,
-      source: newExercise.source ?? "teacher",
-      authorName: newExercise.authorName ?? "Giáo viên",
-    };
-    setCustomItems((prev) => {
-      const next = [created, ...prev];
-      setPersistedJsonValue(TEACHER_EXERCISES_STORAGE_KEY, next);
-      return next;
-    });
-    setSelectedExerciseId(created.id);
+  /** Runs a save, refreshes the bank and selects the result; returns the quiz id, or null after telling the teacher what went wrong. */
+  async function runSave(save: () => Promise<string>) {
+    setSaving(true);
+    try {
+      const id = await save();
+      await queryClient.invalidateQueries({ queryKey: questionBankQueryKeys.root() });
+      setSelectedExerciseId(id);
+      return id;
+    } catch (error) {
+      toast.error(error instanceof Error && error.message ? error.message : "Không lưu được bài. Vui lòng thử lại.");
+      return null;
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  /** Saves on the server and publishes. `sourceId`: the quiz this one is made from, when it is not being saved over itself. */
+  async function persist(exercise: Pick<Exercise, "title" | "type" | "durationMinutes" | "questionIds">, quizId?: string, sourceId?: string) {
+    const kind = exercise.type === "exam" ? "test" : "train";
+    const ids = exercise.questionIds ?? [];
+    // A quiz built in the editor keeps its questions in itself, not in the bank: it is copied whole.
+    const source = ids.length ? undefined : (qbData?.quizzes ?? []).find((quiz) => quiz.id === sourceId);
+    if (source) {
+      return runSave(() => copyQuizAsTeacherExercise({ sourceQuizId: source.id, title: exercise.title, kind, subjectId: source.subjectId, levelId: source.levelId }));
+    }
+    const byId = new Map((qbData?.questions ?? []).map((question) => [question.id, question]));
+    const questions = ids.flatMap((id) => byId.get(id) ?? []);
+    if (!questions.length || questions.length !== ids.length) {
+      toast.error("Không tải được đủ câu hỏi của bài này. Tải lại trang rồi thử lại.");
+      return null;
+    }
+    return runSave(() => saveTeacherExercise({ quizId, title: exercise.title, kind, questions, timeLimitMinutes: exercise.durationMinutes }));
+  }
+
+  function closeDialog() {
     setCreateDialogOpen(false);
     setExerciseToEdit(null);
   }
 
-  function updateExercise(updated: Exercise) {
-    setCustomItems((prev) => {
-      const exists = prev.some((e) => e.id === updated.id);
-      let next: Exercise[];
-      if (exists) {
-        next = prev.map((e) =>
-          e.id === updated.id
-            ? {
-                ...updated,
-                updatedAt: todayInput(),
-              }
-            : e
-        );
-      } else {
-        // Nếu là bài tập hệ thống được giáo viên chỉnh sửa, lưu vào danh sách bài tập tùy chỉnh của giáo viên
-        next = [
-          {
-            ...updated,
-            source: "teacher",
-            authorName: updated.authorName === "Hệ thống ERG" ? "Giáo viên tùy chỉnh" : updated.authorName,
-            updatedAt: todayInput(),
-          },
-          ...prev,
-        ];
-      }
-      setPersistedJsonValue(TEACHER_EXERCISES_STORAGE_KEY, next);
-      return next;
-    });
-    setSelectedExerciseId(updated.id);
-    setCreateDialogOpen(false);
-    setExerciseToEdit(null);
+  async function addExercise(newExercise: Omit<Exercise, "id" | "updatedAt" | "assignedCount">) {
+    const id = await persist(newExercise);
+    if (!id) return false;
+    toast.success("Đã lưu bài vào kho của bạn.");
+    closeDialog();
+    return true;
   }
 
-  function duplicateExercise(exerciseId?: string) {
+  /** Changing a system exercise never touches it: the teacher gets their own copy. */
+  async function updateExercise(updated: Exercise) {
+    const own = updated.source === "teacher";
+    const id = await persist(updated, own ? updated.id : undefined, own ? undefined : updated.id);
+    if (!id) return false;
+    toast.success(updated.source === "teacher" ? "Đã lưu thay đổi." : "Đã lưu thành bài riêng của bạn.");
+    closeDialog();
+    return true;
+  }
+
+  async function duplicateExercise(exerciseId?: string) {
     const target = items.find((e) => e.id === (exerciseId || selectedExercise?.id));
     if (!target) return;
-    const duplicated: Exercise = {
-      ...target,
-      id: `ex-${Date.now()}`,
-      title: `${target.title} (Bản sao)`,
-      status: "draft",
-      source: "teacher",
-      authorName: "Giáo viên",
-      updatedAt: todayInput(),
-      assignedCount: 0,
-    };
-    setCustomItems((prev) => {
-      const next = [duplicated, ...prev];
-      setPersistedJsonValue(TEACHER_EXERCISES_STORAGE_KEY, next);
-      return next;
-    });
-    setSelectedExerciseId(duplicated.id);
+    if (await persist({ ...target, title: `${target.title} (Bản sao)` }, undefined, target.id)) toast.success("Đã tạo bản sao trong kho của bạn.");
+  }
+
+  async function deleteExercise() {
+    if (!exerciseToDelete) return;
+    setSaving(true);
+    try {
+      await deleteTeacherExercise(exerciseToDelete.id);
+      await queryClient.invalidateQueries({ queryKey: questionBankQueryKeys.root() });
+      toast.success("Đã xoá bài khỏi kho. Bài đã giao cho lớp vẫn giữ nguyên.");
+      setExerciseToDelete(null);
+    } catch (error) {
+      toast.error(error instanceof Error && error.message ? error.message : "Không xoá được bài. Vui lòng thử lại.");
+    } finally {
+      setSaving(false);
+    }
   }
 
   return {
     addExercise,
     clearFilters,
     createDialogOpen,
+    deleteExercise,
+    exerciseToDelete,
     difficultyFilter,
     duplicateExercise,
     exerciseToEdit,
     filteredExercises,
+    items,
     levelFilter,
     openCreateDialog,
     openEditDialog,
     portableCatalogOpen,
     quickAssignExercise,
+    saving,
     searchTerm,
     selectedExercise,
     selectedExerciseId,
     setCreateDialogOpen,
     setDifficultyFilter,
+    setExerciseToDelete,
     setExerciseToEdit,
     setLevelFilter,
     setPortableCatalogOpen,

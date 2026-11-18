@@ -10,6 +10,7 @@ import FingerprintRoundedIcon from "@mui/icons-material/FingerprintRounded";
 import FolderRoundedIcon from "@mui/icons-material/FolderRounded";
 import ForumRoundedIcon from "@mui/icons-material/ForumRounded";
 import GroupsRoundedIcon from "@mui/icons-material/GroupsRounded";
+import HelpOutlineRoundedIcon from "@mui/icons-material/HelpOutlineRounded";
 import InboxRoundedIcon from "@mui/icons-material/InboxRounded";
 import LeaderboardRoundedIcon from "@mui/icons-material/LeaderboardRounded";
 import MenuBookRoundedIcon from "@mui/icons-material/MenuBookRounded";
@@ -25,7 +26,7 @@ import type { ErgSheetTileItem } from "@/components/portal/erg-mobile-sheet-part
 import { LEARNING_RESOURCE_WORKSPACE_LABEL } from "@/components/learning-resources/learning-resource-workspace-labels";
 import { teacherPath } from "@/platform/workspaces/workspace-paths";
 
-export type LmsSection = "home" | "homework" | "score" | "attendance" | "schedule" | "classLog" | "discussion" | "resources" | "reports" | "leaderboard" | "timekeeping";
+export type LmsSection = "home" | "homework" | "score" | "attendance" | "schedule" | "classLog" | "discussion" | "resources" | "reports" | "leaderboard" | "timekeeping" | "help";
 export type LmsMobileSection = "home" | "calendar" | "learning" | "inbox" | "timekeeping" | "account";
 
 
@@ -48,6 +49,7 @@ export const lmsNavItems: NavItem[] = [
   { id: "reports", label: "Báo cáo", path: teacherPath("/reports"), icon: FileText },
   { id: "leaderboard", label: "Thi đua", path: teacherPath("/leaderboard"), icon: LeaderboardRoundedIcon },
   { id: "timekeeping", label: "Chấm công", path: teacherPath("/timekeeping"), icon: FingerprintRoundedIcon },
+  { id: "help", label: "Hướng dẫn", path: teacherPath("/help"), icon: HelpOutlineRoundedIcon },
 ];
 
 export const LMS_MENU_GROUPS: MenuGroup[] = [
@@ -154,6 +156,7 @@ export const LMS_MENU_GROUPS: MenuGroup[] = [
       },
     ],
   },
+  { label: "", items: [{ id: "help", label: "Hướng dẫn", icon: <HelpOutlineRoundedIcon />, path: teacherPath("/help") }] },
 ];
 
 const lmsMobileDockItems: Array<ErgMobileDockItem<LmsMobileSection>> = [
@@ -170,7 +173,7 @@ export function visibleLmsDockItems(canAccess: (path: string) => boolean): Array
   return lmsMobileDockItems.filter((item) => item.opensSheet || canAccess(item.path));
 }
 
-export type LmsMobileMoreItem = ErgSheetTileItem & { group: "Giảng dạy" | "Chấm công" };
+export type LmsMobileMoreItem = ErgSheetTileItem & { group: "Giảng dạy" | "Chấm công" | "Trợ giúp" };
 
 /** Account-sheet tiles (design N2), grouped; keeps screens off the dock reachable on mobile. */
 export const lmsMobileMoreItems: LmsMobileMoreItem[] = [
@@ -184,6 +187,7 @@ export const lmsMobileMoreItems: LmsMobileMoreItem[] = [
   { group: "Chấm công", icon: <FileText />, label: "Đơn từ", path: teacherPath("/timekeeping/requests"), tone: "success" },
   { group: "Chấm công", icon: <CalendarViewMonthRoundedIcon />, label: "Công của tôi", path: teacherPath("/timekeeping/timesheet"), tone: "success" },
   { group: "Chấm công", icon: <PendingActionsRoundedIcon />, label: "Duyệt đơn", path: teacherPath("/timekeeping/approvals"), tone: "success" },
+  { group: "Trợ giúp", icon: <HelpOutlineRoundedIcon />, label: "Hướng dẫn", path: teacherPath("/help") },
 ];
 
 function matchesWorkspacePath(pathname: string, canonicalPath: string) {
@@ -219,6 +223,7 @@ const MOBILE_TITLES: Array<[string, string]> = [
   ["/reports", "Báo cáo lớp học"],
   ["/notifications", "Thông báo"],
   ["/account", "Tài khoản"],
+  ["/help", "Hướng dẫn"],
 ];
 
 /** Top-bar title on mobile: specific screen name first, then the dock label, then the desktop section label. */

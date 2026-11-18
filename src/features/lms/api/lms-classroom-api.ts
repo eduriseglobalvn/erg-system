@@ -121,6 +121,7 @@ query LmsClassWorkspace($input: ClassWorkspaceInput!) {
           status
           assignedBy
           recipientMode
+          title
           resources {
             quizId
             quizVersionId
@@ -184,8 +185,10 @@ export function mapClassWorkspaceToStudents(
       classId: student.academicClassId || classInfo.id,
       className,
       gradeLabel,
+      studentCode: student.studentCode || undefined,
+      username: student.username || undefined,
       avatarSeed: initials(student.fullName || student.username || student.studentCode || student.id),
-      currentAssignment: workspace.assignments.items[0]?.quizId ? `Bài tập ${workspace.assignments.items[0].quizId}` : "Chưa có bài đang giao",
+      currentAssignment: currentAssignmentLabel(workspace.assignments),
       currentStage: student.updatedAt ? `Cập nhật ${formatDateLabel(student.updatedAt)}` : "Sẵn sàng học tập",
       // The API has no per-student progress; this is a status-based placeholder, so the UI shows "—" (hasProgressData=false).
       progressRate: status === "ahead" ? 88 : status === "steady" ? 62 : 28,
@@ -206,10 +209,10 @@ export function formatDateLabel(value: string) {
 }
 
 function gradeLabelFor(value?: string | number | null, fallback?: string) {
-  if (value == null || value === "") return fallback ?? "ERG";
+  if (value == null || value === "") return fallback ?? "Toàn hệ thống";
   const str = String(value);
   const grade = str.replace(/^grade[-_]?/i, "");
-  return grade ? `Khoi ${grade}` : fallback ?? "ERG";
+  return grade ? `Khối ${grade}` : fallback ?? "Toàn hệ thống";
 }
 
 function initials(value: string) {
@@ -228,4 +231,13 @@ function mapStudentStatus(status: string | null | undefined, index: number): Stu
   if (normalized === "excellent" || normalized === "ahead") return "ahead";
   if (normalized === "active" || normalized === "steady") return "steady";
   return index % 5 === 0 ? "support" : index % 3 === 0 ? "ahead" : "steady";
+}
+
+/** «Tên bài» of the newest assignment, plus how many more the class has; never a raw id. */
+export function currentAssignmentLabel(assignments: { items: LmsAssignment[]; totalItems?: number | null }): string {
+  const total = assignments.totalItems ?? assignments.items.length;
+  if (!assignments.items.length) return "Chưa có bài đang giao";
+  const title = assignments.items[0].title?.trim();
+  if (!title) return `${total} bài đang giao`;
+  return total > 1 ? `${title} và ${total - 1} bài khác` : title;
 }

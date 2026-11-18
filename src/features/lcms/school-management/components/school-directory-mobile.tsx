@@ -20,7 +20,6 @@ const SECTIONS = [
   { label: "Danh sách trường", path: adminPath("/schools/list") },
   { label: "Người học", path: adminPath("/schools/students") },
   { label: "Giám sát", path: adminPath("/schools/reports") },
-  { label: "Nhập dữ liệu", path: adminPath("/schools/imports") },
 ];
 
 type Props = {

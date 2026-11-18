@@ -34,6 +34,7 @@ export async function getQuizPackage(
   portal: QuizRuntimePortal = DEFAULT_QUIZ_RUNTIME_PORTAL,
   tenantId: string = getDefaultTenantId(),
   signal?: AbortSignal,
+  assignmentId?: string,
 ): Promise<QuizPackage> {
   if (import.meta.env.DEV && runtimeFixturesEnabled()) {
     const { getLocalQuizById, sampleQuiz } = await import("@/domain/quiz/sample-quiz");
@@ -43,8 +44,9 @@ export async function getQuizPackage(
     });
   }
 
-  const cacheKey = `${tenantId}:${portal}:${quizId}`;
-  const backendPackage = await apiRequest<BackendQuizPackage | undefined>(API_ENDPOINTS.lms.quizPackage(quizId), {
+  // The cache key must end with `:${quizId}` (clearNormalizedQuizPackageCache); the assignment goes before it.
+  const cacheKey = `${tenantId}:${portal}:${assignmentId ?? ""}:${quizId}`;
+  const backendPackage = await apiRequest<BackendQuizPackage | undefined>(API_ENDPOINTS.lms.quizPackage(quizId, assignmentId), {
     cache: "default",
     portal,
     ...(signal ? { signal } : {}),

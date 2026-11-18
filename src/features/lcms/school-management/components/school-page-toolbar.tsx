@@ -29,7 +29,8 @@ export function SchoolPageToolbar({
         backdropFilter: "blur(20px)",
         bgcolor: "rgba(255, 255, 255, 0.88)",
         borderBottom: `1px solid ${ergEnterpriseTokens.color.border}`,
-        position: "sticky",
+        // On a phone the stacked header is ~290px tall: pinned it would hide most of the screen.
+        position: { xs: "static", md: "sticky" },
         top: 0,
         zIndex: 4,
       }}
@@ -121,7 +122,7 @@ export function SchoolPageToolbar({
                 }}
               >
                 <CheckCircleRoundedIcon sx={{ fontSize: 15 }} />
-                Đồng bộ 10 phút trước
+                Dữ liệu đã đồng bộ
               </Box>
             </>
           ) : null}

@@ -15,12 +15,10 @@ import {
   archiveSchool,
   archiveSchoolClass,
   archiveSchoolStudent,
-  archiveSchoolSubject,
   bulkEnrollSchoolStudents,
   createSchoolClass,
   createSchool,
   createSchoolStudent,
-  createSchoolSubject,
   enrollSchoolStudent,
   getSchoolDirectory,
   getSchoolOperations,
@@ -28,7 +26,6 @@ import {
   syncDefaultGrades,
   updateSchoolClass,
   updateSchoolStudent,
-  updateSchoolSubject,
   updateSchool,
 } from "@/features/lcms/school-management/api/school-management-api";
 
@@ -106,10 +103,7 @@ describe("school management API", () => {
       .mockResolvedValueOnce({ archiveSchoolClass: { id: "c1", tenantId: "erg", schoolId: "s1", name: "10A2", status: "ARCHIVED", version: "4" } })
       .mockResolvedValueOnce({ createSchoolStudent: { id: "st1", tenantId: "erg", schoolId: "s1", studentCode: "HS01", fullName: "Nguyen An", status: "ACTIVE", version: "1" } })
       .mockResolvedValueOnce({ updateSchoolStudent: { id: "st1", tenantId: "erg", schoolId: "s1", studentCode: "HS01", fullName: "Nguyen B", status: "ACTIVE", version: "2" } })
-      .mockResolvedValueOnce({ archiveSchoolStudent: { id: "st1", tenantId: "erg", schoolId: "s1", studentCode: "HS01", fullName: "Nguyen B", status: "ARCHIVED", version: "3" } })
-      .mockResolvedValueOnce({ createSchoolSubject: { id: "sub1", tenantId: "erg", schoolId: "s1", name: "Math", code: "MATH", status: "ACTIVE", version: "1" } })
-      .mockResolvedValueOnce({ updateSchoolSubject: { id: "sub1", tenantId: "erg", schoolId: "s1", name: "Advanced Math", code: "MATH", status: "ACTIVE", version: "2" } })
-      .mockResolvedValueOnce({ archiveSchoolSubject: { id: "sub1", tenantId: "erg", schoolId: "s1", name: "Advanced Math", code: "MATH", status: "ARCHIVED", version: "3" } });
+      .mockResolvedValueOnce({ archiveSchoolStudent: { id: "st1", tenantId: "erg", schoolId: "s1", studentCode: "HS01", fullName: "Nguyen B", status: "ARCHIVED", version: "3" } });
 
     await expect(createSchoolClass("s1", { name: "10A1", grade: "10" })).resolves.toMatchObject({ id: "c1", version: 2 });
     await expect(updateSchoolClass("s1", "c1", 2, { name: "10A2" })).resolves.toMatchObject({ version: 3 });
@@ -117,10 +111,7 @@ describe("school management API", () => {
     await expect(createSchoolStudent("s1", { studentCode: "HS01", fullName: "Nguyen An" })).resolves.toMatchObject({ id: "st1" });
     await expect(updateSchoolStudent("s1", "st1", 1, { fullName: "Nguyen B" })).resolves.toMatchObject({ version: 2 });
     await expect(archiveSchoolStudent("s1", "st1", 2)).resolves.toMatchObject({ status: "ARCHIVED" });
-    await expect(createSchoolSubject({ schoolId: "s1", name: "Math", code: "MATH" })).resolves.toMatchObject({ id: "sub1" });
-    await expect(updateSchoolSubject("sub1", 1, { name: "Advanced Math" })).resolves.toMatchObject({ version: 2 });
-    await expect(archiveSchoolSubject("sub1", 2)).resolves.toMatchObject({ status: "ARCHIVED" });
-    expect(graphQlRequest).toHaveBeenCalledTimes(9);
+    expect(graphQlRequest).toHaveBeenCalledTimes(6);
     expect(graphQlRequest.mock.calls[0][0]).toMatchObject({ operationName: "LcmsCreateSchoolClass", portal: "lcms" });
     expect(graphQlRequest.mock.calls[0][0].variables.input).toMatchObject({ schoolId: "s1", name: "10A1", grade: "10" });
     expect(graphQlRequest.mock.calls[1][0].variables.input.version).toBe("2");

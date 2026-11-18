@@ -32,8 +32,11 @@ pub fn run() {
                 // bridge used by the Teacher/Student desktop shell. No generic
                 // command or filesystem plugin is registered here.
                 app.handle().plugin(tauri_plugin_process::init())?;
-                app.handle()
-                    .plugin(tauri_plugin_updater::Builder::new().build())?;
+                // The Exam Player ships without updater config, and the plugin panics at startup without one.
+                if app.config().plugins.0.contains_key("updater") {
+                    app.handle()
+                        .plugin(tauri_plugin_updater::Builder::new().build())?;
+                }
             }
             Ok(())
         })

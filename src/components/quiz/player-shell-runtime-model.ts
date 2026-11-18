@@ -1,3 +1,4 @@
+import { scoredMaxPoints } from "@/domain/quiz/quiz";
 import type { LocalQuizAttemptSession } from "@/domain/quiz/quiz-runtime-types";
 import type {
   AnswerPayload,
@@ -57,7 +58,7 @@ export function applyTrainingQuestionResult({
   };
   const submittedCount = Object.keys(answers).length;
   const totalScore = Object.values(answers).reduce((sum, record) => sum + record.result.awardedPoints, 0);
-  const maxScore = questions.reduce((sum, item) => sum + item.points, 0);
+  const maxScore = questions.reduce((sum, item) => sum + scoredMaxPoints(item), 0);
   const percent = maxScore > 0 ? Math.floor((totalScore / maxScore) * 100) : 0;
   return {
     ...attempt,

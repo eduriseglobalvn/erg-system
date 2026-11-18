@@ -5,6 +5,8 @@ type StatusTone = "success" | "warning" | "error" | "info" | "neutral";
 
 const STATUS_VIEW: Record<EmployeeStatus, { label: string; tone: StatusTone }> = {
   ACTIVE: { label: "Đang hoạt động", tone: "success" },
+  // INVITED is what the backend stores for a new employee who has not signed in yet (BUG-A-017).
+  INVITED: { label: "Chờ kích hoạt", tone: "info" },
   PENDING: { label: "Chờ kích hoạt", tone: "info" },
   INACTIVE: { label: "Đã khoá", tone: "neutral" },
   BLOCKED: { label: "Bị chặn", tone: "error" },
@@ -12,7 +14,7 @@ const STATUS_VIEW: Record<EmployeeStatus, { label: string; tone: StatusTone }> =
   UNKNOWN: { label: "Không xác định", tone: "neutral" },
 };
 
-export const EMPLOYEE_STATUS_FILTER_OPTIONS = (["ACTIVE", "PENDING", "INACTIVE", "BLOCKED", "BANNED"] as const).map(
+export const EMPLOYEE_STATUS_FILTER_OPTIONS = (["ACTIVE", "INVITED", "INACTIVE", "BLOCKED", "BANNED"] as const).map(
   (value) => ({ value, label: STATUS_VIEW[value].label }),
 );
 

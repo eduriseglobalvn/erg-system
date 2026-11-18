@@ -16,7 +16,9 @@ const pill = { alignItems: "center", bgcolor: t.color.primarySofter, borderRadiu
 /** Popover chi tiet tiet day (board «TG 9A3, Thứ 5 tiết 4»): 300 px, ten lop, vai tro, nguoi day chinh / tro giang, «Mở lớp học →». */
 export function TeacherEventPopover({ anchor, event, isNew, onClose }: Props) {
   const assistant = event?.myRole === "ASSISTANT";
+  const subject = event ? [event.subjectName, event.levelName].filter(Boolean).join(" · ") : "";
   const rows: [string, string][] = event ? [
+    ...(subject ? [["Môn học", subject] as [string, string]] : []),
     ["Vai trò", assistant ? "Trợ giảng" : "Dạy chính"],
     ...(assistant && event.mainTeacherName ? [["Dạy chính", event.mainTeacherName] as [string, string]] : []),
     ...(!assistant && event.assistantName ? [["Trợ giảng", event.assistantName] as [string, string]] : []),

@@ -164,3 +164,8 @@ export function applyConflictFix(rows: readonly GridRow[], conflict: ScheduleCon
     return withTeacher(row, { id: fix.teacherId ?? undefined, name: fix.teacherName ?? undefined }).row;
   });
 }
+
+/** Dot nhap moi nhat (theo `createdAt`) trong danh sach dot cua mot truong; khong co thi undefined. */
+export function latestDraftId(items: readonly { createdAt: string; id: string; status: string }[] | undefined): string | undefined {
+  return items?.filter((item) => item.status === "DRAFT").sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0]?.id;
+}

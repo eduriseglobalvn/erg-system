@@ -16,6 +16,7 @@ import {
   type TeachingCalendarEvent,
 } from "@/features/teaching-calendar/api/teaching-calendar-api";
 import { formatDateVi, todayInput } from "@/domain/formatters/format-date";
+import { getDefaultTenantId } from "@/lib/graphql-client";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
 import { teacherPath } from "@/platform/workspaces/workspace-paths";
 
@@ -48,12 +49,15 @@ export function TodayLessonsList({
   error,
   events,
   isLoading,
+  noSchool,
   onNavigate,
   onOpenSchedule,
 }: {
   error?: boolean;
   events: TeachingCalendarEvent[];
   isLoading?: boolean;
+  /** Teacher has no published lesson yet, so no school: explain who assigns one. */
+  noSchool?: boolean;
   onNavigate: (href: string) => void;
   onOpenSchedule: () => void;
 }) {
@@ -67,7 +71,7 @@ export function TodayLessonsList({
     return (
       <ErgEmptyState
         action={scheduleAction}
-        description="Hôm nay bạn không có tiết nào được xếp lịch. Mở Lịch làm việc để xem các ngày khác."
+        description={noSchool ? "Bạn chưa được xếp lịch dạy ở trường nào. Phòng Đào tạo sẽ xếp lịch cho bạn, trường và lớp sẽ tự hiện ở đây." : "Hôm nay bạn không có tiết nào được xếp lịch. Mở Lịch làm việc để xem các ngày khác."}
         icon={<EventNoteRoundedIcon />}
         title="Hôm nay không có tiết dạy"
       />
@@ -98,7 +102,7 @@ export function TodayLessonsList({
 /** Today's published lessons for the signed-in teacher (shared by the desktop panel and the mobile home). */
 export function useTodayLessons() {
   const { session } = useAuthSession("lms");
-  const tenantId = session?.tenantId ?? "";
+  const tenantId = session?.tenantId || getDefaultTenantId();
   const date = todayInput();
   const input: MyTeachingCalendarInput = { from: date, statuses: ["PUBLISHED"], tenantId, to: date, viewMode: "ALL" };
   const query = useQuery({
@@ -118,7 +122,7 @@ export function useTodayLessons() {
   };
 }
 
-export function TodayLessonsPanel({ onOpenSchedule }: { onOpenSchedule: () => void }) {
+export function TodayLessonsPanel({ noSchool, onOpenSchedule }: { noSchool?: boolean; onOpenSchedule: () => void }) {
   const navigate = useNavigate();
   const lessons = useTodayLessons();
   const today = formatDateVi(lessons.date);
@@ -130,6 +134,7 @@ export function TodayLessonsPanel({ onOpenSchedule }: { onOpenSchedule: () => vo
         error={lessons.isError}
         events={lessons.events}
         isLoading={lessons.isLoading}
+        noSchool={noSchool}
         onNavigate={(href) => void navigate({ href })}
         onOpenSchedule={onOpenSchedule}
       />

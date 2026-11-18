@@ -12,7 +12,7 @@ import { enforcePermissionRoute, enforceWorkspaceRoute } from "@/app/router/rout
 import { ADMIN_CONTENT_HOME_PATH, ADMIN_CONTENT_ROUTE_PATHS, adminContentPathForSection, canonicalAdminWorkspacePath, validateQuizEditorSearch } from "@/features/lcms/admin-content/admin-content-route";
 import { adminPath } from "@/platform/workspaces/workspace-paths";
 import { RoutePendingSkeleton } from "@/routes/route-feedback";
-import { authedRoute, permissionStaticData, ProfileBody, rootRoute } from "@/routes/portals/route-shared";
+import { authedRoute, HelpGuidePage, permissionStaticData, ProfileBody, rootRoute } from "@/routes/portals/route-shared";
 
 const QuestionTypeDemoPage = lazy(() =>
   import("@/app/pages/shared/question-type-demo-page").then((module) => ({
@@ -162,6 +162,17 @@ const adminIndexRoute = createRoute({
   component: page("AdminHomeRoute"),
 });
 
+const adminHelpRoute = createRoute({
+  getParentRoute: () => adminShellRoute,
+  path: "/admin/help",
+  staticData: permissionStaticData("/admin/help", "ADMIN"),
+  component: () => (
+    <Suspense fallback={<RoutePendingSkeleton />}>
+      <HelpGuidePage workspace="ADMIN" />
+    </Suspense>
+  ),
+});
+
 // Standalone pages: same session/host guard, but not inside the Admin shell.
 const adminProfileRoute = createRoute({
   getParentRoute: () => authedRoute,
@@ -218,6 +229,7 @@ export const adminAuthedRoutes = [
   faceDetectionRedirectRoute,
   adminShellRoute.addChildren([
     adminIndexRoute,
+    adminHelpRoute,
     ...adminContentRoutes,
     ...adminMenuRoutes,
     adminNotificationComposeEditRoute,

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -11,59 +11,30 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 
 import { ERG_ASSETS } from "@/config/seo";
-import type {
-  PasswordChangeResult,
-  RecoveryEmailChallenge,
-  RecoveryEmailVerification,
-  UpdateMyTeacherProfileInput,
-} from "@/platform/auth/api/account-security-api";
-import type { TeacherAccountLifecycle } from "@/platform/auth/types/account-lifecycle";
-import type { TeacherAccount } from "@/platform/auth/types/auth-types";
-import { describeOnboardingError, isGoogleEmail } from "@/platform/auth/components/teacher-onboarding/onboarding-helpers";
-import { OnboardingStepper } from "@/platform/auth/components/teacher-onboarding/onboarding-stepper";
+import type { PasswordChangeResult } from "@/platform/auth/api/account-security-api";
+import { requiresTeacherOnboarding, type TeacherAccountLifecycle } from "@/platform/auth/types/account-lifecycle";
+import { describeOnboardingError } from "@/platform/auth/components/teacher-onboarding/onboarding-helpers";
 import { PasswordStep } from "@/platform/auth/components/teacher-onboarding/password-step";
-import { ProfileStep } from "@/platform/auth/components/teacher-onboarding/profile-step";
-import { RecoveryStep } from "@/platform/auth/components/teacher-onboarding/recovery-step";
 import { alpha } from "@mui/material/styles";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 type TeacherOnboardingWorkspaceProps = {
-  account: TeacherAccount;
-  lifecycle: TeacherAccountLifecycle;
-  onUpdateProfile: (input: Pick<UpdateMyTeacherProfileInput, "fullName" | "phone">) => Promise<TeacherAccount>;
-  onRequestRecovery: (recoveryEmail: string) => Promise<RecoveryEmailChallenge>;
-  onVerifyRecovery: (input: { challengeId: string; otp: string }) => Promise<RecoveryEmailVerification>;
   onChangePassword: (input: { currentPassword: string; newPassword: string }) => Promise<PasswordChangeResult>;
   onComplete: (lifecycle: TeacherAccountLifecycle) => void;
   onLogout: () => void;
 };
 
 export function TeacherOnboardingWorkspace(props: TeacherOnboardingWorkspaceProps) {
-  const [lifecycle, setLifecycle] = useState(props.lifecycle);
-  const [fullName, setFullName] = useState(props.account.fullName);
-  const [phone, setPhone] = useState(props.account.phone ?? "");
-  const [recoveryEmail, setRecoveryEmail] = useState("");
-  const [challenge, setChallenge] = useState<RecoveryEmailChallenge | null>(null);
-  const [otp, setOtp] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [error, setError] = useState("");
-  const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
-
-  const isGoogleAccount = isGoogleEmail(props.account.email);
-
-  useEffect(() => setLifecycle(props.lifecycle), [props.lifecycle]);
-
-  const currentStep = lifecycle.nextSteps[0];
-  const activeStep = currentStep ? ["COMPLETE_PROFILE", "VERIFY_RECOVERY_EMAIL", "CHANGE_PASSWORD"].indexOf(currentStep) : 3;
 
   async function run(action: () => Promise<void>) {
     setBusy(true);
     setError("");
-    setNotice("");
     try {
       await action();
     } catch (caught) {
@@ -71,63 +42,6 @@ export function TeacherOnboardingWorkspace(props: TeacherOnboardingWorkspaceProp
     } finally {
       setBusy(false);
     }
-  }
-
-  function applyLifecycle(nextLifecycle?: TeacherAccountLifecycle) {
-    if (!nextLifecycle) throw new Error("Backend chưa trả lifecycle mới. Không thể tự đánh dấu bước đã hoàn tất.");
-    setLifecycle(nextLifecycle);
-    return nextLifecycle;
-  }
-
-  function saveProfile() {
-    const errors: Record<string, string> = {};
-    if (!fullName.trim()) errors.fullName = "Vui lòng nhập họ và tên.";
-    if (!phone.trim()) errors.phone = "Vui lòng nhập số điện thoại.";
-    else if (!/^\+?[0-9][0-9 .-]{7,14}$/.test(phone.trim())) errors.phone = "Số điện thoại không hợp lệ.";
-    setFieldErrors(errors);
-    if (Object.keys(errors).length) return;
-    void run(async () => {
-      const updated = await props.onUpdateProfile({ fullName: fullName.trim(), phone: phone.trim() });
-      applyLifecycle(updated.lifecycle);
-      setNotice("Đã lưu hồ sơ từ máy chủ.");
-    });
-  }
-
-  function requestRecovery() {
-    const targetEmail = isGoogleAccount
-      ? props.account.email.trim().toLowerCase()
-      : recoveryEmail.trim().toLowerCase();
-
-    if (!isGoogleAccount) {
-      const errors: Record<string, string> = {};
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(targetEmail)) {
-        errors.recoveryEmail = "Email khôi phục không hợp lệ.";
-      }
-      if (targetEmail === props.account.email.trim().toLowerCase()) {
-        errors.recoveryEmail = "Email khôi phục phải khác email đăng nhập.";
-      }
-      setFieldErrors(errors);
-      if (Object.keys(errors).length) return;
-    }
-
-    void run(async () => {
-      const nextChallenge = await props.onRequestRecovery(targetEmail);
-      setChallenge(nextChallenge);
-      setNotice(`Mã xác minh đã được gửi tới ${nextChallenge.maskedEmail}.`);
-    });
-  }
-
-  function verifyRecovery() {
-    if (!challenge) return;
-    if (!otp.trim()) {
-      setFieldErrors({ otp: "Vui lòng nhập mã xác minh." });
-      return;
-    }
-    void run(async () => {
-      const result = await props.onVerifyRecovery({ challengeId: challenge.challengeId, otp: otp.trim() });
-      applyLifecycle(result.lifecycle);
-      setNotice("Email khôi phục đã được xác minh.");
-    });
   }
 
   function changePassword() {
@@ -140,8 +54,8 @@ export function TeacherOnboardingWorkspace(props: TeacherOnboardingWorkspaceProp
     if (Object.keys(errors).length) return;
     void run(async () => {
       const result = await props.onChangePassword({ currentPassword, newPassword });
-      const nextLifecycle = applyLifecycle(result.lifecycle);
-      if (nextLifecycle.status === "ACTIVE" && nextLifecycle.nextSteps.length === 0) props.onComplete(nextLifecycle);
+      if (!result.lifecycle) throw new Error("Backend chưa trả lifecycle mới. Không thể tự đánh dấu bước đã hoàn tất.");
+      if (!requiresTeacherOnboarding(result.lifecycle)) props.onComplete(result.lifecycle);
     });
   }
 
@@ -273,11 +187,9 @@ export function TeacherOnboardingWorkspace(props: TeacherOnboardingWorkspaceProp
                   mx: "auto",
                 }}
               >
-                Các bước được điều khiển bởi trạng thái từ máy chủ và không thể bỏ qua.
+                Đặt mật khẩu mới để bắt đầu sử dụng.
               </Typography>
             </Box>
-
-            <OnboardingStepper activeStep={activeStep} nextSteps={lifecycle.nextSteps} />
 
             {/* Notifications */}
             {error ? (
@@ -296,70 +208,20 @@ export function TeacherOnboardingWorkspace(props: TeacherOnboardingWorkspaceProp
               </Alert>
             ) : null}
 
-            {notice ? (
-              <Alert
-                severity="success"
-                aria-live="polite"
-                sx={{
-                  borderRadius: "14px",
-                  fontSize: 13,
-                  fontWeight: 550,
-                  bgcolor: alpha(ergEnterpriseTokens.color.success, 0.08),
-                  border: `1px solid ${alpha(ergEnterpriseTokens.color.success, 0.2)}`,
-                  color: "success.main",
-                }}
-              >
-                {notice}
-              </Alert>
-            ) : null}
-
-            {/* Step 1: Complete Profile */}
-            {currentStep === "COMPLETE_PROFILE" ? (
-              <ProfileStep
-                busy={busy}
-                fieldErrors={fieldErrors}
-                fullName={fullName}
-                phone={phone}
-                saveProfile={saveProfile}
-                setFullName={setFullName}
-                setPhone={setPhone}
-              />
-            ) : null}
-
-            {/* Step 2: Verify Recovery Email */}
-            {currentStep === "VERIFY_RECOVERY_EMAIL" ? (
-              <RecoveryStep
-                accountEmail={props.account.email}
-                busy={busy}
-                challenge={challenge}
-                fieldErrors={fieldErrors}
-                isGoogleAccount={isGoogleAccount}
-                otp={otp}
-                recoveryEmail={recoveryEmail}
-                requestRecovery={requestRecovery}
-                setOtp={setOtp}
-                setRecoveryEmail={setRecoveryEmail}
-                verifyRecovery={verifyRecovery}
-              />
-            ) : null}
-
-            {/* Step 3: Change Password */}
-            {currentStep === "CHANGE_PASSWORD" ? (
-              <PasswordStep
-                busy={busy}
-                changePassword={changePassword}
-                confirmPassword={confirmPassword}
-                currentPassword={currentPassword}
-                fieldErrors={fieldErrors}
-                newPassword={newPassword}
-                setConfirmPassword={setConfirmPassword}
-                setCurrentPassword={setCurrentPassword}
-                setNewPassword={setNewPassword}
-              />
-            ) : null}
+            <PasswordStep
+              busy={busy}
+              changePassword={changePassword}
+              confirmPassword={confirmPassword}
+              currentPassword={currentPassword}
+              fieldErrors={fieldErrors}
+              newPassword={newPassword}
+              setConfirmPassword={setConfirmPassword}
+              setCurrentPassword={setCurrentPassword}
+              setNewPassword={setNewPassword}
+            />
 
             {/* Logout Button */}
-            <Button variant="contained"
+            <Button variant="text"
               color="inherit"
               disabled={busy}
               onClick={props.onLogout}

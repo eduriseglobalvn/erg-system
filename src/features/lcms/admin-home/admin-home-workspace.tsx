@@ -32,7 +32,7 @@ export function AdminHomeWorkspace({ tenantId }: { tenantId: string }) {
     <Box sx={{ display: "grid", gap: 2.5, maxWidth: 1280, mx: "auto", width: "100%" }}>
       <ErgPageHeader
         description={`${WEEKDAYS[today.getDay()]}, ${formatDateVi(today)}`}
-        primaryAction={<ErgButton leadingIcon={<UploadRoundedIcon />} onClick={() => go("/schools/imports")}>Nhập dữ liệu</ErgButton>}
+        primaryAction={<ErgButton leadingIcon={<UploadRoundedIcon />} onClick={() => go("/schools/students")}>Nhập học sinh</ErgButton>}
         secondaryActions={[
           { label: "Thêm trường", onClick: () => go("/schools/list") },
           { label: "Tạo tài khoản nhân sự", onClick: () => go("/employees") },

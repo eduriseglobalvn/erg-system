@@ -21,11 +21,21 @@ import {
 } from "@/config/portal-urls";
 import ErgMuiProvider from "@/themes/ErgMuiProvider";
 import { buildRedirectPath } from "@/platform/auth/utils/auth-redirects";
+import { authedWorkspaceForPath } from "@/app/router/route-guards";
 import { desktopWorkspaceFromPath, getDesktopRuntime, isDesktopWorkspace } from "@/platform/desktop";
 
 const DesktopUpdateBanner = lazy(() =>
   import("@/features/desktop-release/components/desktop-update-banner").then((module) => ({
     default: module.DesktopUpdateBanner,
+  })),
+);
+
+const PushFloatingHost = lazy(() =>
+  import("@/features/notifications/push/push-floating-host").then((module) => ({ default: module.PushFloatingHost })),
+);
+const PushPermissionPrompt = lazy(() =>
+  import("@/features/notifications/push/push-permission-prompt").then((module) => ({
+    default: module.PushPermissionPrompt,
   })),
 );
 
@@ -80,8 +90,19 @@ export function RootLayout() {
       <Outlet />
       <DesktopUpdateSurface pathname={location.pathname} />
       <ErgToaster richColors position="top-right" />
+      <Suspense fallback={null}>
+        <PushFloatingHost />
+        <PushPermissionPrompt portal={pushPortalForPath(location.pathname)} />
+      </Suspense>
     </ErgMuiProvider>
   );
+}
+
+/** Push devices register under the portal of the signed-in workspace: students elearning, staff lms. */
+function pushPortalForPath(pathname: string) {
+  const workspace = authedWorkspaceForPath(pathname);
+  if (workspace === "STUDENT") return "elearning" as const;
+  return workspace === "ADMIN" || workspace === "TEACHER" ? ("lms" as const) : undefined;
 }
 
 function DesktopUpdateSurface({ pathname }: { pathname: string }) {

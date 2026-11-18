@@ -120,7 +120,7 @@ function buildQuizFromBackendDetail(
     ...(isRecord(settingsRecord.playerTemplate) ? { playerTemplate: settingsRecord.playerTemplate } : {}),
     settings: {
       mode,
-      timeLimitMinutes: numberValue(nestedSettings.timeLimitMinutes ?? nestedSettings.maxDurationMinutes),
+      timeLimitMinutes: numberValue(nestedSettings.timeLimitMinutes ?? nestedSettings.maxDurationMinutes) || editorTimeLimitMinutes(nestedSettings) || 0,
       passPercent: numberValue(nestedSettings.passPercent ?? nestedSettings.passingRate, 50),
       shuffleQuestions: booleanValue(nestedSettings.shuffleQuestions ?? nestedSettings.randomizeQuestionOrder, mode === "testing"),
       shuffleChoices: booleanValue(nestedSettings.shuffleChoices ?? nestedSettings.shuffleAnswers, mode === "testing"),
@@ -178,4 +178,12 @@ function isQuiz(value: unknown): value is Quiz {
       "sections" in value &&
       Array.isArray((value as { sections?: unknown }).sections),
   );
+}
+
+/** The editor stores the limit as "MM:SS" behind a switch; the runtime counts whole minutes (rounded up). */
+export function editorTimeLimitMinutes(settings: Record<string, unknown>): number | undefined {
+  if (settings.enableTimeLimit !== true || typeof settings.timeLimit !== "string") return undefined;
+  const [minutes = 0, seconds = 0] = settings.timeLimit.split(":").map(Number);
+  const total = minutes + seconds / 60;
+  return Number.isFinite(total) && total > 0 ? Math.ceil(total) : undefined;
 }

@@ -1,7 +1,8 @@
 import { ApiClientError, apiRequest } from "@/lib/api-client";
 import { API_ENDPOINTS } from "@/lib/api/api-endpoints";
 
-export type SchoolClassSubjectAllocation = { classId: string; subjectIds: string[] };
+/** `levelIds`: subject id -> KCT level id the class studies that subject at. */
+export type SchoolClassSubjectAllocation = { classId: string; subjectIds: string[]; levelIds?: Record<string, string> };
 
 export type SchoolClassSubjects = {
   schoolId: string;

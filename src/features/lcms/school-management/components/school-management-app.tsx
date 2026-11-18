@@ -19,9 +19,9 @@ const screens: Record<string, LazyExoticComponent<ComponentType>> = {
   "/schools/students": lazy(() => import("@/features/lcms/school-management/screens/school-students-screen")),
   "/schools/subjects": lazy(() => import("@/features/lcms/school-management/screens/school-subjects-screen")),
   "/schools/subject-enrollments": lazy(() => import("@/features/lcms/school-management/screens/school-enrollments-screen")),
-  "/schools/imports": lazy(() => import("@/features/lcms/school-management/screens/school-imports-screen")),
   "/schools/reviews": lazy(() => import("@/features/lcms/school-management/screens/school-reviews-screen")),
   "/schools/reports": lazy(() => import("@/features/lcms/school-management/screens/school-reports-screen")),
+  "/schools/scores": lazy(() => import("@/features/lcms/school-management/screens/school-scores-screen")),
   "/schools/assessments": lazy(() => import("@/features/lcms/school-management/screens/school-assessments-screen")),
   "/schools/audit-log": lazy(() => import("@/features/lcms/school-management/screens/school-audit-screen")),
 };
@@ -35,7 +35,7 @@ function normalizeSchoolRoute(pathname: string) {
 }
 
 // These screens render nothing without a selected school; the directory and detail screens handle that themselves.
-const SCHOOL_SCOPED_ROUTES = new Set(["/schools/overview", "/schools/classes", "/schools/students", "/schools/subjects", "/schools/subject-enrollments", "/schools/imports", "/schools/reviews", "/schools/reports"]);
+const SCHOOL_SCOPED_ROUTES = new Set(["/schools/overview", "/schools/classes", "/schools/students", "/schools/subjects", "/schools/subject-enrollments", "/schools/reviews", "/schools/reports", "/schools/scores"]);
 
 export function SchoolManagementApp() {
   const location = useLocation();

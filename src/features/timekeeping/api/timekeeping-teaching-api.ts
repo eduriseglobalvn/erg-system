@@ -1,4 +1,5 @@
-import { getBackOfficePortal } from "@/lib/api-client";
+// The current portal, not the back office: a teacher on /teacher has no admin session.
+import { resolveCurrentPortal } from "@/platform/auth/api/auth-token-storage";
 import { API_ENDPOINTS } from "@/lib/api/api-endpoints";
 import { createApiClient } from "@/lib/api/create-api-client";
 import type { components } from "@/lib/api/generated/erg-openapi";
@@ -19,7 +20,7 @@ export type ReportTeachingIssueCommand = Schemas["ReportTeachingIssueCommand"];
 export type TeachingRole = "MAIN" | "ASSISTANT";
 export type TeachingPeriodsParams = { role?: TeachingRole; from?: string; to?: string; schoolId?: string; teacherId?: string; q?: string; page?: number };
 
-const client = () => createApiClient({ portal: getBackOfficePortal(), auth: "required" });
+const client = () => createApiClient({ portal: resolveCurrentPortal(), auth: "required" });
 const endpoints = API_ENDPOINTS.timekeeping.teaching;
 
 /** Cong tiet day. `month` is `yyyy-MM`. The backend answers 501 until CBG B3-B8 land. */

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createAssignmentIdempotencyKey } from "./assign-homework-recipient";
+import { buildAssignmentRecipientInput, createAssignmentIdempotencyKey } from "./assign-homework-recipient";
 
 const base = {
   dueAt: "2026-11-16T16:59:00.000Z",
@@ -33,5 +33,26 @@ describe("createAssignmentIdempotencyKey", () => {
     const studentsKey = createAssignmentIdempotencyKey(students);
     expect(createAssignmentIdempotencyKey({ ...students, recipient: { ...students.recipient, studentIds: ["s2", "s1"] } })).toBe(studentsKey);
     expect(createAssignmentIdempotencyKey({ ...students, recipient: { ...students.recipient, studentIds: ["s3"] } })).not.toBe(studentsKey);
+  });
+});
+
+describe("buildAssignmentRecipientInput", () => {
+  const empty = {
+    assignmentClassId: "c1",
+    assignmentGroups: [],
+    gradeStudentIdsByClass: {},
+    selectedAssignmentGroupIds: new Set<string>(),
+    selectedGradeClassIds: new Set<string>(),
+    selectedGradeStudentIdsByClass: {},
+    selectedGroupStudentIdsByGroup: {},
+    targetType: "class" as const,
+  };
+
+  it("sends a whole-class pick as a class assignment and a partial pick as a student list (BUG-X-005)", () => {
+    const classStudentIds = ["s1", "s2", "s3"];
+    expect(buildAssignmentRecipientInput({ ...empty, classStudentIds, selectedStudentIds: new Set(classStudentIds) }))
+      .toEqual({ classId: "c1", recipientMode: "class" });
+    expect(buildAssignmentRecipientInput({ ...empty, classStudentIds, selectedStudentIds: new Set(["s1", "s2"]) }))
+      .toEqual({ classId: "c1", recipientMode: "students", studentIds: ["s1", "s2"] });
   });
 });

@@ -24,6 +24,7 @@ export const CrmPage = lazy(() =>
 );
 export const StudentPage = lazy(() => import("@/app/pages/student/student-page"));
 export const LearningOutcomesPage = lazy(() => import("@/app/pages/shared/learning-outcomes-page"));
+export const HelpGuidePage = lazy(() => import("@/app/pages/shared/help-guide-page"));
 export const PortableExamPage = lazy(() =>
   import("@/app/pages/shared/portable-exam-page").then((module) => ({
     default: module.PortableExamPage,

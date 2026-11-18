@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 
+import { ErgConfirmDialog } from "@/components/erg-mui/erg-confirm-dialog";
 import { useQuestionBankWorkspaceQuery } from "@/features/question-bank/api/question-bank-query";
 import type { QuestionBankQuestion } from "@/features/question-bank/types/question-bank-types";
 import { CreateExerciseDialog } from "./create-exercise-dialog";
@@ -76,6 +77,17 @@ export function DesktopExerciseBankView({
         onSubmit={controller.addExercise}
         initialExercise={controller.exerciseToEdit}
         onUpdate={controller.updateExercise}
+      />
+
+      <ErgConfirmDialog
+        confirmLabel="Xoá bài"
+        description={`Xoá «${controller.exerciseToDelete?.title ?? ""}» khỏi kho của bạn. Bài đã giao cho lớp vẫn giữ nguyên, học sinh vẫn làm và xem điểm được.`}
+        destructive
+        loading={controller.saving}
+        onCancel={() => controller.setExerciseToDelete(null)}
+        onConfirm={() => void controller.deleteExercise()}
+        open={Boolean(controller.exerciseToDelete)}
+        title="Xoá bài này?"
       />
 
       {/* MODAL XEM CHI TIẾT CÂU HỎI */}

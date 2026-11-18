@@ -93,6 +93,7 @@ export function useAuthSession(portal: StoredAuthSession["portal"] = resolveCurr
   const loginMutation = useMutation({
     mutationKey: ["auth", "login"],
     mutationFn: authApi.login,
+    meta: { silent: true }, // the login page shows its own Vietnamese error
   });
   const profileMutation = useMutation({
     mutationKey: ["auth", "profile"],
@@ -107,6 +108,7 @@ export function useAuthSession(portal: StoredAuthSession["portal"] = resolveCurr
   const logoutMutation = useMutation({
     mutationKey: ["auth", "logout"],
     mutationFn: authApi.logout,
+    meta: { silent: true }, // local sign-out always proceeds; an expired session is not an error to show
   });
   const [isHydratingProfile, setIsHydratingProfile] = useState(false);
   const hydratingProfileRef = useRef(false);

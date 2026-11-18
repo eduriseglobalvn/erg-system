@@ -142,11 +142,10 @@ export function catchAllBeforeLoad(ctx?: { context: { auth: AuthRouteState }; lo
     : canonicalLmsWorkspaceHostForRuntime();
   const suffix = `${window.location.search}${window.location.hash}`;
   const safePath = sanitizeLocalRedirect(`${legacyRedirect.path ?? "/"}${suffix}`) ?? legacyRedirect.path ?? "/";
-  if (!shouldRedirectLocalPortal(targetHost)) {
-    // A canonical workspace path that has no concrete route must not redirect to itself forever.
-    if (safePath.split(/[?#]/, 1)[0] === `/${path}`) return;
-    throw redirect({ href: safePath, replace: true });
-  }
+  // A canonical workspace path with no concrete route is a 404 here: every host serves the same routes, so sending
+  // the same path to itself or to another host only loops or lands on a dead host (BUG-A-010).
+  if (safePath.split(/[?#]/, 1)[0] === `/${path}`) return;
+  if (!shouldRedirectLocalPortal(targetHost)) throw redirect({ href: safePath, replace: true });
   throw redirect({
     href: buildPortalHostUrl(targetHost, `${legacyRedirect.path ?? "/"}${suffix}`, legacyRedirect.path),
     reloadDocument: true,

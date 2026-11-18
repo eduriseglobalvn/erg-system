@@ -8,7 +8,7 @@ import Typography from "@mui/material/Typography";
 import { ErgButton } from "@/components/erg-mui/erg-actions";
 import { ErgEmptyState, ErgErrorState } from "@/components/erg-mui/erg-feedback";
 import { exportSheets, overviewFileName, overviewSheets } from "@/features/teaching-calendar/domain/schedule-excel";
-import { toggleSchool } from "@/features/teaching-calendar/domain/overview-model";
+import { overviewErrorMessage, toggleSchool } from "@/features/teaching-calendar/domain/overview-model";
 import { addDaysToDate, weekRangeLabel } from "@/features/teaching-calendar/domain/schedule-copy";
 import { adminPath } from "@/platform/workspaces/workspace-paths";
 import { ContentPendingSkeleton } from "@/routes/route-feedback";
@@ -53,7 +53,7 @@ export function OverviewPage() {
   const failed = tab === "schools" ? data.schools.query.error ?? data.grid.error : data.teachers.error;
   const retry = () => { if (tab === "teachers") void data.teachers.refetch(); else { void data.schools.query.refetch(); if (data.selected.length) void data.grid.refetch(); } };
   const gridSchools = data.grid.data?.schools ?? [];
-  const selectedRows = data.selected.flatMap((id) => { const row = gridSchools.find((school) => school.schoolId === id) ?? data.schools.items.find((school) => school.schoolId === id); return row ? [row] : []; });
+  const selectedRows = data.pageInfo.items.flatMap((id) => { const row = gridSchools.find((school) => school.schoolId === id) ?? data.schools.items.find((school) => school.schoolId === id); return row ? [row] : []; });
   const onToggle = (id: string) => { const next = toggleSchool(data.selected, id); if (next.join() !== data.selected.join()) update({ schools: next }); };
 
   return (
@@ -64,7 +64,7 @@ export function OverviewPage() {
           <Link className="erg-print-hide" href={adminPath("/calendar")} sx={{ ...type(13) }} underline="none">← Lịch giảng dạy</Link>
           <Typography component="h1" sx={{ m: "4px 0 0" }} variant="h1">Bảng tổng thời khoá biểu</Typography>
         </Box>
-        <Box className="erg-print-hide" sx={{ alignItems: "center", display: "flex", gap: 1 }}>
+        <Box className="erg-print-hide" sx={{ alignItems: "center", display: "flex", flexWrap: "wrap", gap: 1 }}>
           <ButtonBase aria-label="Tuần trước" onClick={() => step(-1)} sx={stepSx}>‹</ButtonBase>
           <Typography component="span" sx={type(16, 500)}>{weekRangeLabel(week, "overview")}</Typography>
           <ButtonBase aria-label="Tuần sau" onClick={() => step(1)} sx={stepSx}>›</ButtonBase>
@@ -90,12 +90,19 @@ export function OverviewPage() {
         />
       ) : (
         <OverviewSchoolPicker
-          hasMore={data.schools.hasMore} loadMore={data.schools.fetchNext} onSearch={onSearch} onToggle={onToggle}
+          hasMore={data.schools.hasMore} loadMore={data.schools.fetchNext} onSearch={onSearch} onSelect={(ids) => update({ schools: ids })} onToggle={onToggle}
           rows={data.schools.items} search={params.q} selected={data.selected} selectedRows={selectedRows} total={data.schools.total}
         />
       )}
+      {tab === "schools" && data.pageInfo.pageCount > 1 ? (
+        <Box className="erg-print-hide" sx={{ alignItems: "center", display: "flex", gap: 1 }}>
+          <ButtonBase aria-label="Các trường trước" disabled={data.pageInfo.page === 0} onClick={() => data.setSchoolPage(data.pageInfo.page - 1)} sx={stepSx}>‹</ButtonBase>
+          <Typography component="span" sx={type(13, 500)}>Trường {data.pageInfo.from}–{data.pageInfo.to} trong {data.pageInfo.total}</Typography>
+          <ButtonBase aria-label="Các trường sau" disabled={data.pageInfo.page >= data.pageInfo.pageCount - 1} onClick={() => data.setSchoolPage(data.pageInfo.page + 1)} sx={stepSx}>›</ButtonBase>
+        </Box>
+      ) : null}
       {data.slotDialog}
-      {failed ? <ErgErrorState action={<ErgButton onClick={retry} variant="outlined">Thử lại</ErgButton>} description="Kiểm tra kết nối rồi thử lại." title="Không tải được lịch." /> : tab === "teachers" ? (
+      {failed ? <ErgErrorState action={<ErgButton onClick={retry} variant="outlined">Thử lại</ErgButton>} description={overviewErrorMessage(failed) ?? "Kiểm tra kết nối rồi thử lại."} title="Không tải được lịch." /> : tab === "teachers" ? (
         <OverviewTeacherPanel data={data} params={params} requiredMinutes={requiredMinutes} />
       ) : data.schools.query.isPending || (data.selected.length > 0 && data.grid.isPending) ? <ContentPendingSkeleton />
         : !data.schools.items.length ? <ErgEmptyState title="Không có trường nào khớp bộ lọc" />

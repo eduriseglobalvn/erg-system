@@ -1,6 +1,7 @@
 import {
   getAllQuestions,
   normalizeAnswerForSubmission,
+  scoredMaxPoints,
   scoreQuestion,
 } from "@/domain/quiz/quiz";
 import type {
@@ -44,7 +45,7 @@ export function createQuizPackage(quiz: Quiz, options: PackageOptions = {}): Qui
 export function createAttemptSession(quizPackage: QuizPackage, attemptId = createRuntimeId("attempt")): AttemptSession {
   const now = new Date().toISOString();
   const questions = getAllQuestions(quizPackage.quiz);
-  const maxScore = questions.reduce((sum, question) => sum + question.points, 0);
+  const maxScore = questions.reduce((sum, question) => sum + scoredMaxPoints(question), 0);
   const attempt: Attempt = {
     id: attemptId,
     quizId: quizPackage.quizId,

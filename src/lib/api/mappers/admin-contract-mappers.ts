@@ -81,6 +81,7 @@ function mapEmployeeStatus(status: string | null | undefined): EmployeeStatus {
   const normalized = status?.trim().toUpperCase();
   switch (normalized) {
     case "ACTIVE":
+    case "INVITED": // a new employee who has not signed in yet (BUG-A-017)
     case "PENDING":
     case "BLOCKED":
     case "BANNED":

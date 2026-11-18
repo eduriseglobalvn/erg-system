@@ -29,6 +29,7 @@ function SchoolInformationForm({ saveSchool, school }: { saveSchool: (draft: Sch
   const [saved, setSaved] = useState(false);
   const [confirmTypeChange, setConfirmTypeChange] = useState(false);
   const hasOperationalData = school.classes.length > 0 || school.students.length > 0;
+  const nameMissing = draft.name.trim() === "";
   const typeChanged = draft.schoolType !== school.schoolType;
 
   function field<K extends keyof SchoolDraft>(key: K, value: SchoolDraft[K]) {
@@ -43,6 +44,7 @@ function SchoolInformationForm({ saveSchool, school }: { saveSchool: (draft: Sch
   }
 
   function save() {
+    if (nameMissing) return;
     if (typeChanged && hasOperationalData) setConfirmTypeChange(true);
     else void commit();
   }
@@ -74,7 +76,7 @@ function SchoolInformationForm({ saveSchool, school }: { saveSchool: (draft: Sch
       </Box>
       {typeChanged ? <Alert severity="info" sx={{ mb: 2 }}>Sau khi lưu, hệ thống sẽ chuyển cơ cấu sang <strong>{schoolTypeMeta[draft.schoolType].label}</strong>.</Alert> : null}
       <Paper variant="outlined" sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, p: 2 }}>
-        <TextField label="Tên trường / trung tâm" required value={draft.name} onChange={(event) => field("name", event.target.value)} />
+        <TextField error={nameMissing} helperText={nameMissing ? "Tên trường không được trống" : undefined} label="Tên trường / trung tâm" required value={draft.name} onChange={(event) => field("name", event.target.value)} />
         <TextField helperText="ID do hệ thống tự động cấp" label="ID trường" slotProps={{ input: { readOnly: true } }} value={school.id} />
         <TextField label="Địa chỉ" value={draft.address} onChange={(event) => field("address", event.target.value)} sx={{ gridColumn: { md: "1 / -1" } }} />
         <TextField label="Quận / Huyện" value={draft.district} onChange={(event) => field("district", event.target.value)} />

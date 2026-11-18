@@ -8,6 +8,22 @@ import { buildReviewFixture, reviewQuestion, REVIEW_SKIPPED, REVIEW_WRONG } from
 const { questions, attempt } = buildReviewFixture();
 const results = toQuestionResults(questions, attempt);
 
+describe("review model: Likert survey", () => {
+  const likert = { id: "lk", kind: "likert_scale", title: "", points: 5, feedback: { correct: "", incorrect: "", partial: "" }, likertRows: [{ id: "r1", label: "" }] } as Question;
+  const answered = { questionId: "lk", input: { likertResponses: { r1: "scale-4" } }, result: { questionId: "lk", correct: true, partiallyRight: false, awardedPoints: 5, maxPoints: 5, message: "" } };
+
+  it("is neither right nor wrong, even when an older stored result says correct", () => {
+    const [done] = toQuestionResults([likert], { answers: { lk: answered } });
+    expect(done).toMatchObject({ correct: false, points: 0, survey: true, skipped: false });
+    expect(reviewScoreLabel(done)).toBe("Đã trả lời");
+    expect(buildReviewCells([done], new Set(), 0)[0].state).toBe("done");
+    expect(retryIndices([done])).toEqual([]);
+    const [blank] = toQuestionResults([likert], { answers: {} });
+    expect(blank).toMatchObject({ survey: true, skipped: true });
+    expect(retryIndices([blank])).toEqual([]);
+  });
+});
+
 describe("review model", () => {
   it("retries wrong + skipped questions in ascending order", () => {
     const indices = retryIndices(results);

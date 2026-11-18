@@ -82,8 +82,14 @@ function SheetBody({ group, onClose }: { group: PeriodGroup; onClose: () => void
         })}
       </Box>
       <Box sx={{ alignItems: "center", display: "flex", fontSize: t.type.small.fontSize, minHeight: 44 }}>
-        <Box sx={{ flex: 1 }}>{`Vắng ${absent.length} · ${absenteesText(absent)}`}</Box>
-        <Box component="a" href={teacherPath("/attendance")} sx={{ color: t.color.primary, fontWeight: t.type.label.fontWeight, py: 1.25, textDecoration: "none" }}>Điểm danh</Box>
+        {group.upcoming ? (
+          <Box sx={{ color: t.color.textMuted, flex: 1 }}>Chưa đến giờ tiết nên chưa điểm danh được.</Box>
+        ) : (
+          <>
+            <Box sx={{ flex: 1 }}>{`Vắng ${absent.length} · ${absenteesText(absent)}`}</Box>
+            <Box component="a" href={teacherPath("/attendance")} sx={{ color: t.color.primary, fontWeight: t.type.label.fontWeight, py: 1.25, textDecoration: "none" }}>Điểm danh</Box>
+          </>
+        )}
       </Box>
       <ErgTextField aria-label="Ghi chú" onChange={(e) => setComment(e.target.value)} placeholder="Ghi chú (không bắt buộc)" value={comment} />
       <ErgButton loading={save.isPending} onClick={() => save.mutate()} sx={{ minHeight: 52 }} variant="contained">{`Lưu · ${actualSpan(start, count)}`}</ErgButton>

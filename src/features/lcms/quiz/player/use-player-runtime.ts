@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { type DraftSyncState } from "@/components/quiz/player-status";
@@ -53,7 +53,7 @@ export function usePlayerRuntime({
     };
   }, [identityAccountId, runtimePortal]);
   const [loadState, setLoadState] = useState<PlayerLoadState>({ status: "loading" });
-  const quizPackageQuery = useQuizPackageQuery(portablePackage ? "" : quizId ?? "", runtimePortal);
+  const quizPackageQuery = useQuizPackageQuery(portablePackage ? "" : quizId ?? "", runtimePortal, undefined, portableOffline ? undefined : assignmentId);
   const [started, setStarted] = useState(startImmediately);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [drafts, setDrafts] = useState<Record<string, AnswerPayload>>({});
@@ -64,6 +64,18 @@ export function usePlayerRuntime({
   const [reviewingSubmittedAttempt, setReviewingSubmittedAttempt] = useState(false);
   const [timeUp, setTimeUp] = useState(false);
   const [localRetryIndices, setLocalRetryIndices] = useState<number[] | null>(null);
+  // "Làm lại" on a server hand-in starts from the memory-only fresh session; this is the hand-in to go back to when the server has no attempt left.
+  const [attemptsExhausted, setAttemptsExhausted] = useState(false);
+  const reviewBeforeRetryRef = useRef<PlayerLoadState | null>(null);
+  const onAttemptsExhausted = useCallback(() => {
+    setAttemptsExhausted(true);
+    const review = reviewBeforeRetryRef.current;
+    if (review?.status !== "ready") return;
+    reviewBeforeRetryRef.current = null;
+    setDrafts(review.session.answers);
+    setLoadState(review);
+    setStarted(true);
+  }, []);
   const questionBodyRef = useRef<HTMLDivElement | null>(null);
   // Filled by the ready view each render: option picking, flag and go-to need the current question and session.
   const shortcutsRef = useRef<PlayerShortcuts>({});
@@ -79,6 +91,7 @@ export function usePlayerRuntime({
     portablePackage,
     resolvedQuizId,
     resolvedAssignmentId,
+    reviewAssignmentId: portableOffline || portablePackage ? undefined : assignmentId,
     startImmediately,
     quizPackageQuery,
     setLoadState,
@@ -101,7 +114,7 @@ export function usePlayerRuntime({
   const { beginAttempt, finalizeAttempt, requestSubmit, startLocalRetry, submitCurrentTrainingQuestion, submitReadyAttempt } = usePlayerActions({
     activeAttempt, activePackage, activeQuestion, activeQuiz, activeSession, allQuestionsAnswered, attemptCompleted,
     attemptExpired, attemptScope, drafts, isTrainingMode, portableOffline, queryClient, questions, runtimePortal,
-    saveAttemptAnswerAsync, submitFailed, submitting,
+    saveAttemptAnswerAsync, submitFailed, submitting, onAttemptsExhausted,
     setCurrentIndex, setDrafts, setLoadState, setLocalRetryIndices, setReviewingSubmittedAttempt,
     setStarted, setSubmitDialogMode, setSubmitError, setSubmitting, setTimeUp,
   });
@@ -112,7 +125,7 @@ export function usePlayerRuntime({
   });
 
   const { phase: timeUpPhase, retry: retryTimeUpSubmit } = useTimeUpSubmit({
-    activeAttempt, activePackage, activeSession, attemptCompleted, attemptScope, isTestingMode, started,
+    activeAttempt, activePackage, activeSession, attemptCompleted, attemptScope, isTestingMode: isTestingMode || deadlineAt !== null, started,
     submitReadyAttempt, submitting, timeUp, setLoadState, setSubmitDialogMode, setSubmitError, setSubmitting,
   });
 
@@ -130,10 +143,10 @@ export function usePlayerRuntime({
 
   return {
     activeAttempt, activePackage, activeQuestion, activeQuiz, activeSession, allQuestionsAnswered, attemptCompleted,
-    attemptScope, beginAttempt, currentAnswerComplete, currentIndex, deadlineAt, draftAnswer, draftSync, drafts, finalizeAttempt,
+    attemptScope, attemptsExhausted, beginAttempt, currentAnswerComplete, currentIndex, deadlineAt, draftAnswer, draftSync, drafts, finalizeAttempt,
     isFirstQuestion, isLastQuestion, isMobile, localRetryIndices, setLocalRetryIndices, startLocalRetry, isTestingMode, isTrainingMode, lastResult, loadState, network, questionBodyRef,
     questions, quizPackageQuery, requestSubmit, retryTimeUpSubmit, reviewingAttempt, reviewingSubmittedAttempt,
-    shortcutsRef, setCurrentIndex, setDrafts, setLoadState, setStarted, setSubmitDialogMode, setSubmitError, setTimeUp,
+    reviewBeforeRetryRef, shortcutsRef, setCurrentIndex, setDrafts, setLoadState, setStarted, setSubmitDialogMode, setSubmitError, setTimeUp,
     setReviewingSubmittedAttempt, started, submitCurrentTrainingQuestion, submitDialogMode, submitError, submitFailed,
     submitted, submitting, timeUpPhase,
   };

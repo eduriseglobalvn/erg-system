@@ -19,7 +19,7 @@ export function ScheduleNoticeBanner({ compact = false, notice, onSeen, others }
   if (compact) {
     const link = noticeLinkText(notice).replace(/ ›$/, "");
     return (
-      <Box component="button" onClick={onSeen} role="status" sx={{ bgcolor: t.color.primarySofter, border: 0, borderRadius: `${t.radius.card}px`, color: t.schedule.published.text, cursor: "pointer", display: "flex", font: "inherit", fontSize: SIZE.panel, justifyContent: "space-between", mx: 2, my: "6px", px: 1.5, py: "10px", textAlign: "left" }} type="button">
+      <Box component="a" href={teacherPath("/notifications")} onClick={onSeen} role="status" sx={{ bgcolor: t.color.primarySofter, border: 0, textDecoration: "none", borderRadius: `${t.radius.card}px`, color: t.schedule.published.text, cursor: "pointer", display: "flex", font: "inherit", fontSize: SIZE.panel, justifyContent: "space-between", mx: 2, my: "6px", px: 1.5, py: "10px", textAlign: "left" }}>
         <span><strong style={{ fontWeight: SEMIBOLD }}>{leadOf(link)}</strong>{link.slice(leadOf(link).length)}</span>
         <span>›</span>
       </Box>

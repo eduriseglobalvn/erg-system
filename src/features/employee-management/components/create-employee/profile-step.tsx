@@ -11,12 +11,29 @@ import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 export function ProfileStep({ form, set }: { form: EmployeeForm; set: SetEmployeeField }) {
   return (
     <FormGrid>
-      <AppleFormField label="Mã nhân viên" required>
+      <AppleFormField label="Điện thoại">
+        <TextField
+          value={form.phone}
+          onChange={(event) => set("phone", event.target.value)}
+          placeholder="0901234567"
+          sx={appleCleanInputSx}
+        />
+      </AppleFormField>
+      <AppleFormField label="Email khôi phục">
+        <TextField
+          type="email"
+          value={form.recoveryEmail}
+          onChange={(event) => set("recoveryEmail", event.target.value)}
+          placeholder="recovery@gmail.com"
+          sx={appleCleanInputSx}
+        />
+      </AppleFormField>
+      <AppleFormField label="Mã nhân viên">
         <Box sx={{ display: "flex", gap: 1 }}>
           <TextField
             value={form.employeeCode}
             onChange={(event) => set("employeeCode", event.target.value)}
-            placeholder="NV-001"
+            placeholder="Tự sinh khi bỏ trống"
             sx={{ ...appleCleanInputSx, flex: 1 }}
           />
           <Button
@@ -41,11 +58,11 @@ export function ProfileStep({ form, set }: { form: EmployeeForm; set: SetEmploye
           </Button>
         </Box>
       </AppleFormField>
-      <AppleFormField label="Chức danh" required>
+      <AppleFormField label="Chức danh">
         <TextField
           value={form.jobTitle}
           onChange={(event) => set("jobTitle", event.target.value)}
-          placeholder="Giảng viên chuyên trách..."
+          placeholder="Mặc định theo vai trò"
           sx={appleCleanInputSx}
         />
       </AppleFormField>

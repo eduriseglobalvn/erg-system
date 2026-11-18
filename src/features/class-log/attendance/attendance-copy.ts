@@ -25,6 +25,7 @@ export const markLabels: Record<AttendanceMark, string> = {
 const ERROR_MESSAGES: Record<string, string> = {
   ACTUAL_PERIOD_OUT_OF_RANGE: "Tiết thực tế vượt quá khung chương trình.",
   MONTH_CLOSED: "Tháng đã chốt, không sửa được.",
+  PERIOD_NOT_HAPPENED: "Tiết này chưa diễn ra nên chưa điểm danh được.",
   NOT_TEACHER_OF_PERIOD: "Bạn không phải giáo viên của tiết này.",
   STALE_VERSION: "Dữ liệu vừa được người khác sửa, đã tải lại.",
 };

@@ -31,6 +31,7 @@ const noop = () => undefined;
 
 function tone(r: QuestionResult) {
   if (r.pending) return "info" as const;
+  if (r.survey) return "neutral" as const;
   if (r.partial) return "warning" as const;
   if (r.skipped) return "neutral" as const;
   return r.correct ? ("success" as const) : ("error" as const);
@@ -38,8 +39,8 @@ function tone(r: QuestionResult) {
 
 /** WL5 / L09 question card body: meta tags, prompt, the graded answer, Lời giải, prev/next. */
 export function ReviewQuestionView({ question, record, result, index, total, flagged = false, keyHint, onPrev, onNext }: ReviewQuestionViewProps) {
-  // A pending essay carries a grading note, not a solution.
-  const solution = result.pending ? "" : record?.result?.message || question.feedback[result.correct ? "correct" : result.partial ? "partial" : "incorrect"] || "";
+  // A pending essay carries a grading note, and a survey has no solution.
+  const solution = result.pending || result.survey ? "" : record?.result?.message || question.feedback[result.correct ? "correct" : result.partial ? "partial" : "incorrect"] || "";
   const steps = splitFeedbackSteps(solution);
 
   return (
@@ -49,7 +50,7 @@ export function ReviewQuestionView({ question, record, result, index, total, fla
         <MetaTag tone={tone(result)}>{reviewScoreLabel(result)}</MetaTag>
         {flagged ? <MetaTag tone="neutral"><FlagRounded aria-hidden sx={{ fontSize: tk.size.iconSm }} />Đã đánh dấu</MetaTag> : null}
       </Box>
-      <Typography component="h2" sx={{ color: tk.color.text }} variant="h2">{question.title}</Typography>
+      <Typography component="h2" sx={{ color: tk.color.text, overflowWrap: "anywhere" }} variant="h2">{question.title}</Typography>
 
       <QuestionRenderer
         key={question.id}

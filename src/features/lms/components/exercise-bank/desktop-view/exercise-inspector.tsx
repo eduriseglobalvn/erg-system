@@ -45,6 +45,8 @@ export function ExerciseInspector({
   selectedExerciseQuestions: QuestionBankQuestion[];
 }) {
   const exercise = controller.selectedExercise;
+  // Empty bank: nothing to inspect.
+  if (!exercise) return null;
   return (
     <Paper component="aside" variant="outlined" sx={{ display: "flex", minHeight: 0, flexDirection: "column", overflow: "hidden", borderRadius: 1.5 }}>
       <Box sx={{ flexShrink: 0, borderBottom: 1, borderColor: "divider", px: 1.75, py: 1.25, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -119,7 +121,7 @@ export function ExerciseInspector({
             <Stack direction="row" spacing={0.75} sx={{ alignItems: "center" }}>
               <HelpOutlineIcon fontSize="inherit" sx={{ color: "primary.main" }} />
               <Typography variant="caption" sx={{ fontWeight: "fontWeightBold" }}>
-                Danh sách câu hỏi ({selectedExerciseQuestions.length} câu)
+                Danh sách câu hỏi ({selectedExerciseQuestions.length || exercise.questionCount} câu)
               </Typography>
             </Stack>
             <Button variant="text" size="small" onClick={() => setDetailModalOpen(true)} sx={{ minHeight: 0, py: 0, px: 0.5, typography: "caption", fontWeight: "fontWeightBold" }}>
@@ -129,7 +131,7 @@ export function ExerciseInspector({
 
           {selectedExerciseQuestions.length === 0 ? (
             <Typography variant="caption" component="div" sx={{ ...insetSx, p: 1.5, textAlign: "center", color: "text.secondary" }}>
-              Chưa có câu hỏi nào trong bài tập này.
+              {exercise.questionCount > 0 ? "Bài này được soạn sẵn trong trình soạn nên câu hỏi không liệt kê ở đây. Giao bài hoặc tạo bản riêng để dùng." : "Chưa có câu hỏi nào trong bài tập này."}
             </Typography>
           ) : (
             <Stack spacing={0.75} sx={{ ...insetSx, maxHeight: 250, overflowY: "auto", p: 1 }}>

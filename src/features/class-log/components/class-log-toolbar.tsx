@@ -20,8 +20,6 @@ type Props = {
   pending: number;
   confirming: boolean;
   onConfirm: () => void;
-  /** Set when confirming is impossible for a reason worth telling (shown as a tooltip on the disabled button). */
-  confirmHint?: string;
 };
 
 // Board toolbar controls are 36px tall (stepper, selects, buttons), 13px text.
@@ -37,9 +35,7 @@ export function ClassLogToolbar(p: Props) {
       <ErgSelect onChange={(e) => p.onStatus(e.target.value)} options={statusOptions.map((o) => ({ ...o }))} size="small" slotProps={{ htmlInput: { "aria-label": "Trạng thái" } }} sx={{ ...selectSx, width: 180 }} value={p.status} />
       <Box sx={{ flex: 1 }} />
       <ErgButton onClick={p.onOpenCurriculum} sx={{ ...buttonSx, color: t.color.text }} variant="outlined">{classLogText.curriculumButton}</ErgButton>
-      <Box component="span" title={p.confirmHint}>
-        <ErgButton disabled={p.pending === 0 || Boolean(p.confirmHint)} loading={p.confirming} onClick={p.onConfirm} sx={{ ...buttonSx, px: 2 }} variant="contained">{confirmLabel(p.pending)}</ErgButton>
-      </Box>
+      <ErgButton disabled={p.pending === 0} loading={p.confirming} onClick={p.onConfirm} sx={{ ...buttonSx, px: 2 }} variant="contained">{confirmLabel(p.pending)}</ErgButton>
     </Box>
   );
 }

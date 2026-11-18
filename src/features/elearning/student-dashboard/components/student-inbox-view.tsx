@@ -4,7 +4,7 @@ import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 
-import { ErgButton, ErgSearchField } from "@/components/erg-mui";
+import { ErgButton, ErgEmptyState, ErgSearchField } from "@/components/erg-mui";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { fetchNotificationFeed, notificationQueryKeys, resolveNotificationQueryScope } from "@/features/notifications/api/notification-api";
 import type { NotificationPortal } from "@/features/notifications/api/notification-types";
@@ -85,7 +85,7 @@ export function StudentInboxView({ portal, assignments = [], onOpenAssignment }:
         onBack={mobile ? () => setOpenKey(null) : undefined} onOpenAssignment={onOpenAssignment}
       />
     ) : (
-      <Box sx={{ p: 2 }}><NotificationDetail key={selected.key} portal={portal} notificationId={selected.notification!.id} onBack={() => setOpenKey(null)} /></Box>
+      <Box sx={mobile ? { p: 2 } : { p: 3, height: "100%", overflowY: "auto" }}><NotificationDetail key={selected.key} portal={portal} notificationId={selected.notification!.id} onBack={() => setOpenKey(null)} plain={!mobile} /></Box>
     )
   ) : null;
 
@@ -118,9 +118,9 @@ export function StudentInboxView({ portal, assignments = [], onOpenAssignment }:
         <MarkAllReadButton portal={portal} />
         <ErgButton variant="contained" startIcon={<EditRoundedIcon />} onClick={() => setComposing(true)}>Hỏi giáo viên</ErgButton>
       </Box>
-      <Box sx={{ display: "grid", gridTemplateColumns: "380px minmax(0, 1fr)", height: 820, border: 1, borderColor: "divider", borderRadius: `${t.radius.card}px`, bgcolor: "background.paper", overflow: "hidden" }}>
-        <Box sx={{ borderRight: 1, borderColor: "divider", overflowY: "auto", p: 1.5 }}>{list}</Box>
-        <Box sx={{ minWidth: 0, minHeight: 0 }}>{detail}</Box>
+      <Box sx={{ display: "grid", gridTemplateColumns: "minmax(340px, 460px) minmax(0, 1fr)", height: 820, border: 1, borderColor: "divider", borderRadius: `${t.radius.card}px`, bgcolor: "background.paper", overflow: "hidden" }}>
+        <Box sx={{ borderRight: 1, borderColor: "divider", overflowX: "hidden", overflowY: "auto", p: 1.5 }}>{list}</Box>
+        <Box sx={{ minWidth: 0, minHeight: 0 }}>{detail ?? <Box sx={{ display: "grid", placeItems: "center", height: "100%" }}><ErgEmptyState title="Chọn một tin để xem." description="Nội dung tin nhắn hoặc thông báo sẽ hiện ở đây." /></Box>}</Box>
       </Box>
       {compose}
     </Box>

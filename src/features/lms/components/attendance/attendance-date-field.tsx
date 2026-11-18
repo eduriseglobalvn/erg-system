@@ -11,7 +11,7 @@ export function AttendanceDateField({
   onChange,
   value,
 }: {
-  maxDate: string;
+  maxDate?: string;
   minHeight?: number;
   onChange: (value: string) => void;
   value: string;
@@ -20,7 +20,7 @@ export function AttendanceDateField({
     <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="vi">
       <DatePicker
         format="DD/MM/YYYY"
-        maxDate={dayjs(maxDate)}
+        maxDate={maxDate ? dayjs(maxDate) : undefined}
         onChange={(next) => {
           if (next?.isValid()) onChange(next.format("YYYY-MM-DD"));
         }}

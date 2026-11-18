@@ -8,6 +8,7 @@ import { teacherPath } from "@/platform/workspaces/workspace-paths";
 import {
   authedRoute,
   DesktopReleasePage,
+  HelpGuidePage,
   LearningOutcomesPage,
   permissionStaticData,
   PortableExamPage,
@@ -123,6 +124,13 @@ const teacherNotificationComposeEditRoute = createRoute({
   component: composePage,
 });
 
+const teacherHelpRoute = createRoute({
+  getParentRoute: () => teacherShellRoute,
+  path: "/teacher/help",
+  staticData: permissionStaticData("/teacher/help", "TEACHER"),
+  component: () => <HelpGuidePage workspace="TEACHER" />,
+});
+
 // Standalone pages: same session/host guard, but not inside the Teacher shell.
 const teacherProfileRoute = createRoute({
   getParentRoute: () => authedRoute,
@@ -153,7 +161,7 @@ const learningOutcomesTeacherRoute = createRoute({
 });
 
 export const teacherRoutes = [
-  teacherShellRoute.addChildren([teacherIndexRoute, ...teacherPageRoutes, teacherNotificationDetailRoute, teacherCampaignDetailRoute, teacherNotificationComposeEditRoute]),
+  teacherShellRoute.addChildren([teacherIndexRoute, ...teacherPageRoutes, teacherNotificationDetailRoute, teacherCampaignDetailRoute, teacherNotificationComposeEditRoute, teacherHelpRoute]),
   teacherProfileRoute,
   teacherPortableExamRoute,
   teacherDesktopReleaseRoute,

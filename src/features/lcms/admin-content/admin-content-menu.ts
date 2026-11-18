@@ -1,6 +1,7 @@
 import { createElement } from "react";
 import type { MenuGroup, MenuItem } from "@/components/portal/ErgPortalLayout";
 import FolderRoundedIcon from "@mui/icons-material/FolderRounded";
+import HelpOutlineRoundedIcon from "@mui/icons-material/HelpOutlineRounded";
 
 import { ADMIN_CONTENT_SECTIONS } from "./admin-content-route";
 import { LCMS_MENU_GROUPS } from "@/features/lcms/admin-menu";
@@ -66,6 +67,7 @@ export const ADMIN_MENU_GROUPS: MenuGroup[] = [
   ...withoutLegacyContent(LCMS_MENU_GROUPS).slice(0, 2),
   { label: "", items: [contentMenuItem] },
   ...withoutLegacyContent(LCMS_MENU_GROUPS).slice(2),
+  { label: "", items: [{ id: "admin-help", label: "Hướng dẫn", icon: createElement(HelpOutlineRoundedIcon), path: "/admin/help" }] },
 ].map((group) => ({
   ...group,
   items: group.items.map(canonicalizeAdminMenuItem),

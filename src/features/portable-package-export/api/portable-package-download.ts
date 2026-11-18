@@ -11,6 +11,9 @@ export function downloadPortablePackage(
   if (bundle.portableReady !== true) {
     throw new Error("Gói đề chưa tự chứa đầy đủ tài nguyên nên chưa thể dùng ngoại tuyến.");
   }
+  if (bundle.gradingMode !== "client-first") {
+    throw new Error("Bài này chấm trên máy chủ nên không xuất ngoại tuyến được. Hãy đổi sang chế độ chấm trên máy rồi xuất bản lại.");
+  }
   if (!bundle.packageId || !bundle.signatureBlock?.contentHash || !bundle.signatureBlock.signature) {
     throw new Error("Backend chưa trả về đầy đủ định danh và chữ ký của gói đề.");
   }

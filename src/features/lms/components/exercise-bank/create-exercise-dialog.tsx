@@ -26,9 +26,10 @@ import { useQuestionPicker } from "./create-exercise/use-question-picker";
 interface CreateExerciseDialogProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (data: Omit<Exercise, "id" | "updatedAt" | "assignedCount">) => void;
+  /** Resolves false when saving failed: the form then stays as the teacher left it. */
+  onSubmit: (data: Omit<Exercise, "id" | "updatedAt" | "assignedCount">) => Promise<boolean> | void;
   initialExercise?: Exercise | null;
-  onUpdate?: (updated: Exercise) => void;
+  onUpdate?: (updated: Exercise) => Promise<boolean> | void;
 }
 
 export function CreateExerciseDialog({
@@ -60,6 +61,7 @@ export function CreateExerciseDialog({
   const [status, setStatus] = useState<ExerciseStatus>("published");
   const [classTargets, setClassTargets] = useState("Lớp 6A1 - Nhóm bồi dưỡng");
   const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const currentSubject = useMemo(() => {
     return (
@@ -160,8 +162,9 @@ export function CreateExerciseDialog({
   }
 
 
-  function handleSubmit(event?: React.FormEvent) {
+  async function handleSubmit(event?: React.FormEvent) {
     if (event) event.preventDefault();
+    if (submitting) return;
     if (!title.trim()) {
       setError("Vui lòng nhập tên bài tập");
       setActiveStep("setup");
@@ -176,8 +179,10 @@ export function CreateExerciseDialog({
       .map((t) => t.trim())
       .filter(Boolean);
 
+    setSubmitting(true);
+    let saved: boolean | void;
     if (initialExercise && onUpdate) {
-      onUpdate({
+      saved = await onUpdate({
         ...initialExercise,
         title: title.trim(),
         subject: subjectName,
@@ -192,7 +197,7 @@ export function CreateExerciseDialog({
         questionIds: selectedQuestionIds,
       });
     } else {
-      onSubmit({
+      saved = await onSubmit({
         title: title.trim(),
         subject: subjectName,
         level,
@@ -209,6 +214,8 @@ export function CreateExerciseDialog({
       });
     }
 
+    setSubmitting(false);
+    if (saved === false) return;
     // Reset & close
     setTitle("");
     setSelectedQuestionIds([]);

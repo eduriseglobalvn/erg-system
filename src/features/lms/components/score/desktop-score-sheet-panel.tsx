@@ -53,7 +53,7 @@ export function DesktopScoreSheetPanel({ controller, overlays, selectedClass, se
               fullWidth={false}
               value={controller.selectedSubject}
               onChange={(event) => controller.setSelectedSubject(String(event.target.value))}
-              options={controller.subjectOptions.map((subject) => ({ value: subject, label: subject }))}
+              options={[{ value: "", label: "Chọn môn" }, ...controller.subjectOptions.map((subject) => ({ value: subject.id, label: subject.name }))]}
               slotProps={{ select: { SelectDisplayProps: { "aria-label": "Chọn môn học" } } }}
               sx={{ minWidth: 160 }}
             />

@@ -5,7 +5,7 @@ import ErgPortalLayout from '@/components/portal/ErgPortalLayout';
 import type { PortalInfo } from '@/components/portal/ErgPortalLayout';
 import { useAuthSession } from '@/platform/auth/hooks/use-auth-session';
 import { CrmPortalContent } from './crm-portal-content';
-import { crmNavItems, toMenuGroup } from './crm-nav';
+import { CRM_HELP_MENU_GROUP, crmNavItems, toMenuGroup } from './crm-nav';
 
 // =============================================================================
 // CRM Portal Shell Component
@@ -14,7 +14,7 @@ import { crmNavItems, toMenuGroup } from './crm-nav';
 /** CRM chrome (menu, header identity). Pages go in `children` (the route Outlet); the "/" entry uses the default content. */
 export function CrmPortalShell({ children }: { children?: ReactNode }) {
   const { account, session } = useAuthSession('crm');
-  const menuGroups = useMemo(() => toMenuGroup(crmNavItems), []);
+  const menuGroups = useMemo(() => [...toMenuGroup(crmNavItems), CRM_HELP_MENU_GROUP], []);
 
   const portalInfo: PortalInfo = useMemo(
     () => ({

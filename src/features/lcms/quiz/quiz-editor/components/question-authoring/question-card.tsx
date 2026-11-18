@@ -70,6 +70,9 @@ export function QuestionCard({ slide, question, meta, readiness, onReplaceSlide 
       return { ...writeSlideQuestion(current, { ...latest, contentImage: media ? { url: media.src, alt: media.alt } : undefined }), media };
     });
 
+  // These kinds author the answer sentence in a second field below; the title is only the instruction.
+  const hasSentenceField = slide.kind === "fill-in-the-blanks" || slide.kind === "select-from-lists" || slide.kind === "drag-the-words";
+
   return (
     <Box sx={{ bgcolor: "background.paper", border: 1, borderColor: "divider", borderRadius: `${tokens.radius.card}px`, display: "flex", flexDirection: "column", gap: 2.25, p: 3.5 }}>
       <Typography color="text.secondary" variant="caption">{meta}</Typography>
@@ -77,10 +80,10 @@ export function QuestionCard({ slide, question, meta, readiness, onReplaceSlide 
       <Box>
         <InputBase
           fullWidth
-          inputProps={{ "aria-label": "Đề bài" }}
+          inputProps={{ "aria-label": hasSentenceField ? "Yêu cầu" : "Đề bài" }}
           multiline
           onChange={(event) => setTitle(event.target.value)}
-          placeholder="Nhập đề bài"
+          placeholder={hasSentenceField ? "Nhập yêu cầu (không gõ câu có đáp án ở đây)" : "Nhập đề bài"}
           sx={{
             border: 1, borderColor: "transparent", borderRadius: 1, px: 1.5, py: 1, typography: "h6",
             "&.Mui-focused": { borderColor: "primary.main", boxShadow: tokens.shadow.focus },

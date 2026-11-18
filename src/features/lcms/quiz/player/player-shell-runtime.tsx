@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { QUIZ_ACTIVE_ATTRIBUTE } from "@/features/notifications/push/push-floating-model";
 import { PlayerErrorView, PlayerLoadingView } from "@/components/quiz/player-shell-runtime/player-load-views";
 import { PlayerReadyView } from "./player-ready-view";
 import type { PlayerShellProps } from "./player-shell-props";
@@ -11,6 +13,11 @@ import { usePlayerRuntime } from "./use-player-runtime";
  */
 export function PlayerShellRuntime(props: PlayerShellProps) {
   const rt = usePlayerRuntime(props);
+  // Floating push cards and the push prompt wait while a quiz is open.
+  useEffect(() => {
+    document.documentElement.setAttribute(QUIZ_ACTIVE_ATTRIBUTE, "");
+    return () => document.documentElement.removeAttribute(QUIZ_ACTIVE_ATTRIBUTE);
+  }, []);
   const { activeAttempt, activePackage, activeQuestion, activeQuiz, activeSession, loadState, quizPackageQuery } = rt;
 
   if (loadState.status === "loading") {
@@ -29,7 +36,7 @@ export function PlayerShellRuntime(props: PlayerShellProps) {
   return (
     <PlayerReadyView
       rt={rt}
-      ready={{ quiz: activeQuiz, attempt: activeAttempt, quizPackage: activePackage, question: activeQuestion, session: activeSession }}
+      ready={{ quiz: props.title ? { ...activeQuiz, title: props.title } : activeQuiz, attempt: activeAttempt, quizPackage: activePackage, question: activeQuestion, session: activeSession }}
       portableOffline={props.portableOffline}
       welcomeMeta={props.welcomeMeta}
       onExit={props.onExit}

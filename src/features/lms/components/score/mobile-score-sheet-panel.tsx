@@ -44,7 +44,7 @@ type MobileScoreSheetPanelProps = {
   studentNameFor: (student: ClassroomStudent) => string;
   onSearchQueryChange: (value: string) => void;
   onSelectedSubjectChange: (value: string) => void;
-  subjectOptions: string[];
+  subjectOptions: { id: string; name: string }[];
 };
 
 const primaryTint = (theme: Theme) => alpha(theme.palette.primary.main, 0.1);
@@ -131,7 +131,7 @@ export function MobileScoreSheetPanel({
             size="small"
             value={selectedSubject}
             onChange={(event) => onSelectedSubjectChange(String(event.target.value))}
-            options={subjectOptions.map((subject) => ({ value: subject, label: subject }))}
+            options={[{ value: "", label: "Chọn môn" }, ...subjectOptions.map((subject) => ({ value: subject.id, label: subject.name }))]}
             slotProps={{ select: { SelectDisplayProps: { "aria-label": "Chọn môn học" } } }}
             sx={{ "& .MuiInputBase-root": { minHeight: 44 } }}
           />

@@ -252,6 +252,38 @@ test("refreshes and retries once when a protected API returns 401", async () => 
   expect(retryHeaders.get("Authorization")).toBe("Bearer fresh-token");
 });
 
+test("keeps the raw body on the post-refresh retry when unwrapEnvelope is false (GraphQL)", async () => {
+  vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
+  window.localStorage.setItem(
+    TEACHER_LOCAL_SESSION_KEY,
+    JSON.stringify({
+      accountId: "teacher-1",
+      accessToken: "stale-token",
+      refreshToken: "refresh-token",
+      expiresAt: new Date(Date.now() + 60_000).toISOString(),
+      loggedInAt: new Date().toISOString(),
+      portal: "lms",
+      portals: ["lms"],
+      rememberMe: true,
+    }),
+  );
+  const fetchMock = vi
+    .fn()
+    .mockResolvedValueOnce(new Response(JSON.stringify({ error: { code: "AUTH_INVALID_TOKEN", message: "invalid token" } }), { status: 401 }))
+    .mockResolvedValueOnce(
+      new Response(JSON.stringify({ data: { accessToken: "fresh-token", refreshToken: "next-refresh-token", expiresIn: 3600 } }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    )
+    .mockResolvedValueOnce(new Response(JSON.stringify({ data: { lcms: { ok: true } } }), { status: 200, headers: { "Content-Type": "application/json" } }));
+  vi.stubGlobal("fetch", fetchMock);
+
+  const body = await apiRequest("/api/v1/users/me", { unwrapEnvelope: false });
+
+  expect(body).toMatchObject({ data: { lcms: { ok: true } } });
+});
+
 test("clears the stored session when refresh fails after a 401", async () => {
   vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
   window.localStorage.setItem(

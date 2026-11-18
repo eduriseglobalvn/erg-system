@@ -43,8 +43,8 @@ type ListPaneProps = {
 /** Left column of H12 / the N14 list: filter chips and one merged list of question threads and notifications. */
 export function StudentInboxListPane({ chip, entries, failed, loading, selectedKey, unreadCount, threadUnread, onChip, onRetry, onSelect }: ListPaneProps) {
   return (
-    <Box sx={{ display: "grid", gap: 1.5, alignContent: "start" }}>
-      <Tabs aria-label="Lọc hộp thư" value={chip} onChange={(_, value: InboxChip) => onChip(value)} variant="scrollable" scrollButtons={false} sx={ergChipTabsSx}>
+    <Box sx={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr)", gap: 1.5, alignContent: "start", minWidth: 0 }}>
+      <Tabs aria-label="Lọc hộp thư" value={chip} onChange={(_, value: InboxChip) => onChip(value)} variant="scrollable" scrollButtons="auto" sx={ergChipTabsSx}>
         {INBOX_CHIPS.map((tab) => (
           <Tab key={tab.id} value={tab.id} iconPosition="end" icon={tab.id === "ALL" || tab.id === "THREAD" ? <ErgTabCount count={tab.id === "ALL" ? unreadCount : threadUnread} /> : undefined} label={tab.label} />
         ))}
@@ -76,7 +76,7 @@ function InboxRow({ entry, selected, onSelect }: { entry: InboxEntry; selected: 
       onClick={() => onSelect(entry)}
       sx={{
         alignItems: "flex-start", gap: 1.5, px: 2, py: 1.5, borderBottom: 1, borderColor: "divider", borderLeft: 3, borderLeftColor: "transparent",
-        "&.Mui-selected": { bgcolor: t.color.primarySofter, borderLeftColor: "primary.main" },
+        minWidth: 0, "&.Mui-selected": { bgcolor: t.color.primarySofter, borderLeftColor: "primary.main" },
       }}
     >
       <Box aria-hidden sx={{ display: "grid", placeItems: "center", width: 32, height: 32, flexShrink: 0, borderRadius: `${t.radius.sm}px`, bgcolor: tint.bg, color: tint.dot }}>
@@ -89,7 +89,7 @@ function InboxRow({ entry, selected, onSelect }: { entry: InboxEntry; selected: 
           {entry.unread ? <Box aria-hidden sx={{ width: 8, height: 8, flexShrink: 0, borderRadius: "50%", bgcolor: "primary.main" }} /> : null}
         </Box>
         <Typography variant="subtitle2" sx={{ ...clamp1, fontWeight: entry.unread ? "fontWeightBold" : "fontWeightMedium" }}>{entry.title}</Typography>
-        {entry.preview ? <Typography variant="body2" sx={{ ...clamp1, color: "text.secondary" }}>{entry.preview}</Typography> : null}
+        {entry.preview ? <Typography variant="body2" sx={{ display: "-webkit-box", WebkitBoxOrient: "vertical", WebkitLineClamp: 2, overflow: "hidden", overflowWrap: "anywhere", color: "text.secondary" }}>{entry.preview}</Typography> : null}
       </Box>
     </ListItemButton>
   );

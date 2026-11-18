@@ -20,6 +20,8 @@ import {
   typeLabels,
 } from "./exercise-bank-model";
 import type { ExerciseBankController } from "./use-exercise-bank-controller";
+import { CreateExerciseDialog } from "./create-exercise-dialog";
+import { ErgConfirmDialog } from "@/components/erg-mui/erg-confirm-dialog";
 import { ergMobileDockAnchor } from "@/components/portal/erg-mobile-dock";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
@@ -43,7 +45,10 @@ export function MobileExerciseBankView({
     <Box sx={{ minHeight: "100%", bgcolor: "background.default", px: 1.5, pb: 2, pt: 1.5, color: "text.primary" }}>
       {/* Design N9: plain title, search and one scrolling chip row; no hero card. */}
       <Box component="section">
-        <Typography variant="h1">Kho luyện tập</Typography>
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1 }}>
+          <Typography variant="h1">Kho luyện tập</Typography>
+          <Button variant="outlined" size="small" onClick={controller.openCreateDialog} sx={{ flexShrink: 0, minHeight: 36 }}>Tạo bài mới</Button>
+        </Box>
         <Typography variant="caption" component="p" sx={{ mt: 0.25, color: "text.secondary" }}>{controller.filteredExercises.length} bài phù hợp bộ lọc</Typography>
         <ErgSearchField
           value={controller.searchTerm}
@@ -110,9 +115,9 @@ export function MobileExerciseBankView({
 
         {controller.filteredExercises.length === 0 ? (
           <ErgEmptyState
-            title="Không có bài phù hợp"
-            description="Thử đổi từ khoá hoặc xoá bộ lọc để xem lại kho bài."
-            action={<Button variant="outlined" onClick={controller.clearFilters} sx={{ height: 44, px: 2.5 }}>Xoá lọc</Button>}
+            title={controller.items.length === 0 ? "Chưa có bài tập nào" : "Không có bài phù hợp"}
+            description={controller.items.length === 0 ? "Tạo bài mới, hoặc nhờ quản trị viên xuất bản bài cho trường của bạn." : "Thử đổi từ khoá hoặc xoá bộ lọc để xem lại kho bài."}
+            action={controller.items.length === 0 ? undefined : <Button variant="outlined" onClick={controller.clearFilters} sx={{ height: 44, px: 2.5 }}>Xoá lọc</Button>}
           />
         ) : null}
       </Box>
@@ -134,9 +139,37 @@ export function MobileExerciseBankView({
             <Button variant="contained" fullWidth startIcon={<SendOutlinedIcon fontSize="small" />} onClick={() => onAssign(controller.selectedExercise.title)} sx={{ mt: 1.5, height: 44, borderRadius: 2 }}>
               Giao bài tập này
             </Button>
+            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mt: 1 }}>
+              <Button variant="text" size="small" disabled={controller.saving} onClick={() => void controller.duplicateExercise(controller.selectedExercise.id)} sx={{ minHeight: 36 }}>Nhân bản</Button>
+              <Button variant="text" size="small" onClick={() => controller.openEditDialog(controller.selectedExercise)} sx={{ minHeight: 36 }}>Sửa</Button>
+              {controller.selectedExercise.source === "teacher" ? (
+                <Button variant="text" size="small" color="error" onClick={() => controller.setExerciseToDelete(controller.selectedExercise)} sx={{ minHeight: 36 }}>Xoá</Button>
+              ) : null}
+            </Box>
           </Paper>
         </Box>
       ) : null}
+
+      <CreateExerciseDialog
+        open={controller.createDialogOpen}
+        onClose={() => {
+          controller.setCreateDialogOpen(false);
+          controller.setExerciseToEdit(null);
+        }}
+        onSubmit={controller.addExercise}
+        initialExercise={controller.exerciseToEdit}
+        onUpdate={controller.updateExercise}
+      />
+      <ErgConfirmDialog
+        confirmLabel="Xoá bài"
+        description={`Xoá «${controller.exerciseToDelete?.title ?? ""}» khỏi kho của bạn. Bài đã giao cho lớp vẫn giữ nguyên, học sinh vẫn làm và xem điểm được.`}
+        destructive
+        loading={controller.saving}
+        onCancel={() => controller.setExerciseToDelete(null)}
+        onConfirm={() => void controller.deleteExercise()}
+        open={Boolean(controller.exerciseToDelete)}
+        title="Xoá bài này?"
+      />
     </Box>
   );
 }

@@ -16,6 +16,7 @@ import Typography from "@mui/material/Typography";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 
 import { ERG_ASSETS } from "@/config/seo";
+import { canonicalWorkspaceForPath } from "@/platform/workspaces/workspace-route";
 import { authApi } from "@/platform/auth/api/auth-api";
 import { AccessDeniedWorkspaceTargetCard } from "@/platform/auth/components/access-denied-workspace-target";
 import { logoutAccount } from "@/platform/auth/api/auth-storage";
@@ -23,6 +24,8 @@ import { readStoredAuthSession } from "@/platform/auth/api/auth-token-storage";
 import { getCurrentStudentSession, logoutStudentSession } from "@/platform/auth/api/student-auth-storage";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
 import { evaluatePermission } from "@/platform/auth/permissions/permission-evaluator";
+import { misroutedStudentHome } from "@/platform/auth/permissions/student-only";
+import { projectVerifiedWorkspaces } from "@/platform/auth/permissions/workspace-capability-projection";
 import { routeAcceptedPermissions, routePermissionForPath } from "@/platform/auth/permissions/route-permission-matrix";
 import {
   accessDeniedWorkspaceLabel,
@@ -47,7 +50,8 @@ export function AccessDeniedPage() {
   const emailFromQuery = params.get("email") ?? "";
   const redirect = sanitizeAccessDeniedRedirect(params.get("redirect"));
   const requestedWorkspace = workspaceFromAccessDeniedPortal(portal);
-  const workspaceLabel = accessDeniedWorkspaceLabel(portal);
+  // The page asked for names the workspace ("/admin" is the Admin Workspace), whatever portal key the redirect carried.
+  const workspaceLabel = accessDeniedWorkspaceLabel(canonicalWorkspaceForPath(redirect.split(/[?#]/, 1)[0]) ?? portal);
   const accountEmail = auth.account?.email || emailFromQuery;
   const targets = resolveAccessDeniedTargets({
     requestedPortal: portal,
@@ -57,6 +61,14 @@ export function AccessDeniedPage() {
     permissions: auth.session?.permissions,
     deniedPermissions: auth.session?.deniedPermissions,
   });
+
+  // A learner-only account never rests on this page: it goes to the student home.
+  const studentHome = auth.account
+    ? misroutedStudentHome({ workspaces: projectVerifiedWorkspaces({ ...auth.session }), lifecycle: auth.account.lifecycle }, redirect.split(/[?#]/, 1)[0])
+    : null;
+  useEffect(() => {
+    if (studentHome) void navigate({ href: studentHome, replace: true });
+  }, [navigate, studentHome]);
 
   useEffect(() => {
     const portalKey = portalKeyFromAccessDeniedValue(portal);

@@ -324,10 +324,10 @@ export async function loadQuizEditorWorkspace(input: QuizEditorWorkspaceInput = 
   };
 }
 
-export async function loadQuizEditorDraft(quizId: string, signal?: AbortSignal): Promise<QuizEditorDraftDocument> {
+export async function loadQuizEditorDraft(quizId: string, signal?: AbortSignal, portal: "lcms" | "lms" = "lcms"): Promise<QuizEditorDraftDocument> {
   const response = await graphQlRequest<QuizDraftResponse, { quizId: string }>({
     operationName: "LcmsQuizDraft",
-    portal: "lcms",
+    portal,
     query: QuizDraftDocument,
     signal,
     variables: { quizId },

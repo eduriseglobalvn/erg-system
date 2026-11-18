@@ -15,6 +15,11 @@ export function resolveLmsTeacherRuns({
   return [...createdRuns, ...(workspaceRuns.length ? workspaceRuns : fallbackRuns)];
 }
 
+/** The session bootstrap only knows class names, not rosters: never print its placeholder 0 as a head count. */
+export function knownStudentCount(classroom?: { metricsAvailable?: boolean; studentCount: number }) {
+  return classroom && classroom.metricsAvailable !== false ? classroom.studentCount : undefined;
+}
+
 const SCHEDULE_NOTIFICATION_KINDS = new Set(["SCHEDULE_PUBLISHED", "SCHEDULE_CHANGED", "SCHEDULE_CANCELLED"]);
 
 /** Moi thong bao lich day (cong bo, doi tiet, huy/nghi) deu phai lam moi lich cua giao vien. */

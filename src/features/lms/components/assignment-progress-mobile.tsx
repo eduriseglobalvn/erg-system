@@ -29,6 +29,8 @@ type Props = {
   /** Server totals for the header (the list below may be one page of them). */
   counts: { completed: number; needsReview: number; total: number };
   onBack: () => void;
+  /** Opens essay grading for a row whose hand-in waits for the teacher; absent for the other rows. */
+  gradeAction?: (row: ProgressMobileRow) => (() => void) | undefined;
   /** Absent when there is nothing to reload (no server, no assignment). */
   onRefresh?: () => void;
   refreshing?: boolean;
@@ -40,7 +42,7 @@ type Props = {
 };
 
 /** Phone "Tiến độ học tập" (canvas N10) on the desktop page's queries: ring, counts, segmented list, sticky "Nhắc". */
-export function AssignmentProgressMobile({ classLabel, counts, onBack, onRefresh, refreshing, rows, run, status, updatedLabel }: Props) {
+export function AssignmentProgressMobile({ classLabel, counts, gradeAction, onBack, onRefresh, refreshing, rows, run, status, updatedLabel }: Props) {
   const [segment, setSegment] = useState<Segment>("pending");
   const pending = rows.filter((row) => row.status !== "completed");
   const inProgress = rows.filter((row) => row.status === "inprogress");
@@ -86,7 +88,7 @@ export function AssignmentProgressMobile({ classLabel, counts, onBack, onRefresh
         <Paper sx={{ overflow: "hidden" }} variant="outlined">
           {visible.length ? (
             <Box aria-label="Danh sách học sinh" component="ul" sx={{ listStyle: "none", m: 0, p: 0 }}>
-              {visible.map((row) => <ProgressStudentRow key={row.id} row={row} />)}
+              {visible.map((row) => <ProgressStudentRow key={row.id} onGrade={gradeAction?.(row)} row={row} />)}
             </Box>
           ) : (
             <Typography color="text.secondary" sx={{ p: 2, textAlign: "center" }} variant="body2">Không có học sinh nào ở mục này.</Typography>

@@ -35,7 +35,7 @@ describe("class log copy", () => {
     expect(lessonLogErrorKind({ message: "ACTUAL_PERIOD_OUT_OF_RANGE" })).toBe("ACTUAL_PERIOD_OUT_OF_RANGE");
     expect(lessonLogErrorKind(new Error("boom"))).toBeNull();
     expect(lessonLogErrorText({ message: "MONTH_CLOSED" })).toBe("Tháng đã chốt, không sửa được.");
-    expect(lessonLogErrorText({ message: "PERIOD_NOT_HAPPENED" })).toBe("Tuần này chưa có tiết nào diễn ra nên chưa thể xác nhận.");
+    expect(lessonLogErrorText({ message: "PERIOD_NOT_HAPPENED" })).toBe("Tiết này chưa diễn ra nên chưa điểm danh được.");
     expect(lessonLogErrorText({ message: "STALE_VERSION" })).toBe("Dữ liệu vừa được người khác sửa, đã tải lại.");
   });
 

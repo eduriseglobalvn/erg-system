@@ -1,3 +1,16 @@
+/**
+ * Like shuffleAway, but no id lands at its `avoid` position, so a matching board never starts with a right piece
+ * beside its own left item. Retries the seed a bounded number of times (so still pure); with ids.length < 2 or in
+ * the unlucky case that none works it returns the last shuffle, which is at least never equal to `avoid`.
+ */
+export function derangeAway(ids: string[], avoid: string[], seed: string): string[] {
+  let result = shuffleAway(ids, avoid, seed);
+  for (let attempt = 1; attempt < 64 && result.some((id, index) => id === avoid[index]); attempt += 1) {
+    result = shuffleAway(ids, avoid, `${seed}#${attempt}`);
+  }
+  return result;
+}
+
 /** A fixed shuffle of `ids` for `seed`; never equal to `avoid` when ids.length ≥ 2. Pure, no Math.random. */
 export function shuffleAway(ids: string[], avoid: string[], seed: string): string[] {
   // FNV-1a 32-bit hash of the seed feeds a mulberry32 PRNG.

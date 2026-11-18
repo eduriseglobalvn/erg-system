@@ -17,7 +17,7 @@ import Typography from "@mui/material/Typography";
 import { useRef, useState, type ChangeEvent } from "react";
 import { fetchGoogleSheetCsv, fetchGoogleSheetTabs, parseGoogleSheetUrl, type GoogleSheetTab } from "@/features/lcms/imports/google-sheets-csv-adapter";
 import { StudentSpreadsheetGrid } from "@/features/lcms/school-management/components/student-spreadsheet-grid";
-import { createBlankImportRow, validateImportRow } from "@/features/lcms/school-management/components/student-import-utils";
+import { createBlankImportRow, normalizeStudentMatrix } from "@/features/lcms/school-management/components/student-import-utils";
 import { extractStudentsFromRosterMatrix, isSchoolRosterMatrix } from "@/features/lcms/school-management/utils/vietnamese-school-sheet-parser";
 import type { PartnerSchool, StudentImportRow } from "@/features/lcms/school-management/types/school-management-types";
 import { schoolTypeMeta, schoolTypeUsesGrades } from "@/features/lcms/school-management/types/school-type-config";
@@ -49,7 +49,7 @@ export function StudentImportDialog({ onClose, onImport, school }: {
     setLoading(true); setMessage(""); setSheetTabs([]); setSelectedTab("all");
     try {
       const XLSX = await import("xlsx");
-      const workbook = XLSX.read(await file.arrayBuffer(), { type: "array" });
+      const workbook = XLSX.read(await file.arrayBuffer(), { type: "array", raw: /.csv$/i.test(file.name) });
       const sheetNames = workbook.SheetNames;
 
       if (sheetNames.length > 1) {
@@ -63,7 +63,7 @@ export function StudentImportDialog({ onClose, onImport, school }: {
         const extracted = sheets.flatMap((s) =>
           isSchoolRosterMatrix(s.matrix)
             ? extractStudentsFromRosterMatrix(s.matrix, { defaultClassName: s.name, usesGrades })
-            : normalizeMatrix(s.matrix, usesGrades, s.name)
+            : normalizeStudentMatrix(s.matrix, usesGrades, s.name)
         );
 
         setRows(extracted.length ? extracted : blankRows());
@@ -75,7 +75,7 @@ export function StudentImportDialog({ onClose, onImport, school }: {
       const data = XLSX.utils.sheet_to_json<Array<string | number>>(sheet, { header: 1, defval: "" });
       const extracted = isSchoolRosterMatrix(data)
         ? extractStudentsFromRosterMatrix(data, { defaultClassName: sheetNames[0], usesGrades })
-        : normalizeMatrix(data.slice(1), usesGrades);
+        : normalizeStudentMatrix(data, usesGrades);
 
       setRows(extracted.length ? extracted : blankRows());
       setMessage(`Đã đọc ${extracted.length} học sinh từ ${file.name}. Kiểm tra lại dữ liệu trước khi nhập.`);
@@ -101,7 +101,7 @@ export function StudentImportDialog({ onClose, onImport, school }: {
         const extracted = tabResults.flatMap((t) =>
           isSchoolRosterMatrix(t.matrix)
             ? extractStudentsFromRosterMatrix(t.matrix, { defaultClassName: t.name, usesGrades })
-            : normalizeMatrix(t.matrix, usesGrades, t.name)
+            : normalizeStudentMatrix(t.matrix, usesGrades, t.name)
         );
 
         setRows(extracted.length ? extracted : blankRows());
@@ -113,7 +113,7 @@ export function StudentImportDialog({ onClose, onImport, school }: {
       const matrix = await fetchGoogleSheetCsv(url, targetTab ? { sheetName: targetTab } : {});
       const extracted = isSchoolRosterMatrix(matrix)
         ? extractStudentsFromRosterMatrix(matrix, { defaultClassName: targetTab, usesGrades })
-        : normalizeMatrix(matrix.slice(1), usesGrades, targetTab);
+        : normalizeStudentMatrix(matrix, usesGrades, targetTab);
 
       setRows(extracted.length ? extracted : blankRows());
       setMessage(`Đã kết nối và đọc ${extracted.length} học sinh${targetTab ? ` lớp ${targetTab}` : ""}.`);
@@ -279,27 +279,4 @@ export function StudentImportDialog({ onClose, onImport, school }: {
       </DialogActions>
     </Dialog>
   );
-}
-
-function normalizeMatrix(matrix: Array<Array<string | number>>, usesGrades: boolean, defaultClassName = ""): StudentImportRow[] {
-  return matrix.filter((cells) => cells.some((cell) => String(cell).trim())).map((cells, index) => {
-    const rawCode = String(cells[0] ?? "");
-    const rawName = String(cells[1] ?? "");
-    const rawBirthDate = String(cells[2] ?? "");
-    const rawGrade = usesGrades ? String(cells[3] ?? "") : "";
-    const rawClass = usesGrades ? String(cells[4] ?? "") : String(cells[3] ?? "");
-    const rawPhone = usesGrades ? String(cells[5] ?? "") : String(cells[4] ?? "");
-
-    return validateImportRow({
-      id: `import-${Date.now()}-${index}`,
-      code: rawCode,
-      fullName: rawName,
-      birthDate: rawBirthDate,
-      grade: rawGrade,
-      className: rawClass || defaultClassName,
-      guardianPhone: rawPhone,
-      note: "",
-      valid: false,
-    }, usesGrades);
-  });
 }

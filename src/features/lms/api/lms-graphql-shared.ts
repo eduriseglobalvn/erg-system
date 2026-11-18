@@ -36,6 +36,8 @@ export type LmsAssignment = {
   status?: string | null;
   assignedBy?: string | null;
   recipientMode?: string | null;
+  recipientCount?: number | null;
+  submittedCount?: number | null;
   createdAt?: string | null;
   updatedAt?: string | null;
 };

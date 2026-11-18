@@ -47,6 +47,9 @@ export const API_ENDPOINTS = {
     assignableRoles: path("/api/v1/rbac/assignable-roles"),
     catalog: path("/api/v1/rbac/catalog"),
   },
+  help: {
+    faqs: path("/api/v1/help/faqs"),
+  },
   audit: {
     events: "/api/v1/audit/events" satisfies ContractPath,
     export: "/api/v1/audit/export" satisfies ContractPath,
@@ -107,13 +110,22 @@ export const API_ENDPOINTS = {
     assignmentRecipients: (assignmentId: string) => path(`/api/v1/lms/assignments/${encodeApiPathSegment(assignmentId)}/recipients`),
     attempts: "/api/v1/lms/attempts" satisfies ContractPath,
     attemptAnswer: (attemptId: string, questionId: string) => path(`/api/v1/lms/attempts/${encodeApiPathSegment(attemptId)}/answers/${encodeApiPathSegment(questionId)}`),
+    attemptAnswerGrade: (attemptId: string, questionId: string) => path(`/api/v1/lms/attempts/${encodeApiPathSegment(attemptId)}/answers/${encodeApiPathSegment(questionId)}/grade`),
+    attemptManualAnswers: (attemptId: string) => path(`/api/v1/lms/attempts/${encodeApiPathSegment(attemptId)}/manual-answers`),
     attemptImport: path("/api/v1/lms/attempts/import"),
     attemptSubmit: (attemptId: string) => path(`/api/v1/lms/attempts/${encodeApiPathSegment(attemptId)}/submit`),
     attemptDraft: (attemptId: string) => path(`/api/v1/lms/attempts/${encodeApiPathSegment(attemptId)}/draft`),
     attemptSync: (attemptId: string) => path(`/api/v1/lms/attempts/${encodeApiPathSegment(attemptId)}/sync`),
     quiz: (quizId: string) => path(`/api/v1/lms/quizzes/${encodeApiPathSegment(quizId)}`),
-    quizPackage: (quizId: string) => path(`/api/v1/lms/quizzes/${encodeApiPathSegment(quizId)}/package`),
+    // assignmentId pins the quiz version of that assignment (without it the latest version is served).
+    quizPackage: (quizId: string, assignmentId?: string) => {
+      const packagePath = path(`/api/v1/lms/quizzes/${encodeApiPathSegment(quizId)}/package`);
+      return (assignmentId ? `${packagePath}?assignmentId=${encodeURIComponent(assignmentId)}` : packagePath) as ContractPath;
+    },
+    attemptLatestSubmitted: (assignmentId: string) =>
+      path(`/api/v1/lms/assignments/${encodeApiPathSegment(assignmentId)}/attempts/latest-submitted`),
     quizStudents: (quizId: string) => path(`/api/v1/lms/quizzes/${encodeApiPathSegment(quizId)}/students`),
+    studentCredentialReset: (classId: string, studentId: string) => path(`/api/v1/lms/classes/${encodeApiPathSegment(classId)}/students/${encodeApiPathSegment(studentId)}/reset-credential`),
     studentGroups: "/api/v1/lms/student-groups" satisfies ContractPath,
     studentGroup: (groupId: string) => path(`/api/v1/lms/student-groups/${encodeApiPathSegment(groupId)}`),
     educationUnits: "/api/v1/lms/education-units" satisfies ContractPath,

@@ -87,7 +87,7 @@ export function ClassImportDialog({
     setLoading(true); setMessage(""); setPreview([]); setSelectedIndices(new Set());
     try {
       const XLSX = await import("xlsx");
-      const workbook = XLSX.read(await file.arrayBuffer(), { type: "array" });
+      const workbook = XLSX.read(await file.arrayBuffer(), { type: "array", raw: /.csv$/i.test(file.name) });
       const sheetNames = workbook.SheetNames;
       if (sheetNames.length > 1) {
         const sheets = sheetNames.map((name) => ({

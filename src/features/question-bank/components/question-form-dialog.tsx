@@ -4,6 +4,14 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import TextField from "@mui/material/TextField";
+import { buildQuestionSlide } from "@/features/lcms/quiz/quiz-editor/hooks/quiz-editor-state/quiz-editor-slide-factories";
+import { createNewQuizProjectSettings } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-project-defaults";
+import { QuestionCard } from "@/features/lcms/quiz/quiz-editor/components/question-authoring/question-card";
+import { questionTypeLabel } from "@/features/lcms/quiz/quiz-editor/components/question-authoring/question-type-catalog";
+import { QuestionTypePickerDialog } from "@/features/lcms/quiz/quiz-editor/components/question-authoring/question-type-picker-dialog";
+import { readSlideQuestion, readSlideReadiness } from "@/features/lcms/quiz/quiz-editor/components/question-authoring/slide-question";
+import type { QuizEditorSlideUpdate } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
+import { useI18n } from "@/platform/i18n";
 import type { QuestionBankCopy } from "./question-bank-copy";
 import { SelectControl } from "./question-bank-primitives";
 import type { QuestionFormDraft, QuestionFormMode } from "./question-bank-workspace-types";
@@ -25,22 +33,43 @@ export function QuestionFormDialog({
   onSubmit: () => void;
   saving: boolean;
 }) {
+  const { t } = useI18n();
   const update = <K extends keyof QuestionFormDraft>(key: K, value: QuestionFormDraft[K]) => {
     onChange({ ...draft, [key]: value });
   };
+  const { slide } = draft;
+
+  // Same 14 types and cards as the quiz editor; the question only exists once a type is picked.
+  if (!slide) {
+    return (
+      <QuestionTypePickerDialog
+        open
+        title={copy.createQuestionTitle}
+        onClose={onClose}
+        onPick={(type) =>
+          update(
+            "slide",
+            buildQuestionSlide(type, createNewQuizProjectSettings(), (prefix) => `${prefix}-${crypto.randomUUID()}`),
+          )
+        }
+      />
+    );
+  }
+  // shortcut: reads the slide from this render, so an async image result can overwrite an edit made meanwhile.
+  const replaceSlide = (next: QuizEditorSlideUpdate) => update("slide", typeof next === "function" ? next(slide) : next);
+  const typeLabel = questionTypeLabel(slide.kind as Parameters<typeof questionTypeLabel>[0]);
 
   return (
     <Dialog open onClose={saving ? undefined : onClose} fullWidth maxWidth="md">
       <DialogTitle>{mode === "edit" ? copy.editQuestionTitle : copy.createQuestionTitle}</DialogTitle>
-      <DialogContent className="space-y-4 pt-2">
-        <TextField
-          label={copy.questionStemLabel}
-          value={draft.stem}
-          onChange={(event) => update("stem", event.target.value)}
-          fullWidth
-          required
-          multiline
-          minRows={2}
+      <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}>
+        <QuestionCard
+          key={slide.id}
+          meta={typeLabel}
+          onReplaceSlide={replaceSlide}
+          question={readSlideQuestion(slide, t)}
+          readiness={readSlideReadiness(slide, t)}
+          slide={slide}
         />
         <TextField
           label={copy.questionObjectiveLabel}
@@ -51,17 +80,6 @@ export function QuestionFormDialog({
           minRows={2}
         />
         <div className="grid gap-3 sm:grid-cols-3">
-          <SelectControl
-            label={copy.questionTypeLabel}
-            value={draft.type}
-            onChange={(value) => update("type", value as QuestionFormDraft["type"])}
-            options={[
-              { value: "multiple-choice", label: "Multiple choice" },
-              { value: "multiple-response", label: "Multiple response" },
-              { value: "true-false", label: "True/false" },
-              { value: "short-answer", label: "Short answer" },
-            ]}
-          />
           <SelectControl
             label={copy.questionDifficultyLabel}
             value={draft.difficulty}
@@ -82,20 +100,6 @@ export function QuestionFormDialog({
               { value: "pilot", label: copy.status.pilot },
             ]}
           />
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <TextField label="A" value={draft.choiceA} onChange={(event) => update("choiceA", event.target.value)} fullWidth />
-          <TextField label="B" value={draft.choiceB} onChange={(event) => update("choiceB", event.target.value)} fullWidth />
-          <TextField label="C" value={draft.choiceC} onChange={(event) => update("choiceC", event.target.value)} fullWidth />
-          <TextField label="D" value={draft.choiceD} onChange={(event) => update("choiceD", event.target.value)} fullWidth />
-        </div>
-        <div className="grid gap-3 sm:grid-cols-[180px_minmax(0,1fr)]">
-          <TextField
-            label={copy.questionAnswerLabel}
-            value={draft.answer}
-            onChange={(event) => update("answer", event.target.value)}
-            fullWidth
-          />
           <TextField
             label={copy.questionTagsLabel}
             value={draft.tagsText}
@@ -105,8 +109,8 @@ export function QuestionFormDialog({
         </div>
       </DialogContent>
       <DialogActions>
-        <Button variant="contained" onClick={onClose} disabled={saving}>{copy.cancel}</Button>
-        <Button onClick={onSubmit} disabled={saving || !draft.stem.trim()} variant="contained">
+        <Button variant="outlined" onClick={onClose} disabled={saving}>{copy.cancel}</Button>
+        <Button onClick={onSubmit} disabled={saving || !slide.title.trim()} variant="contained">
           {saving ? copy.savingQuestion : copy.saveQuestion}
         </Button>
       </DialogActions>

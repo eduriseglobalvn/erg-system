@@ -2,6 +2,8 @@ export {
   buildClientSubmitPayload,
   clearNormalizedQuizPackageCache,
   createEmptyAttempt,
+  buildAttemptFromLatestSubmitted,
+  getLatestSubmittedAttempt,
   getQuizPackage,
   gradeFinalAttemptLocally,
   prepareQuizPackageForAttempt,
@@ -41,6 +43,7 @@ export {
 } from "@/features/lcms/quiz/quiz-runtime/api/offline-quiz-attempt-queue";
 export type {
   FinalSubmitPayload,
+  LatestSubmittedAttempt,
   LoadedQuizRuntime,
   LocalQuizAttemptSession,
   LocalQuizAttemptStatus,

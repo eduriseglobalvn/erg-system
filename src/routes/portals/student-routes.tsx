@@ -5,6 +5,7 @@ import { studentPath } from "@/platform/workspaces/workspace-paths";
 import {
   authedRoute,
   DesktopReleasePage,
+  HelpGuidePage,
   LearningOutcomesPage,
   permissionStaticData,
   PortableExamPage,
@@ -51,8 +52,16 @@ const learningOutcomesStudentRoute = createRoute({
   component: () => <LearningOutcomesPage workspace="STUDENT" />,
 });
 
+const studentHelpRoute = createRoute({
+  getParentRoute: () => authedRoute,
+  path: "/student/help",
+  staticData: permissionStaticData("/student/help", "STUDENT"),
+  component: () => <HelpGuidePage workspace="STUDENT" />,
+});
+
 /** Children of `_authed`. */
 export const studentRoutes = [
+  studentHelpRoute,
   studentProfileRoute,
   studentRedirectRoute,
   studentPortableExamRoute,

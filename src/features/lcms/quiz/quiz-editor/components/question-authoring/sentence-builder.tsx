@@ -65,7 +65,7 @@ export function SentenceBuilder({ sentence, onChange, blankStyle, badge, hint, r
     if (!el) return;
     const id = newRowId("blank");
     const next = addBlank(sentence, el.selectionStart, el.selectionEnd, id);
-    if (!next) { toast.info("Hãy bôi đen một từ chưa là ô trống."); return; }
+    if (!next) { toast.info("Hãy gõ cả câu vào ô «Câu có ô trống» bên dưới, rồi bôi đen một từ chưa là ô trống."); return; }
     onChange(next);
     const end = next.blanks.find((b) => b.id === id)!.end;
     el.focus();

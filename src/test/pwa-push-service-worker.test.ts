@@ -6,9 +6,9 @@ import { expect, test, vi } from "vitest";
 const source = readFileSync(resolve(process.cwd(), "public/pwa-push.js"), "utf8");
 const ORIGIN = "https://lms.erg.edu.vn";
 
-function loadWorker() {
+function loadWorker(clientState: { focused?: boolean; visibilityState?: string } = {}) {
   const listeners: Record<string, (event: unknown) => void> = {};
-  const client = { url: `${ORIGIN}/teacher`, focus: vi.fn(async () => undefined), navigate: vi.fn(async (_url: string) => undefined), postMessage: vi.fn() };
+  const client = { url: `${ORIGIN}/teacher`, ...clientState, focus: vi.fn(async () => undefined), navigate: vi.fn(async (_url: string) => undefined), postMessage: vi.fn() };
   const self = {
     location: new URL(ORIGIN),
     addEventListener: (type: string, listener: (event: unknown) => void) => {
@@ -33,7 +33,7 @@ function loadWorker() {
     return client.navigate.mock.calls.at(-1)?.[0];
   }
 
-  return { push, click, client };
+  return { push, click, client, self };
 }
 
 const webPush = (extra: Record<string, unknown> = {}) => ({ notificationId: "m1", title: "Khẩn", body: "Nội dung", priority: "URGENT", url: "/notifications/m1", tag: "m1", requireInteraction: true, ...extra });
@@ -63,4 +63,34 @@ test("without a url the click keeps the /notifications/{id}?source=push behaviou
   const worker = loadWorker();
   const [, options] = await worker.push({ data: { notificationId: "m 2", title: "FCM" } });
   expect(await worker.click(options.data)).toBe(`${ORIGIN}/notifications/m%202?source=push`);
+});
+
+test("open tabs receive title, body and priority for the floating card", async () => {
+  const worker = loadWorker();
+  await worker.push(webPush({ eventType: "CAMPAIGN", portal: "elearning" }));
+  expect(worker.client.postMessage).toHaveBeenCalledWith({
+    type: "erg:notification-push",
+    payload: expect.objectContaining({ title: "Khẩn", body: "Nội dung", priority: "URGENT", eventType: "CAMPAIGN", portal: "elearning", url: "/notifications/m1" }),
+  });
+});
+
+test("a focused, visible tab gets only the in-app card, not a duplicate system notification", async () => {
+  const worker = loadWorker({ focused: true, visibilityState: "visible" });
+  await worker.push(webPush());
+  expect(worker.client.postMessage).toHaveBeenCalled();
+  expect(worker.self.registration.showNotification).not.toHaveBeenCalled();
+});
+
+test("an FCM message (notification block + string data) shows exactly one notification tagged by its id", async () => {
+  const worker = loadWorker();
+  const [title, options] = await worker.push({
+    data: { notificationId: "m3", priority: "URGENT", deeplink: "/elearning/assignments/a1", portal: "elearning" },
+    fcmMessageId: "f1",
+    from: "500719081826",
+    notification: { title: "Bài mới", body: "Có bài tập mới" },
+  });
+  expect(worker.self.registration.showNotification).toHaveBeenCalledTimes(1);
+  expect(title).toBe("Bài mới");
+  expect(options).toMatchObject({ body: "Có bài tập mới", requireInteraction: true, tag: "m3" });
+  expect(await worker.click(options.data)).toBe(`${ORIGIN}/elearning/assignments/a1`);
 });

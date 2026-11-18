@@ -2,6 +2,10 @@ import { describe, expect, test } from "vitest";
 import { employeeStatusView, scopeLabel, summarize } from "@/features/employee-management/lib/employee-display";
 
 describe("employee display mapping", () => {
+  test("an invited account reads as waiting for activation", () => {
+    expect(employeeStatusView("INVITED").label).toBe("Chờ kích hoạt");
+  });
+
   test("maps every status to Vietnamese without leaking enum codes", () => {
     for (const status of ["ACTIVE", "PENDING", "INACTIVE", "BLOCKED", "BANNED", "UNKNOWN", "SOMETHING_NEW"]) {
       expect(employeeStatusView(status).label).not.toMatch(/^[A-Z_]+$/);

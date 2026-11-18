@@ -136,7 +136,8 @@ async function performGraphQlRequest<TData, TVariables extends Record<string, un
         200,
       );
     }
-    throw new ApiClientError("GraphQL response missing data.", "GRAPHQL_DATA_MISSING", 200);
+    console.error(`GraphQL response missing data for ${operationName}.`);
+    throw new ApiClientError("Máy chủ trả dữ liệu chưa đầy đủ. Vui lòng thử lại.", "GRAPHQL_DATA_MISSING", 200);
   }
 
   if (payload.errors?.length) {

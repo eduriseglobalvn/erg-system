@@ -50,7 +50,7 @@ describe("SentenceBuilder", () => {
     textarea.setSelectionRange(3, 3);
     fireEvent.click(screen.getByRole("button", { name: "Tạo ô trống" }));
     expect(latest).toBe(S);
-    expect(toastInfo).toHaveBeenCalledWith("Hãy bôi đen một từ chưa là ô trống.");
+    expect(toastInfo).toHaveBeenCalledWith("Hãy gõ cả câu vào ô «Câu có ô trống» bên dưới, rồi bôi đen một từ chưa là ô trống.");
   });
 
   it("opens the blank under the caret on Enter and removes it", () => {

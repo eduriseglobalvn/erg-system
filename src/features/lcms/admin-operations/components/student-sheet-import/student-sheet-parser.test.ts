@@ -59,7 +59,8 @@ describe("parseStudentSheet", () => {
     expect(result.detectedClasses).toEqual(["6A1"]);
     expect(result.students).toHaveLength(2);
     expect(result.students[0]).toMatchObject({ fullName: "Nguyễn Văn An", className: "6A1", status: "valid", note: "Hợp lệ" });
-    expect(result.students[0].generatedUsername).toMatch(/^an\.nguyen\.6a1\.[a-z0-9]+$/);
+    expect(result.students[0].generatedUsername).toMatch(/^thcsd\.nguyenvanan\d{4}$/);
+    expect(result.students[0].generatedPassword).toBe(result.students[0].generatedUsername);
     expect(result.students[1]).toMatchObject({ status: "warning", generatedUsername: "" });
   });
 

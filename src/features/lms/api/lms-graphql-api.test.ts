@@ -52,6 +52,11 @@ test("maps LMS assignments into assignment runs", () => {
   });
 });
 
+test("uses submitted and recipient counts from the homework list", () => {
+  const [run] = mapAssignmentsToRuns([{ id: "asg-2", academicClassId: "class-1", recipientCount: 4, submittedCount: 1 }]);
+  expect(run).toMatchObject({ recipientCount: 4, submittedCount: 1, completionRate: 25 });
+});
+
 test("maps class workspace students into classroom students", () => {
   const workspace: LmsClassWorkspace = {
     tenantId: "erg",

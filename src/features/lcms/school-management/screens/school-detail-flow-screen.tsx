@@ -61,7 +61,8 @@ export default function SchoolDetailFlowScreen() {
   const stepMeta = baseStepMeta.map((step, index) => index === 2 ? { ...step, label: `Danh sách ${labels.learnerLabel.toLowerCase()}` } : index === 3 ? { ...step, label: `${labels.subjectLabel} & ghi danh` } : step);
   const structureReady = selectedSchool.classes.length > 0 && (!usesGrades || selectedSchool.classes.every((classroom) => selectedSchool.grades.includes(classroom.grade)));
   const completion = [Boolean(selectedSchool.name && selectedSchool.id), structureReady, selectedSchool.students.length > 0, selectedSchool.subjects.length > 0, structureReady && selectedSchool.students.length > 0 && selectedSchool.subjects.length > 0];
-  const completedCount = completion.slice(0, 4).filter(Boolean).length;
+  const completedCount = completion.filter(Boolean).length;
+  const stepCount = completion.length;
   const content = [<SchoolInformationStep key="information" />, <SchoolStructureStep key="structure" />, <SchoolStudentsStep key="students" />, <SchoolCurriculumStep key="curriculum" />, <SchoolReviewStep key="review" />][activeStep];
 
   function goStep(step: number) {
@@ -81,8 +82,8 @@ export default function SchoolDetailFlowScreen() {
         <Chip color="primary" label={schoolTypeMeta[selectedSchool.schoolType].shortLabel} size="small" variant="outlined" />
       </Box>
       <Box sx={{ alignItems: "center", display: "flex", gap: 1.5, minWidth: { xs: "100%", sm: 260 } }}>
-        <Typography color="text.secondary" sx={{ fontSize: 12, fontWeight: 600, whiteSpace: "nowrap" }}>Tiến độ thiết lập: {completedCount}/4</Typography>
-        <LinearProgress color={completedCount === 4 ? "success" : "primary"} sx={{ flex: 1, height: 6, borderRadius: 3 }} value={completedCount * 25} variant="determinate" />
+        <Typography color="text.secondary" sx={{ fontSize: 12, fontWeight: 600, whiteSpace: "nowrap" }}>Tiến độ thiết lập: {completedCount}/{stepCount}</Typography>
+        <LinearProgress color={completedCount === stepCount ? "success" : "primary"} sx={{ flex: 1, height: 6, borderRadius: 3 }} value={(completedCount / stepCount) * 100} variant="determinate" />
       </Box>
     </Paper>
 

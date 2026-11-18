@@ -65,7 +65,7 @@ export function buildAdminHomeSummary(
   const tasks: AdminHomeTask[] = [];
   for (const school of schools) {
     if (school.studentCount === 0) {
-      tasks.push({ id: `empty-${school.id}`, title: `${school.name} chưa có người học`, detail: "Nhập danh sách học sinh để bắt đầu xếp lớp.", path: "/schools/imports", tone: "warning" });
+      tasks.push({ id: `empty-${school.id}`, title: `${school.name} chưa có người học`, detail: "Nhập danh sách học sinh để bắt đầu xếp lớp.", path: "/schools/students", tone: "warning" });
     }
   }
   if (unplaced > 0) {

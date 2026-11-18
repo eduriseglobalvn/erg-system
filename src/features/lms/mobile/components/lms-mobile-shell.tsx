@@ -1,3 +1,4 @@
+import { nameInitials } from "@/domain/formatters/format-initials";
 import { useState, type ReactNode } from "react";
 import BadgeRoundedIcon from "@mui/icons-material/BadgeRounded";
 import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
@@ -76,14 +77,14 @@ export function LmsMobileShell<TSection extends string>({
         activeId={activeSection}
         ariaLabel="Điều hướng giáo viên"
         hideAt="xl"
-        items={dockItems.map((item) => (item.opensSheet ? { ...item, avatarInitials: nameInitials(teacherName) } : item))}
+        items={dockItems.map((item) => (item.opensSheet ? { ...item, avatarInitials: nameInitials(teacherName) || "GV" } : item))}
         onNavigate={navigate}
         onOpenSheet={() => setAccountOpen(true)}
       />
       <LmsScopeSheet classes={classes} onClassChange={onClassChange} onOpenChange={setScopeOpen} onSchoolChange={onSchoolChange} open={scopeOpen} schools={schools} selectedClassId={selectedClassId} selectedSchoolId={selectedSchoolId} />
 
       <MobileBottomSheet
-        header={<ErgSheetIdentity badges={["Giáo viên", schoolName].filter(Boolean)} email={teacherEmail} initials={nameInitials(teacherName)} name={teacherName} />}
+        header={<ErgSheetIdentity badges={["Giáo viên", schoolName].filter(Boolean)} email={teacherEmail} initials={nameInitials(teacherName) || "GV"} name={teacherName} />}
         onOpenChange={setAccountOpen}
         open={accountOpen}
         title={teacherName}
@@ -120,13 +121,6 @@ export function LmsMobileShell<TSection extends string>({
       <LmsPwaSetupSheet installPrompt={installPrompt} notifications={notifications} onOpenChange={setPwaOpen} open={pwaOpen} />
     </Box>
   );
-}
-
-/** First + last word initials ("Lê Thị Thùy" → "LT") for the dock account avatar. */
-function nameInitials(name: string) {
-  const words = name.trim().split(/\s+/).filter(Boolean);
-  if (!words.length) return "GV";
-  return (words[0][0] + (words.length > 1 ? words[words.length - 1][0] : "")).toUpperCase();
 }
 
 function AccountRow({ hint, icon, label, onClick }: { hint?: string; icon: ReactNode; label: string; onClick: () => void }) {

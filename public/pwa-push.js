@@ -15,10 +15,12 @@ self.addEventListener("push", (event) => {
   };
 
   event.waitUntil(
-    Promise.all([
-      self.registration.showNotification(title, options),
-      broadcastPush(payload),
-    ]),
+    self.clients.matchAll({ includeUncontrolled: true, type: "window" }).then((clients) => {
+      broadcastPush(clients, payload);
+      // A focused, visible ERG tab shows the floating in-app card instead; skip the duplicate system notification.
+      if (clients.some((client) => client.focused && client.visibilityState === "visible")) return undefined;
+      return self.registration.showNotification(title, options);
+    }),
   );
 });
 
@@ -73,11 +75,18 @@ function normalizePushPayload(rawPayload) {
     badge: readString(notification.badge) || readString(data.badge),
     body: readString(notification.body) || readString(data.body) || readString(data.bodyPreview),
     deeplink: readString(data.deeplink) || readString(fcmOptions.link),
+    eventType: readString(data.eventType),
     icon: readString(notification.icon) || readString(data.icon),
     notificationId,
     portal: readString(data.portal) || "lms",
+    priority: readString(data.priority),
     recipientId,
-    requireInteraction: data.requireInteraction === true || rawPayload.requireInteraction === true,
+    // FCM data values are strings, so URGENT arrives as priority "URGENT" / "true" rather than a boolean.
+    requireInteraction:
+      data.requireInteraction === true ||
+      data.requireInteraction === "true" ||
+      rawPayload.requireInteraction === true ||
+      readString(data.priority) === "URGENT",
     sourceId,
     tag: readString(data.tag),
     title: readString(notification.title) || readString(data.title),
@@ -114,17 +123,21 @@ function resolveTargetUrl(data) {
   return toSameOriginUrl("/notifications?source=push");
 }
 
-function broadcastPush(payload) {
+function broadcastPush(clients, payload) {
   const message = {
     type: PUSH_MESSAGE_TYPE,
-    payload: toClickData(payload),
+    payload: {
+      ...toClickData(payload),
+      body: payload.body,
+      eventType: payload.eventType,
+      priority: payload.priority,
+      title: payload.title,
+    },
   };
 
-  return self.clients.matchAll({ includeUncontrolled: true, type: "window" }).then((clients) => {
-    for (const client of clients) {
-      client.postMessage(message);
-    }
-  });
+  for (const client of clients) {
+    client.postMessage(message);
+  }
 }
 
 function readFcmOptions(rawPayload) {

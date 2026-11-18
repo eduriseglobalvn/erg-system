@@ -8,5 +8,6 @@ export function portableArtifactErrorMessage(error: unknown) {
   if (code === "INVALID_SIGNATURE" || code === "INVALID_CONTENT_HASH") return "Nội dung bài thi đã bị thay đổi hoặc không còn toàn vẹn.";
   if (code === "EXPIRED" || code === "REVOKED") return "Gói bài thi đã hết hạn hoặc bị thu hồi.";
   if (code === "MIN_RUNTIME") return "Gói bài thi yêu cầu phiên bản ứng dụng mới hơn.";
+  if (code === "NOT_OFFLINE_GRADABLE") return "Bài này được chấm trên máy chủ nên không làm ngoại tuyến được. Hãy báo giáo viên.";
   return "Gói bài thi không hợp lệ, bị thiếu hoặc không tương thích với phiên bản này.";
 }

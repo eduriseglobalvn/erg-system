@@ -1,3 +1,4 @@
+import { nameInitials } from "@/domain/formatters/format-initials";
 import profanityWords from "@/features/elearning/student-dashboard/config/profanity-words.json";
 import type { StudentDiscussionFeedPost } from "@/features/elearning/student-dashboard/types/discussion-feed-types";
 import type { StudentAssignmentAttempt, StudentDiscussionThread } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
@@ -16,12 +17,7 @@ export function getBestAttempt(attempts: StudentAssignmentAttempt[]) {
 }
 
 export function getInitials(name: string) {
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .slice(-2)
-    .map((part) => part.slice(0, 1).toUpperCase())
-    .join("");
+  return nameInitials(name);
 }
 export function createInitialDiscussionFeedPosts(threads: StudentDiscussionThread[]): StudentDiscussionFeedPost[] {
   return threads.map((thread) => ({

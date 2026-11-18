@@ -36,128 +36,6 @@ export type ExerciseFilters = {
 
 export const allExerciseFilter = "all";
 
-export const exercises: Exercise[] = [
-  {
-    id: "ex-001",
-    title: "IC3 GS6 - Ôn tập máy tính căn bản",
-    subject: "IC3 GS6",
-    level: "Level 1",
-    classTargets: ["IC3 GS6 Level 1 - Tối 2/4", "MOS Excel 2021 - Cuối tuần"],
-    type: "quiz",
-    difficulty: "easy",
-    status: "published",
-    questionCount: 25,
-    durationMinutes: 35,
-    updatedAt: "2026-06-02",
-    assignedCount: 4,
-    tags: ["IC3", "Computer basics", "Trắc nghiệm"],
-    source: "system",
-    authorName: "Hệ thống ERG",
-  },
-  {
-    id: "ex-002",
-    title: "MOS Excel - Hàm IF, SUMIF, COUNTIF",
-    subject: "MOS",
-    level: "Intermediate",
-    classTargets: ["MOS Excel 2021 - Cuối tuần"],
-    type: "practice",
-    difficulty: "medium",
-    status: "published",
-    questionCount: 18,
-    durationMinutes: 45,
-    updatedAt: "2026-06-01",
-    assignedCount: 2,
-    tags: ["Excel", "Hàm điều kiện"],
-    source: "teacher",
-    authorName: "Cô Hoàng Lan",
-  },
-  {
-    id: "ex-003",
-    title: "Scratch - Dự án mê cung",
-    subject: "Scratch",
-    level: "Thiếu nhi",
-    classTargets: ["Scratch thiếu nhi - Sáng T7"],
-    type: "project",
-    difficulty: "medium",
-    status: "draft",
-    questionCount: 6,
-    durationMinutes: 60,
-    updatedAt: "2026-05-29",
-    assignedCount: 0,
-    tags: ["Scratch", "Game", "Dự án"],
-    source: "system",
-    authorName: "Hệ thống ERG",
-  },
-  {
-    id: "ex-004",
-    title: "Python Junior - Vòng lặp và danh sách",
-    subject: "Python",
-    level: "Junior",
-    classTargets: ["Python Junior - Chiều CN"],
-    type: "practice",
-    difficulty: "easy",
-    status: "published",
-    questionCount: 20,
-    durationMinutes: 40,
-    updatedAt: "2026-05-28",
-    assignedCount: 3,
-    tags: ["Python", "Loop", "List"],
-    source: "teacher",
-    authorName: "Thầy Quốc Vương",
-  },
-  {
-    id: "ex-005",
-    title: "Tin học trẻ - Mini contest thuật toán",
-    subject: "Tin học trẻ",
-    level: "Đội tuyển",
-    classTargets: ["Python Junior - Chiều CN", "Scratch thiếu nhi - Sáng T7"],
-    type: "exam",
-    difficulty: "hard",
-    status: "published",
-    questionCount: 5,
-    durationMinutes: 90,
-    updatedAt: "2026-05-25",
-    assignedCount: 1,
-    tags: ["Contest", "Algorithm"],
-    source: "system",
-    authorName: "Hệ thống ERG",
-  },
-  {
-    id: "ex-006",
-    title: "AI cơ bản - Prompt tốt và prompt chưa tốt",
-    subject: "AI",
-    level: "Foundation",
-    classTargets: ["IC3 GS6 Level 1 - Tối 2/4"],
-    type: "quiz",
-    difficulty: "easy",
-    status: "draft",
-    questionCount: 12,
-    durationMinutes: 25,
-    updatedAt: "2026-05-22",
-    assignedCount: 0,
-    tags: ["AI", "Prompt"],
-    source: "system",
-    authorName: "Hệ thống ERG",
-  },
-  {
-    id: "ex-007",
-    title: "MOS PowerPoint - Thiết kế slide báo cáo",
-    subject: "MOS",
-    level: "Foundation",
-    classTargets: ["MOS Excel 2021 - Cuối tuần"],
-    type: "project",
-    difficulty: "medium",
-    status: "archived",
-    questionCount: 8,
-    durationMinutes: 50,
-    updatedAt: "2026-05-12",
-    assignedCount: 5,
-    tags: ["PowerPoint", "Presentation"],
-    source: "system",
-    authorName: "Hệ thống ERG",
-  },
-];
-
 export const statusLabels: Record<ExerciseStatus, string> = {
   published: "Đã xuất bản",
   draft: "Bản nháp",
@@ -201,11 +79,11 @@ export function chipPropsForTone(tone: BadgeTone): Pick<ChipProps, "color" | "va
   return { color: "primary" };
 }
 
-export function uniqueExerciseValues(key: "subject" | "level") {
-  return Array.from(new Set(exercises.map((exercise) => exercise[key]))).sort();
+export function uniqueExerciseValues(items: Exercise[], key: "subject" | "level") {
+  return Array.from(new Set(items.map((exercise) => exercise[key]))).sort();
 }
 
-export function filterExercises(filters: ExerciseFilters, sourceList: Exercise[] = exercises) {
+export function filterExercises(filters: ExerciseFilters, sourceList: Exercise[]) {
   const normalizedSearch = filters.searchTerm.trim().toLowerCase();
   return sourceList.filter((exercise) => {
     const matchesSearch = !normalizedSearch
@@ -223,7 +101,7 @@ export function filterExercises(filters: ExerciseFilters, sourceList: Exercise[]
   });
 }
 
-export function summarizeExercises(filtered: Exercise[], allItems: Exercise[] = exercises) {
+export function summarizeExercises(filtered: Exercise[], allItems: Exercise[]) {
   return {
     all: allItems.length,
     published: allItems.filter((exercise) => exercise.status === "published").length,

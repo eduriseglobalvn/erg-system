@@ -83,7 +83,7 @@ export function CellEditorPopover({ anchorEl, batchId, date, initialView, onChan
         {slot.startTime && slot.endTime ? <Typography sx={{ color: "text.secondary", typography: "caption" }}>{slot.startTime}–{slot.endTime}</Typography> : null}
       </Box>
       {options.isPending ? <Stack spacing={1} sx={{ p: 1.5 }}><Skeleton height={40} /><Skeleton height={40} /></Stack> : null}
-      {options.isError ? <Typography color="error" sx={{ p: 1.5, typography: "body2" }}>Không tải được gợi ý cho ô này.</Typography> : null}
+      {options.isError ? <Typography color="error" sx={{ p: 1.5, typography: "body2" }}>{(options.error as { status?: number } | null)?.status === 401 ? "Phiên đăng nhập đã hết hạn. Nháp đã được lưu, hãy đăng nhập lại để xếp tiếp." : "Không tải được gợi ý cho ô này."}</Typography> : null}
       {data && view === "form" ? (
         <Stack spacing={1} sx={{ p: 1.75 }}>
           <ClassCombobox

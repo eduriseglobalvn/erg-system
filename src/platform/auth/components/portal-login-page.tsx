@@ -16,6 +16,9 @@ import {
 import { getPortalLoginCopy, type PortalKey } from "@/platform/auth/components/portal-login-copy";
 import { NoticeBanner, PortalLoginShell } from "@/platform/auth/components/portal-login-presentation";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
+import { isStudentOnlySession, misroutedStudentHome } from "@/platform/auth/permissions/student-only";
+import { canonicalWorkspaceForPath } from "@/platform/workspaces/workspace-route";
+import { projectVerifiedWorkspaces } from "@/platform/auth/permissions/workspace-capability-projection";
 import { isAuthOnlyRedirect, sanitizeLocalRedirect } from "@/platform/auth/utils/auth-redirects";
 import { canAccessPortal } from "@/platform/auth/utils/portal-access";
 import { isBffAuthEnabled } from "@/lib/api-client";
@@ -72,10 +75,17 @@ export function PortalLoginPage({ badge, description, portal, title }: PortalLog
     window.setTimeout(() => void navigate({ href: path, replace: true }), 0);
   };
 
+  const sessionWorkspaces = projectVerifiedWorkspaces({ ...(auth.session ?? teacherSession) });
+  const redirectPath = redirect.split(/[?#]/, 1)[0];
   const redirectTarget = canAccessPortal({ portal, studentSession, teacherAccount, teacherSession })
     ? redirect
     : portal !== "elearning" && auth.account
-      ? isAuthOnlyRedirect(portal, redirect) ? redirect : accessDeniedPath(portal, auth.account.email, redirect)
+      ? isAuthOnlyRedirect(portal, redirect)
+        ? redirect
+        // A learner-only account on a staff page goes to the student home, never to the denial page.
+        : misroutedStudentHome({ workspaces: sessionWorkspaces, lifecycle: auth.account.lifecycle }, redirectPath)
+          // Already on its way to a student page (a signed-in learner opening /login): let the student guard decide.
+          ?? (isStudentOnlySession(sessionWorkspaces) && canonicalWorkspaceForPath(redirectPath) === "STUDENT" ? redirect : accessDeniedPath(portal, auth.account.email, redirect))
       : null;
 
   // A string dependency navigates once per target. <Navigate> re-fires on every render while the

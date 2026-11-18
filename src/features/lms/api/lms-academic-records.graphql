@@ -43,3 +43,7 @@ mutation LmsUpsertGradebookScore($input: UpsertGradebookScoreInput!) {
     studentId columnId score maxScore version updatedAt
   }
 }
+
+mutation LmsDeleteGradebookScore($input: DeleteGradebookScoreInput!) {
+  deleteGradebookScore(input: $input)
+}

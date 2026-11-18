@@ -47,6 +47,11 @@ describe("portable package download", () => {
       .toThrow(/chưa tự chứa/i);
   });
 
+  it("refuses a server-graded package, which a student could not submit offline", () => {
+    expect(() => downloadPortablePackage(bundle({ gradingMode: "server-authoritative" }), "Quiz"))
+      .toThrow(/chấm trên máy chủ/i);
+  });
+
   it("accepts only credential-free HTTPS release URLs", () => {
     expect(publishedDesktopArtifactUrl(bundle({ downloadUrl: "https://downloads.erg.edu.vn/exam.exe" })))
       .toBe("https://downloads.erg.edu.vn/exam.exe");

@@ -96,7 +96,7 @@ export function GroupTargetCard({ model }: { model: AssignHomeworkController }) 
             {filteredAssignmentGroups.map((group, index) => {
               const isChecked = selectedAssignmentGroupIds.has(group.id);
               const selectedStudentCount = selectedGroupStudentIdsByGroup[group.id]?.length ?? group.studentIds.length;
-              const mutedText = isChecked ? { color: "common.white", opacity: 0.8 } : { color: "text.secondary" };
+              const mutedText = { color: "text.secondary" };
               return (
                 <TableRow
                   key={group.id}
@@ -104,10 +104,9 @@ export function GroupTargetCard({ model }: { model: AssignHomeworkController }) 
                   sx={{
                     cursor: "pointer",
                     userSelect: "none",
-                    // group.color is per-group data, not a theme token.
-                    bgcolor: isChecked ? group.color : "background.paper",
+                    // group.color is per-group data, not a theme token; it only marks the left edge so row text keeps contrast.
+                    bgcolor: isChecked ? "info.light" : "background.paper",
                     borderLeft: `4px solid ${group.color}`,
-                    "& td": isChecked ? { color: "common.white" } : undefined,
                   }}
                 >
                   <TableCell align="center" sx={{ px: 2.5 }}>
@@ -120,7 +119,7 @@ export function GroupTargetCard({ model }: { model: AssignHomeworkController }) 
                         e.stopPropagation();
                         openAssignmentGroupPreview(group.id);
                       }}
-                      sx={{ display: "inline-flex", alignItems: "center", gap: 1, typography: "body2", fontWeight: "fontWeightMedium", color: isChecked ? "common.white" : "primary.main", "&:hover": { textDecoration: "underline" } }}
+                      sx={{ display: "inline-flex", alignItems: "center", gap: 1, typography: "body2", fontWeight: "fontWeightMedium", color: "primary.main", "&:hover": { textDecoration: "underline" } }}
                     >
                       {group.name}
                     </ButtonBase>
@@ -138,7 +137,7 @@ export function GroupTargetCard({ model }: { model: AssignHomeworkController }) 
                         py: 0.5,
                         fontWeight: "fontWeightBold",
                         ...(isChecked
-                          ? { border: 1, borderColor: "common.white", color: "common.white" }
+                          ? { border: 1, borderColor: "primary.main", color: "primary.main" }
                           : { bgcolor: "info.light", color: "primary.main" }),
                       }}
                     >

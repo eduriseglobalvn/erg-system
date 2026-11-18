@@ -1,13 +1,14 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "@tanstack/react-router";
 
 import { teachingCalendarQueryKeys } from "@/features/teaching-calendar/api/teaching-calendar-query-keys";
+import { loadTeachingScheduleBatches } from "@/features/teaching-calendar/api/teaching-calendar-batch-api";
 import { loadTeachingOverviewGrid, loadTeachingOverviewSchools } from "@/features/teaching-calendar/api/teaching-calendar-overview-api";
 import { loadTeachingPeriodTemplates, loadTeachingScheduleDraft, saveTeachingScheduleDraft } from "@/features/teaching-calendar/api/teaching-calendar-schedule-api";
 import { loadLcmsTeachingCalendarWorkspace } from "@/features/teaching-calendar/api/teaching-calendar-workspace-query-api";
 import { addDaysToDate, weekStartOf, weekdayIndex } from "@/features/teaching-calendar/domain/schedule-copy";
-import { cellStates, eventsToRows, rowsByCell } from "@/features/teaching-calendar/domain/schedule-grid-model";
+import { cellStates, eventsToRows, latestDraftId, rowsByCell } from "@/features/teaching-calendar/domain/schedule-grid-model";
 import { todayInput } from "@/domain/formatters/format-date";
 import { getDefaultTenantId } from "@/lib/graphql-client";
 import { useScheduleDraft } from "./use-schedule-draft";
@@ -20,13 +21,16 @@ export function useSchedulePage() {
   const tenantId = getDefaultTenantId();
   const params = new URLSearchParams(useLocation().searchStr);
   const urlBatchId = params.get("batchId") ?? undefined;
+  // Khong co ?batchId: chon truong xong thi nap dot DRAFT moi nhat cua truong (chi khi luoi dang trong, khong de len cong dang sua).
+  const [autoBatchId, setAutoBatchId] = useState<string>();
+  const activeBatchId = urlBatchId ?? autoBatchId;
   const urlSchoolId = params.get("schoolId") ?? "";
   const urlWeek = params.get("week") ?? undefined;
   const draft = useScheduleDraft({ save: saveTeachingScheduleDraft });
   const { hydrate, meta } = draft;
   // Dot da nap (theo ?batchId): doi batchId tren cung trang thi nap lai, khong de autosave ghi de dot cu.
   const hydratedKey = useRef<string | null>(null);
-  const batchKey = urlBatchId ?? "";
+  const batchKey = activeBatchId ?? "";
 
   const templates = useQuery({ queryFn: ({ signal }) => loadTeachingPeriodTemplates(signal), queryKey: teachingCalendarQueryKeys.periodTemplates(tenantId), staleTime: 5 * 60_000 });
   const weekStart = weekStartOf(meta.applyFrom || urlWeek || todayInput());
@@ -36,19 +40,28 @@ export function useSchedulePage() {
     staleTime: 60_000,
   });
   const saved = useQuery({
-    enabled: Boolean(urlBatchId),
-    queryFn: ({ signal }) => loadTeachingScheduleDraft(urlBatchId as string, signal),
-    queryKey: teachingCalendarQueryKeys.scheduleDraft(tenantId, urlBatchId ?? ""),
+    enabled: Boolean(activeBatchId),
+    queryFn: ({ signal }) => loadTeachingScheduleDraft(activeBatchId as string, signal),
+    queryKey: teachingCalendarQueryKeys.scheduleDraft(tenantId, activeBatchId ?? ""),
     staleTime: 0,
   });
   const schoolId = meta.schoolId || saved.data?.batch.schoolId || urlSchoolId;
   const workspaceFrom = saved.data?.batch.applyFrom ? weekStartOf(saved.data.batch.applyFrom) : weekStart;
   const workspace = useQuery({
-    enabled: Boolean(schoolId) && (!urlBatchId || Boolean(saved.data)),
+    enabled: Boolean(schoolId) && (!activeBatchId || Boolean(saved.data)),
     queryFn: ({ signal }) => loadLcmsTeachingCalendarWorkspace({ from: workspaceFrom, schoolIds: [schoolId], statuses: ["DRAFT", "PUBLISHED"], tenantId, to: addDaysToDate(workspaceFrom, 7) }, signal),
     queryKey: teachingCalendarQueryKeys.workspace("lcms", "schedule-page", { from: workspaceFrom, schoolIds: [schoolId], statuses: ["DRAFT", "PUBLISHED"], tenantId, to: addDaysToDate(workspaceFrom, 7) }),
     staleTime: 0,
   });
+  const batchInput = { page: 0, schoolId: meta.schoolId, size: 20, status: "DRAFT" as const, tenantId };
+  const drafts = useQuery({
+    enabled: !urlBatchId && Boolean(meta.schoolId) && draft.rows.length === 0,
+    queryFn: ({ signal }) => loadTeachingScheduleBatches(batchInput, signal),
+    queryKey: teachingCalendarQueryKeys.batches("lcms", batchInput),
+    staleTime: 0,
+  });
+  const latestDraft = latestDraftId(drafts.data?.items);
+  if (!urlBatchId && latestDraft && draft.rows.length === 0 && autoBatchId !== latestDraft) setAutoBatchId(latestDraft);
   const holidayWeek = useQuery({
     enabled: Boolean(schoolId),
     queryFn: ({ signal }) => loadTeachingOverviewGrid({ schoolIds: [schoolId], weekStart }, signal),
@@ -61,7 +74,7 @@ export function useSchedulePage() {
   // Nap mot lan: dot da luu (version, nhan, xung dot, dong tu su kien) hoac trang moi theo ?schoolId&week.
   useEffect(() => {
     if (hydratedKey.current === batchKey || !template) return;
-    if (urlBatchId) {
+    if (activeBatchId) {
       if (!saved.data || !workspace.data) return;
       const batch = saved.data.batch;
       const applyFrom = batch.applyFrom ?? weekStart;
@@ -85,7 +98,7 @@ export function useSchedulePage() {
     hydratedKey.current = batchKey;
     const applyFrom = weekStartOf(urlWeek ?? todayInput());
     hydrate({ meta: { applyFrom, periodTemplateId: template.id, repeatUntil: addDaysToDate(applyFrom, DEFAULT_SPAN_DAYS), schoolId: urlSchoolId }, rows: [] });
-  }, [batchKey, hydrate, saved.data, template, urlBatchId, urlSchoolId, urlWeek, weekStart, workspace.data]);
+  }, [activeBatchId, batchKey, hydrate, saved.data, template, urlSchoolId, urlWeek, weekStart, workspace.data]);
 
   const holidays = useMemo(() => new Map((holidayWeek.data?.holidays ?? [])
     .filter((holiday) => weekdayIndex(holiday.date) !== 0)
@@ -96,7 +109,7 @@ export function useSchedulePage() {
   const school = schools.data?.items.find((item) => item.schoolId === meta.schoolId);
 
   return {
-    batchStatus: saved.data?.batch.status ?? ("DRAFT" as const), catalog, cells, draft, holidays, loading: templates.isPending || (Boolean(urlBatchId) && !meta.periodTemplateId && (saved.isPending || workspace.isPending)),
+    batchStatus: saved.data?.batch.status ?? ("DRAFT" as const), catalog, cells, draft, holidays, loading: templates.isPending || (Boolean(activeBatchId) && !meta.periodTemplateId && (saved.isPending || workspace.isPending)),
     error: templates.error ?? saved.error ?? null, refetch: () => { void templates.refetch(); void saved.refetch(); },
     school, schools: schools.data?.items ?? [], states, template, templates: templates.data ?? [], weekStart,
   };

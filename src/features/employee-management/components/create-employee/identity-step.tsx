@@ -24,23 +24,6 @@ export function IdentityStep({ form, set }: { form: EmployeeForm; set: SetEmploy
           sx={appleCleanInputSx}
         />
       </AppleFormField>
-      <AppleFormField label="Điện thoại">
-        <TextField
-          value={form.phone}
-          onChange={(event) => set("phone", event.target.value)}
-          placeholder="0901234567"
-          sx={appleCleanInputSx}
-        />
-      </AppleFormField>
-      <AppleFormField label="Email khôi phục">
-        <TextField
-          type="email"
-          value={form.recoveryEmail}
-          onChange={(event) => set("recoveryEmail", event.target.value)}
-          placeholder="recovery@gmail.com"
-          sx={appleCleanInputSx}
-        />
-      </AppleFormField>
     </FormGrid>
   );
 }

@@ -71,7 +71,7 @@ export function GroupColorPicker({ value, onChange }: { value: string; onChange:
           const selected = option.value === value;
           return (
             <ButtonBase
-              key={option.value}
+              key={option.label}
               aria-label={`Chọn màu ${option.label}`}
               aria-pressed={selected}
               onClick={() => onChange(option.value)}

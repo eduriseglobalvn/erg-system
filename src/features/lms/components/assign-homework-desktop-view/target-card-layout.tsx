@@ -10,7 +10,8 @@ export function TargetCardShell({ children, clip = false }: { children: ReactNod
       sx={{
         position: clip ? undefined : "relative",
         display: "flex",
-        minHeight: 0,
+        // Keep the list usable on short screens; the page scrolls instead of squeezing it to 0.
+        minHeight: 320,
         flex: 1,
         flexDirection: "column",
         overflow: clip ? "hidden" : "visible",

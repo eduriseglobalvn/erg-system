@@ -29,7 +29,7 @@ export function mapLmsStudentGroupsToAssignHomeworkGroups(groups: LmsStudentGrou
     id: group.id,
     name: group.name,
     color: group.color || "var(--erg-blue)",
-    source: group.note || "BE student groups",
+    source: group.note || "Nhóm học sinh",
     studentIds: group.studentIds,
   }));
 }

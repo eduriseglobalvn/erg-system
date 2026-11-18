@@ -6,6 +6,14 @@ const mocks = vi.hoisted(() => ({
   readStoredAuthSession: vi.fn(),
   fetchWebPushConfig: vi.fn(),
   registerNotificationDevice: vi.fn(),
+  getFcmRegistrationToken: vi.fn(),
+  unregisterNotificationDevice: vi.fn(),
+}));
+
+vi.mock("@/features/notifications/push/fcm-registration", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/features/notifications/push/fcm-registration")>()),
+  getFcmRegistrationToken: mocks.getFcmRegistrationToken,
+  readFirebaseWebConfig: () => ({ vapidKey: "fcm-key" }),
 }));
 
 vi.mock("@/lib/graphql-client", () => ({
@@ -20,8 +28,8 @@ vi.mock("@/features/notifications/api/notification-api", () => ({
   fetchWebPushConfig: mocks.fetchWebPushConfig,
   heartbeatNotificationDevice: vi.fn(),
   registerNotificationDevice: mocks.registerNotificationDevice,
-  revokeNotificationDevice: vi.fn(),
-  unregisterNotificationDevice: vi.fn(),
+  revokeNotificationDevice: vi.fn(async () => undefined),
+  unregisterNotificationDevice: mocks.unregisterNotificationDevice,
 }));
 
 import {
@@ -35,6 +43,8 @@ beforeEach(() => {
   mocks.readStoredAuthSession.mockReturnValue({ accountId: "student-b" });
   mocks.fetchWebPushConfig.mockReset();
   mocks.registerNotificationDevice.mockReset();
+  mocks.getFcmRegistrationToken.mockReset();
+  mocks.unregisterNotificationDevice.mockReset();
   installNotificationSupport("granted");
 });
 
@@ -113,6 +123,63 @@ test("skips subscribing when the server has Web Push disabled", async () => {
   expect(push.subscribe).not.toHaveBeenCalled();
   expect(mocks.registerNotificationDevice).not.toHaveBeenCalled();
   expect(result.current.state).toBe("unconfigured");
+});
+
+test("on app open a Web Push device moves to FCM silently when the server switched channel", async () => {
+  mocks.fetchWebPushConfig.mockResolvedValue({ enabled: true, provider: "fcm" });
+  mocks.registerNotificationDevice.mockResolvedValue({ id: "device-2", lastSeenAt: null });
+  mocks.getFcmRegistrationToken.mockResolvedValue("fcm-token-1");
+  window.localStorage.setItem(getPwaNotificationDeviceStorageKey(), JSON.stringify({
+    channel: "webpush",
+    deviceRegistrationId: "device-1",
+    permissionState: "granted",
+    portal: "lms",
+    registrationToken: "https://fcm.googleapis.com/wp/abc",
+    syncedAt: new Date(0).toISOString(),
+  }));
+  const oldSubscription = { endpoint: "https://fcm.googleapis.com/wp/abc", toJSON: () => ({}), unsubscribe: vi.fn(async () => true) };
+  const fcmSubscription = { endpoint: "https://fcm.googleapis.com/fcm/send/x", toJSON: () => ({}) };
+  const getSubscription = vi.fn().mockResolvedValueOnce(oldSubscription).mockResolvedValue(fcmSubscription);
+  Object.defineProperty(navigator, "serviceWorker", {
+    configurable: true,
+    value: { ready: Promise.resolve({ scope: "/", pushManager: { getSubscription, subscribe: vi.fn() } }) },
+  });
+
+  const { result } = renderHook(() => usePwaNotifications());
+  await vi.waitFor(() => expect(mocks.registerNotificationDevice).toHaveBeenCalled());
+  expect(result.current.state).toBe("enabled");
+
+  expect(mocks.unregisterNotificationDevice).toHaveBeenCalledWith(expect.objectContaining({ registrationToken: "https://fcm.googleapis.com/wp/abc" }));
+  expect(oldSubscription.unsubscribe).toHaveBeenCalled();
+  expect(mocks.registerNotificationDevice).toHaveBeenCalledWith(expect.objectContaining({ transport: "FCM", registrationToken: "fcm-token-1", keys: undefined }));
+  expect(JSON.parse(window.localStorage.getItem(getPwaNotificationDeviceStorageKey()) ?? "{}")).toMatchObject({ channel: "fcm", registrationToken: "fcm-token-1" });
+});
+
+test("on app open a browser that lost its subscription subscribes again when push was turned on here", async () => {
+  mocks.fetchWebPushConfig.mockResolvedValue({ enabled: true, provider: "fcm" });
+  mocks.registerNotificationDevice.mockResolvedValue({ id: "device-3", lastSeenAt: null });
+  mocks.getFcmRegistrationToken.mockResolvedValue("fcm-token-2");
+  window.localStorage.setItem(getPwaNotificationDeviceStorageKey(), JSON.stringify({
+    channel: "fcm",
+    deviceRegistrationId: "device-1",
+    permissionState: "granted",
+    portal: "lms",
+    registrationToken: "fcm-token-1",
+    syncedAt: new Date(0).toISOString(),
+  }));
+  const fcmSubscription = { endpoint: "https://fcm.googleapis.com/fcm/send/y", toJSON: () => ({}) };
+  // Nothing at first (dropped), then the one Firebase creates.
+  const getSubscription = vi.fn().mockResolvedValueOnce(null).mockResolvedValueOnce(null).mockResolvedValue(fcmSubscription);
+  Object.defineProperty(navigator, "serviceWorker", {
+    configurable: true,
+    value: { ready: Promise.resolve({ scope: "/", pushManager: { getSubscription, subscribe: vi.fn() } }) },
+  });
+
+  const { result } = renderHook(() => usePwaNotifications());
+  await vi.waitFor(() => expect(mocks.registerNotificationDevice).toHaveBeenCalled());
+
+  expect(result.current.state).toBe("enabled");
+  expect(mocks.registerNotificationDevice).toHaveBeenCalledWith(expect.objectContaining({ transport: "FCM", registrationToken: "fcm-token-2" }));
 });
 
 function installPushRegistration() {

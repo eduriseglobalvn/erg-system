@@ -28,7 +28,7 @@ void invalidPath;
 
 const employeeStatusContract: Equal<
   EmployeeStatus,
-  "ACTIVE" | "PENDING" | "BLOCKED" | "BANNED" | "INACTIVE" | "UNKNOWN"
+  "ACTIVE" | "INVITED" | "PENDING" | "BLOCKED" | "BANNED" | "INACTIVE" | "UNKNOWN"
 > = true;
 const employeeItemStatusContract: Equal<EmployeeItem["status"], EmployeeStatus> = true;
 const employeeFilterStatusContract: Equal<NonNullable<EmployeeListFilters["status"]>, EmployeeStatusInput> = true;

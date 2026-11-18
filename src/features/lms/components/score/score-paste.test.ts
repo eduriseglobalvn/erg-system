@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { describePaste, isBlockPaste, nextScoreCell, parseClipboardGrid, parseScoreCell, planScorePaste } from "./score-paste";
+import { describePaste, isBlockPaste, nextScoreCell, parseClipboardGrid, parseScoreCell, parseScoreInput, planScorePaste } from "./score-paste";
 
 describe("score paste helper", () => {
   it("parses an Excel column and block (CRLF, trailing newline)", () => {
@@ -52,5 +52,23 @@ describe("score paste helper", () => {
     expect(nextScoreCell({ row: 2, col: 1 }, "ArrowDown", size)).toBeNull();
     expect(nextScoreCell({ row: 0, col: 0 }, "ArrowLeft", size)).toBeNull();
     expect(nextScoreCell({ row: 0, col: 0 }, "a", size)).toBeNull();
+  });
+});
+
+describe("parseScoreInput (typed cell)", () => {
+  it("never turns an empty cell into 0", () => {
+    expect(parseScoreInput("", 10)).toEqual({ kind: "empty" });
+    expect(parseScoreInput("  ", 10)).toEqual({ kind: "empty" });
+  });
+
+  it("does nothing for an untouched cell and rejects text or off-scale values", () => {
+    expect(parseScoreInput(undefined, 10)).toEqual({ kind: "none" });
+    expect(parseScoreInput("abc", 10)).toEqual({ kind: "invalid" });
+    expect(parseScoreInput("11", 10)).toEqual({ kind: "invalid" });
+  });
+
+  it("accepts 0 and a decimal comma", () => {
+    expect(parseScoreInput("0", 10)).toEqual({ kind: "ok", score: 0 });
+    expect(parseScoreInput("8,5", 10)).toEqual({ kind: "ok", score: 8.5 });
   });
 });

@@ -61,9 +61,24 @@ describe("matching with connected rows (only connected pairs count)", () => {
     expect(scoreQuestion(oldMatching, { ...halfConnected, matchingConnectedRows: [] }).awardedPoints).toBe(0);
   });
 
-  it("nothing connected is not an answer", () => {
+  it("answered only when every left item is connected; a half-matched question counts as unanswered", () => {
     expect(isAnswerComplete(oldMatching, { ...halfConnected, matchingConnectedRows: [] })).toBe(false);
-    expect(isAnswerComplete(oldMatching, halfConnected)).toBe(true);
+    expect(isAnswerComplete(oldMatching, halfConnected)).toBe(false);
+    expect(isAnswerComplete(oldMatching, { ...halfConnected, matchingConnectedRows: ["m2", "m1"] })).toBe(true);
+    // Old answers kept no connection state: a non-empty order still counts.
+    expect(isAnswerComplete(oldMatching, { matchingOrder: ["m1", "m2"] })).toBe(true);
+  });
+
+  it("the shuffled start never leaves a right piece beside its own left item", () => {
+    const pairs = [1, 2, 3, 4, 5].map((n) => ({ id: `m${n}`, prompt: `P${n}` }));
+    const responses = pairs.map((_, index) => ({ id: `r${index + 1}`, response: `R${index + 1}` }));
+    const key = Object.fromEntries(pairs.map((pair, index) => [pair.id, `r${index + 1}`]));
+    for (let n = 0; n < 40; n += 1) {
+      const question: Question = { ...base, id: `q-${n}`, kind: "matching", matching: pairs, matchingResponses: responses, matchingKey: key };
+      const order = createInitialAnswer(question).matchingOrder ?? [];
+      expect(order.some((id, row) => id === key[pairs[row].id])).toBe(false);
+      expect(createInitialAnswer(question).matchingOrder).toEqual(order);
+    }
   });
 
   it("submits assignments for connected rows only", () => {

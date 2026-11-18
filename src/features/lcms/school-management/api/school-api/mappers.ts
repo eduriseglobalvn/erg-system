@@ -30,6 +30,12 @@ export function mapDirectorySchool(item: DirectoryItem): PartnerSchool {
   };
 }
 
+/** ENROLLED is what the roster import and «Ghi danh vào lớp» store: that student is studying (BUG-A-060). */
+export function studentDisplayStatus(status: string): "studying" | "at-risk" | "inactive" {
+  const value = status.toUpperCase();
+  return value === "AT_RISK" ? "at-risk" : value === "ACTIVE" || value === "ENROLLED" ? "studying" : "inactive";
+}
+
 export function mapOperations(workspace: OperationsWorkspace): PartnerSchool {
   const currentYear = workspace.academicYears.find((year) => year.id === workspace.school.currentAcademicYearId)
     ?? workspace.academicYears.find((year) => year.status.toUpperCase() === "ACTIVE")
@@ -56,7 +62,7 @@ export function mapOperations(workspace: OperationsWorkspace): PartnerSchool {
       className: student.className ?? "",
       guardianPhone: student.guardianPhone ?? "",
       subjectIds: student.subjectIds,
-      status: student.status.toUpperCase() === "AT_RISK" ? "at-risk" : student.status.toUpperCase() === "ACTIVE" ? "studying" : "inactive",
+      status: studentDisplayStatus(student.status),
       academicClassId: undefined,
     })),
     classes: workspace.classes.map((classroom) => ({

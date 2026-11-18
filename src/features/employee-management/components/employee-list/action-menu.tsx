@@ -20,7 +20,8 @@ export function EmployeeActionMenu({
     <Menu anchorEl={anchorEl} onClose={onClose} open={Boolean(anchorEl)}>
       <MenuItem onClick={onView}>Xem hồ sơ</MenuItem>
       <MenuItem onClick={onAssignRole}>Gán nhóm quyền</MenuItem>
-      <MenuItem onClick={onToggleStatus}>{status === "ACTIVE" ? "Khoá tài khoản" : "Mở khoá tài khoản"}</MenuItem>
+      {/* An invited account is not locked, so there is nothing to unlock. */}
+      {status === "INVITED" ? null : <MenuItem onClick={onToggleStatus}>{status === "ACTIVE" ? "Khoá tài khoản" : "Mở khoá tài khoản"}</MenuItem>}
     </Menu>
   );
 }

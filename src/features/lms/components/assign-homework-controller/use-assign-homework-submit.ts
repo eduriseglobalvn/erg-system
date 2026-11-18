@@ -13,6 +13,7 @@ export function useAssignHomeworkSubmit(params: {
   setValidationError: (message: string) => void;
   setIsSubmitting: (value: boolean) => void;
   assignmentClass?: { id: string };
+  classStudentIds: string[];
   selectedAssignmentGroupIds: RecipientInput["selectedAssignmentGroupIds"];
   selectedGradeClassIds: RecipientInput["selectedGradeClassIds"];
   gradeStudentIdsByClass: RecipientInput["gradeStudentIdsByClass"];
@@ -38,6 +39,7 @@ export function useAssignHomeworkSubmit(params: {
     setValidationError,
     setIsSubmitting,
     assignmentClass,
+    classStudentIds,
     selectedAssignmentGroupIds,
     selectedGradeClassIds,
     gradeStudentIdsByClass,
@@ -73,6 +75,7 @@ export function useAssignHomeworkSubmit(params: {
     try {
       const recipient = buildAssignmentRecipientInput({
         assignmentClassId: assignmentClass?.id,
+        classStudentIds,
         selectedAssignmentGroupIds,
         selectedGradeClassIds,
         gradeStudentIdsByClass,

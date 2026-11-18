@@ -40,13 +40,10 @@ export function TeacherWeekPanel({ weekStart, onWeek, onCurriculum }: Props) {
   const periods = week?.days.flatMap((d) => d.periods) ?? [];
   const lagging = week?.lagChip ? periods.find((p) => p.classId === week.lagChip?.classId) : undefined;
   const stats = week?.stats;
-  // Unfiltered week with periods but none happened yet: the server would answer PERIOD_NOT_HAPPENED.
-  const nothingHappened = !session && !status && periods.length > 0 && !periods.some((p) => p.happened);
 
   return (
     <Box sx={{ display: "flex", flex: 1, flexDirection: "column", minHeight: 0 }}>
       <ClassLogToolbar
-        confirmHint={nothingHappened ? classLogText.nothingHappened : undefined}
         confirming={confirm.isPending}
         onConfirm={() => confirm.mutate()}
         onOpenCurriculum={() => onCurriculum(curriculumTargetOf(lagging ?? periods[0]))}

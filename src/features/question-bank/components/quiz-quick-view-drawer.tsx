@@ -9,14 +9,14 @@ import { ErgConfirmDialog } from "@/components/erg-mui/erg-confirm-dialog";
 import { ErgStatusChip } from "@/components/erg-mui/erg-feedback";
 import { formatDateTimeVi } from "@/domain/formatters/format-date";
 import { useQuizEditorDraftQuery } from "@/features/lcms/quiz/quiz-editor";
-import { questionTypeLabelKeys } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
+import { questionTypeLabelKeys, type QuestionType } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import type { QuestionBankQuestion, QuizBankItem } from "@/features/question-bank/types/question-bank-types";
 import { useI18n } from "@/platform/i18n";
 import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
 import type { QuestionBankCopy } from "./question-bank-copy";
 import { QuickViewDrawer, QuickViewSection } from "./question-bank-quick-view-drawer";
 import { QUIZ_STATUS_TONE } from "./quiz-bank-panel";
-import { quizPackageMaxPoints, readQuizPackageDraft } from "./quiz-package-draft";
+import { quizPackageMaxPoints, quizQuestionSlides, readQuizPackageDraft } from "./quiz-package-draft";
 
 /** B2: quick view of one quiz: properties, its questions, and the package actions. */
 export function QuizQuickViewDrawer({
@@ -50,6 +50,10 @@ export function QuizQuickViewDrawer({
   const draftQuery = useQuizEditorDraftQuery(quiz.id);
   const pkg = draftQuery.data ? readQuizPackageDraft(draftQuery.data, quiz) : null;
   const maxPoints = draftQuery.data ? quizPackageMaxPoints(draftQuery.data.tree) : 0;
+  // The bank list rarely holds a quiz's own questions; the saved draft always does.
+  const rows: QuizQuestionRow[] = questions.some(Boolean)
+    ? questions.map((question) => ({ stem: question?.stem, type: question?.type }))
+    : draftQuery.data ? quizQuestionSlides(draftQuery.data.tree).map((slide) => ({ stem: slide.title || undefined, type: slide.kind as QuestionType })) : [];
   const onOff = (value: boolean) => (value ? copy.onValue : copy.offValue);
   const properties: Array<[string, string]> = [
     [copy.quizTable.kind, copy.quizKind[quiz.kind]],
@@ -112,7 +116,7 @@ export function QuizQuickViewDrawer({
         </Box>
       </QuickViewSection>
       <QuickViewSection title={copy.quizQuestionsTitle(quiz.questionCount)}>
-        <QuizQuestionList copy={copy} questions={questions} />
+        <QuizQuestionList copy={copy} rows={rows} />
       </QuickViewSection>
       {quiz.ownerLabel ? (
         <QuickViewSection title={copy.quizInfoTitle}>
@@ -134,25 +138,27 @@ export function QuizQuickViewDrawer({
   );
 }
 
-function QuizQuestionList({ copy, questions }: { copy: QuestionBankCopy; questions: (QuestionBankQuestion | undefined)[] }) {
+type QuizQuestionRow = { stem?: string; type?: QuestionType };
+
+function QuizQuestionList({ copy, rows }: { copy: QuestionBankCopy; rows: QuizQuestionRow[] }) {
   const { t: translate } = useI18n();
-  if (!questions.length) {
+  if (!rows.length) {
     return <Typography variant="body2" sx={{ color: t.color.textMuted }}>{copy.noQuestionDetails}</Typography>;
   }
   return (
     <Box component="ol" sx={{ bgcolor: t.color.surface, border: `1px solid ${t.color.border}`, borderRadius: `${t.radius.card}px`, listStyle: "none", m: 0, overflow: "hidden", p: 0 }}>
-      {questions.map((question, index) => (
+      {rows.map((question, index) => (
         <Box
           component="li"
-          key={question?.id ?? index}
+          key={index}
           sx={{ alignItems: "center", borderTop: index ? `1px solid ${t.color.divider}` : 0, display: "grid", gap: 1.25, gridTemplateColumns: "24px minmax(0, 1fr) auto", px: 1.5, py: 1.25 }}
         >
           <Typography variant="caption" sx={{ color: t.color.textMuted }}>{index + 1}</Typography>
-          <Typography variant="body2" noWrap title={question?.stem}>
-            {question?.stem ?? copy.packageQuestionFallback(String(index + 1))}
+          <Typography variant="body2" noWrap title={question.stem}>
+            {question.stem ?? copy.packageQuestionFallback(String(index + 1))}
           </Typography>
           <Typography variant="caption" sx={{ color: t.color.textMuted }}>
-            {question ? translate(questionTypeLabelKeys[question.type]) : ""}
+            {question.type ? translate(questionTypeLabelKeys[question.type]) : ""}
           </Typography>
         </Box>
       ))}

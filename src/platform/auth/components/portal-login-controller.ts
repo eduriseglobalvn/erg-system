@@ -221,9 +221,10 @@ function preferredWorkspaceForLogin(
     deniedPermissions: session?.deniedPermissions,
     portals: session?.portals,
   });
+  // An account with the admin gate lands there first (super admin has only "*", PDT also holds teacher access).
+  if (workspaces.includes("ADMIN")) return "ADMIN";
   if (workspaces.includes("TEACHER")) return "TEACHER";
   if (workspaces.includes("STUDENT")) return "STUDENT";
-  if (workspaces.includes("ADMIN")) return "ADMIN";
   return undefined;
 }
 

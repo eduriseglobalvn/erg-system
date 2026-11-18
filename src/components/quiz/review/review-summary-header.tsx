@@ -42,11 +42,11 @@ export function ReviewScoreStrip({ scoreOutOf10, correct, total, elapsedSeconds 
     ...(elapsedSeconds === null ? [] : [{ value: formatTimer(elapsedSeconds), label: "thời gian", color: tk.color.text }]),
   ];
   return (
-    <Box component="dl" sx={{ borderBottom: "1px solid", borderColor: tk.color.divider, display: "grid", gridTemplateColumns: `repeat(${cells.length}, minmax(0, 1fr))`, m: 0, mb: 0.5, mt: -0.5, pb: 1.5, textAlign: "center" }}>
+    <Box component="dl" sx={{ borderBottom: "1px solid", borderColor: tk.color.divider, display: "grid", gridTemplateColumns: `repeat(${cells.length}, minmax(0, 1fr))`, m: 0, mb: 0.5, mt: -0.5, pb: 1, textAlign: "center" }}>
       {cells.map((cell, i) => (
         <Box key={cell.label} sx={{ borderLeft: i ? "1px solid" : 0, borderColor: tk.color.divider, display: "flex", flexDirection: "column-reverse" }}>
           <Typography component="dt" sx={{ color: tk.color.textMuted }} variant="caption">{cell.label}</Typography>
-          <Typography component="dd" sx={{ color: cell.color, fontVariantNumeric: "tabular-nums", fontWeight: "fontWeightBold", m: 0 }} variant="h2">{cell.value}</Typography>
+          <Typography component="dd" sx={{ color: cell.color, fontVariantNumeric: "tabular-nums", fontWeight: "fontWeightBold", m: 0 }} variant="h5">{cell.value}</Typography>
         </Box>
       ))}
     </Box>

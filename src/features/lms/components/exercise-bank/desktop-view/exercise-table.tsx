@@ -168,12 +168,25 @@ export function ExerciseTable({
         >
           Xem câu hỏi
         </MenuItem>
+        {menuExercise?.source === "teacher" ? (
+          <MenuItem
+            onClick={() => {
+              controller.setExerciseToDelete(menuExercise);
+              setMenu(null);
+            }}
+            sx={{ color: "error.main" }}
+          >
+            Xoá bài
+          </MenuItem>
+        ) : null}
       </Menu>
 
 
       {controller.filteredExercises.length === 0 ? (
         <Typography variant="caption" component="div" sx={{ p: 4, textAlign: "center", color: "text.secondary" }}>
-          Không tìm thấy bài tập phù hợp. Thử đổi từ khóa hoặc đặt lại bộ lọc.
+          {controller.items.length === 0
+            ? "Chưa có bài tập nào trong kho. Tạo bài mới, hoặc nhờ quản trị viên xuất bản bài cho trường của bạn."
+            : "Không tìm thấy bài tập phù hợp. Thử đổi từ khóa hoặc đặt lại bộ lọc."}
         </Typography>
       ) : null}
     </Box>

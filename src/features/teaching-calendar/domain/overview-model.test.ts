@@ -1,6 +1,7 @@
 import { expect, it } from "vitest";
 
-import { buildSchoolDayChips, chipWho, conflictNote, foldPeriod, foldSlots, slotText, type TeacherSlotInput, overviewCellKind, rowNote, toggleSchool, type OverviewCell, type OverviewConflict } from "./overview-model";
+import { ApiClientError } from "@/lib/api-client/errors";
+import { buildSchoolDayChips, chipWho, conflictNote, foldPeriod, foldSlots, slotText, type TeacherSlotInput, overviewCellKind, overviewErrorMessage, paginateSchools, rowNote, SCHOOLS_PER_PAGE, selectedSchoolIds, toggleSchool, type OverviewCell, type OverviewConflict } from "./overview-model";
 
 const side = (className: string, schoolShortName: string, teacherName = "Q.Vương", eventId = className) => ({ className, eventId, roomName: "PM 03", schoolShortName, teacherName });
 const clash = { kind: "TEACHER_TIME", mine: side("9A4", "TCĐ"), other: side("8A2", "Nguyễn Du"), severity: "ERROR" } as unknown as OverviewConflict;
@@ -26,8 +27,30 @@ it("classifies cells for styling", () => {
   expect(overviewCellKind(cell({}))).toBe("published");
 });
 
-it("limits side-by-side schools to four", () => {
-  expect(toggleSchool(["a", "b", "c", "d"], "e")).toEqual(["a", "b", "c", "d"]);
+it("does not cap the selection; default is the first page only", () => {
+  const many = Array.from({ length: 200 }, (_, n) => `s${n}`);
+  expect(toggleSchool(many, "extra")).toHaveLength(201);
+  expect(selectedSchoolIds(many, [])).toHaveLength(200);
+  expect(selectedSchoolIds([], many.map((schoolId) => ({ schoolId })))).toEqual(many.slice(0, SCHOOLS_PER_PAGE));
+});
+
+it("pages the selected schools: empty, exact multiple, remainder, last page, clamping", () => {
+  const ids = (n: number) => Array.from({ length: n }, (_, k) => k);
+  expect(paginateSchools([], 0, 4)).toMatchObject({ from: 0, items: [], page: 0, pageCount: 1, to: 0, total: 0 });
+  expect(paginateSchools(ids(8), 1, 4)).toMatchObject({ from: 5, items: [4, 5, 6, 7], pageCount: 2, to: 8 });
+  expect(paginateSchools(ids(10), 2, 4)).toMatchObject({ from: 9, items: [8, 9], page: 2, pageCount: 3, to: 10, total: 10 });
+  expect(paginateSchools(ids(10), 9, 4).page).toBe(2);
+  expect(paginateSchools(ids(10), -1, 4).page).toBe(0);
+});
+
+it("shows the server's business message, not the connection hint, for GraphQL errors", () => {
+  const business = new ApiClientError("Chỉ xem cạnh nhau tối đa 3 trường.", "GRAPHQL_ERROR", 200, [{ extensions: { code: "TOO_MANY_SCHOOLS" }, message: "Chỉ xem cạnh nhau tối đa 3 trường." }]);
+  expect(overviewErrorMessage(business)).toBe("Chỉ xem cạnh nhau tối đa 3 trường.");
+  expect(overviewErrorMessage(new ApiClientError("Failed to fetch", "NETWORK_ERROR", 0))).toBeUndefined();
+  expect(overviewErrorMessage(new TypeError("Failed to fetch"))).toBeUndefined();
+});
+
+it("keeps toggling", () => {
   expect(toggleSchool(["a", "b", "c"], "b")).toEqual(["a", "c"]);
   expect(toggleSchool(["a"], "b")).toEqual(["a", "b"]);
 });

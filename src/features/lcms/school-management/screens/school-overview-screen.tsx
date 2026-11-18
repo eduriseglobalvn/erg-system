@@ -20,7 +20,7 @@ export default function SchoolOverviewScreen() {
       description="Tình trạng học sinh, lớp học, môn đăng ký và các việc cần xử lý của trường."
       action={
         <Button
-          onClick={() => void navigate({ href: `${adminPath("/schools/imports")}?schoolId=${selectedSchool.id}` })}
+          onClick={() => void navigate({ href: `${adminPath("/schools/students")}?schoolId=${selectedSchool.id}` })}
           startIcon={<FileUploadRoundedIcon sx={{ fontSize: 18 }} />}
           variant="contained"
           sx={{
@@ -45,7 +45,7 @@ export default function SchoolOverviewScreen() {
             },
           }}
         >
-          Nhập dữ liệu
+          Nhập học sinh
         </Button>
       }
     >

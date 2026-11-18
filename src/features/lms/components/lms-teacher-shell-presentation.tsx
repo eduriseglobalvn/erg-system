@@ -30,6 +30,7 @@ export function LmsHeaderSchoolControl({
           onChange={onSchoolChange}
           size="small"
           displayEmpty
+          disabled={schools.length === 0}
           MenuProps={scopeMenuProps}
           sx={scopeSelectSx({ minWidth: 176, variant: "title" })}
           renderValue={(value) => {
@@ -38,7 +39,7 @@ export function LmsHeaderSchoolControl({
               <Stack direction="row" spacing={0.85} sx={{ alignItems: "center", minWidth: 0 }}>
                 <SchoolLogo school={school} />
                 <Typography noWrap sx={{ color: "#1C252E", fontSize: 14, fontWeight: 600, lineHeight: "22px" }}>
-                  {school?.name ?? "Trường"}
+                  {school?.name ?? (schools.length ? "Trường" : "Chưa có trường")}
                 </Typography>
               </Stack>
             );

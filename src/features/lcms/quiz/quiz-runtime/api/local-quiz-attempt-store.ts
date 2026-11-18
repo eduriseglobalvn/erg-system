@@ -48,6 +48,7 @@ export const localQuizAttemptStore = {
       serverStartedAt: stored.serverStartedAt,
       serverTimeAtStart: stored.serverTimeAtStart,
       deadlineAt: stored.deadlineAt,
+      durationMinutes: stored.durationMinutes,
       serverClockOffsetMs: stored.serverClockOffsetMs,
     };
   },
@@ -57,6 +58,8 @@ export const localQuizAttemptStore = {
     assignmentId: string;
     attemptId: string;
     packageHash: string;
+    /** false keeps the session in memory until the server accepted the start (it is saved by markServerStarted). */
+    persist?: boolean;
     portal?: QuizRuntimePortal | null;
     quizId: string;
     quizVersion: string;
@@ -95,7 +98,7 @@ export const localQuizAttemptStore = {
       submitIdempotencyKey: input.submitIdempotencyKey,
     };
 
-    await this.saveSession(session);
+    if (input.persist !== false) await this.saveSession(session);
     return session;
   },
 
@@ -204,7 +207,9 @@ export const localQuizAttemptStore = {
     const policy = result.policySnapshot;
     const serverStartedAt = policy?.startedAt ?? result.startedAt;
     const serverTimeAtStart = policy?.serverTimeAtStart ?? serverStartedAt;
-    const serverTimeMs = serverTimeAtStart ? Date.parse(serverTimeAtStart) : Number.NaN;
+    // serverTime is the server clock now; serverTimeAtStart is when the attempt first started, minutes ago on a resume.
+    const clockSample = policy?.serverTime ?? serverTimeAtStart;
+    const serverTimeMs = clockSample ? Date.parse(clockSample) : Number.NaN;
     const serverClockOffsetMs = Number.isFinite(serverTimeMs) ? serverTimeMs - Date.now() : undefined;
     const nextSession: LocalQuizAttemptSession = {
       ...session,
@@ -217,6 +222,7 @@ export const localQuizAttemptStore = {
       ...(serverStartedAt ? { serverStartedAt } : {}),
       ...(serverTimeAtStart ? { serverTimeAtStart } : {}),
       ...(policy?.deadlineAt ? { deadlineAt: policy.deadlineAt } : {}),
+      ...(policy?.durationMinutes ? { durationMinutes: policy.durationMinutes } : {}),
       ...(serverClockOffsetMs !== undefined ? { serverClockOffsetMs } : {}),
       clientEvents: [
         ...session.clientEvents,

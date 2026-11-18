@@ -1,7 +1,7 @@
 import { createAttemptSession, gradeAttemptLocally } from "@/domain/quiz/assessment-engine";
-import { canGradeLocally, getAllQuestions } from "@/domain/quiz/quiz";
+import { canGradeLocally, getAllQuestions, normalizeAnswerForSubmission } from "@/domain/quiz/quiz";
 import type { Attempt, Quiz, QuizPackage } from "@/domain/quiz/types";
-import type { FinalSubmitPayload, RuntimeServerAttemptSnapshot, SubmitAttemptInput } from "@/features/lcms/quiz/quiz-runtime/types/quiz-runtime-types";
+import type { FinalSubmitPayload, LatestSubmittedAttempt, RuntimeServerAttemptSnapshot, SubmitAttemptInput } from "@/features/lcms/quiz/quiz-runtime/types/quiz-runtime-types";
 import { isRecord } from "@/features/lcms/quiz/quiz-runtime/api/quiz-runtime-normalization-utils";
 
 export type BackendSubmitAttemptResponse =
@@ -56,6 +56,50 @@ export function gradeFinalAttemptLocally(
 ): Attempt {
   const session = createAttemptSession(quizPackage, attemptId);
   return gradeAttemptLocally(session, answers).attempt;
+}
+
+/**
+ * The attempt the server already graded, rebuilt for the result/review screens. Per-question results are the
+ * server's (the package has no answer key, so nothing is re-graded); an answer the student never gave stays empty.
+ */
+export function buildAttemptFromLatestSubmitted(quizPackage: QuizPackage, submission: LatestSubmittedAttempt): Attempt {
+  const questions = getAllQuestions(quizPackage.quiz);
+  const answers = Object.fromEntries(
+    questions.map((question) => {
+      const result = submission.results[question.id];
+      return [
+        question.id,
+        {
+          questionId: question.id,
+          input: normalizeAnswerForSubmission(question, submission.answers[question.id]),
+          result: {
+            questionId: question.id,
+            correct: Boolean(result?.correct),
+            partiallyRight: Boolean(result?.partiallyRight),
+            awardedPoints: result?.awardedPoints ?? 0,
+            maxPoints: result?.maxPoints ?? question.points,
+            message: "",
+            ...(result?.needsManualGrade ? { pendingReview: true } : {}),
+          },
+        },
+      ];
+    }),
+  ) as Attempt["answers"];
+  const records = Object.values(answers);
+  const totalScore = submission.score ?? records.reduce((sum, record) => sum + record.result.awardedPoints, 0);
+  const maxScore = submission.maxScore ?? records.reduce((sum, record) => sum + record.result.maxPoints, 0);
+
+  return {
+    id: submission.attemptId,
+    quizId: quizPackage.quizId,
+    answers,
+    submittedCount: questions.length,
+    totalQuestions: questions.length,
+    totalScore,
+    maxScore,
+    percent: submission.percent ?? (maxScore > 0 ? Math.round((totalScore / maxScore) * 100) : 0),
+    passed: Boolean(submission.passed),
+  };
 }
 
 export function normalizeSubmitResponse(response: BackendSubmitAttemptResponse, input: SubmitAttemptInput): Attempt {

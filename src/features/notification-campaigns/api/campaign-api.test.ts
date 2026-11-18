@@ -189,7 +189,7 @@ test("useCampaignEstimate sends nothing before 300 ms and one request (last audi
     });
     expect(calls()).toHaveLength(1);
     expect(calls()[0]?.method).toBe("POST");
-    expect(JSON.parse(String(calls()[0]?.body))).toEqual({ classIds: ["a", "b", "c"] });
+    expect(JSON.parse(String(calls()[0]?.body))).toEqual({ classIds: ["a", "b", "c"], wholeTenant: false });
     expect(result.current.data).toEqual({ total: 7, students: 7 });
   } finally {
     vi.useRealTimers();
@@ -211,7 +211,7 @@ test("useCampaignEstimate drops the previous breakdown as soon as the audience i
 });
 
 test("normalizeAudience makes element order irrelevant and drops empty parts", () => {
-  expect(normalizeAudience({ classIds: ["b", "a", "a"], userIds: [], wholeTenant: false })).toEqual({ classIds: ["a", "b"] });
+  expect(normalizeAudience({ classIds: ["b", "a", "a"], userIds: [], wholeTenant: false })).toEqual({ classIds: ["a", "b"], wholeTenant: false });
   expect(JSON.stringify(normalizeAudience({ roles: ["STUDENT"], classIds: ["x"], wholeTenant: true }))).toBe(
     JSON.stringify(normalizeAudience({ wholeTenant: true, classIds: ["x"], roles: ["STUDENT"] })),
   );

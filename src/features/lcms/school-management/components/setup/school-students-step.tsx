@@ -18,6 +18,10 @@ import { useSchoolManagementContext } from "@/features/lcms/school-management/co
 import { SchoolStepSurface } from "@/features/lcms/school-management/components/setup/school-step-surface";
 import { StudentCredentialsDialog, type StudentCredentialsResult } from "@/features/lcms/school-management/components/setup/student-credentials-dialog";
 import { buildStudentLogins } from "@/features/lcms/school-management/utils/student-account-credentials";
+import {
+  StudentPasswordResetFlow,
+  type StudentPasswordResetTarget,
+} from "@/features/lms/student-credentials/student-password-reset-flow";
 import { StudentImportDialog } from "@/features/lcms/school-management/components/student-import-dialog";
 import { schoolTypeMeta, schoolTypeUsesGrades } from "@/features/lcms/school-management/types/school-type-config";
 import type { StudentImportRow } from "@/features/lcms/school-management/types/school-management-types";
@@ -30,6 +34,7 @@ export function SchoolStudentsStep() {
   const [credentials, setCredentials] = useState<StudentCredentialsResult | null>(null);
   const [selectedClass, setSelectedClass] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [resetTarget, setResetTarget] = useState<StudentPasswordResetTarget | null>(null);
 
   const schoolClasses = selectedSchool?.classes ?? NONE;
   const schoolStudents = selectedSchool?.students ?? NONE;
@@ -67,12 +72,20 @@ export function SchoolStudentsStep() {
   const meta = schoolTypeMeta[selectedSchool.schoolType];
   const usesGrades = schoolTypeUsesGrades(selectedSchool.schoolType);
 
+  // The roster rows carry the class name only; the reset endpoint needs the class id.
+  const classIdOf = (student: { academicClassId?: string | null; className: string }) =>
+    student.academicClassId || selectedSchool!.classes.find((c) => c.name === student.className)?.id || "";
+
   async function importStudents(rows: StudentImportRow[]) {
     // Every imported student also gets a login (active, learner role, no onboarding) created by the backend.
-    const logins = buildStudentLogins(rows);
+    const logins = buildStudentLogins(rows, selectedSchool!.name);
+    // A student already on the roster keeps the account it has: the backend returns it untouched, so no password is shown for it (BUG-X-004).
+    // shortcut: a roster student that had no login gets one now but its password is not shown, use «Cấp lại mật khẩu»; return an accountCreated flag from the import when that case matters
+    const existing = new Set(schoolStudents.map((student) => student.code.trim().toLowerCase()));
+    const codes = rows.map((row, index) => row.code || `${selectedSchool!.id}-${Date.now()}-${index}`);
     const saved = await addStudents(
       rows.map((row, index) => ({
-        code: row.code || `${selectedSchool!.id}-${Date.now()}-${index}`,
+        code: codes[index],
         fullName: row.fullName,
         birthDate: row.birthDate,
         grade: row.grade,
@@ -84,8 +97,12 @@ export function SchoolStudentsStep() {
       }))
     );
     // Only logins the backend confirms (same username, linked account) were created now; the rest already had one.
-    const created = new Map(saved.filter((item) => item.authUserId && item.username).map((item) => [item.username!.toLowerCase(), item]));
-    const sheetOrder = logins.map((login) => (login && created.has(login.username) ? login : null));
+    // Keyed by student code: the backend may number a login that another school already uses (BUG-A-003), so its username is the one shown.
+    const createdByCode = new Map(saved.filter((item) => item.authUserId && item.username && !existing.has(item.studentCode.trim().toLowerCase())).map((item) => [item.studentCode.trim().toLowerCase(), item.username!]));
+    const sheetOrder = logins.map((login, index) => {
+      const username = createdByCode.get(codes[index].trim().toLowerCase());
+      return login && username ? { ...login, username } : null;
+    });
     const issued = rows.flatMap((row, index) => {
       const login = sheetOrder[index];
       return login ? [{ code: row.code, fullName: row.fullName, className: row.className, ...login }] : [];
@@ -270,6 +287,7 @@ export function SchoolStudentsStep() {
                 <TableCell>{meta.classLabel}</TableCell>
                 <TableCell>Liên hệ phụ huynh</TableCell>
                 <TableCell>Trạng thái</TableCell>
+                <TableCell>Thao tác</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -294,12 +312,22 @@ export function SchoolStudentsStep() {
                       size="small"
                     />
                   </TableCell>
+                  <TableCell>
+                    <Button
+                      disabled={!classIdOf(student)}
+                      onClick={() => setResetTarget({ classId: classIdOf(student), studentId: student.id, studentName: student.fullName })}
+                      size="small"
+                      variant="text"
+                    >
+                      Cấp lại mật khẩu
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))}
               {!filteredStudents.length ? (
                 <TableRow>
                   <TableCell
-                    colSpan={usesGrades ? 7 : 6}
+                    colSpan={usesGrades ? 8 : 7}
                     sx={{ color: "text.secondary", py: 5, textAlign: "center" }}
                   >
                     {searchQuery
@@ -322,6 +350,7 @@ export function SchoolStudentsStep() {
         ) : null}
       </SchoolStepSurface>
 
+      <StudentPasswordResetFlow onClose={() => setResetTarget(null)} portal="lcms" target={resetTarget} />
       {credentials ? <StudentCredentialsDialog onClose={() => setCredentials(null)} result={credentials} /> : null}
       {importOpen ? (
         <StudentImportDialog

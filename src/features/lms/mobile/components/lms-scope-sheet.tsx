@@ -85,8 +85,8 @@ export function LmsScopeSheet({
             <Box sx={{ alignItems: "center", bgcolor: "background.paper", border: "1px dashed", borderColor: "divider", borderRadius: `${radius.card}px`, display: "flex", gap: 1.5, p: 2 }}>
               <Box sx={{ alignItems: "center", bgcolor: "action.hover", borderRadius: `${radius.control}px`, color: "text.secondary", display: "flex", flexShrink: 0, height: 40, justifyContent: "center", width: 40 }}><GroupOffRoundedIcon /></Box>
               <Box sx={{ minWidth: 0 }}>
-                <Typography variant="subtitle2">Bạn chưa được phân lớp ở trường này</Typography>
-                <Typography color="text.secondary" component="div" variant="caption">Liên hệ quản lý trường để được thêm vào lớp.</Typography>
+                <Typography variant="subtitle2">Bạn chưa có lịch dạy nào được xuất bản</Typography>
+                <Typography color="text.secondary" component="div" variant="caption">Khi Phòng đào tạo xếp lịch, trường và lớp sẽ hiện ở đây.</Typography>
               </Box>
             </Box>
           ) : visibleClasses.length === 0 ? (

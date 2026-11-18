@@ -5,7 +5,6 @@ import type {
   OperationalClassRecord,
   OperationalEnrollmentRecord,
   OperationalStudentRecord,
-  OperationalSubjectRecord,
   SchoolStudentInput,
 } from "@/features/lcms/school-management/api/school-api/types";
 
@@ -67,10 +66,6 @@ export function isOperationalClassRecord(value: unknown): value is OperationalCl
 
 export function isOperationalStudentRecord(value: unknown): value is OperationalStudentRecord {
   return isObject(value) && typeof value.id === "string" && typeof value.schoolId === "string" && typeof value.studentCode === "string" && typeof value.fullName === "string" && typeof value.status === "string" && isFiniteNumber(value.version);
-}
-
-export function isOperationalSubjectRecord(value: unknown): value is OperationalSubjectRecord {
-  return isObject(value) && typeof value.id === "string" && typeof value.name === "string" && typeof value.code === "string" && typeof value.status === "string" && isFiniteNumber(value.version);
 }
 
 export function isOperationalEnrollmentRecord(value: unknown): value is OperationalEnrollmentRecord {

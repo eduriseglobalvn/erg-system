@@ -15,6 +15,7 @@ import type {
   StudentDashboardProfile,
   StudentTeacherAnnouncement,
 } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
+import { nameWithoutTags } from "@/domain/formatters/format-initials";
 import { resolveOverviewHero } from "@/features/elearning/student-dashboard/utils/student-overview-hero";
 import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
 
@@ -94,7 +95,9 @@ export function StudentDashboardMobileOverview({
     : openAssignments.length === 0 && completedAssignments.length === 0
       ? copy.todayEmptyDescription
       : copy.greetingOpen(openAssignments.length);
-  const name = profile.name.trim().split(/\s+/).slice(-2).join(" ") || copy.learnerFallbackName;
+  const nameWords = nameWithoutTags(profile.name).split(/\s+/).filter(Boolean);
+  // Tên 3 từ trở xuống gọi đủ; dài hơn thì gọi hai từ cuối.
+  const name = nameWords.slice(nameWords.length > 3 ? -2 : 0).join(" ") || copy.learnerFallbackName;
 
   return (
     <Stack spacing={2.5}>

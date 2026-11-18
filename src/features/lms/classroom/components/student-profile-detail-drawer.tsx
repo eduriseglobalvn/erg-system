@@ -1,11 +1,9 @@
 import CloseIcon from "@mui/icons-material/Close";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import type { ReactNode } from "react";
 
 import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
-import InputAdornment from "@mui/material/InputAdornment";
 import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
@@ -28,6 +26,8 @@ export type StudentProfileStatusOption<TValue extends string = string> = {
 type StudentProfileDetailDrawerProps<TValue extends string = StudentStatus> = {
   draft: StudentProfileDetailDraft;
   onClose: () => void;
+  /** Shown as «Cấp lại mật khẩu» in the footer when given. */
+  onResetPassword?: () => void;
   onStatusChange?: (value: TValue) => void;
   onUpdate: (patch: Partial<StudentProfileDetailDraft>) => void;
   statusLabel?: string;
@@ -41,6 +41,7 @@ const twoColumnGrid = { display: "grid", gap: 1.5, gridTemplateColumns: { sm: "r
 export function StudentProfileDetailDrawer<TValue extends string = StudentStatus>({
   draft,
   onClose,
+  onResetPassword,
   onStatusChange,
   onUpdate,
   statusLabel = "Trạng thái học tập",
@@ -107,27 +108,10 @@ export function StudentProfileDetailDrawer<TValue extends string = StudentStatus
             </Box>
           </DetailSection>
 
-          <DetailSection title="Tài khoản Student Workspace">
+          <DetailSection title="Tài khoản học sinh">
             <Box sx={twoColumnGrid}>
-              <Field label="Username">
-                <ErgTextField compact value={draft.username} onChange={(event) => onUpdate({ username: event.target.value })} />
-              </Field>
-              <Field label="Mật khẩu">
-                <ErgTextField
-                  compact
-                  value={draft.password}
-                  onChange={(event) => onUpdate({ password: event.target.value })}
-                  slotProps={{
-                    input: {
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <LockOutlinedIcon fontSize="inherit" sx={{ color: "text.secondary" }} />
-                        </InputAdornment>
-                      ),
-                    },
-                  }}
-                />
-              </Field>
+              {/* Read-only: the real login name; passwords are never shown, use «Cấp lại mật khẩu». */}
+              <ReadOnlyField label="Tên đăng nhập" value={student.username ?? "Chưa có dữ liệu"} />
               <ReadOnlyField label="Lần đăng nhập gần nhất" value={student.lastActivity} />
               <ReadOnlyField label="Thiết bị thường dùng" value={profile.device} />
             </Box>
@@ -135,7 +119,7 @@ export function StudentProfileDetailDrawer<TValue extends string = StudentStatus
 
           <DetailSection title="Theo dõi học tập">
             <Box sx={{ display: "grid", gap: 1, gridTemplateColumns: { xs: "repeat(2, minmax(0, 1fr))", sm: "repeat(4, minmax(0, 1fr))" }, mt: 1.5 }}>
-              <MiniMetric label="Tiến độ" value={`${student.progressRate}%`} />
+              <MiniMetric label="Tiến độ" value={student.hasProgressData === false ? "—" : `${student.progressRate}%`} />
               <MiniMetric label="Điểm TB" value={`${student.averageScore}`} />
               <MiniMetric label="Hoàn thành" value={`${student.completedAssignments} bài`} />
               <MiniMetric label="Streak" value={`${student.streakDays} ngày`} />
@@ -171,6 +155,11 @@ export function StudentProfileDetailDrawer<TValue extends string = StudentStatus
 
       <Stack direction="row" spacing={1} sx={{ alignItems: "center", bgcolor: "background.default", borderColor: "divider", borderTop: 1, justifyContent: "space-between", p: 1.5 }}>
         <Typography variant="body2" color="text.secondary" sx={{ fontWeight: "fontWeightMedium" }}>{student.name} - {student.className}</Typography>
+        {onResetPassword ? (
+          <ErgButton type="button" variant="outlined" onClick={onResetPassword} sx={{ height: 36, ml: "auto", px: 1.5 }}>
+            Cấp lại mật khẩu
+          </ErgButton>
+        ) : null}
         <ErgButton type="button" variant="contained" onClick={onClose} sx={{ height: 36, px: 1.5 }}>
           Lưu thông tin
         </ErgButton>
@@ -184,7 +173,7 @@ function buildStudentProfile(student: ClassroomStudent) {
     address: "Chưa có dữ liệu",
     birthDate: "Chưa có dữ liệu",
     careHistory: "Chưa có dữ liệu",
-    code: student.id,
+    code: student.studentCode ?? "Chưa có dữ liệu",
     device: "Chưa có dữ liệu",
     gender: "Chưa có dữ liệu",
     guardianEmail: "Chưa có dữ liệu",

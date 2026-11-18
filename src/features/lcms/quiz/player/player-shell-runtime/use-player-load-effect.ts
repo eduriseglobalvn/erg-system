@@ -1,9 +1,11 @@
 import { useEffect, type Dispatch, type SetStateAction } from "react";
 
-import { createFreshLocalSession } from "@/features/lcms/quiz/player/player-shell-session";
+import { createFreshLocalSession, createReviewSession } from "@/features/lcms/quiz/player/player-shell-session";
 import type { PlayerLoadState, SubmitDialogMode } from "@/components/quiz/player-shell-runtime-model";
 import {
+  buildAttemptFromLatestSubmitted,
   createEmptyAttempt,
+  getLatestSubmittedAttempt,
   getOfflineQuizSnapshot,
   gradeFinalAttemptLocally,
   localQuizAttemptStore,
@@ -22,6 +24,8 @@ export type UsePlayerLoadEffectArgs = {
   portablePackage: QuizPackage | undefined;
   resolvedQuizId: string | undefined;
   resolvedAssignmentId: string | undefined;
+  /** Real assignment of the student portal; unset for portable/preview/offline players, which never ask the server for a hand-in. */
+  reviewAssignmentId?: string;
   startImmediately: boolean;
   quizPackageQuery: ReturnType<typeof useQuizPackageQuery>;
   setLoadState: Dispatch<SetStateAction<PlayerLoadState>>;
@@ -42,6 +46,7 @@ export function usePlayerLoadEffect({
   portablePackage,
   resolvedQuizId,
   resolvedAssignmentId,
+  reviewAssignmentId,
   startImmediately,
   quizPackageQuery,
   setLoadState,
@@ -64,7 +69,8 @@ export function usePlayerLoadEffect({
       };
     }
 
-    if (quizPackageQuery.isPending) {
+    // A portable package turns the query off, and a disabled query with no data stays pending forever.
+    if (!portablePackage && quizPackageQuery.isPending) {
       setLoadState({ status: "loading" });
       return () => {
         cancelled = true;
@@ -119,15 +125,26 @@ export function usePlayerLoadEffect({
             ? storedSession
             : null;
 
-        const session = reusableSession ?? (await createFreshLocalSession(resolvedAssignmentId, quizPackage, attemptScope));
-        const playablePackage = prepareQuizPackageForAttempt(
+        // No usable local session: the server may already hold a hand-in (other browser, cleared data) to show instead of the start screen.
+        // A failed lookup keeps the old behaviour (start screen).
+        const submission = !reusableSession && reviewAssignmentId
+          ? await getLatestSubmittedAttempt(reviewAssignmentId, runtimePortal).catch(() => null)
+          : null;
+        const reviewPackage = submission
+          ? prepareQuizPackageForAttempt(quizPackage, submission.attemptId)
+          : null;
+        const serverAttempt = submission && reviewPackage ? buildAttemptFromLatestSubmitted(reviewPackage, submission) : null;
+        const session = submission && reviewPackage && serverAttempt
+          ? createReviewSession(resolvedAssignmentId, reviewPackage, submission, serverAttempt, attemptScope)
+          : reusableSession ?? (await createFreshLocalSession(resolvedAssignmentId, quizPackage, attemptScope));
+        const playablePackage = reviewPackage ?? prepareQuizPackageForAttempt(
           quizPackage,
           session.shuffleSeed ?? session.attemptId,
         );
-        const attempt =
-          session.status === "submitted"
+        const attempt = serverAttempt ??
+          (session.status === "submitted"
             ? gradeFinalAttemptLocally(playablePackage, session.attemptId, session.answers)
-            : createEmptyAttempt(playablePackage, session.attemptId);
+            : createEmptyAttempt(playablePackage, session.attemptId));
 
         if (cancelled) {
           return;
@@ -179,6 +196,7 @@ export function usePlayerLoadEffect({
     quizPackageQuery.error,
     quizPackageQuery.isPending,
     resolvedAssignmentId,
+    reviewAssignmentId,
     startImmediately,
   ]);
 }

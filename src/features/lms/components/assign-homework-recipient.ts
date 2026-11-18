@@ -13,6 +13,7 @@ export type AssignmentRecipientInput = {
 export function buildAssignmentRecipientInput({
   assignmentClassId,
   assignmentGroups,
+  classStudentIds,
   gradeStudentIdsByClass,
   selectedAssignmentGroupIds,
   selectedGradeClassIds,
@@ -23,6 +24,8 @@ export function buildAssignmentRecipientInput({
 }: {
   assignmentClassId?: string;
   assignmentGroups: AssignHomeworkGroupOption[];
+  /** Every student of the chosen class; when all are picked the assignment is sent to the class itself. */
+  classStudentIds?: string[];
   gradeStudentIdsByClass: Record<string, string[]>;
   selectedAssignmentGroupIds: Set<string>;
   selectedGradeClassIds: Set<string>;
@@ -32,7 +35,9 @@ export function buildAssignmentRecipientInput({
   targetType: "grade" | "class" | "group";
 }): AssignmentRecipientInput {
   if (targetType === "class") {
-    return selectedStudentIds.size > 0
+    // Whole class stays a class assignment, so students who join later still receive it (BUG-X-005).
+    const wholeClass = Boolean(classStudentIds?.length) && classStudentIds!.every((id) => selectedStudentIds.has(id));
+    return selectedStudentIds.size > 0 && !wholeClass
       ? {
           classId: assignmentClassId,
           recipientMode: "students",

@@ -60,16 +60,16 @@ const KIND_LABEL: Record<QuestionKind, string> = {
   true_false: "Đúng / Sai",
   short_answer: "Trả lời ngắn",
   numeric: "Đáp số",
-  matching: "Ghép nối",
-  sequence: "Sắp xếp",
+  matching: "Ghép cặp",
+  sequence: "Sắp xếp thứ tự",
   fill_blank: "Điền chỗ trống",
   inline_choice: "Chọn trong câu",
   select_from_lists: "Chọn từ danh sách",
-  drag_words: "Kéo thả từ",
+  drag_words: "Kéo từ vào câu",
   hotspot: "Điểm nóng",
-  drag_drop: "Kéo thả nhóm",
-  likert_scale: "Thang đo",
-  essay: "Trả lời mở",
+  drag_drop: "Phân loại",
+  likert_scale: "Thang đánh giá",
+  essay: "Tự luận",
 };
 
 // The warning caption stays for screen readers; the pill has room for the clock only.
@@ -77,7 +77,7 @@ const visuallyHidden = { clip: "rect(0 0 0 0)", height: 1, overflow: "hidden", p
 
 export function MobilePlayerShell(props: MobilePlayerShellProps) {
   const {
-    answeredCount, attemptCompleted, cells, isBookmarked, isTestingMode, isTrainingMode, playerCardStyle, question, questions, quiz,
+    answeredCount, attemptCompleted, cells, isBookmarked, isTrainingMode, playerCardStyle, question, questions, quiz,
     reviewingSubmittedAttempt, started, timer, saveIndicator, onJumpToQuestion, onRequestSubmit, onToggleBookmark, body, resultBody,
   } = props;
   const [listOpen, setListOpen] = useState(false);
@@ -89,7 +89,7 @@ export function MobilePlayerShell(props: MobilePlayerShellProps) {
 
   const showResult = attemptCompleted && !reviewingSubmittedAttempt;
   const current = cells.find((cell) => cell.state === "current")?.index ?? 0;
-  const showTimer = isTestingMode && !attemptCompleted && timer;
+  const showTimer = !attemptCompleted && timer;
   return (
     <Box sx={{ display: { md: "none" } }}>
       <Box component="section" sx={{ ...playerCardStyle, borderColor: "transparent", minHeight: "100svh", pb: 14 }}>
@@ -152,7 +152,7 @@ export function MobilePlayerShell(props: MobilePlayerShellProps) {
                 </Button>
               </Box>
               <Box>
-                <Typography className="quiz-player-question-title" component="p" sx={{ color: tk.color.text, lineHeight: 1.5 }} variant="h3">{question.title}</Typography>
+                <Typography className="quiz-player-question-title" component="p" sx={{ color: tk.color.text, lineHeight: 1.5, overflowWrap: "anywhere" }} variant="h3">{question.title}</Typography>
                 {question.instructions ? <Typography sx={{ color: tk.color.textMuted, mt: 0.5 }} variant="body2">{question.instructions}</Typography> : null}
               </Box>
               <Box sx={{ display: "grid", gap: 1.5 }}>{body}</Box>

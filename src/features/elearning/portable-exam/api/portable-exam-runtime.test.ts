@@ -76,3 +76,13 @@ test("a portable payload keeps the teacher's player template on the quiz", () =>
   const template = { accentColor: "#0071E3" };
   expect(normalizePortableQuizPackage(portable({ ...sampleQuiz, playerTemplate: template })).quiz.playerTemplate).toEqual(template);
 });
+
+test("plays the quiz the editor published: the payload has no quiz id, only info, settings and sections", () => {
+  const normalized = normalizePortableQuizPackage(portable({
+    info: { title: "[TEST] Portable" },
+    settings: { passingRate: 70, enableTimeLimit: true, timeLimit: "30:00" },
+    sections: [{ id: "s1", title: "Phần 1", questions: [{ id: "q1", kind: "single_choice", title: "Câu 1", points: 1, choices: [{ id: "c1", label: "A" }, { id: "c2", label: "B" }] }] }],
+  }));
+  expect(normalized.quiz).toMatchObject({ id: "q", title: "[TEST] Portable", settings: { mode: "testing", passPercent: 70, timeLimitMinutes: 30 } });
+  expect(normalized.quiz.sections[0]?.questions).toHaveLength(1);
+});

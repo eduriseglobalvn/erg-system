@@ -8,11 +8,12 @@ import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
 import { evaluatePermission } from "@/platform/auth/permissions/permission-evaluator";
 
 type ExerciseBankPageProps = {
+  currentClassId?: string;
   onBack: () => void;
   onAssign: (exerciseTitle: string) => void;
 };
 
-export function ExerciseBankPage({ onBack, onAssign }: ExerciseBankPageProps) {
+export function ExerciseBankPage({ currentClassId, onBack, onAssign }: ExerciseBankPageProps) {
   const isMobile = useLmsMobileBreakpoint("(max-width: 767px)");
   const controller = useExerciseBankController();
   const auth = useAuthSession("lms");
@@ -32,6 +33,7 @@ export function ExerciseBankPage({ onBack, onAssign }: ExerciseBankPageProps) {
       )}
       {controller.quickAssignExercise ? (
         <QuickAssignDialog
+          currentClassId={currentClassId}
           exercise={controller.quickAssignExercise}
           onClose={() => controller.setQuickAssignTitle("")}
           onDone={(title) => {

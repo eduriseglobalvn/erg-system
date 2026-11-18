@@ -16,8 +16,8 @@ export const QUIZ_RUNTIME_PACKAGE_GC_TIME_MS = QUERY_POLICIES.offlineCore.gcTime
 export const quizRuntimeQueryKeys = {
   root: ["quiz-runtime"] as const,
   packageRoot: (tenantId: string = getDefaultTenantId()) => [...quizRuntimeQueryKeys.root, "package", tenantId] as const,
-  package: (portal: QuizRuntimePortal, quizId: string, tenantId: string = getDefaultTenantId()) =>
-    [...quizRuntimeQueryKeys.packageRoot(tenantId), portal, quizId] as const,
+  package: (portal: QuizRuntimePortal, quizId: string, tenantId: string = getDefaultTenantId(), assignmentId?: string) =>
+    [...quizRuntimeQueryKeys.packageRoot(tenantId), portal, quizId, ...(assignmentId ? [assignmentId] : [])] as const,
 };
 
 export const quizRuntimeMutationKeys = {
@@ -30,12 +30,13 @@ export function quizPackageQueryOptions(
   quizId: string,
   portal: QuizRuntimePortal = "elearning",
   tenantId: string = getDefaultTenantId(),
+  assignmentId?: string,
 ) {
   return {
     enabled: Boolean(quizId),
     gcTime: QUIZ_RUNTIME_PACKAGE_GC_TIME_MS,
-    queryFn: ({ signal }: { signal: AbortSignal }) => getQuizPackage(quizId, portal, tenantId, signal),
-    queryKey: quizRuntimeQueryKeys.package(portal, quizId, tenantId),
+    queryFn: ({ signal }: { signal: AbortSignal }) => getQuizPackage(quizId, portal, tenantId, signal, assignmentId),
+    queryKey: quizRuntimeQueryKeys.package(portal, quizId, tenantId, assignmentId),
     staleTime: QUIZ_RUNTIME_PACKAGE_STALE_TIME_MS,
   };
 }
@@ -44,8 +45,9 @@ export function useQuizPackageQuery(
   quizId: string,
   portal: QuizRuntimePortal = "elearning",
   tenantId: string = getDefaultTenantId(),
+  assignmentId?: string,
 ) {
-  return useQuery(quizPackageQueryOptions(quizId, portal, tenantId));
+  return useQuery(quizPackageQueryOptions(quizId, portal, tenantId, assignmentId));
 }
 
 export function useSaveAttemptDraftMutation() {

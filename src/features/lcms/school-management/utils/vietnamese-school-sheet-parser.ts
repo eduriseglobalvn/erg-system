@@ -1,4 +1,5 @@
 import type { StudentImportRow } from "@/features/lcms/school-management/types/school-management-types";
+import { classifyStudentHeader, normalizeGrade, toViDate } from "@/features/lcms/school-management/utils/student-import-columns";
 import type { ClassImportPreviewRow } from "@/features/lcms/school-management/components/class-import-utils";
 
 export type RosterColumnMapping = {
@@ -9,6 +10,8 @@ export type RosterColumnMapping = {
   fullNameIndex: number;
   classIndex: number;
   birthdayIndex: number;
+  gradeIndex: number;
+  codeIndex: number;
   phoneIndex: number;
   isSplitNameColumns: boolean;
 };
@@ -133,6 +136,8 @@ export function findRosterHeaderMapping(matrix: Array<Array<string | number>>): 
     const tenIndex = norm.findIndex((c) => c === "ten");
     const classIndex = norm.findIndex((c) => c === "lop" || c === "tenlop");
     const birthdayIndex = norm.findIndex((c) => c === "ngaysinh" || c === "ns" || c === "dob");
+    const gradeIndex = norm.findIndex((c) => c === "khoi" || c === "khoilop");
+    const codeIndex = norm.findIndex((c) => c === "ma" || c === "mahs" || c === "mahocsinh");
     const phoneIndex = norm.findIndex((c) => c === "sdt" || c === "dienthoai" || c === "sodienthoai" || c === "sdtph");
 
     // Check if this row is the header row
@@ -151,7 +156,9 @@ export function findRosterHeaderMapping(matrix: Array<Array<string | number>>): 
       } else if (hoVaTenIndex >= 0) {
         // Inspect the next column in data rows: is next column filled with 1-word given names?
         const nextCol = hoVaTenIndex + 1;
-        if (nextCol < row.length && nextCol !== classIndex) {
+        // A neighbouring column that is itself a known field (Ngày sinh, Khối...) is not the given-name column.
+        const nextKind = classifyStudentHeader(row[nextCol]);
+        if (nextCol < row.length && nextCol !== classIndex && (nextKind === null || nextKind === "given")) {
           // Check subsequent rows to verify if nextCol has given names (single word)
           let singleWordCount = 0;
           let sampleCount = 0;
@@ -196,6 +203,8 @@ export function findRosterHeaderMapping(matrix: Array<Array<string | number>>): 
         fullNameIndex,
         classIndex,
         birthdayIndex,
+        gradeIndex,
+        codeIndex,
         phoneIndex,
         isSplitNameColumns,
       };
@@ -251,10 +260,12 @@ export function extractStudentsFromRosterMatrix(
 
     const rowClassName = mapping.classIndex >= 0 ? String(row[mapping.classIndex] ?? "").trim() : "";
     const className = rowClassName || options.defaultClassName || "";
-    const { grade } = parseClassNameAndGrade(className);
+    const columnGrade = mapping.gradeIndex >= 0 ? normalizeGrade(String(row[mapping.gradeIndex] ?? "")) : "";
+    const grade = columnGrade || parseClassNameAndGrade(className).grade;
     const rawCode = mapping.sttIndex >= 0 ? String(row[mapping.sttIndex] ?? "").trim() : "";
-    const code = rawCode ? `${className}-${rawCode}` : (className ? `${className}-${students.length + 1}` : "");
-    const birthDate = mapping.birthdayIndex >= 0 ? String(row[mapping.birthdayIndex] ?? "").trim() : "";
+    const ownCode = mapping.codeIndex >= 0 ? String(row[mapping.codeIndex] ?? "").trim() : "";
+    const code = ownCode || (rawCode ? `${className}-${rawCode}` : (className ? `${className}-${students.length + 1}` : ""));
+    const birthDate = mapping.birthdayIndex >= 0 ? toViDate(row[mapping.birthdayIndex]) : "";
     const guardianPhone = mapping.phoneIndex >= 0 ? String(row[mapping.phoneIndex] ?? "").trim() : "";
 
     const missing = [!fullName && "Họ tên", usesGrades && !grade && "Khối", !className && "Lớp"].filter(Boolean);

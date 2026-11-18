@@ -33,6 +33,7 @@ export const viCopy = {
   actionColumn: "Chi tiết",
   selectStudent: (name: string): string => `Chọn ${name}`,
   viewDetail: "Xem",
+  resetPassword: "Cấp lại mật khẩu",
   emptyTitle: "Không có học sinh phù hợp",
   emptyDescription: "Thử đổi bộ lọc hoặc tìm theo tên học sinh khác.",
   status: {
@@ -137,6 +138,7 @@ export const enCopy = {
   actionColumn: "Details",
   selectStudent: (name: string): string => `Select ${name}`,
   viewDetail: "View",
+  resetPassword: "Reset password",
   emptyTitle: "No matching students",
   emptyDescription: "Try changing the filters or searching another name.",
   status: {

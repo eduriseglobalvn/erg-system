@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "identifier": "vn.erg.examplayer",
   "build": {
+    "beforeBuildCommand": "bun run portable:build:web",
     "frontendDist": "../dist-portable"
   },
   "app": {
@@ -16,7 +17,7 @@
         "minWidth": 960,
         "minHeight": 600,
         "resizable": true,
-        "fullscreen": true,
+        "maximized": true,
         "visible": true,
         "devtools": false
       }

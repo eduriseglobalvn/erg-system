@@ -133,6 +133,7 @@ export function QuestionEditorShell(props: Props) {
       </Box>
       <ErgConfirmDialog
         confirmLabel="Xoá"
+        description="Bài đã giao cho học sinh giữ nguyên phiên bản đã xuất bản. Thay đổi này chỉ có hiệu lực từ lần xuất bản sau."
         destructive
         onCancel={() => setConfirmingDelete(false)}
         onConfirm={deleteQuestion}

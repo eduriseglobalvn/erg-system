@@ -211,6 +211,10 @@ export function StudentDashboardWorkspaceRuntime() {
     void navigate({ href: studentPath("/") });
   }
 
+  function openHelp() {
+    void navigate({ href: studentPath("/help") });
+  }
+
   function handleSignOut() {
     logoutElearningViewerSession();
     setAccount(null);
@@ -334,7 +338,7 @@ export function StudentDashboardWorkspaceRuntime() {
           copy={copy}
           openAssignments={openAssignments}
           profile={dashboardProfile}
-          onSignIn={handleSignIn} onTierOpen={sidebarData.tier ? () => openTierView("tier") : undefined}
+          onHelpOpen={openHelp} onSignIn={handleSignIn} onTierOpen={sidebarData.tier ? () => openTierView("tier") : undefined}
           onSignOut={handleSignOut}
         />
       ) : null}
@@ -371,6 +375,7 @@ export function StudentDashboardWorkspaceRuntime() {
         notifications={discussion.discussionNotifications}
         unreadAnnouncementCount={unreadInboxCount}
         onAccountOpen={() => handlePageChange("account")}
+        onHelpOpen={account ? openHelp : undefined}
         onTierOpen={() => openTierView("tier")}
         onNotificationClose={() => setNotificationAnchor(null)}
         onNotificationClick={handleDiscussionNotificationClick}

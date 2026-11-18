@@ -82,3 +82,14 @@ test("teacher classes are the classes they teach; groups only from those classes
   expect(api.directory).not.toHaveBeenCalled();
   expect(api.groups).toHaveBeenCalledWith(expect.objectContaining({ portal: undefined }), expect.anything());
 });
+
+test("distinctOptions keeps one option per id and tells same-label options apart", async () => {
+  const { distinctOptions } = await import("./use-audience-directory");
+  const out = distinctOptions([
+    { id: "class-0001", label: "7A1 · THCS Vân Đồn" },
+    { id: "class-0001", label: "7A1 · THCS Vân Đồn" },
+    { id: "class-0002", label: "7A1 · THCS Vân Đồn" },
+    { id: "class-0003", label: "6A5 · THCS Vân Đồn" },
+  ]);
+  expect(out.map((o) => o.label)).toEqual(["7A1 · THCS Vân Đồn · mã …0001", "7A1 · THCS Vân Đồn · mã …0002", "6A5 · THCS Vân Đồn"]);
+});

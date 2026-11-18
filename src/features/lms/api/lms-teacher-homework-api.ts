@@ -103,6 +103,8 @@ query LmsTeacherHomeworkWorkspace($input: TeacherHomeworkWorkspaceInput) {
           status
           assignedBy
           recipientMode
+          recipientCount
+          submittedCount
           resources {
             quizId
             quizVersionId
@@ -211,9 +213,11 @@ export function mapAssignmentsToRuns(
   return assignments.map((assignment) => {
     const classOption = classOptions.find((item) => item.id === assignment.academicClassId);
     const progress = progressByAssignmentId.get(assignment.id);
-    const submittedCount = progress?.submittedCount ?? 0;
+    const submittedCount = progress?.submittedCount ?? assignment.submittedCount ?? 0;
     const inProgressCount = progress?.inProgressCount ?? 0;
-    const total = submittedCount + inProgressCount;
+    // The list now carries submitted/recipient counts; the progress map (when given) keeps its own denominator.
+    const recipientCount = progress ? 0 : assignment.recipientCount ?? 0;
+    const total = recipientCount || submittedCount + inProgressCount;
     const primaryResource = primaryAssignmentResource(assignment);
 
     return {
@@ -226,6 +230,7 @@ export function mapAssignmentsToRuns(
       targetLevel: classOption?.name || assignment.academicClassId || "Lớp đã giao",
       activeClasses: assignment.academicClassId ? 1 : 0,
       completionRate: total ? Math.round((submittedCount / total) * 100) : 0,
+      recipientCount: recipientCount || undefined,
       submittedCount,
       inProgressCount,
       needsReviewCount: progress?.needsReviewCount ?? 0,

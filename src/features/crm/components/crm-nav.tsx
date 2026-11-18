@@ -2,6 +2,7 @@ import ApartmentRoundedIcon from '@mui/icons-material/ApartmentRounded';
 import AssignmentRoundedIcon from '@mui/icons-material/AssignmentRounded';
 import CalculateRoundedIcon from '@mui/icons-material/CalculateRounded';
 import HandshakeRoundedIcon from '@mui/icons-material/HandshakeRounded';
+import HelpOutlineRoundedIcon from '@mui/icons-material/HelpOutlineRounded';
 import PhoneInTalkRoundedIcon from '@mui/icons-material/PhoneInTalkRounded';
 import TrendingUpRoundedIcon from '@mui/icons-material/TrendingUpRounded';
 import type { DashboardLeaf, DashboardLeafVariant } from '@/layouts/dashboard/types/dashboard-types';
@@ -99,6 +100,12 @@ export function toMenuGroup(crmItems: CrmNavItem[]): MenuGroup[] {
       })),
   }));
 }
+
+/** Not a CRM page (CrmPortalContent never renders it): /seo/help is its own route. */
+export const CRM_HELP_MENU_GROUP: MenuGroup = {
+  label: '',
+  items: [{ id: 'seo-help', label: 'Hướng dẫn', path: '/seo/help', icon: <HelpOutlineRoundedIcon /> }],
+};
 
 // =============================================================================
 // Helpers

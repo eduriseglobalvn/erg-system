@@ -130,7 +130,7 @@ export function HomeworkPanel({ selectedClass, runs, onAssign, onViewProgress }:
                       <TableCell>{run.subjectLabel}</TableCell>
                       <TableCell>{run.targetLevel || selectedClass?.className || "Cả lớp"}</TableCell>
                       <TableCell>{formatShortDateTimeVi(run.dueLabel) || run.dueLabel}</TableCell>
-                      <TableCell>{Math.round(run.completionRate)}%</TableCell>
+                      <TableCell>{(run.recipientCount ?? 0) + run.submittedCount + run.inProgressCount > 0 ? `${Math.round(run.completionRate)}%` : "—"}</TableCell>
                       <TableCell>
                         <ErgStatusChip label={STATUS_LABEL[runStatus]} tone={STATUS_TONE[runStatus]} />
                       </TableCell>

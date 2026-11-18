@@ -20,7 +20,7 @@ export function permissionForLmsPath(path: string): LmsRoutePermission | null {
 
 export function canNavigateToLmsPath(path: string, grantedPermissions: readonly string[] = [], deniedPermissions: readonly string[] = []) {
   const normalized = normalizeLmsPath(path);
-  if (!normalized || normalized === "home" || normalized === "dashboard") return true;
+  if (!normalized || normalized === "home" || normalized === "dashboard" || normalized === "help") return true;
   const permission = permissionForLmsPath(path);
   if (!permission) return false;
   return evaluatePermission({ permission, grantedPermissions, deniedPermissions });

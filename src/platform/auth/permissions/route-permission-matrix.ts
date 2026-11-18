@@ -199,6 +199,11 @@ export const ROUTE_PERMISSION_MATRIX: readonly RoutePermissionEntry[] = [
   { path: "/teacher/learning-outcomes", workspace: "TEACHER", resource: "learning-outcomes", action: "read", permission: "learning.outcomes.read" },
   { path: "/student/learning-outcomes", workspace: "STUDENT", resource: "learning-outcomes", action: "read", permission: "learning.outcomes.read" },
   ...crmPaths.map(crmEntry),
+  // Help guide: anyone who can open the portal's home can read its guide.
+  { path: "/admin/help", workspace: "ADMIN", resource: "help", action: "read", permission: "lms.admin" },
+  { path: "/teacher/help", workspace: "TEACHER", resource: "help", action: "read", permission: "lms.dashboard.read" },
+  { path: "/student/help", workspace: "STUDENT", resource: "help", action: "read", permission: "elearning.assignment.read_self", alternatePermissions: STUDENT_PREVIEW_ALTERNATES },
+  { path: "/seo/help", workspace: "CRM", resource: "help", action: "read", permission: "crm.workspace.access" },
 ];
 
 const sortedMatrix = [...ROUTE_PERMISSION_MATRIX].sort((left, right) => right.path.length - left.path.length);

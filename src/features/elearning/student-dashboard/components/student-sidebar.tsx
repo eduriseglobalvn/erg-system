@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import BoltRoundedIcon from "@mui/icons-material/BoltRounded";
+import HelpOutlineRoundedIcon from "@mui/icons-material/HelpOutlineRounded";
 import LocalFireDepartmentRoundedIcon from "@mui/icons-material/LocalFireDepartmentRounded";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
 import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
@@ -65,7 +66,7 @@ function StatChip({ tone, icon, children }: { tone: keyof typeof STAT_TONES; ico
 }
 
 /** Student sidebar body (spec 7.0): brand, tier profile card, grouped nav, streak reminder, account row. */
-export function StudentSidebar({ activePage, data, initials, name, rankingEnabled, todoCount, unreadCount, notificationSlot, onAccountOpen, onTierOpen, onPageChange, onSignOut, signedIn }: {
+export function StudentSidebar({ activePage, data, initials, name, rankingEnabled, todoCount, unreadCount, notificationSlot, onAccountOpen, onHelpOpen, onTierOpen, onPageChange, onSignOut, signedIn }: {
   /** Bell button: the web design has no top bar, so the notification entry sits in the brand row. */
   notificationSlot?: ReactNode;
   activePage: StudentPageKey;
@@ -76,6 +77,8 @@ export function StudentSidebar({ activePage, data, initials, name, rankingEnable
   todoCount: number;
   unreadCount: number;
   onAccountOpen: () => void;
+  /** Opens the help guide (/student/help). */
+  onHelpOpen?: () => void;
   /** Opens the tier page (H15) from the profile card when the student has a tier. */
   onTierOpen?: () => void;
   onPageChange: (page: StudentPageKey) => void;
@@ -125,6 +128,12 @@ export function StudentSidebar({ activePage, data, initials, name, rankingEnable
       <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
         <NavGroup activePage={activePage} items={study} label="Học tập" onPageChange={onPageChange} />
         <NavGroup activePage={activePage} items={classItems} label="Lớp của tôi" onPageChange={onPageChange} />
+        {onHelpOpen ? (
+          <ListItemButton disableRipple onClick={onHelpOpen} sx={{ ...navRowSx(false, { height: 40 }), gap: 1.25, mt: 1.5, px: 1.25 }}>
+            <HelpOutlineRoundedIcon sx={{ fontSize: NAV_ICON_SIZE }} />
+            <Typography color="inherit" component="span" variant="subtitle2">Hướng dẫn</Typography>
+          </ListItemButton>
+        ) : null}
       </Box>
       {data.streakNudge ? (
         <Box data-design="streak-nudge" sx={{ alignItems: "center", bgcolor: t.fireTint.card, border: 1, borderColor: t.fireTint.border, borderRadius: `${t.radius.card}px`, color: t.fireTint.ink, display: "flex", gap: 1.25, px: 1.5, py: 1.25 }}>

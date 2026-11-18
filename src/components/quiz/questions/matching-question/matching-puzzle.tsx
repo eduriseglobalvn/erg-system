@@ -19,6 +19,7 @@ import { puzzleAnnouncements } from "./matching-board";
 import { PUZZLE, pieceMaxWidthFor, rowAtPoint } from "./puzzle-geometry";
 import { NonTouchPointerSensor } from "./non-touch-pointer-sensor";
 import { GripDots, GripHandle, PuzzlePiece } from "./puzzle-piece";
+import { useReorderSlide } from "../use-reorder-slide";
 
 export type PuzzleRow = {
   id: string;
@@ -110,9 +111,18 @@ function RightCell({ row, index, mode, locked, maxWidth, onMoveKey }: { row: Puz
       }}
     >
       <PuzzlePiece side="right" tone={row.state ?? "idle"} maxWidth={maxWidth}>
-        <Box sx={{ flex: 1, minWidth: 0 }}>{row.right}</Box>
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          {row.right}
+          {/* Row-wise placement is not a pairing: only a connected piece is matched, so say which is which. Under the text, so a phone-width piece keeps its width for the words. */}
+          {learner && !locked && !row.state ? (
+            <Box component="span" sx={{ typography: "caption", color: row.connected ? "success.main" : "text.secondary", display: "block" }}>
+              {row.connected ? "Đã ghép" : "Chưa ghép"}
+            </Box>
+          ) : null}
+        </Box>
+        {/* A phone-width piece gives the grip's width to the words: the whole piece drags there anyway. */}
         {learner ? (
-          locked ? <GripDots /> : <GripHandle />
+          maxWidth < 160 ? null : locked ? <GripDots /> : <GripHandle />
         ) : (
           <IconButton
             ref={setActivatorNodeRef}
@@ -209,6 +219,8 @@ export function MatchingPuzzle({ rows, mode, locked = false, onDrop }: Props) {
   };
 
   const activeRow = activeId ? rows.find((row) => row.pieceId === activeId) : undefined;
+  // The inner piece slides, not the cell: the cell keeps its own transform for the connected offset (so only up and down here).
+  useReorderSlide(gridRef, "[data-piece-id] > [data-piece=\"right\"]", (node) => node.parentElement?.dataset.pieceId, rows.map((row) => row.pieceId ?? "").join("|"), true);
 
   return (
     <DndContext
@@ -241,7 +253,8 @@ export function MatchingPuzzle({ rows, mode, locked = false, onDrop }: Props) {
           ))}
         </Box>
       </Box>
-      <DragOverlay>
+      {/* No fly-back: the piece is already in its new row, where it slides in. */}
+      <DragOverlay dropAnimation={null}>
         {activeRow ? (
           <PuzzlePiece side="right" tone="idle" maxWidth={maxWidth} sx={{ transform: "rotate(-2deg) scale(1.03)", filter: `drop-shadow(${tokens.shadow.md})` }}>
             <Box sx={{ flex: 1, minWidth: 0 }}>{activeRow.right}</Box>

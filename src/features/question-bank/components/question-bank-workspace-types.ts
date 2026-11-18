@@ -1,4 +1,5 @@
 import type { QuizEditorDraftDocument } from "@/features/lcms/quiz/quiz-editor";
+import type { QuizEditorSlide } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import type { QuizCreateDraft } from "./quiz-create-package-dialog";
 import type {
   QuestionBankQuestion,
@@ -11,17 +12,12 @@ export type QuizKindFilter = "all" | QuizBankKind;
 export type QuestionFormMode = "create" | "edit";
 
 export type QuestionFormDraft = {
-  stem: string;
+  /** The question as the quiz editor card authors it; null until a type is picked. */
+  slide: QuizEditorSlide | null;
   objective: string;
-  type: QuestionBankQuestion["type"];
   difficulty: QuestionBankQuestion["difficulty"];
   status: QuestionBankQuestion["status"];
   tagsText: string;
-  choiceA: string;
-  choiceB: string;
-  choiceC: string;
-  choiceD: string;
-  answer: string;
 };
 
 export type QuizPackageEditDraft = {
@@ -29,4 +25,6 @@ export type QuizPackageEditDraft = {
   doc: QuizEditorDraftDocument;
   draft: QuizCreateDraft;
   quiz: QuizBankItem;
+  /** The draft was changed after the last publish: saving the settings must not publish that unfinished work. */
+  unpublishedEdits?: boolean;
 };

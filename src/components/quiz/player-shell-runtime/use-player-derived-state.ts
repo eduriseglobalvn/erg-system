@@ -49,7 +49,9 @@ export function usePlayerDerivedState({
   const isFirstQuestion = currentIndex === 0;
   const isLastQuestion = currentIndex === questions.length - 1;
   const testingDurationSeconds = Math.max(activeQuiz?.settings.timeLimitMinutes ?? 0, 0) * 60;
-  const deadlineAt = isTestingMode && activeSession && (activeSession.serverStarted || portableOffline)
+  // A practice quiz assigned with a time limit is cut off by the server too, so it gets the same clock (BUG-G-009).
+  const timed = isTestingMode || (activeSession?.durationMinutes ?? 0) > 0;
+  const deadlineAt = timed && activeSession && (activeSession.serverStarted || portableOffline)
     ? attemptDeadlineMs(activeSession, testingDurationSeconds, portableOffline)
     : null;
   const attemptServerNowMs = activeSession ? serverNowMs(activeSession, undefined, portableOffline) : null;

@@ -85,8 +85,6 @@ const rows: Row[] = [
   ["drag words empty", words, {}, 0, "wrong"],
   ["drag drop all", dnd, { dragDropPlacements: { d1: "t1", d2: "t2" } }, 10, "correct"],
   ["drag drop swapped", dnd, { dragDropPlacements: { d1: "t2", d2: "t1" } }, 0, "wrong"],
-  ["likert all rows", likert, { likertResponses: { r1: "1", r2: "3" } }, 10, "correct"],
-  ["likert missing row", likert, { likertResponses: { r1: "1" } }, 0, "wrong"],
   ["essay blank", essay, { essayText: "   " }, 0, "wrong"],
   ["hotspot inside rect", rect, { hotspotPoint: { x: 20, y: 20 } }, 10, "correct"],
   ["hotspot rect edge", rect, { hotspotPoint: { x: 30, y: 30 } }, 10, "correct"],
@@ -105,6 +103,19 @@ describe("scoreQuestion (table)", () => {
     expect(result.partiallyRight).toBe(state === "partial");
     expect(result.maxPoints).toBe(10);
     expect(result.message).toBe(state === "correct" ? "OK" : state === "partial" ? "PART" : "NO");
+  });
+
+  it("does not score a Likert self-assessment: no points, no maximum, never right or wrong", () => {
+    const full = scoreQuestion(likert, { likertResponses: { r1: "1", r2: "3" } });
+    expect(full).toMatchObject({ awardedPoints: 0, maxPoints: 0, correct: false, partiallyRight: false, pendingReview: true });
+    expect(scoreQuestion(likert, { likertResponses: { r1: "1" } })).toMatchObject({ awardedPoints: 0, maxPoints: 0, correct: false });
+    expect(scoreQuestion(likert, { likertResponses: { r1: "1" } }).pendingReview).toBeUndefined();
+    // Same maximum and score the server grades: the Likert question adds nothing to either.
+    const quiz = { settings: { passPercent: 50 }, sections: [{ questions: [single, likert] }] } as unknown as Quiz;
+    const session = createAttemptSession(createQuizPackage(quiz), "att");
+    expect(session.attempt.maxScore).toBe(10);
+    const graded = gradeAttemptLocally(session, { [single.id]: { choiceId: "c2" }, [likert.id]: { likertResponses: { r1: "1", r2: "3" } } });
+    expect(graded.attempt).toMatchObject({ totalScore: 10, maxScore: 10, percent: 100 });
   });
 
   it("never auto-awards essay points; marks the answer for teacher review", () => {

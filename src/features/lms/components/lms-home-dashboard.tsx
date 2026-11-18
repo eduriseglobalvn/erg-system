@@ -11,6 +11,7 @@ import AssignmentRoundedIcon from "@mui/icons-material/AssignmentRounded";
 import { ErgEmptyState } from "@/components/erg-mui/erg-feedback";
 import type { AssignmentRun, ClassroomSnapshot } from "@/domain/school/classroom-types";
 import { TodayLessonsPanel } from "@/features/lms/components/lms-home-today-lessons";
+import { knownStudentCount } from "@/features/lms/components/lms-teacher-shell-utils";
 import { formatDateVi, todayInput } from "@/domain/formatters/format-date";
 import { greetingFor, LmsHomeMobile } from "@/features/lms/components/lms-home-mobile";
 
@@ -88,7 +89,7 @@ export function LmsHomeDashboard({
             </Typography>
             <Typography color="text.secondary" variant="body2" sx={{ mt: 0.5 }}>
               {today ? `Hôm nay, ${today} · ` : ""}
-              {selectedSchoolName} · {selectedClass?.className ?? "Chưa chọn lớp"} · {selectedClass?.studentCount ?? 0} học sinh
+              {[selectedSchoolName, selectedClass?.className ?? "Chưa chọn lớp", knownStudentCount(selectedClass) === undefined ? "" : `${knownStudentCount(selectedClass)} học sinh`].filter(Boolean).join(" · ")}
             </Typography>
           </Box>
           <Stack direction={{ xs: "column", sm: "row" }} spacing={1} sx={{ width: { xs: "100%", sm: "auto" } }}>
@@ -172,7 +173,7 @@ export function LmsHomeDashboard({
             )}
           </Panel>
 
-          <TodayLessonsPanel onOpenSchedule={onOpenSchedule} />
+          <TodayLessonsPanel noSchool={!selectedSchoolName} onOpenSchedule={onOpenSchedule} />
         </Box>
       </Box>
     </Box>

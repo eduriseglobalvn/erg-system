@@ -23,7 +23,7 @@ import { useMemo, useState } from "react";
 import { StudentScopeNavigator } from "@/features/lcms/school-management/components/students/student-scope-navigator";
 import type { PartnerSchool, SchoolStudent } from "@/features/lcms/school-management/types/school-management-types";
 import { AppleMetricCard } from "@/features/lcms/school-management/components/students/school-student-directory/apple-metric-card";
-import { filterSchoolStudents, getAvatarStyle, getInitials, statusMeta } from "@/features/lcms/school-management/components/students/school-student-directory/student-directory-utils";
+import { countAssignedStudents, filterSchoolStudents, getAvatarStyle, getInitials, statusMeta } from "@/features/lcms/school-management/components/students/school-student-directory/student-directory-utils";
 import { StudentProfileDrawer } from "@/features/lcms/school-management/components/students/school-student-directory/student-profile-drawer";
 import { tableHeadCellSx } from "@/features/lcms/school-management/components/students/school-student-directory/table-head-cell-sx";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
@@ -45,7 +45,7 @@ export function SchoolStudentDirectoryWorkspace({ school }: { school: PartnerSch
   const visible = filtered.slice(page * 12, page * 12 + 12);
   const scopeLabel = selectedClass !== "all" ? `Lớp ${selectedClass}` : selectedGrade !== "all" ? `Khối ${selectedGrade}` : "Toàn trường";
   const atRisk = filtered.filter((student) => student.status === "at-risk").length;
-  const assigned = filtered.filter((student) => student.subjectIds.length > 0).length;
+  const assigned = countAssignedStudents(filtered);
 
   function resetPage() { setPage(0); }
 

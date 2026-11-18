@@ -13,15 +13,10 @@ import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
-import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import {
-  DEFAULT_CURRICULUM_CATALOG,
-  fetchCurriculumCatalog,
-  type CurriculumSubjectCatalogItem,
-} from "@/features/lcms/school-management/api/curriculum-catalog";
+import { useCurriculumCatalogQuery } from "@/features/lcms/school-management/api/curriculum-catalog";
 import type { PartnerSchool } from "@/features/lcms/school-management/types/school-management-types";
 
 export function SchoolSubjectAssignDialog({
@@ -33,85 +28,30 @@ export function SchoolSubjectAssignDialog({
   initialClassId?: string;
   onClose: () => void;
   onSave: (payload: {
-    name: string;
-    code: string;
     selectedClassIds: string[];
     subjectCatalogId: string;
     levelCatalogId: string;
   }) => Promise<void>;
   school: PartnerSchool;
 }) {
-  const [catalog, setCatalog] = useState<CurriculumSubjectCatalogItem[]>(DEFAULT_CURRICULUM_CATALOG);
-  const [subjectId, setSubjectId] = useState<string>(DEFAULT_CURRICULUM_CATALOG[0]?.id ?? "");
-  const [levelId, setLevelId] = useState<string>("");
+  const catalogQuery = useCurriculumCatalogQuery();
+  const catalog = useMemo(() => catalogQuery.data ?? [], [catalogQuery.data]);
+  const [subjectId, setSubjectId] = useState("");
+  const [levelId, setLevelId] = useState("");
   const [selectedClassIds, setSelectedClassIds] = useState<string[]>(() =>
     initialClassId ? [initialClassId] : school.classes.map((cls) => cls.id)
   );
-  const [customName, setCustomName] = useState("");
-  const [customCode, setCustomCode] = useState("");
   const [saving, setSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  useEffect(() => {
-    let active = true;
-    void fetchCurriculumCatalog().then((items) => {
-      if (active && items.length > 0) {
-        setCatalog(items);
-      }
-    });
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  const selectedSubject = useMemo(
-    () => catalog.find((item) => item.id === subjectId || item.code === subjectId),
-    [catalog, subjectId]
-  );
-
-  const availableLevels = useMemo(() => selectedSubject?.levels ?? [], [selectedSubject]);
-
-  useEffect(() => {
-    if (availableLevels.length > 0) {
-      if (!levelId || !availableLevels.some((l) => l.id === levelId || l.code === levelId)) {
-        setLevelId(availableLevels[0]?.id || "");
-      }
-    } else {
-      setLevelId("");
-    }
-  }, [availableLevels, levelId]);
-
-  const selectedLevel = useMemo(
-    () => availableLevels.find((item) => item.id === levelId || item.code === levelId),
-    [availableLevels, levelId]
-  );
-
-  // Auto-generate name and code when subject or level changes
-  useEffect(() => {
-    if (selectedSubject) {
-      const levelName = selectedLevel ? selectedLevel.name : "";
-      const generatedName = levelName
-        ? selectedSubject.name.toLowerCase().includes(levelName.toLowerCase())
-          ? levelName
-          : `${selectedSubject.name} - ${levelName}`
-        : selectedSubject.name;
-
-      const codeSuffix = selectedLevel?.code || selectedSubject.code;
-      const schoolPrefix = school.code ? school.code.toLowerCase().replace(/[^a-z0-9]/g, "") : "sch";
-      let generatedCode = `${codeSuffix}-${schoolPrefix}`;
-      if (school.subjects.some((s) => s.code.toLowerCase() === generatedCode.toLowerCase())) {
-        generatedCode = `${generatedCode}-${Date.now().toString(36).slice(-4)}`;
-      }
-
-      setCustomName(generatedName);
-      setCustomCode(generatedCode);
-    }
-  }, [selectedSubject, selectedLevel, school.code, school.subjects]);
+  const selectedSubject = catalog.find((item) => item.id === subjectId) ?? catalog[0];
+  const availableLevels = selectedSubject?.levels ?? [];
+  const selectedLevel = availableLevels.find((item) => item.id === levelId) ?? availableLevels[0];
 
   const selectedStudentCount = useMemo(() => {
     const classIdSet = new Set(selectedClassIds);
-    return school.students.filter((st) => st.academicClassId && classIdSet.has(st.academicClassId)).length;
-  }, [school.students, selectedClassIds]);
+    return school.classes.reduce((sum, cls) => sum + (classIdSet.has(cls.id) ? cls.studentCount || 0 : 0), 0);
+  }, [school.classes, selectedClassIds]);
 
   function toggleClass(id: string) {
     setSelectedClassIds((current) =>
@@ -128,16 +68,14 @@ export function SchoolSubjectAssignDialog({
   }
 
   async function handleConfirm() {
-    if (!customName.trim() || !customCode.trim()) return;
+    if (!selectedSubject) return;
     setSaving(true);
     setErrorMessage(null);
     try {
       await onSave({
-        name: customName.trim(),
-        code: customCode.trim(),
         selectedClassIds,
-        subjectCatalogId: selectedSubject?.id || "",
-        levelCatalogId: selectedLevel?.id || "",
+        subjectCatalogId: selectedSubject.id,
+        levelCatalogId: selectedLevel?.id ?? "",
       });
       toast.success("Đăng ký môn học thành công");
       onClose();
@@ -174,6 +112,16 @@ export function SchoolSubjectAssignDialog({
       </DialogTitle>
 
       <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2.5, pt: "16px !important" }}>
+        {catalogQuery.isError ? (
+          <Alert
+            action={<Button color="inherit" onClick={() => void catalogQuery.refetch()} size="small" variant="text">Tải lại</Button>}
+            severity="error"
+            sx={{ borderRadius: 2 }}
+          >
+            Không tải được danh mục môn học và level. Chưa thể đăng ký môn cho đến khi tải lại thành công.
+          </Alert>
+        ) : null}
+        {catalogQuery.isPending ? <Alert severity="info" sx={{ borderRadius: 2 }}>Đang tải danh mục môn học…</Alert> : null}
         {errorMessage ? (
           <Alert severity="error" onClose={() => setErrorMessage(null)} sx={{ borderRadius: 2 }}>
             {errorMessage}
@@ -185,8 +133,9 @@ export function SchoolSubjectAssignDialog({
           <Select
             label="1. Môn học chuẩn *"
             labelId="catalog-subject-label"
+            disabled={!catalog.length}
             onChange={(e) => setSubjectId(e.target.value)}
-            value={subjectId}
+            value={selectedSubject?.id ?? ""}
           >
             {catalog.map((sub) => (
               <MenuItem key={sub.id} value={sub.id}>
@@ -207,7 +156,7 @@ export function SchoolSubjectAssignDialog({
             label="2. Cấp độ / Level *"
             labelId="catalog-level-label"
             onChange={(e) => setLevelId(e.target.value)}
-            value={levelId}
+            value={selectedLevel?.id ?? ""}
           >
             {availableLevels.map((lvl) => (
               <MenuItem key={lvl.id} value={lvl.id}>
@@ -291,26 +240,6 @@ export function SchoolSubjectAssignDialog({
             })}
           </Box>
         </Box>
-
-        {/* Step 4: Thông tin nhận diện môn học */}
-        <Box sx={{ display: "grid", gap: 1.5, gridTemplateColumns: { xs: "1fr", sm: "2fr 1fr" } }}>
-          <TextField
-            helperText="Tên môn học hiển thị trong trường"
-            label="Tên hiển thị *"
-            onChange={(e) => setCustomName(e.target.value)}
-            required
-            size="small"
-            value={customName}
-          />
-          <TextField
-            helperText="Mã định danh nội bộ"
-            label="Mã nội bộ *"
-            onChange={(e) => setCustomCode(e.target.value)}
-            required
-            size="small"
-            value={customCode}
-          />
-        </Box>
       </DialogContent>
 
       <DialogActions sx={{ px: 3, pb: 2.5, pt: 1, borderTop: "1px solid", borderColor: "divider" }}>
@@ -318,7 +247,7 @@ export function SchoolSubjectAssignDialog({
           Hủy
         </Button>
         <Button
-          disabled={!customName.trim() || !customCode.trim() || saving}
+          disabled={!selectedSubject || saving}
           onClick={() => void handleConfirm()}
           startIcon={saving ? <CircularProgress color="inherit" size={16} /> : null}
           variant="contained"

@@ -45,6 +45,7 @@ export type AssignmentRun = {
   targetLevel: string;
   activeClasses: number;
   completionRate: number;
+  recipientCount?: number;
   submittedCount: number;
   inProgressCount: number;
   needsReviewCount: number;
@@ -62,6 +63,10 @@ export type ClassroomStudent = {
   className: string;
   gradeLabel: string;
   avatarSeed: string;
+  /** Mã học sinh (studentCode), not the internal id. */
+  studentCode?: string;
+  /** Tên đăng nhập thật của tài khoản học sinh. */
+  username?: string;
   currentAssignment: string;
   currentStage: string;
   progressRate: number;

@@ -95,6 +95,7 @@ export function StudentDataTable({
   copy,
   focusedStudentId,
   onFocusStudent,
+  onResetPassword,
   onToggleStudent,
   selectedIds,
   students,
@@ -102,6 +103,7 @@ export function StudentDataTable({
   copy: StudentCopy;
   focusedStudentId: string | null;
   onFocusStudent: (studentId: string) => void;
+  onResetPassword: (student: ClassroomStudent) => void;
   onToggleStudent: (studentId: string) => void;
   selectedIds: string[];
   students: ClassroomStudent[];
@@ -160,6 +162,7 @@ export function StudentDataTable({
                   checked={selectedIds.includes(student.id)}
                   copy={copy}
                   onFocus={() => onFocusStudent(student.id)}
+                  onResetPassword={() => onResetPassword(student)}
                   onToggle={() => onToggleStudent(student.id)}
                   student={student}
                 />
@@ -182,6 +185,7 @@ export function StudentDataTable({
             checked={selectedIds.includes(student.id)}
             copy={copy}
             onFocus={() => onFocusStudent(student.id)}
+            onResetPassword={() => onResetPassword(student)}
             onToggle={() => onToggleStudent(student.id)}
             student={student}
           />
@@ -222,6 +226,7 @@ function StudentTableRow({
   checked,
   copy,
   onFocus,
+  onResetPassword,
   onToggle,
   student,
 }: {
@@ -229,6 +234,7 @@ function StudentTableRow({
   checked: boolean;
   copy: StudentCopy;
   onFocus: () => void;
+  onResetPassword: () => void;
   onToggle: () => void;
   student: ClassroomStudent;
 }) {
@@ -277,9 +283,14 @@ function StudentTableRow({
         <Chip label={copy.status[student.status]} size="small" color={getStatusTone(student.status)} />
       </TableCell>
       <TableCell>
-        <Button size="small" variant="outlined" onClick={onFocus}>
-          {copy.viewDetail}
-        </Button>
+        <Stack direction="row" spacing={1}>
+          <Button size="small" variant="outlined" onClick={onFocus}>
+            {copy.viewDetail}
+          </Button>
+          <Button size="small" variant="text" onClick={onResetPassword}>
+            {copy.resetPassword}
+          </Button>
+        </Stack>
       </TableCell>
     </TableRow>
   );
@@ -290,6 +301,7 @@ function StudentMobileCard({
   checked,
   copy,
   onFocus,
+  onResetPassword,
   onToggle,
   student,
 }: {
@@ -297,6 +309,7 @@ function StudentMobileCard({
   checked: boolean;
   copy: StudentCopy;
   onFocus: () => void;
+  onResetPassword: () => void;
   onToggle: () => void;
   student: ClassroomStudent;
 }) {
@@ -336,9 +349,14 @@ function StudentMobileCard({
         <Typography variant="subtitle2" component="span">
           {student.averageScore} {copy.scoreUnit}
         </Typography>
-        <Button size="small" variant="outlined" onClick={onFocus}>
-          {copy.viewDetail}
-        </Button>
+        <Stack direction="row" spacing={1}>
+          <Button size="small" variant="outlined" onClick={onFocus}>
+            {copy.viewDetail}
+          </Button>
+          <Button size="small" variant="text" onClick={onResetPassword}>
+            {copy.resetPassword}
+          </Button>
+        </Stack>
       </Stack>
     </Paper>
   );

@@ -1,6 +1,7 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { useQueries } from "@tanstack/react-query";
 import { QUERY_POLICIES } from "@/lib/query-policy";
+import { StudentPasswordResetFlow, type StudentPasswordResetTarget } from "@/features/lms/student-credentials/student-password-reset-flow";
 
 import Box from "@mui/material/Box";
 import ButtonBase from "@mui/material/ButtonBase";
@@ -156,6 +157,7 @@ export function ClassManagementPage({ classes, selectedClass, selectedSchoolName
     });
   }, [classificationFilter, debouncedSearchValue, manualClassifications, progressFilter, scopeStudents]);
 
+  const [resetTarget, setResetTarget] = useState<StudentPasswordResetTarget | null>(null);
   const detailStudent = students.find((student) => student.id === detailStudentId) ?? null;
   const scopeLabel = scopeOptions.find((option) => option.value === resolvedScopeId)?.label ?? selectedClass?.className ?? "Lớp học";
 
@@ -186,7 +188,7 @@ export function ClassManagementPage({ classes, selectedClass, selectedSchoolName
           <Box sx={{ minWidth: 220, mr: "auto" }}>
             <Typography variant="subtitle2">{scopeLabel}</Typography>
             <Typography variant="caption" color="text.secondary" sx={{ display: "block", fontWeight: "fontWeightBold" }}>
-              {selectedSchoolName} · {visibleStudents.length}/{scopeStudents.length} học sinh
+              {[selectedSchoolName, `${visibleStudents.length}/${scopeStudents.length} học sinh`].filter(Boolean).join(" · ")}
             </Typography>
           </Box>
           <FilterSelect
@@ -378,10 +380,12 @@ export function ClassManagementPage({ classes, selectedClass, selectedSchoolName
         <StudentProfileDetailDrawer
           draft={studentDrafts[detailStudent.id] ?? createStudentProfileDraft(detailStudent)}
           onClose={() => setDetailStudentId(null)}
+          onResetPassword={() => setResetTarget({ classId: detailStudent.classId, studentId: detailStudent.id, studentName: detailStudent.name })}
           onUpdate={(patch) => updateStudentDraft(detailStudent.id, patch)}
           student={detailStudent}
         />
       ) : null}
+      <StudentPasswordResetFlow onClose={() => setResetTarget(null)} portal="lms" target={resetTarget} />
     </Box>
   );
 }
@@ -483,8 +487,8 @@ function createStudentProfileDraft(student: ClassroomStudent) {
   const baseUsername = removeVietnameseMarks(student.name).toLowerCase().replace(/[^a-z0-9]+/g, ".").replace(/^\.+|\.+$/g, "");
   return {
     name: student.name,
-    username: baseUsername || student.id,
-    password: `${student.avatarSeed.toLowerCase()}@2026`,
+    username: student.username ?? (baseUsername || student.id),
+    password: "",
     note: student.mentorNote,
   };
 }

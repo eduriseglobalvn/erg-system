@@ -47,7 +47,7 @@ export function AssignHomeworkDesktopView({ model }: AssignHomeworkDesktopViewPr
           <MobileAssignProgress step={step} targetType={targetType} selectedCount={selectedStudentIds.size} />
         ) : null}
         {step === 1 ? (
-          <Box sx={{ width: "100%", height: "100%", px: { xs: 2, md: 4 }, py: { xs: 2, md: 3 }, display: "flex", flexDirection: "column", gap: 2, minHeight: 0 }}>
+          <Box sx={{ width: "100%", height: "100%", px: { xs: 2, md: 4 }, py: { xs: 2, md: 3 }, display: "flex", flexDirection: "column", gap: 2, minHeight: 0, overflowY: "auto" }}>
             {errorBanner}
 
             {isMobile ? null : (

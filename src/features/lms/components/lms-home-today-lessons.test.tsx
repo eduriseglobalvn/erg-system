@@ -2,7 +2,9 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import type { TeachingCalendarEvent } from "@/features/teaching-calendar/api/teaching-calendar-api";
-import { buildLessonLinks, TodayLessonsList } from "./lms-home-today-lessons";
+vi.mock("@/platform/auth/hooks/use-auth-session", () => ({ useAuthSession: () => ({ session: { tenantId: "" } }) }));
+import * as calendarApi from "@/features/teaching-calendar/api/teaching-calendar-api";
+import { buildLessonLinks, TodayLessonsList, useTodayLessons } from "./lms-home-today-lessons";
 
 const lesson = {
   className: "9A1",
@@ -40,5 +42,19 @@ describe("TodayLessonsList", () => {
     expect(screen.getByText("Hôm nay không có tiết dạy")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Xem lịch" }));
     expect(onOpenSchedule).toHaveBeenCalled();
+  });
+});
+
+describe("useTodayLessons", () => {
+  it("loads today's lessons with the default tenant when the teacher session carries none", async () => {
+    const { renderHook, waitFor } = await import("@testing-library/react");
+    const { QueryClient, QueryClientProvider } = await import("@tanstack/react-query");
+    const loader = vi.spyOn(calendarApi, "loadLmsMyTeachingCalendar").mockResolvedValue({ events: [lesson] } as never);
+    const client = new QueryClient();
+    const { result } = renderHook(() => useTodayLessons(), {
+      wrapper: ({ children }) => <QueryClientProvider client={client}>{children}</QueryClientProvider>,
+    });
+    await waitFor(() => expect(result.current.events).toHaveLength(1));
+    expect(loader.mock.calls[0][0].tenantId).toBeTruthy();
   });
 });

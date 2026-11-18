@@ -11,7 +11,7 @@ import { ErgContentBand, ErgPageSurface } from "@/components/erg-mui/erg-layout"
 import { can } from "@/features/rbac/lib/can";
 import { ErgPageHeader } from "@/components/erg-mui/erg-page-header";
 import { ErgDataTableShell } from "@/components/erg-mui/erg-table";
-import { CreateEmployeeWizard } from "@/features/employee-management/components/create-employee-wizard";
+import { CreateEmployeeDialog } from "@/features/employee-management/components/create-employee-dialog";
 import { EmployeeDetailDrawer } from "@/features/employee-management/components/employee-detail-drawer";
 import { EmployeeActionMenu } from "@/features/employee-management/components/employee-list/action-menu";
 import { EmployeeMobileList } from "@/features/employee-management/components/employee-list/employee-mobile-list";
@@ -201,7 +201,7 @@ export function EmployeeListWorkspace({ tenantId }: { tenantId: string }) {
         userId={selectedUserId}
       />
 
-      <CreateEmployeeWizard onClose={() => setCreateOpen(false)} open={createOpen} tenantId={tenantId} />
+      <CreateEmployeeDialog onClose={() => setCreateOpen(false)} open={createOpen} tenantId={tenantId} />
     </ErgContentBand>
   );
 }

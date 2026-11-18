@@ -141,7 +141,7 @@ export function SchedulePage() {
       <ScheduleHeader
         batchLabel={draft.batchLabel} batchStatus={batchStatus} errorCount={errors}
         onExport={() => void exportSheets(() => [scheduleSheet({ rows, schoolName: school?.schoolName ?? "", template, weekStart })], overviewFileName(weekStart))} onPublish={() => setConfirmPublish(true)}
-        onRename={setRenameAnchor} onReusePrevious={meta.schoolId ? () => setReuseOpen(true) : undefined} onRetry={() => void draft.flush()} publishing={publishing} rowCount={rows.length}
+        onRename={setRenameAnchor} onReusePrevious={meta.schoolId ? () => setReuseOpen(true) : undefined} onRetry={() => void draft.flush().then((saved) => { if (saved) setPublishError(null); })} publishing={publishing} rowCount={rows.length}
         savedAt={draft.savedAt} schoolName={school?.schoolName ?? ""} status={draft.status} templateName={template.name}
       />
       {draft.status === "stale" ? <Alert action={<ErgButton onClick={() => window.location.reload()} variant="text">Tải lại</ErgButton>} severity="error">{STALE_VERSION_MESSAGE}</Alert> : null}

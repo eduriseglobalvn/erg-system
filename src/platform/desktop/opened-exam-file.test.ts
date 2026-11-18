@@ -22,4 +22,8 @@ it("returns the opened file bytes, or null when the player was started without a
   expect(invoke).toHaveBeenCalledWith("opened_exam_file");
   invoke.mockResolvedValueOnce(new ArrayBuffer(0));
   await expect(readOpenedExamFile()).resolves.toBeNull();
+  invoke.mockResolvedValueOnce([123, 125]);
+  expect(new Uint8Array((await readOpenedExamFile())!)).toEqual(new Uint8Array([123, 125]));
+  invoke.mockResolvedValueOnce([]);
+  await expect(readOpenedExamFile()).resolves.toBeNull();
 });

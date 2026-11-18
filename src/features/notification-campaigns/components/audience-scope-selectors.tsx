@@ -52,6 +52,7 @@ export function AudienceScopeSelectors({ draft, kind, onChange }: Props) {
   return (
     <Autocomplete<AudienceOption, true>
       filterSelectedOptions
+      getOptionKey={(o) => o.id}
       getOptionLabel={(o) => o.label}
       isOptionEqualToValue={(o, v) => o.id === v.id}
       loading={directory.loading}

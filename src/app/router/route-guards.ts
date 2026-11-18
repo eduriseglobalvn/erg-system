@@ -13,7 +13,7 @@ import { ELEARNING_PORTAL_HOSTS, isPortalHost, shouldRedirectLocalPortal } from 
 import { buildPortalHostUrl } from "@/app/router/portal-host-url";
 import { resolveActivePortal } from "@/app/router/portal-host-resolution";
 import { crmPaths } from "@/platform/auth/permissions/portal-route-registry";
-import { misroutedStudentHome } from "@/platform/auth/permissions/student-only";
+import { isStudentOnlySession, misroutedStudentHome } from "@/platform/auth/permissions/student-only";
 import {
   canonicalLmsWorkspaceHostForRuntime,
   canonicalWorkspaceForPath,
@@ -66,7 +66,7 @@ export function enforceWorkspaceRoute(
   throwAuthRedirect(decisions[0], workspace, safeRedirect, auth);
 }
 
-const CRM_ROUTE_PATHS: ReadonlySet<string> = new Set(crmPaths.map((path) => `/${path}`));
+const CRM_ROUTE_PATHS: ReadonlySet<string> = new Set([...crmPaths.map((path) => `/${path}`), "/seo/help"]);
 
 /** Workspace of a path served under `_authed`: /admin, /teacher, /student prefixes, or a CRM path (/seo...). */
 export function authedWorkspaceForPath(pathname: string): Workspace | undefined {
@@ -109,7 +109,14 @@ export function authedBeforeLoad({ context, location }: { context: { auth: AuthR
     enforceWorkspaceRoute(auth, location, workspace);
     enforceCanonicalWorkspaceHost(location, workspace);
   };
-  return withFreshAuth(context.auth, guard);
+  // The app context is scoped to the portal of the page first loaded: after a full load of /admin it reads the lcms
+  // scope and a learner (session stored under lms) looks signed out, on /admin and then on /student too. Judge the
+  // learner by the stored session so the misrouted-student rule applies (BUG-A-046). Staff keep the refresh path.
+  const stored = context.auth.authenticated ? null : storedAuthRouteState("lms");
+  // Staff too when the page first loaded is outside the lms scope: the stored session is already valid (expired ones
+  // are dropped on read), and going through a token refresh here raced the router and crashed the denial page.
+  const usable = stored?.authenticated && (isStudentOnlySession(stored.workspaces) || resolveCurrentPortal() !== "lms") ? stored : null;
+  return withFreshAuth(usable ?? context.auth, guard);
 }
 
 /** An expired access token with a stored refresh token is not a sign-out: refresh once before deciding with `run`. */
@@ -122,8 +129,7 @@ export function withFreshAuth<T>(auth: AuthRouteState, run: (auth: AuthRouteStat
   return run(auth);
 }
 
-function storedAuthRouteState() {
-  const portal = resolveCurrentPortal();
+function storedAuthRouteState(portal = resolveCurrentPortal()) {
   return createAuthRouteState({ account: getCurrentAccount(portal), session: getAuthScope(portal).session, apiBacked: hasApiBase() });
 }
 

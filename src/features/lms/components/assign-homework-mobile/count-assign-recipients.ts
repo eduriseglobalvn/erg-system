@@ -5,6 +5,7 @@ import type { AssignHomeworkController } from "@/features/lms/components/use-ass
 export function countAssignRecipients(model: AssignHomeworkController): number {
   const recipient = buildAssignmentRecipientInput({
     assignmentClassId: model.assignmentClass?.id,
+    classStudentIds: model.students.map((student) => student.id),
     assignmentGroups: model.activeAssignmentGroups,
     gradeStudentIdsByClass: model.gradeStudentIdsByClass,
     selectedAssignmentGroupIds: model.selectedAssignmentGroupIds,
@@ -15,6 +16,7 @@ export function countAssignRecipients(model: AssignHomeworkController): number {
     targetType: model.targetType,
   });
   if (recipient.studentIds) return recipient.studentIds.length;
+  if (recipient.recipientMode === "class") return model.selectedStudentIds.size;
   if (recipient.recipientMode === "group") {
     return model.activeAssignmentGroups.find((group) => group.id === recipient.groupId)?.studentIds.length ?? 0;
   }

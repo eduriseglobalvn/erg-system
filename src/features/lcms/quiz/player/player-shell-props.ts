@@ -7,6 +7,8 @@ import type { Attempt, QuizPackage } from "@/domain/quiz/types";
 export type PlayerShellProps = {
   assignmentId?: string;
   quizId?: string;
+  /** Name of the assignment the student opened; shown instead of the quiz's own title (a draft quiz is still "Bài kiểm tra mới"). */
+  title?: string;
   /** A verified .ergquiz package can use this same player without a second UI. */
   portablePackage?: QuizPackage;
   /** Portable packages may run without an online attempt endpoint. */

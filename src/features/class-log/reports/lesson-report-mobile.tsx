@@ -9,6 +9,7 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 
 import { ErgButton, ErgIconButton } from "@/components/erg-mui/erg-actions";
+import { ErgConfirmDialog } from "@/components/erg-mui/erg-confirm-dialog";
 import { ErgEmptyState } from "@/components/erg-mui/erg-feedback";
 import { todayInput } from "@/domain/formatters/format-date";
 import { teacherPath } from "@/platform/workspaces/workspace-paths";
@@ -29,6 +30,7 @@ export function LessonReportMobile() {
   const [weekStart, setWeekStart] = useState(currentWeekStart);
   const [day, setDay] = useState("");
   const [editing, setEditing] = useState<PeriodGroup | null>(null);
+  const [asking, setAsking] = useState(false);
   const query = useTeacherWeek(weekStart, "", "");
   const confirm = useConfirmWeek(weekStart);
   const week = query.data;
@@ -72,7 +74,7 @@ export function LessonReportMobile() {
       <Box sx={{ display: "flex", flex: 1, flexDirection: "column", gap: 1.25, px: 2, py: 1.5 }}>
         <PanelState isError={query.isError} isPending={query.isPending} onRetry={() => void query.refetch()}>
           {groups.length === 0 ? <ErgEmptyState title={classLogText.emptyWeek} /> : null}
-          {todo.map((g) => <TodoCard confirming={confirm.isPending} group={g} key={g.key} onConfirm={() => confirm.mutate()} onEdit={() => setEditing(g)} />)}
+          {todo.map((g) => <TodoCard confirming={confirm.isPending} group={g} key={g.key} onConfirm={() => setAsking(true)} onEdit={() => setEditing(g)} />)}
           {done.length ? (
             <Box sx={{ bgcolor: "background.paper", border: `1px solid ${t.color.border}`, borderRadius: `${t.radius.card}px`, overflow: "hidden" }}>
               {done.map((g, i) => <DoneRow first={i === 0} group={g} key={g.key} />)}
@@ -81,6 +83,8 @@ export function LessonReportMobile() {
         </PanelState>
         <ErgButton onClick={() => void navigate({ href: teacherPath("/class-log?tab=class") })} variant="text">Mở sổ đầu bài ›</ErgButton>
       </Box>
+      {/* The server confirms the whole week at once, so the card says so before it happens (BUG-D-005). */}
+      <ErgConfirmDialog confirmLabel="Xác nhận" description="Mọi tiết đã dạy trong tuần này sẽ được xác nhận cùng lúc, không chỉ tiết vừa chọn." loading={confirm.isPending} onCancel={() => setAsking(false)} onConfirm={() => confirm.mutate(undefined, { onSettled: () => setAsking(false) })} open={asking} title={`Xác nhận ${week?.stats?.pending ?? 0} tiết đã dạy trong tuần?`} />
       <LessonReportPeriodSheet group={editing} onClose={() => setEditing(null)} />
     </Box>
   );
@@ -92,13 +96,14 @@ function TodoCard({ group, confirming, onEdit, onConfirm }: { group: PeriodGroup
       <Box sx={{ alignItems: "center", display: "flex", gap: 1.25 }}>
         <Box component="span" sx={{ alignItems: "center", bgcolor: t.color.primarySofter, borderRadius: "8px", color: t.statusTint.info.color, display: "inline-flex", flex: "none", fontWeight: t.type.label.fontWeight, height: 36, justifyContent: "center", width: 48 }}>{group.className}</Box>
         <Box component="span" sx={{ flex: 1, fontWeight: t.type.label.fontWeight }}>{whenText(group)}</Box>
-        <Box component="span" sx={{ bgcolor: t.color.danger, borderRadius: "50%", height: 8, width: 8 }} />
+        {group.upcoming ? null : <Box component="span" sx={{ bgcolor: t.color.danger, borderRadius: "50%", height: 8, width: 8 }} />}
       </Box>
       <ButtonBase aria-label={`Đổi bài dạy ${group.className}`} onClick={onEdit} sx={{ alignItems: "center", bgcolor: t.color.primarySofter, borderRadius: `${t.radius.control}px`, color: t.statusTint.info.color, display: "flex", fontSize: t.type.small.fontSize, gap: 1, justifyContent: "flex-start", minHeight: 44, px: 1.5, py: 1.25, textAlign: "left" }}>
         <Box sx={{ display: "flex", flex: 1, flexDirection: "column", gap: 0.25 }}>{lessonLines(group).map((line) => <span key={line}>{line}</span>)}</Box>
         <Box component="span" sx={{ fontWeight: t.type.label.fontWeight }}>Đổi</Box>
       </ButtonBase>
-      <ErgButton loading={confirming} onClick={onConfirm} sx={{ minHeight: 44 }} variant="outlined">Xác nhận</ErgButton>
+      {/* An upcoming period is filled in ahead but confirmed only after it was taught. */}
+      {group.upcoming ? null : <ErgButton loading={confirming} onClick={onConfirm} sx={{ minHeight: 44 }} variant="outlined">Xác nhận</ErgButton>}
     </Box>
   );
 }

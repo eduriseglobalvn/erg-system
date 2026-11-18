@@ -1,10 +1,14 @@
 import { API_ENDPOINTS } from "@/lib/api/api-endpoints";
 import { resolveCurrentPortal, type StoredAuthSession } from "@/platform/auth/api/auth-token-storage";
+import { canonicalWorkspaceForPath } from "@/platform/workspaces/workspace-route";
 import type { ApiRequestOptions } from "./response";
 
 export function portalFromPath(path: string): StoredAuthSession["portal"] | undefined {
   const normalized = path.toLowerCase();
-  if (normalized.includes(API_ENDPOINTS.routing.curriculumBase) || normalized.includes(API_ENDPOINTS.routing.contentBase)) return "lcms";
+  if (normalized.includes(API_ENDPOINTS.routing.curriculumBase) || normalized.includes(API_ENDPOINTS.routing.contentBase)) {
+    // A teacher page only holds the lms session: pinning these reads to lcms made the client refuse them before sending (BUG-A-043).
+    return typeof window !== "undefined" && canonicalWorkspaceForPath(window.location.pathname) === "TEACHER" ? "lms" : "lcms";
+  }
   if (normalized.includes(API_ENDPOINTS.account.me)) {
     return resolveCurrentPortal();
   }

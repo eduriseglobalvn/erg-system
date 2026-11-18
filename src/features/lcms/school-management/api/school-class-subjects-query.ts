@@ -28,7 +28,11 @@ export function useSaveSchoolClassSubjectsMutation(scope: SchoolClassSubjectsQue
   return useMutation({
     mutationFn: (input: { allocations: SchoolClassSubjectAllocation[]; expectedVersion?: number }) =>
       saveSchoolClassSubjects({ schoolId: scope.schoolId!, academicYear: scope.academicYear }, input),
-    onSuccess: (saved) => queryClient.setQueryData(schoolClassSubjectsQueryKey(scope), saved),
+    onSuccess: (saved) => {
+      queryClient.setQueryData(schoolClassSubjectsQueryKey(scope), saved);
+      // The school's subject list is derived from these allocations; reload it so the cards change at once.
+      void queryClient.invalidateQueries({ queryKey: ["lcms", "school-management"] });
+    },
     // A 409 means someone else saved first: reload the server set instead of keeping a stale version.
     onError: () => queryClient.invalidateQueries({ queryKey: schoolClassSubjectsQueryKey(scope) }),
   });

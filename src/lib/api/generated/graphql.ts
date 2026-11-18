@@ -39,6 +39,14 @@ export type CreateStudentDiscussionInput = {
   readonly title: string;
 };
 
+export type DeleteGradebookScoreInput = {
+  readonly classId: string;
+  readonly columnId: string;
+  readonly studentId: string;
+  readonly subjectId: string;
+  readonly tenantId?: string | null | undefined;
+};
+
 export type DeleteStudentDiscussionItemInput = {
   readonly targetId: string;
   readonly targetType: string;
@@ -599,6 +607,13 @@ export type LmsUpsertGradebookScoreMutationVariables = Exact<{
 
 
 export type LmsUpsertGradebookScoreMutation = { readonly upsertGradebookScore: { readonly studentId: string, readonly columnId: string, readonly score: number, readonly maxScore: number, readonly version: number, readonly updatedAt: string } };
+
+export type LmsDeleteGradebookScoreMutationVariables = Exact<{
+  input: DeleteGradebookScoreInput;
+}>;
+
+
+export type LmsDeleteGradebookScoreMutation = { readonly deleteGradebookScore: boolean };
 
 export type TeachingCalendarSideFieldsFragment = { readonly eventId: string | null, readonly teacherId: string | null, readonly teacherName: string | null, readonly classId: string | null, readonly className: string | null, readonly roomId: string | null, readonly roomName: string | null, readonly schoolId: string, readonly schoolName: string, readonly schoolShortName: string, readonly subjectName: string | null, readonly batchId: string | null, readonly batchLabel: string | null, readonly batchStatus: string | null, readonly createdByName: string | null, readonly createdByRole: string | null, readonly createdAt: string | null, readonly periodNo: number | null, readonly startTime: string | null, readonly endTime: string | null };
 

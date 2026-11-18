@@ -16,12 +16,8 @@ describe("selectExerciseQuestions", () => {
     const r = selectExerciseQuestions(ex({ questionIds: ["4", "1", "zz"] }), bank);
     expect(r.map((x) => x.id)).toEqual(["4", "1"]);
   });
-  it("falls back to subject match limited by questionCount", () => {
-    const r = selectExerciseQuestions(ex({ questionIds: ["zz"] }), bank);
-    expect(r.map((x) => x.id)).toEqual(["1", "2"]);
-  });
-  it("falls back to the first N bank questions when no subject matches", () => {
-    const r = selectExerciseQuestions(ex({ subject: "Zzz", questionCount: 3 }), [q("a", "x"), q("b", "y")].map((x) => ({ ...x, subjectLabel: "" })));
-    expect(r.map((x) => x.id)).toEqual(["a", "b"]);
+  it("never stands in look-alike bank questions for a quiz that keeps its own", () => {
+    expect(selectExerciseQuestions(ex({ questionIds: ["zz"] }), bank)).toEqual([]);
+    expect(selectExerciseQuestions(ex({ questionIds: [], questionCount: 3 }), bank)).toEqual([]);
   });
 });

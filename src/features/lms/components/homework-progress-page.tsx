@@ -42,7 +42,10 @@ import { ErgSearchField } from "@/components/erg-mui/erg-form";
 import { ErgTable } from "@/components/erg-mui/erg-table";
 import { formatDateTimeVi } from "@/domain/formatters/format-date";
 import { formatShortDateTimeVi } from "@/features/lms/api/lms-date-label";
+import { reviewAttemptsByStudent } from "@/features/lms/api/lms-manual-grading-api";
 import { AssignmentProgressMobile } from "@/features/lms/components/assignment-progress-mobile";
+import { ManualGradingDialog } from "@/features/lms/components/manual-grading-dialog";
+import { scoreLabel } from "@/features/lms/components/assignment-progress-mobile/progress-student-row";
 import { useLmsMobileBreakpoint } from "@/features/lms/mobile/hooks/use-lms-mobile-breakpoint";
 import { AssignmentProgressExportControl } from "@/features/reporting/components/assignment-progress-export-control";
 
@@ -56,6 +59,7 @@ type StudentProgressRow = {
   className: string;
   progress: number;
   score: number | null;
+  scoreMax?: number;
   status: ProgressStatus;
   timestamp: string;
 };
@@ -141,6 +145,10 @@ export function HomeworkProgressPage({
     [assignmentReportQuery.data, selectedClass],
   );
   const progressRows = apiBacked ? (reportRows.length ? reportRows : graphQlRows) : fallbackRows;
+  // Essay answers wait for the teacher: the row of such a hand-in opens the grading dialog (BUG-D-004).
+  const reviewAttempts = useMemo(() => reviewAttemptsByStudent(progressQuery.data), [progressQuery.data]);
+  const reviewAttemptOf = (row: StudentProgressRow) => reviewAttempts.get(row.id) ?? (row.userId ? reviewAttempts.get(row.userId) : undefined);
+  const [grading, setGrading] = useState<{ attemptId: string; studentName: string } | null>(null);
   const filteredRows = useMemo(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase();
 
@@ -171,9 +179,17 @@ export function HomeworkProgressPage({
     const loading = apiBacked && (progressQuery.isLoading || assignmentReportQuery.isLoading) && !progressRows.length;
     const failed = apiBacked && progressQuery.isError && assignmentReportQuery.isError && !progressRows.length;
     return (
+      <>
+      {grading ? (
+        <ManualGradingDialog attemptId={grading.attemptId} key={grading.attemptId} onClose={() => setGrading(null)} onGraded={() => refresh?.()} studentName={grading.studentName} />
+      ) : null}
       <AssignmentProgressMobile
         classLabel={selectedClass?.className}
         counts={{ completed, needsReview: needsReviewCount, total }}
+        gradeAction={(row) => {
+          const attemptId = reviewAttempts.get(row.id) ?? (row.userId ? reviewAttempts.get(row.userId) : undefined);
+          return attemptId ? () => setGrading({ attemptId, studentName: row.name }) : undefined;
+        }}
         onBack={onBack}
         onRefresh={refresh}
         refreshing={refreshing}
@@ -182,6 +198,7 @@ export function HomeworkProgressPage({
         status={failed ? "error" : loading ? "loading" : "ready"}
         updatedLabel={updatedLabel}
       />
+      </>
     );
   }
 
@@ -203,6 +220,15 @@ export function HomeworkProgressPage({
               </Typography>
             </Stack>
             <Typography variant="h3" component="h1" sx={{ mt: 0.5 }}>Theo dõi bài tập</Typography>
+            {grading ? (
+              <ManualGradingDialog
+                attemptId={grading.attemptId}
+                key={grading.attemptId}
+                onClose={() => setGrading(null)}
+                onGraded={() => refresh?.()}
+                studentName={grading.studentName}
+              />
+            ) : null}
             <Typography variant="body2" noWrap sx={{ mt: 0.5, color: "text.secondary", fontWeight: "fontWeightMedium" }}>
               Kiểm tra tiến độ làm bài, trạng thái nộp và điểm của học sinh trong {selectedClass?.className ?? "lớp hiện tại"}.
             </Typography>
@@ -310,7 +336,7 @@ export function HomeworkProgressPage({
                     </Box>
                     <Box sx={{ mt: 1, display: "flex", alignItems: "center", gap: 1 }}>
                       <ProgressBar row={row} />
-                      <Typography variant="body2" sx={{ width: 64, textAlign: "right", fontWeight: "fontWeightMedium" }}>{row.score !== null ? `${row.score}/100` : "—"}</Typography>
+                      <Typography variant="body2" sx={{ width: 64, textAlign: "right", fontWeight: "fontWeightMedium" }}>{scoreLabel(row, "—")}</Typography>
                     </Box>
                   </Box>
                 ))}
@@ -336,9 +362,16 @@ export function HomeworkProgressPage({
                           <ProgressBar row={row} />
                         </Box>
                       </TableCell>
-                      <TableCell align="center" sx={{ fontWeight: "fontWeightMedium" }}>{row.score !== null ? `${row.score}/100` : "-"}</TableCell>
+                      <TableCell align="center" sx={{ fontWeight: "fontWeightMedium" }}>{scoreLabel(row)}</TableCell>
                       <TableCell>
-                        <ProgressStatusBadge status={row.status} />
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                          <ProgressStatusBadge status={row.status} />
+                          {reviewAttemptOf(row) ? (
+                            <Button size="small" variant="outlined" onClick={() => setGrading({ attemptId: reviewAttemptOf(row) ?? "", studentName: row.name })}>
+                              Chấm bài
+                            </Button>
+                          ) : null}
+                        </Box>
                       </TableCell>
                       <TableCell sx={{ color: "text.secondary", fontWeight: "fontWeightMedium" }}>{row.timestamp}</TableCell>
                     </TableRow>
@@ -368,7 +401,7 @@ export function HomeworkProgressPage({
               ) : null}
             </Box>
             {needsReviewCount > 0 ? (
-              <Typography variant="body2" sx={{ mt: 1.5, color: "error.main", fontWeight: "fontWeightMedium" }}>{needsReviewCount} bài cần chấm</Typography>
+              <Typography variant="body2" sx={{ mt: 1.5, color: "error.main", fontWeight: "fontWeightMedium" }}>{needsReviewCount} bài cần chấm — bấm «Chấm bài» ở dòng học sinh</Typography>
             ) : null}
           </Paper>
         </Box>
@@ -387,7 +420,6 @@ function mapAssignmentProgressRows(
   const recipientRows = workspace.recipients.items.map((recipient, index) => {
     const attempt = recipient.latestAttempt ?? recipient.bestAttempt;
     const status = statusFromRecipient(recipient);
-    const score = scoreFromAttempt(attempt);
     const studentId = recipientStudentId(recipient);
 
     return {
@@ -396,7 +428,7 @@ function mapAssignmentProgressRows(
       userId: recipient.authUserId || undefined,
       className: selectedClass?.className || recipient.academicClassId || workspace.assignment.academicClassId || "Lớp học",
       progress: progressPercentFromAttempt(attempt, status),
-      score,
+      ...rawScoreOf(attempt),
       status,
       timestamp: formatProgressTimestamp(attempt?.submittedAt || attempt?.updatedAt || recipient.updatedAt),
     } satisfies StudentProgressRow;
@@ -406,14 +438,13 @@ function mapAssignmentProgressRows(
 
   return workspace.attempts.items.map((attempt, index) => {
     const status = statusFromAttempt(attempt);
-    const score = scoreFromAttempt(attempt);
 
     return {
       id: attempt.studentId || attempt.id || `attempt-${index + 1}`,
       name: attempt.studentId || `Học sinh ${index + 1}`,
       className: selectedClass?.className || workspace.assignment.academicClassId || "Lớp học",
       progress: progressPercentFromAttempt(attempt, status),
-      score,
+      ...rawScoreOf(attempt),
       status,
       timestamp: formatProgressTimestamp(attempt.submittedAt || attempt.updatedAt || attempt.startedAt),
     } satisfies StudentProgressRow;
@@ -527,6 +558,14 @@ function progressPercentFromReportStudent(student: AssignmentReportStudentRow, s
 function scoreFromReportStudent(student: AssignmentReportStudentRow) {
   if (typeof student.score !== "number") return null;
   return Math.round(Math.max(0, Math.min(student.score, 100)));
+}
+
+/** The graded score on its own scale (800/1000) when the attempt carries one; otherwise the percentage (/100). */
+function rawScoreOf(attempt: AssignmentProgressAttempt | null | undefined): Pick<StudentProgressRow, "score" | "scoreMax"> {
+  if (attempt && typeof attempt.score === "number" && typeof attempt.maxScore === "number" && attempt.maxScore > 0) {
+    return { score: Math.round(attempt.score), scoreMax: Math.round(attempt.maxScore) };
+  }
+  return { score: scoreFromAttempt(attempt) };
 }
 
 function scoreFromAttempt(attempt: AssignmentProgressAttempt | null | undefined) {

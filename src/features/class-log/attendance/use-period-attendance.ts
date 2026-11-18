@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
+import { useLocation } from "@tanstack/react-router";
 import { toast } from "sonner";
 
 import { todayInput } from "@/domain/formatters/format-date";
@@ -22,9 +23,19 @@ import { useCurriculumRows, useDayPeriodsQuery, useRosterQuery, useSaveAttendanc
 
 type LogDraft = { actualPeriod?: number; comment?: string };
 
+const isIsoDate = (value: string | null): value is string => Boolean(value && /^\d{4}-\d{2}-\d{2}$/.test(value));
+
+/** `?date=yyyy-MM-dd&scheduleId=` from the calendar's "Mở lớp học" link; a bad date falls back to today. */
+export function readAttendanceDeepLink(searchStr: string) {
+  const params = new URLSearchParams(searchStr);
+  const date = params.get("date");
+  return { date: isIsoDate(date) ? date : null, scheduleId: params.get("scheduleId") ?? "" };
+}
+
 export function usePeriodAttendance() {
   const { accountId } = resolveAcademicRecordIdentity();
-  const [date, setDate] = useState(todayInput);
+  const link = readAttendanceDeepLink(useLocation().searchStr);
+  const [date, setDate] = useState(() => link.date ?? todayInput());
   const [groupKey, setGroupKey] = useState<string | null>(null);
   const [periodNo, setPeriodNo] = useState<number | null>(null);
   const [edits, setEdits] = useState<Record<string, MarkMap>>({});
@@ -35,7 +46,7 @@ export function usePeriodAttendance() {
 
   const dayQuery = useDayPeriodsQuery(date);
   const groups = useMemo(() => groupPeriods(dayQuery.data ?? []), [dayQuery.data]);
-  const group = groups.find((item) => item.key === groupKey) ?? groups[0] ?? null;
+  const group = groups.find((item) => item.key === groupKey) ?? groups.find((item) => link.scheduleId && item.eventId === link.scheduleId) ?? groups[0] ?? null;
   const period: LessonLogPeriod | null = group?.periods.find((item) => item.periodNo === periodNo) ?? group?.periods[0] ?? null;
   const key = period ? periodKey(period) : "";
 

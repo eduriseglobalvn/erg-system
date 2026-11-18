@@ -8,6 +8,8 @@ import type { QuestionComponentProps } from "@/components/quiz/questions/types";
 import { createInitialAnswer, getSequenceCorrectOrder } from "@/domain/quiz/quiz";
 import { useIsMobile } from "@/hooks/use-mobile";
 
+import { useReorderSlide } from "./use-reorder-slide";
+
 import { DraggableSequenceCard, SequenceCard, SequenceRow } from "./sequence-question/sequence-card";
 import { moveTo, SEQUENCE_ROW, sequenceAnnouncements } from "./sequence-question/sequence-order";
 
@@ -31,6 +33,7 @@ export function SequenceQuestion({ question, value, submitted = false, reviewMod
   const correct = result?.correctSequenceOrder?.length ? result.correctSequenceOrder : getSequenceCorrectOrder(question);
   const showReview = reviewMode && correct.length > 0;
   const activeItem = activeId ? itemMap.get(activeId) : undefined;
+  useReorderSlide(listRef, "[data-sequence-id]", (node) => node.dataset.sequenceId, order.join("|"));
 
   // Reordering moves the focused card's DOM node, which drops focus; put it back once the new order renders.
   // Runs every render: a move the parent ignored renders the old order and is dropped, so a later drag can't use it.

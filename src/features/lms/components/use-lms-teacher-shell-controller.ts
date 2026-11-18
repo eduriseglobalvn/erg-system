@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 
@@ -147,7 +148,7 @@ export function useLmsTeacherShellController() {
       : selectedClassOptions[0]?.id ?? classes[0]?.id ?? (apiBacked ? "" : defaultClassId);
   const selectedClass = selectedClassOptions.find((classroom) => classroom.id === selectedClassId) ?? selectedClassOptions[0];
   const selectedSchool = schools.find((school) => school.id === selectedSchoolId) ?? schools[0] ?? (apiBacked ? undefined : classroomSchools[0]);
-  const selectedSchoolName = selectedSchool?.name ?? "ERG";
+  const selectedSchoolName = selectedSchool?.name ?? "" // no published schedule, no school: never show the tenant name as a school;
   const activeNav = lmsNavItems.find((item) => item.id === activeSection) ?? lmsNavItems[0];
   const activeMobileNav = { label: resolveMobileTitle(pathname, activeMobileSection, activeNav.label) };
   const teacherName = account?.fullName || "Lê Thị Thùy";
@@ -209,6 +210,27 @@ export function useLmsTeacherShellController() {
     navigator.serviceWorker.addEventListener("message", handleNotificationMessage);
     return () => navigator.serviceWorker.removeEventListener("message", handleNotificationMessage);
   }, [notificationScope, queryClient, tenantId]);
+
+  // A deep link (e.g. "Mở lớp học" from the calendar) names its class in the URL: make the class bar follow it, once per URL.
+  const urlClassId = new URLSearchParams(location.searchStr).get("classId") ?? "";
+  const appliedUrlClassId = useRef("");
+  useEffect(() => {
+    if (!urlClassId || appliedUrlClassId.current === urlClassId) return;
+    const target = classes.find((classroom) => classroom.id === urlClassId);
+    if (!target) {
+      // The class list is loaded and the link names a class the teacher does not teach: say so instead of silently showing another class (BUG-D-006).
+      if (classes.length) {
+        appliedUrlClassId.current = urlClassId;
+        toast.info("Bạn không được phân công lớp trong liên kết này. Đang hiển thị lớp của bạn.");
+      }
+      return;
+    }
+    appliedUrlClassId.current = urlClassId;
+    if (target.id === selectedClassId) return;
+    setSelectedSchoolId(target.schoolId);
+    setSelectedClassId(target.id);
+    setPersistedJsonValue<StoredTeacherScope>(TEACHER_SCOPE_STORAGE_KEY, { schoolId: target.schoolId, classId: target.id });
+  }, [classes, selectedClassId, urlClassId]);
 
   function selectSchool(schoolId: string) {
     const firstClass = classes.find((classroom) => classroom.schoolId === schoolId);

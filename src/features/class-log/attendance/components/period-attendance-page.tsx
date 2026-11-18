@@ -4,8 +4,9 @@ import Typography from "@mui/material/Typography";
 
 import { ErgButton } from "@/components/erg-mui/erg-actions";
 import { ErgEmptyState, ErgErrorState, ErgStatusChip } from "@/components/erg-mui/erg-feedback";
-import { ErgSearchField, ErgTextField } from "@/components/erg-mui/erg-form";
+import { ErgSearchField } from "@/components/erg-mui/erg-form";
 import { ErgPageHeader } from "@/components/erg-mui/erg-page-header";
+import { AttendanceDateField } from "@/features/lms/components/attendance/attendance-date-field";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { teacherPath } from "@/platform/workspaces/workspace-paths";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
@@ -143,14 +144,7 @@ export function PeriodAttendancePage() {
           <ErgPageHeader description={attendanceCopy.subtitle} title={attendanceCopy.title} />
         </Box>
         {m.pendingCount > 0 ? <ErgStatusChip label={`${attendanceCopy.offlinePending} (${m.pendingCount})`} tone="warning" /> : null}
-        <ErgTextField
-          compact
-          onChange={(event) => event.target.value && m.setDate(event.target.value)}
-          slotProps={{ htmlInput: { "aria-label": "Ngày điểm danh" } }}
-          sx={{ maxWidth: 180 }}
-          type="date"
-          value={m.date}
-        />
+        <AttendanceDateField onChange={m.setDate} value={m.date} />
         <ErgButton onClick={openLog} sx={{ borderColor: ergEnterpriseTokens.color.border, color: "primary.main", display: { md: "inline-flex", xs: "none" }, px: "14px" }} variant="outlined">Xem cả tuần</ErgButton>
       </Box>
       {body}

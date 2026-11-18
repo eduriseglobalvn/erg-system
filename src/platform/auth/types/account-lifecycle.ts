@@ -24,5 +24,6 @@ export type TeacherAccountLifecycle = {
 
 export function requiresTeacherOnboarding(lifecycle?: TeacherAccountLifecycle | null) {
   if (!lifecycle) return false;
-  return lifecycle.status === "PROVISIONED" || lifecycle.status === "FIRST_LOGIN_RESTRICTED" || lifecycle.nextSteps.length > 0;
+  // Only the password change gates a first login; profile and recovery email are optional (an older BE may still list them).
+  return lifecycle.mustChangePassword || lifecycle.nextSteps.includes("CHANGE_PASSWORD");
 }

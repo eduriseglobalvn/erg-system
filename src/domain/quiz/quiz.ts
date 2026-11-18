@@ -7,7 +7,7 @@ import type {
   Question,
   Quiz,
 } from "@/domain/quiz/types";
-import { shuffleAway } from "@/domain/quiz/shuffle-away";
+import { derangeAway, shuffleAway } from "@/domain/quiz/shuffle-away";
 
 export function getAllQuestions(quiz: Quiz): Question[] {
   return quiz.sections.flatMap((section) => section.questions);
@@ -15,6 +15,11 @@ export function getAllQuestions(quiz: Quiz): Question[] {
 
 export function getQuestionById(quiz: Quiz, questionId: string): Question | undefined {
   return getAllQuestions(quiz).find((question) => question.id === questionId);
+}
+
+/** Points a question adds to the attempt's maximum: a Likert self-assessment adds none. */
+export function scoredMaxPoints(question: Question): number {
+  return question.kind === "likert_scale" ? 0 : question.points;
 }
 
 export function scoreQuestion(question: Question, answer: AnswerPayload): AnswerResult {
@@ -219,10 +224,12 @@ export function scoreQuestion(question: Question, answer: AnswerPayload): Answer
       return result;
     }
     case "likert_scale": {
-      if ((question.likertRows ?? []).every((row) => Boolean(answer.likertResponses?.[row.id]))) {
-        result.correct = true;
-        result.awardedPoints = question.points;
-        result.message = question.feedback.correct;
+      // Self-assessment is not scored: 0 points, never right or wrong (the server grades it as a survey).
+      result.maxPoints = 0;
+      result.message = "";
+      if (isAnswerComplete(question, answer)) {
+        result.pendingReview = true;
+        result.message = "Đã ghi nhận câu trả lời.";
       }
       return result;
     }
@@ -259,14 +266,16 @@ export function isAnswerComplete(question: Question, answer?: AnswerPayload | nu
       return Boolean(answer.choiceId);
     case "multiple_response":
       return (answer.choiceIds?.length ?? 0) > 0;
-    case "matching":
+    case "matching": {
+      const pairs = question.matching ?? [];
+      const connected = answer.matchingConnectedRows;
       return (
-        (question.matching ?? []).every((pair) => Boolean(answer.matchingAssignments?.[pair.id])) ||
+        pairs.every((pair) => Boolean(answer.matchingAssignments?.[pair.id])) ||
+        // Every left item needs its own match; a half-matched question counts as unanswered.
         // Old answers carry no connection state: a non-empty order still counts as answered.
-        (Array.isArray(answer.matchingConnectedRows)
-          ? answer.matchingConnectedRows.length > 0
-          : (answer.matchingOrder?.length ?? 0) > 0)
+        (Array.isArray(connected) ? pairs.every((pair) => connected.includes(pair.id)) : (answer.matchingOrder?.length ?? 0) > 0)
       );
+    }
     case "sequence":
       return (answer.sequenceOrder?.length ?? 0) > 0;
     case "inline_choice":
@@ -352,9 +361,9 @@ export function createInitialAnswer(question: Question): AnswerPayload {
       const pairIds = pairs.map((pair) => pair.id);
       return {
         matchingOrder: !responseIds
-          ? shuffleAway(pairIds, pairIds, question.id)
+          ? derangeAway(pairIds, pairIds, question.id)
           : key
-            ? shuffleAway(responseIds, pairs.map((pair) => key[pair.id] ?? ""), question.id)
+            ? derangeAway(responseIds, pairs.map((pair) => key[pair.id] ?? ""), question.id)
             : responseIds, // keyless secured body: the server already shuffled it away from the key
         matchingConnectedRows: [],
       };

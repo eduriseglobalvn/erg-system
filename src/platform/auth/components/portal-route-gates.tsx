@@ -111,7 +111,7 @@ export function StudentPortalAuthGate({ children }: Omit<PortalAuthGateProps, "p
 }
 
 function needsOnboarding(account: ReturnType<typeof useAuthSession>["account"]) {
-  return Boolean(account && (requiresTeacherOnboarding(account.lifecycle) || (!account.lifecycle && account.isProfileCompleted === false)));
+  return Boolean(account && requiresTeacherOnboarding(account.lifecycle));
 }
 
 function accessDeniedPath(portal: PortalKey, email: string, redirect: string) {

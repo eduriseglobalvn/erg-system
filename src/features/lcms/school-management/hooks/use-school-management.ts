@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
+import { ApiClientError } from "@/lib/api-client";
 import {
   activateAcademicYear,
   archiveSchool,
@@ -10,7 +12,6 @@ import {
   createGrade,
   createSchool,
   createSchoolStudent,
-  createSchoolSubject,
   importSchoolStudents,
   importSchoolStudentsWithAccounts,
   updateSchoolClass,
@@ -21,8 +22,8 @@ import {
   updateGrade,
   updateSchool,
 } from "@/features/lcms/school-management/api/school-management-api";
-import type { SchoolClass, SchoolDraft, SchoolStudent, SchoolSubject } from "@/features/lcms/school-management/types/school-management-types";
-import type { OperationalClassRecord, SchoolClassInput, SchoolStudentAccountInput, SchoolStudentInput, SchoolSubjectInput } from "@/features/lcms/school-management/api/school-management-api";
+import type { SchoolClass, SchoolDraft, SchoolStudent } from "@/features/lcms/school-management/types/school-management-types";
+import type { OperationalClassRecord, SchoolClassInput, SchoolStudentAccountInput, SchoolStudentInput } from "@/features/lcms/school-management/api/school-management-api";
 import { lmsAssignmentReadQueryKeys } from "@/features/lms/api/lms-assignment-command-query";
 import { getDefaultTenantId } from "@/lib/graphql-client";
 import { QUERY_POLICIES } from "@/lib/query-policy";
@@ -82,9 +83,17 @@ export function useSchoolManagement(initialSchoolId?: string | null) {
   }, [accountId, queryClient, tenantId]);
 
   const saveMutation = useMutation({
-    mutationFn: ({ draft, schoolId, version }: { draft: SchoolDraft; schoolId?: string; version?: number }) => (
-      schoolId ? updateSchool(schoolId, version, draft) : createSchool(draft)
-    ),
+    mutationFn: async ({ draft, schoolId, version }: { draft: SchoolDraft; schoolId?: string; version?: number }) => {
+      try {
+        return await (schoolId ? updateSchool(schoolId, version, draft) : createSchool(draft));
+      } catch (error) {
+        // Backend gửi câu tiếng Anh khi trùng tên; đổi sang tiếng Việt cho người dùng.
+        if (error instanceof ApiClientError && error.status === 409 && /name already exists/i.test(error.message)) {
+          throw new ApiClientError("Tên trường đã tồn tại. Vui lòng nhập tên khác.", error.code, error.status, error.details, error.requestId);
+        }
+        throw error;
+      }
+    },
   });
   const archiveMutation = useMutation({ mutationFn: archiveSchool });
   const yearCreateMutation = useMutation({ mutationFn: ({ schoolId, input }: { schoolId: string; input: Parameters<typeof createAcademicYear>[1] }) => createAcademicYear(schoolId, input) });
@@ -97,7 +106,6 @@ export function useSchoolManagement(initialSchoolId?: string | null) {
   const classUpdateMutation = useMutation({ mutationFn: ({ schoolId, classId, version, input }: { schoolId: string; classId: string; version: number; input: Partial<SchoolClassInput> }) => updateSchoolClass(schoolId, classId, version, input) });
   const studentCreateMutation = useMutation({ mutationFn: ({ schoolId, input }: { schoolId: string; input: SchoolStudentInput }) => createSchoolStudent(schoolId, input) });
   const studentImportMutation = useMutation({ mutationFn: ({ schoolId, items }: { schoolId: string; items: SchoolStudentInput[] }) => importSchoolStudents(schoolId, items) });
-  const subjectCreateMutation = useMutation({ mutationFn: (input: SchoolSubjectInput) => createSchoolSubject(input) });
   const enrollmentMutation = useMutation({ mutationFn: ({ items }: { items: Array<{ studentId: string; classId: string; academicYear?: string | null }> }) => bulkEnrollSchoolStudents(items) });
 
   const saveSchool = useCallback(async (draft: SchoolDraft, schoolId?: string) => {
@@ -174,6 +182,13 @@ export function useSchoolManagement(initialSchoolId?: string | null) {
   const addStudents = useCallback(async (rows: Array<Omit<SchoolStudent, "id">>) => {
     if (!selectedSchoolId) return [];
     const items = rows.map((row) => toStudentInput(row, selectedSchool));
+    // A row naming a class the school does not have used to be saved with no class, silently (BUG-B-005, BUG-B-009).
+    const missing = [...new Set(rows.filter((row, index) => row.className.trim() && !items[index].academicClassId).map((row) => row.className.trim()))];
+    if (missing.length) {
+      const message = `Chưa có lớp ${missing.slice(0, 5).join(", ")}${missing.length > 5 ? ` và ${missing.length - 5} lớp khác` : ""} trong trường. Tạo lớp trước rồi nhập lại; chưa học sinh nào được lưu.`;
+      toast.error(message);
+      throw new Error(message);
+    }
     let saved: Array<{ studentCode: string; username?: string | null; authUserId?: string | null }> = [];
     // Rows that ask for a login go over REST (GraphQL variables must not carry passwords); the rest keep the old path.
     const withAccount = items.filter((item): item is SchoolStudentAccountInput => "password" in item);
@@ -184,18 +199,6 @@ export function useSchoolManagement(initialSchoolId?: string | null) {
     await refreshSchoolData(selectedSchoolId);
     return saved;
   }, [refreshSchoolData, selectedSchool, selectedSchoolId, studentCreateMutation, studentImportMutation]);
-
-  const addSubject = useCallback(async (row: Omit<SchoolSubject, "id" | "studentCount">) => {
-    if (!selectedSchoolId) return undefined;
-    const created = await subjectCreateMutation.mutateAsync({
-      schoolId: selectedSchoolId,
-      name: row.name,
-      code: row.code,
-      status: row.status || "ACTIVE",
-    });
-    await refreshSchoolData(selectedSchoolId);
-    return created;
-  }, [refreshSchoolData, selectedSchoolId, subjectCreateMutation]);
 
   const updateClassGrade = useCallback(async (classId: string, grade: string) => {
     if (!selectedSchoolId) return;
@@ -216,7 +219,6 @@ export function useSchoolManagement(initialSchoolId?: string | null) {
   return {
     addClasses,
     addStudents,
-    addSubject,
     enrollStudentsInClass,
     updateClassGrade,
     saveSchool,
@@ -233,10 +235,11 @@ export function useSchoolManagement(initialSchoolId?: string | null) {
     setSelectedSchoolId,
     isLoading: directoryQuery.isLoading || (Boolean(selectedSchoolId) && operationsQuery.isLoading),
     isFetching: directoryQuery.isFetching || operationsQuery.isFetching,
-    isSaving: saveMutation.isPending || archiveMutation.isPending || yearCreateMutation.isPending || yearActivateMutation.isPending || yearCloseMutation.isPending || gradeSyncMutation.isPending || gradeCreateMutation.isPending || gradeUpdateMutation.isPending || classCreateMutation.isPending || classUpdateMutation.isPending || studentCreateMutation.isPending || studentImportMutation.isPending || subjectCreateMutation.isPending || enrollmentMutation.isPending,
-    error: directoryQuery.error ?? operationsQuery.error ?? saveMutation.error ?? archiveMutation.error,
+    isSaving: saveMutation.isPending || archiveMutation.isPending || yearCreateMutation.isPending || yearActivateMutation.isPending || yearCloseMutation.isPending || gradeSyncMutation.isPending || gradeCreateMutation.isPending || gradeUpdateMutation.isPending || classCreateMutation.isPending || classUpdateMutation.isPending || studentCreateMutation.isPending || studentImportMutation.isPending || enrollmentMutation.isPending,
+    // Load errors only: a failed save shows the global toast and must leave the form on screen.
+    error: directoryQuery.error ?? operationsQuery.error,
     refetch: () => refreshSchoolData(selectedSchoolId),
-    unsupportedApiMessage: "CRUD lớp, học sinh, môn học và ghi danh lớp đã nối contract backend. Ghi danh môn học chưa có mutation trong schema hiện tại.",
+    unsupportedApiMessage: "Ghi danh môn học cho học sinh chưa làm được ở màn này.",
   };
 }
 

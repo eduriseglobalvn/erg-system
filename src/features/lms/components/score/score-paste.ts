@@ -22,6 +22,16 @@ export function parseScoreCell(raw: string, max: number): number | null {
   return value >= 0 && value <= max ? Math.round(value * 100) / 100 : null;
 }
 
+export type ScoreInput = { kind: "none" } | { kind: "empty" } | { kind: "invalid" } | { kind: "ok"; score: number };
+
+/** What a typed cell means: an empty cell must never become 0 (`Number("") === 0`); text or a value off the scale is invalid. */
+export function parseScoreInput(raw: string | undefined, max: number): ScoreInput {
+  if (raw === undefined) return { kind: "none" };
+  if (raw.trim() === "") return { kind: "empty" };
+  const score = parseScoreCell(raw, max);
+  return score === null ? { kind: "invalid" } : { kind: "ok", score };
+}
+
 /** True when the clipboard holds more than one cell, i.e. it should be handled as a block paste. */
 export function isBlockPaste(grid: string[][]) {
   return grid.length > 1 || (grid[0]?.length ?? 0) > 1;

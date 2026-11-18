@@ -16,7 +16,9 @@ import {
   TeachingSchedulePanel,
   ClassLogPage,
 } from "@/features/lms/components/lms-teacher-shell-pages";
-import { getClassStudents, TeacherWorkspaceFrame } from "@/features/lms/components/lms-teacher-shell-frame";
+import { TeacherWorkspaceFrame } from "@/features/lms/components/lms-teacher-shell-frame";
+import { ClassScoreBoard } from "@/features/lms/components/score/class-score-board";
+import { TeacherClassRoster } from "@/features/lms/components/teacher-class-roster";
 import { useLmsTeacherShellModel } from "@/features/lms/components/lms-teacher-shell-context";
 import { TeacherLearningHub } from "@/features/lms/learning-hub/teacher-learning-hub";
 import { LmsHomeDashboard } from "@/features/lms/components/lms-home-dashboard";
@@ -102,6 +104,7 @@ export function TeacherExerciseBankRoute() {
   return (
     <Suspense fallback={null}>
       <ExerciseBankPage
+        currentClassId={m.selectedClass?.id}
         onBack={() => void m.navigate({ href: back })}
         onAssign={(exerciseTitle) => m.handleLocalAssignmentCreated(exerciseTitle, "Kho bài tập", back)}
       />
@@ -143,6 +146,8 @@ export function TeacherClassManagementRoute() {
   return (
     <Suspense fallback={null}>
       <ClassManagementPage
+        // The page keeps its own scope; a new class in the header restarts it on that class.
+        key={m.selectedClass?.id}
         classes={m.classes}
         selectedClass={m.selectedClass}
         selectedSchoolName={m.selectedSchoolName}
@@ -194,7 +199,9 @@ export function TeacherScoreRoute() {
   const m = useLmsTeacherShellModel();
   return (
     <Suspense fallback={null}>
-      <ScoreSheetPanel selectedClass={m.selectedClass} selectedSchoolName={m.selectedSchoolName} students={getClassStudents(m.selectedClass?.id)} />
+      <TeacherClassRoster selectedClass={m.selectedClass}>
+        {(students) => <ClassScoreBoard classId={m.selectedClass?.id} manual={<ScoreSheetPanel selectedClass={m.selectedClass} selectedSchoolName={m.selectedSchoolName} students={students} />} />}
+      </TeacherClassRoster>
     </Suspense>
   );
 }
@@ -222,14 +229,18 @@ export function TeacherReportsRoute() {
   const m = useLmsTeacherShellModel();
   return (
     <TeacherWorkspaceFrame selectedClass={m.selectedClass} selectedSchoolName={m.selectedSchoolName}>
-      <ReportsPanel
-        classes={m.classes}
-        onClassChange={(classId) => m.handleClassChange({ target: { value: classId } })}
-        runs={m.runs}
-        selectedClass={m.selectedClass}
-        selectedSchoolName={m.selectedSchoolName}
-        students={getClassStudents(m.selectedClass?.id)}
-      />
+      <TeacherClassRoster selectedClass={m.selectedClass}>
+        {(students) => (
+          <ReportsPanel
+            classes={m.classes}
+            onClassChange={(classId) => m.handleClassChange({ target: { value: classId } })}
+            runs={m.runs}
+            selectedClass={m.selectedClass}
+            selectedSchoolName={m.selectedSchoolName}
+            students={students}
+          />
+        )}
+      </TeacherClassRoster>
     </TeacherWorkspaceFrame>
   );
 }

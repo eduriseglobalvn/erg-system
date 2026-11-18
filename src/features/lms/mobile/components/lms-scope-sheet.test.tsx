@@ -31,4 +31,11 @@ describe("LmsScopeSheet", () => {
     expect(onClassChange).toHaveBeenCalledWith("class-1");
     expect(onOpenChange).toHaveBeenCalledWith(false);
   });
+
+  it("explains the published-schedule rule when the teacher has no school or class", () => {
+    render(
+      <LmsScopeSheet classes={[]} onClassChange={vi.fn()} onOpenChange={vi.fn()} onSchoolChange={vi.fn()} open schools={[]} selectedClassId="" selectedSchoolId="" />,
+    );
+    expect(screen.getByText("Bạn chưa có lịch dạy nào được xuất bản")).toBeTruthy();
+  });
 });

@@ -13,6 +13,7 @@ import { ergEnterpriseTokens as tk } from "@/themes/erg-enterprise-tokens";
 const segSx = {
   bgcolor: tk.color.divider,
   borderRadius: `${tk.radius.control}px`,
+  flexWrap: "wrap",
   gap: "2px",
   p: "3px",
   "& .MuiToggleButtonGroup-grouped": {
@@ -21,7 +22,7 @@ const segSx = {
     color: tk.color.textSecondary,
     flex: "1 1 auto",
     fontWeight: "fontWeightMedium",
-    height: 36,
+    height: 32,
     m: 0,
     px: 0.75,
     textTransform: "none",

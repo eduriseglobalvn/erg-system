@@ -50,7 +50,7 @@ export function ErgDialog({ actions, children, description, onClose, slotProps, 
       }}
       {...props}
     >
-      <Box sx={{ alignItems: "center", display: "flex", justifyContent: "space-between", px: 3, pt: 2.5, pb: 1.5 }}>
+      <Box sx={{ alignItems: "center", display: "flex", gap: 1, justifyContent: "space-between", px: 3, pt: 2.5, pb: 1.5 }}>
         <DialogTitle
           id={titleId}
           sx={{
@@ -58,6 +58,10 @@ export function ErgDialog({ actions, children, description, onClose, slotProps, 
             fontSize: "1.2rem",
             fontWeight: 600,
             letterSpacing: "-0.02em",
+            // a long title wraps instead of pushing the close button off a phone screen
+            flex: "1 1 auto", // MUI's DialogTitle is flex "0 0 auto" and would not shrink
+            minWidth: 0,
+            overflowWrap: "anywhere",
             p: 0,
           }}
         >
@@ -71,6 +75,7 @@ export function ErgDialog({ actions, children, description, onClose, slotProps, 
             sx={{
               bgcolor: "rgba(0, 0, 0, 0.05)",
               color: "text.primary",
+              flexShrink: 0,
               height: 30,
               width: 30,
               "&:hover": { bgcolor: "rgba(0, 0, 0, 0.09)", transform: "scale(1.05)" },

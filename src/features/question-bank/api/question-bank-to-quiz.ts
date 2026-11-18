@@ -12,6 +12,7 @@ import type {
   QuizProjectSettings,
 } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import { applyQuizThemePreset, defaultQuizThemePreset } from "@/features/lcms/quiz/quiz-theme/quiz-theme-presets";
+import { loadQuizEditorDraft } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-api";
 import type { QuestionBankQuestion } from "@/features/question-bank/types/question-bank-types";
 import { syncQuizEditorSlideFromRuntimeQuestion } from "@/features/lcms/quiz/quiz-editor/api/elearning-quiz-to-editor";
 
@@ -56,6 +57,18 @@ export type QuizDraftFromBankQuestions = {
   playerTemplate: QuizPlayerTemplate;
   tree: QuizEditorGroup[];
 };
+
+/** The draft of a quiz the caller owns, under a new title (a fresh copy of a system quiz still carries the source's title inside). */
+export async function createQuizDraftFromQuiz(quizId: string, title: string, portal: "lcms" | "lms"): Promise<QuizDraftFromBankQuestions> {
+  const source = await loadQuizEditorDraft(quizId, undefined, portal);
+  if (!source.tree.some((group) => group.slides.length)) throw new Error("Bài gốc chưa có câu hỏi nào để sao chép.");
+  const info = source.settings.info;
+  return {
+    playerTemplate: source.playerTemplate,
+    settings: { ...source.settings, info: { ...info, title, page: { ...info.page, testTitle: title } } },
+    tree: source.tree,
+  };
+}
 
 export function createQuizDraftFromBankQuestions(
   questions: QuestionBankQuestion[],

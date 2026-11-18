@@ -236,7 +236,7 @@ function normalizeManageableUnits(session: SessionCurrentResponseDTO): LmsEducat
     units.unshift({
       id: session.currentScope.unitId,
       type: "system",
-      name: labelByUnitId.get(session.currentScope.unitId) || "ERG System",
+      name: labelByUnitId.get(session.currentScope.unitId) || "Toàn hệ thống",
       code: "ERG-SYSTEM",
     });
   }

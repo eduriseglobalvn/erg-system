@@ -183,6 +183,15 @@ export function purgeLegacyAuthStorage() {
   }
 }
 
+/** Whose session this tab holds (staff account id, or the student's id), without the remembered sign-in other tabs share. */
+export function currentTabAccountId(): string | undefined {
+  if (!canUseStorage()) return undefined;
+  const student = parseJson<StoredStudentSession | null>(window.sessionStorage.getItem(STUDENT_TEMP_SESSION_KEY), null);
+  const slots = [TEACHER_TEMP_SESSION_KEY, ...(["admin", "crm", "lms", "lcms"] as const).map((portal) => portalSessionKey(TEACHER_TEMP_SESSION_KEY, portal))];
+  const staff = teacherSessionSnapshot ?? slots.map((key) => parseJson<StoredAuthIdentity | null>(window.sessionStorage.getItem(key), null)).find((session) => session?.accountId);
+  return staff?.accountId ?? student?.id ?? student?.email ?? undefined;
+}
+
 export function readStoredAuthIdentity(portal?: StoredAuthSession["portal"]) {
   return readRawStoredAuthSession(portal);
 }
@@ -285,6 +294,8 @@ export function persistStudentSession(session: StoredStudentSession) {
   window.sessionStorage.setItem(STUDENT_TEMP_SESSION_KEY, JSON.stringify(session));
   if (session.rememberMe && session.refreshToken) setPersistedJsonValue(STUDENT_LOCAL_SESSION_KEY, { ...session, accessToken: undefined });
   else removePersistedJsonValue(STUDENT_LOCAL_SESSION_KEY);
+  // Other tabs learn who signed in here (the account id only, never a token).
+  window.dispatchEvent(new CustomEvent(AUTH_SESSION_STORAGE_CHANGED_EVENT, { detail: { accountId: session.id ?? session.email } }));
 }
 
 /** The student's own refresh credential. The remembered copy is shared by all tabs, so it holds the newest rotated token. */

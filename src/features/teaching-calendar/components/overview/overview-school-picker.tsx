@@ -3,12 +3,11 @@ import Box from "@mui/material/Box";
 import ButtonBase from "@mui/material/ButtonBase";
 import Checkbox from "@mui/material/Checkbox";
 import Popover from "@mui/material/Popover";
-import Tooltip from "@mui/material/Tooltip";
 
+import { ErgButton } from "@/components/erg-mui";
 import { ErgSearchField } from "@/components/erg-mui/erg-form";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import type { TeachingOverviewSchoolPage } from "@/features/teaching-calendar/api/teaching-calendar-overview-api";
-import { MAX_COMPARED_SCHOOLS } from "@/features/teaching-calendar/domain/overview-model";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 import { schoolBadge } from "./overview-school-grid";
 import { ink, tone, type, weight } from "./overview-styles";
@@ -18,6 +17,8 @@ type Props = {
   hasMore: boolean;
   loadMore: () => void;
   onSearch: (value: string) => void;
+  /** Replaces the whole selection: «Chọn tất cả» / «Đặt lại» — empty means the default first schools (BUG-B-023). */
+  onSelect: (ids: string[]) => void;
   onToggle: (id: string) => void;
   rows: readonly Row[];
   search: string;
@@ -29,8 +30,8 @@ type Props = {
 /** «Thu gon» ten truong tren chip: bo tien to THCS / TH nhu board. */
 const chipName = (name: string) => name.replace(/^(THCS|TH) /, "");
 
-/** Hang chon truong cua board 6.6: nut «Trường: n / tổng ▾» mo danh sach tick (toi da 4) + chip tung truong da chon, co «⚠ n». */
-export function OverviewSchoolPicker({ hasMore, loadMore, onSearch, onToggle, rows, search, selected, selectedRows, total }: Props) {
+/** Hang chon truong cua board 6.6: nut «Trường: n / tổng ▾» mo danh sach tick (khong gioi han) + chip tung truong da chon, co «⚠ n». */
+export function OverviewSchoolPicker({ hasMore, loadMore, onSearch, onSelect, onToggle, rows, search, selected, selectedRows, total }: Props) {
   const [anchor, setAnchor] = useState<HTMLElement | null>(null);
   const [text, setText] = useState(search);
   const debounced = useDebouncedValue(text, 300);
@@ -43,7 +44,6 @@ export function OverviewSchoolPicker({ hasMore, loadMore, onSearch, onToggle, ro
     observer.observe(element);
     return () => observer.disconnect();
   }, [anchor, hasMore, loadMore, rows.length]);
-  const full = selected.length >= MAX_COMPARED_SCHOOLS;
   return (
     <Box className="erg-print-hide" sx={{ ...type(13), alignItems: "center", color: ink.textSecondary, display: "flex", flexWrap: "wrap", gap: 1 }}>
       <ButtonBase
@@ -65,18 +65,20 @@ export function OverviewSchoolPicker({ hasMore, loadMore, onSearch, onToggle, ro
       >
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1, p: 1.5 }}>
           <ErgSearchField onChange={(event) => setText(event.target.value)} placeholder="Tìm trường…" value={text} />
+          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+            <ErgButton onClick={() => onSelect([...new Set([...selected, ...rows.map((row) => row.schoolId)])])} size="small" variant="text">Chọn tất cả</ErgButton>
+            <ErgButton onClick={() => onSelect([])} size="small" variant="text">Đặt lại</ErgButton>
+          </Box>
           <Box component="ul" role="listbox" sx={{ listStyle: "none", m: 0, maxHeight: 320, overflowY: "auto", p: 0 }}>
             {rows.map((row) => {
               const on = selected.includes(row.schoolId);
               const badge = schoolBadge(row);
               return (
-                <Tooltip disableHoverListener={on || !full} key={row.schoolId} title={`Tối đa ${MAX_COMPARED_SCHOOLS} trường cạnh nhau`}>
-                  <Box component="li" sx={{ ...type(13), alignItems: "center", display: "flex", gap: 0.5 }}>
+                <Box component="li" key={row.schoolId} sx={{ ...type(13), alignItems: "center", display: "flex", gap: 0.5 }}>
                     <Checkbox checked={on} onChange={() => onToggle(row.schoolId)} size="small" slotProps={{ input: { "aria-label": row.schoolName } }} />
                     <Box component="span" sx={{ flex: 1, minWidth: 0 }}>{row.schoolName}</Box>
                     {badge ? <Box component="span" sx={{ ...type(11, 600), bgcolor: badge.bg, borderRadius: `${ergEnterpriseTokens.radius.chip}px`, color: badge.color, px: "7px" }}>{badge.label}</Box> : null}
-                  </Box>
-                </Tooltip>
+                </Box>
               );
             })}
             <div ref={sentinel} />

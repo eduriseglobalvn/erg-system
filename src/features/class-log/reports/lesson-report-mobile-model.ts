@@ -11,18 +11,23 @@ export type PeriodGroup = {
   periods: ClassLogPeriod[];
   confirmed: boolean;
   late: boolean;
+  /** No period of this event has happened yet: reportable, but attendance is not available. */
+  upcoming: boolean;
 };
 
 export type DayDot = "ok" | "late" | "miss" | "none";
 
-/** Periods that already happened, grouped by event and day, in time order. Periods still to come are not reportable. */
+/**
+ * Periods grouped by event and day, in time order. A group keeps all its periods; one with none
+ * happened yet is `upcoming` (reportable, no attendance).
+ */
 export function groupPeriods(week: ClassLogWeek): PeriodGroup[] {
   const groups = new Map<string, PeriodGroup>();
   for (const day of [...week.days].sort((a, b) => a.date.localeCompare(b.date))) {
     for (const p of [...day.periods].sort((a, b) => a.periodNo - b.periodNo)) {
-      if (!p.happened) continue;
       const key = `${p.eventId}|${p.date}`;
-      const group = groups.get(key) ?? { key, date: p.date, className: p.className, subjectName: p.subjectName, periods: [], confirmed: true, late: false };
+      const group = groups.get(key) ?? { key, date: p.date, className: p.className, subjectName: p.subjectName, periods: [], confirmed: true, late: false, upcoming: true };
+      group.upcoming &&= !p.happened;
       group.periods.push(p);
       group.confirmed &&= p.status === "CONFIRMED";
       group.late ||= p.late;
@@ -34,7 +39,7 @@ export function groupPeriods(week: ClassLogWeek): PeriodGroup[] {
 
 /** The dot under a day of the strip: something waiting wins, then late, then done. */
 export function dayDot(groups: ReadonlyArray<PeriodGroup>, date: string): DayDot {
-  const day = groups.filter((g) => g.date === date);
+  const day = groups.filter((g) => g.date === date && !g.upcoming);
   if (day.length === 0) return "none";
   if (day.some((g) => !g.confirmed)) return "miss";
   return day.some((g) => g.late) ? "late" : "ok";

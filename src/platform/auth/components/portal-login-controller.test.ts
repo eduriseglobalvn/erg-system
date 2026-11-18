@@ -42,6 +42,14 @@ describe("post-login workspace redirect", () => {
     )).toBe("/admin");
   });
 
+  it("lands a super admin (wildcard permission, all workspaces) in Admin", () => {
+    expect(resolveDefaultPostLoginRedirect(
+      { id: "sa", email: "admin@erg.edu.vn", role: "teacher" } as never,
+      "lms",
+      session({ permissions: ["*"], roles: ["system.super_admin"], workspaces: ["ADMIN", "CRM", "STUDENT", "TEACHER"] }),
+    )).toBe("/admin");
+  });
+
   it("keeps a teacher-only account in Teacher and a student-only account in Student", () => {
     expect(resolveDefaultPostLoginRedirect(teacherAccount, "lms", session())).toBe("/teacher");
     expect(resolveDefaultPostLoginRedirect(

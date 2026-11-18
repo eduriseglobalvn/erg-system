@@ -1,3 +1,4 @@
+import { useState } from "react";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import Box from "@mui/material/Box";
@@ -35,6 +36,8 @@ export const QUIZ_STATUS_TONE: Record<QuizBankStatus, "success" | "warning" | "n
   draft: "neutral",
 };
 
+const isTeacherQuiz = (quiz: QuizBankItem) => quiz.scopeLabel === "Giáo viên";
+
 const wideOnly = { display: { xs: "none", md: "table-cell" } } as const;
 
 /** B1: quiz bank list. Rows open the quick view (B2); export and delete sit at the row end. */
@@ -56,7 +59,7 @@ export function QuizBankPanel({
   publishingQuizId,
   onSubjectChange,
   quizKind,
-  quizzes,
+  quizzes: allQuizzes,
   searchValue,
   subjects,
   title,
@@ -85,11 +88,15 @@ export function QuizBankPanel({
   subjects: QuestionBankSubject[];
   title: string;
 }) {
+  // The server labels a quiz a teacher built for their own classes; the list opens on the system quizzes.
+  const [owner, setOwner] = useState<"system" | "teacher">("system");
+  const teacherCount = allQuizzes.filter(isTeacherQuiz).length;
+  const quizzes = allQuizzes.filter((quiz) => isTeacherQuiz(quiz) === (owner === "teacher"));
   return (
     <Stack spacing={2}>
       <QuestionBankPageHeader
         title={title}
-        meta={[activeSubject.label, activeLevel.label, copy.quizBankMeta(kindCounts.all)].filter(Boolean).join(" · ")}
+        meta={[activeSubject.label, activeLevel.label, isLoading ? "" : copy.quizBankMeta(kindCounts.all)].filter(Boolean).join(" · ")}
         controls={
           <QuestionBankScopeControls
             activeLevel={activeLevel}
@@ -143,10 +150,24 @@ export function QuizBankPanel({
                     if (value) onKindChange(value as QuizKindFilter);
                   }}
                 >
-                  <ToggleButton value="all">{copy.allQuizKinds} · {kindCounts.all}</ToggleButton>
-                  <ToggleButton value="train">{copy.quizKind.train} · {kindCounts.train}</ToggleButton>
-                  <ToggleButton value="test">{copy.quizKind.test} · {kindCounts.test}</ToggleButton>
+                  <ToggleButton value="all">{copy.allQuizKinds}{isLoading ? "" : ` · ${kindCounts.all}`}</ToggleButton>
+                  <ToggleButton value="train">{copy.quizKind.train}{isLoading ? "" : ` · ${kindCounts.train}`}</ToggleButton>
+                  <ToggleButton value="test">{copy.quizKind.test}{isLoading ? "" : ` · ${kindCounts.test}`}</ToggleButton>
                 </ToggleButtonGroup>
+                {teacherCount > 0 || owner === "teacher" ? (
+                  <ToggleButtonGroup
+                    exclusive
+                    size="small"
+                    value={owner}
+                    aria-label={copy.quizOwnerFilter.label}
+                    onChange={(_, value) => {
+                      if (value) setOwner(value as "system" | "teacher");
+                    }}
+                  >
+                    <ToggleButton value="system">{copy.quizOwnerFilter.system} · {allQuizzes.length - teacherCount}</ToggleButton>
+                    <ToggleButton value="teacher">{copy.quizOwnerFilter.teacher} · {teacherCount}</ToggleButton>
+                  </ToggleButtonGroup>
+                ) : null}
               </Stack>
             }
           />
@@ -195,7 +216,9 @@ export function QuizBankPanel({
                   <TableCell sx={{ maxWidth: 0 }}>
                     <Typography variant="subtitle2" noWrap title={quiz.title}>{quiz.title}</Typography>
                     <Typography variant="caption" component="p" noWrap sx={{ color: t.color.textMuted }}>
-                      {quiz.topicLabels.join(", ") || copy.otherTopic} · {copy.scopeLabel(quiz.scope)}
+                      {isTeacherQuiz(quiz)
+                        ? `${copy.quizOwnerFilter.teacher}: ${quiz.ownerLabel}`
+                        : `${quiz.topicLabels.join(", ") || copy.otherTopic} · ${copy.scopeLabel(quiz.scope)}`}
                     </Typography>
                   </TableCell>
                   <TableCell sx={wideOnly}>

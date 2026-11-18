@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { DashboardPageShell } from "@/components/dashboard/dashboard-page-shell";
+import { ErgConfirmDialog } from "@/components/erg-mui/erg-confirm-dialog";
 import { adminContentPathForSection } from "@/features/lcms/admin-content/admin-content-route";
 import type { CreateQuizFromBankOptions } from "@/features/lcms/create-quiz-from-bank";
 import type { QuestionBankQuestion, QuizBankItem } from "@/features/question-bank/types/question-bank-types";
@@ -32,6 +33,7 @@ export function QuestionBankWorkspace({
 }) {
   const [portableQuiz, setPortableQuiz] = useState<QuizBankItem | null>(null);
   const [autoPickOpen, setAutoPickOpen] = useState(false);
+  const [quizToDelete, setQuizToDelete] = useState<QuizBankItem | null>(null);
   const navigate = useNavigate();
   const { locale } = useI18n();
   const copy: QuestionBankCopy = locale === "vi"
@@ -111,7 +113,7 @@ export function QuestionBankWorkspace({
           // B1 "Create quiz" starts in the question bank, where questions are picked.
           onCreateQuiz={() => void navigate({ href: adminContentPathForSection("questions") })}
           onKindChange={setQuizKind}
-          onDeleteQuiz={deleteQuiz}
+          onDeleteQuiz={setQuizToDelete}
           onExportPortable={setPortableQuiz}
           onPreviewQuiz={setQuickViewQuiz}
           onPublishQuiz={(quiz) => void publishQuiz(quiz)}
@@ -125,6 +127,16 @@ export function QuestionBankWorkspace({
           title={activeLeaf.title}
         />
       )}
+      <ErgConfirmDialog
+        open={quizToDelete !== null}
+        title={quizToDelete ? copy.confirmDeleteQuiz(quizToDelete.title) : ""}
+        confirmLabel={copy.deleteQuiz}
+        cancelLabel={copy.cancel}
+        destructive
+        loading={deleteQuizMutation.isPending}
+        onCancel={() => setQuizToDelete(null)}
+        onConfirm={() => quizToDelete && void deleteQuiz(quizToDelete).finally(() => setQuizToDelete(null))}
+      />
       {quickViewQuestion ? (
         <QuestionQuickViewDrawer
           copy={copy}
@@ -145,7 +157,7 @@ export function QuestionBankWorkspace({
           copy={copy}
           deleting={deleteQuizMutation.isPending}
           onClose={() => setQuickViewQuiz(null)}
-          onDelete={(quiz) => deleteQuiz(quiz, true)}
+          onDelete={deleteQuiz}
           onEdit={onOpenQuiz ? (quiz) => onOpenQuiz(quiz.id) : undefined}
           onExportPortable={setPortableQuiz}
           onOpenSettings={(quiz) => void openUpdateQuizPackage(quiz)}

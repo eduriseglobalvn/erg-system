@@ -6,6 +6,7 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import IconButton from "@mui/material/IconButton";
+import MenuItem from "@mui/material/MenuItem";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import {
@@ -14,6 +15,8 @@ import {
 } from "@/features/employee-management/components/apple-ui-tokens";
 import type { EmployeeEditForm } from "@/features/employee-management/components/employee-detail/types";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
+
+const EMPLOYMENT_TYPES = ["FULL_TIME", "PART_TIME", "CONTRACTOR"];
 
 export function EmployeeEditDialog({
   form,
@@ -149,13 +152,21 @@ export function EmployeeEditDialog({
             sx={appleInputSx}
           />
           <TextField
+            select
             label="Loại hợp đồng"
             value={form.employmentType}
             onChange={(event) => onChange("employmentType", event.target.value)}
-            placeholder="FULL_TIME, PART_TIME..."
-            slotProps={{ inputLabel: { shrink: true } }}
+            slotProps={{ inputLabel: { shrink: true }, select: { displayEmpty: true } }}
             sx={appleInputSx}
-          />
+          >
+            <MenuItem value="">Chưa chọn</MenuItem>
+            <MenuItem value="FULL_TIME">Toàn thời gian</MenuItem>
+            <MenuItem value="PART_TIME">Bán thời gian</MenuItem>
+            <MenuItem value="CONTRACTOR">Cộng tác viên</MenuItem>
+            {form.employmentType && !EMPLOYMENT_TYPES.includes(form.employmentType) ? (
+              <MenuItem value={form.employmentType}>Khác</MenuItem>
+            ) : null}
+          </TextField>
           <TextField
             label="Nơi làm việc"
             value={form.workLocation}

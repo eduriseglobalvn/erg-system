@@ -1,4 +1,5 @@
 import { formatDateVi } from "@/domain/formatters/format-date";
+import { getRoleMeta } from "@/platform/auth/permissions/role-display-catalog";
 
 /** Chuoi hien thi cua man Lich day (KE_HOACH_LICH_DAY.md 4.6). Ngay di vao la `yyyy-MM-dd`. */
 
@@ -99,7 +100,8 @@ export function sourceLabel(side: SourceSideLike): string {
   if (side.batchLabel) parts.push(side.batchLabel);
   if (side.batchStatus) parts.push(side.batchStatus === "PUBLISHED" ? "đã áp dụng" : "nháp");
   if (side.createdByName) {
-    const role = side.createdByRole ? ` (${side.createdByRole})` : "";
+    // The server sends the role's code; the catalog has its short Vietnamese name.
+    const role = side.createdByRole ? ` (${getRoleMeta(side.createdByRole).label})` : "";
     const when = side.createdAt ? ` ${formatDateVi(side.createdAt).slice(0, 5)}` : "";
     parts.push(`xếp bởi ${side.createdByName}${role}${when}`);
   }

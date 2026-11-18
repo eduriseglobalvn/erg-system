@@ -1,8 +1,11 @@
 import type {
   AttendanceWorkspaceInput,
+  DeleteGradebookScoreInput,
   GradebookWorkspaceInput,
   LmsAttendanceWorkspaceQuery,
   LmsAttendanceWorkspaceQueryVariables,
+  LmsDeleteGradebookScoreMutation,
+  LmsDeleteGradebookScoreMutationVariables,
   LmsGradebookWorkspaceQuery,
   LmsGradebookWorkspaceQueryVariables,
   LmsUpsertAttendanceMutation,
@@ -74,6 +77,20 @@ export async function upsertGradebookScore(input: UpsertGradebookScoreInput, sig
   return validateResponse(response, isGradebookMutationResponse, "lms.gradebook-score-upsert").upsertGradebookScore;
 }
 
+/** Clears one cell; resolves to false when the cell had no score. */
+export async function deleteGradebookScore(input: DeleteGradebookScoreInput, signal?: AbortSignal) {
+  const tenantId = input.tenantId?.trim() || getDefaultTenantId();
+  const response = await graphQlRequest<LmsDeleteGradebookScoreMutation, LmsDeleteGradebookScoreMutationVariables & Record<string, unknown>>({
+    operationName: "LmsDeleteGradebookScore",
+    portal: "lms",
+    query: LmsAcademicRecordsDocument,
+    signal,
+    tenantId,
+    variables: { input: { ...input, tenantId } },
+  });
+  return validateResponse(response, isGradebookDeleteResponse, "lms.gradebook-score-delete").deleteGradebookScore;
+}
+
 function isAttendanceRecord(value: unknown) {
   return isObject(value) && isNonEmptyString(value.id) && isNonEmptyString(value.studentId) &&
     isNonEmptyString(value.subjectId) && isNonEmptyString(value.attendanceDate) &&
@@ -114,6 +131,10 @@ function isGradebookResponse(value: unknown): value is LmsGradebookWorkspaceQuer
 
 function isAttendanceMutationResponse(value: unknown): value is LmsUpsertAttendanceMutation {
   return isObject(value) && isAttendanceRecord(value.upsertAttendance);
+}
+
+function isGradebookDeleteResponse(value: unknown): value is LmsDeleteGradebookScoreMutation {
+  return isObject(value) && typeof value.deleteGradebookScore === "boolean";
 }
 
 function isGradebookMutationResponse(value: unknown): value is LmsUpsertGradebookScoreMutation {

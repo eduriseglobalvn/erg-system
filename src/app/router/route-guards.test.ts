@@ -72,6 +72,17 @@ describe("authedBeforeLoad (single guard for converted workspaces)", () => {
     expect(run(student, "/student/learning-outcomes")).toMatchObject({ href: "https://lms.erg.edu.local/student/learning-outcomes" });
   });
 
+  it("sends a learner-only session on /admin pages to the student home, a teacher still gets the denial", () => {
+    const student = createAuthRouteState({
+      account,
+      session: { permissions: ["elearning.assignment.read_self"], portals: ["elearning"], workspaces: ["STUDENT"] },
+      apiBacked: true,
+    });
+    expect(run(student, "/admin")).toMatchObject({ to: "/student" });
+    expect(run(student, "/admin/notifications")).toMatchObject({ to: "/student" });
+    expect(run(teacher, "/admin")).toMatchObject({ to: "/access-denied", search: { portal: "ADMIN" } });
+  });
+
   it("requires the CRM host for CRM paths and never redirects them", () => {
     const crm = createAuthRouteState({
       account,

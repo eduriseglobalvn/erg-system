@@ -1,3 +1,4 @@
+import { canonicalWorkspaceForPath } from "@/platform/workspaces/workspace-route";
 import { API_ENDPOINTS } from "@/lib/api/api-endpoints";
 import { mapWorkspace, type QuestionBankWorkspaceDTO } from "@/features/question-bank/api/question-bank-mappers";
 import type {
@@ -12,6 +13,9 @@ import { apiRequest } from "@/lib/api-client";
 import { getDefaultTenantId, graphQlRequest } from "@/lib/graphql-client";
 import { runtimeFixturesEnabled } from "@/lib/runtime-fixtures";
 import { isObject, validateResponse } from "@/lib/validate-response";
+
+// A teacher session only holds the lms portal: pinning these calls to lcms made the client refuse them before sending (BUG-A-048).
+const bankPortal = () => (typeof window !== "undefined" && canonicalWorkspaceForPath(window.location.pathname) === "TEACHER" ? "lms" : "lcms");
 
 export type QuestionBankWorkspaceInput = {
   tenantId?: string;
@@ -199,7 +203,7 @@ export async function updateQuestionBankQuestion(input: QuestionBankSaveQuestion
 export async function deleteQuestionBankQuestion(questionId: string): Promise<QuestionBankDeleteQuestionResult> {
   return apiRequest<QuestionBankDeleteQuestionResult>(API_ENDPOINTS.lcms.question(questionId), {
     method: "DELETE",
-    portal: "lcms",
+    portal: bankPortal(),
   });
 }
 
@@ -211,7 +215,7 @@ export async function updateQuizBankMeta({ quizId, ...body }: QuizBankMetaInput)
   return apiRequest<QuizBankMetaResult>(API_ENDPOINTS.lcms.quiz(quizId), {
     body: JSON.stringify(body),
     method: "PATCH",
-    portal: "lcms",
+    portal: bankPortal(),
   });
 }
 
@@ -241,7 +245,7 @@ async function saveQuestionBankQuestion(
       metadata: input.metadata,
     }),
     method,
-    portal: "lcms",
+    portal: bankPortal(),
   });
 }
 
@@ -252,7 +256,7 @@ async function loadQuestionBankWorkspace(input: QuestionBankWorkspaceInput, sign
 async function requestQuestionBankWorkspacePage(input: QuestionBankWorkspaceInput, signal?: AbortSignal) {
   const response = await graphQlRequest<QuestionBankWorkspaceResponse, { input: QuestionBankWorkspaceInput }>({
     operationName: "QuestionBankWorkspace",
-    portal: "lcms",
+    portal: bankPortal(),
     query: QuestionBankWorkspaceDocument,
     signal,
     tenantId: input.tenantId ?? getDefaultTenantId(),

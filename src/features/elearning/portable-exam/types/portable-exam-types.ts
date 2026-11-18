@@ -55,6 +55,8 @@ export type PortableExamManifest = {
  * normalizes it into this shape.
  */
 export type PortableExamPackageEnvelope = {
+  /** Added by the teacher's browser on download, outside the signed payload (portable-exam-password.ts). */
+  accessPasswordHash?: string;
   artifactType?: string;
   assetsManifest?: Record<string, PortableExamAsset>;
   bundleFormatVersion?: number;
@@ -94,6 +96,7 @@ export type PortableExamVerificationErrorCode =
   | "INVALID_URL"
   | "KEY_NOT_TRUSTED"
   | "MIN_RUNTIME"
+  | "NOT_OFFLINE_GRADABLE"
   | "REVOKED"
   | "SIZE_LIMIT"
   | "UNSUPPORTED_ALGORITHM"

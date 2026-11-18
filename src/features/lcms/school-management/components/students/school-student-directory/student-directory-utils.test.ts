@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  countAssignedStudents,
   filterSchoolStudents,
   getAvatarStyle,
   getInitials,
@@ -49,5 +50,16 @@ describe("filterSchoolStudents", () => {
     expect(filterSchoolStudents(list, { ...all, search: " tran " }).map((s) => s.code)).toEqual(["HS02"]);
     expect(filterSchoolStudents(list, { ...all, search: "hs01" }).map((s) => s.code)).toEqual(["HS01"]);
     expect(filterSchoolStudents(list, { ...all, search: "0911" }).map((s) => s.code)).toEqual(["HS02"]);
+  });
+});
+
+describe("countAssignedStudents", () => {
+  it("ignores students without a class even when they carry subject ids", () => {
+    const list = [
+      student({ subjectIds: ["m1"] }),
+      student({ subjectIds: ["m1"], className: "" }),
+      student({ subjectIds: [] }),
+    ];
+    expect(countAssignedStudents(list)).toBe(1);
   });
 });

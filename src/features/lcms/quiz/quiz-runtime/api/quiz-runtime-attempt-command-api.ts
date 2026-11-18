@@ -5,6 +5,7 @@ import { gradeFinalAttemptLocally, isServerAttemptSnapshot, normalizeSubmitRespo
 import { API_ENDPOINTS } from "@/lib/api/api-endpoints";
 import type { AnswerPayload, Attempt } from "@/domain/quiz/types";
 import type {
+  LatestSubmittedAttempt,
   RuntimeServerAttemptSnapshot,
   SaveAttemptAnswerInput,
   SaveAttemptAnswerResult,
@@ -38,6 +39,7 @@ type BackendStartAttemptResponse = {
     expiresAt?: string;
     startedAt?: string;
     serverTimeAtStart?: string;
+    serverTime?: string;
     durationMinutes?: number;
   };
   attempt?: {
@@ -123,6 +125,22 @@ export async function submitFinalAttempt(input: SubmitAttemptInput): Promise<Att
 
     throw error;
   }
+}
+
+/** The student's last handed-in attempt of an assignment, or null when there is none (or no API). */
+export async function getLatestSubmittedAttempt(
+  assignmentId: string,
+  portal: QuizRuntimePortal = DEFAULT_QUIZ_RUNTIME_PORTAL,
+): Promise<LatestSubmittedAttempt | null> {
+  if (!hasApiBase()) {
+    return null;
+  }
+
+  const response = await apiRequest<LatestSubmittedAttempt | null | undefined>(
+    API_ENDPOINTS.lms.attemptLatestSubmitted(assignmentId),
+    { portal },
+  );
+  return response && typeof response.attemptId === "string" ? response : null;
 }
 
 export async function saveAttemptDraft(input: SaveAttemptDraftInput): Promise<RuntimeServerAttemptSnapshot | null> {

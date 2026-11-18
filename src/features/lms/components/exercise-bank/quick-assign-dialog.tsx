@@ -21,10 +21,13 @@ const LAST_CLASS_KEY = "erg:quick-assign:last-class:v1";
 
 /** Chọn bài (đã chọn) -> chọn lớp (gợi ý lớp giao gần nhất) -> Giao; hạn mặc định +7 ngày. */
 export function QuickAssignDialog({
+  currentClassId,
   exercise,
   onClose,
   onDone,
 }: {
+  /** Lớp đang chọn ở thanh lớp: được chọn sẵn trước lớp giao gần nhất. */
+  currentClassId?: string;
   exercise: Exercise;
   onClose: () => void;
   onDone: (exerciseTitle: string) => void;
@@ -42,7 +45,8 @@ export function QuickAssignDialog({
   const classes = useMemo(() => bootstrap.data?.classes ?? [], [bootstrap.data?.classes]);
   const lastClassId = useMemo(() => getPersistedJsonValue<string>(LAST_CLASS_KEY, ""), []);
   const [pickedClassId, setPickedClassId] = useState("");
-  const classId = pickedClassId || (classes.some((c) => c.id === lastClassId) ? lastClassId : (classes[0]?.id ?? ""));
+  const preferredClassId = [currentClassId, lastClassId].find((id) => id && classes.some((c) => c.id === id));
+  const classId = pickedClassId || preferredClassId || (classes[0]?.id ?? "");
   const [due, setDue] = useState(() => defaultQuickAssignDueInput());
   const mutation = useCreateLmsAssignmentMutation({ offline: {} });
   const dueAt = dueInputToIso(due);

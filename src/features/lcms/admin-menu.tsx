@@ -30,8 +30,8 @@ const schoolManagementMenuItem = item({
 
     { label: "Người học theo khối/lớp", path: "/schools/students" },
     { label: "Giám sát đào tạo", path: "/schools/reports" },
+    { label: "Bảng điểm lớp", path: "/schools/scores" },
     { label: "Kiểm tra & câu hỏi", path: "/schools/assessments" },
-    { label: "Nhập dữ liệu", path: "/schools/imports" },
     { label: "Nhật ký hoạt động", path: "/schools/audit-log" },
   ],
 });

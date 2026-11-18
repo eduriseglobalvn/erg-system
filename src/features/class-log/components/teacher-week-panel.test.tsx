@@ -76,10 +76,9 @@ describe("teacher week panel", () => {
     expect(screen.queryByRole("option", { name: "13" })).toBeNull();
   });
 
-  it("disables confirm with a hint when no period of the week has happened yet", async () => {
-    api.loadTeacherWeek.mockResolvedValue(week([period({ happened: false })], { taught: 0, confirmed: 0, pending: 1 }));
+  it("has nothing to confirm in a week whose periods are all upcoming: a period is confirmed after it was taught", async () => {
+    api.loadTeacherWeek.mockResolvedValue(week([period({ happened: false })], { taught: 0, confirmed: 0, pending: 0 }));
     renderPanel();
-    expect(await screen.findByRole("button", { name: "Xác nhận 1 tiết" })).toBeDisabled();
-    expect(screen.getByTitle("Tuần này chưa có tiết nào diễn ra nên chưa thể xác nhận.")).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: /Xác nhận/ })).toBeDisabled();
   });
 });

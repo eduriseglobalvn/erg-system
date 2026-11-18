@@ -13,6 +13,9 @@ import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 const { success, error, warning, neutral } = ergEnterpriseTokens.statusTint;
 
+// Scores are sums of floats (820.2299999999999): show at most 2 decimals.
+const scoreFormat = new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 2 });
+
 export type FinalResultScreenProps = {
   attempt: Attempt;
   questions: Question[];
@@ -33,30 +36,33 @@ export function FinalResultScreen({ attempt, questions, resultDisplay, onReview,
   const results = toQuestionResults(questions, attempt);
   const rows = questions.map((question, index) => {
     const r = results[index];
-    const state: "correct" | "partial" | "wrong" | "pending" | "blank" =
-      r.pending ? "pending" : r.correct ? "correct" : r.partial ? "partial" : r.skipped ? "blank" : "wrong";
+    const state: "correct" | "partial" | "wrong" | "pending" | "blank" | "survey" =
+      r.survey && !r.skipped ? "survey" : r.pending ? "pending" : r.correct ? "correct" : r.partial ? "partial" : r.skipped ? "blank" : "wrong";
     return { question, index, state };
   });
   const correctCount = rows.filter((row) => row.state === "correct").length;
   // Partial credit counts with Sai, like the review filter.
   const wrongCount = rows.filter((row) => row.state === "wrong" || row.state === "partial").length;
   const pendingCount = rows.filter((row) => row.state === "pending").length;
+  // Likert is answered but not scored: it is neither Đúng, Sai nor Chưa làm.
+  const surveyCount = rows.filter((row) => row.state === "survey").length;
   // Keyless (server-authoritative) package: the submit returns only score/percent/passed, so no per-question claims.
   const gradable = canGradeLocally(questions);
   const showReview = gradable && resultDisplay.showReviewButton;
   const answeredCount = results.filter((r) => !r.skipped).length;
-  const resultMessage = attempt.passed ? resultDisplay.passMessage : resultDisplay.failMessage;
+  // While answers still await a teacher, "not passed" is not final: do not tell the learner to try again.
+  const resultMessage = attempt.passed ? resultDisplay.passMessage : pendingCount > 0 ? "Bài làm đã được ghi nhận, còn câu đang chờ giáo viên chấm." : resultDisplay.failMessage;
 
   return (
     <Box sx={{ display: "grid", gap: 3, mx: "auto", maxWidth: 720, px: 2, py: 3, width: "100%" }}>
       <Box sx={{ display: "grid", gap: 1, justifyItems: "center", textAlign: "center" }}>
         <Typography component="h2" variant="h5">{resultMessage}</Typography>
         <Typography data-testid="result-score" variant="h4" color="primary">
-          {attempt.totalScore}/{attempt.maxScore}
+          {scoreFormat.format(attempt.totalScore)}/{scoreFormat.format(attempt.maxScore)}
         </Typography>
         <Typography color="text.secondary" variant="body2">
           {gradable
-            ? `${Math.round(attempt.percent)}% · Đúng ${correctCount} · Sai ${wrongCount}${pendingCount ? ` · Chờ chấm ${pendingCount}` : ""} · Chưa làm ${rows.length - correctCount - wrongCount - pendingCount}`
+            ? `${Math.round(attempt.percent)}% · Đúng ${correctCount} · Sai ${wrongCount}${pendingCount ? ` · Chờ chấm ${pendingCount}` : ""} · Chưa làm ${rows.length - correctCount - wrongCount - pendingCount - surveyCount}`
             : `${Math.round(attempt.percent)}% · Đã làm ${answeredCount}/${rows.length} câu`}
         </Typography>
       </Box>
@@ -65,7 +71,7 @@ export function FinalResultScreen({ attempt, questions, resultDisplay, onReview,
       <Box component="ol" aria-label="Kết quả từng câu" sx={{ display: "grid", gap: 1, gridTemplateColumns: "repeat(auto-fill, minmax(88px, 1fr))", listStyle: "none", m: 0, p: 0 }}>
         {rows.map(({ question, index, state }) => {
           const tint = state === "correct" ? success : state === "wrong" ? error : state === "partial" ? warning : neutral;
-          const label = state === "correct" ? "đúng" : state === "partial" ? "đúng một phần" : state === "wrong" ? "sai" : state === "pending" ? "chờ giáo viên chấm" : "chưa làm";
+          const label = state === "correct" ? "đúng" : state === "partial" ? "đúng một phần" : state === "wrong" ? "sai" : state === "pending" ? "chờ giáo viên chấm" : state === "survey" ? "đã trả lời" : "chưa làm";
           return (
             <li key={question.id}>
               <ButtonBase

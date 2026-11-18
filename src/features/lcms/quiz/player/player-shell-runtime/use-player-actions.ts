@@ -1,5 +1,6 @@
 import { useCallback, type Dispatch, type SetStateAction } from "react";
 import type { QueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 import {
   applyTrainingQuestionResult,
@@ -9,7 +10,7 @@ import {
 } from "@/components/quiz/player-shell-runtime-model";
 import { offlineAttemptScope } from "@/components/quiz/player-shell-runtime/player-shell-runtime-helpers";
 import { buildNormalizedAnswers, serverNowMs } from "@/components/quiz/player-shell-utils";
-import { ensureServerAttempt } from "@/features/lcms/quiz/player/player-shell-session";
+import { ensureServerAttempt, isAttemptsExhaustedError, startAttemptErrorMessage } from "@/features/lcms/quiz/player/player-shell-session";
 import {
   buildClientSubmitPayload,
   createEmptyAttempt,
@@ -47,6 +48,8 @@ export type UsePlayerActionsArgs = {
   saveAttemptAnswerAsync: ReturnType<typeof useSaveAttemptAnswerMutation>["mutateAsync"];
   submitFailed: boolean;
   submitting: boolean;
+  /** The server refused a new attempt (409): none left. */
+  onAttemptsExhausted?: () => void;
   setCurrentIndex: Dispatch<SetStateAction<number>>;
   setDrafts: Dispatch<SetStateAction<Record<string, AnswerPayload>>>;
   setLoadState: Dispatch<SetStateAction<PlayerLoadState>>;
@@ -79,6 +82,7 @@ export function usePlayerActions({
   saveAttemptAnswerAsync,
   submitFailed,
   submitting,
+  onAttemptsExhausted,
   setCurrentIndex,
   setDrafts,
   setLoadState,
@@ -206,11 +210,15 @@ export function usePlayerActions({
         setCurrentIndex(nextIndex);
       }
     } catch (error) {
-      setSubmitError(error instanceof Error ? error.message : "Không thể bắt đầu lượt làm. Vui lòng thử lại.");
+      if (isAttemptsExhaustedError(error)) onAttemptsExhausted?.();
+      const message = startAttemptErrorMessage(error);
+      setSubmitError(message);
+      // The welcome screen does not show submitError, so a refused start would otherwise be silent.
+      toast.error(message);
     } finally {
       setSubmitting(false);
     }
-  }, [activeAttempt, activePackage, activeSession, portableOffline, runtimePortal, setCurrentIndex, setDrafts, setLoadState, setStarted, setSubmitError, setSubmitting, setTimeUp]);
+  }, [activeAttempt, activePackage, activeSession, onAttemptsExhausted, portableOffline, runtimePortal, setCurrentIndex, setDrafts, setLoadState, setStarted, setSubmitError, setSubmitting, setTimeUp]);
 
   const submitCurrentTrainingQuestion = useCallback(async () => {
     if (

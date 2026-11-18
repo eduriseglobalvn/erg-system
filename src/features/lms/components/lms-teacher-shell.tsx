@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import Box from "@mui/material/Box";
 import { Outlet } from "@tanstack/react-router";
 
@@ -7,6 +8,7 @@ import {
   LmsHeaderClassControl,
   LmsHeaderSchoolControl,
 } from "@/features/lms/components/lms-teacher-shell-presentation";
+import { knownStudentCount } from "@/features/lms/components/lms-teacher-shell-utils";
 import { LmsTeacherShellContext } from "@/features/lms/components/lms-teacher-shell-context";
 import { useLmsTeacherShellController } from "@/features/lms/components/use-lms-teacher-shell-controller";
 import { LmsMobileShell } from "@/features/lms/mobile";
@@ -22,13 +24,17 @@ export function LmsTeacherShell() {
 }
 
 function LmsTeacherShellFrame({ model }: { model: ReturnType<typeof useLmsTeacherShellController> }) {
+  const mobileClasses = useMemo(
+    () => model.classes.map((classroom) => ({ ...classroom, studentCount: knownStudentCount(classroom) })),
+    [model.classes],
+  );
   if (model.isMobile) {
     return (
       <Box sx={{ bgcolor: "background.default", display: "flex", height: "100dvh", minHeight: "100dvh", ...ERG_FULL_VIEWPORT_FALLBACK, minWidth: 0, overflow: "hidden", width: "100%" }}>
         <LmsMobileShell
           activeLabel={model.activeMobileNav.label}
           activeSection={model.activeMobileSection}
-          classes={model.classes}
+          classes={mobileClasses}
           dockItems={model.mobileDockItems}
           moreItems={model.mobileMoreItems}
           schoolName={model.selectedSchoolName}
@@ -38,7 +44,7 @@ function LmsTeacherShellFrame({ model }: { model: ReturnType<typeof useLmsTeache
           selectedSchoolId={model.selectedSchoolId}
           teacherEmail={model.teacherEmail}
           teacherName={model.teacherName}
-          onClassChange={model.setSelectedClassId}
+          onClassChange={(classId) => model.handleClassChange({ target: { value: classId } })}
           onNavigate={(path) => void model.navigate({ href: path })}
           onSchoolChange={model.selectSchool}
           onSignOut={model.signOut}

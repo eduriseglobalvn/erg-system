@@ -1,3 +1,4 @@
+import { buildStudentLogins } from "@/features/lcms/school-management/utils/student-account-credentials";
 import type {
   GoogleVisualizationCell as GvizCell,
   GoogleVisualizationResponse as GvizResponse,
@@ -66,7 +67,6 @@ export function parseStudentSheet(payload: GvizResponse, options: ParseOptions):
   const attendanceCodeIndex = findHeaderIndex(headerRow, "MA D D");
   const classIndex = findHeaderIndex(headerRow, "LOP");
   const schoolName = detectSchoolName(slicedRows.slice(0, headerIndex));
-  const usernameCounts = new Map<string, number>();
 
   const students = slicedRows
     .slice(headerIndex + 1)
@@ -81,8 +81,6 @@ export function parseStudentSheet(payload: GvizResponse, options: ParseOptions):
       const givenName = getColumn(row, givenNameIndex);
       const fullName = [familyName, givenName].filter(Boolean).join(" ").trim();
       const className = getColumn(row, classIndex);
-      const generatedUsername = fullName && className ? createUniqueUsername(fullName, className, usernameCounts) : "";
-      const generatedPassword = "123456";
       const status = fullName && className ? "valid" : "warning";
 
       return {
@@ -97,12 +95,17 @@ export function parseStudentSheet(payload: GvizResponse, options: ParseOptions):
         attendanceCode: getColumn(row, attendanceCodeIndex),
         className,
         schoolName,
-        generatedUsername,
-        generatedPassword,
+        generatedUsername: "",
+        generatedPassword: "",
         status,
         note: status === "valid" ? "Hợp lệ" : "Cần kiểm tra",
       };
     });
+  const logins = buildStudentLogins(students.map((student) => ({ fullName: student.status === "valid" ? student.fullName : "" })), schoolName);
+  students.forEach((student, index) => {
+    student.generatedUsername = logins[index]?.username ?? "";
+    student.generatedPassword = logins[index]?.password ?? "";
+  });
 
   return {
     detectedSchoolName: schoolName,
@@ -197,30 +200,6 @@ function columnNameToIndex(columnName: string) {
   if (!normalized) return 0;
 
   return normalized.split("").reduce((total, char) => total * 26 + char.charCodeAt(0) - 64, 0) - 1;
-}
-
-function createUniqueUsername(fullName: string, className: string, usernameCounts: Map<string, number>) {
-  const parts = toSlug(fullName).split(".").filter(Boolean);
-  const firstName = parts.at(-1) ?? "hs";
-  const familyName = parts[0] ?? "erg";
-  const classSlug = toSlug(className).replace(/\./g, "");
-  const baseUsername = [firstName, familyName, classSlug].filter(Boolean).join(".");
-  const currentCount = usernameCounts.get(baseUsername) ?? 0;
-  usernameCounts.set(baseUsername, currentCount + 1);
-  const randomSuffix = Math.random().toString(36).slice(2, 6);
-
-  return currentCount === 0 ? `${baseUsername}.${randomSuffix}` : `${baseUsername}${currentCount + 1}.${randomSuffix}`;
-}
-
-function toSlug(value: string) {
-  return value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/đ/g, "d")
-    .replace(/Đ/g, "D")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, ".")
-    .replace(/(^\.|\.$)/g, "");
 }
 
 export function getInitials(value: string) {

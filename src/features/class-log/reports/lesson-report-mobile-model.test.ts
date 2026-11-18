@@ -9,11 +9,19 @@ const two = [
 ];
 
 describe("lesson report mobile model", () => {
-  it("groups the periods of one event and day and skips periods that have not happened", () => {
-    const groups = groupPeriods(week([...two, period({ eventId: "e2", date: "2026-11-13", happened: false })]));
-    expect(groups).toHaveLength(1);
-    expect(whenText(groups[0]!)).toBe("T5 12/11 · Tiết 1–2");
-    expect(lessonLines(groups[0]!)).toEqual(["T10 · Bài 7", "T11 · Chưa có trong KCT"]);
+  it("groups the periods of one event and day; a group with no period happened yet is upcoming but still reportable", () => {
+    const all = groupPeriods(week([...two, period({ eventId: "e2", date: "2026-11-13", happened: false })]));
+    expect(all.map((g) => g.upcoming)).toEqual([false, true]);
+    expect(dayDot(all, "2026-11-13")).toBe("none");
+    expect(all[1]!.periods).toHaveLength(1);
+    expect(whenText(all[0]!)).toBe("T5 12/11 · Tiết 1–2");
+    expect(lessonLines(all[0]!)).toEqual(["T10 · Bài 7", "T11 · Chưa có trong KCT"]);
+  });
+
+  it("keeps every period of a group, happened or not; it is upcoming only when none happened", () => {
+    const [group] = groupPeriods(week([two[0]!, { ...two[1]!, happened: false }]));
+    expect(group).toMatchObject({ upcoming: false, confirmed: false });
+    expect(group!.periods).toHaveLength(2);
   });
 
   it("is confirmed only when every period is, and late when any is", () => {

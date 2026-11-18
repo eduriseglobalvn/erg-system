@@ -67,7 +67,7 @@ export function PlayerDesktopLayout(props: PlayerDesktopLayoutProps) {
     onBackToList, onExit, onJumpToQuestion, onRetry, handleToggleBookmark, setCurrentIndex,
   } = props;
   const showResult = attemptCompleted && !reviewingSubmittedAttempt;
-  const timer = isTestingMode && !attemptCompleted ? (
+  const timer = (isTestingMode || countdownProps.deadlineAt !== null) && !attemptCompleted ? (
     <PlayerCountdown {...countdownProps}>{(seconds) => <PlayerTimerText seconds={seconds} />}</PlayerCountdown>
   ) : null;
 
@@ -103,7 +103,7 @@ export function PlayerDesktopLayout(props: PlayerDesktopLayoutProps) {
                   <Box component="span" sx={{ ml: 0.75 }}><Kbd>F</Kbd></Box>
                 </Button>
               </Box>
-              <Typography component="h2" sx={{ color: tk.color.text }} variant="h2">
+              <Typography component="h2" sx={{ color: tk.color.text, overflowWrap: "anywhere" }} variant="h2">
                 {readyQuestion.title}
               </Typography>
             </>

@@ -1,4 +1,3 @@
-import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import GroupAddRoundedIcon from "@mui/icons-material/GroupAddRounded";
 import GroupsRoundedIcon from "@mui/icons-material/GroupsRounded";
 import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
@@ -25,21 +24,6 @@ export default function SchoolSubjectsScreen() {
     <SchoolPageShell
       title="Môn học đăng ký"
       description="Danh mục môn trường sử dụng, quy mô ghi danh và giáo viên phụ trách chuyên môn."
-      action={
-        <Button
-          disabled
-          startIcon={<AddRoundedIcon sx={{ fontSize: 18 }} />}
-          variant="contained"
-          sx={{
-            borderRadius: "10px",
-            fontSize: "0.85rem",
-            fontWeight: 600,
-            textTransform: "none",
-          }}
-        >
-          Đăng ký môn
-        </Button>
-      }
     >
       {unsupportedApiMessage ? (
         <Alert

@@ -271,7 +271,7 @@
     "hex": 34,
     "font": 5
   },
-  "src/features/employee-management/components/create-employee-wizard.tsx": {
+  "src/features/employee-management/components/create-employee-dialog.tsx": {
     "hex": 0,
     "font": 4
   },
@@ -287,21 +287,9 @@
     "hex": 0,
     "font": 1
   },
-  "src/features/employee-management/components/create-employee/review-row.tsx": {
-    "hex": 0,
-    "font": 2
-  },
   "src/features/employee-management/components/create-employee/role-step.tsx": {
     "hex": 0,
     "font": 1
-  },
-  "src/features/employee-management/components/create-employee/step-indicator.tsx": {
-    "hex": 2,
-    "font": 1
-  },
-  "src/features/employee-management/components/create-employee/wizard-actions.tsx": {
-    "hex": 3,
-    "font": 4
   },
   "src/features/employee-management/components/employee-detail-drawer.tsx": {
     "hex": 1,
@@ -965,27 +953,15 @@
   },
   "src/platform/auth/components/teacher-onboarding-workspace.tsx": {
     "hex": 3,
-    "font": 14
+    "font": 12
   },
   "src/platform/auth/components/teacher-onboarding/onboarding-section.tsx": {
     "hex": 0,
     "font": 3
   },
-  "src/platform/auth/components/teacher-onboarding/onboarding-stepper.tsx": {
-    "hex": 4,
-    "font": 9
-  },
   "src/platform/auth/components/teacher-onboarding/password-step.tsx": {
     "hex": 2,
     "font": 3
-  },
-  "src/platform/auth/components/teacher-onboarding/profile-step.tsx": {
-    "hex": 2,
-    "font": 3
-  },
-  "src/platform/auth/components/teacher-onboarding/recovery-step.tsx": {
-    "hex": 5,
-    "font": 18
   },
   "src/routes/route-feedback.tsx": {
     "hex": 1,

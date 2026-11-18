@@ -1,11 +1,33 @@
 import type { TeachingOverviewGrid } from "@/features/teaching-calendar/api/teaching-calendar-overview-api";
+import { ApiClientError } from "@/lib/api-client/errors";
 import { weekdayName, travelLabel } from "./schedule-copy";
 
 export type OverviewCell = TeachingOverviewGrid["cells"][number];
 export type OverviewConflict = TeachingOverviewGrid["conflicts"][number];
 export type OverviewSlot = TeachingOverviewGrid["template"]["slots"][number];
 
-export const MAX_COMPARED_SCHOOLS = 4;
+/** So truong ve moi trang cua luoi (so cot hien thi tot tren may tinh). BE nhan toi da 50 truong moi lan goi. */
+export const SCHOOLS_PER_PAGE = 4;
+
+/** Truong dang chon: lay tu URL (khong gioi han so luong); khong co thi mac dinh la trang dau cua danh sach. */
+export function selectedSchoolIds(urlIds: readonly string[], defaults: readonly { schoolId: string }[]): string[] {
+  return urlIds.length ? [...urlIds] : defaults.slice(0, SCHOOLS_PER_PAGE).map((school) => school.schoolId);
+}
+
+/** Cat danh sach truong da chon thanh trang: `page` tu 0, tu dong ep vao [0, pageCount-1]; `from`/`to` la so thu tu 1-based de hien «Trường a–b trong N». */
+export function paginateSchools<T>(ids: readonly T[], page: number, size = SCHOOLS_PER_PAGE) {
+  const pageCount = Math.max(1, Math.ceil(ids.length / size));
+  const current = Math.min(Math.max(0, page), pageCount - 1);
+  const items = ids.slice(current * size, (current + 1) * size);
+  return { from: items.length ? current * size + 1 : 0, items, page: current, pageCount, to: current * size + items.length, total: ids.length };
+}
+
+/** Loi nghiep vu cua BE (GraphQL `errors[].extensions.code` + message tieng Viet) -> cau hien thi; loi mang/khac -> undefined. */
+export function overviewErrorMessage(error: unknown): string | undefined {
+  if (!(error instanceof ApiClientError) || !Array.isArray(error.details)) return undefined;
+  const item = (error.details as Array<{ extensions?: { code?: unknown }; message?: unknown }>).find((entry) => typeof entry?.extensions?.code === "string" && typeof entry.message === "string" && entry.message.trim());
+  return item ? String(item.message) : undefined;
+}
 /** Luoi bang tong khong hien tiet 5 / 10 (khong co gio): chi cac tiet co gio. */
 export type OverviewRow = {
   cells: ReadonlyMap<string, readonly OverviewCell[]>;
@@ -67,10 +89,9 @@ export function overviewCellKind(cell: OverviewCell): OverviewCellKind {
   return cell.status === "DRAFT" ? "draft" : "published";
 }
 
-/** Tick truong: toi da `MAX_COMPARED_SCHOOLS`; tick vuot bi bo qua (UI hien tooltip). */
+/** Tick truong: bo tick thi bo, chua tick thi them (khong gioi han). */
 export function toggleSchool(selected: readonly string[], id: string): string[] {
-  if (selected.includes(id)) return selected.filter((item) => item !== id);
-  return selected.length >= MAX_COMPARED_SCHOOLS ? [...selected] : [...selected, id];
+  return selected.includes(id) ? selected.filter((item) => item !== id) : [...selected, id];
 }
 
 /** Mot khung gio tren bang tong theo truong (6.6): cac tiet lien nhau cung lop/GV/trang thai gop thanh mot khung. */

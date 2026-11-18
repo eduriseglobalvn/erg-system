@@ -11,6 +11,7 @@ import { QuestionListPanel } from "@/components/quiz/question-list-panel";
 import { buildReviewCells, retryIndices, reviewScoreOutOf10, toQuestionResults } from "@/components/quiz/review/review-model";
 import { ReviewQuestionView } from "@/components/quiz/review/review-question-view";
 import { reviewPaperSx, ReviewScoreStrip, ReviewSummaryHeader } from "@/components/quiz/review/review-summary-header";
+import { canGradeLocally } from "@/domain/quiz/quiz";
 import type { Attempt, Question } from "@/domain/quiz/types";
 import { ergEnterpriseTokens as tk } from "@/themes/erg-enterprise-tokens";
 
@@ -31,7 +32,7 @@ export type ReviewLayoutProps = {
 
 const cardSx = { bgcolor: tk.color.surface, border: "1px solid", borderColor: tk.color.border, borderRadius: `${tk.radius.card}px`, p: { xs: 2, md: 3 } };
 
-/** L08/L09/WL5. Web: question left, list 380px right. Phone: grid first, a tapped cell opens the detail. */
+/** L08/L09/WL5. Web: question left, list 320px right (sticky). Phone: grid first, a tapped cell opens the detail. */
 export function ReviewLayout({ attempt, questions, flagged, current, elapsedSeconds, surface, title, meta, onSelect, onBack, startLocalRetry }: ReviewLayoutProps) {
   const [phoneDetail, setPhoneDetail] = useState(false);
   const results = toQuestionResults(questions, attempt);
@@ -40,6 +41,7 @@ export function ReviewLayout({ attempt, questions, flagged, current, elapsedSeco
   const question = questions[index];
   const phone = surface === "phone";
   const correct = results.filter((r) => r.correct && !r.pending).length;
+  const scoredTotal = results.filter((r) => !r.survey).length;
 
   const select = (next: number) => {
     onSelect(next);
@@ -57,7 +59,8 @@ export function ReviewLayout({ attempt, questions, flagged, current, elapsedSeco
     </Box>
   );
   const panel = <QuestionListPanel mode="review" cells={buildReviewCells(results, flagged, index)} surface={surface} onSelect={select} />;
-  const retryButton = retry.length > 0 ? (
+  // The local retry grades with the answer key; a keyless package (server-graded review) has none.
+  const retryButton = retry.length > 0 && canGradeLocally(questions) ? (
     <ErgButton fullWidth startIcon={phone ? undefined : <ReplayRounded />} sx={{ mt: phone ? 0 : "auto" }} variant="contained" onClick={() => startLocalRetry(retry)}>
       {`Luyện lại ${retry.length} câu`}
     </ErgButton>
@@ -73,7 +76,7 @@ export function ReviewLayout({ attempt, questions, flagged, current, elapsedSeco
           </>
         ) : (
           <>
-            <ReviewSummaryHeader scoreOutOf10={reviewScoreOutOf10(attempt)} correct={correct} total={questions.length} elapsedSeconds={elapsedSeconds} onBack={onBack} />
+            <ReviewSummaryHeader scoreOutOf10={reviewScoreOutOf10(attempt)} correct={correct} total={scoredTotal} elapsedSeconds={elapsedSeconds} onBack={onBack} />
             <Box data-testid="review-aside" sx={{ ...cardSx, display: "flex", flexDirection: "column", gap: 2, minHeight: 0 }}>
               {panel}
               {retryButton}
@@ -84,14 +87,14 @@ export function ReviewLayout({ attempt, questions, flagged, current, elapsedSeco
     );
   }
 
-  const wrong = results.filter((r) => !r.pending && !r.correct && !r.skipped).length;
+  const wrong = results.filter((r) => !r.pending && !r.survey && !r.correct && !r.skipped).length;
   const skipped = results.filter((r) => r.skipped).length;
   return (
     <PlayerWebPage backLabel="Kết quả" onBack={onBack} title={title ?? "Xem lại bài làm"} meta={[`${questions.length} câu`, meta].filter(Boolean).join(" · ")}>
-      <Box component="section" sx={webColumnSx}>{detail}</Box>
-      <Box component="aside" sx={{ ...webSideSx, flexBasis: 380 }}>
+      <Box component="section" sx={{ ...webColumnSx, maxWidth: "none", minHeight: "calc(100vh - 180px)", "@supports (height: 100dvh)": { minHeight: "calc(100dvh - 180px)" } }}>{detail}</Box>
+      <Box component="aside" sx={{ ...webSideSx, alignSelf: "flex-start", maxHeight: "calc(100vh - 120px)", position: "sticky", top: 0, "@supports (height: 100dvh)": { maxHeight: "calc(100dvh - 120px)" } }}>
         <Box data-testid="review-aside" sx={{ ...webCardSx, display: "flex", flex: 1, flexDirection: "column", gap: 1.5, minHeight: 0, overflowY: "auto" }}>
-          <ReviewScoreStrip scoreOutOf10={reviewScoreOutOf10(attempt)} correct={correct} total={questions.length} elapsedSeconds={elapsedSeconds} />
+          <ReviewScoreStrip scoreOutOf10={reviewScoreOutOf10(attempt)} correct={correct} total={scoredTotal} elapsedSeconds={elapsedSeconds} />
           <Box sx={{ alignItems: "baseline", display: "flex", gap: 1, justifyContent: "space-between" }}>
             <Typography component="h2" sx={{ color: tk.color.text }} variant="subtitle2">Danh sách câu hỏi</Typography>
             <Typography sx={{ color: tk.color.textMuted, fontVariantNumeric: "tabular-nums" }} variant="caption">{`${wrong} sai · ${skipped} bỏ trống`}</Typography>

@@ -41,7 +41,8 @@ export default function SchoolClassesScreen() {
   const assignedTeachers = selectedSchool.classes.filter((c) => Boolean(c.homeroomTeacher)).length;
 
   async function handleImport(classList: Array<Omit<SchoolClass, "id">>, students?: StudentImportRow[]) {
-    await addClasses(classList);
+    // The class list in memory is not refreshed yet, so the new classes are matched by the ids just returned.
+    const created = new Map(((await addClasses(classList)) ?? []).map((c) => [c.name.trim().toLowerCase(), c.id]));
     if (students && students.length > 0) {
       await addStudents(
         students.map((row) => ({
@@ -50,6 +51,7 @@ export default function SchoolClassesScreen() {
           birthDate: row.birthDate,
           grade: row.grade,
           className: row.className,
+          academicClassId: created.get(row.className.trim().toLowerCase()),
           guardianPhone: row.guardianPhone,
           subjectIds: [],
           status: "studying",

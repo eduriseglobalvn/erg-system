@@ -66,7 +66,8 @@ export function PlayerReadyView({
     };
   });
   const resultDisplay: QuizResultDisplay = { ...defaultResultDisplay, ...(readyQuiz.result ?? {}) };
-  resultDisplay.showReviewButton &&= canGradeLocally(questions); // keyless package: review would show wrong data
+  // Keyless package: local grading would show wrong data, so review needs the server's per-question results.
+  resultDisplay.showReviewButton &&= Boolean(readySession.reviewOnly) || canGradeLocally(questions);
   const restoredDraft = loadState.status === "ready" && loadState.restored;
   const bookmarkedQuestionIds = readySession.bookmarkedQuestionIds;
   const isCurrentQuestionBookmarked = bookmarkedQuestionIds.includes(readyQuestion.id);
@@ -82,14 +83,16 @@ export function PlayerReadyView({
   const quizMeta = [welcomeMeta?.subjectLabel?.trim(), isTrainingMode ? "Luyện tập" : "Kiểm tra"].filter(Boolean).join(" · ");
   const exit = onExit ?? handleBackToList;
 
+  // deadlineAt is only set for a timed attempt: a test, or practice assigned with a time limit.
+  const timed = isTestingMode || deadlineAt !== null;
   const countdownProps = {
-    active: started && isTestingMode && !attemptCompleted,
+    active: started && timed && !attemptCompleted,
     deadlineAt,
     localClock: portableOffline,
     onExpiredChange: setTimeUp,
     session: activeSession,
   };
-  const countdown = isTestingMode ? (
+  const countdown = timed ? (
     <PlayerCountdown {...countdownProps}>{(seconds) => <PlayerTimerText seconds={seconds} />}</PlayerCountdown>
   ) : null;
 

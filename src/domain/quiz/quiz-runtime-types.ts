@@ -27,7 +27,39 @@ export type LocalQuizAttemptSession = {
   serverStartedAt?: string;
   serverTimeAtStart?: string;
   deadlineAt?: string;
+  /** Minutes the assignment allows; set means the attempt is timed whatever the quiz mode. */
+  durationMinutes?: number;
   serverClockOffsetMs?: number;
+  /** In-memory only: the server's submitted attempt shown for review; never written to IndexedDB. */
+  reviewOnly?: boolean;
+  /** Review session only: the server said no attempt is left. */
+  attemptsExhausted?: boolean;
+};
+
+/** GET /lms/assignments/{id}/attempts/latest-submitted. Carries no answer key. */
+export type LatestSubmittedAttempt = {
+  attemptId: string;
+  assignmentId: string;
+  quizId: string;
+  quizVersionId?: string | null;
+  packageHash?: string | null;
+  status: "submitted" | "graded" | "needs_review";
+  score?: number | null;
+  maxScore?: number | null;
+  percent?: number | null;
+  passed?: boolean | null;
+  startedAt?: string | null;
+  submittedAt?: string | null;
+  answers: Record<string, AnswerPayload>;
+  results: Record<string, {
+    correct: boolean;
+    partiallyRight: boolean;
+    awardedPoints: number;
+    maxPoints: number;
+    needsManualGrade: boolean;
+  }>;
+  /** The assignment has no attempt left, so "Làm lại" is not offered. */
+  attemptsExhausted?: boolean;
 };
 
 export type StartAttemptInput = {
@@ -57,6 +89,8 @@ export type StartAttemptResult = {
     expiresAt?: string;
     startedAt?: string;
     serverTimeAtStart?: string;
+    /** Server clock when the response was built. */
+    serverTime?: string;
     durationMinutes?: number;
   };
 };

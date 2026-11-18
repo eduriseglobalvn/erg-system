@@ -16,7 +16,7 @@ import {
 import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
 
 // Canvas table column positions (H09): title 335, time 147, correct 240, score 100 (+16 inner padding), tries 77, action 128.
-const WEB_COLUMNS = "minmax(0,335px) minmax(0,147px) minmax(0,240px) 100px 77px 128px";
+const WEB_COLUMNS = "minmax(0,335px) minmax(0,147px) minmax(0,240px) 150px 77px 128px";
 const BAND_COLOR: Record<ScoreBand, string> = { error: t.color.danger, ok: t.color.success, primary: t.color.primary };
 const BAND_TILE: Record<ScoreBand, { bg: string; fg: string }> = {
   error: { bg: t.statusTint.error.bg, fg: t.statusTint.error.color },
@@ -60,12 +60,14 @@ function WebKpis({ items }: { items: StudentDashboardAssignment[] }) {
   const best = s.best;
   const bestCorrect = best && correctText(best) ? ` · đúng ${correctText(best)} câu` : "";
   return (
-    <Box data-design="submitted-kpis" sx={{ alignItems: "center", display: "grid", gap: 2, gridTemplateColumns: "repeat(4, minmax(0, 1fr))" }}>
-      <Box sx={{ ...boardCardSx, alignItems: "center", display: "flex", flexDirection: "column", gap: 0.5, p: 2 }}>
-        <Ring label={s.averageTen} size={64} value={Number(s.averageTen.replace(",", "."))} />
-        <Typography color="textSecondary" variant="caption">Điểm trung bình</Typography>
-        <Box sx={{ alignItems: "baseline", display: "flex", gap: 0.25 }}><Big>{s.averageTen}</Big><Unit>/10</Unit></Box>
-        <Typography color="textSecondary" variant="caption">{`${s.count} bài · lần nộp gần nhất`}</Typography>
+    <Box data-design="submitted-kpis" sx={{ alignItems: "stretch", display: "grid", gap: 2, gridTemplateColumns: { xs: "repeat(2, minmax(0, 1fr))", lg: "repeat(4, minmax(0, 1fr))" } }}>
+      <Box sx={{ ...boardCardSx, alignItems: "center", display: "flex", gap: 1.5, p: 2 }}>
+        <Ring label={s.averageTen} size={52} value={Number(s.averageTen.replace(",", "."))} />
+        <Box sx={{ display: "grid", gap: 0.5, minWidth: 0 }}>
+          <Typography color="textSecondary" variant="caption">Điểm trung bình</Typography>
+          <Box sx={{ alignItems: "baseline", display: "flex", gap: 0.25 }}><Big>{s.averageTen}</Big><Unit>/10</Unit></Box>
+          <Typography color="textSecondary" variant="caption">{`${s.count} bài · lần nộp gần nhất`}</Typography>
+        </Box>
       </Box>
       {s.correct ? (
         <Kpi note={<Typography color="textSecondary" variant="caption">{`${correctPct}% số câu của ${s.count} bài`}</Typography>} title="Câu trả lời đúng">
@@ -119,7 +121,7 @@ function WebRow({ a, onOpen }: { a: StudentDashboardAssignment; onOpen: (id: str
               <Typography component="span" sx={{ color: BAND_COLOR[band], fontVariantNumeric: "tabular-nums", lineHeight: 1 }} variant="h2">{score10(a)}</Typography>
               <Unit>/10</Unit>
             </Box>
-            <Typography color="textSecondary" variant="caption">{rawScoreLabel(a)}</Typography>
+            <Typography color="textSecondary" noWrap variant="caption">{rawScoreLabel(a)}</Typography>
           </>
         ) : null}
       </Box>

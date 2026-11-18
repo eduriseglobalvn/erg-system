@@ -1,4 +1,4 @@
-export type EmployeeStatus = "ACTIVE" | "PENDING" | "BLOCKED" | "BANNED" | "INACTIVE" | "UNKNOWN";
+export type EmployeeStatus = "ACTIVE" | "INVITED" | "PENDING" | "BLOCKED" | "BANNED" | "INACTIVE" | "UNKNOWN";
 export type EmployeeStatusInput = Exclude<EmployeeStatus, "UNKNOWN">;
 
 export type EmployeeListFilters = {

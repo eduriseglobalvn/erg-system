@@ -5,13 +5,15 @@ import {
   saveApprovedOfflineQuizSnapshot,
   startAttempt,
 } from "@/features/lcms/quiz/quiz-runtime";
-import type { QuizRuntimePortal } from "@/domain/quiz/quiz-runtime-types";
-import type { QuizPackage } from "@/domain/quiz/types";
+import { ApiClientError } from "@/lib/api-client/errors";
+import type { LatestSubmittedAttempt, LocalQuizAttemptSession, QuizRuntimePortal } from "@/domain/quiz/quiz-runtime-types";
+import type { Attempt, QuizPackage } from "@/domain/quiz/types";
 
 export async function createFreshLocalSession(
   assignmentId: string,
   quizPackage: QuizPackage,
   scope?: LocalQuizAttemptScope,
+  persist = true,
 ) {
   const localAttemptId = createRuntimeKey("attempt");
   const startKey = createRuntimeKey("start");
@@ -22,6 +24,7 @@ export async function createFreshLocalSession(
     assignmentId,
     attemptId: localAttemptId,
     packageHash: quizPackage.contentHash,
+    persist,
     portal: scope?.portal,
     quizId: quizPackage.quizId,
     quizVersion: quizPackage.quizVersion,
@@ -30,6 +33,44 @@ export async function createFreshLocalSession(
     submitIdempotencyKey: submitKey,
     tenantId: scope?.tenantId,
   });
+}
+
+/** A submitted session built from the server's attempt. Memory only: never saved, so a later "Làm lại" starts clean. */
+export function createReviewSession(
+  assignmentId: string,
+  quizPackage: QuizPackage,
+  submission: LatestSubmittedAttempt,
+  attempt: Attempt,
+  scope?: LocalQuizAttemptScope,
+): LocalQuizAttemptSession {
+  const submittedAt = submission.submittedAt ?? submission.startedAt ?? new Date().toISOString();
+  return {
+    accountId: scope?.accountId ?? undefined,
+    assignmentId,
+    attemptId: submission.attemptId,
+    answers: Object.fromEntries(Object.entries(attempt.answers).map(([questionId, record]) => [questionId, record.input])),
+    bookmarkedQuestionIds: [],
+    clientEvents: [],
+    packageHash: quizPackage.contentHash,
+    portal: scope?.portal ?? undefined,
+    quizId: quizPackage.quizId,
+    quizVersion: quizPackage.quizVersion,
+    reviewOnly: true, attemptsExhausted: Boolean(submission.attemptsExhausted),
+    startedAt: submission.startedAt ?? submittedAt,
+    status: "submitted",
+    submitIdempotencyKey: "",
+    submittedAt,
+    tenantId: scope?.tenantId ?? undefined,
+    updatedAt: submittedAt,
+  };
+}
+
+/** The server answers 409 when the assignment has no attempts left ("Làm lại" after the last one); other errors keep their own message. */
+export const isAttemptsExhaustedError = (error: unknown) => error instanceof ApiClientError && error.status === 409;
+
+export function startAttemptErrorMessage(error: unknown) {
+  if (isAttemptsExhaustedError(error)) return "Bài này đã hết lượt làm, không thể làm lại. Hãy hỏi giáo viên nếu bạn cần thêm lượt.";
+  return error instanceof Error ? error.message : "Không thể bắt đầu lượt làm. Vui lòng thử lại.";
 }
 
 export async function ensureServerAttempt(

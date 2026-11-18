@@ -140,6 +140,14 @@ describe("player template from the package", () => {
     expect(loaded.playerTemplate).toEqual({ accentColor: "#0071E3" });
   });
 
+  it("counts down an editor-made quiz: the editor saves the limit as MM:SS behind a switch", () => {
+    const minutes = (settings: unknown) => normalizeQuizPackage(detail({ settings })).quiz.settings.timeLimitMinutes;
+    expect(minutes({ enableTimeLimit: true, timeLimit: "30:00" })).toBe(30);
+    expect(minutes({ enableTimeLimit: true, timeLimit: "00:45" })).toBe(1);
+    expect(minutes({ enableTimeLimit: false, timeLimit: "30:00" })).toBe(0);
+    expect(minutes({ timeLimitMinutes: 20, enableTimeLimit: true, timeLimit: "30:00" })).toBe(20);
+  });
+
   it("has no playerTemplate when the package carries none or junk", () => {
     expect(normalizeQuizPackage(detail({})).quiz).not.toHaveProperty("playerTemplate");
     expect(normalizeQuizPackage(detail({ playerTemplate: "red" })).quiz).not.toHaveProperty("playerTemplate");

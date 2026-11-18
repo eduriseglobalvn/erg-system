@@ -71,7 +71,7 @@ export function normalizePortableQuizPackage(
     assetsManifest: verified.envelope.assetsManifest,
     gradingMode: manifest.gradingMode,
     source,
-    quiz: rawQuiz,
+    quiz: asQuizDetail(rawQuiz, manifest),
     ...(answerKey ? { answerKey } : {}),
   };
   const roster = parsePortableRoster(payload.roster);
@@ -89,6 +89,26 @@ export async function getStoredPortableQuizPackage(input: {
   return {
     quizPackage: normalizePortableQuizPackage(record, "tauri-cache"),
     record,
+  };
+}
+
+/**
+ * The signed payload carries the quiz as the editor published it ({info, settings, sections, ...}); the online API
+ * reshapes that into a quiz detail server-side (QuizRuntimePackageService.toResponse). The Player has no server, so it
+ * does the same here.
+ */
+function asQuizDetail(rawQuiz: unknown, manifest: VerifiedPortableExamPackage["manifest"]): unknown {
+  if (!isRecord(rawQuiz) || "id" in rawQuiz || !Array.isArray(rawQuiz.sections)) return rawQuiz;
+  const info = isRecord(rawQuiz.info) ? rawQuiz.info : {};
+  const settings = isRecord(rawQuiz.settings) ? rawQuiz.settings : {};
+  return {
+    quiz: { id: manifest.quizId, title: info.title, version: manifest.versionNumber ?? manifest.versionLabel },
+    slides: rawQuiz.sections,
+    // shortcut: the package does not carry the quiz kind the online API takes the mode from, so an exported quiz plays
+    // as a test (no per-question answers shown); add the mode to package_json on the backend to honour practice quizzes.
+    settings: { info, playerTemplate: rawQuiz.playerTemplate, settings: { mode: "testing", ...settings } },
+    result: rawQuiz.result,
+    theme: rawQuiz.theme,
   };
 }
 

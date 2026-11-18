@@ -7,15 +7,16 @@ import { OfflineTeachingCommandError } from "@/features/lms/offline-teaching";
 import {
   isPendingAcademicRecordMutation,
   resolveAcademicRecordIdentity,
+  useDeleteGradebookScoreMutation,
   useGradebookWorkspaceQuery,
   useUpsertGradebookScoreMutation,
 } from "@/features/lms/api/lms-academic-record-query";
-import { lmsSubjectOptions } from "@/features/lms/components/lms-subject-options";
+import { useClassSubjectOptions } from "@/features/lms/api/class-subject-options";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useVirtualList } from "@/hooks/use-virtual-list";
 import { formatDateVi } from "@/domain/formatters/format-date";
 import { runtimeFixturesEnabled } from "@/lib/runtime-fixtures";
-import { describePaste, isBlockPaste, parseClipboardGrid, planScorePaste } from "./score-paste";
+import { describePaste, isBlockPaste, parseClipboardGrid, parseScoreInput, planScorePaste } from "./score-paste";
 import {
   baseScoreColumns,
   classificationOptions,
@@ -42,7 +43,7 @@ export function useScoreSheetController(students: ClassroomStudent[], selectedCl
   const [manualScores, setManualScores] = useState<Record<string, string>>({});
   const [bonusScores, setBonusScores] = useState<Record<string, string>>({});
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedSubject, setSelectedSubject] = useState(lmsSubjectOptions[0] ?? "");
+  const [pickedSubject, setSelectedSubject] = useState("");
   const [classificationFilter, setClassificationFilter] = useState<Classification[]>(classificationOptions);
   const [classificationSort, setClassificationSort] = useState<ClassificationSort>(null);
   const [manualClassifications, setManualClassifications] = useState<Record<string, Classification>>({});
@@ -57,6 +58,9 @@ export function useScoreSheetController(students: ClassroomStudent[], selectedCl
   const tableScrollRef = useRef<HTMLDivElement>(null);
   const debouncedSearchQuery = useDebouncedValue(searchQuery);
   const identity = resolveAcademicRecordIdentity();
+  const subjectOptions = useClassSubjectOptions(selectedClass?.schoolId, selectedClass?.id).options;
+  // A subject picked for another class does not carry over: scores are stored by the class's own KCT subject id.
+  const selectedSubject = subjectOptions.some((item) => item.id === pickedSubject) ? pickedSubject : "";
   const gradebookScope = {
     ...identity,
     classId: selectedClass?.id,
@@ -67,6 +71,7 @@ export function useScoreSheetController(students: ClassroomStudent[], selectedCl
   // Keep offline teaching default-deny until the server publishes an explicit
   // capability for gradebook mutations.
   const scoreMutation = useUpsertGradebookScoreMutation(gradebookScope, { offline: {} });
+  const deleteScoreMutation = useDeleteGradebookScoreMutation(gradebookScope);
 
   const serverColumns = (gradebookQuery.data?.columns ?? []).map((column) => ({
     id: column.id,
@@ -168,8 +173,29 @@ export function useScoreSheetController(students: ClassroomStudent[], selectedCl
   function commitScore(columnId: string, studentId: string, nextValue?: string) {
     const column = scoreColumns.find((item) => item.id === columnId);
     const raw = nextValue ?? manualScores[`${columnId}:${studentId}`];
-    const score = Number(raw);
-    if (!column || !selectedClass?.id || identity.accountId === "anonymous" || !Number.isFinite(score)) return;
+    if (!column || !selectedClass?.id || identity.accountId === "anonymous") return;
+    const input = parseScoreInput(raw, column.maxScore);
+    if (input.kind === "none") return;
+    if (input.kind !== "ok") {
+      // An emptied cell removes the saved score (never sent as 0); an out-of-scale value is put back.
+      const saved = gradebookQuery.data?.scores.some((item) => item.studentId === studentId && item.columnId === columnId);
+      if (input.kind === "empty" && saved && selectedSubject) {
+        deleteScoreMutation.mutate({ classId: selectedClass.id, columnId, studentId, subjectId: selectedSubject, tenantId: identity.tenantId }, {
+          onError: () => toast.error("Không thể xoá điểm. Dữ liệu cũ đã được khôi phục."),
+          onSettled: () => clearManualScore(`${columnId}:${studentId}`),
+        });
+        return;
+      }
+      clearManualScore(`${columnId}:${studentId}`);
+      if (input.kind !== "empty") toast.warning(`Điểm phải từ 0 đến ${column.maxScore}.`);
+      return;
+    }
+    const score = input.score;
+    if (!selectedSubject) {
+      clearManualScore(`${columnId}:${studentId}`);
+      toast.warning("Chọn môn học trước khi nhập điểm.");
+      return;
+    }
     const current = gradebookQuery.data?.scores.find((item) => item.studentId === studentId && item.columnId === columnId);
     const key = `${columnId}:${studentId}`;
     scoreMutation.mutate({
@@ -280,7 +306,7 @@ export function useScoreSheetController(students: ClassroomStudent[], selectedCl
     studentDrafts,
     studentNameFor: (student: ClassroomStudent) => studentDrafts[student.id]?.name ?? student.name,
     studentStates,
-    subjectOptions: lmsSubjectOptions,
+    subjectOptions,
     tableScrollRef,
     updateBonusScore,
     updateManualScore,

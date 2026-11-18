@@ -1,3 +1,4 @@
+import { nameInitials } from "@/domain/formatters/format-initials";
 import type { ReactNode } from "react";
 import MessageSquare from "@mui/icons-material/ForumOutlined";
 import NotificationsNoneRoundedIcon from "@mui/icons-material/NotificationsNoneRounded";
@@ -23,13 +24,6 @@ import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 const TITLED_BY_PAGE = new Set<StudentPageKey>(["assignments", "ranking", "discussion", "announcements"]);
 
-function getInitials(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  if (parts.length === 0) return "HS";
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-}
-
 /** Canvas ".desk": 16px padding and gap around a 232px floating sidebar card (spec 7.0). */
 const DESK_GAP = 16;
 const SIDEBAR_CARD_WIDTH = 232;
@@ -37,7 +31,7 @@ const SIDEBAR_CARD_WIDTH = 232;
 export function TopMenuShell({
   account, activePage, children, copy, dashboardProfile,
   notificationAnchor, notifications, sidebarData, todoCount, unreadAnnouncementCount,
-  onAccountOpen, onTierOpen, onNotificationClose, onNotificationClick,
+  onAccountOpen, onHelpOpen, onTierOpen, onNotificationClose, onNotificationClick,
   onNotificationOpen, onPageChange, onSignOut,
 }: {
   account: ElearningViewerSession | null;
@@ -51,6 +45,7 @@ export function TopMenuShell({
   todoCount: number;
   unreadAnnouncementCount: number;
   onAccountOpen: () => void;
+  onHelpOpen?: () => void;
   onTierOpen?: () => void;
   onNotificationClose: () => void;
   onNotificationClick: (threadId: string, replyId?: string) => void;
@@ -83,7 +78,7 @@ export function TopMenuShell({
           <Box sx={{ mb: 1.5 }}><PortalSidebarWorkspaceHeader active collapsed={false} fluid portalInfo={{ name: "Học sinh", workspaceCapabilities: workspaces }} /></Box>
         ) : null}
         <StudentSidebar
-          activePage={activePage} data={sidebarData} initials={getInitials(studentName)} name={studentName}
+          activePage={activePage} data={sidebarData} initials={nameInitials(studentName) || "HS"} name={studentName}
           rankingEnabled={copy.navItems.some((item) => item.key === "ranking")} signedIn={Boolean(account)}
           todoCount={todoCount} unreadCount={unreadAnnouncementCount}
           notificationSlot={(
@@ -93,7 +88,7 @@ export function TopMenuShell({
               </IconButton>
             </Tooltip>
           )}
-          onAccountOpen={onAccountOpen} onTierOpen={onTierOpen} onPageChange={onPageChange} onSignOut={onSignOut}
+          onAccountOpen={onAccountOpen} onHelpOpen={onHelpOpen} onTierOpen={onTierOpen} onPageChange={onPageChange} onSignOut={onSignOut}
         />
       </Box>
 

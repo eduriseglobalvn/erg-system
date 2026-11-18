@@ -19,7 +19,9 @@ export const webCardSx = {
 } as const;
 
 export const webColumnSx = { display: "flex", flex: "1 1 560px", flexDirection: "column", gap: 2, maxWidth: 820, minWidth: 0 } as const;
-export const webSideSx = { display: "flex", flex: "0 1 340px", flexDirection: "column", gap: 2, minWidth: 280 } as const;
+export const webSideSx = { display: "flex", flex: "0 1 320px", flexDirection: "column", gap: 2, minWidth: 280 } as const;
+// Side padding of the playing area: 24px, growing so the content stays at most 1600px wide and centred on big screens.
+const webGutter = "max(24px, calc((100% - 1600px) / 2))";
 
 type PlayerWebPageProps = {
   backLabel: string;
@@ -66,8 +68,8 @@ export function PlayerWebPage({ backLabel, onBack, title, meta, actions, progres
       <Box
         component="main"
         sx={fill
-          ? { alignItems: "stretch", display: "flex", flex: 1, gap: 2, minHeight: 0, overflow: "hidden", p: 2 }
-          : { alignContent: "flex-start", alignItems: alignTop ? "flex-start" : "stretch", display: "flex", flex: 1, flexWrap: "wrap", gap: 3, justifyContent: "center", minHeight: 0, overflowY: "auto", p: 3 }}
+          ? { alignItems: "stretch", display: "flex", flex: 1, gap: 2, minHeight: 0, overflow: "hidden", py: 2, px: webGutter }
+          : { alignContent: "flex-start", alignItems: alignTop ? "flex-start" : "stretch", display: "flex", flex: 1, flexWrap: "wrap", gap: 3, justifyContent: "center", minHeight: 0, overflowY: "auto", py: 3, px: webGutter }}
       >
         {children}
       </Box>
@@ -130,20 +132,20 @@ export function KeyHintRow({ hint }: { hint: string }) {
 
 const KIND_LABEL: Record<QuestionKind, string> = {
   single_choice: "Một đáp án",
-  true_false: "Đúng/Sai",
+  true_false: "Đúng / Sai",
   multiple_response: "Nhiều đáp án",
   short_answer: "Trả lời ngắn",
-  numeric: "Trả lời số",
+  numeric: "Đáp số",
   fill_blank: "Điền chỗ trống",
   inline_choice: "Chọn trong câu",
-  select_from_lists: "Chọn trong câu",
-  matching: "Ghép nối",
-  sequence: "Sắp xếp",
-  drag_words: "Kéo thả từ",
-  drag_drop: "Kéo thả",
+  select_from_lists: "Chọn từ danh sách",
+  matching: "Ghép cặp",
+  sequence: "Sắp xếp thứ tự",
+  drag_words: "Kéo từ vào câu",
+  drag_drop: "Phân loại",
   hotspot: "Điểm nóng",
-  likert_scale: "Thang đo",
-  essay: "Trả lời mở",
+  likert_scale: "Thang đánh giá",
+  essay: "Tự luận",
 };
 
 export const questionKindLabel = (kind: QuestionKind) => KIND_LABEL[kind];

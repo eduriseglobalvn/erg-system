@@ -46,6 +46,7 @@ function EventCard({ event, isNew, next, now, onOpen }: { event: TeachingCalenda
   const done = new Date(event.endAt) < now;
   const left = Math.ceil((new Date(event.startAt).getTime() - now.getTime()) / 60_000);
   const place = [event.roomName, event.schoolName].filter(Boolean).join(" · ");
+  const subject = [event.subjectName, event.levelName].filter(Boolean).join(" · ");
   const withLine = assistant ? `Dạy chính: ${event.mainTeacherName ?? "—"}` : event.assistantName ? `Trợ giảng: ${event.assistantName}` : "";
   const tag = (label: string): ReactNode => <Box component="span" sx={pill}>{label}</Box>;
   return (
@@ -66,6 +67,7 @@ function EventCard({ event, isNew, next, now, onOpen }: { event: TeachingCalenda
           {next && left > 0 && left <= 60 ? <Box component="span" sx={{ color: t.color.primaryHover, fontSize: SIZE.title, fontWeight: MEDIUM }}>· còn {left} phút</Box> : null}
           {assistant ? tag("Trợ giảng") : null}{isNew ? tag("Mới") : null}{cancelled ? tag("Đã huỷ") : null}
         </Box>
+        {subject ? <Box sx={{ color: t.color.textSecondary, fontSize: SIZE.title }}>{subject}</Box> : null}
         <Box sx={{ color: t.color.textSecondary, fontSize: SIZE.title }}>{place || schoolPlainName(event.schoolName)}</Box>
         {withLine ? <Box sx={{ color: t.color.textMuted, fontSize: SIZE.title }}>{withLine}</Box> : null}
       </Box>

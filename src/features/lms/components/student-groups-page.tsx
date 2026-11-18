@@ -335,7 +335,7 @@ export function StudentGroupsPage({
             </Typography>
             <Typography variant="h3" component="h1" sx={{ mt: 0.5 }}>Quản lý nhóm học sinh</Typography>
             <Typography variant="body2" noWrap sx={{ mt: 0.25, color: "text.secondary", fontWeight: "fontWeightMedium" }}>
-              Tạo nhóm và bóc học sinh từ nhiều lớp khác nhau trong {selectedSchoolName}.
+              Tạo nhóm và chọn học sinh từ nhiều lớp khác nhau{selectedSchoolName ? ` trong ${selectedSchoolName}` : ""}.
             </Typography>
           </Box>
           <Box sx={{ display: "grid", gap: 1, gridTemplateColumns: { xs: "1fr", sm: "repeat(3, minmax(0, 1fr))" }, minWidth: { lg: 520 } }}>

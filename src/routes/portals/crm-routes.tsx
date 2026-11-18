@@ -1,7 +1,7 @@
 import { createRoute, lazyRouteComponent } from "@tanstack/react-router";
 
 import { crmPaths } from "@/app/portal-route-registry";
-import { authedRoute, permissionStaticData } from "@/routes/portals/route-shared";
+import { authedRoute, HelpGuidePage, permissionStaticData } from "@/routes/portals/route-shared";
 
 // Pathless layout: the CRM shell renders the page of each /seo* route in its <Outlet />.
 const crmShellRoute = createRoute({
@@ -19,5 +19,12 @@ const crmPageRoutes = crmPaths.map((cPath) =>
   }),
 );
 
+const crmHelpRoute = createRoute({
+  getParentRoute: () => crmShellRoute,
+  path: "/seo/help",
+  staticData: permissionStaticData("/seo/help", "CRM"),
+  component: () => <HelpGuidePage workspace="CRM" />,
+});
+
 /** Children of `_authed`. */
-export const crmRoutes = [crmShellRoute.addChildren(crmPageRoutes)];
+export const crmRoutes = [crmShellRoute.addChildren([...crmPageRoutes, crmHelpRoute])];

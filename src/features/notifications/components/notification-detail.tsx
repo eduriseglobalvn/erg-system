@@ -16,10 +16,10 @@ import { fetchNotificationDetail, markNotificationRead, notificationQueryKeys, r
 import type { NotificationPortal } from "../api/notification-types";
 import { inboxSourceLabel, needsAck, priorityLabel } from "./inbox-filters";
 
-type NotificationDetailProps = { portal: NotificationPortal; notificationId: string; onBack: () => void };
+type NotificationDetailProps = { portal: NotificationPortal; notificationId: string; onBack: () => void; /** Sits directly in a bordered panel: no own card, no back button. */ plain?: boolean };
 
 /** One inbox message; opening it marks it read, and a campaign that asks for it gets the "Đã nắm thông tin" ack. */
-export function NotificationDetail({ portal, notificationId, onBack }: NotificationDetailProps) {
+export function NotificationDetail({ portal, notificationId, onBack, plain = false }: NotificationDetailProps) {
   const queryClient = useQueryClient();
   const scope = resolveNotificationQueryScope(portal);
   const query = useQuery({
@@ -75,12 +75,12 @@ export function NotificationDetail({ portal, notificationId, onBack }: Notificat
   const ackedAt = item.ackedAt ?? ackedNow;
 
   return (
-    <Box sx={{ display: "grid", gap: 1.5, maxWidth: 760 }}>
-      {back}
-      <Box component="article" sx={{ border: 1, borderColor: "divider", borderRadius: `${ergEnterpriseTokens.radius.card}px`, bgcolor: "background.paper", p: { xs: 2, md: 3 } }}>
+    <Box sx={{ display: "grid", gap: 1.5, maxWidth: plain ? "70ch" : 760 }}>
+      {plain ? null : back}
+      <Box component="article" sx={plain ? undefined : { border: 1, borderColor: "divider", borderRadius: `${ergEnterpriseTokens.radius.card}px`, bgcolor: "background.paper", p: { xs: 2, md: 3 } }}>
         {priority ? <ErgStatusChip label={priority} tone={priority === "Khẩn" ? "error" : "warning"} sx={{ mb: 1 }} /> : null}
         <Typography variant="h5" component="h1" sx={{ fontWeight: "fontWeightBold" }}>{item.title}</Typography>
-        <Typography variant="body2" sx={{ mt: 0.5, color: "text.secondary" }}>
+        <Typography variant="body2" sx={{ mt: 0.5, color: "text.secondary", ...(plain && { pb: 2, borderBottom: 1, borderColor: "divider" }) }}>
           {[inboxSourceLabel(item), formatDateTimeVi(item.createdAt)].filter(Boolean).join(" · ")}
         </Typography>
         <Typography variant="body1" sx={{ mt: 2, whiteSpace: "pre-line", overflowWrap: "anywhere" }}>{item.body || item.description}</Typography>

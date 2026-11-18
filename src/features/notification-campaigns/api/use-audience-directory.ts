@@ -62,10 +62,18 @@ function useAdminDirectory(scope: AudienceScope, enabled: boolean) {
     return {
       schools: directoryItems.map((s) => ({ id: s.id, label: s.name || s.id })).sort(byLabel),
       grades: [...codes].map((code) => ({ id: code, label: `Khối ${code}` })).sort(byLabel),
-      classes: details.schools.flatMap((s) => s.classes.map((c) => ({ id: c.id, label: `${c.name} · ${s.name}` }))).sort(byLabel),
+      classes: distinctOptions(details.schools.flatMap((s) => s.classes.map((c) => ({ id: c.id, label: `${c.name} · ${s.name}` })))).sort(byLabel),
     };
   }, [details.schools, directoryItems]);
   return { ...lists, loading: directory.isFetching || details.pending, error: directory.error ?? details.error };
+}
+
+/** One option per id; options sharing a label (two schools with the same name) get the id tail so they can be told apart (BUG-B-017). */
+export function distinctOptions<T extends { id: string; label: string }>(options: T[]): T[] {
+  const unique = [...new Map(options.map((o) => [o.id, o])).values()];
+  const count = new Map<string, number>();
+  for (const o of unique) count.set(o.label, (count.get(o.label) ?? 0) + 1);
+  return unique.map((o) => ((count.get(o.label) ?? 0) > 1 ? { ...o, label: `${o.label} · mã …${o.id.slice(-4)}` } : o));
 }
 
 /** Teacher: only the classes they teach (the backend's own list, 403 otherwise). */

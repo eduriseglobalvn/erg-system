@@ -127,6 +127,7 @@ export function StudentQuizSession({
         <PlayerShell
           assignmentId={assignment.id}
           quizId={assignment.quizId}
+          title={assignment.title}
           portableOffline={preview}
           runtimePortal={runtimePortal}
           welcomeMeta={{ dueAt: assignment.dueAt, subjectLabel: assignment.subjectLabel }}

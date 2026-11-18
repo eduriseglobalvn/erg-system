@@ -6,7 +6,7 @@ import { loadTeachingOverviewGrid, type TeachingOverviewSchoolPage, loadTeaching
 import { teachingCalendarQueryKeys } from "@/features/teaching-calendar/api/teaching-calendar-query-keys";
 import { loadLcmsTeachingCalendarWorkspace } from "@/features/teaching-calendar/api/teaching-calendar-workspace-query-api";
 import type { TeachingCalendarEvent } from "@/features/teaching-calendar/api/teaching-calendar-workspace-types";
-import { MAX_COMPARED_SCHOOLS } from "@/features/teaching-calendar/domain/overview-model";
+import { paginateSchools, selectedSchoolIds } from "@/features/teaching-calendar/domain/overview-model";
 import { addDaysToDate } from "@/features/teaching-calendar/domain/schedule-copy";
 import { getDefaultTenantId } from "@/lib/graphql-client";
 import { adminPath } from "@/platform/workspaces/workspace-paths";
@@ -31,12 +31,16 @@ export function useOverviewData(params: OverviewParams) {
     queryKey: teachingCalendarQueryKeys.overview(tenantId, "schools", { q, quick, week }),
   });
   const schoolItems = useMemo(() => schoolPages.data?.pages.flatMap((page) => page.items) ?? [], [schoolPages.data]);
-  const selected = params.schools.length ? params.schools.slice(0, MAX_COMPARED_SCHOOLS) : schoolItems.slice(0, MAX_COMPARED_SCHOOLS).map((school) => school.schoolId);
+  const selected = selectedSchoolIds(params.schools, schoolItems);
+  // Luoi chi tai va ve MOT trang truong; doi tuan hoac doi trang thi tai lai dung phan do.
+  const [schoolPage, setSchoolPage] = useState(0);
+  const pageInfo = paginateSchools(selected, schoolPage);
+  const pageIds = pageInfo.items;
   const grid = useQuery({
-    enabled: schoolsTab && selected.length > 0,
+    enabled: schoolsTab && pageIds.length > 0,
     placeholderData: keepPreviousData,
-    queryFn: ({ signal }) => loadTeachingOverviewGrid({ schoolIds: selected, weekStart: week }, signal),
-    queryKey: teachingCalendarQueryKeys.overview(tenantId, "grid", { schoolIds: selected, weekStart: week }),
+    queryFn: ({ signal }) => loadTeachingOverviewGrid({ schoolIds: pageIds, weekStart: week }, signal),
+    queryKey: teachingCalendarQueryKeys.overview(tenantId, "grid", { schoolIds: pageIds, weekStart: week }),
   });
 
   const teachers = useQuery({
@@ -51,10 +55,10 @@ export function useOverviewData(params: OverviewParams) {
     queryKey: teachingCalendarQueryKeys.loadSettings(tenantId),
     staleTime: 5 * 60_000,
   });
-  const schoolFilter = schoolsTab ? selected : undefined;
+  const schoolFilter = schoolsTab ? pageIds : undefined;
   const workspaceInput = { from: week, schoolIds: schoolFilter, statuses: ["DRAFT", "PUBLISHED"] as Array<"DRAFT" | "PUBLISHED">, tenantId, to: addDaysToDate(week, 7) };
   const workspace = useQuery({
-    enabled: schoolsTab ? selected.length > 0 : true,
+    enabled: schoolsTab ? pageIds.length > 0 : true,
     queryFn: ({ signal }) => loadLcmsTeachingCalendarWorkspace(workspaceInput, signal),
     queryKey: teachingCalendarQueryKeys.workspace("lcms", "overview", workspaceInput),
     staleTime: 60_000,
@@ -71,7 +75,7 @@ export function useOverviewData(params: OverviewParams) {
   };
 
   return {
-    eventsById, grid, loadSettings: settings.data, openSchedule, selected, slotDialog: slotDialogs.element,
+    eventsById, grid, loadSettings: settings.data, openSchedule, pageInfo, selected, setSchoolPage, slotDialog: slotDialogs.element,
     schools: { fetchNext: () => void schoolPages.fetchNextPage(), hasMore: Boolean(schoolPages.hasNextPage), items: schoolItems, query: schoolPages, quickCounts: schoolPages.data?.pages[0]?.quickCounts, total: schoolPages.data?.pages[0]?.total ?? 0 },
     setTeacherPage, teacherPage, teachers,
   };
