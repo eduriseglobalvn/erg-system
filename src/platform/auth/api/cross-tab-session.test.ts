@@ -71,6 +71,7 @@ test("another account signing out leaves this tab signed in", async () => {
   initializeCrossTabAuthSync();
 
   FakeBroadcastChannel.latest!.emit({ type: "signed-out", accountId: "admin" });
+  FakeBroadcastChannel.latest!.emit({ type: "signed-out" }); // from a signed-out tab: no account, not ours
   expect(storage.clearStoredAuthSessions).not.toHaveBeenCalled();
 
   FakeBroadcastChannel.latest!.emit({ type: "signed-out", accountId: "pdt" });
@@ -87,6 +88,8 @@ test("a newer sign-in as someone else forgets this tab's session and reloads; th
 
   FakeBroadcastChannel.latest!.emit({ type: "session-changed", accountId: "teacher" });
   expect(logout).not.toHaveBeenCalled();
+  // The local re-read must not go back out: a CustomEvent's detail is null, which used to be announced as a sign-out.
+  expect(FakeBroadcastChannel.latest!.posted).toEqual([]);
 
   FakeBroadcastChannel.latest!.emit({ type: "session-changed", accountId: "student-1" });
   await vi.waitFor(() => expect(reload).toHaveBeenCalledTimes(1));

@@ -28,20 +28,26 @@ function handleMessage(message: SyncMessage) {
   const own = ownAccountId ?? currentTabAccountId();
   const otherAccount = Boolean(message.accountId && own && message.accountId !== own);
   if (message.type === "signed-out") {
-    // Another account signing out (or losing its session) is not this tab's business.
-    if (!otherAccount) clearQuietly();
+    // Another account signing out is not this tab's business. Nor is an anonymous sign-out: a superseded tab left on
+    // the sign-in page sends one when it re-reads its empty storage, and that ended the newer account's session.
+    if (!own || message.accountId === own) clearQuietly();
   } else if (message.type === "session-changed") {
     // Owner rule 18/11: one browser holds one account. A newer sign-in as someone else ends this tab's session.
     if (otherAccount) endSupersededSession();
-    else window.dispatchEvent(new CustomEvent(AUTH_SESSION_STORAGE_CHANGED_EVENT, { detail: undefined }));
+    else quietly(() => window.dispatchEvent(new CustomEvent(AUTH_SESSION_STORAGE_CHANGED_EVENT)));
   }
 }
 
 function clearQuietly() {
+  quietly(clearStoredAuthSessions);
+  ownAccountId = undefined;
+}
+
+/** Runs a reaction to a remote signal without announcing it back to the other tabs. */
+function quietly(run: () => void) {
   applyingRemoteMessage = true;
   try {
-    clearStoredAuthSessions();
-    ownAccountId = undefined;
+    run();
   } finally {
     applyingRemoteMessage = false;
   }
@@ -61,7 +67,6 @@ function endSupersededSession() {
 
 function handleLocalSessionChange(event: CustomEvent<{ accountId?: string } | null | undefined>) {
   if (applyingRemoteMessage || !channel) return;
-  if (event.detail === undefined) return; // the local echo of a remote signal
   const accountId = event.detail?.accountId ?? ownAccountId;
   ownAccountId = event.detail ? accountId : undefined;
   channel.postMessage({ type: event.detail ? "session-changed" : "signed-out", ...(accountId ? { accountId } : {}) } satisfies SyncMessage);
