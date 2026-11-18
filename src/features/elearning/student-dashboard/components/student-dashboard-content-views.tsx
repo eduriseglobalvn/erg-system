@@ -14,7 +14,7 @@ import Chip from "@mui/material/Chip";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import { useState } from "react";
-import { nameWithoutTags } from "@/domain/formatters/format-initials";
+import { nameInitials, nameWithoutTags } from "@/domain/formatters/format-initials";
 import { StudentPasswordDialog } from "@/features/elearning/student-dashboard/components/student-password-dialog";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 import { type ElearningViewerSession } from "@/platform/auth/api/elearning-viewer-session";
@@ -76,7 +76,7 @@ export function OverviewView({ announcement, assignmentsFailed, assignmentsLoadi
               {discussionPreview.map((post) => (
                 <Paper key={post.id} sx={{ bgcolor: "#FAFAFC", border: `1px solid ${MUI_DIVIDER}`, borderRadius: "12px", p: 1.4 }}>
                   <Stack direction="row" spacing={1} alignItems="center">
-                    <Avatar sx={{ bgcolor: MUI_PRIMARY, height: 28, width: 28, fontSize: 11, fontWeight: 600 }}>{post.authorName.slice(0, 1)}</Avatar>
+                    <Avatar sx={{ bgcolor: MUI_PRIMARY, height: 28, width: 28, fontSize: 11, fontWeight: 600 }}>{nameInitials(post.authorName)}</Avatar>
                     <Box sx={{ minWidth: 0, flex: 1 }}>
                       <Typography noWrap variant="body2" sx={{ fontWeight: 600 }}>{post.authorName}</Typography>
                       <Typography noWrap variant="caption" color="text.secondary">{copy.discussionRepliesLabel(post.commentCount)}</Typography>
@@ -121,7 +121,7 @@ export function AccountView({ account, averageAssignmentScore, copy, openAssignm
           <CardContent sx={{ p: 2.5 }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>{copy.learningProfileTitle}</Typography>
             <Stack direction="row" spacing={2} alignItems="center" sx={{ mt: 2 }}>
-              <Avatar sx={{ bgcolor: MUI_PRIMARY, height: 56, width: 56, fontSize: 20, fontWeight: 600 }}>{(account?.name ?? profile.name).slice(0, 1)}</Avatar>
+              <Avatar sx={{ bgcolor: MUI_PRIMARY, height: 56, width: 56, fontSize: 20, fontWeight: 600 }}>{nameInitials(account?.name ?? profile.name) || "HS"}</Avatar>
               <Box>
                 <Typography variant="h6" sx={{ fontWeight: 600 }}>{account?.name ?? profile.name}</Typography>
                 <Typography variant="body2" color="text.secondary">{account?.email ?? profile.className}</Typography>
