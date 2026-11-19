@@ -1,6 +1,6 @@
 "use client";
 
-import { Link } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 
 import { ErgButton } from "@/components/erg-mui/erg-actions";
 import { ErgEmptyState } from "@/components/erg-mui/erg-feedback";
@@ -13,11 +13,12 @@ import { useI18n } from "@/platform/i18n";
  */
 export function AdminErgPortalWorkspace() {
   const { t } = useI18n();
+  const navigate = useNavigate();
   return (
     <ErgEmptyState
       title={t("notFound.title")}
       description={t("notFound.description")}
-      action={<ErgButton component={Link} to={adminPath("/")}>{t("notFound.backHome")}</ErgButton>}
+      action={<ErgButton onClick={() => void navigate({ to: adminPath("/") })}>{t("notFound.backHome")}</ErgButton>}
     />
   );
 }
