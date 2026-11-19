@@ -88,7 +88,7 @@ const teacherGuide: HelpGuide = {
       steps: [
         { text: "Vào «Hoạt động học tập» → «Lớp học» và chọn lớp." },
         { text: "Tìm tên học sinh, nhấn «Cấp lại mật khẩu»." },
-        { text: "Hộp «Cấp lại mật khẩu học sinh?» hiện ra. Xác nhận. Mật khẩu mới chính là tên đăng nhập của em đó." },
+        { text: "Hộp «Cấp lại mật khẩu học sinh?» hiện ra. Xác nhận. Mật khẩu trở về mặc định «erg2026»." },
         { text: "Nhấn «Sao chép» rồi đưa mật khẩu mới cho đúng em đó.", warning: "Không gửi mật khẩu vào nhóm chat chung của lớp." },
         { text: "Em có thể tự đổi sang mật khẩu dễ nhớ hơn trong trang tài khoản của mình." },
       ],
