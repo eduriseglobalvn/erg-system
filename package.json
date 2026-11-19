@@ -117,5 +117,8 @@
     "vite": "^8.1.6",
     "vite-plugin-pwa": "^1.3.0",
     "vitest": "^4.1.12"
+  },
+  "overrides": {
+    "@grpc/grpc-js": "1.13.7"
   }
 }
