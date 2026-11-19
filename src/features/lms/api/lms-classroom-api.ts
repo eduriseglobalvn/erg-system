@@ -104,6 +104,7 @@ query LmsClassWorkspace($input: ClassWorkspaceInput!) {
           updatedAt
           averagePercent
           completedAssignmentCount
+          currentAssignmentTitle
         }
         page
         size
@@ -189,7 +190,8 @@ export function mapClassWorkspaceToStudents(
       studentCode: student.studentCode || undefined,
       username: student.username || undefined,
       avatarSeed: initials(student.fullName || student.username || student.studentCode || student.id),
-      currentAssignment: currentAssignmentLabel(workspace.assignments),
+      // Per student: the assignment of their newest attempt (BUG-C-013), not the class list.
+      currentAssignment: student.currentAssignmentTitle?.trim() || "Chưa làm bài nào",
       currentStage: student.updatedAt ? `Cập nhật ${formatDateLabel(student.updatedAt)}` : "Sẵn sàng học tập",
       // The API has no per-student progress; this is a status-based placeholder, so the UI shows "—" (hasProgressData=false).
       progressRate: status === "ahead" ? 88 : status === "steady" ? 62 : 28,
@@ -228,11 +230,3 @@ function mapStudentStatus(status: string | null | undefined, index: number): Stu
   return index % 5 === 0 ? "support" : index % 3 === 0 ? "ahead" : "steady";
 }
 
-/** «Tên bài» of the newest assignment, plus how many more the class has; never a raw id. */
-export function currentAssignmentLabel(assignments: { items: LmsAssignment[]; totalItems?: number | null }): string {
-  const total = assignments.totalItems ?? assignments.items.length;
-  if (!assignments.items.length) return "Chưa có bài đang giao";
-  const title = assignments.items[0].title?.trim();
-  if (!title) return `${total} bài đang giao`;
-  return total > 1 ? `${title} và ${total - 1} bài khác` : title;
-}
