@@ -11,7 +11,7 @@ const studentGuide: HelpGuide = {
       steps: [
         { text: "Mở trang đăng nhập ERG. Nhập tên đăng nhập và «Mật khẩu» thầy cô đưa cho em." },
         { text: "Nhấn «Đăng nhập». Em vào thẳng trang học, không cần làm thêm gì." },
-        { text: "Quên mật khẩu? Em báo thầy cô phụ trách lớp. Thầy cô sẽ cấp lại mật khẩu cho em; mật khẩu mới chính là tên đăng nhập của em.", warning: "Nhập sai 5 lần liền thì phải chờ 15 phút mới thử lại được." },
+        { text: "Quên mật khẩu? Em báo thầy cô phụ trách lớp. Thầy cô sẽ cấp lại mật khẩu cho em; mật khẩu mặc định thầy cô sẽ đọc cho em.", warning: "Nhập sai 5 lần liền thì phải chờ 15 phút mới thử lại được." },
         { text: "Không cho bạn khác biết mật khẩu của em." },
         { text: "Trên điện thoại, các mục nằm ở thanh dưới cùng. Trên máy tính, các mục nằm bên trái." },
       ],
