@@ -22,6 +22,7 @@ vi.mock("@/features/lcms/quiz/quiz-editor/hooks/use-quiz-editor-scope", async (i
     levelOptions: [],
     levelTopics: [{ id: "t1", label: "Phân số" }],
     questionBankQuery: { data: undefined },
+    questionBankSubjects: [],
     handleCourseChange: vi.fn(),
     handleLevelChange: vi.fn(),
     handleTopicChange: vi.fn(),
