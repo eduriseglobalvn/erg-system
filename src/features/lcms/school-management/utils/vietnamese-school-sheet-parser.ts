@@ -262,9 +262,8 @@ export function extractStudentsFromRosterMatrix(
     const className = rowClassName || options.defaultClassName || "";
     const columnGrade = mapping.gradeIndex >= 0 ? normalizeGrade(String(row[mapping.gradeIndex] ?? "")) : "";
     const grade = columnGrade || parseClassNameAndGrade(className).grade;
-    const rawCode = mapping.sttIndex >= 0 ? String(row[mapping.sttIndex] ?? "").trim() : "";
-    const ownCode = mapping.codeIndex >= 0 ? String(row[mapping.codeIndex] ?? "").trim() : "";
-    const code = ownCode || (rawCode ? `${className}-${rawCode}` : (className ? `${className}-${students.length + 1}` : ""));
+    // No code column: leave it blank so the backend issues one; a code made from the row number changed with sorting.
+    const code = mapping.codeIndex >= 0 ? String(row[mapping.codeIndex] ?? "").trim() : "";
     const birthDate = mapping.birthdayIndex >= 0 ? toViDate(row[mapping.birthdayIndex]) : "";
     const guardianPhone = mapping.phoneIndex >= 0 ? String(row[mapping.phoneIndex] ?? "").trim() : "";
 

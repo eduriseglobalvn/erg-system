@@ -46,7 +46,7 @@ export default function SchoolClassesScreen() {
     if (students && students.length > 0) {
       await addStudents(
         students.map((row) => ({
-          code: row.code || `${selectedSchool!.id}-${Date.now()}`,
+          code: row.code,
           fullName: row.fullName,
           birthDate: row.birthDate,
           grade: row.grade,
