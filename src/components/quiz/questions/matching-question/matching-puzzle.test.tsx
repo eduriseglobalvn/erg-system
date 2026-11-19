@@ -102,26 +102,26 @@ describe("MatchingPuzzle focus and measurement", () => {
 describe("MatchingPuzzle on a phone with a long answer", () => {
   afterEach(() => vi.restoreAllMocks());
 
-  test("pieces stay within the phone width and the two pieces of a row share a minimum height", () => {
+  test("on a phone each pair stacks in one drop row, so pieces get the board width and words are not cut (BUG-G-008)", () => {
     vi.spyOn(HTMLElement.prototype, "clientWidth", "get").mockReturnValue(343);
     const long = "Đáp án rất dài ".repeat(8).slice(0, 120);
     const longRows: PuzzleRow[] = [{ ...rows[0], right: long, rightName: long }, rows[1]];
     const { container } = render(<MatchingPuzzle rows={longRows} mode="learner" onDrop={vi.fn()} />);
     const pieces = Array.from(container.querySelectorAll<HTMLElement>("[data-piece]"));
     expect(pieces).toHaveLength(4);
-    for (const piece of pieces) expect(parseInt(getComputedStyle(piece).maxWidth, 10)).toBeLessThanOrEqual(138);
+    for (const piece of pieces) expect(getComputedStyle(piece).maxWidth).toBe("317px"); // 343 - 26
     const [left, right] = pieces;
-    expect(getComputedStyle(right).minHeight).toBe(getComputedStyle(left).minHeight);
-    expect(getComputedStyle(right).overflowWrap).toBe("anywhere");
+    // the right piece lives inside the left piece's drop row, under it, with no sideways "connected" offset
+    expect(left.parentElement!.contains(right)).toBe(true);
+    expect(getComputedStyle(right.parentElement!).transform).toBe("none");
   });
 
-  test("the number column comes off the cap and an empty trailing column takes no room", () => {
+  test("the stacked board has two columns: row number and the pair", () => {
     vi.spyOn(HTMLElement.prototype, "clientWidth", "get").mockReturnValue(343);
     const plain = rows.map((row) => ({ ...row, trailing: undefined }));
     const { container } = render(<MatchingPuzzle rows={plain} mode="learner" onDrop={vi.fn()} />);
-    for (const piece of Array.from(container.querySelectorAll<HTMLElement>("[data-piece]"))) expect(getComputedStyle(piece).maxWidth).toBe("125px"); // floor((343 - 26 - 48 - 18) / 2)
     const grid = container.querySelector<HTMLElement>("[data-piece]")!.parentElement!.parentElement!;
-    expect(getComputedStyle(grid).gridTemplateColumns.split(" ")).toHaveLength(3);
+    expect(getComputedStyle(grid).gridTemplateColumns).toBe("26px minmax(0, 1fr)");
   });
 
   test("a verdict keeps the trailing column", () => {
@@ -134,7 +134,7 @@ describe("MatchingPuzzle on a phone with a long answer", () => {
     vi.spyOn(HTMLElement.prototype, "clientWidth", "get").mockReturnValue(343);
     const { container } = render(<MatchingPuzzle rows={rows} mode="learner" onDrop={vi.fn()} />);
     const grid = container.querySelector<HTMLElement>("[data-piece]")!.parentElement!.parentElement!;
-    expect(getComputedStyle(grid).gridTemplateColumns.split(" ")).toHaveLength(3);
+    expect(getComputedStyle(grid).gridTemplateColumns).not.toContain("auto");
   });
 
   test("without a measured width (no layout) pieces keep the web cap", () => {

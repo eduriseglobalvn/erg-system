@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { PUZZLE, pathLeft, pathRight, pieceMaxWidthFor, rowAtPoint } from "./puzzle-geometry";
+import { PUZZLE, pathLeft, pathRight, pieceMaxWidthFor, rowAtPoint, isStackedBoard } from "./puzzle-geometry";
 
 describe("puzzle sizes", () => {
   test("apart pieces sit 48 px from each other and a piece is at most 380 px wide", () => {
@@ -65,5 +65,13 @@ describe("rowAtPoint", () => {
   test("returns null outside the grid", () => {
     expect(rowAtPoint({ x: 450, y: 20 }, rows, grid)).toBeNull();
     expect(rowAtPoint({ x: 100, y: 130 }, rows, grid)).toBeNull();
+  });
+});
+
+describe("isStackedBoard", () => {
+  test("a 343 px phone board stacks each pair, a tablet board keeps two columns, an unmeasured box does not stack", () => {
+    expect(isStackedBoard(343)).toBe(true);
+    expect(isStackedBoard(700)).toBe(false);
+    expect(isStackedBoard(0)).toBe(false);
   });
 });
