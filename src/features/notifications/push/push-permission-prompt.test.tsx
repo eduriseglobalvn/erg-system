@@ -48,10 +48,11 @@ test("asks on app open while permission is default and no subscription exists", 
   await waitFor(() => expect(screen.queryByText("Nhận thông báo từ ERG?")).not.toBeInTheDocument());
 });
 
-test("asks when permission is granted but the browser lost its subscription", async () => {
+test("stays quiet when permission is granted but the browser lost its subscription (re-subscribes silently)", async () => {
   setPermission("granted");
   renderPrompt();
-  expect(await screen.findByText("Nhận thông báo từ ERG?")).toBeInTheDocument();
+  await new Promise((resolve) => setTimeout(resolve, 20));
+  expect(screen.queryByText("Nhận thông báo từ ERG?")).not.toBeInTheDocument();
 });
 
 test("stays quiet once subscribed", async () => {
