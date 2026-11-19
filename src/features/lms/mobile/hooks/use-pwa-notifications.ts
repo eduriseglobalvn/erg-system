@@ -76,11 +76,7 @@ export function usePwaNotifications(portal: PwaNotificationPortal = DEFAULT_NOTI
 
       let currentRegistration = await readCurrentBrowserPushRegistration(portal);
       if (!currentRegistration) {
-        if (!readStoredDeviceRegistration(portal)) {
-          setState("default");
-          return "default";
-        }
-        // The browser dropped its subscription but this user turned push on here: subscribe again, no prompt needed.
+        // Permission is already granted (turning it off happens in the browser): subscribe silently, never ask again.
         currentRegistration = await ensureBrowserPushRegistration(portal);
       }
 

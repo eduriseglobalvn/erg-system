@@ -84,6 +84,7 @@ function PushPermissionCard({ accountId, portal }: { accountId: string; portal: 
 
   const offer = shouldOfferPushPrompt({
     dismissed,
+    permissionGranted: Notification.permission === "granted",
     quizActive,
     serverReady: pushServerReady(config),
     state: notifications.state,
