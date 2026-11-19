@@ -38,7 +38,7 @@ export function buildFooterMessage({
       : allQuestionsAnswered
         ? "Tất cả câu hỏi đã có câu trả lời. Bạn có thể nộp bài."
         : isTrainingMode
-          ? "Chọn đáp án rồi bấm Nộp bài cho từng câu. Có thể dùng mục lục để chuyển câu."
+          ? "Chọn đáp án rồi bấm Kết quả để xem đúng sai từng câu. Có thể dùng mục lục để chuyển câu."
           : "Dùng Câu trước / Câu tiếp để rà soát bài trước khi nộp.";
 }
 
