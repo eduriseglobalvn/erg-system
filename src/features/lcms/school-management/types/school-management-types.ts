@@ -63,7 +63,6 @@ export type PartnerSchool = {
   schoolType: SchoolType;
   status: SchoolStatus;
   joinedAt: string;
-  students: SchoolStudent[];
   classes: SchoolClass[];
   grades: string[];
   subjects: SchoolSubject[];
@@ -71,6 +70,10 @@ export type PartnerSchool = {
   version?: number;
   studentCount?: number;
   classCount?: number;
+  /** Only on the school detail (operations) read; the student list itself is paged via getSchoolStudents. */
+  studentStats?: import("@/features/lcms/school-management/api/school-management-api").SchoolStudentStats;
+  scoredStudentCount?: number;
+  averageScore?: number | null;
   academicYears?: import("@/features/lcms/school-management/api/school-management-api").SchoolAcademicYearRecord[];
   gradeRecords?: import("@/features/lcms/school-management/api/school-management-api").SchoolGradeRecord[];
   permissions?: import("@/features/lcms/school-management/api/school-management-api").SchoolPermissions;

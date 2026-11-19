@@ -60,7 +60,7 @@ export default function SchoolDetailFlowScreen() {
   const labels = schoolTypeMeta[selectedSchool.schoolType];
   const stepMeta = baseStepMeta.map((step, index) => index === 2 ? { ...step, label: `Danh sách ${labels.learnerLabel.toLowerCase()}` } : index === 3 ? { ...step, label: `${labels.subjectLabel} & ghi danh` } : step);
   const structureReady = selectedSchool.classes.length > 0 && (!usesGrades || selectedSchool.classes.every((classroom) => selectedSchool.grades.includes(classroom.grade)));
-  const completion = [Boolean(selectedSchool.name && selectedSchool.id), structureReady, selectedSchool.students.length > 0, selectedSchool.subjects.length > 0, structureReady && selectedSchool.students.length > 0 && selectedSchool.subjects.length > 0];
+  const completion = [Boolean(selectedSchool.name && selectedSchool.id), structureReady, (selectedSchool.studentCount ?? 0) > 0, selectedSchool.subjects.length > 0, structureReady && (selectedSchool.studentCount ?? 0) > 0 && selectedSchool.subjects.length > 0];
   const completedCount = completion.filter(Boolean).length;
   const stepCount = completion.length;
   const content = [<SchoolInformationStep key="information" />, <SchoolStructureStep key="structure" />, <SchoolStudentsStep key="students" />, <SchoolCurriculumStep key="curriculum" />, <SchoolReviewStep key="review" />][activeStep];

@@ -14,12 +14,10 @@ import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 import { alpha } from "@mui/material/styles";
 
 export function SchoolOverviewPanel({ school }: { school: PartnerSchool }) {
-  const totalStudents = school.students.length;
-  const atRisk = school.students.filter((student) => student.status === "at-risk").length;
-  const activeStudents = school.students.filter((student) => student.status === "studying").length;
-  const profileComplete = school.students.filter(
-    (student) => Boolean(student.code && student.fullName && student.grade && student.className)
-  ).length;
+  const totalStudents = school.studentStats?.total ?? school.studentCount ?? 0;
+  const atRisk = school.studentStats?.atRisk ?? 0;
+  const activeStudents = school.studentStats?.studying ?? 0;
+  const profileComplete = school.studentStats?.profileComplete ?? 0;
 
   const percentOf = (value: number) => (totalStudents ? Math.round((value / totalStudents) * 100) : 0);
 
@@ -30,7 +28,7 @@ export function SchoolOverviewPanel({ school }: { school: PartnerSchool }) {
       iconBg: alpha(ergEnterpriseTokens.color.primary, 0.08),
       iconColor: ergEnterpriseTokens.color.primary,
       label: "Học sinh",
-      value: school.students.length,
+      value: totalStudents,
     },
     {
       helper: `${school.grades.length} khối đang hoạt động`,

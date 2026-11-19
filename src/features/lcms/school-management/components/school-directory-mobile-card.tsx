@@ -22,7 +22,7 @@ export function SchoolDirectoryMobileCard({ onOpen, school }: { onOpen: (id: str
   const meta = [schoolTypeMeta[school.schoolType]?.shortLabel, school.district].filter(Boolean).join(" · ");
   const counts: Array<[number, string]> = [
     [school.classCount ?? school.classes.length, "lớp"],
-    [school.studentCount ?? school.students.length, "HS"],
+    [school.studentCount ?? 0, "HS"],
   ];
   return (
     <Box component="li">

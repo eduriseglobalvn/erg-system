@@ -3,7 +3,8 @@ import type {
   SchoolStatus,
   SchoolType,
 } from "@/features/lcms/school-management/types/school-management-types";
-import type { DirectoryItem, OperationsWorkspace, SchoolCommandResponse } from "@/features/lcms/school-management/api/school-api/types";
+import type { DirectoryItem, OperationsWorkspace, SchoolCommandResponse, SchoolStudentRow } from "@/features/lcms/school-management/api/school-api/types";
+import type { SchoolStudent } from "@/features/lcms/school-management/types/school-management-types";
 
 export function mapDirectorySchool(item: DirectoryItem): PartnerSchool {
   return {
@@ -19,7 +20,6 @@ export function mapDirectorySchool(item: DirectoryItem): PartnerSchool {
     schoolType: fromApiSchoolType(item.schoolType),
     status: fromApiStatus(item.status),
     joinedAt: "",
-    students: [],
     classes: [],
     grades: [],
     subjects: [],
@@ -53,18 +53,6 @@ export function mapOperations(workspace: OperationsWorkspace): PartnerSchool {
     schoolType: fromApiSchoolType(workspace.school.schoolType),
     status: fromApiStatus(workspace.school.status),
     joinedAt: "",
-    students: workspace.students.map((student) => ({
-      id: student.id,
-      code: student.code ?? "",
-      fullName: student.fullName,
-      birthDate: student.birthDate ?? "",
-      grade: student.grade ?? "",
-      className: student.className ?? "",
-      guardianPhone: student.guardianPhone ?? "",
-      subjectIds: student.subjectIds,
-      status: studentDisplayStatus(student.status),
-      academicClassId: undefined,
-    })),
     classes: workspace.classes.map((classroom) => ({
       id: classroom.id,
       name: classroom.name,
@@ -88,9 +76,27 @@ export function mapOperations(workspace: OperationsWorkspace): PartnerSchool {
     version: Number(workspace.school.version),
     studentCount: Number(workspace.summary.studentCount),
     classCount: Number(workspace.summary.classCount),
+    studentStats: workspace.summary.students,
+    scoredStudentCount: workspace.summary.scoredStudentCount,
+    averageScore: workspace.summary.averageScore ?? null,
     academicYears: workspace.academicYears.map((year) => ({ ...year, version: Number(year.version) })),
     gradeRecords: workspace.grades,
     permissions: workspace.permissions,
+  };
+}
+
+export function mapSchoolStudent(student: SchoolStudentRow): SchoolStudent {
+  return {
+    id: student.id,
+    code: student.code ?? "",
+    fullName: student.fullName,
+    birthDate: student.birthDate ?? "",
+    grade: student.grade ?? "",
+    className: student.className ?? "",
+    guardianPhone: student.guardianPhone ?? "",
+    subjectIds: student.subjectIds,
+    status: studentDisplayStatus(student.status),
+    averageScore: student.averageScore ?? null,
   };
 }
 

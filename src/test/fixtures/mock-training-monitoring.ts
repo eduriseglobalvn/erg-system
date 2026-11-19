@@ -23,14 +23,14 @@ const topics = ["Giao tiếp trong trường học", "Tư duy đại số", "H�
 const demoTeacherNames = ["Cô Nguyễn Minh Anh", "Thầy Lê Mạnh Hùng", "Cô Trần Thu Hà", "Thầy Phạm Quốc Bảo"];
 
 export function buildTrainingMonitoringData(school: PartnerSchool): TrainingMonitoringData {
-  const sourceClasses = school.classes.length ? school.classes : [{ id: "unassigned", name: "Chưa xếp lớp", grade: "—", homeroomTeacher: "", studentCount: school.students.length }];
+  const sourceClasses = school.classes.length ? school.classes : [{ id: "unassigned", name: "Chưa xếp lớp", grade: "—", homeroomTeacher: "", studentCount: school.studentCount ?? 0 }];
   const classes = sourceClasses.map((classroom, index) => ({
     ...classroom,
     homeroomTeacher: classroom.homeroomTeacher?.trim() && classroom.homeroomTeacher !== "Chưa phân công"
       ? classroom.homeroomTeacher
       : demoTeacherNames[index % demoTeacherNames.length],
   }));
-  const sourceStudents = school.students.length ? school.students : classes.flatMap((classroom, classIndex) =>
+  const sourceStudents = classes.flatMap((classroom, classIndex) =>
     Array.from({ length: Math.max(4, Math.min(classroom.studentCount, 12)) }, (_, studentIndex): SchoolStudent => ({
       birthDate: "2012-01-01",
       className: classroom.name,

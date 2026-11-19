@@ -101,7 +101,7 @@ export default function SchoolDirectoryScreen() {
 
   const activeCount = schools.filter((s) => s.status === "active").length;
   const onboardingCount = schools.filter((s) => s.status === "onboarding").length;
-  const totalStudents = schools.reduce((acc, s) => acc + (s.studentCount ?? s.students.length), 0);
+  const totalStudents = schools.reduce((acc, s) => acc + (s.studentCount ?? 0), 0);
 
   function openSchool(id: string) {
     selectSchool(id);
@@ -431,7 +431,7 @@ export default function SchoolDirectoryScreen() {
                       {/* Người học */}
                       <TableCell align="right">
                         <Typography sx={{ color: ergEnterpriseTokens.color.text, fontSize: "0.875rem", fontWeight: 600 }}>
-                          {school.studentCount ?? school.students.length}
+                          {school.studentCount ?? 0}
                         </Typography>
                       </TableCell>
 

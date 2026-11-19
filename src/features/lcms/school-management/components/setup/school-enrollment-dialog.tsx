@@ -16,12 +16,17 @@ import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
+import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { useMemo, useState } from "react";
+import { useSchoolStudents } from "@/features/lcms/school-management/hooks/use-school-students";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { schoolTypeMeta, schoolTypeUsesGrades } from "@/features/lcms/school-management/types/school-type-config";
 import type { PartnerSchool } from "@/features/lcms/school-management/types/school-management-types";
+
+const PAGE_SIZE = 100;
 
 export function SchoolEnrollmentDialog({ initialClassId, onClose, onEnroll, school }: {
   initialClassId?: string;
@@ -33,16 +38,19 @@ export function SchoolEnrollmentDialog({ initialClassId, onClose, onEnroll, scho
   const [studentIds, setStudentIds] = useState<Set<string>>(() => new Set());
   const [classFilter, setClassFilter] = useState("all");
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(0);
+  const debouncedSearch = useDebouncedValue(search);
   const [saving, setSaving] = useState(false);
   const meta = schoolTypeMeta[school.schoolType];
   const usesGrades = schoolTypeUsesGrades(school.schoolType);
   const selectedClass = school.classes.find((item) => item.id === classId);
-  const classNames = useMemo(() => Array.from(new Set(school.students.map((student) => student.className).filter(Boolean))).sort(), [school.students]);
-  const filteredStudents = useMemo(() => school.students.filter((student) => {
-    const matchesClass = classFilter === "all" || student.className === classFilter;
-    const query = search.trim().toLocaleLowerCase("vi");
-    return matchesClass && (!query || `${student.fullName} ${student.code} ${student.className}`.toLocaleLowerCase("vi").includes(query));
-  }), [classFilter, school.students, search]);
+  const classNames = useMemo(() => Array.from(new Set(school.classes.map((item) => item.name))).sort(), [school.classes]);
+  // Filtered and paged on the server; the selection is a set of ids, so it survives page changes.
+  const studentPage = useSchoolStudents(school.id, {
+    search: debouncedSearch,
+    className: classFilter === "all" ? undefined : classFilter,
+  }, page, PAGE_SIZE);
+  const filteredStudents = studentPage.data?.items ?? [];
   const selectedVisibleCount = filteredStudents.filter((student) => studentIds.has(student.id)).length;
   const allVisibleSelected = filteredStudents.length > 0 && selectedVisibleCount === filteredStudents.length;
 
@@ -68,14 +76,15 @@ export function SchoolEnrollmentDialog({ initialClassId, onClose, onEnroll, scho
       <TextField label={`Chọn ${meta.classLabel.toLowerCase()} đích`} onChange={(event) => setClassId(event.target.value)} select size="small" value={classId}>{school.classes.map((item) => <MenuItem key={item.id} value={item.id}>{item.name}{item.grade ? ` · Khối ${item.grade}` : ""}</MenuItem>)}</TextField>
       {selectedClass ? <Typography color="text.secondary" variant="caption">Lớp đích: {selectedClass.name} · {selectedClass.studentCount} người học hiện tại</Typography> : null}
       <Box sx={{ alignItems: { xs: "stretch", md: "center" }, display: "grid", gap: 1.25, gridTemplateColumns: { xs: "1fr", md: "minmax(220px, 1fr) 220px auto" } }}>
-        <TextField label={`Tìm ${meta.learnerLabel.toLowerCase()}`} onChange={(event) => setSearch(event.target.value)} size="small" slotProps={{ input: { startAdornment: <InputAdornment position="start"><SearchRoundedIcon fontSize="small" /></InputAdornment> } }} value={search} />
-        <TextField label={meta.classLabel} onChange={(event) => setClassFilter(event.target.value)} select size="small" value={classFilter}><MenuItem value="all">Tất cả {meta.classLabel.toLowerCase()}</MenuItem>{classNames.map((className) => <MenuItem key={className} value={className}>{className}</MenuItem>)}</TextField>
-        <Button onClick={() => toggleAllVisible(!allVisibleSelected)} variant="outlined">{allVisibleSelected ? "Bỏ chọn đang lọc" : "Chọn toàn bộ đang lọc"}</Button>
+        <TextField label={`Tìm ${meta.learnerLabel.toLowerCase()}`} onChange={(event) => { setSearch(event.target.value); setPage(0); }} size="small" slotProps={{ input: { startAdornment: <InputAdornment position="start"><SearchRoundedIcon fontSize="small" /></InputAdornment> } }} value={search} />
+        <TextField label={meta.classLabel} onChange={(event) => { setClassFilter(event.target.value); setPage(0); }} select size="small" value={classFilter}><MenuItem value="all">Tất cả {meta.classLabel.toLowerCase()}</MenuItem>{classNames.map((className) => <MenuItem key={className} value={className}>{className}</MenuItem>)}</TextField>
+        <Button onClick={() => toggleAllVisible(!allVisibleSelected)} variant="outlined">{allVisibleSelected ? "Bỏ chọn trang này" : "Chọn cả trang này"}</Button>
       </Box>
       <TableContainer sx={{ border: "1px solid", borderColor: "divider", borderRadius: 2, flex: 1, minHeight: 0, overflow: "auto" }}><Table stickyHeader size="small" sx={{ minWidth: 760 }}><TableHead><TableRow><TableCell padding="checkbox"><Checkbox checked={allVisibleSelected} indeterminate={selectedVisibleCount > 0 && !allVisibleSelected} onChange={(_, checked) => toggleAllVisible(checked)} /></TableCell><TableCell>{meta.learnerLabel}</TableCell><TableCell>{meta.classLabel} hiện tại</TableCell>{usesGrades ? <TableCell>Khối</TableCell> : null}<TableCell>Mã học sinh</TableCell></TableRow></TableHead><TableBody>
         {filteredStudents.map((student) => <TableRow hover key={student.id} selected={studentIds.has(student.id)}><TableCell padding="checkbox"><Checkbox checked={studentIds.has(student.id)} onChange={() => setStudentIds((current) => { const next = new Set(current); if (next.has(student.id)) next.delete(student.id); else next.add(student.id); return next; })} /></TableCell><TableCell><Typography sx={{ fontWeight: 600 }} variant="body2">{student.fullName}</Typography></TableCell><TableCell>{student.className || "Chưa ghi danh"}</TableCell>{usesGrades ? <TableCell>{student.grade || "Chưa gán"}</TableCell> : null}<TableCell sx={{ fontFamily: "var(--font-mono)" }}>{student.code}</TableCell></TableRow>)}
-        {!filteredStudents.length ? <TableRow><TableCell colSpan={usesGrades ? 5 : 4} sx={{ color: "text.secondary", py: 5, textAlign: "center" }}>Không có người học phù hợp bộ lọc.</TableCell></TableRow> : null}
+        {studentPage.data && !filteredStudents.length ? <TableRow><TableCell colSpan={usesGrades ? 5 : 4} sx={{ color: "text.secondary", py: 5, textAlign: "center" }}>Không có người học phù hợp bộ lọc.</TableCell></TableRow> : null}
       </TableBody></Table></TableContainer>
+      <TablePagination component="div" count={studentPage.data?.totalItems ?? 0} onPageChange={(_, value) => setPage(value)} page={page} rowsPerPage={PAGE_SIZE} rowsPerPageOptions={[PAGE_SIZE]} sx={{ flexShrink: 0 }} />
     </DialogContent>
     <DialogActions sx={{ borderTop: "1px solid", borderColor: "divider", px: 3, py: 1.75 }}><Typography color="text.secondary" sx={{ mr: "auto" }} variant="body2">Đã chọn {studentIds.size} người học</Typography><Button variant="contained" disabled={saving} onClick={onClose}>Hủy</Button><Button disabled={!studentIds.size || !classId || saving} onClick={confirm} startIcon={saving ? <CircularProgress color="inherit" size={16} /> : <PlaylistAddCheckRoundedIcon />} variant="contained">{saving ? "Đang ghi danh..." : "Xác nhận ghi danh"}</Button></DialogActions>
   </Dialog>;

@@ -18,10 +18,9 @@ const school: PartnerSchool = {
   reviews: [],
   schoolType: "secondary",
   status: "active",
-  students: [
-    { id: "s1", code: "S1", fullName: "A", birthDate: "", grade: "6", className: "6A1", guardianPhone: "", subjectIds: [], status: "studying", averageScore: 80 },
-    { id: "s2", code: "S2", fullName: "B", birthDate: "", grade: "6", className: "6A1", guardianPhone: "", subjectIds: [], status: "at-risk", averageScore: 60 },
-  ],
+  studentStats: { total: 2, atRisk: 1, studying: 1, profileComplete: 2, assigned: 0 },
+  scoredStudentCount: 2,
+  averageScore: 70,
   classes: [{ id: "c1", name: "6A1", grade: "6", homeroomTeacher: "Teacher", studentCount: 2 }],
   subjects: [{ id: "math", name: "Math", code: "MATH", studentCount: 2, teacherCount: 1 }],
   studentCount: 2,

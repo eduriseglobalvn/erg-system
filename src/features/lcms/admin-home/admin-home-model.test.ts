@@ -7,13 +7,11 @@ import { buildAdminHomeSummary } from "./admin-home-model";
 
 const school = (patch: Partial<PartnerSchool>): PartnerSchool => ({
   id: "s", code: "", name: "Trường", address: "", district: "", principal: "", contactPhone: "", contactEmail: "",
-  academicYear: "", schoolType: "secondary", status: "active", joinedAt: "", students: [], classes: [], grades: [],
+  academicYear: "", schoolType: "secondary", status: "active", joinedAt: "", classes: [], grades: [],
   subjects: [], reviews: [], ...patch,
 });
 
-const student = (id: string, subjectIds: string[]) => ({
-  id, code: id, fullName: id, birthDate: "", grade: "9", className: "9A1", guardianPhone: "", subjectIds, status: "studying" as const,
-});
+const stats = (total: number, assigned: number) => ({ total, assigned, atRisk: 0, studying: total, profileComplete: total });
 
 const person = (id: string, last: string | null): EmployeeItem => ({
   id, email: `${id}@erg`, fullName: id, status: "ACTIVE", roles: [], isProfileCompleted: true, last_login_at: last, createdAt: "",
@@ -25,7 +23,7 @@ describe("buildAdminHomeSummary", () => {
     const vd = school({ id: "vd", name: "THCS B", status: "onboarding", studentCount: 0, classCount: 0 });
     const detail = school({
       ...tcd,
-      students: [student("1", ["x"]), student("2", []), student("3", [])],
+      studentStats: stats(3, 1),
       classes: [{ id: "c1", name: "9A1", grade: "9", homeroomTeacher: "Chưa phân công", studentCount: 3 }],
     });
 
@@ -39,7 +37,7 @@ describe("buildAdminHomeSummary", () => {
   });
 
   it("has no tasks when everything is in place", () => {
-    const ready = school({ id: "r", students: [student("1", ["x"])], classes: [{ id: "c", name: "6A", grade: "6", homeroomTeacher: "Cô Mai", studentCount: 1 }] });
+    const ready = school({ id: "r", studentStats: stats(1, 1), classes: [{ id: "c", name: "6A", grade: "6", homeroomTeacher: "Cô Mai", studentCount: 1 }] });
     const summary = buildAdminHomeSummary([ready], new Map([["r", ready]]), { users: [person("a", "2026-11-01")], total: 1 });
     expect(summary.tasks).toEqual([]);
   });

@@ -260,15 +260,12 @@ export type SchoolSummary = {
 };
 
 export function summarizeSchool(school: PartnerSchool): SchoolSummary {
-  const scores = school.students
-    .map((student) => student.averageScore)
-    .filter((score): score is number => typeof score === "number" && Number.isFinite(score));
   return {
-    atRiskCount: school.students.filter((student) => student.status === "at-risk").length,
-    averageScore: scores.length ? Math.round(scores.reduce((total, score) => total + score, 0) / scores.length) : null,
+    atRiskCount: school.studentStats?.atRisk ?? 0,
+    averageScore: typeof school.averageScore === "number" ? Math.round(school.averageScore) : null,
     classCount: school.classCount ?? school.classes.length,
-    scoredStudentCount: scores.length,
-    studentCount: school.studentCount ?? school.students.length,
+    scoredStudentCount: school.scoredStudentCount ?? 0,
+    studentCount: school.studentCount ?? 0,
     subjectCount: school.subjects.length,
   };
 }

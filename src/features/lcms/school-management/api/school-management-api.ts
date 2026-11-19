@@ -11,11 +11,13 @@ export type {
   SchoolGradeRecord,
   SchoolPermissions,
   SchoolStudentAccountInput,
+  SchoolStudentFilters,
   SchoolStudentInput,
+  SchoolStudentStats,
 } from "@/features/lcms/school-management/api/school-api/types";
 export { GRAPHQL_MAX_BATCH_SIZE } from "@/features/lcms/school-management/api/school-api/shared";
 export { fromApiSchoolType, fromApiStatus, toApiSchoolType } from "@/features/lcms/school-management/api/school-api/mappers";
-export { getSchoolDirectory, getSchoolOperations } from "@/features/lcms/school-management/api/school-api/directory-api";
+export { getSchoolDirectory, getSchoolOperations, getSchoolStudents } from "@/features/lcms/school-management/api/school-api/directory-api";
 export { archiveSchoolClass, createSchoolClass, updateSchoolClass } from "@/features/lcms/school-management/api/school-api/class-api";
 export { archiveSchoolStudent, createSchoolStudent, importSchoolStudents, importSchoolStudentsWithAccounts, updateSchoolStudent } from "@/features/lcms/school-management/api/school-api/student-api";
 export { bulkEnrollSchoolStudents, enrollSchoolStudent } from "@/features/lcms/school-management/api/school-api/enrollment-api";

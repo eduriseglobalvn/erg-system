@@ -45,8 +45,8 @@ export function buildAdminHomeSummary(
 ): AdminHomeSummary {
   const schools = directory.map((school): AdminHomeSchoolRow => {
     const detail = details.get(school.id);
-    const studentCount = detail?.students.length ?? school.studentCount ?? 0;
-    const placed = detail ? detail.students.filter((student) => student.subjectIds.length > 0).length : null;
+    const studentCount = detail?.studentStats?.total ?? school.studentCount ?? 0;
+    const placed = detail?.studentStats?.assigned ?? null;
     return {
       id: school.id,
       name: school.name,
@@ -58,7 +58,7 @@ export function buildAdminHomeSummary(
   });
 
   const loaded = [...details.values()];
-  const unplaced = loaded.reduce((sum, school) => sum + school.students.filter((student) => student.subjectIds.length === 0).length, 0);
+  const unplaced = loaded.reduce((sum, school) => sum + (school.studentStats ? school.studentStats.total - school.studentStats.assigned : 0), 0);
   const noTeacher = loaded.reduce((sum, school) => sum + school.classes.filter((item) => !hasTeacher(item.homeroomTeacher)).length, 0);
   const staffNeverSignedIn = staff ? staff.users.filter((person) => person.status === "ACTIVE" && !person.last_login_at).length : null;
 
@@ -83,7 +83,7 @@ export function buildAdminHomeSummary(
     activeSchoolCount: schools.filter((school) => school.status === "active").length,
     studentCount: schools.reduce((sum, school) => sum + school.studentCount, 0),
     classCount: schools.reduce((sum, school) => sum + school.classCount, 0),
-    placedStudents: loaded.reduce((sum, school) => sum + school.students.filter((student) => student.subjectIds.length > 0).length, 0),
+    placedStudents: loaded.reduce((sum, school) => sum + (school.studentStats?.assigned ?? 0), 0),
     staffCount: staff ? staff.total : null,
     staffNeverSignedIn,
     schools,

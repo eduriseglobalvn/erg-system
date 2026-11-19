@@ -96,6 +96,7 @@ export async function importSchoolStudentsWithAccounts(schoolId: string, items: 
     created: results.reduce((acc, r) => acc + (r.created || 0), 0),
     replayed: results.reduce((acc, r) => acc + (r.replayed || 0), 0),
     items: results.flatMap((r) => r.items || []),
+    replayedStudentIds: results.flatMap((r) => r.replayedStudentIds ?? []),
   };
 }
 

@@ -158,7 +158,7 @@ export function SchoolCurriculumStep() {
         action={
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
             <Button
-              disabled={!selectedSchool.students.length || !selectedSchool.classes.length}
+              disabled={!selectedSchool.studentCount || !selectedSchool.classes.length}
               onClick={() => openEnrollment()}
               startIcon={<GroupAddRoundedIcon />}
               variant="outlined"
@@ -223,7 +223,7 @@ export function SchoolCurriculumStep() {
             </Typography>
             <Typography color="text.secondary" variant="body2">·</Typography>
             <Typography variant="body2" sx={{ fontWeight: 600 }}>
-              Tổng học sinh: <Box component="span" sx={{ color: "text.primary" }}>{selectedSchool.students.length}</Box>
+              Tổng học sinh: <Box component="span" sx={{ color: "text.primary" }}>{selectedSchool.studentCount ?? 0}</Box>
             </Typography>
           </Box>
 

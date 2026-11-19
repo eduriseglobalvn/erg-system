@@ -18,7 +18,7 @@ export function SchoolReviewStep() {
   const checks = [
     { label: "Thông tin & loại hình", detail: `${meta.label}`, done: Boolean(selectedSchool.name && selectedSchool.id && selectedSchool.schoolType) },
     { label: "Cơ cấu đào tạo", detail: usesGrades ? `${selectedSchool.grades.length} khối · ${selectedSchool.classes.length} lớp` : `${selectedSchool.classes.length} ${meta.classLabel.toLowerCase()} · không dùng khối`, done: structureValid },
-    { label: `Danh sách ${meta.learnerLabel.toLowerCase()}`, detail: `${selectedSchool.students.length} bản ghi`, done: selectedSchool.students.length > 0 },
+    { label: `Danh sách ${meta.learnerLabel.toLowerCase()}`, detail: `${selectedSchool.studentCount ?? 0} bản ghi`, done: (selectedSchool.studentCount ?? 0) > 0 },
     { label: `${meta.subjectLabel} & ghi danh`, detail: `${selectedSchool.subjects.length} ${meta.subjectLabel.toLowerCase()} đã đăng ký`, done: selectedSchool.subjects.length > 0 },
   ];
   const complete = checks.filter((item) => item.done).length;
