@@ -1,13 +1,13 @@
 import { useEffect } from "react";
 import { isRunningStandalone } from "@/hooks/use-install-prompt";
 import { getCurrentAccount } from "@/platform/auth/api/auth-storage";
-import { readStoredRefreshSession, STUDENT_LOCAL_SESSION_KEY } from "@/platform/auth/api/auth-token-storage";
+import { readStoredRefreshSession, STUDENT_LOCAL_SESSION_KEY, TEACHER_LOCAL_SESSION_KEY } from "@/platform/auth/api/auth-token-storage";
 import { isSharedDevice } from "@/platform/auth/api/shared-device";
 import { getCurrentStudentSession } from "@/platform/auth/api/student-auth-storage";
 import { getDesktopRuntime } from "@/platform/desktop";
 import { getPersistedJsonValue } from "@/stores/persisted-store";
 
-/** A browser tab signs out after this long without any interaction (installed PWA and desktop app are exempt). */
+/** A browser tab signs out after this long without any interaction (installed PWA, desktop app and remembered sign-ins on a personal device are exempt). */
 export const IDLE_SIGN_OUT_MS = 156 * 60 * 1000;
 export const LAST_ACTIVITY_KEY = "erg-last-activity";
 const ACTIVITY_WRITE_THROTTLE_MS = 15_000;
@@ -32,9 +32,10 @@ function hasSession() {
   return Boolean(getCurrentAccount() || getCurrentStudentSession() || readStoredRefreshSession());
 }
 
-/** A student who ticked "remember me" on a personal device is not signed out for idling; the backend still caps the session at 90 days. */
+/** Anyone (student or staff) who ticked "remember me" on a personal device is not signed out for idling; the backend caps the session (staff: 7-day sliding, students: 90 days). The remembered copy is only written when rememberMe is on and a refresh token exists. */
 export function isIdleSignOutExempt() {
-  return Boolean(getPersistedJsonValue<{ refreshToken?: string } | null>(STUDENT_LOCAL_SESSION_KEY, null)?.refreshToken) && !isSharedDevice();
+  const remembered = (key: string) => Boolean(getPersistedJsonValue<{ refreshToken?: string } | null>(key, null)?.refreshToken);
+  return (remembered(STUDENT_LOCAL_SESSION_KEY) || remembered(TEACHER_LOCAL_SESSION_KEY)) && !isSharedDevice();
 }
 
 /** Calls `onExpire` once the signed-in user has been idle (in every tab) for IDLE_SIGN_OUT_MS. The clock is shared via localStorage so it survives reloads and closing the browser. */
