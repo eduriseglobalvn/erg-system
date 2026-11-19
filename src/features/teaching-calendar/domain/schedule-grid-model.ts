@@ -26,6 +26,26 @@ export type CellState = "clash" | "travel" | "warn";
 
 export const WEEKDAYS = [1, 2, 3, 4, 5, 6] as const;
 
+/** Owner rule 18/11/2026: more than 2 periods a week for one class is allowed but warned. */
+export const WEEKLY_PERIOD_SOFT_LIMIT = 2;
+
+/** Classes with more than `WEEKLY_PERIOD_SOFT_LIMIT` periods in the week grid. */
+export function classesOverWeeklyLimit(rows: readonly Pick<GridRow, "classId" | "className">[]) {
+  const counts = new Map<string, { className: string; count: number }>();
+  for (const row of rows) {
+    if (!row.classId) continue;
+    const entry = counts.get(row.classId) ?? { className: row.className, count: 0 };
+    entry.count += 1;
+    counts.set(row.classId, entry);
+  }
+  return [...counts.values()].filter((entry) => entry.count > WEEKLY_PERIOD_SOFT_LIMIT);
+}
+
+export function weeklyLimitMessage(over: readonly { className: string; count: number }[]) {
+  const list = over.map((entry) => `${entry.className} (${entry.count} tiết)`).join(", ");
+  return `Quá ${WEEKLY_PERIOD_SOFT_LIMIT} tiết/tuần: ${list}. Vẫn lưu được nếu bạn chắc chắn.`;
+}
+
 export const cellKey = (weekday: number, periodNo: number) => `${weekday}:${periodNo}`;
 
 export function parseCellKey(key: string): { periodNo: number; weekday: number } {

@@ -6,7 +6,7 @@ import { teachingCalendarQueryKeys } from "@/features/teaching-calendar/api/teac
 import { loadTeachingScheduleDraft, saveTeachingScheduleDraft } from "@/features/teaching-calendar/api/teaching-calendar-schedule-api";
 import { loadLcmsTeachingCalendarWorkspace } from "@/features/teaching-calendar/api/teaching-calendar-workspace-query-api";
 import { addDaysToDate, weekStartOf, weekdayIndex } from "@/features/teaching-calendar/domain/schedule-copy";
-import { eventsToRows, toDraftRowInputs, type GridRow } from "@/features/teaching-calendar/domain/schedule-grid-model";
+import { classesOverWeeklyLimit, eventsToRows, toDraftRowInputs, type GridRow, weeklyLimitMessage } from "@/features/teaching-calendar/domain/schedule-grid-model";
 import { getDefaultTenantId } from "@/lib/graphql-client";
 
 /** Mac dinh nhu trang xep lich: lap 10 tuan (69 ngay sau tuan dau). */
@@ -29,21 +29,25 @@ export function useAdminMobileAdd(onDone: () => void) {
       const batch = batches.items[0];
       if (!batch) {
         const applyFrom = weekStartOf(date);
-        return saveTeachingScheduleDraft({ applyFrom, batchId: null, expectedVersion: null, periodTemplateId, repeatUntil: addDaysToDate(applyFrom, DEFAULT_SPAN_DAYS), rows: toDraftRowInputs([added]), schoolId, subjectId, levelId });
+        const result = await saveTeachingScheduleDraft({ applyFrom, batchId: null, expectedVersion: null, periodTemplateId, repeatUntil: addDaysToDate(applyFrom, DEFAULT_SPAN_DAYS), rows: toDraftRowInputs([added]), schoolId, subjectId, levelId });
+        return { result, weekRows: [added] };
       }
       const draft = await loadTeachingScheduleDraft(batch.id);
       const workspace = await loadLcmsTeachingCalendarWorkspace({ from: weekStartOf(batch.applyFrom), schoolIds: [schoolId], statuses: ["DRAFT"], tenantId, to: addDaysToDate(weekStartOf(batch.applyFrom), 7) });
       // BE gan mon cua input cho MOI tiet trong dot -> giu mon dot dang co, chi dung mon vua chon khi dot con trong.
       const first = workspace.events.find((event) => event.batchId === batch.id && event.subjectId);
       const rows = [...eventsToRows(workspace.events, batch.id).filter((existing) => !(existing.weekday === added.weekday && existing.periodNo === added.periodNo)), added];
-      return saveTeachingScheduleDraft({
+      const result = await saveTeachingScheduleDraft({
         applyFrom: batch.applyFrom, batchId: batch.id, expectedVersion: draft.version, periodTemplateId: draft.batch.periodTemplateId ?? periodTemplateId,
         repeatUntil: addDaysToDate(batch.applyFrom, batch.repeatWeeks * 7 - 1), rows: toDraftRowInputs(rows), schoolId,
         levelId: first ? first.levelId : levelId, subjectId: first?.subjectId ?? subjectId,
       });
+      return { result, weekRows: rows };
     },
-    onSuccess: (result) => {
+    onSuccess: ({ result, weekRows }) => {
       toast.success(`Đã thêm vào ${result.batch.label}`);
+      const over = classesOverWeeklyLimit(weekRows);
+      if (over.length) toast.warning(weeklyLimitMessage(over), { duration: 8000 });
       void queryClient.invalidateQueries({ queryKey: teachingCalendarQueryKeys.portalRoot("lcms", tenantId) });
       onDone();
     },

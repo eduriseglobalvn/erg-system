@@ -13,7 +13,7 @@ import { teachingScheduleErrorCode } from "@/features/teaching-calendar/api/teac
 import { teachingCalendarQueryKeys } from "@/features/teaching-calendar/api/teaching-calendar-query-keys";
 import { publishTeachingScheduleBatchV2 } from "@/features/teaching-calendar/api/teaching-calendar-schedule-api";
 import { addDaysToDate } from "@/features/teaching-calendar/domain/schedule-copy";
-import { applyConflictFix, cellKey, conflictRow, dateOfCell, errorConflicts, moveOrSwap, type GridRow, type ScheduleConflict } from "@/features/teaching-calendar/domain/schedule-grid-model";
+import { applyConflictFix, cellKey, classesOverWeeklyLimit, conflictRow, dateOfCell, errorConflicts, moveOrSwap, weeklyLimitMessage, type GridRow, type ScheduleConflict } from "@/features/teaching-calendar/domain/schedule-grid-model";
 import { getDefaultTenantId } from "@/lib/graphql-client";
 import { adminPath } from "@/platform/workspaces/workspace-paths";
 import { ContentPendingSkeleton } from "@/routes/route-feedback";
@@ -103,6 +103,7 @@ export function SchedulePage() {
 
   const focusConflict = (conflict: ScheduleConflict) => openCell(cellKey(conflict.weekday, conflict.periodNo));
   const errors = errorConflicts(draft.conflicts).length + unknown.size;
+  const overLimit = classesOverWeeklyLimit(rows);
   const weeks = weeksBetween(meta.applyFrom, meta.repeatUntil);
   const programs = useMemo(() => (catalog?.levels ?? []).map((level) => ({
     label: [catalog?.subjects.find((subject) => subject.id === level.subjectId)?.label, level.label].filter(Boolean).join(" · "),
@@ -147,6 +148,7 @@ export function SchedulePage() {
       />
       {draft.status === "stale" ? <Alert action={<ErgButton onClick={() => window.location.reload()} variant="text">Tải lại</ErgButton>} severity="error">{STALE_VERSION_MESSAGE}</Alert> : null}
       {publishError ? <Alert onClose={() => setPublishError(null)} severity="error">{publishError}</Alert> : null}
+      {overLimit.length ? <Alert severity="warning" variant="filled">{weeklyLimitMessage(overLimit)}</Alert> : null}
       <ScheduleInfoBar
         meta={meta} onChange={draft.setMeta}
         onSchoolChange={(id) => (rows.length ? setPendingSchool(id) : draft.setMeta({ schoolId: id }))}

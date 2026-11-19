@@ -75,6 +75,6 @@ describe("Admin pruned navigation contract", () => {
       "settings/permissions",
       "settings/roles",
     ]));
-    expect(lcmsWorkspacePaths).toContain("setting/setting-center-feature");
+    expect(lcmsWorkspacePaths).not.toContain("setting/setting-center-feature");
   });
 });
