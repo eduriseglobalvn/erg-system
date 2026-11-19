@@ -63,7 +63,7 @@ export async function createQuizFromBankQuestions(
       idempotencyKey: dependencies.createIdempotencyKey("quiz-editor-create"),
     })
     .catch((error: unknown) => {
-      dependencies.toastError(error instanceof Error ? error.message : "Cannot create quiz from selected questions.");
+      dependencies.toastError(error instanceof Error ? error.message : "Không tạo được gói bài từ các câu đã chọn.");
       return null;
     });
 
@@ -78,14 +78,14 @@ export async function createQuizFromBankQuestions(
       tree: draft.tree,
     })
     .catch((error: unknown) => {
-      dependencies.toastError(error instanceof Error ? error.message : "Cannot create quiz from selected questions.");
+      dependencies.toastError(error instanceof Error ? error.message : "Không tạo được gói bài từ các câu đã chọn.");
       return null;
     });
 
   if (!saved) return;
 
   dependencies.navigate(`${adminPath("/content/quiz-editor")}?quizId=${encodeURIComponent(created.quizId)}`);
-  dependencies.toastSuccess("Created assignment package from selected questions.");
+  dependencies.toastSuccess("Đã tạo gói bài từ các câu đã chọn.");
 }
 
 export type { CreateQuizFromBankOptions };
