@@ -13,6 +13,7 @@ import {
   appendSlidesToGroup,
   copySlideAs,
   getFirstNode,
+  highestIdNumber,
   markSlidesPublished,
   markUnsavedSlidesAsDraft,
   removeSlideFromGroup,
@@ -31,12 +32,6 @@ import type {
 } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 
 /** Highest number ending an id in the tree. Ids made after loading it start past it, so a new question never shares an id with an old one. */
-function highestIdNumber(tree: QuizEditorGroup[] | undefined) {
-  let highest = 0;
-  for (const match of JSON.stringify(tree ?? []).matchAll(/"id":"[^"]*-(\d{1,15})"/g)) highest = Math.max(highest, Number(match[1]));
-  return highest;
-}
-
 export function useQuizEditorState(initialDraftDocument?: QuizEditorDraftDocument | null) {
   const [firstId] = useState(() => Math.max(1000, highestIdNumber(initialDraftDocument?.tree)));
   const nextIdRef = useRef(firstId);
@@ -124,6 +119,14 @@ export function useQuizEditorState(initialDraftDocument?: QuizEditorDraftDocumen
     setSelectedNode(nextSlide ? { type: "slide", groupId: selectedGroup.id, slideId: nextSlide.id } : { type: "group", groupId: selectedGroup.id });
   }
 
+  /** Drops these slides (moved to another quiz); the selection falls back to the first node left. */
+  function removeSlides(slideIds: readonly string[]) {
+    const ids = new Set(slideIds);
+    const next = groups.map((group) => ({ ...group, slides: group.slides.filter((slide) => !ids.has(slide.id)) }));
+    setGroups(next);
+    setSelectedNode(getFirstNode(next));
+  }
+
   function replaceSelectedSlide(update: QuizEditorSlideUpdate) {
     if (!selectedGroup || !selectedSlide) return;
     const apply = (current: QuizEditorSlide) => withEditedStatus(typeof update === "function" ? update(current) : update);
@@ -166,6 +169,7 @@ export function useQuizEditorState(initialDraftDocument?: QuizEditorDraftDocumen
     importQuestionBankQuestions,
     duplicateSelected,
     deleteSelected,
+    removeSlides,
     replaceSelectedSlide,
     markAllAsSavedDraft,
     setSlidesPublished,

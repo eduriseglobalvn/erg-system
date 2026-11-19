@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
 import { QuestionEditorShell } from "@/features/lcms/quiz/quiz-editor/components/question-authoring/question-editor-shell";
 import { useQuestionTypeChange } from "@/features/lcms/quiz/quiz-editor/components/question-authoring/use-question-type-change";
+import { useQuestionExcelImport } from "@/features/lcms/quiz/quiz-editor/components/quiz-list/question-excel-import-dialog";
 import { QuestionTable } from "@/features/lcms/quiz/quiz-editor/components/quiz-list/question-table";
 import { QuizListTitlebar } from "@/features/lcms/quiz/quiz-editor/components/quiz-list/quiz-list-titlebar";
 import { TopicRail } from "@/features/lcms/quiz/quiz-editor/components/quiz-list/topic-rail";
@@ -17,6 +18,7 @@ import { useQuizEditorScope, useQuizEditorScopeSync } from "@/features/lcms/quiz
 import { useQuizEditorSlideViews } from "@/features/lcms/quiz/quiz-editor/hooks/use-quiz-editor-slide-views";
 import { useQuizEditorState } from "@/features/lcms/quiz/quiz-editor/hooks/use-quiz-editor-state";
 import { useQuizEditorSync } from "@/features/lcms/quiz/quiz-editor/hooks/use-quiz-editor-sync";
+import { useMoveQuestions } from "@/features/lcms/quiz/quiz-editor/hooks/use-move-questions";
 import { useQuizList } from "@/features/lcms/quiz/quiz-editor/hooks/use-quiz-list";
 import { useI18n } from "@/platform/i18n";
 import type { QuestionBankQuestion } from "@/features/question-bank/types/question-bank-types";
@@ -99,6 +101,14 @@ export function QuizEditorWorkspace({
     onQuizCreated: openQuiz,
   });
   const list = useQuizList({ scope, quizId: effectiveQuizId, ready: sync.ready, groups, quizProject, selectSlide, openQuiz, openEditor });
+  const move = useMoveQuestions({
+    subject: scope.questionBankSubjects.find((subject) => subject.id === scope.selectedCourseId),
+    levelId: scope.selectedLevel?.id ?? null,
+    topicId: scope.selectedTopicId,
+    groups,
+    removeSlides: editorState.removeSlides,
+  });
+  const excel = useQuestionExcelImport({ topicLabel: list.topicLabel, labels: { subject: scope.selectedCourse.label, level: scope.selectedLevel?.label ?? "" }, createId, onImport: importQuestionBankQuestions });
   const importNoticeCount = useQuizEditorImportedQuestions({
     ready: sync.ready,
     pendingImportedQuestions,
@@ -152,7 +162,18 @@ export function QuizEditorWorkspace({
                 {t("sidebar.questionBank")}: {importNoticeCount} {t("common.questions").toLowerCase()} đã được đưa vào đề nháp hiện tại.
               </Alert>
             ) : null}
-            <QuestionTable onAdd={() => typeChange.openPicker("add")} onOpenRow={list.openRow} rows={list.rows} topicLabel={list.topicLabel} />
+            {/* keyed by topic: slide ids repeat across quizzes, so a selection must not carry over */}
+            <QuestionTable
+              key={scope.selectedTopicId}
+              onAdd={() => typeChange.openPicker("add")}
+              onImportExcel={excel.openImport}
+              onMove={move.openMove}
+              onOpenRow={list.openRow}
+              rows={list.rows}
+              topicLabel={list.topicLabel}
+            />
+            {move.dialog}
+            {excel.dialog}
             {typeChange.dialogs}
             {questionEditorOpen && selectedNode.type === "slide" && selectedSlide && isQuestionType(selectedSlide.kind) ? (
               <QuestionEditorShell

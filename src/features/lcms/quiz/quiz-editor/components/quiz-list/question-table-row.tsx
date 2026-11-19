@@ -1,6 +1,7 @@
 import CloudDoneOutlinedIcon from "@mui/icons-material/CloudDoneOutlined";
 import CloudOffOutlinedIcon from "@mui/icons-material/CloudOffOutlined";
 import Box from "@mui/material/Box";
+import Checkbox from "@mui/material/Checkbox";
 import TableCell from "@mui/material/TableCell";
 import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
@@ -21,11 +22,14 @@ export type QuestionListRow = {
   onServer: boolean;
 };
 
-export function QuestionTableRow({ row, readiness, showTopic, onOpen }: {
+export function QuestionTableRow({ row, readiness, showTopic, onOpen, selected, onToggleSelect }: {
   row: QuestionListRow;
   readiness: QuestionReadiness;
   showTopic: boolean;
   onOpen: () => void;
+  /** Set only where rows can be moved (an open quiz): renders the selection checkbox. */
+  selected?: boolean;
+  onToggleSelect?: () => void;
 }) {
   const { slide } = row;
   const cloud = row.onServer ? "Đã lên máy chủ" : "Chưa lên máy chủ";
@@ -43,6 +47,11 @@ export function QuestionTableRow({ row, readiness, showTopic, onOpen }: {
       sx={{ cursor: "pointer", "&:focus-visible": { boxShadow: tokens.shadow.focus } }}
       tabIndex={0}
     >
+      {onToggleSelect ? (
+        <TableCell onClick={(event) => event.stopPropagation()} onKeyDown={(event) => event.stopPropagation()} padding="checkbox">
+          <Checkbox checked={selected} onChange={onToggleSelect} slotProps={{ input: { "aria-label": `Chọn câu ${row.number}` } }} />
+        </TableCell>
+      ) : null}
       <TableCell sx={{ color: "text.secondary", width: 48 }}>{row.number}</TableCell>
       <TableCell>
         <Typography sx={{ fontWeight: "fontWeightMedium" }} variant="body2">

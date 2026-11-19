@@ -113,3 +113,10 @@ export function withEditedStatus(nextSlide: QuizEditorSlide): QuizEditorSlide {
     status: nextSlide.status === "published" ? ("published" as const) : ("unsaved" as const),
   };
 }
+
+/** Highest numeric id suffix in the tree ("slide-1042" → 1042), so new ids never collide with loaded ones. */
+export function highestIdNumber(tree: QuizEditorGroup[] | undefined) {
+  let highest = 0;
+  for (const match of JSON.stringify(tree ?? []).matchAll(/"id":"[^"]*-(\d{1,15})"/g)) highest = Math.max(highest, Number(match[1]));
+  return highest;
+}
