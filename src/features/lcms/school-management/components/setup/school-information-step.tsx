@@ -84,7 +84,7 @@ function SchoolInformationForm({ saveSchool, school }: { saveSchool: (draft: Sch
         <TextField label="Hiệu trưởng / đầu mối" value={draft.principal} onChange={(event) => field("principal", event.target.value)} />
         <TextField label="Điện thoại" value={draft.contactPhone} onChange={(event) => field("contactPhone", event.target.value)} />
         <TextField label="Email liên hệ" type="email" value={draft.contactEmail} onChange={(event) => field("contactEmail", event.target.value)} />
-        <TextField label="Trạng thái" select value={draft.status} onChange={(event) => field("status", event.target.value as SchoolDraft["status"])}><MenuItem value="onboarding">Đang triển khai</MenuItem><MenuItem value="active">Đang vận hành</MenuItem><MenuItem value="paused">Tạm dừng</MenuItem></TextField>
+        <TextField label="Trạng thái" select value={draft.status} onChange={(event) => field("status", event.target.value as SchoolDraft["status"])}><MenuItem value="onboarding">Đang triển khai</MenuItem><MenuItem value="active">Đang vận hành</MenuItem><MenuItem value="paused">Tạm dừng</MenuItem><MenuItem disabled value="archived">Đã lưu trữ</MenuItem></TextField>
       </Paper>
     </SchoolStepSurface>
     <Dialog maxWidth="sm" onClose={() => setConfirmTypeChange(false)} open={confirmTypeChange}>

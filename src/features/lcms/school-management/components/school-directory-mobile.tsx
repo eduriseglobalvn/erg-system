@@ -11,6 +11,7 @@ import { ErgSearchField } from "@/components/erg-mui/erg-form";
 import { ergChipTabsSx } from "@/components/erg-mui/erg-tabs";
 import { useAdminShellModel } from "@/features/lcms/admin-shell-context";
 import { SchoolDirectoryMobileCard } from "@/features/lcms/school-management/components/school-directory-mobile-card";
+import { type SchoolStatusFilter, SchoolStatusFilterField } from "@/features/lcms/school-management/components/school-status-filter";
 import type { PartnerSchool } from "@/features/lcms/school-management/types/school-management-types";
 import { adminPath } from "@/platform/workspaces/workspace-paths";
 import { ContentPendingSkeleton } from "@/routes/route-feedback";
@@ -29,14 +30,16 @@ type Props = {
   onOpen: (id: string) => void;
   onRetry: () => void;
   onSearchChange: (value: string) => void;
-  /** Already filtered by the search box. */
+  onStatusFilterChange: (value: SchoolStatusFilter) => void;
+  /** Already filtered by the search box and the status filter. */
   schools: PartnerSchool[];
   search: string;
+  statusFilter: SchoolStatusFilter;
   totalCount: number;
 };
 
 /** Phone "Trường học" (canvas N6) on SchoolDirectoryScreen's state: section chips, search, count + "Thêm trường", school cards. */
-export function SchoolDirectoryMobile({ error, isLoading, onAdd, onOpen, onRetry, onSearchChange, schools, search, totalCount }: Props) {
+export function SchoolDirectoryMobile({ error, isLoading, onAdd, onOpen, onRetry, onSearchChange, onStatusFilterChange, schools, search, statusFilter, totalCount }: Props) {
   const navigate = useNavigate();
   const { canAccess } = useAdminShellModel();
   const sections = SECTIONS.filter((section) => canAccess(section.path));
@@ -56,7 +59,7 @@ export function SchoolDirectoryMobile({ error, isLoading, onAdd, onOpen, onRetry
     );
   } else if (!sorted.length) {
     body = totalCount
-      ? <ErgEmptyState description="Thử từ khóa khác hoặc xóa ô tìm kiếm." title="Không có trường phù hợp" />
+      ? <ErgEmptyState description="Thử từ khóa hoặc trạng thái khác." title="Không có trường phù hợp" />
       : <ErgEmptyState description="Bấm “Thêm trường” để tạo trường liên kết đầu tiên." title="Chưa có trường nào" />;
   } else {
     body = (
@@ -90,6 +93,7 @@ export function SchoolDirectoryMobile({ error, isLoading, onAdd, onOpen, onRetry
           slotProps={{ htmlInput: { "aria-label": "Tìm trường" } }}
           value={search}
         />
+        <SchoolStatusFilterField onChange={onStatusFilterChange} value={statusFilter} />
         <Box sx={{ alignItems: "center", display: "flex", gap: 1, justifyContent: "space-between" }}>
           <Typography color="text.secondary" variant="caption">{isLoading || failed ? "" : `${sorted.length} trường · sắp theo tên`}</Typography>
           <ErgButton onClick={onAdd} size="small" startIcon={<AddRoundedIcon />} variant="contained">Thêm trường</ErgButton>

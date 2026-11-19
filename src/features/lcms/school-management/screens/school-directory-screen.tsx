@@ -29,7 +29,8 @@ import { SchoolFormDialog } from "@/features/lcms/school-management/components/s
 import { SchoolDirectoryMobile } from "@/features/lcms/school-management/components/school-directory-mobile";
 import { useSchoolManagementContext } from "@/features/lcms/school-management/components/school-management-context";
 import { SchoolPageShell } from "@/features/lcms/school-management/components/school-page-shell";
-import type { SchoolDraft } from "@/features/lcms/school-management/types/school-management-types";
+import { matchesSchoolStatusFilter, type SchoolStatusFilter, SchoolStatusFilterField } from "@/features/lcms/school-management/components/school-status-filter";
+import { isWorkingSchool, type SchoolDraft } from "@/features/lcms/school-management/types/school-management-types";
 import { schoolTypeMeta } from "@/features/lcms/school-management/types/school-type-config";
 import { adminPath } from "@/platform/workspaces/workspace-paths";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
@@ -82,26 +83,36 @@ const statusMeta = {
     dot: ergEnterpriseTokens.color.textMuted,
     label: "Tạm dừng",
   },
+  archived: {
+    bg: "rgba(0, 0, 0, 0.05)",
+    border: "rgba(0, 0, 0, 0.1)",
+    color: ergEnterpriseTokens.color.textMuted,
+    dot: ergEnterpriseTokens.color.border,
+    label: "Đã lưu trữ",
+  },
 } as const;
 
 export default function SchoolDirectoryScreen() {
   const { error, isLoading, refetch, saveSchool, schools, selectSchool } = useSchoolManagementContext();
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<SchoolStatusFilter>("working");
   const [adding, setAdding] = useState(false);
   const isMobile = useMediaQuery(useTheme().breakpoints.down("md"), { noSsr: true });
 
   const filtered = useMemo(
     () =>
       schools.filter((school) =>
-        `${school.name} ${school.id} ${school.district}`.toLowerCase().includes(search.toLowerCase())
+        matchesSchoolStatusFilter(school, statusFilter)
+        && `${school.name} ${school.id} ${school.district}`.toLowerCase().includes(search.toLowerCase())
       ),
-    [schools, search]
+    [schools, search, statusFilter]
   );
 
   const activeCount = schools.filter((s) => s.status === "active").length;
   const onboardingCount = schools.filter((s) => s.status === "onboarding").length;
-  const totalStudents = schools.reduce((acc, s) => acc + (s.studentCount ?? 0), 0);
+  const workingSchools = schools.filter(isWorkingSchool);
+  const totalStudents = workingSchools.reduce((acc, s) => acc + (s.studentCount ?? 0), 0);
 
   function openSchool(id: string) {
     selectSchool(id);
@@ -125,8 +136,10 @@ export default function SchoolDirectoryScreen() {
           onOpen={openSchool}
           onRetry={() => void refetch()}
           onSearchChange={setSearch}
+          onStatusFilterChange={setStatusFilter}
           schools={filtered}
           search={search}
+          statusFilter={statusFilter}
           totalCount={schools.length}
         />
         {formDialog}
@@ -182,7 +195,7 @@ export default function SchoolDirectoryScreen() {
           iconBg={alpha(ergEnterpriseTokens.color.primary, 0.08)}
           iconColor={ergEnterpriseTokens.color.primary}
           label="Tổng số trường"
-          value={schools.length}
+          value={workingSchools.length}
           subtext="Đơn vị đào tạo liên kết"
         />
         <MetricCard
@@ -243,6 +256,8 @@ export default function SchoolDirectoryScreen() {
             </Typography>
           </Box>
 
+          <Box sx={{ alignItems: "center", display: "flex", flexWrap: "wrap", gap: 1.5 }}>
+          <SchoolStatusFilterField onChange={setStatusFilter} value={statusFilter} />
           <TextField
             placeholder="Tìm tên, mã trường, địa phương..."
             size="small"
@@ -271,6 +286,7 @@ export default function SchoolDirectoryScreen() {
               },
             }}
           />
+          </Box>
         </Box>
 
         {error ? (
@@ -323,7 +339,7 @@ export default function SchoolDirectoryScreen() {
                 <TableRow>
                   <TableCell colSpan={9} sx={{ py: 6, textAlign: "center" }}>
                     <Typography sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: "0.875rem", fontStyle: "italic" }}>
-                      Không tìm thấy trường liên kết nào phù hợp với từ khóa.
+                      Không tìm thấy trường liên kết nào phù hợp với bộ lọc.
                     </Typography>
                   </TableCell>
                 </TableRow>

@@ -2,7 +2,7 @@ import { useQueries, useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
 import { getSchoolDirectory, getSchoolOperations, schoolManagementQueryKeys } from "@/features/lcms/school-management/api/school-management-api";
-import type { PartnerSchool } from "@/features/lcms/school-management/types/school-management-types";
+import { isWorkingSchool, type PartnerSchool } from "@/features/lcms/school-management/types/school-management-types";
 import { lmsAssignmentReadQueryKeys, useLmsStudentGroupsQuery } from "@/features/lms/api/lms-assignment-command-query";
 import { loadLmsTeacherHomeworkWorkspace } from "@/features/lms/api/lms-teacher-homework-api";
 import { getDefaultTenantId } from "@/lib/graphql-client";
@@ -47,7 +47,7 @@ function useAdminDirectory(scope: AudienceScope, enabled: boolean) {
     staleTime: QUERY_POLICIES.transactional.staleTime,
     gcTime: QUERY_POLICIES.transactional.gcTime,
   });
-  const directoryItems = (needsDirectory ? directory.data?.items : undefined) ?? NO_SCHOOLS;
+  const directoryItems = useMemo(() => (needsDirectory ? directory.data?.items.filter(isWorkingSchool) : undefined) ?? NO_SCHOOLS, [directory.data, needsDirectory]);
   const details = useQueries({
     queries: (scope === "GRADE" || scope === "CLASS" ? directoryItems.slice(0, MAX_SCHOOLS) : []).map((school) => ({
       queryKey: schoolManagementQueryKeys.operations(tenantId, accountId, school.id),

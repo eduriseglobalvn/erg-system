@@ -118,11 +118,11 @@ export function fromApiSchoolType(value: string): SchoolType {
 }
 
 export function toApiStatus(value: SchoolStatus) {
-  return ({ active: "ACTIVE", onboarding: "ONBOARDING", paused: "PAUSED" } as const)[value];
+  return ({ active: "ACTIVE", onboarding: "ONBOARDING", paused: "PAUSED", archived: "ARCHIVED" } as const)[value];
 }
 
 export function fromApiStatus(value: string): SchoolStatus {
-  return ({ ACTIVE: "active", ONBOARDING: "onboarding", PAUSED: "paused", ARCHIVED: "paused" } as const)[value.toUpperCase() as "ACTIVE"] ?? "paused";
+  return ({ ACTIVE: "active", ONBOARDING: "onboarding", PAUSED: "paused", ARCHIVED: "archived" } as const)[value.toUpperCase() as "ACTIVE"] ?? "paused";
 }
 
 export function academicYearStart(value: string) {

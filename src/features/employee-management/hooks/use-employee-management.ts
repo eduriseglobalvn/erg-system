@@ -19,6 +19,7 @@ import {
   getSchoolOperations,
   schoolManagementQueryKeys,
 } from "@/features/lcms/school-management/api/school-management-api";
+import { isWorkingSchool } from "@/features/lcms/school-management/types/school-management-types";
 import { getDefaultTenantId } from "@/lib/graphql-client";
 import { QUERY_POLICIES } from "@/lib/query-policy";
 import { getCurrentAccountId } from "@/platform/auth/api/auth-storage";
@@ -83,7 +84,7 @@ export function useEmployeeSchoolOptions(selectedSchoolId?: string) {
   });
 
   return {
-    schools: directoryQuery.data?.items ?? [],
+    schools: (directoryQuery.data?.items ?? []).filter(isWorkingSchool),
     classes: operationsQuery.data?.classes ?? [],
     isPending: directoryQuery.isPending,
   };

@@ -5,6 +5,7 @@ import { ApiClientError } from "@/lib/api-client";
 import {
   activateAcademicYear,
   archiveSchool,
+  restoreSchool,
   bulkEnrollSchoolStudents,
   closeAcademicYear,
   createAcademicYear,
@@ -22,7 +23,7 @@ import {
   updateGrade,
   updateSchool,
 } from "@/features/lcms/school-management/api/school-management-api";
-import type { SchoolClass, SchoolDraft, SchoolStudent } from "@/features/lcms/school-management/types/school-management-types";
+import { isWorkingSchool, type SchoolClass, type SchoolDraft, type SchoolStudent } from "@/features/lcms/school-management/types/school-management-types";
 import type { OperationalClassRecord, SchoolClassInput, SchoolStudentAccountInput, SchoolStudentInput } from "@/features/lcms/school-management/api/school-management-api";
 import { lmsAssignmentReadQueryKeys } from "@/features/lms/api/lms-assignment-command-query";
 import { getDefaultTenantId } from "@/lib/graphql-client";
@@ -52,7 +53,7 @@ export function useSchoolManagement(initialSchoolId?: string | null) {
   useEffect(() => {
     if (!directorySchools.length) return;
     if (!selectedSchoolId) {
-      setSelectedSchoolId(directorySchools[0].id);
+      setSelectedSchoolId((directorySchools.find(isWorkingSchool) ?? directorySchools[0]).id);
     }
   }, [directorySchools, selectedSchoolId]);
 
@@ -97,6 +98,7 @@ export function useSchoolManagement(initialSchoolId?: string | null) {
     },
   });
   const archiveMutation = useMutation({ mutationFn: archiveSchool });
+  const restoreMutation = useMutation({ mutationFn: restoreSchool });
   const yearCreateMutation = useMutation({ mutationFn: ({ schoolId, input }: { schoolId: string; input: Parameters<typeof createAcademicYear>[1] }) => createAcademicYear(schoolId, input) });
   const yearActivateMutation = useMutation({ mutationFn: ({ schoolId, yearId, version }: { schoolId: string; yearId: string; version: number }) => activateAcademicYear(schoolId, yearId, version) });
   const yearCloseMutation = useMutation({ mutationFn: ({ schoolId, yearId, version }: { schoolId: string; yearId: string; version: number }) => closeAcademicYear(schoolId, yearId, version) });
@@ -118,11 +120,16 @@ export function useSchoolManagement(initialSchoolId?: string | null) {
     return resolvedId;
   }, [refreshSchoolData, saveMutation, schools, selectedSchool]);
 
-  const removeSchool = useCallback(async (schoolId: string) => {
+  // Archive keeps the school selected: the detail screen then shows it as archived with a restore button.
+  const archiveSchoolById = useCallback(async (schoolId: string) => {
     await archiveMutation.mutateAsync(schoolId);
-    setSelectedSchoolId((current) => current === schoolId ? "" : current);
-    await refreshSchoolData();
+    await refreshSchoolData(schoolId);
   }, [archiveMutation, refreshSchoolData]);
+
+  const restoreSchoolById = useCallback(async (schoolId: string) => {
+    await restoreMutation.mutateAsync(schoolId);
+    await refreshSchoolData(schoolId);
+  }, [refreshSchoolData, restoreMutation]);
 
   const createYear = useCallback(async (input: Parameters<typeof createAcademicYear>[1]) => {
     if (!selectedSchoolId) return;
@@ -227,7 +234,8 @@ export function useSchoolManagement(initialSchoolId?: string | null) {
     enrollStudentsInClass,
     updateClassGrade,
     saveSchool,
-    removeSchool,
+    archiveSchool: archiveSchoolById,
+    restoreSchool: restoreSchoolById,
     createYear,
     activateYear,
     closeYear,
@@ -240,7 +248,7 @@ export function useSchoolManagement(initialSchoolId?: string | null) {
     setSelectedSchoolId,
     isLoading: directoryQuery.isLoading || (Boolean(selectedSchoolId) && operationsQuery.isLoading),
     isFetching: directoryQuery.isFetching || operationsQuery.isFetching,
-    isSaving: saveMutation.isPending || archiveMutation.isPending || yearCreateMutation.isPending || yearActivateMutation.isPending || yearCloseMutation.isPending || gradeSyncMutation.isPending || gradeCreateMutation.isPending || gradeUpdateMutation.isPending || classCreateMutation.isPending || classUpdateMutation.isPending || studentCreateMutation.isPending || studentImportMutation.isPending || enrollmentMutation.isPending,
+    isSaving: saveMutation.isPending || archiveMutation.isPending || restoreMutation.isPending || yearCreateMutation.isPending || yearActivateMutation.isPending || yearCloseMutation.isPending || gradeSyncMutation.isPending || gradeCreateMutation.isPending || gradeUpdateMutation.isPending || classCreateMutation.isPending || classUpdateMutation.isPending || studentCreateMutation.isPending || studentImportMutation.isPending || enrollmentMutation.isPending,
     // Load errors only: a failed save shows the global toast and must leave the form on screen.
     error: directoryQuery.error ?? operationsQuery.error,
     refetch: () => refreshSchoolData(selectedSchoolId),

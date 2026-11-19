@@ -1,5 +1,5 @@
 import type { EmployeeItem } from "@/lib/api/models/employee-management";
-import type { PartnerSchool } from "@/features/lcms/school-management/types/school-management-types";
+import { isWorkingSchool, type PartnerSchool } from "@/features/lcms/school-management/types/school-management-types";
 
 export type AdminHomeTask = {
   id: string;
@@ -43,7 +43,7 @@ export function buildAdminHomeSummary(
   details: Map<string, PartnerSchool>,
   staff: { users: EmployeeItem[]; total: number } | null,
 ): AdminHomeSummary {
-  const schools = directory.map((school): AdminHomeSchoolRow => {
+  const schools = directory.filter(isWorkingSchool).map((school): AdminHomeSchoolRow => {
     const detail = details.get(school.id);
     const studentCount = detail?.studentStats?.total ?? school.studentCount ?? 0;
     const placed = detail?.studentStats?.assigned ?? null;

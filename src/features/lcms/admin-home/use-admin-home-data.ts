@@ -7,7 +7,7 @@ import {
   getSchoolOperations,
   schoolManagementQueryKeys,
 } from "@/features/lcms/school-management/api/school-management-api";
-import type { PartnerSchool } from "@/features/lcms/school-management/types/school-management-types";
+import { isWorkingSchool, type PartnerSchool } from "@/features/lcms/school-management/types/school-management-types";
 import { getDefaultTenantId } from "@/lib/graphql-client";
 import { QUERY_POLICIES } from "@/lib/query-policy";
 import { getCurrentAccountId } from "@/platform/auth/api/auth-storage";
@@ -33,7 +33,7 @@ export function useAdminHomeData(tenantId: string) {
     staleTime: QUERY_POLICIES.transactional.staleTime,
     gcTime: QUERY_POLICIES.transactional.gcTime,
   });
-  const directory = useMemo(() => directoryQuery.data?.items ?? [], [directoryQuery.data]);
+  const directory = useMemo(() => (directoryQuery.data?.items ?? []).filter(isWorkingSchool), [directoryQuery.data]);
 
   const detailQuery = useQueries({
     queries: directory.slice(0, MAX_DETAILED_SCHOOLS).map((school) => ({

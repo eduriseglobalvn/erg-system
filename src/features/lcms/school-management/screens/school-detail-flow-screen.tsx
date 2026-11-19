@@ -13,6 +13,7 @@ import Stepper from "@mui/material/Stepper";
 import Typography from "@mui/material/Typography";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
+import { SchoolArchiveAction } from "@/features/lcms/school-management/components/school-archive-action";
 import { SchoolPageShell } from "@/features/lcms/school-management/components/school-page-shell";
 import { useSchoolManagementContext } from "@/features/lcms/school-management/components/school-management-context";
 import { SchoolCurriculumStep } from "@/features/lcms/school-management/components/setup/school-curriculum-step";
@@ -73,7 +74,7 @@ export default function SchoolDetailFlowScreen() {
   }
 
   return <SchoolPageShell
-      action={<Button onClick={() => void navigate({ href: adminPath("/schools/list") })} startIcon={<ArrowBackRoundedIcon />} variant="outlined">Danh sách trường</Button>}
+      action={<Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}><SchoolArchiveAction /><Button onClick={() => void navigate({ href: adminPath("/schools/list") })} startIcon={<ArrowBackRoundedIcon />} variant="outlined">Danh sách trường</Button></Box>}
     title={selectedSchool.name}
   >
     <Paper variant="outlined" sx={{ alignItems: { xs: "flex-start", sm: "center" }, display: "flex", flexDirection: { xs: "column", sm: "row" }, gap: 1.5, justifyContent: "space-between", mb: 2, px: 2, py: 1.25 }}>

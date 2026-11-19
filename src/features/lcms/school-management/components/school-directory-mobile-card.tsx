@@ -14,6 +14,7 @@ const STATUS = {
   active: { label: "Đang vận hành", tone: "success" },
   onboarding: { label: "Đang triển khai", tone: "warning" },
   paused: { label: "Tạm dừng", tone: "neutral" },
+  archived: { label: "Đã lưu trữ", tone: "neutral" },
 } as const;
 
 /** Canvas N6 school card: initials avatar, name, type · district, class/learner counts, status badge. Tapping opens the school. */
