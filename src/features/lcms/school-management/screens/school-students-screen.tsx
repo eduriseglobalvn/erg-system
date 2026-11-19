@@ -18,7 +18,7 @@ export default function SchoolStudentsScreen() {
   async function importStudents(rows: StudentImportRow[]) {
     await addStudents(
       rows.map((row) => ({
-        code: row.code || `${selectedSchool!.id}-${Date.now()}`,
+        code: row.code,
         fullName: row.fullName,
         birthDate: row.birthDate,
         grade: row.grade,

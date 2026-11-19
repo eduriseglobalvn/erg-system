@@ -46,7 +46,7 @@ export function SchoolStructureStep() {
       });
 
       await addStudents(students.map((row) => ({
-        code: row.code || `${selectedSchool!.id}-${Date.now()}`,
+        code: row.code,
         fullName: row.fullName,
         academicClassId: classMap.get(row.className.trim().toLowerCase()),
         birthDate: row.birthDate,

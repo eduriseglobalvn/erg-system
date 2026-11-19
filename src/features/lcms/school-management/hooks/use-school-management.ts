@@ -190,17 +190,19 @@ export function useSchoolManagement(initialSchoolId?: string | null) {
       toast.error(message);
       throw new Error(message);
     }
-    let saved: Array<{ studentCode: string; username?: string | null; authUserId?: string | null; replayed?: boolean }> = [];
+    // Returned in row order: callers match a row to its saved student (and login) by index, since a blank code is issued by the backend.
+    const saved: Array<{ studentCode: string; username?: string | null; authUserId?: string | null; replayed?: boolean }> = new Array(items.length);
     // Rows that ask for a login go over REST (GraphQL variables must not carry passwords); the rest keep the old path.
-    const withAccount = items.filter((item): item is SchoolStudentAccountInput => "password" in item);
-    const plain = items.filter((item) => !("password" in item));
-    if (withAccount.length) {
-      const result = await importSchoolStudentsWithAccounts(selectedSchoolId, withAccount);
+    const accountRows = items.flatMap((item, index) => ("password" in item ? [index] : []));
+    const plainRows = items.flatMap((item, index) => ("password" in item ? [] : [index]));
+    if (accountRows.length) {
+      const result = await importSchoolStudentsWithAccounts(selectedSchoolId, accountRows.map((index) => items[index] as SchoolStudentAccountInput));
       const replayed = new Set(result.replayedStudentIds);
-      saved = result.items.map((item) => ({ ...item, replayed: replayed.has(item.id) }));
+      result.items.forEach((item, i) => { saved[accountRows[i]] = { ...item, replayed: replayed.has(item.id) }; });
     }
-    if (plain.length > 1) saved = [...saved, ...(await studentImportMutation.mutateAsync({ schoolId: selectedSchoolId, items: plain })).items];
-    else if (plain[0]) saved = [...saved, await studentCreateMutation.mutateAsync({ schoolId: selectedSchoolId, input: plain[0] })];
+    const plain = plainRows.map((index) => items[index]);
+    if (plain.length > 1) (await studentImportMutation.mutateAsync({ schoolId: selectedSchoolId, items: plain })).items.forEach((item, i) => { saved[plainRows[i]] = item; });
+    else if (plain[0]) saved[plainRows[0]] = await studentCreateMutation.mutateAsync({ schoolId: selectedSchoolId, input: plain[0] });
     await refreshSchoolData(selectedSchoolId);
     return saved;
   }, [refreshSchoolData, selectedSchool, selectedSchoolId, studentCreateMutation, studentImportMutation]);

@@ -247,20 +247,25 @@ export function SchoolStudentDirectoryWorkspace({ school }: { school: PartnerSch
                       <TableCell sx={{ borderBottom: "1px solid rgba(0, 0, 0, 0.04)", py: 1.5, verticalAlign: "middle", width: 130 }}>
                         <Box
                           component="span"
+                          title={student.code}
                           sx={{
-                            alignItems: "center",
                             bgcolor: "rgba(0, 0, 0, 0.04)",
                             border: `1px solid ${ergEnterpriseTokens.color.border}`,
                             borderRadius: "6px",
                             color: ergEnterpriseTokens.color.text,
-                            display: "inline-flex",
+                            // One line: a long imported code is cut with "…" (full code on hover) instead of wrapping the row.
+                            display: "inline-block",
                             fontFamily: '"SF Mono", "JetBrains Mono", Menlo, Consolas, monospace',
                             fontSize: "0.78rem",
                             fontWeight: 600,
-                            height: 26,
                             letterSpacing: "0.02em",
-                            lineHeight: 1,
+                            lineHeight: "24px",
+                            maxWidth: "100%",
+                            overflow: "hidden",
                             px: 1,
+                            textOverflow: "ellipsis",
+                            verticalAlign: "middle",
+                            whiteSpace: "nowrap",
                           }}
                         >
                           {student.code}

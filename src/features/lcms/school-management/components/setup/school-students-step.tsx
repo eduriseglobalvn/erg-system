@@ -75,10 +75,10 @@ export function SchoolStudentsStep() {
     // Every imported student also gets a login (active, learner role, no onboarding) created by the backend.
     const logins = buildStudentLogins(rows, selectedSchool!.name);
     // A student already on the roster keeps the account it has: the backend returns it untouched (replayed), so no password is shown for it (BUG-X-004).
-    const codes = rows.map((row, index) => row.code || `${selectedSchool!.id}-${Date.now()}-${index}`);
     const saved = await addStudents(
       rows.map((row, index) => ({
-        code: codes[index],
+        // Blank code: the backend issues one (HS-XXXXXX) and recognises a returning child by name + birthday.
+        code: row.code,
         fullName: row.fullName,
         birthDate: row.birthDate,
         grade: row.grade,
@@ -90,15 +90,14 @@ export function SchoolStudentsStep() {
       }))
     );
     // Only logins the backend confirms (same username, linked account) were created now; the rest already had one.
-    // Keyed by student code: the backend may number a login that another school already uses (BUG-A-003), so its username is the one shown.
-    const createdByCode = new Map(saved.filter((item) => item.authUserId && item.username && !item.replayed).map((item) => [item.studentCode.trim().toLowerCase(), item.username!]));
+    // saved is in row order; the backend may number a login that another school already uses (BUG-A-003), so its username is the one shown.
     const sheetOrder = logins.map((login, index) => {
-      const username = createdByCode.get(codes[index].trim().toLowerCase());
-      return login && username ? { ...login, username } : null;
+      const item = saved[index];
+      return login && item?.authUserId && item.username && !item.replayed ? { ...login, username: item.username } : null;
     });
     const issued = rows.flatMap((row, index) => {
       const login = sheetOrder[index];
-      return login ? [{ code: row.code, fullName: row.fullName, className: row.className, ...login }] : [];
+      return login ? [{ code: saved[index].studentCode, fullName: row.fullName, className: row.className, ...login }] : [];
     });
     if (issued.length) setCredentials({ rows: issued, sheetOrder, skipped: rows.length - issued.length });
   }
@@ -286,7 +285,7 @@ export function SchoolStudentsStep() {
               {filteredStudents.map((student, idx) => (
                 <TableRow hover key={student.id}>
                   <TableCell sx={{ color: "text.secondary", fontSize: 12 }}>{page * PAGE_SIZE + idx + 1}</TableCell>
-                  <TableCell sx={{ fontFamily: "var(--font-mono)", fontSize: 12 }}>
+                  <TableCell sx={{ fontFamily: "var(--font-mono)", fontSize: 12, maxWidth: 160, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }} title={student.code}>
                     {student.code || "—"}
                   </TableCell>
                   <TableCell sx={{ fontWeight: 600 }}>{student.fullName}</TableCell>

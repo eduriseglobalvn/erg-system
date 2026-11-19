@@ -172,7 +172,7 @@ export function ClassStudentsViewerDialog({
                     <TableCell sx={{ fontSize: 14, fontWeight: 600 }}>{student.fullName}</TableCell>
                     <TableCell>{student.grade || classRow.grade || "—"}</TableCell>
                     <TableCell>{student.className || classRow.name}</TableCell>
-                    <TableCell sx={{ color: "text.secondary", fontFamily: "var(--font-mono)", fontSize: 12 }}>
+                    <TableCell sx={{ color: "text.secondary", fontFamily: "var(--font-mono)", fontSize: 12, maxWidth: 160, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }} title={student.code}>
                       {student.code || "—"}
                     </TableCell>
                     <TableCell sx={{ color: "text.secondary", fontSize: 13 }}>

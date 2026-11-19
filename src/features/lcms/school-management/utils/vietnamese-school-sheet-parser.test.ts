@@ -119,12 +119,12 @@ describe("vietnamese-school-sheet-parser", () => {
     expect(students[0].fullName).toBe("Lê Hoàng Ngọc Anh");
     expect(students[0].className).toBe("9A1");
     expect(students[0].grade).toBe("9");
-    expect(students[0].code).toBe("9A1-1");
+    expect(students[0].code).toBe("");
 
     expect(students[1].fullName).toBe("Nguyễn Minh Trâm Anh");
-    expect(students[1].code).toBe("9A1-2");
+    expect(students[1].code).toBe("");
 
     expect(students[2].fullName).toBe("Lê Hà Hồng Ánh");
-    expect(students[2].code).toBe("9A1-3");
+    expect(students[2].code).toBe("");
   });
 });
