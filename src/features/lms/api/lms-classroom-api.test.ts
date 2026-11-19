@@ -1,10 +1,13 @@
 import { expect, test } from "vitest";
 
-import { currentAssignmentLabel } from "@/features/lms/api/lms-classroom-api";
+import { mapClassWorkspaceToStudents, type LmsClassWorkspace } from "@/features/lms/api/lms-classroom-api";
 
-test("the «Bài đang làm» column names the newest assignment and counts the rest, never a raw id", () => {
-  expect(currentAssignmentLabel({ items: [], totalItems: 0 })).toBe("Chưa có bài đang giao");
-  expect(currentAssignmentLabel({ items: [{ id: "a", title: "Ôn tập chủ đề 1" }], totalItems: 1 })).toBe("Ôn tập chủ đề 1");
-  expect(currentAssignmentLabel({ items: [{ id: "a", title: "Ôn tập chủ đề 1" }, { id: "b" }], totalItems: 3 })).toBe("Ôn tập chủ đề 1 và 2 bài khác");
-  expect(currentAssignmentLabel({ items: [{ id: "a", quizId: "01a1e60d" }], totalItems: 2 })).toBe("2 bài đang giao");
+test("the «Bài đang làm» column shows each student's own newest assignment (BUG-C-013)", () => {
+  const page = { page: 0, size: 20, totalItems: 2, totalPages: 1, hasNext: false };
+  const workspace = {
+    classInfo: { id: "c1", name: "7A1" },
+    students: { ...page, items: [{ id: "s1", fullName: "A", currentAssignmentTitle: "Ôn tập chủ đề 1" }, { id: "s2", fullName: "B", currentAssignmentTitle: null }] },
+    assignments: { ...page, items: [{ id: "a", title: "Bài của lớp" }] },
+  } as unknown as LmsClassWorkspace;
+  expect(mapClassWorkspaceToStudents(workspace).map((s) => s.currentAssignment)).toEqual(["Ôn tập chủ đề 1", "Chưa làm bài nào"]);
 });

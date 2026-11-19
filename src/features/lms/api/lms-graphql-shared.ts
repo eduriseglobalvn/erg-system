@@ -16,6 +16,8 @@ export type LmsStudent = {
   /** Class workspace roster only: this student's own score in the class. */
   averagePercent?: number | null;
   completedAssignmentCount?: number | null;
+  /** Title of the assignment of the student's newest attempt in this class; null when none. */
+  currentAssignmentTitle?: string | null;
 };
 
 export type LmsAssignmentResource = {
