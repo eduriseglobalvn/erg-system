@@ -7,6 +7,8 @@ export function pushServerReady(config: { enabled?: boolean; provider?: string |
 
 export type PushPromptInput = {
   serverReady: boolean;
+  /** Browser permission already granted: usePwaNotifications subscribes silently, so never ask. */
+  permissionGranted: boolean;
   /** null while the browser's push subscription is still being read. */
   subscriptionMissing: boolean | null;
   /** usePwaNotifications state: "default" = not asked yet, or granted without a subscription. */
@@ -17,7 +19,7 @@ export type PushPromptInput = {
 
 /** Asked on every app open until this browser is subscribed; «Để sau» only hides it for this app open. */
 export function shouldOfferPushPrompt(input: PushPromptInput) {
-  return input.serverReady && input.subscriptionMissing === true && input.state === "default" && !input.dismissed && !input.quizActive;
+  return input.serverReady && !input.permissionGranted && input.subscriptionMissing === true && input.state === "default" && !input.dismissed && !input.quizActive;
 }
 
 /** Permission denied: the how-to-re-enable hint is shown once per account, never repeated. */

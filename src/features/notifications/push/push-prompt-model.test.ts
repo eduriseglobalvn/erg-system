@@ -2,7 +2,7 @@ import { afterEach, expect, test } from "vitest";
 
 import { markDeniedHintSeen, pushServerReady, readDeniedHintSeen, shouldOfferPushPrompt, type PushPromptInput } from "./push-prompt-model";
 
-const ready: PushPromptInput = { serverReady: true, subscriptionMissing: true, state: "default", dismissed: false, quizActive: false };
+const ready: PushPromptInput = { serverReady: true, permissionGranted: false, subscriptionMissing: true, state: "default", dismissed: false, quizActive: false };
 
 afterEach(() => window.localStorage.clear());
 
@@ -16,6 +16,7 @@ test("not offered once subscribed, while still checking, or when the server has 
   expect(shouldOfferPushPrompt({ ...ready, state: "enabled" })).toBe(false);
   expect(shouldOfferPushPrompt({ ...ready, state: "unsupported" })).toBe(false);
   expect(shouldOfferPushPrompt({ ...ready, serverReady: false })).toBe(false);
+  expect(shouldOfferPushPrompt({ ...ready, permissionGranted: true })).toBe(false);
 });
 
 test("«Để sau» and an open quiz hide it for now", () => {

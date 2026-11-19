@@ -155,6 +155,18 @@ test("on app open a Web Push device moves to FCM silently when the server switch
   expect(JSON.parse(window.localStorage.getItem(getPwaNotificationDeviceStorageKey()) ?? "{}")).toMatchObject({ channel: "fcm", registrationToken: "fcm-token-1" });
 });
 
+test("on app open a browser with permission granted but no subscription subscribes silently, even with nothing stored", async () => {
+  mocks.fetchWebPushConfig.mockResolvedValue({ enabled: true, provider: "webpush", publicKey: "BPk" });
+  mocks.registerNotificationDevice.mockResolvedValue({ id: "device-4", lastSeenAt: null });
+  const { subscribe } = installPushRegistration();
+
+  const { result } = renderHook(() => usePwaNotifications());
+  await vi.waitFor(() => expect(result.current.state).toBe("enabled"));
+
+  expect(subscribe).toHaveBeenCalled();
+  expect(mocks.registerNotificationDevice).toHaveBeenCalledWith(expect.objectContaining({ transport: "WEB_PUSH" }));
+});
+
 test("on app open a browser that lost its subscription subscribes again when push was turned on here", async () => {
   mocks.fetchWebPushConfig.mockResolvedValue({ enabled: true, provider: "fcm" });
   mocks.registerNotificationDevice.mockResolvedValue({ id: "device-3", lastSeenAt: null });
