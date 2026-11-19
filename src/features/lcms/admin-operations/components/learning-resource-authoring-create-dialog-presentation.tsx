@@ -249,7 +249,8 @@ export function StatusField({ taxonomy, value, onChange }: { taxonomy?: boolean;
       <AppSelect style={{ width: "100%" }} value={value} onChange={(event) => onChange(event.target.value)}>
         <option value={taxonomy ? "active" : "published"}>Đã xuất bản</option>
         <option value="draft">Bản nháp</option>
-        <option value="hidden">Đã ẩn</option>
+        {/* Môn, cấp độ, chủ đề: backend chỉ nhận active | archived | draft. */}
+        <option value={taxonomy ? "archived" : "hidden"}>Đã ẩn</option>
       </AppSelect>
     </Field>
   );
