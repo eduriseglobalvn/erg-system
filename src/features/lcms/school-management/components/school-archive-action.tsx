@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { ErgConfirmDialog } from "@/components/erg-mui/erg-confirm-dialog";
 import { useSchoolManagementContext } from "@/features/lcms/school-management/components/school-management-context";
 
-/** Archive is soft (backend DELETE sets ARCHIVED, data kept); an archived school shows a restore button instead. */
+/** Archive locks the school's open classes, students and their logins (backend keeps a record so restore reopens exactly those); an archived school shows a restore button instead. */
 export function SchoolArchiveAction() {
   const { archiveSchool, isSaving, restoreSchool, selectedSchool } = useSchoolManagementContext();
   const [asking, setAsking] = useState(false);
@@ -27,6 +27,8 @@ export function SchoolArchiveAction() {
       </Button>
     );
   }
+
+  const openClasses = selectedSchool.classes.filter((c) => c.status?.toUpperCase() === "ACTIVE").length;
 
   async function confirm() {
     setPending(true);
@@ -48,7 +50,7 @@ export function SchoolArchiveAction() {
       </Button>
       <ErgConfirmDialog
         confirmLabel="Lưu trữ"
-        description="Trường sẽ ẩn khỏi danh sách đang hợp tác, trang tổng quan và các ô chọn trường khi phân công lớp, học sinh, giáo viên. Dữ liệu lớp, học sinh và lịch sử vẫn được giữ; có thể khôi phục bất cứ lúc nào từ bộ lọc “Đã lưu trữ”."
+        description={`${openClasses} lớp, ${selectedSchool.studentCount ?? 0} học sinh sẽ bị lưu trữ và khoá đăng nhập; khôi phục sẽ mở lại. Trường ẩn khỏi danh sách đang hợp tác và các ô chọn trường; dữ liệu và lịch sử vẫn được giữ, khôi phục từ bộ lọc “Đã lưu trữ”.`}
         destructive
         loading={pending}
         onCancel={() => setAsking(false)}

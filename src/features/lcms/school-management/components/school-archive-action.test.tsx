@@ -14,14 +14,14 @@ const restoreSchool = vi.fn(() => Promise.resolve());
 beforeEach(() => {
   archiveSchool.mockClear();
   restoreSchool.mockClear();
-  context.value = { archiveSchool, isSaving: false, restoreSchool, selectedSchool: { id: "s1", name: "THCS Nguyễn Du", status: "active" } };
+  context.value = { archiveSchool, isSaving: false, restoreSchool, selectedSchool: { id: "s1", name: "THCS Nguyễn Du", status: "active", studentCount: 120, classes: [{ status: "active" }, { status: "ACTIVE" }, { status: "archived" }] } };
 });
 
-it("archives only after the confirm dialog that names the school", async () => {
+it("archives only after the confirm dialog that names the school and what it locks", async () => {
   render(<SchoolArchiveAction />);
 
   fireEvent.click(screen.getByRole("button", { name: "Lưu trữ trường" }));
-  expect(screen.getByRole("dialog", { name: "Lưu trữ THCS Nguyễn Du?" })).toHaveTextContent("Dữ liệu lớp, học sinh và lịch sử vẫn được giữ");
+  expect(screen.getByRole("dialog", { name: "Lưu trữ THCS Nguyễn Du?" })).toHaveTextContent("2 lớp, 120 học sinh sẽ bị lưu trữ và khoá đăng nhập; khôi phục sẽ mở lại");
   expect(archiveSchool).not.toHaveBeenCalled();
 
   fireEvent.click(screen.getByRole("button", { name: "Lưu trữ" }));
