@@ -11,7 +11,8 @@ import { ErgButton } from "@/components/erg-mui/erg-actions";
 import { loadTeachingPeriodTemplates } from "@/features/teaching-calendar/api/teaching-calendar-schedule-api";
 import { teachingCalendarQueryKeys } from "@/features/teaching-calendar/api/teaching-calendar-query-keys";
 import { loadTeachingSlotOptions } from "@/features/teaching-calendar/api/teaching-calendar-slot-options-api";
-import type { TeachingCalendarEvent } from "@/features/teaching-calendar/api/teaching-calendar-workspace-types";
+import { ErgSelect } from "@/components/erg-mui/erg-form";
+import type { TeachingCalendarCatalog, TeachingCalendarEvent } from "@/features/teaching-calendar/api/teaching-calendar-workspace-types";
 import { dayLabel, sourceLabel, weekdayIndex, weekdayName } from "@/features/teaching-calendar/domain/schedule-copy";
 import { newClientRowId, withTeacher, type GridRow } from "@/features/teaching-calendar/domain/schedule-grid-model";
 import { getDefaultTenantId } from "@/lib/graphql-client";
@@ -40,7 +41,7 @@ function MobileField({ disabled, error, label, muted, onClick, value }: { disabl
 type View = "form" | "teacher" | "assistant" | "room";
 type Row = GridRow;
 
-type Props = { date: string; events: readonly TeachingCalendarEvent[]; onClose: () => void; open: boolean; schoolId: string; schoolName: string };
+type Props = { catalog?: TeachingCalendarCatalog; date: string; events: readonly TeachingCalendarEvent[]; onClose: () => void; open: boolean; schoolId: string; schoolName: string };
 
 /** Chu phu cua chip tiet (6.9): «trống» / «—» (khong gio) / gio bat dau (dang chon) / «đã xếp» (lop da co tiet). */
 export function periodChipHint(slot: { periodNo: number; startTime?: string | null }, selected: boolean, taken: boolean): string {
@@ -54,8 +55,17 @@ export function AdminMobileSheet(props: Props) {
   return props.open ? <AdminMobileSheetBody {...props} /> : null;
 }
 
-function AdminMobileSheetBody({ date, events, onClose, open, schoolId, schoolName }: Props) {
+function AdminMobileSheetBody({ catalog, date, events, onClose, open, schoolId, schoolName }: Props) {
   const tenantId = getDefaultTenantId();
+  // BE bat buoc mon khi luu nhap (SUBJECT_REQUIRED) va gan 1 mon cho ca dot -> dot nhap da co mon thi khoa theo mon do.
+  const programs = (catalog?.levels ?? []).map((level) => ({
+    label: [catalog?.subjects.find((subject) => subject.id === level.subjectId)?.label, level.label].filter(Boolean).join(" · "),
+    value: `${level.subjectId}|${level.id}`,
+  }));
+  const draftEvent = events.find((event) => event.schoolId === schoolId && event.status === "DRAFT" && event.subjectId);
+  const seed = draftEvent ?? events.find((event) => event.schoolId === schoolId && event.subjectId && event.levelId);
+  const [program, setProgram] = useState(seed?.subjectId && seed.levelId ? `${seed.subjectId}|${seed.levelId}` : "");
+  const [subjectId, levelId] = program.split("|");
   const [view, setView] = useState<View>("form");
   const [periodNo, setPeriodNo] = useState(1);
   const [row, setRow] = useState<Row | null>(null);
@@ -74,7 +84,6 @@ function AdminMobileSheetBody({ date, events, onClose, open, schoolId, schoolNam
   const data = options.data;
   const weekday = weekdayIndex(date);
   const takenPeriods = new Set(events.filter((event) => event.date === date && event.classId === row?.classId).map((event) => event.periodStart));
-  const program = events.find((event) => event.schoolId === schoolId)?.levelName ?? events.find((event) => event.schoolId === schoolId)?.subjectName;
   const apply = (next: Row) => { setRow(next); setView("form"); };
   const draftRow = (): Row => row ?? { classId: "", className: "", clientRowId: newClientRowId(), periodNo, weekday };
   const teacherOption = data?.teachers.find((teacher) => teacher.teacherId === row?.teacherId);
@@ -82,10 +91,10 @@ function AdminMobileSheetBody({ date, events, onClose, open, schoolId, schoolNam
   const swap = busy ? data?.teachers.find((teacher) => teacher.state === "FREE" || teacher.state === "SUGGESTED") : undefined;
   const periodTemplateId = template?.id ?? "";
   const sunday = weekday === 0;
-  const canAdd = !sunday && Boolean(row?.classId && row.teacherId && slot?.startTime && periodTemplateId);
+  const canAdd = !sunday && Boolean(subjectId && row?.classId && row.teacherId && slot?.startTime && periodTemplateId);
 
   return (
-    <MobileBottomSheet description={[schoolName, program].filter(Boolean).join(" · ")} onOpenChange={(next) => !next && onClose()} open={open} title={`Thêm tiết · ${dayLabel(date)}`}>
+    <MobileBottomSheet description={schoolName} onOpenChange={(next) => !next && onClose()} open={open} title={`Thêm tiết · ${dayLabel(date)}`}>
       {view === "form" ? (
         <Stack spacing={1.5}>
           <Box>
@@ -107,6 +116,10 @@ function AdminMobileSheetBody({ date, events, onClose, open, schoolId, schoolNam
               })}
             </Box>
           </Box>
+          <ErgSelect
+            disabled={Boolean(draftEvent) || !programs.length} helperText={draftEvent ? "Theo môn của đợt nháp đang có" : undefined} label="Môn · Chương trình"
+            onChange={(event) => setProgram(event.target.value)} options={programs} value={program}
+          />
           {data ? (
             <ClassCombobox
               classes={data.classes} grade={data.grade} onChange={(option) => option && apply({ ...draftRow(), classId: option.classId, className: option.className, periodNo })}
@@ -127,7 +140,7 @@ function AdminMobileSheetBody({ date, events, onClose, open, schoolId, schoolNam
           {row?.className ? <Box sx={{ bgcolor: scheduleTokens.published.bg, borderRadius: `${ergEnterpriseTokens.radius.control}px`, color: scheduleTokens.published.text, fontSize: "0.75rem", px: "10px", py: 1 }}>Khi áp dụng: cấp quyền lớp {row.className} cho giáo viên được chọn.</Box> : null}
           {sunday ? <Typography color="error" role="alert" sx={{ typography: "caption" }}>Chủ nhật không có trong lưới xếp lịch. Chọn ngày từ Thứ 2 đến Thứ 7.</Typography> : null}
           {add.isError ? <Typography color="error" role="alert" sx={{ typography: "caption" }}>Chưa lưu được · Thử lại</Typography> : null}
-          <ErgButton disabled={!canAdd} fullWidth sx={{ borderRadius: `${ergEnterpriseTokens.radius.control}px`, fontSize: "0.9375rem", height: 48 }} loading={add.isPending} onClick={() => row && add.mutate({ date, periodTemplateId, row, schoolId })} variant="contained">Thêm vào nháp</ErgButton>
+          <ErgButton disabled={!canAdd} fullWidth sx={{ borderRadius: `${ergEnterpriseTokens.radius.control}px`, fontSize: "0.9375rem", height: 48 }} loading={add.isPending} onClick={() => row && add.mutate({ date, levelId, periodTemplateId, row, schoolId, subjectId })} variant="contained">Thêm vào nháp</ErgButton>
         </Stack>
       ) : null}
       {data && view === "room" && row ? (

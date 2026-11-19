@@ -87,7 +87,7 @@ export function useCalendarMain() {
     return next.length === all.length || !next.length ? [] : next;
   });
   return {
-    anchor, canDelete: Boolean(workspace.data?.permissions.canDelete), conflicts, draftCards, events,
+    anchor, canDelete: Boolean(workspace.data?.permissions.canDelete), catalog: workspace.data?.catalog, conflicts, draftCards, events,
     error: workspace.error, loading: workspace.isPending, mode, range, refetch: () => void workspace.refetch(), repeatUntilOf,
     schoolIds, schoolOptions: schools.data?.items ?? [], setAnchor, setMode, setSchoolIds, shortNames, teacherCounts, teacherIds,
     toggleSchool: toggle(setSchoolIds, (schools.data?.items ?? []).map((school) => school.schoolId)), toggleTeacher: toggle(setTeacherIds, teacherCounts.map((teacher) => teacher.id)), weekStart,

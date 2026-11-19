@@ -7,7 +7,7 @@ import type { GridRow } from "@/features/teaching-calendar/domain/schedule-grid-
 
 import { useScheduleDraft } from "./use-schedule-draft";
 
-const meta = { applyFrom: "2026-11-09", periodTemplateId: "tpl", repeatUntil: "2027-01-17", schoolId: "school" };
+const meta = { applyFrom: "2026-11-09", periodTemplateId: "tpl", repeatUntil: "2027-01-17", schoolId: "school", subjectId: "math" };
 const row = (id: string): GridRow => ({ classId: "c", className: "9A1", clientRowId: id, periodNo: 1, weekday: 1 });
 
 function result(version: number, rowIdMap: Array<{ clientRowId: string; eventId: string }> = []): TeachingScheduleDraftResult {
@@ -103,4 +103,19 @@ it("saves pending changes on unmount", () => {
   act(() => hook.current.setRows(() => [row("r1")]));
   unmount();
   expect(save).toHaveBeenCalledTimes(1);
+});
+
+it("does not send rows without a subject and asks for one, then saves once it is picked", async () => {
+  const save = vi.fn().mockResolvedValue(result(1));
+  const { result: hook } = renderHook(() => useScheduleDraft({ save }));
+  act(() => hook.current.hydrate({ meta: { ...meta, subjectId: undefined }, rows: [] }));
+  act(() => hook.current.setRows(() => [row("r1")]));
+  await act(async () => { await vi.advanceTimersByTimeAsync(1500); });
+  expect(save).not.toHaveBeenCalled();
+  expect(hook.current.status).toBe("needsSubject");
+
+  act(() => hook.current.setMeta({ levelId: "l1", subjectId: "math" }));
+  await act(async () => { await vi.advanceTimersByTimeAsync(1500); });
+  expect(save).toHaveBeenCalledTimes(1);
+  expect(save.mock.calls[0][0]).toMatchObject({ levelId: "l1", subjectId: "math" });
 });

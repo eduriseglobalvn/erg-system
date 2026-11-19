@@ -43,12 +43,13 @@ it("creates a new draft batch when the school has none", async () => {
   mocks.batches.mockResolvedValue({ items: [] });
   const onDone = vi.fn();
   const { result } = renderHook(() => useAdminMobileAdd(onDone), { wrapper });
-  await act(async () => { result.current.mutate({ date: "2026-11-11", periodTemplateId: "tpl", row, schoolId: "s1" }); });
+  await act(async () => { result.current.mutate({ date: "2026-11-11", levelId: "l1", periodTemplateId: "tpl", row, schoolId: "s1", subjectId: "math" }); });
   await waitFor(() => expect(onDone).toHaveBeenCalled());
   const input = mocks.save.mock.calls[0][0];
   expect(input.batchId).toBeNull();
   expect(input.applyFrom).toBe("2026-11-09");
   expect(input.rows).toHaveLength(1);
+  expect(input).toMatchObject({ levelId: "l1", subjectId: "math" });
   expect(input.rows[0]).toMatchObject({ classId: "c1", periodNo: 6, teacherId: "t1", weekday: 3 });
 });
 
@@ -57,7 +58,18 @@ it("appends one row to the current draft batch with its expected version", async
   mocks.draft.mockResolvedValue({ batch: { periodTemplateId: "tpl" }, version: 4 });
   mocks.workspace.mockResolvedValue({ events: [] });
   const { result } = renderHook(() => useAdminMobileAdd(vi.fn()), { wrapper });
-  await act(async () => { result.current.mutate({ date: "2026-11-11", periodTemplateId: "tpl", row, schoolId: "s1" }); });
+  await act(async () => { result.current.mutate({ date: "2026-11-11", levelId: "l1", periodTemplateId: "tpl", row, schoolId: "s1", subjectId: "math" }); });
   await waitFor(() => expect(mocks.save).toHaveBeenCalled());
-  expect(mocks.save.mock.calls[0][0]).toMatchObject({ batchId: "b1", expectedVersion: 4, repeatUntil: "2027-01-17" });
+  expect(mocks.save.mock.calls[0][0]).toMatchObject({ batchId: "b1", expectedVersion: 4, levelId: "l1", repeatUntil: "2027-01-17", subjectId: "math" });
+});
+
+it("keeps the subject of a draft batch that already has lessons (BE applies it to every lesson)", async () => {
+  mocks.batches.mockResolvedValue({ items: [{ applyFrom: "2026-11-09", id: "b1", repeatWeeks: 10 }] });
+  mocks.draft.mockResolvedValue({ batch: { periodTemplateId: "tpl" }, version: 4 });
+  const existing = { batchId: "b1", classId: "c2", className: "9A2", date: "2026-11-09", id: "e1", levelId: "l9", periodStart: 1, status: "DRAFT", subjectId: "eng", teachers: [] };
+  mocks.workspace.mockResolvedValue({ events: [existing] });
+  const { result } = renderHook(() => useAdminMobileAdd(vi.fn()), { wrapper });
+  await act(async () => { result.current.mutate({ date: "2026-11-11", levelId: "l1", periodTemplateId: "tpl", row, schoolId: "s1", subjectId: "math" }); });
+  await waitFor(() => expect(mocks.save).toHaveBeenCalled());
+  expect(mocks.save.mock.calls[0][0]).toMatchObject({ levelId: "l9", subjectId: "eng" });
 });

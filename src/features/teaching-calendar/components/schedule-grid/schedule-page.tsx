@@ -51,7 +51,8 @@ export function SchedulePage() {
   const [publishError, setPublishError] = useState<string | null>(null);
   const clipboard = useRef<GridRow | null>(null);
   const rename = useRenameBatch({ batchId: meta.batchId ?? "", onRenamed: draft.applyBatch, schoolName: school?.schoolName ?? "", version: meta.version ?? 0 });
-  const busy = draft.status === "dirty" || draft.status === "saving";
+  // needsSubject = tiet chua luu duoc: chan roi trang de khong mat.
+  const busy = draft.status === "dirty" || draft.status === "saving" || draft.status === "needsSubject";
   const blocker = useBlocker({ enableBeforeUnload: () => busy, shouldBlockFn: () => busy, withResolver: true });
 
   const setCell = useCallback((key: string, row: GridRow | null) => {
