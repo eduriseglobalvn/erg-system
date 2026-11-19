@@ -51,7 +51,7 @@ export default function SchoolSubjectsScreen() {
         {selectedSchool.subjects.map((subject) => {
           const percent = Math.min(
             100,
-            Math.round((subject.studentCount / Math.max(selectedSchool.students.length, 1)) * 100)
+            Math.round((subject.studentCount / Math.max(selectedSchool.studentCount ?? 0, 1)) * 100)
           );
 
           return (

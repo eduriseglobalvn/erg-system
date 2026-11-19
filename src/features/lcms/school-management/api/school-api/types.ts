@@ -119,6 +119,8 @@ export type BulkStudentImportResult = {
   created: number;
   replayed: number;
   items: OperationalStudentRecord[];
+  /** Only on the REST (account) import: rows already on the roster, returned untouched. */
+  replayedStudentIds?: string[];
 };
 
 export type BulkEnrollmentResult = {
@@ -165,14 +167,30 @@ export type OperationsWorkspace = {
     currentAcademicYearId?: string | null;
     version: number;
   };
-  summary: { classCount: number; activeClassCount: number; studentCount: number; gradeCount: number };
+  summary: {
+    classCount: number;
+    activeClassCount: number;
+    studentCount: number;
+    gradeCount: number;
+    students: SchoolStudentStats;
+    scoredStudentCount: number;
+    averageScore?: number | null;
+  };
   academicYears: Array<Omit<SchoolAcademicYearRecord, "version"> & { version: string | number }>;
   grades: SchoolGradeRecord[];
   classes: Array<{ id: string; name: string; grade?: string | null; homeroomTeacher?: string | null; studentCount: number; status?: string | null }>;
-  students: Array<{ id: string; code?: string | null; fullName: string; birthDate?: string | null; grade?: string | null; className?: string | null; guardianPhone?: string | null; subjectIds: string[]; status: string; averageScore?: number | null }>;
   subjects: Array<{ id: string; name: string; code?: string | null; studentCount: number; teacherCount: number }>;
   permissions: SchoolPermissions;
 };
+
+/** Counts over a school's students, computed in SQL (the list itself is paged). */
+export type SchoolStudentStats = { total: number; atRisk: number; studying: number; profileComplete: number; assigned: number };
+
+export type SchoolStudentRow = { id: string; code?: string | null; fullName: string; birthDate?: string | null; grade?: string | null; className?: string | null; guardianPhone?: string | null; subjectIds: string[]; status: string; averageScore?: number | null };
+
+export type SchoolStudentFilters = { search?: string; grade?: string; className?: string; status?: "studying" | "at-risk" | "inactive" };
+
+export type SchoolStudentPageResponse = Omit<DirectoryWorkspace, "items"> & { items: SchoolStudentRow[]; stats: SchoolStudentStats };
 
 export type SchoolCommandResponse = OperationsWorkspace["school"] & {
   currentAcademicYear?: SchoolAcademicYearRecord | null;

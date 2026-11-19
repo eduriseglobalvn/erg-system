@@ -28,7 +28,7 @@ function SchoolInformationForm({ saveSchool, school }: { saveSchool: (draft: Sch
   const [draft, setDraft] = useState<SchoolDraft>(() => toDraft(school));
   const [saved, setSaved] = useState(false);
   const [confirmTypeChange, setConfirmTypeChange] = useState(false);
-  const hasOperationalData = school.classes.length > 0 || school.students.length > 0;
+  const hasOperationalData = school.classes.length > 0 || (school.studentCount ?? 0) > 0;
   const nameMissing = draft.name.trim() === "";
   const typeChanged = draft.schoolType !== school.schoolType;
 

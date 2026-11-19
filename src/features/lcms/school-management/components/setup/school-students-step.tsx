@@ -10,11 +10,14 @@ import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
+import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { useMemo, useState } from "react";
 import { useSchoolManagementContext } from "@/features/lcms/school-management/components/school-management-context";
+import { useSchoolStudents } from "@/features/lcms/school-management/hooks/use-school-students";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { SchoolStepSurface } from "@/features/lcms/school-management/components/setup/school-step-surface";
 import { StudentCredentialsDialog, type StudentCredentialsResult } from "@/features/lcms/school-management/components/setup/student-credentials-dialog";
 import { buildStudentLogins } from "@/features/lcms/school-management/utils/student-account-credentials";
@@ -27,6 +30,7 @@ import { schoolTypeMeta, schoolTypeUsesGrades } from "@/features/lcms/school-man
 import type { StudentImportRow } from "@/features/lcms/school-management/types/school-management-types";
 // Stable fallback so memo deps do not change every render.
 const NONE: never[] = [];
+const PAGE_SIZE = 50;
 
 export function SchoolStudentsStep() {
   const { addStudents, selectedSchool } = useSchoolManagementContext();
@@ -34,34 +38,24 @@ export function SchoolStudentsStep() {
   const [credentials, setCredentials] = useState<StudentCredentialsResult | null>(null);
   const [selectedClass, setSelectedClass] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [page, setPage] = useState(0);
   const [resetTarget, setResetTarget] = useState<StudentPasswordResetTarget | null>(null);
 
   const schoolClasses = selectedSchool?.classes ?? NONE;
-  const schoolStudents = selectedSchool?.students ?? NONE;
+  const debouncedSearch = useDebouncedValue(searchQuery);
 
   // Hooks stay above the `!selectedSchool` guard so they run on every render.
-  const classNames = useMemo(() => {
-    const set = new Set(schoolClasses.map((c) => c.name));
-    schoolStudents.forEach((s) => {
-      if (s.className) set.add(s.className);
-    });
-    return Array.from(set).sort((a, b) => a.localeCompare(b, "vi", { numeric: true }));
-  }, [schoolClasses, schoolStudents]);
-
-  const filteredStudents = useMemo(() => {
-    const q = searchQuery.toLowerCase().trim();
-    return schoolStudents.filter((student) => {
-      const matchClass = selectedClass === "all" || student.className === selectedClass;
-      const matchSearch =
-        !q ||
-        student.fullName.toLowerCase().includes(q) ||
-        (student.code && student.code.toLowerCase().includes(q)) ||
-        (student.className && student.className.toLowerCase().includes(q));
-      return matchClass && matchSearch;
-    });
-  }, [schoolStudents, selectedClass, searchQuery]);
-
-  const atRiskCount = useMemo(() => schoolStudents.filter((s) => s.status === "at-risk").length, [schoolStudents]);
+  const sortedClasses = useMemo(
+    () => [...schoolClasses].sort((a, b) => a.name.localeCompare(b.name, "vi", { numeric: true })),
+    [schoolClasses],
+  );
+  // Search and class filter run on the server, one page at a time, so a school of any size stays fast.
+  const studentPage = useSchoolStudents(selectedSchool?.id, {
+    search: debouncedSearch,
+    className: selectedClass === "all" ? undefined : selectedClass,
+  }, page, PAGE_SIZE);
+  const filteredStudents = studentPage.data?.items ?? NONE;
+  const totalFiltered = studentPage.data?.totalItems ?? 0;
 
   const selectedClassInfo = useMemo(() => {
     if (selectedClass === "all") return null;
@@ -69,6 +63,7 @@ export function SchoolStudentsStep() {
   }, [selectedClass, schoolClasses]);
 
   if (!selectedSchool) return null;
+  const atRiskCount = selectedSchool.studentStats?.atRisk ?? 0;
   const meta = schoolTypeMeta[selectedSchool.schoolType];
   const usesGrades = schoolTypeUsesGrades(selectedSchool.schoolType);
 
@@ -79,9 +74,7 @@ export function SchoolStudentsStep() {
   async function importStudents(rows: StudentImportRow[]) {
     // Every imported student also gets a login (active, learner role, no onboarding) created by the backend.
     const logins = buildStudentLogins(rows, selectedSchool!.name);
-    // A student already on the roster keeps the account it has: the backend returns it untouched, so no password is shown for it (BUG-X-004).
-    // shortcut: a roster student that had no login gets one now but its password is not shown, use «Cấp lại mật khẩu»; return an accountCreated flag from the import when that case matters
-    const existing = new Set(schoolStudents.map((student) => student.code.trim().toLowerCase()));
+    // A student already on the roster keeps the account it has: the backend returns it untouched (replayed), so no password is shown for it (BUG-X-004).
     const codes = rows.map((row, index) => row.code || `${selectedSchool!.id}-${Date.now()}-${index}`);
     const saved = await addStudents(
       rows.map((row, index) => ({
@@ -98,7 +91,7 @@ export function SchoolStudentsStep() {
     );
     // Only logins the backend confirms (same username, linked account) were created now; the rest already had one.
     // Keyed by student code: the backend may number a login that another school already uses (BUG-A-003), so its username is the one shown.
-    const createdByCode = new Map(saved.filter((item) => item.authUserId && item.username && !existing.has(item.studentCode.trim().toLowerCase())).map((item) => [item.studentCode.trim().toLowerCase(), item.username!]));
+    const createdByCode = new Map(saved.filter((item) => item.authUserId && item.username && !item.replayed).map((item) => [item.studentCode.trim().toLowerCase(), item.username!]));
     const sheetOrder = logins.map((login, index) => {
       const username = createdByCode.get(codes[index].trim().toLowerCase());
       return login && username ? { ...login, username } : null;
@@ -154,7 +147,7 @@ export function SchoolStudentsStep() {
               Tổng {meta.learnerLabel.toLowerCase()}:
             </Typography>
             <Typography sx={{ fontSize: 16, fontWeight: 600 }}>
-              {selectedSchool.students.length}
+              {selectedSchool.studentCount ?? 0}
             </Typography>
           </Box>
           <Box sx={{ alignItems: "center", display: "flex", gap: 0.75 }}>
@@ -186,7 +179,7 @@ export function SchoolStudentsStep() {
               </Typography>
               <Chip
                 color="primary"
-                label={`Lớp ${selectedClassInfo.name} · Sĩ số ${filteredStudents.length}`}
+                label={`Lớp ${selectedClassInfo.name} · Sĩ số ${selectedClassInfo.studentCount}`}
                 size="small"
                 sx={{ fontWeight: 600 }}
               />
@@ -224,14 +217,13 @@ export function SchoolStudentsStep() {
               <Chip
                 clickable
                 color={selectedClass === "all" ? "primary" : "default"}
-                label={`Tất cả (${selectedSchool.students.length})`}
-                onClick={() => setSelectedClass("all")}
+                label={`Tất cả (${selectedSchool.studentCount ?? 0})`}
+                onClick={() => { setSelectedClass("all"); setPage(0); }}
                 size="small"
                 sx={{ fontWeight: selectedClass === "all" ? 850 : 500 }}
                 variant={selectedClass === "all" ? "filled" : "outlined"}
               />
-              {classNames.map((cName) => {
-                const count = selectedSchool.students.filter((s) => s.className === cName).length;
+              {sortedClasses.map(({ name: cName, studentCount: count }) => {
                 const isSelected = selectedClass === cName;
                 return (
                   <Chip
@@ -239,7 +231,7 @@ export function SchoolStudentsStep() {
                     color={isSelected ? "primary" : "default"}
                     key={cName}
                     label={`${cName} (${count})`}
-                    onClick={() => setSelectedClass(cName)}
+                    onClick={() => { setSelectedClass(cName); setPage(0); }}
                     size="small"
                     sx={{ fontWeight: isSelected ? 850 : 500 }}
                     variant={isSelected ? "filled" : "outlined"}
@@ -251,7 +243,7 @@ export function SchoolStudentsStep() {
               placeholder="Tìm theo tên hoặc mã..."
               size="small"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => { setSearchQuery(e.target.value); setPage(0); }}
               sx={{ minWidth: { xs: "100%", sm: 240 } }}
               slotProps={{
                 input: {
@@ -293,7 +285,7 @@ export function SchoolStudentsStep() {
             <TableBody>
               {filteredStudents.map((student, idx) => (
                 <TableRow hover key={student.id}>
-                  <TableCell sx={{ color: "text.secondary", fontSize: 12 }}>{idx + 1}</TableCell>
+                  <TableCell sx={{ color: "text.secondary", fontSize: 12 }}>{page * PAGE_SIZE + idx + 1}</TableCell>
                   <TableCell sx={{ fontFamily: "var(--font-mono)", fontSize: 12 }}>
                     {student.code || "—"}
                   </TableCell>
@@ -324,7 +316,7 @@ export function SchoolStudentsStep() {
                   </TableCell>
                 </TableRow>
               ))}
-              {!filteredStudents.length ? (
+              {studentPage.data && !totalFiltered ? (
                 <TableRow>
                   <TableCell
                     colSpan={usesGrades ? 8 : 7}
@@ -342,11 +334,15 @@ export function SchoolStudentsStep() {
           </Table>
         </TableContainer>
 
-        {filteredStudents.length > 0 ? (
-          <Typography color="text.secondary" sx={{ mt: 1 }} variant="caption">
-            Hiển thị {filteredStudents.length} / {selectedSchool.students.length} bản ghi
-            {selectedClass !== "all" ? ` (Lớp ${selectedClass})` : ""} · cuộn trong bảng để xem tiếp.
-          </Typography>
+        {totalFiltered > 0 ? (
+          <TablePagination
+            component="div"
+            count={totalFiltered}
+            onPageChange={(_, value) => setPage(value)}
+            page={page}
+            rowsPerPage={PAGE_SIZE}
+            rowsPerPageOptions={[PAGE_SIZE]}
+          />
         ) : null}
       </SchoolStepSurface>
 

@@ -169,14 +169,14 @@ export function StudentScopeNavigator({
               py: 0.35,
             }}
           >
-            {school.students.length}
+            {school.studentCount ?? 0}
           </Box>
         </ListItemButton>
 
         {/* Grades Breakdown */}
         {school.grades.map((grade) => {
           const gradeClasses = school.classes.filter((classroom) => classroom.grade === grade);
-          const gradeCount = school.students.filter((student) => student.grade === grade).length;
+          const gradeCount = gradeClasses.reduce((sum, classroom) => sum + classroom.studentCount, 0);
           const gradeSelected = selectedGrade === grade && selectedClass === "all";
           const isExpanded = Boolean(expandedGrades[grade]);
           const hasClasses = gradeClasses.length > 0;
@@ -263,9 +263,7 @@ export function StudentScopeNavigator({
                   >
                     {gradeClasses.map((classroom) => {
                       const isSelected = selectedClass === classroom.name;
-                      const actualCount = school.students.filter(
-                        (student) => student.className === classroom.name
-                      ).length;
+                      const actualCount = classroom.studentCount;
 
                       return (
                         <ListItemButton

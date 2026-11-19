@@ -79,6 +79,7 @@ export function useSchoolManagement(initialSchoolId?: string | null) {
       await queryClient.invalidateQueries({
         queryKey: schoolManagementQueryKeys.operations(tenantId, accountId, schoolId),
       });
+      void queryClient.invalidateQueries({ queryKey: schoolManagementQueryKeys.students(tenantId, accountId, schoolId) });
     }
   }, [accountId, queryClient, tenantId]);
 
@@ -189,11 +190,15 @@ export function useSchoolManagement(initialSchoolId?: string | null) {
       toast.error(message);
       throw new Error(message);
     }
-    let saved: Array<{ studentCode: string; username?: string | null; authUserId?: string | null }> = [];
+    let saved: Array<{ studentCode: string; username?: string | null; authUserId?: string | null; replayed?: boolean }> = [];
     // Rows that ask for a login go over REST (GraphQL variables must not carry passwords); the rest keep the old path.
     const withAccount = items.filter((item): item is SchoolStudentAccountInput => "password" in item);
     const plain = items.filter((item) => !("password" in item));
-    if (withAccount.length) saved = (await importSchoolStudentsWithAccounts(selectedSchoolId, withAccount)).items;
+    if (withAccount.length) {
+      const result = await importSchoolStudentsWithAccounts(selectedSchoolId, withAccount);
+      const replayed = new Set(result.replayedStudentIds);
+      saved = result.items.map((item) => ({ ...item, replayed: replayed.has(item.id) }));
+    }
     if (plain.length > 1) saved = [...saved, ...(await studentImportMutation.mutateAsync({ schoolId: selectedSchoolId, items: plain })).items];
     else if (plain[0]) saved = [...saved, await studentCreateMutation.mutateAsync({ schoolId: selectedSchoolId, input: plain[0] })];
     await refreshSchoolData(selectedSchoolId);

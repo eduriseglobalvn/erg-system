@@ -6,8 +6,8 @@ const school: PartnerSchool = {
   academicYear: "2026–2027",
   address: "25 Nguyễn Huệ",
   classes: [
-    { id: "class-8a1", grade: "8", homeroomTeacher: "Cô Trần Thu Hà", name: "8A1", studentCount: 3 },
-    { id: "class-8a2", grade: "8", homeroomTeacher: "Thầy Lê Mạnh Hùng", name: "8A2", studentCount: 3 },
+    { id: "class-8a1", grade: "8", homeroomTeacher: "Cô Trần Thu Hà", name: "8A1", studentCount: 4 },
+    { id: "class-8a2", grade: "8", homeroomTeacher: "Thầy Lê Mạnh Hùng", name: "8A2", studentCount: 4 },
   ],
   code: "ERG-SECONDARY",
   contactEmail: "school@erg.edu.vn",
@@ -21,17 +21,6 @@ const school: PartnerSchool = {
   reviews: [],
   schoolType: "secondary",
   status: "active",
-  students: Array.from({ length: 6 }, (_, index) => ({
-    birthDate: "2012-05-10",
-    className: index < 3 ? "8A1" : "8A2",
-    code: `HS00${index + 1}`,
-    fullName: `Học sinh ${index + 1}`,
-    grade: "8",
-    guardianPhone: "0900000000",
-    id: `student-${index + 1}`,
-    status: index === 4 ? "at-risk" : "studying",
-    subjectIds: ["subject-eng"],
-  })),
   subjects: [{ code: "ENG", id: "subject-eng", name: "Tiếng Anh", studentCount: 6, teacherCount: 2 }],
 };
 
@@ -56,7 +45,7 @@ describe("training monitoring demo dataset", () => {
 
     expect(data.classSummaries).toHaveLength(2);
     expect(data.teachers).toHaveLength(2);
-    expect(data.students).toHaveLength(6);
+    expect(data.students).toHaveLength(8);
     expect(data.assignments.length).toBeGreaterThanOrEqual(6);
   });
 

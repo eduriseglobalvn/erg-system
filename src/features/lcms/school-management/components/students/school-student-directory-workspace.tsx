@@ -19,11 +19,14 @@ import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { useMemo, useState } from "react";
+import { useState } from "react";
+import { useSchoolStudents } from "@/features/lcms/school-management/hooks/use-school-students";
+import type { SchoolStudentFilters } from "@/features/lcms/school-management/api/school-management-api";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { StudentScopeNavigator } from "@/features/lcms/school-management/components/students/student-scope-navigator";
 import type { PartnerSchool, SchoolStudent } from "@/features/lcms/school-management/types/school-management-types";
 import { AppleMetricCard } from "@/features/lcms/school-management/components/students/school-student-directory/apple-metric-card";
-import { countAssignedStudents, filterSchoolStudents, getAvatarStyle, getInitials, statusMeta } from "@/features/lcms/school-management/components/students/school-student-directory/student-directory-utils";
+import { getAvatarStyle, getInitials, statusMeta } from "@/features/lcms/school-management/components/students/school-student-directory/student-directory-utils";
 import { StudentProfileDrawer } from "@/features/lcms/school-management/components/students/school-student-directory/student-profile-drawer";
 import { tableHeadCellSx } from "@/features/lcms/school-management/components/students/school-student-directory/table-head-cell-sx";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
@@ -37,15 +40,19 @@ export function SchoolStudentDirectoryWorkspace({ school }: { school: PartnerSch
   const [page, setPage] = useState(0);
   const [selectedStudent, setSelectedStudent] = useState<SchoolStudent | null>(null);
 
-  const filtered = useMemo(
-    () => filterSchoolStudents(school.students, { selectedGrade, selectedClass, status, search }),
-    [school.students, search, selectedClass, selectedGrade, status],
-  );
+  const debouncedSearch = useDebouncedValue(search);
+  const { data } = useSchoolStudents(school.id, {
+    search: debouncedSearch,
+    grade: selectedGrade === "all" ? undefined : selectedGrade,
+    className: selectedClass === "all" ? undefined : selectedClass,
+    status: status === "all" ? undefined : status as SchoolStudentFilters["status"],
+  }, page, 12);
 
-  const visible = filtered.slice(page * 12, page * 12 + 12);
+  const visible = data?.items ?? [];
+  const total = data?.totalItems ?? 0;
   const scopeLabel = selectedClass !== "all" ? `Lớp ${selectedClass}` : selectedGrade !== "all" ? `Khối ${selectedGrade}` : "Toàn trường";
-  const atRisk = filtered.filter((student) => student.status === "at-risk").length;
-  const assigned = countAssignedStudents(filtered);
+  const atRisk = data?.stats.atRisk ?? 0;
+  const assigned = data?.stats.assigned ?? 0;
 
   function resetPage() { setPage(0); }
 
@@ -68,7 +75,7 @@ export function SchoolStudentDirectoryWorkspace({ school }: { school: PartnerSch
             iconColor={ergEnterpriseTokens.color.primary}
             iconBg={alpha(ergEnterpriseTokens.color.primary, 0.08)}
             label={`Người học · ${scopeLabel}`}
-            value={filtered.length}
+            value={total}
             subtext="Học sinh trong phạm vi"
           />
           <AppleMetricCard
@@ -76,8 +83,8 @@ export function SchoolStudentDirectoryWorkspace({ school }: { school: PartnerSch
             iconColor="#15803D"
             iconBg={alpha(ergEnterpriseTokens.color.success, 0.12)}
             label="Đã gán môn học"
-            value={`${assigned}/${filtered.length}`}
-            subtext={`${Math.round((assigned / (filtered.length || 1)) * 100)}% đã được xếp môn`}
+            value={`${assigned}/${total}`}
+            subtext={`${Math.round((assigned / (total || 1)) * 100)}% đã được xếp môn`}
           />
           <AppleMetricCard
             icon={<WarningAmberRoundedIcon sx={{ fontSize: 20 }} />}
@@ -128,7 +135,7 @@ export function SchoolStudentDirectoryWorkspace({ school }: { school: PartnerSch
                     py: 0.25,
                   }}
                 >
-                  {filtered.length} người học
+                  {total} người học
                 </Box>
               </Box>
               <Typography sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: "0.78rem", mt: 0.35 }}>
@@ -370,7 +377,7 @@ export function SchoolStudentDirectoryWorkspace({ school }: { school: PartnerSch
           </TableContainer>
 
           {/* Empty State */}
-          {!filtered.length ? (
+          {data && !total ? (
             <Box sx={{ p: 6, textAlign: "center" }}>
               <Box
                 sx={{
@@ -399,7 +406,7 @@ export function SchoolStudentDirectoryWorkspace({ school }: { school: PartnerSch
           {/* Apple Table Pagination */}
           <TablePagination
             component="div"
-            count={filtered.length}
+            count={total}
             onPageChange={(_, value) => setPage(value)}
             page={page}
             rowsPerPage={12}

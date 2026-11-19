@@ -1,4 +1,3 @@
-import type { SchoolStudent } from "@/features/lcms/school-management/types/school-management-types";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 import { alpha } from "@mui/material/styles";
 import { nameInitials } from "@/domain/formatters/format-initials";
@@ -49,27 +48,3 @@ export const statusMeta = {
     label: "Ngừng học",
   },
 } as const;
-
-export type StudentDirectoryFilter = {
-  selectedGrade: string;
-  selectedClass: string;
-  status: string;
-  search: string;
-};
-
-export function filterSchoolStudents(
-  students: SchoolStudent[],
-  { selectedGrade, selectedClass, status, search }: StudentDirectoryFilter,
-) {
-  return students.filter((student) => {
-    const matchesScope = (selectedGrade === "all" || student.grade === selectedGrade) && (selectedClass === "all" || student.className === selectedClass);
-    const matchesStatus = status === "all" || student.status === status;
-    const matchesSearch = `${student.fullName} ${student.code} ${student.guardianPhone}`.toLowerCase().includes(search.trim().toLowerCase());
-    return matchesScope && matchesStatus && matchesSearch;
-  });
-}
-
-/** Học sinh chưa xếp lớp (className trống) không thuộc lớp nào được gán môn nên không tính là «đã gán môn». */
-export function countAssignedStudents(students: SchoolStudent[]) {
-  return students.filter((student) => student.className && student.subjectIds.length > 0).length;
-}

@@ -22,6 +22,7 @@ import {
   enrollSchoolStudent,
   getSchoolDirectory,
   getSchoolOperations,
+  getSchoolStudents,
   importSchoolStudents,
   syncDefaultGrades,
   updateSchoolClass,
@@ -52,10 +53,17 @@ describe("school management API", () => {
   });
 
   it("reads a selected school workspace through GraphQL", async () => {
-    graphQlRequest.mockResolvedValue({ lcms: { schoolOperations: { school: { id: "s1", name: "ERG", schoolType: "PRIMARY", status: "ACTIVE", version: 1, currentAcademicYearId: "y1" }, summary: { classCount: 1, activeClassCount: 1, studentCount: 20, gradeCount: 1 }, academicYears: [{ id: "y1", startYear: 2025, endYear: 2026, displayName: "2025–2026", status: "ACTIVE", version: "1" }], grades: [{ id: "g1", academicYearId: "y1", gradeCode: "1", label: "Khối 1", sortOrder: 1, status: "ACTIVE", source: "DEFAULT" }], classes: [{ id: "c1", name: "1A1", grade: "1", homeroomTeacher: "Cô Mai", studentCount: 20, status: "ACTIVE" }], students: [{ id: "st1", code: "HS001", fullName: "Nguyễn An", grade: "1", className: "1A1", subjectIds: ["sub1"], status: "ACTIVE" }], subjects: [{ id: "sub1", name: "Tiếng Anh", code: "ENG", studentCount: 20, teacherCount: 1 }], permissions: { canCreateSchool: true, canUpdateSchool: true, canArchiveSchool: true, canManageClasses: true } } } });
+    graphQlRequest.mockResolvedValue({ lcms: { schoolOperations: { school: { id: "s1", name: "ERG", schoolType: "PRIMARY", status: "ACTIVE", version: 1, currentAcademicYearId: "y1" }, summary: { classCount: 1, activeClassCount: 1, studentCount: 20, gradeCount: 1, scoredStudentCount: 0, averageScore: null, students: { total: 20, atRisk: 2, studying: 18, profileComplete: 20, assigned: 20 } }, academicYears: [{ id: "y1", startYear: 2025, endYear: 2026, displayName: "2025–2026", status: "ACTIVE", version: "1" }], grades: [{ id: "g1", academicYearId: "y1", gradeCode: "1", label: "Khối 1", sortOrder: 1, status: "ACTIVE", source: "DEFAULT" }], classes: [{ id: "c1", name: "1A1", grade: "1", homeroomTeacher: "Cô Mai", studentCount: 20, status: "ACTIVE" }], subjects: [{ id: "sub1", name: "Tiếng Anh", code: "ENG", studentCount: 20, teacherCount: 1 }], permissions: { canCreateSchool: true, canUpdateSchool: true, canArchiveSchool: true, canManageClasses: true } } } });
     const result = await getSchoolOperations("s1");
     expect(graphQlRequest).toHaveBeenCalledWith(expect.objectContaining({ variables: { input: { schoolId: "s1" } } }));
-    expect(result).toMatchObject({ id: "s1", academicYear: "2025–2026", grades: ["1"], studentCount: 20, classes: [{ name: "1A1" }], students: [{ fullName: "Nguyễn An" }], subjects: [{ code: "ENG" }] });
+    expect(result).toMatchObject({ id: "s1", academicYear: "2025–2026", grades: ["1"], studentCount: 20, classes: [{ name: "1A1" }], studentStats: { total: 20, atRisk: 2 }, subjects: [{ code: "ENG" }] });
+  });
+
+  it("reads one server-filtered page of students", async () => {
+    graphQlRequest.mockResolvedValue({ lcms: { schoolStudents: { items: [{ id: "st1", code: "HS001", fullName: "Nguyễn An", grade: "1", className: "1A1", subjectIds: [], status: "AT_RISK" }], page: 2, size: 50, totalItems: 1501, totalPages: 31, hasNext: true, hasPrevious: true, stats: { total: 1501, atRisk: 1, studying: 1400, profileComplete: 1501, assigned: 900 } } } });
+    const result = await getSchoolStudents("s1", { search: "  an ", className: "1A1", status: "at-risk" }, 2, 50);
+    expect(graphQlRequest).toHaveBeenCalledWith(expect.objectContaining({ operationName: "LcmsSchoolStudents", variables: { input: { schoolId: "s1", search: "an", grade: undefined, className: "1A1", status: "at-risk", page: 2, size: 50 } } }));
+    expect(result).toMatchObject({ totalItems: 1501, stats: { assigned: 900 }, items: [{ code: "HS001", status: "at-risk" }] });
   });
 
   it("forwards cancellation signals for directory and operations reads", async () => {
