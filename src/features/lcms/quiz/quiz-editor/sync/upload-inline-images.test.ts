@@ -42,7 +42,7 @@ describe("uploadInlineImages", () => {
     expect(uploader.presign).toHaveBeenCalledTimes(1);
     expect(uploader.presign).toHaveBeenCalledWith(expect.objectContaining({ sha256: "sha", mimeType: "image/png" }));
     expect(uploader.put).toHaveBeenCalledTimes(1);
-    expect(uploader.put.mock.calls[0]?.[0]).toBe("https://up/x");
+    expect(uploader.put).toHaveBeenCalledWith("https://up/x", expect.any(Blob), "image/png", "sha");
     expect(uploader.commit).toHaveBeenCalledWith({ mediaId: "m1", width: 10, height: 20 });
   });
 
@@ -124,20 +124,23 @@ describe("createQuizImageUploader.put", () => {
 
   it("rethrows a dropped connection as a network ApiClientError", async () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new TypeError("Failed to fetch")));
-    const error = await createQuizImageUploader().put("https://up/x", new Blob(["x"]), "image/png").catch((e: unknown) => e);
+    const error = await createQuizImageUploader().put("https://up/x", new Blob(["x"]), "image/png", "ab".repeat(32)).catch((e: unknown) => e);
     expect(error).toBeInstanceOf(ApiClientError);
     expect(error).toMatchObject({ code: "NETWORK_ERROR", status: 0 });
   });
 
   it("rejects on a non-2xx response", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false, status: 403 }));
-    await expect(createQuizImageUploader().put("https://up/x", new Blob(["x"]), "image/png")).rejects.toThrow("403");
+    await expect(createQuizImageUploader().put("https://up/x", new Blob(["x"]), "image/png", "ab".repeat(32))).rejects.toThrow("403");
   });
 
-  it("sends a PUT with Content-Type on success", async () => {
+  it("sends a PUT with the content type and the signed SHA-256 checksum headers", async () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: true, status: 200 });
     vi.stubGlobal("fetch", fetchMock);
-    await createQuizImageUploader().put("https://up/x", new Blob(["x"]), "image/png");
-    expect(fetchMock).toHaveBeenCalledWith("https://up/x", expect.objectContaining({ method: "PUT", headers: { "Content-Type": "image/png" } }));
+    await createQuizImageUploader().put("https://up/x", new Blob(["x"]), "image/png", "ab".repeat(32));
+    expect(fetchMock).toHaveBeenCalledWith("https://up/x", expect.objectContaining({
+      method: "PUT",
+      headers: { "Content-Type": "image/png", "x-amz-checksum-sha256": btoa("«".repeat(32)), "x-amz-sdk-checksum-algorithm": "SHA256" },
+    }));
   });
 });

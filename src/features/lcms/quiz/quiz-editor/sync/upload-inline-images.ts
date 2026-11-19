@@ -12,7 +12,7 @@ import { QUIZ_IMAGE_TYPES, readImageSize } from "@/lib/media/quiz-image";
 
 export type QuizImageUploader = {
   presign: (input: QuizEditorMediaPresignInput) => Promise<QuizEditorMediaPresignResult>;
-  put: (uploadUrl: string, blob: Blob, mimeType: string) => Promise<void>;
+  put: (uploadUrl: string, blob: Blob, mimeType: string, sha256: string) => Promise<void>;
   commit: (input: QuizEditorMediaCommitInput) => Promise<QuizEditorMediaCommitResult>;
 };
 
@@ -20,10 +20,16 @@ export function createQuizImageUploader(): QuizImageUploader {
   return {
     presign: presignQuizEditorMedia,
     commit: commitQuizEditorMedia,
-    async put(uploadUrl, blob, mimeType) {
+    async put(uploadUrl, blob, mimeType, sha256) {
+      // The backend signs these checksum headers into the URL; without them R2 rejects the PUT.
+      const headers = {
+        "Content-Type": mimeType,
+        "x-amz-checksum-sha256": hexToBase64(sha256),
+        "x-amz-sdk-checksum-algorithm": "SHA256",
+      };
       let response: Response;
       try {
-        response = await fetch(uploadUrl, { method: "PUT", body: blob, headers: { "Content-Type": mimeType } });
+        response = await fetch(uploadUrl, { method: "PUT", body: blob, headers });
       } catch (error) {
         // A dropped connection must read as a network error so the sync engine retries it.
         throw new ApiClientError(error instanceof Error && error.message ? error.message : "Tải ảnh lên thất bại (mất kết nối).", "NETWORK_ERROR", 0);
@@ -54,6 +60,10 @@ export function dataUrlToBlob(dataUrl: string): Blob {
   } catch {
     throw new Error("Ảnh không hợp lệ (không giải mã được data URL).");
   }
+}
+
+export function hexToBase64(hex: string): string {
+  return btoa(String.fromCharCode(...(hex.match(/../g) ?? []).map((byte) => parseInt(byte, 16))));
 }
 
 async function sha256Hex(blob: Blob): Promise<string> {
@@ -105,7 +115,7 @@ export async function uploadInlineImages(
     let url = bySha.get(sha256);
     if (!url) {
       const presigned = await uploader.presign({ sha256, mimeType: blob.type, byteSize: blob.size });
-      if (!presigned.deduped && presigned.uploadUrl) await uploader.put(presigned.uploadUrl, blob, blob.type);
+      if (!presigned.deduped && presigned.uploadUrl) await uploader.put(presigned.uploadUrl, blob, blob.type, sha256);
       const { width, height } = await readSize(dataUrl);
       url = (await uploader.commit({ mediaId: presigned.mediaId, width, height })).url;
       bySha.set(sha256, url);
