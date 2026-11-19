@@ -18,6 +18,14 @@ const person = (id: string, last: string | null): EmployeeItem => ({
 });
 
 describe("buildAdminHomeSummary", () => {
+  it("leaves paused and archived schools out of counts and tasks", () => {
+    const summary = buildAdminHomeSummary([school({ id: "a" }), school({ id: "p", status: "paused" }), school({ id: "x", status: "archived" })], new Map(), null);
+
+    expect(summary.schools.map((row) => row.id)).toEqual(["a"]);
+    expect(summary.schoolCount).toBe(1);
+    expect(summary.tasks.some((task) => task.id.endsWith("-p") || task.id.endsWith("-x"))).toBe(false);
+  });
+
   it("counts from the loaded detail and lists only real gaps", () => {
     const tcd = school({ id: "tcd", name: "THCS A", studentCount: 3, classCount: 1 });
     const vd = school({ id: "vd", name: "THCS B", status: "onboarding", studentCount: 0, classCount: 0 });

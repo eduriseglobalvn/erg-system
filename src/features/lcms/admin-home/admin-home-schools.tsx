@@ -20,6 +20,7 @@ const STATUS = {
   active: { label: "Đang vận hành", tint: t.statusTint.success },
   onboarding: { label: "Đang triển khai", tint: t.statusTint.warning },
   paused: { label: "Tạm dừng", tint: t.statusTint.neutral },
+  archived: { label: "Đã lưu trữ", tint: t.statusTint.neutral },
 } as const;
 
 // Name | status | learners | classes | placed share, one grid so header and rows line up.

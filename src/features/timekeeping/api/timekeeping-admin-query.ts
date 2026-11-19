@@ -80,7 +80,8 @@ export function useTimekeepingSchools() {
   return useQuery({
     queryKey: schoolManagementQueryKeys.directory(tenantId, accountId),
     queryFn: ({ signal }) => getSchoolDirectory("", signal),
-    select: (directory) => directory.items.map((school) => ({ id: school.id, name: school.name })),
+    // Paused schools keep their attendance history; archived ones are gone from daily work.
+    select: (directory) => directory.items.filter((school) => school.status !== "archived").map((school) => ({ id: school.id, name: school.name })),
     staleTime: QUERY_POLICIES.reference.staleTime,
     gcTime: QUERY_POLICIES.reference.gcTime,
   });

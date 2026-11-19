@@ -25,7 +25,9 @@ vi.mock("@/platform/auth/hooks/use-auth-session", () => ({
   useAuthSession: () => ({ account: { id: "t1" }, session: { tenantId: "erg" } }),
 }));
 
-const schools = Array.from({ length: 25 }, (_, i) => ({ id: `s${i}`, name: `Trường ${i}` }));
+const schools = Array.from({ length: 25 }, (_, i) => ({ id: `s${i}`, name: `Trường ${i}`, status: "active" }));
+// Paused and archived schools are not audience options.
+const closedSchools = [{ id: "p1", name: "Tạm dừng", status: "paused" }, { id: "x1", name: "Lưu trữ", status: "archived" }];
 
 function wrapper({ children }: { children: ReactNode }) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -34,7 +36,7 @@ function wrapper({ children }: { children: ReactNode }) {
 
 beforeEach(() => {
   for (const fn of Object.values(api)) fn.mockReset();
-  api.directory.mockResolvedValue({ items: schools });
+  api.directory.mockResolvedValue({ items: [...closedSchools, ...schools] });
   api.operations.mockImplementation(async (id: string) => ({
     id,
     name: `Trường ${id}`,
@@ -92,4 +94,10 @@ test("distinctOptions keeps one option per id and tells same-label options apart
     { id: "class-0003", label: "6A5 · THCS Vân Đồn" },
   ]);
   expect(out.map((o) => o.label)).toEqual(["7A1 · THCS Vân Đồn · mã …0001", "7A1 · THCS Vân Đồn · mã …0002", "6A5 · THCS Vân Đồn"]);
+});
+
+test("admin school options leave out paused and archived schools", async () => {
+  const { result } = renderHook(() => useAudienceDirectory("admin", "SCHOOL"), { wrapper });
+  await waitFor(() => expect(result.current.schools).toHaveLength(25));
+  expect(result.current.schools.map((s) => s.id)).not.toContain("x1");
 });

@@ -115,3 +115,18 @@ it("keeps the desktop table from md up", () => {
   expect(screen.queryByRole("heading", { level: 1, name: "Trường học" })).not.toBeInTheDocument();
   expect(screen.getByRole("table")).toBeInTheDocument();
 });
+
+it("shows working schools by default and reaches paused or archived ones through the status filter", () => {
+  context.value = { ...context.value, schools: [school("s1", "THCS Nguyễn Du", "active", 12, 410), school("s3", "THCS Cũ", "archived", 1, 5), school("s4", "THCS Nghỉ", "paused", 1, 5)] };
+  render(<SchoolDirectoryScreen />);
+
+  expect(screen.getAllByRole("listitem")).toHaveLength(1);
+  expect(screen.queryByText("THCS Cũ")).not.toBeInTheDocument();
+
+  fireEvent.mouseDown(screen.getByRole("combobox", { name: "Trạng thái" }));
+  fireEvent.click(screen.getByRole("option", { name: "Đã lưu trữ" }));
+  const items = within(screen.getByRole("list", { name: "Danh sách trường" })).getAllByRole("listitem");
+  expect(items).toHaveLength(1);
+  expect(items[0]).toHaveTextContent("THCS Cũ");
+  expect(items[0]).toHaveTextContent("Đã lưu trữ");
+});

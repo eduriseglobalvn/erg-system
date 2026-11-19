@@ -6,6 +6,7 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import type { ReactNode } from "react";
 import { useSchoolManagementContext } from "@/features/lcms/school-management/components/school-management-context";
+import { isWorkingSchool } from "@/features/lcms/school-management/types/school-management-types";
 import { schoolTypeMeta } from "@/features/lcms/school-management/types/school-type-config";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 import { alpha } from "@mui/material/styles";
@@ -99,7 +100,7 @@ export function SchoolPageToolbar({
                   },
                 }}
               >
-                {schools.map((school) => (
+                {schools.filter((school) => isWorkingSchool(school) || school.id === selectedSchool.id).map((school) => (
                   <MenuItem key={school.id} value={school.id} sx={{ fontSize: "0.85rem", fontWeight: 600 }}>
                     {school.name}
                   </MenuItem>

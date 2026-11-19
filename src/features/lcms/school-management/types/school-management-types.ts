@@ -1,4 +1,9 @@
-export type SchoolStatus = "active" | "onboarding" | "paused";
+export type SchoolStatus = "active" | "onboarding" | "paused" | "archived";
+
+/** Schools that take new work: pickers and work lists skip paused and archived ones. */
+export function isWorkingSchool(school: { status: SchoolStatus }) {
+  return school.status === "active" || school.status === "onboarding";
+}
 
 export type SchoolType = "primary" | "secondary" | "high-school" | "university" | "training-center";
 
