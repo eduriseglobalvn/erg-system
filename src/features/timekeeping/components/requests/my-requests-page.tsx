@@ -18,6 +18,7 @@ import { PunchCard } from "../punch/punch-card";
 import { periodOf } from "../punch/punch-format";
 import { ChipChoice } from "./chip-choice";
 import { RequestListItem } from "./request-list-item";
+import { requestErrorText } from "./request-model";
 import { useRequestsNav } from "./use-requests-nav";
 
 const FILTERS = [
@@ -64,7 +65,8 @@ export function MyRequestsPage() {
           value={month.data ? `${unitsVi(month.data.annualLeaveRemaining)} ngày` : month.isError ? "—" : null}
         />
         <Summary
-          caption={`Còn trong T${today.slice(5, 7)}`}
+          // BUG-A-020: a 4xx (e.g. no school with timekeeping) says why instead of a bare dash.
+          caption={explanation.isError ? requestErrorText(explanation.error) : `Còn trong T${today.slice(5, 7)}`}
           title="Giải trình"
           value={remaining !== undefined ? `${remaining} / ${MONTHLY_LIMIT} lượt` : explanation.isError ? "—" : null}
         />
