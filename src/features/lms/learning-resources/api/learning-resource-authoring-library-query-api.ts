@@ -79,7 +79,8 @@ export async function loadLearningResourceLibraryGraphQl(
       categoryId: input.categoryId,
       sectionId: input.sectionId,
       topicId: input.topicId,
-      status: input.status ?? "active",
+      // No default filter: backend returns every status to content managers (draft subjects included) and only active ones to others.
+      status: input.status,
       visibility: input.visibility,
       page: Number.isFinite(page) && page >= 0 ? page : 0,
       size: Number.isFinite(size) && size > 0 ? size : 100,

@@ -226,6 +226,8 @@ test("loads learning resource taxonomies from GraphQL library tree", async () =>
   const taxonomy = await loadLearningResourceTaxonomies();
 
   expect(graphQlRequestMock).toHaveBeenCalledWith(expect.objectContaining({ portal: "lcms" }));
+  // Draft subjects must reach the authoring tree, so no status filter is sent.
+  expect(graphQlRequestMock.mock.calls[0]?.[0].variables.input).not.toHaveProperty("status");
   expect(taxonomy.subjects).toEqual([expect.objectContaining({ id: "subject-1", label: "Tin hoc" })]);
   expect(taxonomy.categories).toEqual([expect.objectContaining({ id: "level-1", label: "Level 1", subjectId: "subject-1" })]);
   expect(taxonomy.sections).toEqual([expect.objectContaining({ id: "topic-1", label: "May tinh", categoryId: "level-1" })]);
