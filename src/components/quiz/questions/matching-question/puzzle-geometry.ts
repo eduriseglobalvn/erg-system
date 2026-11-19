@@ -27,3 +27,6 @@ export function rowAtPoint(p: { x: number; y: number }, rows: { id: string; top:
   if (p.x < grid.left - 30 || p.x > grid.right + 30 || p.y < grid.top - 10 || p.y > grid.bottom + 10) return null;
   return rows.find((row) => row.top - 7 <= p.y && p.y <= row.bottom + 7)?.id ?? null;
 }
+
+/** Phone board: two pieces side by side would leave ~75 px for words and cut them mid-word, so each pair stacks (left over right). */
+export const isStackedBoard = (boxWidth: number): boolean => boxWidth > 0 && pieceMaxWidthFor(boxWidth - PUZZLE.numberColumn) < 160;

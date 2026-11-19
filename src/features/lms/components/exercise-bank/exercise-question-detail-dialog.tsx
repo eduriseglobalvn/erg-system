@@ -24,20 +24,21 @@ import {
 
 type ChipTone = ComponentProps<typeof ErgStatusChip>["tone"];
 
+// Same names as the quiz editor's type catalog (BUG-C-009).
 const questionTypeConfig: Record<string, { label: string; tone: ChipTone }> = {
-  "multiple-choice": { label: "Trắc nghiệm 1 đáp án", tone: "info" },
-  "multiple-response": { label: "Trắc nghiệm nhiều đáp án", tone: "info" },
+  "multiple-choice": { label: "Một đáp án", tone: "info" },
+  "multiple-response": { label: "Nhiều đáp án", tone: "info" },
   "true-false": { label: "Đúng / Sai", tone: "info" },
-  "fill-in-the-blanks": { label: "Điền vào chỗ trống", tone: "warning" },
-  "drag-the-words": { label: "Kéo thả từ", tone: "warning" },
-  "matching": { label: "Nối cột / Ghép thẻ", tone: "success" },
+  "fill-in-the-blanks": { label: "Điền chỗ trống", tone: "warning" },
+  "drag-the-words": { label: "Kéo từ vào câu", tone: "warning" },
+  "matching": { label: "Ghép cặp", tone: "success" },
   "sequence": { label: "Sắp xếp thứ tự", tone: "success" },
   "short-answer": { label: "Trả lời ngắn", tone: "neutral" },
-  "numeric": { label: "Điền đáp số", tone: "success" },
+  "numeric": { label: "Đáp số", tone: "success" },
   "essay": { label: "Tự luận", tone: "warning" },
   "code": { label: "Lập trình / Code", tone: "neutral" },
-  "hotspot": { label: "Tương tác hình ảnh", tone: "info" },
-  "drag-and-drop": { label: "Kéo thả đối tượng", tone: "info" },
+  "hotspot": { label: "Điểm nóng", tone: "info" },
+  "drag-and-drop": { label: "Phân loại", tone: "info" },
 };
 
 function getQuestionTypeConfig(type?: string) {

@@ -44,6 +44,9 @@ describe("buildFooterMessage", () => {
 
   it("differs between training and testing", () => {
     expect(buildFooterMessage({ ...base, isTrainingMode: true })).toContain("từng câu");
+    // Practice has a per-question "Kết quả" button, not "Nộp bài" (BUG-A-053).
+    expect(buildFooterMessage({ ...base, isTrainingMode: true })).toContain("Kết quả");
+    expect(buildFooterMessage({ ...base, isTrainingMode: true })).not.toContain("Nộp bài");
     expect(buildFooterMessage(base)).toContain("rà soát");
   });
 });

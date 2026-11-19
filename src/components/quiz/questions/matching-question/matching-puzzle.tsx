@@ -16,7 +16,7 @@ import { Fragment, useEffect, useLayoutEffect, useRef, useState, type KeyboardEv
 import { ergEnterpriseTokens as tokens } from "@/themes/erg-enterprise-tokens";
 
 import { puzzleAnnouncements } from "./matching-board";
-import { PUZZLE, pieceMaxWidthFor, rowAtPoint } from "./puzzle-geometry";
+import { PUZZLE, isStackedBoard, pieceMaxWidthFor, rowAtPoint } from "./puzzle-geometry";
 import { NonTouchPointerSensor } from "./non-touch-pointer-sensor";
 import { GripDots, GripHandle, PuzzlePiece } from "./puzzle-piece";
 import { useReorderSlide } from "../use-reorder-slide";
@@ -69,17 +69,19 @@ function RowNumber({ n, tone }: { n: number; tone?: PuzzleRow["state"] }) {
 type Props = { rows: PuzzleRow[]; mode: "learner" | "author"; locked?: boolean; onDrop: (from: number, to: number | null) => void };
 type MoveKey = (event: KeyboardEvent, index: number) => void;
 
-function LeftCell({ row, maxWidth }: { row: PuzzleRow; maxWidth: number }) {
+function LeftCell({ row, maxWidth, children }: { row: PuzzleRow; maxWidth: number; children?: ReactNode }) {
   const { isOver, setNodeRef } = useDroppable({ id: row.id });
-  // display grid stretches the piece to the row height, so a wrapped row draws both pieces with the same h
+  // display grid stretches the piece to the row height, so a wrapped row draws both pieces with the same h.
+  // Stacked (phone): the right piece sits under the left one inside the drop row, so the whole pair is the target.
   return (
-    <Box ref={setNodeRef} sx={{ display: "grid" }}>
+    <Box ref={setNodeRef} sx={{ display: "grid", rowGap: 0.75 }}>
       <PuzzlePiece side="left" tone={isOver ? "over" : (row.state ?? "idle")} maxWidth={maxWidth}>{row.left}</PuzzlePiece>
+      {children}
     </Box>
   );
 }
 
-function RightCell({ row, index, mode, locked, maxWidth, onMoveKey }: { row: PuzzleRow & { pieceId: string }; index: number; maxWidth: number; mode: Props["mode"]; locked: boolean; onMoveKey: MoveKey }) {
+function RightCell({ row, index, mode, locked, maxWidth, stacked, onMoveKey }: { row: PuzzleRow & { pieceId: string }; index: number; maxWidth: number; stacked: boolean; mode: Props["mode"]; locked: boolean; onMoveKey: MoveKey }) {
   const { attributes, listeners, setNodeRef, setActivatorNodeRef, isDragging } = useDraggable({ id: row.pieceId, disabled: locked, attributes: { roleDescription: "mảnh ghép" } });
   const learner = mode === "learner";
   const activator = { ...attributes, ...listeners, onKeyDown: (event: KeyboardEvent) => onMoveKey(event, index) };
@@ -98,8 +100,8 @@ function RightCell({ row, index, mode, locked, maxWidth, onMoveKey }: { row: Puz
       sx={{
         display: "grid",
         position: "relative",
-        ml: `${PUZZLE.gap}px`,
-        transform: row.connected ? `translateX(-${PUZZLE.gap + PUZZLE.knob}px)` : "none",
+        ml: stacked ? 0 : `${PUZZLE.gap}px`,
+        transform: row.connected && !stacked ? `translateX(-${PUZZLE.gap + PUZZLE.knob}px)` : "none",
         opacity: isDragging ? 0.3 : 1,
         cursor: learner && !locked ? "grab" : undefined,
         touchAction: "manipulation",
@@ -172,7 +174,8 @@ export function MatchingPuzzle({ rows, mode, locked = false, onDrop }: Props) {
   }, []);
   // The verdict column only exists once some row has a verdict, so a plain learner board gets the width back.
   const hasTrailing = rows.some((row) => row.trailing) && (boxWidth === 0 || boxWidth >= TRAILING_MIN_BOARD);
-  const maxWidth = boxWidth > 0 ? pieceMaxWidthFor(boxWidth - PUZZLE.numberColumn - (hasTrailing ? 72 : 0)) : PUZZLE.maxWidth;
+  const stacked = isStackedBoard(boxWidth);
+  const maxWidth = stacked ? Math.min(PUZZLE.maxWidth, boxWidth - PUZZLE.numberColumn) : boxWidth > 0 ? pieceMaxWidthFor(boxWidth - PUZZLE.numberColumn - (hasTrailing ? 72 : 0)) : PUZZLE.maxWidth;
 
   // A move swaps content under fixed rows, so focus follows the piece once the next rows render; a rejected move matches nothing.
   useEffect(() => {
@@ -237,16 +240,24 @@ export function MatchingPuzzle({ rows, mode, locked = false, onDrop }: Props) {
       <Box ref={scrollRef} sx={{ overflowX: "auto" }}>
         <Box
           ref={gridRef}
-          sx={{ display: "grid", gridTemplateColumns: `${PUZZLE.numberColumn}px max-content max-content${hasTrailing ? " auto" : ""}`, rowGap: 1.75, alignItems: "stretch", width: "max-content", mx: "auto" }}
+          sx={{ display: "grid", gridTemplateColumns: stacked ? `${PUZZLE.numberColumn}px minmax(0, 1fr)` : `${PUZZLE.numberColumn}px max-content max-content${hasTrailing ? " auto" : ""}`, rowGap: 1.75, alignItems: "stretch", width: stacked ? "100%" : "max-content", mx: "auto" }}
         >
           {rows.map((row, index) => (
             <Fragment key={row.id}>
               <Box sx={{ alignSelf: "center" }}><RowNumber n={index + 1} /></Box>
-              <LeftCell row={row} maxWidth={maxWidth} />
-              {row.pieceId ? (
-                <RightCell key={row.id} row={{ ...row, pieceId: row.pieceId }} index={index} mode={mode} locked={locked} maxWidth={maxWidth} onMoveKey={handleMoveKey} />
+              {stacked ? (
+                <LeftCell row={row} maxWidth={maxWidth}>
+                  {row.pieceId ? <RightCell row={{ ...row, pieceId: row.pieceId }} index={index} mode={mode} locked={locked} maxWidth={maxWidth} stacked onMoveKey={handleMoveKey} /> : null}
+                </LeftCell>
               ) : (
-                <Box key={row.id} />
+                <>
+                  <LeftCell row={row} maxWidth={maxWidth} />
+                  {row.pieceId ? (
+                    <RightCell key={row.id} row={{ ...row, pieceId: row.pieceId }} index={index} mode={mode} locked={locked} maxWidth={maxWidth} stacked={false} onMoveKey={handleMoveKey} />
+                  ) : (
+                    <Box key={row.id} />
+                  )}
+                </>
               )}
               {hasTrailing ? <Box sx={{ alignSelf: "center", pl: 1.5, minWidth: 60 }}>{row.trailing}</Box> : null}
             </Fragment>

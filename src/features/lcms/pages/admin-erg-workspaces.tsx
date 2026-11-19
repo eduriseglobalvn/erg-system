@@ -1,37 +1,24 @@
 "use client";
 
-import Box from "@mui/material/Box";
+import { useNavigate } from "@tanstack/react-router";
 
-import PageHeader from "@/components/shared/PageHeader";
+import { ErgButton } from "@/components/erg-mui/erg-actions";
 import { ErgEmptyState } from "@/components/erg-mui/erg-feedback";
-import type { MenuItem as PortalMenuItem } from "@/components/portal/ErgPortalLayout";
-import { getMenuItemDescription } from "@/features/lcms/admin-menu";
 import { adminPath } from "@/platform/workspaces/workspace-paths";
+import { useI18n } from "@/platform/i18n";
 
-const FALLBACK_TITLES: Record<string, string> = {
-  "/customers": "Khách hàng",
-  "/center-tasks": "Công việc",
-  "/report": "Báo cáo",
-  "/setting": "Thiết lập",
-  "/integration": "Thiết lập",
-  "/employees": "Nhân sự",
-};
-
-export function AdminErgPortalWorkspace({ activeItem, pathname }: { activeItem: PortalMenuItem | null; pathname: string }) {
-  const fallback = Object.entries(FALLBACK_TITLES).find(([prefix]) => pathname.startsWith(prefix))?.[1] ?? "Dữ liệu";
-  const title = activeItem?.label ?? fallback;
-
+/**
+ * Admin paths kept for old links that have no screen of their own (users, rubrics, report/*, setting/* ...).
+ * They say "not found" in place instead of repeating the home title over an empty box (BUG-UI-005).
+ */
+export function AdminErgPortalWorkspace() {
+  const { t } = useI18n();
+  const navigate = useNavigate();
   return (
-    <Box>
-      <PageHeader
-        title={title}
-        subtitle={activeItem ? getMenuItemDescription(activeItem) : undefined}
-        breadcrumbs={[{ label: "Dashboard", href: adminPath("/") }, { label: title }]}
-      />
-      <ErgEmptyState
-        title="Chưa có dữ liệu"
-        description="Không gian làm việc này chưa được kết nối với nguồn dữ liệu."
-      />
-    </Box>
+    <ErgEmptyState
+      title={t("notFound.title")}
+      description={t("notFound.description")}
+      action={<ErgButton onClick={() => void navigate({ to: adminPath("/") })}>{t("notFound.backHome")}</ErgButton>}
+    />
   );
 }

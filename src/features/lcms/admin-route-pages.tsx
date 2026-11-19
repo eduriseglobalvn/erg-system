@@ -115,10 +115,9 @@ export function AdminContentWorkspaceRoute() {
   );
 }
 
-/** Every other Admin menu entry (customers, reports, settings ...) renders through the generic workspace host. */
+/** Admin paths without a screen of their own (old links: customers, reports, settings ...) say "not found". */
 export function AdminGenericRoute() {
-  const { activeItem, legacyPathname } = useAdminShellModel();
-  return <AdminErgPortalWorkspace activeItem={activeItem ?? null} pathname={legacyPathname} />;
+  return <AdminErgPortalWorkspace />;
 }
 
 const CalendarMainPage = lazy(() => import("@/features/teaching-calendar/components/main/admin-calendar-main").then((m) => ({ default: m.AdminCalendarMain })));

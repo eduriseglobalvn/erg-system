@@ -50,6 +50,12 @@ describe("MyRequestsPage (G06)", () => {
     expect(h.navigate).toHaveBeenLastCalledWith(expect.objectContaining({ href: expect.stringContaining("?id=r1") }));
   });
 
+  it("says why the explanation balance is missing when the server refuses it (BUG-A-020)", async () => {
+    h.api.explanationContext.mockRejectedValueOnce(Object.assign(new Error("Bạn chưa thuộc trường nào có cấu hình chấm công"), { status: 422 }));
+    renderPage();
+    expect(await screen.findByText("Bạn chưa thuộc trường nào có cấu hình chấm công")).toBeInTheDocument();
+  });
+
   it("shows an empty state when there is nothing to list", async () => {
     renderPage([]);
     expect(await screen.findByText("Chưa có đơn nào")).toBeInTheDocument();
