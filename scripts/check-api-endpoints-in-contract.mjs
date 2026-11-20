@@ -21,6 +21,7 @@ export const ALLOWED_OUTSIDE_CONTRACT = new Map([
   ["/api/v1/lms/games/rooms", "classroom games: backend is built in parallel, add to the OpenAPI export then drop these three rows"],
   ["/api/v1/lms/games/rooms/join", "classroom games: see above"],
   ["/api/v1/lms/games/rooms/${encodeApiPathSegment(roomId)}", "classroom games: see above"],
+  ["/api/v1/lms/games/sources", "classroom games: see above"],
 ]);
 
 /** Every `/api/...` string literal in the registry, with `${ROOT_CONST}` prefixes resolved from same-file constants. */

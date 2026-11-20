@@ -108,6 +108,7 @@ export const API_ENDPOINTS = {
   games: {
     rooms: path("/api/v1/lms/games/rooms"),
     roomJoin: path("/api/v1/lms/games/rooms/join"),
+    sources: path("/api/v1/lms/games/sources"),
     room: (roomId: string) => path(`/api/v1/lms/games/rooms/${encodeApiPathSegment(roomId)}`),
     socket: (roomId: string) => `/ws/games/${encodeApiPathSegment(roomId)}`,
   },

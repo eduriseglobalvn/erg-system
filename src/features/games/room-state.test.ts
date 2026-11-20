@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { PlayerState, ServerMessage } from "@/features/games/game-types";
-import { applyServerMessage, initialRoomViewState, remainingMs, selectHackScreen, type RoomViewState } from "@/features/games/room-state";
+import { applyServerMessage, initialRoomViewState, remainingMs, selectHackScreen, selectHostScreen, type RoomViewState } from "@/features/games/room-state";
 
 const me: PlayerState = { playerId: "p1", displayName: "Minh Anh", stars: 100, coins: 0, streak: 1, firewall: false, rank: 1, playerCount: 2, answeredCount: 1, correctCount: 1 };
 const question = { id: "q1", kind: "single_choice", title: "?", points: 1, feedback: { correct: "", incorrect: "", partial: "" }, choices: [] } as never;
@@ -77,5 +77,24 @@ describe("room state machine", () => {
     const resumed = run([{ type: "room.state", seq: 9, data: { phase: "RUNNING", serverNow: 0, screen: "LOOT_RESULT", me, loot: { pickedSlot: 0, slots: [...slots], me }, countdownStartsAt: 5_000 } }]);
     expect(selectHackScreen(resumed)).toBe("LOOT_OPEN");
     expect(resumed.countdownStartsAt).toBe(5_000);
+  });
+
+  it("host: me stays null, phases pick the teacher view and class.stats is kept", () => {
+    let state = run([{ type: "room.state", seq: 1, data: { phase: "LOBBY", serverNow: 1_000, screen: "LOBBY", me: null, lobby: { players: [], count: 0, classSize: 32 } } }]);
+    expect(state.me).toBeNull();
+    expect(selectHostScreen(state)).toBe("LOBBY");
+    expect(selectHostScreen(initialRoomViewState)).toBe("LOADING");
+    state = run([{ type: "room.phase", seq: 2, data: { phase: "RUNNING", endsAt: 61_000 } }], state);
+    expect(selectHostScreen(state)).toBe("LIVE");
+    const stats = { answeredTotal: 5, accuracy: 0.74, perQuestion: [{ questionId: "q1", title: "Q", wrongRate: 0.5 }], playersOnline: 3 };
+    state = run([{ type: "class.stats", seq: 3, data: stats }], state);
+    expect(state.stats).toEqual(stats);
+    expect(state.me).toBeNull();
+    state = run([{ type: "room.phase", seq: 4, data: { phase: "PAUSED", pausedRemainingMs: 30_000 } }], state);
+    expect(selectHostScreen(state)).toBe("LIVE");
+    expect(remainingMs(state, 5_000)).toBe(30_000);
+    state = run([{ type: "room.ended", seq: 5, data: { final: [] } }], state);
+    expect(selectHostScreen(state)).toBe("ENDED");
+    expect(selectHostScreen({ ...state, phase: "CANCELLED" })).toBe("CANCELLED");
   });
 });

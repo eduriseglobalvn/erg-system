@@ -1,4 +1,4 @@
-import type { RoomSummary } from "@/features/games/game-types";
+import type { CreateRoomBody, GameSource, RoomSummary } from "@/features/games/game-types";
 import { API_ENDPOINTS } from "@/lib/api/api-endpoints";
 import { apiRequest } from "@/lib/api-client";
 
@@ -13,4 +13,24 @@ export function joinGameRoom(code: string) {
 
 export function fetchGameRoom(roomId: string) {
   return apiRequest<RoomSummary>(API_ENDPOINTS.games.room(roomId), { portal: "elearning" });
+}
+
+// Teacher side (lms portal).
+const lms = { portal: "lms" } as const;
+
+export function fetchGameSources(classId: string) {
+  return apiRequest<GameSource[]>(`${API_ENDPOINTS.games.sources}?classId=${encodeURIComponent(classId)}`, lms);
+}
+
+export function createGameRoom(body: CreateRoomBody) {
+  return apiRequest<RoomSummary>(API_ENDPOINTS.games.rooms, { ...lms, method: "POST", body: JSON.stringify(body) });
+}
+
+/** `status` is a comma list (LOBBY,RUNNING,...); omit for every room. */
+export function fetchGameRooms(status?: string) {
+  return apiRequest<RoomSummary[]>(status ? `${API_ENDPOINTS.games.rooms}?status=${encodeURIComponent(status)}` : API_ENDPOINTS.games.rooms, lms);
+}
+
+export function fetchGameRoomAsHost(roomId: string) {
+  return apiRequest<RoomSummary>(API_ENDPOINTS.games.room(roomId), lms);
 }

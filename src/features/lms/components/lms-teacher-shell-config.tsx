@@ -13,6 +13,7 @@ import GroupsRoundedIcon from "@mui/icons-material/GroupsRounded";
 import HelpOutlineRoundedIcon from "@mui/icons-material/HelpOutlineRounded";
 import InboxRoundedIcon from "@mui/icons-material/InboxRounded";
 import LeaderboardRoundedIcon from "@mui/icons-material/LeaderboardRounded";
+import SportsEsportsRoundedIcon from "@mui/icons-material/SportsEsportsRounded";
 import MenuBookRoundedIcon from "@mui/icons-material/MenuBookRounded";
 import PendingActionsRoundedIcon from "@mui/icons-material/PendingActionsRounded";
 import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
@@ -109,6 +110,12 @@ export const LMS_MENU_GROUPS: MenuGroup[] = [
         label: "Thảo luận",
         icon: <ForumRoundedIcon />,
         path: teacherPath("/discussion"),
+      },
+      {
+        id: "games",
+        label: "Trò chơi",
+        icon: <SportsEsportsRoundedIcon />,
+        path: teacherPath("/games"),
       },
     ],
   },
@@ -215,6 +222,7 @@ export function resolveLmsMobileSection(pathname: string): LmsMobileSection | nu
 const MOBILE_TITLES: Array<[string, string]> = [
   ["/homework/assign", "Giao bài"],
   ["/homework/exercise-bank", "Kho luyện tập"],
+  ["/games", "Trò chơi"],
   ["/homework/progress", "Tiến độ học tập"],
   ["/homework/student-groups", "Nhóm học sinh"],
   ["/homework/class", "Lớp học"],

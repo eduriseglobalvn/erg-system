@@ -79,6 +79,37 @@ export type RoomEndedData = {
   me?: FinalEntry & { weakQuestions: { questionId: string; title: string; /** 0-based position in the room's question list; show `index + 1` */ index: number; wrongCount: number }[] };
 };
 
+/** Host only (class.stats, at most once per 2 s). `wrongRate` is a fraction 0..1. */
+export type ClassStats = {
+  answeredTotal: number;
+  accuracy: number;
+  perQuestion: { questionId: string; title: string; wrongRate: number }[];
+  playersOnline: number;
+};
+
+/** GET /sources item: one published quiz version the teacher can open a room from. */
+export type GameSource = {
+  quizVersionId: string;
+  quizId: string;
+  title: string;
+  versionNumber: number;
+  publishedAt: string;
+  questionCount: number;
+  playableCount: number;
+  filteredCount: number;
+  /** Questions dropped by the room filter, by kind (essay, likert_scale, ...). */
+  filteredByKind: Record<string, number>;
+};
+
+/** POST /rooms body. */
+export type CreateRoomBody = {
+  gameType: GameType;
+  quizVersionId: string;
+  classId: string;
+  durationMinutes: number;
+  rules: RoomRules;
+};
+
 export type RoomStateData = {
   phase: RoomStatus;
   serverNow: number;
@@ -109,7 +140,7 @@ export type ServerMessage =
   | { type: "loot.result"; seq: number; data: LootResultData }
   | { type: "leaderboard"; seq: number; data: LeaderboardData }
   | { type: "feed"; seq: number; data: { items: FeedItem[] } }
-  | { type: "class.stats"; seq: number; data: unknown }
+  | { type: "class.stats"; seq: number; data: ClassStats }
   | { type: "room.ended"; seq: number; data: RoomEndedData }
   | { type: "error"; seq: number; data: { code: string; message: string } };
 
@@ -117,4 +148,5 @@ export type ClientMessage =
   | { type: "resume"; data: { lastSeq: number } }
   | { type: "answer"; data: { questionId: string; answer: unknown; clientMs: number } }
   | { type: "loot.pick"; data: { slot: number } }
-  | { type: "next"; data: Record<string, never> };
+  | { type: "next"; data: Record<string, never> }
+  | { type: "host.start" | "host.pause" | "host.resume" | "host.end"; data: Record<string, never> };

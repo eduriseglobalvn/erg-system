@@ -1,5 +1,6 @@
 import type {
   AnswerResultData,
+  ClassStats,
   FinalEntry,
   GameScreen,
   LeaderboardData,
@@ -37,6 +38,8 @@ export type RoomViewState = {
   lobby: LobbyData | null;
   leaderboard: LeaderboardData | null;
   feed: { at: string; text: string; tone: string }[];
+  /** Host only: class.stats. */
+  stats: ClassStats | null;
   marks: Record<number, QuestionMark>;
   ended: RoomEndedData | null;
   error: { code: string; message: string } | null;
@@ -63,6 +66,7 @@ export const initialRoomViewState: RoomViewState = {
   lobby: null,
   leaderboard: null,
   feed: [],
+  stats: null,
   marks: {},
   ended: null,
   error: null,
@@ -132,6 +136,8 @@ export function applyServerMessage(state: RoomViewState, message: ServerMessage,
       return { ...next, leaderboard: message.data };
     case "feed":
       return { ...next, feed: [...message.data.items.slice().reverse(), ...state.feed].slice(0, FEED_LIMIT) };
+    case "class.stats":
+      return { ...next, stats: message.data };
     case "room.ended":
       return { ...next, phase: "ENDED", screen: "ENDED", ended: message.data };
     case "error":
@@ -180,6 +186,27 @@ export function selectHackScreen(state: RoomViewState): HackScreenId {
     }
     case "DONE_WAITING":
       return "WAITING";
+    default:
+      return "LOADING";
+  }
+}
+
+export type HostScreenId = "LOADING" | "LOBBY" | "LIVE" | "ENDED" | "CANCELLED";
+
+/** Which teacher view the room is on, from the phase alone (the host has no player screen: `me` is null). */
+export function selectHostScreen(state: RoomViewState): HostScreenId {
+  switch (state.phase) {
+    case "LOBBY":
+      return "LOBBY";
+    case "COUNTDOWN":
+    case "RUNNING":
+    case "PAUSED":
+    case "ENDING":
+      return "LIVE";
+    case "ENDED":
+      return "ENDED";
+    case "CANCELLED":
+      return "CANCELLED";
     default:
       return "LOADING";
   }

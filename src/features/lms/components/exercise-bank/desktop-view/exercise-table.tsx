@@ -12,6 +12,7 @@ import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
 import { ErgButton, ErgIconButton } from "@/components/erg-mui/erg-actions";
 import { ErgTable } from "@/components/erg-mui/erg-table";
+import { OpenGameButton } from "@/features/games/teacher/open-game-button";
 import { typeLabels } from "../exercise-bank-model";
 import type { ExerciseBankController } from "../use-exercise-bank-controller";
 import { DifficultyBadge, StatusIndicator } from "./exercise-badges";
@@ -134,6 +135,7 @@ export function ExerciseTable({
                     >
                       Giao
                     </ErgButton>
+                    {exercise.status === "published" ? <OpenGameButton quizId={exercise.id} /> : null}
                     <ErgIconButton
                       label="Thao tác khác"
                       onClick={(event) => {
