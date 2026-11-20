@@ -30,8 +30,9 @@ export function formatClock(ms: number) {
   return `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
 }
 
+/** Thousands grouped with a plain space as the designs show ("1 540"); Intl vi-VN would print "1.540". */
 export function formatNumber(value: number) {
-  return new Intl.NumberFormat("vi-VN").format(value);
+  return String(Math.round(value)).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
 }
 
 type HackScreenProps = {

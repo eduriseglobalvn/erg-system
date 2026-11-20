@@ -41,6 +41,11 @@ function StarCoinBar({ me, phone }: { me: FinalEntry; phone: boolean }) {
   );
 }
 
+/** "nhiệm vụ 07 · sai 2 lần" under each weak spot. */
+export function weakSubline({ index, wrongCount }: { index: number; wrongCount: number }) {
+  return `nhiệm vụ ${String(index + 1).padStart(2, "0")}${wrongCount > 0 ? ` · sai ${wrongCount} lần` : ""}`;
+}
+
 /** Red "N LỖ HỔNG CẦN VÁ" card. The patch-up mode (screen 16) is a later batch, so its button stays disabled. */
 function WeakPanel({ me, phone, onLeave }: { me: NonNullable<RoomEndedData["me"]>; phone: boolean; onLeave: () => void }) {
   const weak = me.weakQuestions;
@@ -50,7 +55,10 @@ function WeakPanel({ me, phone, onLeave }: { me: NonNullable<RoomEndedData["me"]
         {weak.length ? `${weak.length} LỖ HỔNG CẦN VÁ · CÂU BẠN CÒN SAI` : "KHÔNG CÒN LỖ HỔNG · BẠN LÀM ĐÚNG HẾT"}
       </Box>
       {weak.map((item) => (
-        <Box key={item.questionId} sx={{ border: `1px solid ${c.weakBorder}`, borderRadius: `${hk.radius.chip}px`, padding: phone ? "8px 10px" : "10px 12px", fontSize: phone ? hk.fs[14] : hk.fs[15], fontWeight: hk.font.weightBold, color: c.white, overflowWrap: "anywhere" }}>{item.title}</Box>
+        <Box key={item.questionId} sx={{ border: `1px solid ${c.weakBorder}`, borderRadius: `${hk.radius.chip}px`, padding: phone ? "8px 10px" : "10px 12px", overflowWrap: "anywhere" }}>
+          <Box sx={{ fontSize: phone ? hk.fs[14] : hk.fs[15], fontWeight: hk.font.weightBold, color: c.white }}>{item.title}</Box>
+          <Box sx={{ fontSize: phone ? hk.fs[11] : hk.fs[12], color: c.pink }}>{weakSubline(item)}</Box>
+        </Box>
       ))}
       <Box sx={{ marginTop: "auto", display: "flex", gap: "10px" }}>
         {weak.length ? (
@@ -118,9 +126,10 @@ export function ResultScreen({ phone, ended, room, onLeave }: ResultScreenProps)
               </Box>
               <StarCoinBar me={me} phone />
             </Panel>
-            <Box sx={{ position: "relative", display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: "6px" }}>
+            <Box sx={{ position: "relative", display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: "6px" }}>
               <Tile phone value={`${accuracy}%`} label={`đúng ${me.correctCount}/${me.answeredCount}`} />
               <Tile phone value={`x${me.longestStreak}`} label="chuỗi dài" />
+              <Tile phone value={`${me.rank}/${ended.final.length}`} label="hạng cuối" />
               <Tile phone value={String(me.answeredCount)} label="nhiệm vụ" />
             </Box>
           </>
@@ -162,10 +171,11 @@ export function ResultScreen({ phone, ended, room, onLeave }: ResultScreenProps)
               <Panel sx={{ padding: "16px 18px", display: "flex", flexDirection: "column", gap: "10px" }}>
                 <Box sx={{ color: c.dim, fontSize: hk.fs[12], fontWeight: hk.font.weightBold }}>HỒ SƠ CỦA BẠN</Box>
                 <StarCoinBar me={me} phone={false} />
-                <Box sx={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: "8px" }}>
+                <Box sx={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: "8px" }}>
                   <Tile phone={false} value={`${accuracy}%`} label={`đúng ${me.correctCount}/${me.answeredCount}`} />
                   <Tile phone={false} value={`x${me.longestStreak}`} label="chuỗi dài nhất" />
                   <Tile phone={false} value={`${me.rank}/${ended.final.length}`} label="hạng cuối" />
+                  <Tile phone={false} value={String(me.answeredCount)} label="nhiệm vụ" />
                 </Box>
               </Panel>
               <WeakPanel me={me} phone={false} onLeave={onLeave} />

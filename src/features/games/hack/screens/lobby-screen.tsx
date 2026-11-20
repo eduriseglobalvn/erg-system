@@ -3,7 +3,7 @@ import ButtonBase from "@mui/material/ButtonBase";
 
 import type { LobbyData, PlayerState, RoomSummary } from "@/features/games/game-types";
 import { hk } from "@/features/games/hack/hack-tokens";
-import { Cursor, HackScreen, Panel, TermLine, WindowTitle, toHandle } from "@/features/games/hack/ui/hack-ui";
+import { Cursor, HackScreen, Panel, TermLine, WindowTitle, formatNumber, toHandle } from "@/features/games/hack/ui/hack-ui";
 
 const c = hk.color;
 
@@ -69,6 +69,9 @@ export function LobbyScreen({ phone, me, lobby, room, onLeave }: LobbyScreenProp
   const others = (lobby?.players ?? []).filter((player) => player.playerId !== myId);
   const shown = others.slice(0, phone ? 4 : 10);
   const hidden = Math.max(0, count - shown.length - (me ? 1 : 0));
+  const classSize = Math.max(lobby?.classSize ?? 0, count);
+  const waiting = classSize - count;
+  const countLine = `${classSize > count ? `${formatNumber(count)} / ${formatNumber(classSize)}` : formatNumber(count)} MÁY ĐÃ VÀO MẠNG`;
   const handle = me ? toHandle(me.displayName) : "";
   const taskLine = room ? `tải ${room.questionCount} nhiệm vụ: ${room.quizTitle}` : "tải nhiệm vụ";
 
@@ -105,7 +108,7 @@ export function LobbyScreen({ phone, me, lobby, room, onLeave }: LobbyScreenProp
             <TermLine tag="[OK]">{taskLine}</TermLine>
             <Box sx={{ color: c.yellow }}>[..] chờ cô giáo phát lệnh <Cursor color={c.yellow} /></Box>
           </Panel>
-          <Box sx={{ fontSize: hk.fs[20], fontWeight: hk.font.weightBold, color: c.green }}>{count} MÁY ĐÃ VÀO MẠNG</Box>
+          <Box sx={{ fontSize: hk.fs[20], fontWeight: hk.font.weightBold, color: c.green }}>{countLine}</Box>
           {tiles}
           <Panel sx={{ padding: "12px 14px", fontSize: hk.fs[13], lineHeight: 1.9 }}><HowToPlay phone /></Panel>
           {noteBox}
@@ -135,7 +138,10 @@ export function LobbyScreen({ phone, me, lobby, room, onLeave }: LobbyScreenProp
           </Box>
         </Panel>
         <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: "14px" }}>
-          <Box sx={{ fontSize: hk.fs[26], fontWeight: hk.font.weightBold, color: c.green }}>{count} MÁY ĐÃ VÀO MẠNG</Box>
+          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+            <Box sx={{ fontSize: hk.fs[26], fontWeight: hk.font.weightBold, color: c.green }}>{countLine}</Box>
+            {waiting > 0 ? <Box sx={{ fontSize: hk.fs[13], color: c.dim }}>còn chờ {waiting} máy</Box> : null}
+          </Box>
           {tiles}
           {noteBox}
         </Box>

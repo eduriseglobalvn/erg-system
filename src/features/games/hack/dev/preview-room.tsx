@@ -1,7 +1,7 @@
 // DEV ONLY: /student/games/preview?screen=<id>&kind=<question kind> renders one screen from a fixed state,
 // without a socket or backend. Reached through a dynamic import behind import.meta.env.DEV, so it is not in production builds.
 import type { Question } from "@/domain/quiz/types";
-import type { PlayerState } from "@/features/games/game-types";
+import type { PlayerState, RoomSummary } from "@/features/games/game-types";
 import { HackRoomView } from "@/features/games/hack/hack-room";
 import { initialRoomViewState, type RoomViewState } from "@/features/games/room-state";
 
@@ -10,7 +10,7 @@ const base = { points: 1, feedback };
 
 const QUESTIONS: Record<string, Question> = {
   single_choice: { ...base, id: "q1", kind: "single_choice", title: "Phần mở rộng nào sau đây là của một tệp hình ảnh?", choices: [".docx", ".png", ".mp3", ".xlsx"].map((label, index) => ({ id: `c${index}`, label, correct: index === 1 })) },
-  true_false: { ...base, id: "q2", kind: "true_false", title: "\"Khi xóa một tệp khỏi USB, tệp đó được chuyển vào Thùng rác (Recycle Bin) của máy tính.\"", choices: [{ id: "t", label: "Đúng", correct: false }, { id: "f", label: "Sai", correct: true }] },
+  true_false: { ...base, id: "q2", kind: "true_false", title: "Khi xóa một tệp khỏi USB, tệp đó được chuyển vào Thùng rác (Recycle Bin) của máy tính.", choices: [{ id: "t", label: "Đúng", correct: false }, { id: "f", label: "Sai", correct: true }] },
   multiple_response: { ...base, id: "q3", kind: "multiple_response", title: "Những phần mở rộng nào sau đây là của tệp hình ảnh?", choices: [".png", ".docx", ".jpg", ".mp3", ".gif", ".xlsx"].map((label, index) => ({ id: `m${index}`, label, correct: [0, 2, 4].includes(index) })) },
   short_answer: { ...base, id: "q4", kind: "short_answer", title: "Tổ hợp phím nào dùng để sao chép tệp đang chọn trên Windows?", textBlanks: [{ id: "b1", label: "", correctAnswers: ["Ctrl + C"] }] },
   numeric: { ...base, id: "q5", kind: "numeric", title: "Một USB còn trống 2 GB. Chép được tối đa bao nhiêu tệp video, mỗi tệp nặng 250 MB? (1 GB = 1 024 MB)", numericAnswer: { correctValue: 8, tolerance: 0, unit: "tệp" } },
@@ -24,19 +24,23 @@ const QUESTIONS: Record<string, Question> = {
 
 const me: PlayerState = { playerId: "me", displayName: "Minh Anh", stars: 1540, coins: 630, streak: 2, firewall: false, rank: 4, playerCount: 32, answeredCount: 11, correctCount: 9 };
 const answerResult = { questionId: "q2", correct: false, correctAnswer: { correctChoiceIds: ["f"] }, solution: "Thùng rác chỉ giữ tệp xóa từ ổ cứng của máy. Tệp trên USB bị xóa thẳng, không khôi phục được từ Thùng rác. Vì vậy hãy sao lưu trước khi xóa.", starsGained: 0, me: { ...me, streak: 0, stars: 1760, coins: 950 }, requeueAfter: 3 };
-const slots = [{ kind: "SMALL_WALLET", coins: 150 }, { kind: "BIG_WALLET", coins: 400 }, { kind: "EMPTY", coins: 0 }] as const;
-const lootMe = { ...me, stars: 1660, coins: 950, streak: 3, firewall: true };
-const players = ["HOANG_BAO", "THU_KHANH", "GIA_HUY", "PHUONG_LINH", "DUC_TRI", "VAN_HA", "KHANH_LY"].map((name, index) => ({ playerId: `p${index}`, displayName: name }));
-const top = [["HOANG_BAO", 5480], ["THU_KHANH", 5120], ["GIA_HUY", 3840], ["Minh Anh", 2170], ["PHUONG_LINH", 2050]].map(([name, total], index) => ({ playerId: index === 3 ? "me" : `p${index}`, displayName: String(name), stars: 0, coins: 0, total: Number(total), rank: index + 1 }));
-const final = [...top, { playerId: "p9", displayName: "DUC_TRI", stars: 1650, coins: 1470, total: 3120, rank: 6 }].map((entry) => ({ ...entry, correctCount: 17, answeredCount: 20, longestStreak: 6 }));
+const slots = [{ kind: "SCRAP", coins: 50 }, { kind: "BIG_WALLET", coins: 400 }, { kind: "EMPTY", coins: 0 }] as const;
+const lootBefore = { ...me, rank: 4 };
+const lootMe = { ...me, stars: 1660, coins: 950, streak: 3, firewall: true, rank: 3 };
+const players = ["HOANG_BAO", "THU_KHANH", "GIA_HUY", "PHUONG_LINH", "DUC_TRI", "VAN_HA", "KHANH_LY", "QUOC_AN", "BAO_NGOC", "TUAN_KIET"].map((name, index) => ({ playerId: `p${index}`, displayName: name }));
+const top = [["HOANG_BAO", 5480], ["THU_KHANH", 5120], ["GIA_HUY", 3840], ["Minh Anh", 2170], ["PHUONG_LINH", 2050]].map(([name, total], index) => ({ playerId: index === 3 ? "me" : `p${index}`, displayName: String(name), stars: 0, coins: 0, total: Number(total), rank: index + 1, firewall: index === 1 }));
+const finalRows: [string, number, number][] = [["THU_KHANH", 2450, 3790], ["HOANG_BAO", 2280, 3430], ["Minh Anh", 2330, 1980], ["GIA_HUY", 1870, 2335], ["PHUONG_LINH", 2100, 1390], ["DUC_TRI", 1650, 1470], ["VAN_HA", 1760, 1120]];
+const final = finalRows.map(([name, stars, coins], index) => ({ playerId: name === "Minh Anh" ? "me" : `p${index}`, displayName: name, stars, coins, total: stars + coins, rank: index + 1, correctCount: 17, answeredCount: 20, longestStreak: 6 }));
+
+const room: RoomSummary = { id: "preview", gameType: "HACK", code: "4253", status: "RUNNING", classId: "c1", className: "7A2", quizTitle: "IC3 GS6 Level 1", durationMinutes: 10, rules: { allowHack: false, emergencyPatch: false, showLeaderboard: true, showSolution: true, allowLateJoin: false, questionOrder: "LESSON" }, playerCount: 32, questionCount: 20, createdAt: "2026-11-20T08:00:00" };
 
 function stateFor(screen: string, kind: string): RoomViewState {
   const open: RoomViewState = { ...initialRoomViewState, connection: "open", phase: "RUNNING", endsAt: Date.now() + 222_000, me };
-  const question = { index: 11, total: 20, question: QUESTIONS[kind] ?? QUESTIONS.single_choice };
-  const withQuestion = { ...open, screen: "QUESTION" as const, question, marks: { 0: "ok", 1: "ok", 2: "ok", 3: "wrong", 4: "ok", 5: "ok", 6: "wrong", 7: "ok", 8: "ok", 9: "ok", 10: "ok" } as RoomViewState["marks"], leaderboard: { top, me: { rank: 4, total: 2170 } }, feed: [{ at: "2026-11-20T08:03:51", text: "GIA_HUY giải mã ví nhỏ +150", tone: "loot" }, { at: "2026-11-20T08:03:44", text: "THU_KHANH bật tường lửa", tone: "firewall" }] };
+  const question = { index: 12, total: 20, question: QUESTIONS[kind] ?? QUESTIONS.single_choice };
+  const withQuestion = { ...open, screen: "QUESTION" as const, question, marks: { 1: "ok", 2: "ok", 3: "ok", 4: "wrong", 5: "ok", 6: "ok", 7: "wrong", 8: "ok", 9: "ok", 10: "ok", 11: "ok" } as RoomViewState["marks"], leaderboard: { top, me: { rank: 4, total: 2170 } }, feed: [{ at: "2026-11-20T08:03:51", text: "GIA_HUY giải mã ví nhỏ +150", tone: "loot" }, { at: "2026-11-20T08:03:48", text: "DUC_TRI vá lỗ hổng +64", tone: "info" }, { at: "2026-11-20T08:03:44", text: "THU_KHANH bật tường lửa", tone: "firewall" }] };
   switch (screen) {
     case "lobby":
-      return { ...open, phase: "LOBBY", screen: "LOBBY", lobby: { players, count: 28 } };
+      return { ...open, phase: "LOBBY", screen: "LOBBY", lobby: { players, count: 28, classSize: 32 } };
     case "countdown":
       return { ...open, phase: "COUNTDOWN", screen: "COUNTDOWN", countdownStartsAt: Date.now() + 2_500 };
     case "wrong":
@@ -44,7 +48,7 @@ function stateFor(screen: string, kind: string): RoomViewState {
     case "loot":
       return { ...withQuestion, screen: "LOOT_PICK", me: lootMe, answerResult: { ...answerResult, correct: true, starsGained: 120, me: lootMe }, lootOffered: true };
     case "loot-open":
-      return { ...withQuestion, screen: "LOOT_RESULT", me: lootMe, lootResult: { pickedSlot: 1, slots: slots.map((slot) => ({ ...slot })), me: lootMe } };
+      return { ...withQuestion, rankBeforeLoot: lootBefore.rank, screen: "LOOT_RESULT", me: lootMe, lootResult: { pickedSlot: 1, slots: slots.map((slot) => ({ ...slot })), me: lootMe } };
     case "loot-empty":
       return { ...withQuestion, screen: "LOOT_RESULT", me: lootMe, answerResult: { ...answerResult, correct: true, starsGained: 120, me: lootMe }, lootResult: { pickedSlot: 2, slots: slots.map((slot) => ({ ...slot })), me: lootMe } };
     case "reconnect":
@@ -52,7 +56,7 @@ function stateFor(screen: string, kind: string): RoomViewState {
     case "timeup":
       return { ...open, phase: "ENDING", me: { ...me, stars: 2330, coins: 1980 } };
     case "result":
-      return { ...open, phase: "ENDED", screen: "ENDED", ended: { final, me: { ...final[3], playerId: "me", rank: 3, stars: 2330, coins: 1980, total: 4310, weakQuestions: [{ questionId: "a", title: "Sắp xếp các bước nén thư mục" }, { questionId: "b", title: "Ghép phần mở rộng với ứng dụng" }] } } };
+      return { ...open, phase: "ENDED", screen: "ENDED", ended: { final, me: { ...final[2], weakQuestions: [{ questionId: "a", title: "Sắp xếp các bước nén thư mục", index: 6, wrongCount: 2 }, { questionId: "b", title: "Ghép phần mở rộng với ứng dụng", index: 14, wrongCount: 1 }] } } };
     default:
       return withQuestion;
   }
@@ -62,5 +66,5 @@ function stateFor(screen: string, kind: string): RoomViewState {
 export default function PreviewRoom() {
   const params = new URLSearchParams(window.location.search);
   const state = stateFor(params.get("screen") ?? "question", params.get("kind") ?? "single_choice");
-  return <HackRoomView state={state} room={undefined} send={() => true} retryNow={() => undefined} />;
+  return <HackRoomView state={state} room={room} send={() => true} retryNow={() => undefined} />;
 }

@@ -41,10 +41,10 @@ describe("room state machine", () => {
   });
 
   it("ignores replayed seq numbers after a resume but always accepts a full room.state", () => {
-    const state = run([{ type: "room.lobby", seq: 5, data: { players: [], count: 3 } }]);
-    const replay = applyServerMessage(state, { type: "room.lobby", seq: 4, data: { players: [], count: 1 } }, 0);
+    const state = run([{ type: "room.lobby", seq: 5, data: { players: [], count: 3, classSize: 32 } }]);
+    const replay = applyServerMessage(state, { type: "room.lobby", seq: 4, data: { players: [], count: 1, classSize: 32 } }, 0);
     expect(replay.lobby?.count).toBe(3);
-    const snapshot = applyServerMessage(state, { type: "room.state", seq: 2, data: { phase: "LOBBY", serverNow: 0, screen: "LOBBY", lobby: { players: [], count: 9 } } }, 0);
+    const snapshot = applyServerMessage(state, { type: "room.state", seq: 2, data: { phase: "LOBBY", serverNow: 0, screen: "LOBBY", lobby: { players: [], count: 9, classSize: 32 } } }, 0);
     expect(snapshot.lobby?.count).toBe(9);
     expect(snapshot.lastSeq).toBe(5);
   });
@@ -66,5 +66,16 @@ describe("room state machine", () => {
     expect(remainingMs(state, 31_000)).toBe(30_000);
     const paused = run([{ type: "room.phase", seq: 2, data: { phase: "PAUSED", pausedRemainingMs: 42_000 } }], state);
     expect(remainingMs(paused, 99_000)).toBe(42_000);
+  });
+
+  it("keeps my rank from before the pack and rebuilds a picked pack from room.state.loot", () => {
+    const before = { ...me, rank: 4 };
+    const slots = [{ kind: "SCRAP", coins: 50 }, { kind: "BIG_WALLET", coins: 400 }, { kind: "EMPTY", coins: 0 }] as const;
+    const opened = run([{ type: "loot.result", seq: 2, data: { pickedSlot: 1, slots: [...slots], me: { ...me, rank: 3 } } }], { ...initialRoomViewState, me: before, lastSeq: 1 });
+    expect(opened.rankBeforeLoot).toBe(4);
+    expect(opened.me?.rank).toBe(3);
+    const resumed = run([{ type: "room.state", seq: 9, data: { phase: "RUNNING", serverNow: 0, screen: "LOOT_RESULT", me, loot: { pickedSlot: 0, slots: [...slots], me }, countdownStartsAt: 5_000 } }]);
+    expect(selectHackScreen(resumed)).toBe("LOOT_OPEN");
+    expect(resumed.countdownStartsAt).toBe(5_000);
   });
 });

@@ -1,6 +1,6 @@
 import Box from "@mui/material/Box";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 
 import { monoFontStack } from "@/config/fonts";
 import { hk } from "@/features/games/hack/hack-tokens";
@@ -25,8 +25,23 @@ const hackTheme = createTheme(ergEnterpriseTheme, {
   typography: { fontFamily: monoFontStack },
 });
 
+const MONO_FONT_LINK_ID = "hack-mono-font";
+
+// JetBrains Mono is not bundled (no @fontsource package); like the quiz fonts in config/fonts.ts it comes from Google Fonts, only on the game routes.
+function useMonoFont() {
+  useEffect(() => {
+    if (document.getElementById(MONO_FONT_LINK_ID)) return;
+    const link = document.createElement("link");
+    link.id = MONO_FONT_LINK_ID;
+    link.rel = "stylesheet";
+    link.href = "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap";
+    document.head.appendChild(link);
+  }, []);
+}
+
 /** Dark mono theme for the game routes plus the CSS variables the quiz question components read (teacher-template hooks). */
 export function HackThemeProvider({ children }: { children: ReactNode }) {
+  useMonoFont();
   return (
     <ThemeProvider theme={hackTheme}>
       <Box

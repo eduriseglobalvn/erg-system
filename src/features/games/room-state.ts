@@ -32,6 +32,8 @@ export type RoomViewState = {
   answerResult: AnswerResultData | null;
   lootResult: LootResultData | null;
   lootOffered: boolean;
+  /** My rank just before the last loot pack was opened, for "lên hạng N" on screen 07. */
+  rankBeforeLoot: number | null;
   lobby: LobbyData | null;
   leaderboard: LeaderboardData | null;
   feed: { at: string; text: string; tone: string }[];
@@ -57,6 +59,7 @@ export const initialRoomViewState: RoomViewState = {
   answerResult: null,
   lootResult: null,
   lootOffered: false,
+  rankBeforeLoot: null,
   lobby: null,
   leaderboard: null,
   feed: [],
@@ -81,6 +84,7 @@ export function applyServerMessage(state: RoomViewState, message: ServerMessage,
     case "room.state": {
       const { data } = message;
       const result = data.lastResult;
+      const lootResult = isLootResult(data.loot) ? data.loot : isLootResult(result) ? result : null;
       return {
         ...next,
         phase: data.phase,
@@ -91,8 +95,10 @@ export function applyServerMessage(state: RoomViewState, message: ServerMessage,
         me: data.me ?? state.me,
         question: data.question ?? null,
         answerResult: result && !isLootResult(result) ? result : null,
-        lootResult: isLootResult(result) ? result : null,
+        lootResult,
         lootOffered: data.screen === "LOOT_PICK",
+        countdownStartsAt: data.countdownStartsAt ?? state.countdownStartsAt,
+        ended: data.ended ?? state.ended,
         lobby: data.lobby ?? state.lobby,
         leaderboard: data.leaderboard ?? state.leaderboard,
       };
@@ -121,7 +127,7 @@ export function applyServerMessage(state: RoomViewState, message: ServerMessage,
     case "loot.offer":
       return { ...next, screen: "LOOT_PICK", lootOffered: true };
     case "loot.result":
-      return { ...next, screen: "LOOT_RESULT", lootResult: message.data, me: message.data.me, lootOffered: false };
+      return { ...next, screen: "LOOT_RESULT", lootResult: message.data, me: message.data.me, lootOffered: false, rankBeforeLoot: state.me?.rank ?? null };
     case "leaderboard":
       return { ...next, leaderboard: message.data };
     case "feed":

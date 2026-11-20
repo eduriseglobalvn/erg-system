@@ -3,7 +3,7 @@ import { useEffect } from "react";
 
 import type { LootResultData } from "@/features/games/game-types";
 import { hk } from "@/features/games/hack/hack-tokens";
-import { lootCopy, lootSummary, packLabels } from "@/features/games/hack/loot-meta";
+import { lootCopy, lootSummary, packLabels, rankChange } from "@/features/games/hack/loot-meta";
 import { Chip, HackButton, HackScreen, Panel, TermLine, formatNumber } from "@/features/games/hack/ui/hack-ui";
 import { HudBar } from "@/features/games/hack/ui/hud";
 
@@ -13,6 +13,8 @@ const AUTO_NEXT_MS = 2000;
 type LootResultProps = {
   phone: boolean;
   result: LootResultData;
+  /** My rank before the pack was opened (screen 07 says "lên hạng 3"). */
+  rankBefore?: number | null;
   getRemainingMs: (nowMs: number) => number;
   locked: boolean;
   onNext: () => void;
@@ -23,7 +25,7 @@ function lootFileName(result: LootResultData) {
 }
 
 /** 07 · Gói ra xu: lật luôn 2 gói kia (HLootOpen / HPLootOpen). */
-export function LootOpenScreen({ phone, result, locked, onNext }: Omit<LootResultProps, "getRemainingMs">) {
+export function LootOpenScreen({ phone, result, rankBefore = null, locked, onNext }: Omit<LootResultProps, "getRemainingMs">) {
   const picked = result.slots[result.pickedSlot];
   const copy = lootCopy(picked.kind);
   const file = lootFileName(result);
@@ -49,7 +51,7 @@ export function LootOpenScreen({ phone, result, locked, onNext }: Omit<LootResul
         <Box><Box component="span" sx={{ color: c.green }}>$</Box> giai_ma {file}</Box>
         <TermLine tag="[OK]">{phone ? `+${formatNumber(picked.coins)} xu vào /kho_xu` : `chuyển ${formatNumber(picked.coins)} xu vào /kho_xu`}</TermLine>
         <TermLine tag="[OK]">
-          /kho_xu: {formatNumber(before)} → <Box component="span" sx={{ color: c.yellow, fontWeight: hk.font.weightBold }}>{formatNumber(result.me.coins)}</Box> · hạng {result.me.rank} · {phone ? "gói kia" : "hai gói kia"}: {others.join(" và ")}
+          /kho_xu: {formatNumber(before)} → <Box component="span" sx={{ color: c.yellow, fontWeight: hk.font.weightBold }}>{formatNumber(result.me.coins)}</Box> · {rankChange(rankBefore, result.me.rank)} · {phone ? "gói kia" : "hai gói kia"}: {others.join(" và ")}
         </TermLine>
         {firewall ? <TermLine tag="[OK]">{phone ? "tường lửa đang bảo vệ kho xu" : "tường lửa đang bật, kho xu được bảo vệ"}</TermLine> : null}
       </Panel>

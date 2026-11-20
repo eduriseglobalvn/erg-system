@@ -31,6 +31,13 @@ export function lootCopy(kind: LootKind): KindCopy {
   return KIND_COPY[kind];
 }
 
+/** "lên hạng 3" / "xuống hạng 5" / "giữ hạng 4"; plain "hạng N" when the rank before is unknown. */
+export function rankChange(before: number | null, now: number): string {
+  if (before === null) return `hạng ${now}`;
+  if (now < before) return `lên hạng ${now}`;
+  return now > before ? `xuống hạng ${now}` : `giữ hạng ${now}`;
+}
+
 /** "tệp vụn +50" / "GÓI RỖNG": how a slot reads in the terminal lines. */
 export function lootSummary(slot: LootSlotData): string {
   return slot.kind === "EMPTY" ? "GÓI RỖNG" : `${KIND_COPY[slot.kind].short} +${formatNumber(slot.coins)}`;

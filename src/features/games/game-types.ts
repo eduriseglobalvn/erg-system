@@ -47,6 +47,7 @@ export type PlayerState = {
 };
 
 /** The question DTO is the same one the normal quiz player gets (answer key stripped). */
+/** `index` is the 1-based mission number (correct answers + 1, at most `total`). */
 export type QuestionPayload = { index: number; total: number; question: Question };
 
 /** Correct-answer fields of the normal AnswerResult (correctChoiceIds, correctSequenceOrder, ...). */
@@ -66,14 +67,16 @@ export type LootSlotData = { kind: LootKind; coins: number };
 export type LootResultData = { pickedSlot: number; slots: LootSlotData[]; me: PlayerState };
 
 export type LeaderEntry = { playerId: string; displayName: string; stars: number; coins: number; total: number; rank: number };
-export type LeaderboardData = { top: LeaderEntry[]; me: { rank: number; total: number } };
+/** `firewall` drives the "[TL]" mark next to a player on the question screen. */
+export type LeaderboardData = { top: (LeaderEntry & { firewall: boolean })[]; me: { rank: number; total: number } };
 export type FeedItem = { at: string; text: string; tone: "info" | "loot" | "firewall" };
-export type LobbyData = { players: { playerId: string; displayName: string }[]; count: number };
+/** `classSize` = enrolled students of the class (for "28 / 32 MÁY" and "còn chờ N máy"). */
+export type LobbyData = { players: { playerId: string; displayName: string }[]; count: number; classSize: number };
 
 export type FinalEntry = LeaderEntry & { correctCount: number; answeredCount: number; longestStreak: number };
 export type RoomEndedData = {
   final: FinalEntry[];
-  me?: FinalEntry & { weakQuestions: { questionId: string; title: string }[] };
+  me?: FinalEntry & { weakQuestions: { questionId: string; title: string; /** 0-based position in the room's question list; show `index + 1` */ index: number; wrongCount: number }[] };
 };
 
 export type RoomStateData = {
@@ -88,6 +91,11 @@ export type RoomStateData = {
   lastResult?: AnswerResultData | LootResultData | null;
   leaderboard?: LeaderboardData | null;
   lobby?: LobbyData | null;
+  /** Rebuilds the pack screen on reconnect: a result once a pack was opened, `{ slots }` while the offer is pending. */
+  loot?: LootResultData | { slots: number } | null;
+  countdownStartsAt?: number | null;
+  /** Final result when the room is already ENDED. */
+  ended?: RoomEndedData | null;
 };
 
 export type ServerMessage =

@@ -87,6 +87,8 @@ export function LootScreen({ phone, me, starsGained, getRemainingMs, locked, onP
         <Box role="group" aria-label="Ba gói dữ liệu" sx={{ display: "flex", flexDirection: phone ? "column" : "row", gap: phone ? "12px" : "28px", marginTop: phone ? 0 : "34px" }}>
           {labels.map((label, slot) => {
             const selected = chosen === slot;
+            // Hover and keyboard focus show the "chosen" look (amber lock, green label), as the design's middle card does.
+            const lit = { borderColor: c.green, bgcolor: c.selected, transform: phone ? undefined : "translateY(-14px)", "& svg": { stroke: c.yellow }, "& .pack-idle": { display: "none" }, "& .pack-lit": { display: "inline-block" } };
             return (
               <ButtonBase
                 key={label.name}
@@ -109,6 +111,9 @@ export function LootScreen({ phone, me, starsGained, getRemainingMs, locked, onP
                   gap: phone ? "16px" : "12px",
                   textAlign: phone ? "left" : "center",
                   transform: !phone && selected ? "translateY(-14px)" : undefined,
+                  "& .pack-lit": { display: selected ? "inline-block" : "none" },
+                  "& .pack-idle": { display: selected ? "none" : "inline-block" },
+                  "&:hover:not(.Mui-disabled), &.Mui-focusVisible": phone ? undefined : lit,
                   "&.Mui-disabled": { color: c.text },
                   "&.Mui-focusVisible": { outline: `2px solid ${c.white}`, outlineOffset: "2px" },
                 }}
@@ -121,8 +126,9 @@ export function LootScreen({ phone, me, starsGained, getRemainingMs, locked, onP
                 {phone ? (
                   selected ? <Box component="span" sx={{ bgcolor: c.green, color: c.bg, padding: "6px 10px", borderRadius: `${hk.radius.chip}px`, fontSize: hk.fs[13], fontWeight: hk.font.weightBold }}>ĐÃ CHỌN</Box> : null
                 ) : (
-                  <Box component="span" sx={{ marginTop: "auto", padding: selected ? "6px 16px" : "5px 16px", border: selected ? 0 : `1px solid ${c.border}`, bgcolor: selected ? c.green : "transparent", color: selected ? c.bg : undefined, borderRadius: `${hk.radius.chip}px`, fontSize: hk.fs[15], fontWeight: hk.font.weightBold }}>
-                    {selected ? `> PHÍM ${slot + 1} · GIẢI MÃ` : `PHÍM ${slot + 1}`}
+                  <Box component="span" sx={{ marginTop: "auto", display: "flex" }}>
+                    <Box component="span" className="pack-idle" sx={{ padding: "5px 16px", border: `1px solid ${c.border}`, borderRadius: `${hk.radius.chip}px`, fontSize: hk.fs[15], fontWeight: hk.font.weightBold }}>PHÍM {slot + 1}</Box>
+                    <Box component="span" className="pack-lit" sx={{ padding: "6px 16px", bgcolor: c.green, color: c.bg, borderRadius: `${hk.radius.chip}px`, fontSize: hk.fs[15], fontWeight: hk.font.weightBold }}>&gt; PHÍM {slot + 1} · GIẢI MÃ</Box>
                   </Box>
                 )}
               </ButtonBase>

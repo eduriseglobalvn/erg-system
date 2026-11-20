@@ -87,7 +87,7 @@ export function WrongScreen({ phone, me, result, payload, answered, getRemaining
       <Box sx={{ flex: 1, fontSize: phone ? hk.fs[13] : hk.fs[15], lineHeight: phone ? 1.6 : undefined, color: c.errText }}>
         {phone ? "Không mất sao, không mất xu. Chỉ lỡ 1 gói dữ liệu." : "Không mất sao, không mất xu. Chỉ lỡ 1 gói dữ liệu và chuỗi về 0."}
       </Box>
-      {phone || !payload ? null : <Box sx={{ fontSize: hk.fs[13], fontWeight: hk.font.weightBold, color: c.yellow }}>nhiệm vụ {payload.index + 1}/{payload.total}</Box>}
+      {phone || !payload ? null : <Box sx={{ fontSize: hk.fs[13], fontWeight: hk.font.weightBold, color: c.yellow }}>nhiệm vụ {payload.index}/{payload.total}</Box>}
     </Box>
   );
   const body = (
