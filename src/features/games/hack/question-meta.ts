@@ -79,6 +79,8 @@ export function phoneNote(question: Question, progress: string | null): string |
       return `Mỗi dòng một lựa chọn.${done}`;
     case "sequence":
       return "Dùng nút ^ v để đổi chỗ. Đúng toàn bộ thứ tự mới tính.";
+    case "hotspot":
+      return "Vòng ngắm to 44px để chạm trúng. Bấm PHÓNG TO để xem rõ ảnh; chạm lại để dời điểm.";
     case "matching":
       return `Giữ mảnh 0,12 giây rồi kéo, như trên LMS.${done}`;
     default:
@@ -87,7 +89,7 @@ export function phoneNote(question: Question, progress: string | null): string |
 }
 
 /** Footer hint of the command line, per kind (desktop). */
-export function footerHint(question: Question): string {
+export function footerHint(question: Question, value?: AnswerPayload): string {
   switch (question.kind) {
     case "single_choice":
       return "phím A B C D, Enter để chạy";
@@ -112,7 +114,11 @@ export function footerHint(question: Question): string {
     case "drag_words":
       return "Kéo thả, hoặc bấm từ rồi bấm chỗ trống · bấm từ đã đặt để trả về kho.";
     case "hotspot":
-      return "Bấm lại để dời điểm ngắm · vùng đúng do giáo viên vẽ trong LMS.";
+    {
+      const point = value?.hotspotPoint;
+      const at = point && question.hotspotImage ? ` · tọa độ x=${Math.round(point.x * question.hotspotImage.width)} y=${Math.round(point.y * question.hotspotImage.height)}` : "";
+      return `Bấm lại để dời điểm ngắm${at} · vùng đúng do giáo viên vẽ trong LMS.`;
+    }
     case "drag_drop":
       return `Kéo thả, hoặc bấm thiết bị rồi bấm nhóm · bấm thiết bị trong nhóm để trả về · xếp hết ${question.dragDropItems?.length ?? 0} mới chạy được.`;
     default:

@@ -72,7 +72,7 @@ function Stat({ label, value, color, phone }: { label: string; value: number; co
 }
 
 /** 14 · Hết giờ (HTimeUp / HPTimeUp). */
-export function TimeUpScreen({ phone, me }: { phone: boolean; me: PlayerState | null }) {
+export function TimeUpScreen({ phone, me, questionCount }: { phone: boolean; me: PlayerState | null; questionCount?: number }) {
   const total = me ? me.stars + me.coins : 0;
   return (
     <HackScreen phone={phone} center={!phone} label="Hết giờ" sx={phone ? { alignItems: "center", gap: "12px", padding: "110px 14px 16px" } : { gap: "12px" }}>
@@ -102,6 +102,11 @@ export function TimeUpScreen({ phone, me }: { phone: boolean; me: PlayerState | 
             <Stat label="TỔNG TẠM TÍNH" value={total} color={c.green} phone={false} />
           </Box>
         )
+      ) : null}
+      {questionCount ? (
+        <Box sx={{ position: "relative", alignSelf: phone ? "stretch" : undefined, fontSize: phone ? hk.fs[12] : hk.fs[13], lineHeight: phone ? 1.6 : undefined, color: c.mint }}>
+          Xong {questionCount} nhiệm vụ trước giờ: {phone ? "" : "bạn "}được làm lại các câu từng sai để lấy thêm sao{phone ? "." : " cho đến khi hết giờ."}
+        </Box>
       ) : null}
     </HackScreen>
   );

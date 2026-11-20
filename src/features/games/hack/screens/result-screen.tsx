@@ -60,7 +60,8 @@ function WeakPanel({ me, phone, onLeave }: { me: NonNullable<RoomEndedData["me"]
           <Box sx={{ fontSize: phone ? hk.fs[11] : hk.fs[12], color: c.pink }}>{weakSubline(item)}</Box>
         </Box>
       ))}
-      <Box sx={{ marginTop: "auto", display: "flex", gap: "10px" }}>
+      {weak.length ? <Box sx={{ marginTop: "auto", fontSize: phone ? hk.fs[11] : hk.fs[12], color: c.dim }}>Chế độ vá lỗ hổng chưa mở ở đợt này.</Box> : null}
+      <Box sx={{ marginTop: weak.length ? 0 : "auto", display: "flex", gap: "10px" }}>
         {weak.length ? (
           <HackButton disabled fullWidth={phone} sx={phone ? undefined : { flex: 1 }} minHeight={52} fontSize={phone ? hk.fs[16] : hk.fs[17]} paddingX={16}>&gt; VÁ NGAY {weak.length} LỖ HỔNG</HackButton>
         ) : null}
@@ -138,7 +139,7 @@ export function ResultScreen({ phone, ended, room, onLeave }: ResultScreenProps)
           <RankRows entries={ended.final} meId={me?.playerId} rows={PHONE_ROWS} phone />
         </Panel>
         {me ? <WeakPanel me={me} phone onLeave={onLeave} /> : null}
-        <HackButton outline onClick={onLeave} fullWidth minHeight={48} fontSize={hk.fs[14]}>THOÁT</HackButton>
+        {me && me.weakQuestions.length > 0 ? null : <HackButton outline onClick={onLeave} fullWidth minHeight={48} fontSize={hk.fs[14]}>THOÁT</HackButton>}
       </HackScreen>
     );
   }

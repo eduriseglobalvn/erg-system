@@ -1,10 +1,11 @@
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { useState, type ReactNode } from "react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import type { AnswerPayload, Question } from "@/domain/quiz/types";
-import { DragDropBody, DragWordsBody, SequenceBody } from "@/features/games/hack/ui/drag-inputs";
+import { HotspotBody, nudgePoint, pointFromClick } from "@/features/games/hack/ui/hotspot-input";
+import { DragDropBody, DragWordsBody, SequenceBody, moveItem } from "@/features/games/hack/ui/drag-inputs";
 import { InlineChoiceBody } from "@/features/games/hack/ui/inline-inputs";
 
 const feedback = { correct: "", incorrect: "", partial: "" };
@@ -53,5 +54,38 @@ describe("hack answer bodies", () => {
     render(<Harness question={question} initial={{ sequenceOrder: ["a", "b"] }}>{(value, set) => <SequenceBody question={question} value={value} onChange={set} phone locked={false} />}</Harness>);
     fireEvent.click(screen.getByRole("button", { name: "Xuống: Một" }));
     expect(read().sequenceOrder).toEqual(["b", "a"]);
+  });
+
+  it("sequence: Alt + arrow keys reorder the focused row, plain arrows do not", () => {
+    const question = { ...base, kind: "sequence", title: "t", sequenceItems: [{ id: "a", label: "Một" }, { id: "b", label: "Hai" }, { id: "c", label: "Ba" }] } as Question;
+    render(<Harness initial={{ sequenceOrder: ["a", "b", "c"] }}>{(value, set) => <SequenceBody question={question} value={value} onChange={set} phone={false} locked={false} />}</Harness>);
+    const row = (id: string) => document.querySelector<HTMLElement>(`[data-seq-id="${id}"]`) as HTMLElement;
+    fireEvent.keyDown(row("b"), { key: "ArrowDown" });
+    expect(read().sequenceOrder).toEqual(["a", "b", "c"]);
+    fireEvent.keyDown(row("b"), { key: "ArrowDown", altKey: true });
+    expect(read().sequenceOrder).toEqual(["a", "c", "b"]);
+    fireEvent.keyDown(row("a"), { key: "ArrowUp", altKey: true });
+    expect(read().sequenceOrder).toEqual(["a", "c", "b"]);
+  });
+
+  it("moveItem stays inside the list", () => {
+    expect(moveItem(["a", "b"], 0, -1)).toEqual(["a", "b"]);
+    expect(moveItem(["a", "b", "c"], 0, 2)).toEqual(["c", "b", "a"]);
+  });
+
+  it("hotspot: the answer is hotspotPoint as 0..1 fractions of the image, like the LMS component", () => {
+    expect(pointFromClick({ left: 100, top: 50, width: 400, height: 200 }, 300, 100)).toEqual({ x: 0.5, y: 0.25 });
+    expect(pointFromClick({ left: 0, top: 0, width: 10, height: 10 }, -5, 99)).toEqual({ x: 0, y: 1 });
+    expect(nudgePoint(undefined, "ArrowRight")).toEqual({ x: 0.51, y: 0.5 });
+    expect(nudgePoint({ x: 1, y: 0 }, "ArrowRight")).toEqual({ x: 1, y: 0 });
+    expect(nudgePoint(undefined, "a")).toBeNull();
+    const question = { ...base, kind: "hotspot", title: "t", hotspotImage: { url: "x.png", width: 640, height: 400 }, hotspotAreas: [] } as Question;
+    const rect = vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue({ left: 0, top: 0, width: 200, height: 100, right: 200, bottom: 100, x: 0, y: 0, toJSON: () => ({}) });
+    render(<Harness initial={{}}>{(value, set) => <HotspotBody question={question} value={value} onChange={set} phone locked={false} />}</Harness>);
+    fireEvent.click(screen.getByRole("application"), { clientX: 50, clientY: 25 });
+    expect(read().hotspotPoint).toEqual({ x: 0.25, y: 0.25 });
+    fireEvent.click(screen.getByRole("button", { name: /BỎ ĐIỂM/ }));
+    expect(read().hotspotPoint).toBeUndefined();
+    rect.mockRestore();
   });
 });

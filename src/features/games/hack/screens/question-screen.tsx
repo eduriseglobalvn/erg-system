@@ -9,6 +9,7 @@ import { createInitialAnswer, isAnswerComplete, normalizeAnswerForSubmission } f
 import type { LeaderboardData, PlayerState, QuestionPayload } from "@/features/games/game-types";
 import { hk } from "@/features/games/hack/hack-tokens";
 import { answerProgress, echoCommand, footerHint, isTrueChoice, kindCopy, nextStarReward, phoneNote } from "@/features/games/hack/question-meta";
+import { HotspotBody } from "@/features/games/hack/ui/hotspot-input";
 import { DragDropBody, DragWordsBody, SequenceBody } from "@/features/games/hack/ui/drag-inputs";
 import { InlineChoiceBody, SelectListsBody } from "@/features/games/hack/ui/inline-inputs";
 import { MultiChoiceButtons, NumericField, ShortAnswerField } from "@/features/games/hack/ui/answer-inputs";
@@ -186,6 +187,8 @@ export function QuestionScreen({ phone, me, payload, marks, getRemainingMs, lead
         <NumericField question={question} value={value} onChange={setValue} phone={phone} locked={disabled} />
       ) : question.kind === "inline_choice" ? (
         <InlineChoiceBody question={question} value={value} onChange={setValue} phone={phone} locked={disabled} />
+      ) : question.kind === "hotspot" ? (
+        <HotspotBody question={question} value={value} onChange={setValue} phone={phone} locked={disabled} />
       ) : question.kind === "sequence" ? (
         <SequenceBody question={question} value={value} onChange={setValue} phone={phone} locked={disabled} />
       ) : question.kind === "drag_words" ? (
@@ -214,10 +217,10 @@ export function QuestionScreen({ phone, me, payload, marks, getRemainingMs, lead
   const echoLine = echo !== null ? (
     <Box sx={{ flex: 1, fontSize: phone ? hk.fs[13] : hk.fs[14] }}>
       <Box component="span" sx={{ color: c.green }}>$</Box> {echo}<Cursor />
-      {phone ? null : <Box component="span" sx={{ color: c.dim }}> · {footerHint(question)}</Box>}
+      {phone ? null : <Box component="span" sx={{ color: c.dim }}> · {footerHint(question, value)}</Box>}
     </Box>
   ) : (
-    <Box sx={{ flex: 1, fontSize: phone ? hk.fs[12] : hk.fs[14], color: c.dim, lineHeight: phone ? 1.6 : undefined }}>{footerHint(question)}</Box>
+    <Box sx={{ flex: 1, fontSize: phone ? hk.fs[12] : hk.fs[14], color: c.dim, lineHeight: phone ? 1.6 : undefined }}>{footerHint(question, value)}</Box>
   );
   const runButton = (
     <HackButton disabled={disabled || !complete} onClick={run} fullWidth={phone} fontSize={hk.fs[18]} minHeight={56} paddingX={36}>
@@ -233,8 +236,8 @@ export function QuestionScreen({ phone, me, payload, marks, getRemainingMs, lead
     return (
       <HackScreen phone label="Nhiệm vụ">
         <HudBar me={me} getRemainingMs={getRemainingMs} phone compact={!withSide} />
-        <QuestionProgress total={payload.total} current={payload.index} marks={marks} phone />
-        <Box sx={{ position: "relative", flex: 1, display: "flex", flexDirection: "column", gap: "12px", padding: "12px 14px 16px" }}>
+        {withSide ? <QuestionProgress total={payload.total} current={payload.index} marks={marks} phone /> : null}
+        <Box sx={{ position: "relative", flex: 1, display: "flex", flexDirection: "column", gap: withSide ? "12px" : "10px", padding: withSide ? "12px 14px 16px" : "12px 14px 14px", minHeight: 0 }}>
           <Panel sx={{ padding: withSide ? "14px" : "12px", flex: withSide ? undefined : 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", fontSize: hk.fs[12], fontWeight: hk.font.weightBold, whiteSpace: "nowrap" }}>
               <Chip color={c.green} solid sx={{ padding: "3px 8px" }}>{missionLabel}</Chip>
@@ -260,8 +263,8 @@ export function QuestionScreen({ phone, me, payload, marks, getRemainingMs, lead
   return (
     <HackScreen phone={false} label="Nhiệm vụ">
       <HudBar me={me} getRemainingMs={getRemainingMs} phone={false} compact={!withSide} />
-      <QuestionProgress total={payload.total} current={payload.index} marks={marks} phone={false} />
-      <Box sx={{ position: "relative", flex: 1, display: "flex", gap: "20px", padding: "14px 24px 24px" }}>
+      {withSide ? <QuestionProgress total={payload.total} current={payload.index} marks={marks} phone={false} /> : null}
+      <Box sx={{ position: "relative", flex: 1, display: "flex", gap: "20px", padding: withSide ? "14px 24px 24px" : "20px 24px 24px" }}>
         <Panel sx={{ flex: 1, minWidth: 0, padding: "20px 22px", display: "flex", flexDirection: "column", gap: "14px" }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: "12px", fontSize: hk.fs[13], fontWeight: hk.font.weightBold }}>
             <Chip color={c.green} solid>{missionLabel}</Chip>

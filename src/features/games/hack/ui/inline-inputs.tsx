@@ -81,10 +81,12 @@ export function InlineChoiceBody({ question, value, onChange, phone, locked }: B
 
 /** Select from lists (HQSelectLists / HPQSelectLists): one row per statement, every option a button. */
 export function SelectListsBody({ question, value, onChange, phone, locked }: BodyProps) {
+  // The first row still waiting for an answer gets the amber outline, as on the board.
+  const firstEmpty = (question.inlineBlanks ?? []).find((blank) => !value.inlineSelections?.[blank.id])?.id;
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: phone ? "8px" : "10px" }}>
       {(question.inlineBlanks ?? []).map((blank) => (
-        <Box key={blank.id} role="group" aria-label={blank.statement} sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: phone ? "6px 12px" : "16px", bgcolor: c.bg, border: `1px solid ${c.border}`, borderRadius: `${hk.radius.panel}px`, padding: phone ? "8px" : "8px 14px" }}>
+        <Box key={blank.id} role="group" aria-label={blank.statement} sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: phone ? "6px 12px" : "16px", bgcolor: c.bg, border: `1px solid ${blank.id === firstEmpty ? c.yellow : c.border}`, borderRadius: `${hk.radius.panel}px`, padding: phone ? "8px" : "8px 14px" }}>
           <Box component="span" sx={{ fontSize: phone ? hk.fs[15] : hk.fs[19], width: phone ? "auto" : "220px", color: c.white }}>{blank.statement}</Box>
           {phone ? null : <Box component="span" aria-hidden="true" sx={{ color: c.dim }}>=&gt;</Box>}
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>

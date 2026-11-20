@@ -136,7 +136,7 @@ function HackRoomScreen({ state, room, send, retryNow }: HackRoomViewProps) {
     case "RECONNECT":
       return <ReconnectScreen phone={phone} attempt={state.attempt} failed={state.connection === "failed"} droppedClock={state.droppedAtMs ? formatClock(remainingMs(state, state.droppedAtMs)) : null} me={me} onRetry={retryNow} onLeave={leave} />;
     case "TIME_UP":
-      return <TimeUpScreen phone={phone} me={me} />;
+      return <TimeUpScreen phone={phone} me={me} questionCount={room?.questionCount} />;
     case "RESULT":
       return state.ended ? <ResultScreen phone={phone} ended={state.ended} room={room} onLeave={leave} /> : <WaitingScreen phone={phone} />;
     case "WAITING":

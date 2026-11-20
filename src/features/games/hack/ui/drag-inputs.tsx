@@ -1,6 +1,6 @@
 import Box from "@mui/material/Box";
 import ButtonBase from "@mui/material/ButtonBase";
-import { Fragment, useState, type DragEvent } from "react";
+import { Fragment, useEffect, useRef, useState, type DragEvent } from "react";
 
 import type { AnswerPayload, Question } from "@/domain/quiz/types";
 import { hk } from "@/features/games/hack/hack-tokens";
@@ -140,37 +140,76 @@ export function DragDropBody({ question, value, onChange, phone, locked }: BodyP
   );
 }
 
-/** Sequence (HQSequence / HPQSequence): numbered rows with ^ v buttons; the payload is the same sequenceOrder as the shared component. */
+/** Moves the item at `from` by `delta` places; returns the same array when it cannot move. */
+export function moveItem<T>(order: T[], from: number, delta: number): T[] {
+  const to = from + delta;
+  if (from < 0 || from >= order.length || to < 0 || to >= order.length) return order;
+  const next = [...order];
+  [next[from], next[to]] = [next[to], next[from]];
+  return next;
+}
+
+/** Sequence (HQSequence / HPQSequence): numbered rows; ^ v buttons, Alt + arrow keys and (desktop) the "::" handle reorder them. Same sequenceOrder payload as the shared component. */
 export function SequenceBody({ question, value, onChange, phone, locked }: BodyProps) {
   const items = question.sequenceItems ?? [];
   const order = value.sequenceOrder?.length ? value.sequenceOrder : items.map((item) => item.id);
   const [last, setLast] = useState<string | null>(null);
+  const dragId = useRef<string | null>(null);
+  const list = useRef<HTMLOListElement>(null);
+  const refocus = useRef<string | null>(null);
   const labelOf = (id: string) => items.find((item) => item.id === id)?.label ?? "";
 
-  const move = (index: number, delta: number) => {
-    const to = index + delta;
-    if (to < 0 || to >= order.length) return;
-    const next = [...order];
-    [next[index], next[to]] = [next[to], next[index]];
+  // Moving a row re-renders it in a new place; hand keyboard focus back to the row that was moved.
+  useEffect(() => {
+    if (!refocus.current) return;
+    list.current?.querySelector<HTMLElement>(`[data-seq-id="${refocus.current}"]`)?.focus();
+    refocus.current = null;
+  });
+
+  const move = (index: number, delta: number, keepFocus = false) => {
+    const next = moveItem(order, index, delta);
+    if (next === order) return;
     setLast(order[index]);
+    if (keepFocus) refocus.current = order[index];
     onChange({ sequenceOrder: next });
+  };
+  const dropOn = (index: number) => {
+    const from = order.findIndex((id) => id === dragId.current);
+    dragId.current = null;
+    if (from >= 0 && from !== index) move(from, index - from);
   };
   const arrowSx = (active: boolean, off: boolean) => ({ flex: "none", width: "44px", height: "44px", border: `1px solid ${active ? c.green : c.border}`, borderRadius: `${hk.radius.chip}px`, color: off ? c.dim : active ? c.green : c.text, fontFamily: "inherit", fontSize: phone ? hk.fs[16] : hk.fs[18], fontWeight: hk.font.weightBold, ...focusSx });
 
   return (
-    <Box component="ol" sx={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: phone ? "8px" : "10px", fontSize: phone ? hk.fs[14] : hk.fs[18] }}>
-      {order.map((id, index) => {
-        const active = id === last;
-        return (
-          <Box key={id} component="li" sx={{ display: "flex", alignItems: "center", gap: phone ? "8px" : "14px", minHeight: phone ? "56px" : "60px", padding: phone ? "0 6px 0 10px" : "0 12px 0 16px", border: `2px solid ${active ? c.green : c.border}`, borderRadius: `${hk.radius.panel}px`, bgcolor: active ? c.selected : c.bg, color: active ? c.white : c.text }}>
-            <Box component="span" sx={{ color: c.green }}>{String(index + 1).padStart(2, "0")}</Box>
-            {phone ? null : <Box component="span" aria-hidden="true" sx={{ color: active ? c.green : c.dim }}>::</Box>}
-            <Box component="span" sx={{ flex: 1, minWidth: 0, overflowWrap: "anywhere" }}>{labelOf(id)}</Box>
-            <ButtonBase aria-label={`Lên: ${labelOf(id)}`} disabled={locked || index === 0} onClick={() => move(index, -1)} sx={arrowSx(active, index === 0)}>^</ButtonBase>
-            <ButtonBase aria-label={`Xuống: ${labelOf(id)}`} disabled={locked || index === order.length - 1} onClick={() => move(index, 1)} sx={arrowSx(active, index === order.length - 1)}>v</ButtonBase>
-          </Box>
-        );
-      })}
-    </Box>
+    <>
+      <Box ref={list} component="ol" sx={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: phone ? "8px" : "10px", fontSize: phone ? hk.fs[14] : hk.fs[18] }}>
+        {order.map((id, index) => {
+          const active = id === last;
+          return (
+            <Box
+              key={id}
+              component="li"
+              data-seq-id={id}
+              tabIndex={locked ? -1 : 0}
+              onKeyDown={(event) => {
+                if (locked || !event.altKey || (event.key !== "ArrowUp" && event.key !== "ArrowDown")) return;
+                event.preventDefault();
+                move(index, event.key === "ArrowUp" ? -1 : 1, true);
+              }}
+              onDragOver={(event) => event.preventDefault()}
+              onDrop={() => dropOn(index)}
+              sx={{ display: "flex", alignItems: "center", gap: phone ? "8px" : "14px", minHeight: phone ? "56px" : "60px", padding: phone ? "0 6px 0 10px" : "0 12px 0 16px", border: `2px solid ${active ? c.green : c.border}`, borderRadius: `${hk.radius.panel}px`, bgcolor: active ? c.selected : c.bg, color: active ? c.white : c.text, "&:focus-visible": { outline: `2px solid ${c.white}`, outlineOffset: "2px" } }}
+            >
+              <Box component="span" sx={{ color: c.green }}>{String(index + 1).padStart(2, "0")}</Box>
+              {phone ? null : <Box component="span" aria-hidden="true" draggable={!locked} onDragStart={() => { dragId.current = id; }} sx={{ color: active ? c.green : c.dim, cursor: locked ? "default" : "grab" }}>::</Box>}
+              <Box component="span" sx={{ flex: 1, minWidth: 0, overflowWrap: "anywhere" }}>{labelOf(id)}</Box>
+              <ButtonBase aria-label={`Lên: ${labelOf(id)}`} disabled={locked || index === 0} onClick={() => move(index, -1)} sx={arrowSx(active, index === 0)}>^</ButtonBase>
+              <ButtonBase aria-label={`Xuống: ${labelOf(id)}`} disabled={locked || index === order.length - 1} onClick={() => move(index, 1)} sx={arrowSx(active, index === order.length - 1)}>v</ButtonBase>
+            </Box>
+          );
+        })}
+      </Box>
+      {phone ? null : <Box sx={{ marginTop: "14px", fontSize: hk.fs[13], color: c.mint }}>Kéo dòng bằng tay nắm "::" hoặc dùng nút ^ v. Bàn phím: Tab tới dòng, Alt + mũi tên để đổi chỗ.</Box>}
+    </>
   );
 }
