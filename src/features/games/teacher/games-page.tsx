@@ -34,10 +34,15 @@ type GamesViewProps = {
   loading: boolean;
   onNew: () => void;
   onEnter: (roomId: string) => void;
+  /** "Chơi lại" on an ended room: new room on the same quiz and class. */
+  onReplay: (room: RoomSummary) => void;
 };
 
+/** "64%", or "—" while nobody has answered. */
+const formatAccuracy = (accuracy: number | null) => (accuracy === null ? "—" : `${Math.round(accuracy * 100)}%`);
+
 /** One row of the open-rooms / history table. */
-function RoomRow({ room, onEnter }: { room: RoomSummary; onEnter: (roomId: string) => void }) {
+function RoomRow({ room, onEnter, onReplay }: { room: RoomSummary; onEnter: (roomId: string) => void; onReplay: (room: RoomSummary) => void }) {
   const status = STATUS_LABEL[room.status];
   return (
     <TableRow hover>
@@ -46,12 +51,16 @@ function RoomRow({ room, onEnter }: { room: RoomSummary; onEnter: (roomId: strin
       <TableCell>{room.className}</TableCell>
       <TableCell sx={{ whiteSpace: "nowrap" }}>{formatDateTimeVi(room.createdAt)} · {room.durationMinutes} phút</TableCell>
       <TableCell><ErgStatusChip label={status.label} tone={status.tone} /></TableCell>
+      <TableCell sx={{ whiteSpace: "nowrap", fontWeight: "fontWeightMedium" }}>{formatAccuracy(room.accuracy)}</TableCell>
       <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
         {isOpen(room.status) ? (
           <ErgButton size="small" variant="outlined" onClick={() => onEnter(room.id)}>Vào phòng</ErgButton>
         ) : (
-          // Report and replay arrive with the report wave.
-          <Typography variant="caption" sx={{ color: "text.disabled" }}>Báo cáo: sắp có</Typography>
+          // The report screen arrives with the report wave.
+          <Box sx={{ display: "inline-flex", alignItems: "center", gap: 1.5 }}>
+            <Typography variant="caption" sx={{ color: "text.disabled" }}>Báo cáo: sắp có</Typography>
+            {room.status === "ENDED" ? <ErgButton size="small" variant="outlined" onClick={() => onReplay(room)}>Chơi lại</ErgButton> : null}
+          </Box>
         )}
       </TableCell>
     </TableRow>
@@ -59,7 +68,7 @@ function RoomRow({ room, onEnter }: { room: RoomSummary; onEnter: (roomId: strin
 }
 
 /** LMS 3 · Trang Trò chơi (LmsArena): game cards, open rooms and history. */
-export function GamesView({ rooms, loading, onNew, onEnter }: GamesViewProps) {
+export function GamesView({ rooms, loading, onNew, onEnter, onReplay }: GamesViewProps) {
   const open = rooms.filter((room) => isOpen(room.status));
   const history = rooms.filter((room) => !isOpen(room.status));
   return (
@@ -91,7 +100,7 @@ export function GamesView({ rooms, loading, onNew, onEnter }: GamesViewProps) {
         <ErgEmptyState title="Chưa có phòng nào" description="Chọn một bài trong Kho bài tập rồi bấm Mở trò chơi để tạo phòng đầu tiên." />
       ) : (
         <Paper variant="outlined" sx={{ overflow: "auto" }}>
-          <ErgTable sx={{ minWidth: 720 }}>
+          <ErgTable sx={{ minWidth: 800 }}>
             <TableHead>
               <TableRow>
                 <TableCell>Trò chơi</TableCell>
@@ -99,11 +108,12 @@ export function GamesView({ rooms, loading, onNew, onEnter }: GamesViewProps) {
                 <TableCell>Lớp</TableCell>
                 <TableCell>Thời gian</TableCell>
                 <TableCell>Trạng thái</TableCell>
+                <TableCell>Tỉ lệ đúng</TableCell>
                 <TableCell align="right">Thao tác</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {[...open, ...history].map((room) => <RoomRow key={room.id} room={room} onEnter={onEnter} />)}
+              {[...open, ...history].map((room) => <RoomRow key={room.id} room={room} onEnter={onEnter} onReplay={onReplay} />)}
             </TableBody>
           </ErgTable>
         </Paper>
@@ -125,6 +135,7 @@ export function TeacherGamesPage() {
       loading={rooms.isPending}
       onNew={() => { void navigate({ href: teacherPath("/homework/exercise-bank") }); }}
       onEnter={(roomId) => { void navigate({ href: teacherPath(`/games/${encodeURIComponent(roomId)}`) }); }}
+      onReplay={(room) => { void navigate({ href: `${teacherPath("/games/new")}?quizId=${encodeURIComponent(room.quizId)}&classId=${encodeURIComponent(room.classId)}` }); }}
     />
   );
 }

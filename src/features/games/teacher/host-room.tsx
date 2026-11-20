@@ -71,6 +71,7 @@ export function HostRoomView({ state, room, teacherLabel, joinUrl, send, onExit 
           feed={state.feed}
           feedClock={feedClock}
           stats={state.stats}
+          allowHack={room?.rules.allowHack ?? false}
           busy={busy}
           onPause={() => command("host.pause")}
           onResume={() => command("host.resume")}

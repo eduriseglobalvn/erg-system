@@ -7,12 +7,13 @@ import { HostBar } from "@/features/games/teacher/host-bar";
 
 const c = hk.color;
 const SHOWN = 15;
+const MISSING_SHOWN = 6;
 
 type LobbyViewProps = {
   room: RoomSummary | undefined;
   lobby: LobbyData | null;
   teacherLabel: string;
-  /** Where students type the code, shown under it (QR is not built: no QR library is installed). */
+  /** Where students type the code, shown under it. */
   joinUrl: string;
   busy: boolean;
   onStart: () => void;
@@ -25,6 +26,8 @@ export function LobbyView({ room, lobby, teacherLabel, joinUrl, busy, onStart, o
   const count = lobby?.count ?? room?.playerCount ?? 0;
   const classSize = Math.max(lobby?.classSize ?? 0, count);
   const waiting = classSize - count;
+  const missing = lobby?.missing ?? [];
+  const missingNames = missing.slice(0, MISSING_SHOWN).map((student) => student.displayName).join(", ");
   const shown = players.slice(0, SHOWN);
   const hidden = Math.max(0, count - shown.length);
   const countLine = `${classSize > count ? `${formatNumber(count)} / ${formatNumber(classSize)}` : formatNumber(count)} MÁY ĐÃ VÀO MẠNG`;
@@ -44,7 +47,9 @@ export function LobbyView({ room, lobby, teacherLabel, joinUrl, busy, onStart, o
         <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: "14px", minWidth: 0 }}>
           <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: "16px" }}>
             <Box sx={{ fontSize: hk.fs[26], fontWeight: hk.font.weightBold, color: c.green }}>{countLine}</Box>
-            {waiting > 0 ? <Box sx={{ fontSize: hk.fs[13], color: c.dim }}>còn chờ {waiting} máy</Box> : null}
+            {missing.length > 0 ? (
+              <Box sx={{ fontSize: hk.fs[14], color: c.yellow, textAlign: "right" }}>chưa vào: {missingNames}{missing.length > MISSING_SHOWN ? ` +${missing.length - MISSING_SHOWN}` : ""}</Box>
+            ) : waiting > 0 ? <Box sx={{ fontSize: hk.fs[13], color: c.dim }}>còn chờ {waiting} máy</Box> : null}
           </Box>
           <Box sx={{ display: "grid", gridTemplateColumns: "repeat(5, minmax(0, 1fr))", gap: "10px", fontSize: hk.fs[14], fontWeight: hk.font.weightBold }}>
             {shown.map((player) => (

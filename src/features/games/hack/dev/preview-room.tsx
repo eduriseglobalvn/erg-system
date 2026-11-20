@@ -36,7 +36,7 @@ const top = [["HOANG_BAO", 5480], ["THU_KHANH", 5120], ["GIA_HUY", 3840], ["Minh
 const finalRows: [string, number, number][] = [["THU_KHANH", 2450, 3790], ["HOANG_BAO", 2280, 3430], ["Minh Anh", 2330, 1980], ["GIA_HUY", 1870, 2335], ["PHUONG_LINH", 2100, 1390], ["DUC_TRI", 1650, 1470], ["VAN_HA", 1760, 1120]];
 const final = finalRows.map(([name, stars, coins], index) => ({ playerId: name === "Minh Anh" ? "me" : `p${index}`, displayName: name, stars, coins, total: stars + coins, rank: index + 1, correctCount: 17, answeredCount: 20, longestStreak: 6 }));
 
-const room: RoomSummary = { id: "preview", gameType: "HACK", code: "4253", status: "RUNNING", classId: "c1", className: "7A2", quizTitle: "IC3 GS6 Level 1", durationMinutes: 10, rules: { allowHack: false, emergencyPatch: false, showLeaderboard: true, showSolution: true, allowLateJoin: false, questionOrder: "LESSON" }, playerCount: 32, questionCount: 20, createdAt: "2026-11-20T08:00:00" };
+const room: RoomSummary = { id: "preview", gameType: "HACK", code: "4253", status: "RUNNING", classId: "c1", className: "7A2", quizId: "q1", quizVersionId: "v1", quizTitle: "IC3 GS6 Level 1", questionSet: "ALL", durationMinutes: 10, rules: { allowHack: false, emergencyPatch: false, showLeaderboard: true, showSolution: true, allowLateJoin: false, questionOrder: "LESSON" }, playerCount: 32, questionCount: 20, accuracy: null, createdAt: "2026-11-20T08:00:00" };
 
 function stateFor(screen: string, kind: string): RoomViewState {
   const open: RoomViewState = { ...initialRoomViewState, connection: "open", phase: "RUNNING", endsAt: Date.now() + 222_000, me };
@@ -44,7 +44,7 @@ function stateFor(screen: string, kind: string): RoomViewState {
   const withQuestion = { ...open, screen: "QUESTION" as const, question, marks: { 1: "ok", 2: "ok", 3: "ok", 4: "wrong", 5: "ok", 6: "ok", 7: "wrong", 8: "ok", 9: "ok", 10: "ok", 11: "ok" } as RoomViewState["marks"], leaderboard: { top, me: { rank: 4, total: 2170 } }, feed: [[231, "GIA_HUY giải mã ví nhỏ +150", "loot"], [234, "DUC_TRI vá lỗ hổng +64", "info"], [238, "THU_KHANH bật tường lửa", "firewall"]].map(([left, text, tone]) => ({ at: new Date((open.endsAt ?? 0) - Number(left) * 1000).toISOString(), text: String(text), tone: String(tone) })) };
   switch (screen) {
     case "lobby":
-      return { ...open, phase: "LOBBY", screen: "LOBBY", lobby: { players, count: 28, classSize: 32 } };
+      return { ...open, phase: "LOBBY", screen: "LOBBY", lobby: { players, count: 28, classSize: 32, missing: [] } };
     case "countdown":
       return { ...open, phase: "COUNTDOWN", screen: "COUNTDOWN", countdownStartsAt: Date.now() + 2_500 };
     case "wrong":

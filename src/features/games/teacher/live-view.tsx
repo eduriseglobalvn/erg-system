@@ -10,6 +10,7 @@ import { useNow } from "@/features/games/use-now";
 const c = hk.color;
 const WORST_SHOWN = 3;
 const FEED_SHOWN = 4;
+const BOARD_ROWS = 8;
 
 type LiveViewProps = {
   roomCode: string;
@@ -23,6 +24,8 @@ type LiveViewProps = {
   /** Game clock of a feed line (mm:ss left), or null. */
   feedClock: (at: string) => string | null;
   stats: ClassStats | null;
+  /** room.rules.allowHack: the "lần hack thắng" tile only exists when hacking is on. */
+  allowHack: boolean;
   busy: boolean;
   onPause: () => void;
   onResume: () => void;
@@ -64,20 +67,23 @@ function ControlButton({ children, onClick, disabled, color }: { children: strin
   );
 }
 
+/** avgProgress has one decimal: "11" or "11,5". */
+const formatProgress = (value: number) => String(Math.round(value * 10) / 10).replace(".", ",");
+
 function Stat({ value, label, color }: { value: string; label: string; color: string }) {
   return (
     <Box>
-      <Box sx={{ fontSize: hk.fs[28], fontWeight: hk.font.weightBold, color }}>{value}</Box>
-      <Box sx={{ color: c.dim, fontSize: hk.fs[11] }}>{label}</Box>
+      <Box sx={{ fontSize: hk.fs[26], fontWeight: hk.font.weightBold, color }}>{value}</Box>
+      <Box sx={{ color: c.dim, fontSize: hk.fs[12] }}>{label}</Box>
     </Box>
   );
 }
 
 /** GV 3 · Màn chiếu (HTeacherLive): COUNTDOWN, RUNNING, PAUSED and ENDING. */
-export function LiveView({ roomCode, teacherLabel, phase, getRemainingMs, getCountdownMs, leaderboard, feed, feedClock, stats, busy, onPause, onResume, onEnd }: LiveViewProps) {
-  const top = leaderboard?.top ?? [];
+export function LiveView({ roomCode, teacherLabel, phase, getRemainingMs, getCountdownMs, leaderboard, feed, feedClock, stats, allowHack, busy, onPause, onResume, onEnd }: LiveViewProps) {
+  const top = (leaderboard?.top ?? []).slice(0, BOARD_ROWS);
   const max = Math.max(0, ...top.map((entry) => entry.total));
-  const worst = (stats?.perQuestion ?? []).filter((q) => q.wrongRate > 0).sort((a, b) => b.wrongRate - a.wrongRate).slice(0, WORST_SHOWN);
+  const worst = (stats?.perQuestion ?? []).filter((q) => q.wrongPlayers > 0).sort((a, b) => b.wrongPlayers - a.wrongPlayers).slice(0, WORST_SHOWN);
   const paused = phase === "PAUSED";
   const online = stats?.playersOnline ?? 0;
 
@@ -113,15 +119,15 @@ export function LiveView({ roomCode, teacherLabel, phase, getRemainingMs, getCou
             {worst.map((question) => (
               <Box key={question.questionId} sx={{ border: `1px solid ${c.weakBorder}`, borderRadius: `${hk.radius.panel}px`, padding: "10px 12px", fontSize: hk.fs[14], fontWeight: hk.font.weightBold }}>
                 {question.title}
-                <Box sx={{ color: c.pink, fontSize: hk.fs[12], fontWeight: hk.font.weightMedium }}>{Math.round(question.wrongRate * 100)}% lượt trả lời sai</Box>
+                <Box sx={{ color: c.pink, fontSize: hk.fs[12], fontWeight: hk.font.weightMedium }}>{question.wrongPlayers}/{stats?.playerCount ?? 0} máy sai · {Math.round(question.wrongRate * 100)}%</Box>
               </Box>
             ))}
             <Box sx={{ marginTop: "auto", color: c.dim, fontSize: hk.fs[12] }}>Danh sách này được lưu vào LMS để cô giảng lại sau trận.</Box>
           </Panel>
-          <Panel sx={{ display: "flex", justifyContent: "space-around", padding: "14px", textAlign: "center" }}>
-            <Stat value={formatNumber(stats?.answeredTotal ?? 0)} label="lượt trả lời" color={c.white} />
-            <Stat value={`${stats ? Math.round(stats.accuracy * 100) : 0}%`} label="tỉ lệ đúng" color={c.green} />
-            <Stat value={String(online)} label="máy đang chạy" color={c.yellow} />
+          <Panel sx={{ display: "grid", gridTemplateColumns: `repeat(${allowHack ? 3 : 2}, minmax(0, 1fr))`, gap: "8px", padding: "14px 18px", textAlign: "center" }}>
+            <Stat value={`${formatProgress(stats?.avgProgress ?? 0)}/${stats?.questionTotal ?? 0}`} label="tiến độ trung bình" color={c.white} />
+            {allowHack ? <Stat value={formatNumber(stats?.hackWins ?? 0)} label="lần hack thắng" color={c.green} /> : null}
+            <Stat value={formatNumber(stats?.firewallOn ?? 0)} label="máy bật tường lửa" color={c.yellow} />
           </Panel>
         </Box>
       </Box>

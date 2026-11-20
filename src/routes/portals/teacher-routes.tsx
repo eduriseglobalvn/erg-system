@@ -114,15 +114,18 @@ const teacherGamesRoute = createRoute({
 });
 
 function TeacherGameCreate() {
-  const { quizId } = teacherGameCreateRoute.useSearch();
-  return <Suspense fallback={null}><CreateRoomPage quizId={quizId} /></Suspense>;
+  const { quizId, classId } = teacherGameCreateRoute.useSearch();
+  return <Suspense fallback={null}><CreateRoomPage quizId={quizId} classId={classId} /></Suspense>;
 }
 
 const teacherGameCreateRoute = createRoute({
   getParentRoute: () => authedRoute,
   path: "/teacher/games/new",
   staticData: permissionStaticData("/teacher/games", "TEACHER"),
-  validateSearch: (search: Record<string, unknown>): { quizId?: string } => (typeof search.quizId === "string" && search.quizId ? { quizId: search.quizId } : {}),
+  validateSearch: (search: Record<string, unknown>): { quizId?: string; classId?: string } => ({
+    ...(typeof search.quizId === "string" && search.quizId ? { quizId: search.quizId } : {}),
+    ...(typeof search.classId === "string" && search.classId ? { classId: search.classId } : {}),
+  }),
   component: TeacherGameCreate,
 });
 

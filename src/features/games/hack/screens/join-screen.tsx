@@ -70,11 +70,6 @@ export function JoinScreen({ phone, studentName, busy, error, onSubmit }: JoinSc
   );
 
   const errorLine = error ? <Box role="alert" sx={{ fontSize: phone ? hk.fs[12] : hk.fs[13], lineHeight: phone ? 1.6 : undefined, color: c.pink }}>{error}</Box> : null;
-  const qrLine = (
-    <Box sx={{ fontSize: hk.fs[12], lineHeight: phone ? 1.6 : undefined, color: c.dim }}>
-      {phone ? "Quét mã QR trên bảng thì vào thẳng phòng chờ." : "Quét mã QR trên bảng thì vào thẳng phòng chờ, bỏ qua bước này."}
-    </Box>
-  );
   const button = (
     <HackButton disabled={!ready || busy} onClick={submit} fullWidth fontSize={phone ? hk.fs[17] : hk.fs[20]} minHeight={phone ? 56 : 60} sx={phone ? { marginTop: "auto" } : undefined}>
       {phone ? "> KẾT NỐI (đủ 4 số)" : "> KẾT NỐI (nhập đủ 4 số)"}
@@ -93,7 +88,6 @@ export function JoinScreen({ phone, studentName, busy, error, onSubmit }: JoinSc
         <Box component="label" htmlFor="join-code" sx={{ position: "relative", fontSize: hk.fs[12], fontWeight: hk.font.weightBold, color: c.dim }}>MÃ PHÒNG (4 SỐ)</Box>
         {digits}
         {errorLine}
-        {qrLine}
         {button}
       </HackScreen>
     );
@@ -115,7 +109,6 @@ export function JoinScreen({ phone, studentName, busy, error, onSubmit }: JoinSc
           {digits}
           {errorLine}
           {button}
-          {qrLine}
         </Box>
       </Panel>
     </HackScreen>

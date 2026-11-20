@@ -41,10 +41,10 @@ describe("room state machine", () => {
   });
 
   it("ignores replayed seq numbers after a resume but always accepts a full room.state", () => {
-    const state = run([{ type: "room.lobby", seq: 5, data: { players: [], count: 3, classSize: 32 } }]);
-    const replay = applyServerMessage(state, { type: "room.lobby", seq: 4, data: { players: [], count: 1, classSize: 32 } }, 0);
+    const state = run([{ type: "room.lobby", seq: 5, data: { players: [], count: 3, classSize: 32, missing: [] } }]);
+    const replay = applyServerMessage(state, { type: "room.lobby", seq: 4, data: { players: [], count: 1, classSize: 32, missing: [] } }, 0);
     expect(replay.lobby?.count).toBe(3);
-    const snapshot = applyServerMessage(state, { type: "room.state", seq: 2, data: { phase: "LOBBY", serverNow: 0, screen: "LOBBY", lobby: { players: [], count: 9, classSize: 32 } } }, 0);
+    const snapshot = applyServerMessage(state, { type: "room.state", seq: 2, data: { phase: "LOBBY", serverNow: 0, screen: "LOBBY", lobby: { players: [], count: 9, classSize: 32, missing: [] } } }, 0);
     expect(snapshot.lobby?.count).toBe(9);
     expect(snapshot.lastSeq).toBe(5);
   });
@@ -80,13 +80,13 @@ describe("room state machine", () => {
   });
 
   it("host: me stays null, phases pick the teacher view and class.stats is kept", () => {
-    let state = run([{ type: "room.state", seq: 1, data: { phase: "LOBBY", serverNow: 1_000, screen: "LOBBY", me: null, lobby: { players: [], count: 0, classSize: 32 } } }]);
+    let state = run([{ type: "room.state", seq: 1, data: { phase: "LOBBY", serverNow: 1_000, screen: "LOBBY", me: null, lobby: { players: [], count: 0, classSize: 32, missing: [] } } }]);
     expect(state.me).toBeNull();
     expect(selectHostScreen(state)).toBe("LOBBY");
     expect(selectHostScreen(initialRoomViewState)).toBe("LOADING");
     state = run([{ type: "room.phase", seq: 2, data: { phase: "RUNNING", endsAt: 61_000 } }], state);
     expect(selectHostScreen(state)).toBe("LIVE");
-    const stats = { answeredTotal: 5, accuracy: 0.74, perQuestion: [{ questionId: "q1", title: "Q", wrongRate: 0.5 }], playersOnline: 3 };
+    const stats = { answeredTotal: 5, accuracy: 0.74, perQuestion: [{ questionId: "q1", title: "Q", wrongRate: 0.5, wrongPlayers: 1, answeredPlayers: 2 }], playersOnline: 3, playerCount: 4, avgProgress: 1.5, questionTotal: 10, firewallOn: 1, hackWins: 0 };
     state = run([{ type: "class.stats", seq: 3, data: stats }], state);
     expect(state.stats).toEqual(stats);
     expect(state.me).toBeNull();

@@ -18,8 +18,9 @@ export function fetchGameRoom(roomId: string) {
 // Teacher side (lms portal).
 const lms = { portal: "lms" } as const;
 
-export function fetchGameSources(classId: string) {
-  return apiRequest<GameSource[]>(`${API_ENDPOINTS.games.sources}?classId=${encodeURIComponent(classId)}`, lms);
+/** With a classId the items also carry classSize and classWrongCount; lastGame is always there. */
+export function fetchGameSources(classId?: string) {
+  return apiRequest<GameSource[]>(classId ? `${API_ENDPOINTS.games.sources}?classId=${encodeURIComponent(classId)}` : API_ENDPOINTS.games.sources, lms);
 }
 
 export function createGameRoom(body: CreateRoomBody) {

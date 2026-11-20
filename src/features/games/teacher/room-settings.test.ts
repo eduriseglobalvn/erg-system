@@ -13,7 +13,7 @@ describe("room settings", () => {
   it("builds the create-room body with hack and emergency patch forced off", () => {
     const body = buildCreateRoomBody({ ...ready, durationMinutes: 8, showSolution: false, questionOrder: "WRONG_FIRST" }, source());
     expect(body).toEqual({
-      gameType: "HACK", quizVersionId: "v2", classId: "c1", durationMinutes: 8,
+      gameType: "HACK", quizVersionId: "v2", classId: "c1", durationMinutes: 8, questionSet: "ALL",
       rules: { allowHack: false, emergencyPatch: false, showLeaderboard: true, showSolution: false, allowLateJoin: true, questionOrder: "WRONG_FIRST" },
     });
   });
@@ -26,6 +26,14 @@ describe("room settings", () => {
     expect(validateSettings({ ...ready, durationMinutes: 4 }, source())).toMatch(/5 đến 30/);
     expect(validateSettings({ ...ready, durationMinutes: 31 }, source())).toMatch(/5 đến 30/);
     expect(validateSettings({ ...ready, durationMinutes: 12.5 }, source())).toMatch(/5 đến 30/);
+  });
+
+  it("sends the class-wrong question set and blocks it while the class has no wrong question", () => {
+    const wrong = { ...ready, questionSet: "CLASS_WRONG" as const };
+    expect(buildCreateRoomBody(wrong, source({ classWrongCount: 6 })).questionSet).toBe("CLASS_WRONG");
+    expect(validateSettings(wrong, source({ classWrongCount: 6 }))).toBeNull();
+    expect(validateSettings(wrong, source({ classWrongCount: 0 }))).toMatch(/chưa có câu hay sai/);
+    expect(validateSettings(wrong, source())).toMatch(/chưa có câu hay sai/);
   });
 
   it("clamps the duration stepper", () => {

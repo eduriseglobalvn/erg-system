@@ -3,6 +3,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import RemoveIcon from "@mui/icons-material/Remove";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
+import ButtonBase from "@mui/material/ButtonBase";
 import Chip from "@mui/material/Chip";
 import Paper from "@mui/material/Paper";
 import Switch from "@mui/material/Switch";
@@ -50,18 +51,25 @@ function Label({ children }: { children: string }) {
   return <Typography variant="subtitle2" sx={{ mb: 0.75, color: "text.secondary" }}>{children}</Typography>;
 }
 
-function Choice({ title, hint, selected, disabled }: { title: string; hint: string; selected?: boolean; disabled?: boolean }) {
+function Choice({ title, hint, selected, disabled, onSelect }: { title: string; hint: string; selected?: boolean; disabled?: boolean; onSelect?: () => void }) {
   return (
-    <Box sx={{ flex: 1, p: 1.5, borderRadius: 1.5, border: 1, borderColor: selected ? "primary.main" : "divider", bgcolor: selected ? "action.selected" : "transparent", opacity: disabled ? 0.55 : 1 }}>
-      <Typography variant="subtitle2" sx={{ color: selected ? "primary.main" : "text.primary" }}>{title}</Typography>
-      <Typography variant="caption" sx={{ color: "text.secondary" }}>{hint}</Typography>
-    </Box>
+    <ButtonBase
+      role="radio"
+      aria-checked={Boolean(selected)}
+      disabled={disabled || !onSelect}
+      onClick={onSelect}
+      sx={{ flex: 1, p: 1.5, borderRadius: 1.5, border: 1, borderColor: selected ? "primary.main" : "divider", bgcolor: selected ? "action.selected" : "transparent", opacity: disabled ? 0.55 : 1, display: "block", textAlign: "left", font: "inherit" }}
+    >
+      <Typography variant="subtitle2" component="div" sx={{ color: selected ? "primary.main" : "text.primary" }}>{title}</Typography>
+      <Typography variant="caption" component="div" sx={{ color: "text.secondary" }}>{hint}</Typography>
+    </ButtonBase>
   );
 }
 
 /** LMS 3 · Cài đặt phòng (LmsSettings): class, duration, question set and the room rules. */
 export function SettingsStep({ settings, classes, source, problem, failure, busy, onChange, onBack, onSubmit }: SettingsStepProps) {
   const set = <K extends keyof RoomSettings>(key: K, value: RoomSettings[K]) => onChange({ ...settings, [key]: value });
+  const classWrongCount = source?.classWrongCount ?? 0;
   const filtered = source ? describeFiltered(source.filteredByKind) : "";
   return (
     <Box sx={{ ...stageSx, p: { xs: 2, md: 3 }, display: "flex", flexDirection: "column", gap: 2 }}>
@@ -77,7 +85,7 @@ export function SettingsStep({ settings, classes, source, problem, failure, busy
             <Label>Ván kết thúc khi</Label>
             <Box sx={{ display: "flex", gap: 1.5 }}>
               <Choice title="Hết giờ" hint="Dừng khi hết thời gian đã đặt." selected />
-              <Choice title="Đủ sao" hint="Sắp có." disabled />
+              <Choice title="Đủ sao · đợt sau" hint="Dừng khi có người đạt số sao đặt trước." disabled />
             </Box>
           </Box>
           <Box>
@@ -94,14 +102,20 @@ export function SettingsStep({ settings, classes, source, problem, failure, busy
           <Box>
             <Label>Lớp chơi</Label>
             <AppSelect aria-label="Lớp chơi" value={settings.classId} onChange={(event) => set("classId", event.target.value)}>
-              {classes.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
+              {classes.map((item) => <option key={item.id} value={item.id}>{item.id === settings.classId && source?.classSize ? `${item.label} · ${source.classSize} học sinh` : item.label}</option>)}
             </AppSelect>
           </Box>
           <Box>
             <Label>Bộ câu</Label>
-            <Box sx={{ display: "flex", gap: 1.5 }}>
-              <Choice title="Cả bài" hint="Mọi câu chơi được của bài." selected />
-              <Choice title="Câu lớp hay sai" hint="Sắp có." disabled />
+            <Box role="radiogroup" aria-label="Bộ câu" sx={{ display: "flex", gap: 1.5 }}>
+              <Choice title="Cả bài" hint="Mọi câu chơi được của bài." selected={settings.questionSet === "ALL"} onSelect={() => set("questionSet", "ALL")} />
+              <Choice
+                title="Câu lớp hay sai"
+                hint={classWrongCount > 0 ? `${classWrongCount} câu lớp từng làm sai.` : "Lớp chưa có câu sai nào."}
+                selected={settings.questionSet === "CLASS_WRONG"}
+                disabled={classWrongCount <= 0}
+                onSelect={() => set("questionSet", "CLASS_WRONG")}
+              />
             </Box>
           </Box>
           <Box sx={{ mt: "auto", border: 1, borderColor: "divider", borderRadius: 1.5, p: 1.5, display: "flex", flexDirection: "column", gap: 1 }}>

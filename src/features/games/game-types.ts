@@ -16,6 +16,8 @@ export type RoomRules = {
   questionOrder: "RANDOM" | "LESSON" | "WRONG_FIRST";
 };
 
+export type QuestionSet = "ALL" | "CLASS_WRONG";
+
 export type RoomSummary = {
   id: string;
   gameType: GameType;
@@ -23,11 +25,16 @@ export type RoomSummary = {
   status: RoomStatus;
   classId: string;
   className: string;
+  quizId: string;
+  quizVersionId: string;
   quizTitle: string;
+  questionSet: QuestionSet;
   durationMinutes: number;
   rules: RoomRules;
   playerCount: number;
   questionCount: number;
+  /** Correct answers / all answers of the room (0..1); null until somebody answered. */
+  accuracy: number | null;
   createdAt: string;
   startedAt?: string | null;
   endedAt?: string | null;
@@ -70,8 +77,11 @@ export type LeaderEntry = { playerId: string; displayName: string; stars: number
 /** `firewall` drives the "[TL]" mark next to a player on the question screen. */
 export type LeaderboardData = { top: (LeaderEntry & { firewall: boolean })[]; me: { rank: number; total: number } };
 export type FeedItem = { at: string; text: string; tone: "info" | "loot" | "firewall" };
-/** `classSize` = enrolled students of the class (for "28 / 32 MÁY" and "còn chờ N máy"). */
-export type LobbyData = { players: { playerId: string; displayName: string }[]; count: number; classSize: number };
+/**
+ * `classSize` = enrolled students of the class (for "28 / 32 MÁY" and "còn chờ N máy").
+ * `missing` = class students not in the room yet; only the host receives it (students get []).
+ */
+export type LobbyData = { players: { playerId: string; displayName: string }[]; count: number; classSize: number; missing: { userId: string; displayName: string }[] };
 
 export type FinalEntry = LeaderEntry & { correctCount: number; answeredCount: number; longestStreak: number };
 export type RoomEndedData = {
@@ -79,12 +89,19 @@ export type RoomEndedData = {
   me?: FinalEntry & { weakQuestions: { questionId: string; title: string; /** 0-based position in the room's question list; show `index + 1` */ index: number; wrongCount: number }[] };
 };
 
-/** Host only (class.stats, at most once per 2 s). `wrongRate` is a fraction 0..1. */
+/** Host only (class.stats, at most once per 2 s). `wrongRate` is a fraction 0..1; `wrongPlayers` counts machines, not attempts. */
 export type ClassStats = {
   answeredTotal: number;
   accuracy: number;
-  perQuestion: { questionId: string; title: string; wrongRate: number }[];
+  perQuestion: { questionId: string; title: string; wrongRate: number; wrongPlayers: number; answeredPlayers: number }[];
   playersOnline: number;
+  playerCount: number;
+  /** Mean correctCount, one decimal. */
+  avgProgress: number;
+  /** Missions in the game. */
+  questionTotal: number;
+  firewallOn: number;
+  hackWins: number;
 };
 
 /** GET /sources item: one published quiz version the teacher can open a room from. */
@@ -99,6 +116,11 @@ export type GameSource = {
   filteredCount: number;
   /** Questions dropped by the room filter, by kind (essay, likert_scale, ...). */
   filteredByKind: Record<string, number>;
+  /** Only with a classId: enrolled students, and playable questions the class got wrong in earlier ended rooms. */
+  classSize?: number | null;
+  classWrongCount?: number | null;
+  /** Latest ended room of this teacher on the quiz (any version), or null. */
+  lastGame?: { roomId: string; gameType: GameType; className: string; endedAt: string } | null;
 };
 
 /** POST /rooms body. */
@@ -107,6 +129,7 @@ export type CreateRoomBody = {
   quizVersionId: string;
   classId: string;
   durationMinutes: number;
+  questionSet: QuestionSet;
   rules: RoomRules;
 };
 

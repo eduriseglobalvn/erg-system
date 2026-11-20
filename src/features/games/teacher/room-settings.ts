@@ -1,4 +1,4 @@
-import type { CreateRoomBody, GameSource, RoomRules } from "@/features/games/game-types";
+import type { CreateRoomBody, GameSource, QuestionSet, RoomRules } from "@/features/games/game-types";
 
 export const DURATION_MIN = 5;
 export const DURATION_MAX = 30;
@@ -7,6 +7,7 @@ export type RoomSettings = {
   classId: string;
   quizVersionId: string;
   durationMinutes: number;
+  questionSet: QuestionSet;
   showLeaderboard: boolean;
   showSolution: boolean;
   allowLateJoin: boolean;
@@ -17,6 +18,7 @@ export const DEFAULT_SETTINGS: RoomSettings = {
   classId: "",
   quizVersionId: "",
   durationMinutes: 10,
+  questionSet: "ALL",
   showLeaderboard: true,
   showSolution: true,
   allowLateJoin: true,
@@ -44,6 +46,7 @@ export function describeFiltered(filteredByKind: Record<string, number>): string
 export function validateSettings(settings: RoomSettings, source: GameSource | undefined): string | null {
   if (!source) return "Chọn bài tập để chơi.";
   if (!settings.classId) return "Chọn lớp chơi.";
+  if (settings.questionSet === "CLASS_WRONG" && !source.classWrongCount) return "Lớp này chưa có câu hay sai trong bài này.";
   if (source.playableCount <= 0) return "Bài này không có câu nào chơi được trong trò chơi.";
   if (!Number.isInteger(settings.durationMinutes) || settings.durationMinutes < DURATION_MIN || settings.durationMinutes > DURATION_MAX) {
     return `Thời lượng từ ${DURATION_MIN} đến ${DURATION_MAX} phút.`;
@@ -58,6 +61,7 @@ export function buildCreateRoomBody(settings: RoomSettings, source: GameSource):
     quizVersionId: source.quizVersionId,
     classId: settings.classId,
     durationMinutes: settings.durationMinutes,
+    questionSet: settings.questionSet,
     rules: {
       allowHack: false,
       emergencyPatch: false,

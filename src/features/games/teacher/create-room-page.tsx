@@ -17,15 +17,17 @@ function createErrorMessage(error: unknown) {
 }
 
 /** /teacher/games/new?quizId=...: pick the game, then the room settings; POST /rooms and open the control room. */
-export function CreateRoomPage({ quizId }: { quizId?: string }) {
+export function CreateRoomPage({ quizId, classId: initialClassId }: { quizId?: string; classId?: string }) {
   const navigate = useNavigate();
   const { classes } = useTeacherClasses();
   const [step, setStep] = useState<"pick" | "settings">("pick");
-  const [draft, setDraft] = useState<RoomSettings>(DEFAULT_SETTINGS);
+  const [draft, setDraft] = useState<RoomSettings>({ ...DEFAULT_SETTINGS, classId: initialClassId ?? "" });
   const classId = draft.classId || classes[0]?.id || "";
   const sources = useQuery({ queryKey: ["games", "sources", classId], queryFn: () => fetchGameSources(classId), enabled: Boolean(classId), staleTime: 60_000 });
   const source = pickSource(sources.data ?? [], quizId);
-  const settings = { ...draft, classId, quizVersionId: source?.quizVersionId ?? "" };
+  // A class with no wrong questions cannot play CLASS_WRONG: fall back to the whole quiz.
+  const questionSet = source?.classWrongCount ? draft.questionSet : "ALL";
+  const settings = { ...draft, classId, questionSet, quizVersionId: source?.quizVersionId ?? "" };
   const problem = validateSettings(settings, source);
   const create = useMutation({
     mutationKey: ["games", "create"],
