@@ -104,6 +104,13 @@ export const API_ENDPOINTS = {
     versionedBase: "/api/v1/",
     centers: "/api/v1/centers" satisfies ContractPath,
   },
+  // Realtime classroom games (wayground/HOP_DONG_API.md). The socket path is not under /api: it is the WebSocket upgrade.
+  games: {
+    rooms: path("/api/v1/lms/games/rooms"),
+    roomJoin: path("/api/v1/lms/games/rooms/join"),
+    room: (roomId: string) => path(`/api/v1/lms/games/rooms/${encodeApiPathSegment(roomId)}`),
+    socket: (roomId: string) => `/ws/games/${encodeApiPathSegment(roomId)}`,
+  },
   lms: {
     assignments: "/api/v1/lms/assignments" satisfies ContractPath,
     assignment: (assignmentId: string) => path(`/api/v1/lms/assignments/${encodeApiPathSegment(assignmentId)}`),
