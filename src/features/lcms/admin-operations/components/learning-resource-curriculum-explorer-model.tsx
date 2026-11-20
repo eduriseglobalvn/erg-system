@@ -131,7 +131,7 @@ export function folderRoleLabel(role: CurriculumFolderRole) {
 }
 
 export function statusLabel(status?: string) {
-  if (status === "hidden") return "Đã ẩn";
+  if (status === "hidden" || status === "archived") return "Đã ẩn";
   if (status === "draft" || status === "reviewing") return "Bản nháp";
   if (status === "active" || status === "published" || status === "ready") return "Đã xuất bản";
   return status || "Chưa rõ";

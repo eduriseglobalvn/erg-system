@@ -75,7 +75,7 @@ function mergeSummary(left: ContentSummary, right: ContentSummary): ContentSumma
 
 function addStatusCount(summary: ContentSummary, status?: string) {
   const normalized = status?.toLowerCase();
-  if (normalized === "hidden") {
+  if (normalized === "hidden" || normalized === "archived") {
     summary.hidden += 1;
     return;
   }

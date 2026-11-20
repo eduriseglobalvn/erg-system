@@ -187,7 +187,7 @@ export function getDisplayLink(resource: AttachedResourceItem | LocalContentItem
 }
 
 export function getPublishStatusLabel(status?: string) {
-  if (status === "hidden") return "Đã ẩn";
+  if (status === "hidden" || status === "archived") return "Đã ẩn";
   if (status === "draft") return "Bản nháp";
   if (status === "active" || status === "published") return "Đã xuất bản";
   return "Bản nháp";
