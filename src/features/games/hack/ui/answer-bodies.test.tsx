@@ -10,7 +10,7 @@ import { InlineChoiceBody } from "@/features/games/hack/ui/inline-inputs";
 const feedback = { correct: "", incorrect: "", partial: "" };
 const base = { points: 1, feedback, id: "q" };
 
-function Harness({ question, initial, children }: { question: Question; initial: AnswerPayload; children: (value: AnswerPayload, set: (next: AnswerPayload) => void) => ReactNode }) {
+function Harness({ initial, children }: { question?: Question; initial: AnswerPayload; children: (value: AnswerPayload, set: (next: AnswerPayload) => void) => ReactNode }) {
   const [value, setValue] = useState(initial);
   return (
     <ThemeProvider theme={createTheme()}>

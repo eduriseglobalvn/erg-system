@@ -8,7 +8,7 @@ import { initialRoomViewState, type RoomViewState } from "@/features/games/room-
 const feedback = { correct: "", incorrect: "", partial: "" };
 const base = { points: 1, feedback };
 
-const HOTSPOT_IMAGE = `data:image/svg+xml;utf8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="640" height="400"><rect width="640" height="400" fill="#E9EEF2"/><rect width="640" height="30" fill="#2B3A46"/><rect y="30" width="640" height="40" fill="#fff"/><rect x="330" y="38" width="60" height="24" fill="none" stroke="#99a"/><rect y="70" width="120" height="330" fill="#F5F7F9"/></svg>')}`;
+const HOTSPOT_IMAGE = `data:image/svg+xml;utf8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="640" height="400"><rect width="640" height="400" fill="gainsboro"/><rect width="640" height="30" fill="darkslategray"/><rect y="30" width="640" height="40" fill="white"/><rect x="330" y="38" width="60" height="24" fill="none" stroke="gray"/><rect y="70" width="120" height="330" fill="whitesmoke"/></svg>')}`;
 
 const QUESTIONS: Record<string, Question> = {
   single_choice: { ...base, id: "q1", kind: "single_choice", title: "Phần mở rộng nào sau đây là của một tệp hình ảnh?", choices: [".docx", ".png", ".mp3", ".xlsx"].map((label, index) => ({ id: `c${index}`, label, correct: index === 1 })) },
