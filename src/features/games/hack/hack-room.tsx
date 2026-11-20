@@ -90,6 +90,13 @@ function HackRoomScreen({ state, room, send, retryNow }: HackRoomViewProps) {
     [send],
   );
 
+  const feedClock = useCallback(
+    (at: string) => {
+      const stamp = Date.parse(at);
+      return state.endsAt === null || Number.isNaN(stamp) ? null : formatClock(state.endsAt - stamp);
+    },
+    [state.endsAt],
+  );
   const locked = state.connection !== "open" || state.phase === "PAUSED";
   const screen = selectHackScreen(state);
   const { me } = state;
@@ -112,6 +119,7 @@ function HackRoomScreen({ state, room, send, retryNow }: HackRoomViewProps) {
           leaderboard={state.leaderboard}
           feed={state.feed}
           locked={locked}
+          feedClock={feedClock}
           onSubmit={submit}
         />
       );

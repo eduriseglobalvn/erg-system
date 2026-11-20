@@ -17,7 +17,7 @@ export const HACK_QUESTION_KINDS: readonly QuestionKind[] = [
   "drag_drop",
 ];
 
-type KindCopy = { chip: string | null; hint: string; titleSize: number };
+type KindCopy = { chip: string | null; phoneChip?: string; hint: string; titleSize: number };
 
 const KIND_COPY: Partial<Record<QuestionKind, KindCopy>> = {
   single_choice: { chip: null, hint: "chọn 1 mã", titleSize: 28 },
@@ -29,7 +29,7 @@ const KIND_COPY: Partial<Record<QuestionKind, KindCopy>> = {
   sequence: { chip: "SẮP XẾP THỨ TỰ", hint: "xếp lại các dòng lệnh", titleSize: 24 },
   fill_blank: { chip: "ĐIỀN CHỖ TRỐNG", hint: "gõ vào từng ô trong câu", titleSize: 24 },
   inline_choice: { chip: "CHỌN TRONG CÂU", hint: "mở từng danh sách ngay trong câu", titleSize: 24 },
-  select_from_lists: { chip: "CHỌN TỪ DANH SÁCH", hint: "mỗi dòng chọn 1 giá trị", titleSize: 24 },
+  select_from_lists: { chip: "CHỌN TỪ DANH SÁCH", phoneChip: "CHỌN TỪ D.SÁCH", hint: "mỗi dòng chọn 1 giá trị", titleSize: 24 },
   drag_words: { chip: "KÉO TỪ", hint: "kéo từ trong kho vào chỗ trống", titleSize: 24 },
   hotspot: { chip: "ĐIỂM TRÊN ẢNH", hint: "ngắm và khóa mục tiêu trên ảnh", titleSize: 24 },
   drag_drop: { chip: "KÉO THẢ", hint: "đưa từng gói vào đúng nhóm", titleSize: 24 },
@@ -58,6 +58,29 @@ export function answerProgress(question: Question, value: AnswerPayload): string
       return `đã xếp ${count(value.dragDropPlacements)}/${question.dragDropItems?.length ?? 0}`;
     case "hotspot":
       return value.hotspotPoint ? "đã khóa 1 điểm" : "chưa khóa điểm nào";
+    default:
+      return null;
+  }
+}
+
+const capital = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
+
+/** One-line note at the foot of the phone panel (HPQ* boards); null when the board has none. */
+export function phoneNote(question: Question, progress: string | null): string | null {
+  const done = progress ? ` ${capital(progress)}.` : "";
+  switch (question.kind) {
+    case "true_false":
+      return "Chạm một ô rồi chạm CHẠY LỆNH.";
+    case "multiple_response":
+      return `Chọn đủ và không thừa mới tính đúng.${done}`;
+    case "numeric":
+      return "Bàn phím số của game, không bật bàn phím hệ thống.";
+    case "select_from_lists":
+      return `Mỗi dòng một lựa chọn.${done}`;
+    case "sequence":
+      return "Dùng nút ^ v để đổi chỗ. Đúng toàn bộ thứ tự mới tính.";
+    case "matching":
+      return `Giữ mảnh 0,12 giây rồi kéo, như trên LMS.${done}`;
     default:
       return null;
   }

@@ -3,7 +3,7 @@ import { useEffect } from "react";
 
 import type { LootResultData } from "@/features/games/game-types";
 import { hk } from "@/features/games/hack/hack-tokens";
-import { lootCopy, lootSummary, packLabels, rankChange } from "@/features/games/hack/loot-meta";
+import { lootCopy, lootShortSummary, lootSummary, packLabels, rankChange } from "@/features/games/hack/loot-meta";
 import { Chip, HackButton, HackScreen, Panel, TermLine, formatNumber } from "@/features/games/hack/ui/hack-ui";
 import { HudBar } from "@/features/games/hack/ui/hud";
 
@@ -29,7 +29,7 @@ export function LootOpenScreen({ phone, result, rankBefore = null, locked, onNex
   const picked = result.slots[result.pickedSlot];
   const copy = lootCopy(picked.kind);
   const file = lootFileName(result);
-  const others = result.slots.filter((_, slot) => slot !== result.pickedSlot).map(lootSummary);
+  const others = result.slots.filter((_, slot) => slot !== result.pickedSlot).map(phone ? lootShortSummary : lootSummary);
   const before = result.me.coins - picked.coins;
   const amount = picked.kind === "HACK_COMMAND" ? "LỆNH HACK" : `+${formatNumber(picked.coins)} XU`;
   const firewall = result.me.firewall;
@@ -111,7 +111,7 @@ export function LootEmptyScreen({ phone, result, starsGained, getRemainingMs, lo
 
   return (
     <HackScreen phone={phone} label="Gói rỗng">
-      <HudBar me={result.me} getRemainingMs={getRemainingMs} phone={phone} hideRank />
+      <HudBar me={result.me} getRemainingMs={getRemainingMs} phone={phone} hideRank={!phone} compact={phone} />
       <Box sx={{ position: "relative", flex: 1, display: "flex", flexDirection: "column", gap: phone ? "10px" : 0, padding: phone ? "12px 14px 14px" : "20px 24px 24px", minHeight: 0 }}>
         <Panel sx={{ flex: 1, minHeight: 0, padding: phone ? "12px" : "20px 24px", display: "flex", flexDirection: "column", gap: phone ? "12px" : "14px" }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: "12px", fontSize: phone ? hk.fs[12] : hk.fs[13], fontWeight: hk.font.weightBold }}>

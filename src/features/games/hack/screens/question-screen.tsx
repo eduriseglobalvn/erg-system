@@ -8,7 +8,9 @@ import type { AnswerPayload, Question } from "@/domain/quiz/types";
 import { createInitialAnswer, isAnswerComplete, normalizeAnswerForSubmission } from "@/domain/quiz/quiz";
 import type { LeaderboardData, PlayerState, QuestionPayload } from "@/features/games/game-types";
 import { hk } from "@/features/games/hack/hack-tokens";
-import { answerProgress, echoCommand, footerHint, isTrueChoice, kindCopy, nextStarReward } from "@/features/games/hack/question-meta";
+import { answerProgress, echoCommand, footerHint, isTrueChoice, kindCopy, nextStarReward, phoneNote } from "@/features/games/hack/question-meta";
+import { DragDropBody, DragWordsBody, SequenceBody } from "@/features/games/hack/ui/drag-inputs";
+import { InlineChoiceBody, SelectListsBody } from "@/features/games/hack/ui/inline-inputs";
 import { MultiChoiceButtons, NumericField, ShortAnswerField } from "@/features/games/hack/ui/answer-inputs";
 import { Chip, Cursor, HackButton, HackScreen, Panel } from "@/features/games/hack/ui/hack-ui";
 import { HudBar, QuestionProgress } from "@/features/games/hack/ui/hud";
@@ -27,6 +29,8 @@ type QuestionScreenProps = {
   feed: { at: string; text: string; tone: string }[];
   /** Answer buttons stay locked while offline, paused, or after the answer was sent. */
   locked: boolean;
+  /** Feed stamp as the game clock left at that moment ("03:51"); null falls back to wall time. */
+  feedClock?: (at: string) => string | null;
   onSubmit: (questionId: string, answer: AnswerPayload) => void;
 };
 
@@ -37,7 +41,7 @@ function ChoiceButtons({ question, value, onChange, phone, locked }: { question:
   const choices = question.choices ?? [];
   if (question.kind === "true_false") {
     return (
-      <Box role="group" aria-label="Các đáp án" sx={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: phone ? "10px" : "16px", marginTop: phone ? 0 : "10px" }}>
+      <Box role="group" aria-label="Các đáp án" sx={{ display: "grid", gridTemplateColumns: phone ? "1fr" : "repeat(2, minmax(0, 1fr))", gap: phone ? "10px" : "16px", marginTop: phone ? 0 : "10px" }}>
         {choices.map((choice, index) => {
           const isTrue = isTrueChoice(choice.label, index);
           const selected = value.choiceId === choice.id;
@@ -64,7 +68,7 @@ function ChoiceButtons({ question, value, onChange, phone, locked }: { question:
             >
               <Box component="span" sx={{ fontSize: phone ? hk.fs[34] : hk.fs[44], fontWeight: hk.font.weightBold, color: selected ? c.bg : c.green }}>{isTrue ? "TRUE" : "FALSE"}</Box>
               <Box component="span" sx={{ fontSize: phone ? hk.fs[15] : hk.fs[18], fontWeight: hk.font.weightBold }}>
-                [{isTrue ? "T" : "F"}] Mệnh đề {isTrue ? "ĐÚNG" : "SAI"}{selected ? " · đã chọn" : ""}
+                {phone ? "" : `[${isTrue ? "T" : "F"}] `}Mệnh đề {isTrue ? "ĐÚNG" : "SAI"}{selected ? " · đã chọn" : ""}
               </Box>
             </ButtonBase>
           );
@@ -115,7 +119,7 @@ function ChoiceButtons({ question, value, onChange, phone, locked }: { question:
 }
 
 /** 04 · Nhiệm vụ, all 13 kinds (HQuestion, HQ*, HPQuestion, HPQ*). */
-export function QuestionScreen({ phone, me, payload, marks, getRemainingMs, leaderboard, feed, locked, onSubmit }: QuestionScreenProps) {
+export function QuestionScreen({ phone, me, payload, marks, getRemainingMs, leaderboard, feed, locked, feedClock, onSubmit }: QuestionScreenProps) {
   const { question } = payload;
   const [value, setValue] = useState<AnswerPayload>(() => createInitialAnswer(question));
   const [sent, setSent] = useState(false);
@@ -180,12 +184,24 @@ export function QuestionScreen({ phone, me, payload, marks, getRemainingMs, lead
         <ShortAnswerField question={question} value={value} onChange={setValue} phone={phone} locked={disabled} />
       ) : question.kind === "numeric" ? (
         <NumericField question={question} value={value} onChange={setValue} phone={phone} locked={disabled} />
+      ) : question.kind === "inline_choice" ? (
+        <InlineChoiceBody question={question} value={value} onChange={setValue} phone={phone} locked={disabled} />
+      ) : question.kind === "sequence" ? (
+        <SequenceBody question={question} value={value} onChange={setValue} phone={phone} locked={disabled} />
+      ) : question.kind === "drag_words" ? (
+        <DragWordsBody question={question} value={value} onChange={setValue} phone={phone} locked={disabled} />
+      ) : question.kind === "drag_drop" ? (
+        <DragDropBody question={question} value={value} onChange={setValue} phone={phone} locked={disabled} />
+      ) : question.kind === "select_from_lists" ? (
+        <SelectListsBody question={question} value={value} onChange={setValue} phone={phone} locked={disabled} />
       ) : (
         <Box
           sx={{
             // The shared question components hard-code light borders and surfaces; recolour them for the dark theme.
             "& .MuiButtonBase-root:not([aria-pressed='true'])": { borderColor: c.border },
-            "& input, & textarea": { color: c.white, fontFamily: "inherit" },
+            "& input, & textarea": { color: c.white },
+            // The shared components set their own heading/body fonts; the game is one mono family.
+            "&& *": { fontFamily: "inherit" },
           }}
         >
           <QuestionRenderer question={question} value={value} onChange={setValue} submitted={disabled} />
@@ -222,12 +238,12 @@ export function QuestionScreen({ phone, me, payload, marks, getRemainingMs, lead
           <Panel sx={{ padding: withSide ? "14px" : "12px", flex: withSide ? undefined : 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", fontSize: hk.fs[12], fontWeight: hk.font.weightBold, whiteSpace: "nowrap" }}>
               <Chip color={c.green} solid sx={{ padding: "3px 8px" }}>{missionLabel}</Chip>
-              {copy.chip ? <Chip color={c.cyan} sx={{ padding: "2px 8px" }}>{copy.chip}</Chip> : null}
+              {copy.chip ? <Chip color={c.cyan} sx={{ padding: "2px 8px" }}>{copy.phoneChip ?? copy.chip}</Chip> : null}
               {withSide ? <Box component="span" sx={{ color: c.cyan }}>+{reward} sao · 1 gói</Box> : null}
             </Box>
-            <Box component="h2" sx={{ margin: "12px 0 0", fontSize: withSide ? titleSize : hk.fs[17], lineHeight: 1.45, fontWeight: hk.font.weightBold, color: c.white }}>{question.title}</Box>
+            <Box component="h2" sx={{ fontFamily: "inherit", margin: "12px 0 0", fontSize: withSide ? titleSize : hk.fs[17], lineHeight: 1.45, fontWeight: hk.font.weightBold, color: c.white }}>{question.title}</Box>
             {question.instructions ? <Box sx={{ marginTop: "6px", fontSize: hk.fs[13], color: c.dim }}>{question.instructions}</Box> : null}
-            {withSide ? null : <Box sx={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "10px", flex: 1 }}>{question.contentImage && question.kind !== "hotspot" ? <QuestionContentImage question={question} /> : null}{body}{question.kind === "numeric" ? <Box sx={{ marginTop: "auto", fontSize: hk.fs[12], color: c.dim }}>Bàn phím số của game, không bật bàn phím hệ thống.</Box> : null}</Box>}
+            {withSide ? null : <Box sx={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "10px", flex: 1 }}>{question.contentImage && question.kind !== "hotspot" ? <QuestionContentImage question={question} /> : null}{body}{phoneNote(question, progress) ? <Box sx={{ marginTop: "auto", fontSize: hk.fs[12], color: c.dim }}>{phoneNote(question, progress)}</Box> : null}</Box>}
           </Panel>
           {withSide && question.contentImage ? <QuestionContentImage question={question} /> : null}
           {withSide ? body : null}
@@ -254,7 +270,7 @@ export function QuestionScreen({ phone, me, payload, marks, getRemainingMs, lead
             <Box sx={{ flex: 1 }} />
             <Box component="span" sx={{ color: progress ? c.yellow : c.cyan }}>{progress ?? `${withSide ? "thưởng: " : ""}+${reward} sao và 1 gói dữ liệu`}</Box>
           </Box>
-          <Box component="h2" sx={{ margin: 0, fontSize: titleSize, lineHeight: 1.4, fontWeight: hk.font.weightBold, color: c.white }}>{question.title}</Box>
+          <Box component="h2" sx={{ fontFamily: "inherit", margin: 0, fontSize: titleSize, lineHeight: 1.4, fontWeight: hk.font.weightBold, color: c.white }}>{question.title}</Box>
           {question.instructions ? <Box sx={{ fontSize: hk.fs[14], color: c.dim }}>{question.instructions}</Box> : null}
           {question.contentImage && question.kind !== "hotspot" ? <QuestionContentImage question={question} /> : null}
           {body}
@@ -266,7 +282,7 @@ export function QuestionScreen({ phone, me, payload, marks, getRemainingMs, lead
         {withSide ? (
           <Box sx={{ width: "320px", flex: "none", display: "flex", flexDirection: "column", gap: "16px" }}>
             {leaderboard ? <LeaderboardPanel data={leaderboard} me={me} /> : null}
-            <FeedPanel items={feed} hint={hintLine} />
+            <FeedPanel items={feed} hint={hintLine} clockOf={feedClock} />
           </Box>
         ) : null}
       </Box>

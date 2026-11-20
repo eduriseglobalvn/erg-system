@@ -38,6 +38,11 @@ export function rankChange(before: number | null, now: number): string {
   return now > before ? `xuống hạng ${now}` : `giữ hạng ${now}`;
 }
 
+/** Phone wording: "+50" / "RỖNG". */
+export function lootShortSummary(slot: LootSlotData): string {
+  return slot.kind === "EMPTY" ? "RỖNG" : slot.kind === "HACK_COMMAND" ? "lệnh hack" : `+${formatNumber(slot.coins)}`;
+}
+
 /** "tệp vụn +50" / "GÓI RỖNG": how a slot reads in the terminal lines. */
 export function lootSummary(slot: LootSlotData): string {
   return slot.kind === "EMPTY" ? "GÓI RỖNG" : `${KIND_COPY[slot.kind].short} +${formatNumber(slot.coins)}`;

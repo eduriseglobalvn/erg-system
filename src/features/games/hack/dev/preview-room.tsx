@@ -8,6 +8,8 @@ import { initialRoomViewState, type RoomViewState } from "@/features/games/room-
 const feedback = { correct: "", incorrect: "", partial: "" };
 const base = { points: 1, feedback };
 
+const HOTSPOT_IMAGE = `data:image/svg+xml;utf8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="640" height="400"><rect width="640" height="400" fill="#E9EEF2"/><rect width="640" height="30" fill="#2B3A46"/><rect y="30" width="640" height="40" fill="#fff"/><rect x="330" y="38" width="60" height="24" fill="none" stroke="#99a"/><rect y="70" width="120" height="330" fill="#F5F7F9"/></svg>')}`;
+
 const QUESTIONS: Record<string, Question> = {
   single_choice: { ...base, id: "q1", kind: "single_choice", title: "Phần mở rộng nào sau đây là của một tệp hình ảnh?", choices: [".docx", ".png", ".mp3", ".xlsx"].map((label, index) => ({ id: `c${index}`, label, correct: index === 1 })) },
   true_false: { ...base, id: "q2", kind: "true_false", title: "Khi xóa một tệp khỏi USB, tệp đó được chuyển vào Thùng rác (Recycle Bin) của máy tính.", choices: [{ id: "t", label: "Đúng", correct: false }, { id: "f", label: "Sai", correct: true }] },
@@ -17,7 +19,9 @@ const QUESTIONS: Record<string, Question> = {
   sequence: { ...base, id: "q6", kind: "sequence", title: "Sắp xếp các bước nén một thư mục thành tệp .zip trên Windows.", sequenceItems: ["Nhấp chuột phải vào thư mục", "Chọn Compressed (zipped) folder", "Chọn Send to", "Đặt tên cho tệp nén rồi nhấn Enter"].map((label, index) => ({ id: `s${index}`, label })) },
   matching: { ...base, id: "q7", kind: "matching", title: "Nối mỗi phần mở rộng với ứng dụng dùng để mở nó.", matching: [{ id: "p1", prompt: ".docx", response: "Microsoft Word" }, { id: "p2", prompt: ".xlsx", response: "Microsoft Excel" }, { id: "p3", prompt: ".pptx", response: "Microsoft PowerPoint" }] },
   fill_blank: { ...base, id: "q8", kind: "fill_blank", title: "Hoàn thành đoạn mô tả sau.", textBlanks: [{ id: "f1", label: "", correctAnswers: ["bit"], prefix: "Đơn vị nhỏ nhất để lưu thông tin là", suffix: "." }, { id: "f2", label: "", correctAnswers: ["byte"], prefix: "Tám đơn vị đó hợp thành một", suffix: "," }] },
-  inline_choice: { ...base, id: "q9", kind: "inline_choice", title: "Chọn từ đúng cho mỗi chỗ trong đoạn sau.", inlineBlanks: [{ id: "i1", statement: "RAM là bộ nhớ", options: ["tạm thời", "vĩnh viễn"], correctOptionId: "tạm thời", suffix: "." }] },
+  inline_choice: { ...base, id: "q9", kind: "inline_choice", title: "Chọn từ đúng cho mỗi chỗ trong đoạn sau.", inlineBlanks: [{ id: "i1", statement: "RAM là bộ nhớ", options: ["tạm thời", "vĩnh viễn"], correctOptionId: "tạm thời", suffix: ",", selectPosition: "after" }, { id: "i2", statement: "dữ liệu trong RAM sẽ", options: ["được giữ nguyên", "mất đi", "được nén lại"], correctOptionId: "mất đi", suffix: "khi tắt máy.", selectPosition: "after" }, { id: "i3", statement: "Ổ cứng thì thuộc loại bộ nhớ", options: ["tạm thời", "lâu dài"], correctOptionId: "lâu dài", suffix: ".", selectPosition: "after" }] },
+  select_from_lists: { ...base, id: "q12", kind: "select_from_lists", title: "Phân loại từng thiết bị sau.", inlineBlanks: [["Bàn phím", "Thiết bị vào"], ["Màn hình", "Thiết bị ra"], ["Thẻ nhớ", "Lưu trữ"], ["Máy in", "Thiết bị ra"]].map(([statement, correctOptionId], index) => ({ id: `l${index}`, statement, options: ["Thiết bị vào", "Thiết bị ra", "Lưu trữ"], correctOptionId })) },
+  hotspot: { ...base, id: "q13", kind: "hotspot", title: "Chạm vào nút dùng để đổi tên tệp đang chọn.", hotspotImage: { url: HOTSPOT_IMAGE, width: 640, height: 400 }, hotspotAreas: [{ id: "h1", shape: "rect", x: 330, y: 20, width: 60, height: 30, correct: true }] },
   drag_words: { ...base, id: "q10", kind: "drag_words", title: "Đặt đúng tổ hợp phím vào từng chỗ trống.", wordBank: [{ id: "w1", label: "Ctrl + S" }, { id: "w2", label: "Ctrl + V" }, { id: "w3", label: "Ctrl + Z" }], wordSlots: [{ id: "ws1", label: "Để lưu tệp ta nhấn", correctWordId: "w1", suffix: "," }, { id: "ws2", label: "để dán nhấn", correctWordId: "w2", suffix: "." }] },
   drag_drop: { ...base, id: "q11", kind: "drag_drop", title: "Xếp mỗi thiết bị vào đúng nhóm.", dropTargets: [{ id: "in", label: "THIẾT BỊ VÀO" }, { id: "out", label: "THIẾT BỊ RA" }], dragDropItems: [{ id: "d1", label: "Chuột", correctTargetId: "in" }, { id: "d2", label: "Máy in", correctTargetId: "out" }, { id: "d3", label: "Bàn phím", correctTargetId: "in" }] },
 };
@@ -37,7 +41,7 @@ const room: RoomSummary = { id: "preview", gameType: "HACK", code: "4253", statu
 function stateFor(screen: string, kind: string): RoomViewState {
   const open: RoomViewState = { ...initialRoomViewState, connection: "open", phase: "RUNNING", endsAt: Date.now() + 222_000, me };
   const question = { index: 12, total: 20, question: QUESTIONS[kind] ?? QUESTIONS.single_choice };
-  const withQuestion = { ...open, screen: "QUESTION" as const, question, marks: { 1: "ok", 2: "ok", 3: "ok", 4: "wrong", 5: "ok", 6: "ok", 7: "wrong", 8: "ok", 9: "ok", 10: "ok", 11: "ok" } as RoomViewState["marks"], leaderboard: { top, me: { rank: 4, total: 2170 } }, feed: [{ at: "2026-11-20T08:03:51", text: "GIA_HUY giải mã ví nhỏ +150", tone: "loot" }, { at: "2026-11-20T08:03:48", text: "DUC_TRI vá lỗ hổng +64", tone: "info" }, { at: "2026-11-20T08:03:44", text: "THU_KHANH bật tường lửa", tone: "firewall" }] };
+  const withQuestion = { ...open, screen: "QUESTION" as const, question, marks: { 1: "ok", 2: "ok", 3: "ok", 4: "wrong", 5: "ok", 6: "ok", 7: "wrong", 8: "ok", 9: "ok", 10: "ok", 11: "ok" } as RoomViewState["marks"], leaderboard: { top, me: { rank: 4, total: 2170 } }, feed: [[231, "GIA_HUY giải mã ví nhỏ +150", "loot"], [234, "DUC_TRI vá lỗ hổng +64", "info"], [238, "THU_KHANH bật tường lửa", "firewall"]].map(([left, text, tone]) => ({ at: new Date((open.endsAt ?? 0) - Number(left) * 1000).toISOString(), text: String(text), tone: String(tone) })) };
   switch (screen) {
     case "lobby":
       return { ...open, phase: "LOBBY", screen: "LOBBY", lobby: { players, count: 28, classSize: 32 } };
@@ -46,11 +50,13 @@ function stateFor(screen: string, kind: string): RoomViewState {
     case "wrong":
       return { ...withQuestion, screen: "EXPLAIN", answerResult };
     case "loot":
-      return { ...withQuestion, screen: "LOOT_PICK", me: lootMe, answerResult: { ...answerResult, correct: true, starsGained: 120, me: lootMe }, lootOffered: true };
+      return { ...withQuestion, screen: "LOOT_PICK", me: { ...lootMe, coins: 550, rank: 4 }, answerResult: { ...answerResult, correct: true, starsGained: 120, me: lootMe }, lootOffered: true };
     case "loot-open":
       return { ...withQuestion, rankBeforeLoot: lootBefore.rank, screen: "LOOT_RESULT", me: lootMe, lootResult: { pickedSlot: 1, slots: slots.map((slot) => ({ ...slot })), me: lootMe } };
-    case "loot-empty":
-      return { ...withQuestion, screen: "LOOT_RESULT", me: lootMe, answerResult: { ...answerResult, correct: true, starsGained: 120, me: lootMe }, lootResult: { pickedSlot: 2, slots: slots.map((slot) => ({ ...slot })), me: lootMe } };
+    case "loot-empty": {
+      const emptyMe = { ...lootMe, coins: 630, rank: 4 };
+      return { ...withQuestion, screen: "LOOT_RESULT", me: emptyMe, answerResult: { ...answerResult, correct: true, starsGained: 120, me: emptyMe }, lootResult: { pickedSlot: 1, slots: [{ kind: "SMALL_WALLET", coins: 150 }, { kind: "EMPTY", coins: 0 }, { kind: "SCRAP", coins: 50 }], me: emptyMe } };
+    }
     case "reconnect":
       return { ...withQuestion, connection: "reconnecting", attempt: 2, droppedAtMs: Date.now() - 5_000 };
     case "timeup":

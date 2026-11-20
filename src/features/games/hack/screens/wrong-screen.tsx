@@ -93,7 +93,7 @@ export function WrongScreen({ phone, me, result, payload, answered, getRemaining
   const body = (
     <Panel sx={{ flex: phone ? undefined : 1, padding: phone ? "14px" : "20px 22px", display: "flex", flexDirection: "column", gap: phone ? "10px" : "12px" }}>
       <Box sx={{ fontSize: phone ? hk.fs[11] : hk.fs[12], fontWeight: hk.font.weightBold, color: c.cyan }}>GIẢI MÃ: HỌC LẠI NGAY</Box>
-      {question ? <Box component="h2" sx={{ margin: 0, fontSize: phone ? hk.fs[16] : hk.fs[22], lineHeight: phone ? 1.5 : 1.4, fontWeight: hk.font.weightBold, color: c.white }}>{question.title}</Box> : null}
+      {question ? <Box component="h2" sx={{ fontFamily: "inherit", margin: 0, fontSize: phone ? hk.fs[16] : hk.fs[22], lineHeight: phone ? 1.5 : 1.4, fontWeight: hk.font.weightBold, color: c.white }}>{question.title}</Box> : null}
       {question ? <Review question={question} result={result} answered={answered} phone={phone} /> : null}
       {result.solution ? (
         <Box sx={{ borderLeft: `4px solid ${c.cyan}`, padding: phone ? "0 0 0 12px" : "4px 0 4px 16px", fontSize: phone ? hk.fs[14] : hk.fs[16], lineHeight: 1.7 }}>{result.solution}</Box>

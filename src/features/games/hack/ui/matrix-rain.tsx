@@ -29,9 +29,11 @@ function buildColumns(count: number) {
       head: chars.slice(head, head + 3).join("\n"),
       tip: chars[head + 3],
       after: chars.slice(head + 4).join("\n"),
-      duration: 6 + random() * 6,
-      delay: -random() * 10,
-      opacity: 0.55 + random() * 0.4,
+      duration: 6 + random() * 10,
+      delay: -random() * 16,
+      opacity: 0.56 + random() * 0.43,
+      // The design mixes three glyph sizes (11, 13, 15 px) at roughly 28 / 39 / 33 %.
+      size: [11, 13, 15][random() < 0.28 ? 0 : random() < 0.55 ? 1 : 2],
     };
   });
 }
@@ -52,7 +54,7 @@ export const MatrixRain = memo(function MatrixRain({ phone, tone = "green" }: { 
           key={index}
           sx={{
             width: "1ch",
-            fontSize: hk.fs[11],
+            fontSize: column.size,
             lineHeight: 1.35,
             whiteSpace: "pre",
             opacity: column.opacity,

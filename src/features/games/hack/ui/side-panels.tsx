@@ -43,14 +43,14 @@ function feedTime(at: string) {
 }
 
 const FEED_SHOWN = 3;
-/** "TIN TRÊN MẠNG": the last few feed lines plus a one-line hint for this screen. */
-export function FeedPanel({ items, hint }: { items: { at: string; text: string; tone: string }[]; hint?: string }) {
+/** "TIN TRÊN MẠNG": the last few feed lines, stamped with the game clock (mm:ss left) when `clockOf` can work it out, plus a one-line hint for this screen. */
+export function FeedPanel({ items, hint, clockOf }: { items: { at: string; text: string; tone: string }[]; hint?: string; clockOf?: (at: string) => string | null }) {
   return (
     <Panel sx={{ padding: "14px 16px", fontSize: hk.fs[13], lineHeight: 1.8, flex: 1 }}>
       <Box sx={{ color: c.dim, fontSize: hk.fs[12], fontWeight: hk.font.weightBold }}>TIN TRÊN MẠNG</Box>
       {items.slice(0, FEED_SHOWN).map((item, index) => (
         <Box key={`${item.at}-${index}`}>
-          <Box component="span" sx={{ color: c.yellow }}>{feedTime(item.at)}</Box>{" "}
+          <Box component="span" sx={{ color: c.yellow }}>{clockOf?.(item.at) ?? feedTime(item.at)}</Box>{" "}
           <Box component="span">{item.text}</Box>
         </Box>
       ))}

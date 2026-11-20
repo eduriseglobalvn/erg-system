@@ -58,6 +58,7 @@ export function HackScreen({ children, phone, tone = "green", amber = false, cen
           bgcolor: amber ? c.amberBg : c.bg,
           color: amber ? c.amberText : c.text,
           fontFamily: "inherit",
+          lineHeight: "normal", // the app's global body line-height (1.55) made every bar 4px taller than the design
           overflow: "hidden",
           display: "flex",
           flexDirection: "column",
