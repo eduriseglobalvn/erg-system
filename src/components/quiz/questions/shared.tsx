@@ -5,6 +5,7 @@ import IconButton from "@mui/material/IconButton";
 import InputBase from "@mui/material/InputBase";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
+import { alpha, type Theme } from "@mui/material/styles";
 import type { ReactNode } from "react";
 
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -63,6 +64,25 @@ export function QuestionContentImage({
   );
 }
 
+type BlankState = "empty" | "active" | "filled" | "correct" | "wrong";
+
+/** Same states on a dark theme (the Hack game), read from the palette instead of the light tokens. */
+function darkBlank(theme: Theme, state: BlankState) {
+  const { palette } = theme;
+  switch (state) {
+    case "active":
+      return { bg: alpha(palette.primary.main, 0.16), border: palette.primary.main, color: palette.primary.main };
+    case "filled":
+      return { bg: palette.background.paper, border: palette.primary.main, color: palette.text.primary };
+    case "correct":
+      return { bg: alpha(palette.success.main, 0.16), border: palette.success.main, color: palette.success.main };
+    case "wrong":
+      return { bg: alpha(palette.error.main, 0.16), border: palette.error.main, color: palette.error.main };
+    default:
+      return { bg: palette.background.paper, border: palette.divider, color: palette.text.secondary };
+  }
+}
+
 /** Look of a blank inside running text: dashed while empty, solid once filled, green/red in review. */
 export function blankSx(state: "empty" | "active" | "filled" | "correct" | "wrong") {
   const look = {
@@ -75,10 +95,11 @@ export function blankSx(state: "empty" | "active" | "filled" | "correct" | "wron
   return {
     typography: "subtitle1",
     alignItems: "center",
-    bgcolor: look.bg,
+    bgcolor: (theme: Theme) => (theme.palette.mode === "dark" ? darkBlank(theme, state).bg : look.bg),
     border: `1.5px ${look.style} ${look.border}`,
+    borderColor: (theme: Theme) => (theme.palette.mode === "dark" ? darkBlank(theme, state).border : look.border),
     borderRadius: `${tokens.radius.sm}px`,
-    color: look.color,
+    color: (theme: Theme) => (theme.palette.mode === "dark" ? darkBlank(theme, state).color : look.color),
     display: "inline-flex",
     fontWeight: "fontWeightBold",
     lineHeight: 1.3,
@@ -206,7 +227,7 @@ export function InlineChoiceSegment({
     <Box
       role="radiogroup"
       aria-label={blank.statement}
-      sx={{ bgcolor: tokens.color.divider, borderRadius: `${tokens.radius.control}px`, display: "flex", flex: "none", gap: 0.25, p: "3px", width: { xs: 112, sm: 160 } }}
+      sx={{ bgcolor: (theme: Theme) => (theme.palette.mode === "dark" ? theme.palette.divider : tokens.color.divider), borderRadius: `${tokens.radius.control}px`, display: "flex", flex: "none", gap: 0.25, p: "3px", width: { xs: 112, sm: 160 } }}
     >
       {segmentOrder(blank.options).map((option, index) => {
         const checked = selectedValue === option;

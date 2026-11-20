@@ -97,7 +97,7 @@ export function DragWordsQuestion({
           })}
         </Box>
 
-        <Box sx={{ bgcolor: tokens.color.surfaceSubtle, border: `1px solid ${tokens.color.border}`, borderRadius: `${tokens.radius.card}px`, display: "flex", flexDirection: "column", gap: 1, p: 1.5 }}>
+        <Box sx={{ bgcolor: (theme) => (theme.palette.mode === "dark" ? theme.palette.background.paper : tokens.color.surfaceSubtle), border: `1px solid ${tokens.color.border}`, borderRadius: `${tokens.radius.card}px`, display: "flex", flexDirection: "column", gap: 1, p: 1.5 }}>
           <Box sx={{ alignItems: "center", display: "flex", gap: 1, justifyContent: "space-between" }}>
             <Box component="span" sx={overlineSx}>Ngân hàng từ · chạm để điền</Box>
             <Box component="span" sx={{ typography: "caption", color: "text.secondary", flex: "none", fontVariantNumeric: "tabular-nums" }}>

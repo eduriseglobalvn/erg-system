@@ -9,6 +9,7 @@ import { createInitialAnswer, isAnswerComplete, normalizeAnswerForSubmission } f
 import type { LeaderboardData, PlayerState, QuestionPayload } from "@/features/games/game-types";
 import { hk } from "@/features/games/hack/hack-tokens";
 import { answerProgress, echoCommand, footerHint, isTrueChoice, kindCopy, nextStarReward } from "@/features/games/hack/question-meta";
+import { MultiChoiceButtons, NumericField, ShortAnswerField } from "@/features/games/hack/ui/answer-inputs";
 import { Chip, Cursor, HackButton, HackScreen, Panel } from "@/features/games/hack/ui/hack-ui";
 import { HudBar, QuestionProgress } from "@/features/games/hack/ui/hud";
 import { FeedPanel, LeaderboardPanel } from "@/features/games/hack/ui/side-panels";
@@ -173,6 +174,12 @@ export function QuestionScreen({ phone, me, payload, marks, getRemainingMs, lead
     () =>
       question.kind === "single_choice" || question.kind === "true_false" ? (
         <ChoiceButtons question={question} value={value} onChange={setValue} phone={phone} locked={disabled} />
+      ) : question.kind === "multiple_response" ? (
+        <MultiChoiceButtons question={question} value={value} onChange={setValue} phone={phone} locked={disabled} />
+      ) : question.kind === "short_answer" ? (
+        <ShortAnswerField question={question} value={value} onChange={setValue} phone={phone} locked={disabled} />
+      ) : question.kind === "numeric" ? (
+        <NumericField question={question} value={value} onChange={setValue} phone={phone} locked={disabled} />
       ) : (
         <Box
           sx={{
@@ -203,28 +210,30 @@ export function QuestionScreen({ phone, me, payload, marks, getRemainingMs, lead
   );
   const hintLine = `Đúng câu này: chuỗi x${streakAfter}${streakAfter >= 3 ? ", tường lửa " + (phone ? "bật" : "của bạn bật") : ""}.`;
 
-  const missionLabel = `NHIỆM VỤ ${payload.index + 1}/${payload.total}`;
+  const withSide = question.kind === "single_choice";
+  const missionLabel = `NHIỆM VỤ ${payload.index}/${payload.total}`;
 
   if (phone) {
     return (
       <HackScreen phone label="Nhiệm vụ">
-        <HudBar me={me} getRemainingMs={getRemainingMs} phone />
+        <HudBar me={me} getRemainingMs={getRemainingMs} phone compact={!withSide} />
         <QuestionProgress total={payload.total} current={payload.index} marks={marks} phone />
         <Box sx={{ position: "relative", flex: 1, display: "flex", flexDirection: "column", gap: "12px", padding: "12px 14px 16px" }}>
-          <Panel sx={{ padding: "14px" }}>
-            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", fontSize: hk.fs[12], fontWeight: hk.font.weightBold }}>
+          <Panel sx={{ padding: withSide ? "14px" : "12px", flex: withSide ? undefined : 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
+            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", fontSize: hk.fs[12], fontWeight: hk.font.weightBold, whiteSpace: "nowrap" }}>
               <Chip color={c.green} solid sx={{ padding: "3px 8px" }}>{missionLabel}</Chip>
-              {copy.chip ? <Chip color={c.cyan}>{copy.chip}</Chip> : null}
-              <Box component="span" sx={{ color: progress ? c.yellow : c.cyan }}>{progress ?? `+${reward} sao · 1 gói`}</Box>
+              {copy.chip ? <Chip color={c.cyan} sx={{ padding: "2px 8px" }}>{copy.chip}</Chip> : null}
+              {withSide ? <Box component="span" sx={{ color: c.cyan }}>+{reward} sao · 1 gói</Box> : null}
             </Box>
-            <Box component="h2" sx={{ margin: "12px 0 0", fontSize: titleSize, lineHeight: 1.45, fontWeight: hk.font.weightBold, color: c.white }}>{question.title}</Box>
+            <Box component="h2" sx={{ margin: "12px 0 0", fontSize: withSide ? titleSize : hk.fs[17], lineHeight: 1.45, fontWeight: hk.font.weightBold, color: c.white }}>{question.title}</Box>
             {question.instructions ? <Box sx={{ marginTop: "6px", fontSize: hk.fs[13], color: c.dim }}>{question.instructions}</Box> : null}
+            {withSide ? null : <Box sx={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "10px", flex: 1 }}>{question.contentImage && question.kind !== "hotspot" ? <QuestionContentImage question={question} /> : null}{body}{question.kind === "numeric" ? <Box sx={{ marginTop: "auto", fontSize: hk.fs[12], color: c.dim }}>Bàn phím số của game, không bật bàn phím hệ thống.</Box> : null}</Box>}
           </Panel>
-          {question.contentImage && question.kind !== "hotspot" ? <QuestionContentImage question={question} /> : null}
-          {body}
-          <Box sx={{ fontSize: hk.fs[12], lineHeight: 1.6, color: c.mint }}>{hintLine}</Box>
-          <Box sx={{ marginTop: "auto", display: "flex", flexDirection: "column", gap: "12px" }}>
-            {echoLine}
+          {withSide && question.contentImage ? <QuestionContentImage question={question} /> : null}
+          {withSide ? body : null}
+          {withSide ? <Box sx={{ fontSize: hk.fs[12], lineHeight: 1.6, color: c.mint }}>{hintLine}</Box> : null}
+          <Box sx={{ marginTop: withSide ? "auto" : 0, display: "flex", flexDirection: "column", gap: "12px" }}>
+            {withSide ? echoLine : null}
             {runButton}
           </Box>
         </Box>
@@ -234,7 +243,7 @@ export function QuestionScreen({ phone, me, payload, marks, getRemainingMs, lead
 
   return (
     <HackScreen phone={false} label="Nhiệm vụ">
-      <HudBar me={me} getRemainingMs={getRemainingMs} phone={false} />
+      <HudBar me={me} getRemainingMs={getRemainingMs} phone={false} compact={!withSide} />
       <QuestionProgress total={payload.total} current={payload.index} marks={marks} phone={false} />
       <Box sx={{ position: "relative", flex: 1, display: "flex", gap: "20px", padding: "14px 24px 24px" }}>
         <Panel sx={{ flex: 1, minWidth: 0, padding: "20px 22px", display: "flex", flexDirection: "column", gap: "14px" }}>
@@ -243,7 +252,7 @@ export function QuestionScreen({ phone, me, payload, marks, getRemainingMs, lead
             {copy.chip ? <Chip color={c.cyan}>{copy.chip}</Chip> : null}
             <Box component="span" sx={{ color: c.dim }}>{copy.hint}</Box>
             <Box sx={{ flex: 1 }} />
-            <Box component="span" sx={{ color: progress ? c.yellow : c.cyan }}>{progress ?? `thưởng: +${reward} sao và 1 gói dữ liệu`}</Box>
+            <Box component="span" sx={{ color: progress ? c.yellow : c.cyan }}>{progress ?? `${withSide ? "thưởng: " : ""}+${reward} sao và 1 gói dữ liệu`}</Box>
           </Box>
           <Box component="h2" sx={{ margin: 0, fontSize: titleSize, lineHeight: 1.4, fontWeight: hk.font.weightBold, color: c.white }}>{question.title}</Box>
           {question.instructions ? <Box sx={{ fontSize: hk.fs[14], color: c.dim }}>{question.instructions}</Box> : null}
@@ -254,10 +263,12 @@ export function QuestionScreen({ phone, me, payload, marks, getRemainingMs, lead
             {runButton}
           </Box>
         </Panel>
-        <Box sx={{ width: "320px", flex: "none", display: "flex", flexDirection: "column", gap: "16px" }}>
-          {leaderboard ? <LeaderboardPanel data={leaderboard} me={me} /> : null}
-          <FeedPanel items={feed} hint={hintLine} />
-        </Box>
+        {withSide ? (
+          <Box sx={{ width: "320px", flex: "none", display: "flex", flexDirection: "column", gap: "16px" }}>
+            {leaderboard ? <LeaderboardPanel data={leaderboard} me={me} /> : null}
+            <FeedPanel items={feed} hint={hintLine} />
+          </Box>
+        ) : null}
       </Box>
     </HackScreen>
   );
