@@ -23,6 +23,8 @@ export const CrmPage = lazy(() =>
   })),
 );
 export const StudentPage = lazy(() => import("@/app/pages/student/student-page"));
+export const StudentGamesPage = lazy(() => import("@/app/pages/student/student-games-page"));
+export const StudentGameRoomPage = lazy(() => import("@/app/pages/student/student-game-room-page"));
 export const LearningOutcomesPage = lazy(() => import("@/app/pages/shared/learning-outcomes-page"));
 export const HelpGuidePage = lazy(() => import("@/app/pages/shared/help-guide-page"));
 export const PortableExamPage = lazy(() =>

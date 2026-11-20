@@ -15,6 +15,7 @@ export type RoutePermission =
   | "lms.school.archive"
   | "lms.scope.read"
   | "lms.student.manage"
+  | "lms.games.play"
   | "lms.subject.manage"
   | "lms.enrollment.manage"
   | "lms.quiz.read"
@@ -180,6 +181,8 @@ export const ROUTE_PERMISSION_MATRIX: readonly RoutePermissionEntry[] = [
   { path: "/student", workspace: "STUDENT", resource: "assignment", action: "read", permission: "elearning.assignment.read_self", alternatePermissions: STUDENT_PREVIEW_ALTERNATES },
   { path: "/student/exams/portable", workspace: "STUDENT", resource: "exam.portable", action: "launch", permission: "elearning.assignment.read_self", alternatePermissions: STUDENT_PREVIEW_ALTERNATES },
   { path: "/student/downloads/desktop", workspace: "STUDENT", resource: "desktop.release", action: "read", permission: "elearning.assignment.read_self", alternatePermissions: STUDENT_PREVIEW_ALTERNATES },
+  // Classroom games: /student/games/$roomId inherits this row. Full-screen game, no portal shell.
+  { path: "/student/games", workspace: "STUDENT", resource: "game", action: "launch", permission: "lms.games.play", matchChildren: true, alternatePermissions: STUDENT_PREVIEW_ALTERNATES },
   { path: "/admin/learning-outcomes", workspace: "ADMIN", resource: "learning-outcomes", action: "manage", permission: "learning.outcomes.manage" },
   { path: ADMIN_LEARNING_STANDARDS_PATH, workspace: "ADMIN", resource: "learning-standards", action: "read", permission: "learning.standards.read" },
   { path: ADMIN_ENTERPRISE_CONNECTORS_PATH, workspace: "ADMIN", resource: "enterprise-connectors", action: "read", permission: "enterprise.connectors.read" },
