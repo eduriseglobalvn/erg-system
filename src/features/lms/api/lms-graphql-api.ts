@@ -68,6 +68,7 @@ export type LmsLearningResourceLibrary = {
   resources: GraphQlPage<LmsLearningResourceCard>;
   progress: LmsLearningResourceProgress[];
   recentOpened: LmsLearningResourceRecentOpened[];
+  taxonomyTruncated?: boolean;
 };
 
 const LmsLearningResourceLibraryDocument = `
@@ -76,6 +77,7 @@ query LmsLearningResourceLibrary($input: LearningResourceLibraryInput) {
     learningResourceLibrary(input: $input) {
       tenantId
       educationUnitId
+      taxonomyTruncated
       taxonomyTree {
         id
         kind

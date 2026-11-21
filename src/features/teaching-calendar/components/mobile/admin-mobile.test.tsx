@@ -73,3 +73,16 @@ it("keeps the subject of a draft batch that already has lessons (BE applies it t
   await waitFor(() => expect(mocks.save).toHaveBeenCalled());
   expect(mocks.save.mock.calls[0][0]).toMatchObject({ levelId: "l9", subjectId: "eng" });
 });
+
+it("keeps the key for an identical retry but issues a new one for another school", async () => {
+  mocks.batches.mockResolvedValue({ items: [] });
+  mocks.save.mockRejectedValue(new Error("timeout"));
+  const { result } = renderHook(() => useAdminMobileAdd(vi.fn()), { wrapper });
+  const submit = async (schoolId: string) => { await act(async () => { result.current.mutate({ date: "2026-11-11", levelId: "l1", periodTemplateId: "tpl", row, schoolId, subjectId: "math" }); }); await waitFor(() => expect(result.current.isError).toBe(true)); };
+  await submit("s1");
+  await submit("s1");
+  await submit("s2");
+  const keys = mocks.save.mock.calls.map((call) => call[0].idempotencyKey);
+  expect(keys[1]).toBe(keys[0]);
+  expect(keys[2]).not.toBe(keys[0]);
+});

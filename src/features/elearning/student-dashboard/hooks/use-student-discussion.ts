@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createStudentDiscussion,
   followStudentDiscussion,
+  loadStudentDiscussionComments,
   replyStudentDiscussion,
   setStudentDiscussionReaction,
 } from "@/features/elearning/student-dashboard/api/student-engagement-api";
@@ -25,6 +26,7 @@ import type {
 } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
 import {
   addFeedComment,
+  applyCommentPage,
   createReactionSummary,
   toggleFeedCommentReaction,
   toggleFeedPostReaction,
@@ -60,6 +62,11 @@ export function useStudentDiscussion({
   const discussionFeedQuery = useQuery(studentDiscussionFeedQueryOptions(engagementScope));
   const [discussionPosts, setDiscussionPosts] = useState<StudentDiscussionFeedPost[]>([]);
   const [discussionNotifications, setDiscussionNotifications] = useState<StudentDiscussionNotification[]>([]);
+  // Next discussionComments page per post/parent; page 0 is already embedded in the feed.
+  const commentPages = useRef(new Map<string, number>());
+  // Bumped on every feed reset: a page requested before it is stale and must not merge or move a cursor.
+  const feedGeneration = useRef(0);
+  const loadingKeys = useRef(new Set<string>());
   const justNow = locale === "vi" ? "Vua xong" : "Just now";
 
   useEffect(() => {
@@ -78,6 +85,8 @@ export function useStudentDiscussion({
 
   useEffect(() => {
     if (!apiEnabled || !discussionFeedQuery.data) return;
+    commentPages.current.clear();
+    feedGeneration.current += 1;
     setDiscussionPosts(discussionFeedQuery.data.items);
   }, [apiEnabled, discussionFeedQuery.data]);
 
@@ -226,6 +235,22 @@ export function useStudentDiscussion({
     });
   }
 
+  async function loadMoreDiscussionComments(postId: string, parentId?: string) {
+    const key = `${postId}|${parentId ?? ""}`;
+    if (loadingKeys.current.has(key)) return;
+    const generation = feedGeneration.current;
+    const page = commentPages.current.get(key) ?? 1;
+    loadingKeys.current.add(key);
+    try {
+      const result = await loadStudentDiscussionComments({ page, parentId, postId, tenantId });
+      if (generation !== feedGeneration.current) return;
+      commentPages.current.set(key, page + 1);
+      setDiscussionPosts((currentPosts) => currentPosts.map((post) => (post.id === postId ? applyCommentPage(post, parentId, result) : post)));
+    } finally {
+      loadingKeys.current.delete(key);
+    }
+  }
+
   // Own threads feed the "Của tôi" filter and the "Bạn" badge.
   const viewerPosts = useMemo(
     () => discussionPosts.map((post) => ({ ...post, mine: post.authorId === profile.id })),
@@ -247,6 +272,7 @@ export function useStudentDiscussion({
     createDiscussionPost,
     discussionNotifications,
     discussionPosts: viewerPosts,
+    loadMoreDiscussionComments,
     markNotificationRead,
     toggleDiscussionCommentReaction,
     toggleDiscussionFollow,

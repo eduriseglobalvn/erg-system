@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 import {
   createStudentDiscussion,
   followStudentDiscussion,
+  loadStudentDiscussionComments,
   loadStudentDiscussionFeed,
   markStudentAnnouncementRead,
   replyStudentDiscussion,
@@ -90,6 +91,33 @@ describe("student engagement GraphQL API", () => {
     } as never);
     const [post] = (await loadStudentDiscussionFeed({ tenantId: "tenant-a", accountId: "user-1" })).items;
     expect(post).toMatchObject({ acceptedReplyId: "comment-1", authorId: "user-1", following: true, pinned: true, subject: "Toan", title: "Lich kiem tra" });
+  });
+
+  test("carries the server comment and reply totals and the has-more flags", async () => {
+    const comment = { id: "c1", parentId: null, authorId: null, authorName: "A", authorInitials: "A", content: "x", createdAt: "2026-07-30T12:00:00+07:00", attachmentIds: [], viewerReaction: null, reactions: [], replies: [], replyCount: 45, hasMoreReplies: true };
+    requestMock.mockResolvedValueOnce({
+      elearning: { discussionFeed: { page: 0, size: 20, totalItems: 1, hasNext: false, items: [{
+        id: "post-1", authorId: "user-1", authorName: "Co Hanh", authorInitials: "TH", academicClassId: "class-1", className: "7A",
+        title: "t", content: "c", createdAt: "2026-07-30T12:00:00+07:00", attachmentIds: [], assignmentId: null,
+        viewerReaction: null, reactions: [], comments: [comment], commentCount: 130, hasMoreComments: true,
+      }] } },
+    } as never);
+    const [post] = (await loadStudentDiscussionFeed({ tenantId: "tenant-a", accountId: "user-1" })).items;
+    expect(post).toMatchObject({ commentCount: 130, hasMoreComments: true });
+    expect(post.comments[0]).toMatchObject({ replyCount: 45, hasMoreReplies: true });
+  });
+
+  test("loads a comment page through discussionComments", async () => {
+    requestMock.mockResolvedValueOnce({ elearning: { discussionComments: { hasNext: true, items: [{
+      id: "c0", parentId: null, authorId: null, authorName: "A", authorInitials: "A", content: "old", createdAt: "2026-07-30T12:00:00+07:00",
+      attachmentIds: [], viewerReaction: null, reactions: [], replies: [], replyCount: 0, hasMoreReplies: false,
+    }] } } } as never);
+    const result = await loadStudentDiscussionComments({ tenantId: "tenant-a", postId: "post-1", page: 1 });
+    expect(result).toMatchObject({ hasNext: true, items: [{ id: "c0", replyCount: 0 }] });
+    expect(requestMock).toHaveBeenCalledWith(expect.objectContaining({
+      operationName: "ElearningStudentDiscussionComments",
+      variables: { page: 1, parentId: undefined, postId: "post-1", size: 20, tenantId: "tenant-a" },
+    }));
   });
 
   test("follows a thread through the named mutation", async () => {

@@ -86,22 +86,49 @@ export function addFeedComment({
   if (!parentCommentId) {
     return {
       ...post,
+      commentCount: post.commentCount === undefined ? undefined : post.commentCount + 1,
       comments: [...post.comments, nextComment],
     };
   }
 
   return {
     ...post,
+    commentCount: post.commentCount === undefined ? undefined : post.commentCount + 1,
     // Two levels only: a reply to a reply joins the replies of its root comment.
     comments: post.comments.map((comment) =>
       comment.id === parentCommentId || comment.replies.some((reply) => reply.id === parentCommentId)
-        ? { ...comment, replies: [...comment.replies, nextComment] }
+        ? { ...comment, replies: [...comment.replies, nextComment], replyCount: comment.replyCount === undefined ? undefined : comment.replyCount + 1 }
         : comment),
   };
 }
 
 export function getCommentCount(comments: StudentDiscussionComment[]): number {
   return comments.reduce((total, comment) => total + 1 + getCommentCount(comment.replies), 0);
+}
+
+/** Server total when present (the inline comments are only the first page), else the loaded tree. */
+export function getPostCommentCount(post: StudentDiscussionFeedPost): number {
+  return post.commentCount ?? getCommentCount(post.comments);
+}
+
+/** Pages run newest first and each page oldest to newest, so an older page goes in front; ids already loaded are dropped. */
+export function mergeCommentPage<T extends { id: string }>(existing: readonly T[], incoming: readonly T[]): T[] {
+  const known = new Set(existing.map((item) => item.id));
+  return [...incoming.filter((item) => !known.has(item.id)), ...existing];
+}
+
+/** Folds a loaded page into the top-level comments (no parentId) or the replies of one root comment. */
+export function applyCommentPage(
+  post: StudentDiscussionFeedPost,
+  parentId: string | undefined,
+  page: { hasNext: boolean; items: StudentDiscussionComment[] },
+): StudentDiscussionFeedPost {
+  if (!parentId) return { ...post, comments: mergeCommentPage(post.comments, page.items), hasMoreComments: page.hasNext };
+  return {
+    ...post,
+    comments: post.comments.map((comment) =>
+      comment.id === parentId ? { ...comment, replies: mergeCommentPage(comment.replies, page.items), hasMoreReplies: page.hasNext } : comment),
+  };
 }
 
 export function getFeedPostActivityMs(post: StudentDiscussionFeedPost): number {

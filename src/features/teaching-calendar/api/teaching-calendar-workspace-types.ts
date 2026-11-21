@@ -96,6 +96,7 @@ export type TeachingCalendarFilterOptions = {
 
 export type TeachingCalendarCatalog = {
   assistantTeachers: TeachingCalendarTeacherOption[];
+  catalogTruncated?: boolean;
   classes: TeachingCalendarClassOption[];
   levels: TeachingCalendarLevelOption[];
   rooms: TeachingCalendarRoomOption[];

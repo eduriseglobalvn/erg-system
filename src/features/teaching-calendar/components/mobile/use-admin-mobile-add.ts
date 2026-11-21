@@ -1,6 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRef } from "react";
 import { toast } from "sonner";
 
+import { createClientIdempotencyKey } from "@/features/teaching-calendar/api/teaching-calendar-transport-utils";
 import { loadTeachingScheduleBatches } from "@/features/teaching-calendar/api/teaching-calendar-batch-api";
 import { teachingCalendarQueryKeys } from "@/features/teaching-calendar/api/teaching-calendar-query-keys";
 import { loadTeachingScheduleDraft, saveTeachingScheduleDraft } from "@/features/teaching-calendar/api/teaching-calendar-schedule-api";
@@ -21,6 +23,8 @@ type AddInput = { date: string; levelId: string; periodTemplateId: string; row: 
 export function useAdminMobileAdd(onDone: () => void) {
   const queryClient = useQueryClient();
   const tenantId = getDefaultTenantId();
+  // Khoa gan voi noi dung gui: chi bam lai Y HET sau loi moi dung lai khoa, doi truong/noi dung thi khoa moi.
+  const newDraftKey = useRef<{ key: string; signature: string } | null>(null);
   return useMutation({
     mutationFn: async ({ date, levelId, periodTemplateId, row, schoolId, subjectId }: AddInput) => {
       if (weekdayIndex(date) === 0) throw new Error("Lưới thời khoá biểu chỉ xếp Thứ 2 – Thứ 7.");
@@ -29,7 +33,9 @@ export function useAdminMobileAdd(onDone: () => void) {
       const batch = batches.items[0];
       if (!batch) {
         const applyFrom = weekStartOf(date);
-        const result = await saveTeachingScheduleDraft({ applyFrom, batchId: null, expectedVersion: null, periodTemplateId, repeatUntil: addDaysToDate(applyFrom, DEFAULT_SPAN_DAYS), rows: toDraftRowInputs([added]), schoolId, subjectId, levelId });
+        const signature = JSON.stringify({ date, levelId, periodTemplateId, row, schoolId, subjectId });
+        if (newDraftKey.current?.signature !== signature) newDraftKey.current = { key: createClientIdempotencyKey(), signature };
+        const result = await saveTeachingScheduleDraft({ applyFrom, batchId: null, expectedVersion: null, idempotencyKey: newDraftKey.current.key, periodTemplateId, repeatUntil: addDaysToDate(applyFrom, DEFAULT_SPAN_DAYS), rows: toDraftRowInputs([added]), schoolId, subjectId, levelId });
         return { result, weekRows: [added] };
       }
       const draft = await loadTeachingScheduleDraft(batch.id);
@@ -45,6 +51,7 @@ export function useAdminMobileAdd(onDone: () => void) {
       return { result, weekRows: rows };
     },
     onSuccess: ({ result, weekRows }) => {
+      newDraftKey.current = null;
       toast.success(`Đã thêm vào ${result.batch.label}`);
       const over = classesOverWeeklyLimit(weekRows);
       if (over.length) toast.warning(weeklyLimitMessage(over), { duration: 8000 });

@@ -16,7 +16,7 @@ function formatBreakdown(b: AudienceBreakdown): string {
   return parts.join(" · ") + (b.duplicatesMerged ? ` (trùng ${b.duplicatesMerged} đã gộp)` : "");
 }
 
-/** Presentational: the 422 "Tối đa 5.000 người nhận mỗi lần gửi" arrives as `error` and is shown as is. */
+/** Presentational: the 422 "Tối đa 50.000 người nhận mỗi lần gửi" arrives as `error` and is shown as is. */
 export function AudienceEstimateView({ breakdown, error, loading }: ViewProps) {
   const failed = Boolean(error);
   return (

@@ -178,6 +178,15 @@ test("send now: create, send, then go to the notifications page", async () => {
   expect(send.mutateAsync).toHaveBeenCalledWith("c1");
 });
 
+test("send now: a SENDING result says it is being sent, not that it is done", async () => {
+  create.mutateAsync.mockResolvedValue({ id: "c1" });
+  send.mutateAsync.mockResolvedValue({ id: "c1", status: "SENDING" });
+  render(<CampaignComposeForm portalKind="teacher" initial={{ audience: emptyAudienceWithPerson }} />);
+  fillContent();
+  fireEvent.click(primary());
+  await waitFor(() => expect(toast.success).toHaveBeenCalledWith("Đang gửi thông báo…"));
+});
+
 test("schedule: the chosen local time is sent as ISO", async () => {
   create.mutateAsync.mockResolvedValue({ id: "c2" });
   schedule.mutateAsync.mockResolvedValue({ id: "c2", status: "SCHEDULED" });

@@ -317,6 +317,7 @@ export function StudentDashboardWorkspaceRuntime() {
           posts={discussion.discussionPosts}
           studentClass={dashboardProfile.className}
           viewerName={account?.name || dashboardProfile.name}
+          onLoadMore={discussion.loadMoreDiscussionComments}
           onToggleFollow={discussion.toggleDiscussionFollow}
           onAddComment={discussion.addDiscussionComment}
           onCommentReaction={discussion.toggleDiscussionCommentReaction}

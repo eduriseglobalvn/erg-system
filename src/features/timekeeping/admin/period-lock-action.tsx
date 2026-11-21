@@ -5,12 +5,16 @@ import { toast } from "sonner";
 import { ErgButton } from "@/components/erg-mui/erg-actions";
 import { ErgConfirmDialog } from "@/components/erg-mui/erg-confirm-dialog";
 import { ErgTextField } from "@/components/erg-mui/erg-form";
+import { ApiClientError } from "@/lib/api-client/errors";
 import { usePeriodLock } from "../api/timekeeping-admin-query";
 import type { Timesheet } from "../api/timekeeping-types";
 import { monthLabel } from "../components/my-timesheet/timesheet-summary";
 import { requestErrorText } from "../components/requests/request-model";
 
 type PeriodLockActionProps = { stage: NonNullable<Timesheet["stage"]>; period: string; schoolId: string };
+
+const FORBIDDEN_MESSAGE = "Chỉ Phòng đào tạo được chốt hoặc mở lại kỳ công.";
+const lockErrorText = (error: unknown) => (error instanceof ApiClientError && error.code === "SCHOOL_SCOPE_FORBIDDEN" ? FORBIDDEN_MESSAGE : requestErrorText(error));
 
 /**
  * "Chốt công tháng" (the page's only contained button) or, once locked, "Mở lại kỳ" (outlined, reason required).
@@ -47,7 +51,7 @@ export function PeriodLockAction({ period, schoolId, stage }: PeriodLockActionPr
         {locked ? (
           <ErgTextField label="Lý do" multiline onChange={(event) => setReason(event.target.value)} required rows={2} sx={{ mt: 2 }} value={reason} />
         ) : null}
-        {mutation.isError ? <Typography color="error" role="alert" sx={{ mt: 2 }} variant="body2">{requestErrorText(mutation.error)}</Typography> : null}
+        {mutation.isError ? <Typography color="error" role="alert" sx={{ mt: 2 }} variant="body2">{lockErrorText(mutation.error)}</Typography> : null}
       </ErgConfirmDialog>
     </>
   );

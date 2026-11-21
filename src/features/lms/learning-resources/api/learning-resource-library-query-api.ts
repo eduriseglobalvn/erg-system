@@ -52,20 +52,20 @@ export async function loadLearningResourceLibraryProgress(
   return { schoolId: input.schoolId, academicYear: input.academicYear, lessons: [] } satisfies LearningResourceLibraryProgressDTO;
 }
 
-export async function loadLearningResourceLibrarySections(): Promise<LearningResourceResourceSection[]> {
-  if (import.meta.env.DEV && runtimeFixturesEnabled()) return (await loadMockLibrary()).getMockLearningResourceLibrarySections();
+export async function loadLearningResourceLibrarySections(): Promise<{ sections: LearningResourceResourceSection[]; taxonomyTruncated: boolean }> {
+  if (import.meta.env.DEV && runtimeFixturesEnabled()) return { sections: (await loadMockLibrary()).getMockLearningResourceLibrarySections(), taxonomyTruncated: false };
 
   const graphQlLibrary = await loadGraphQlLearningResourceLibrary();
   if (graphQlLibrary?.resources.items.length) {
-    return mapGraphQlLibraryToSections(graphQlLibrary);
+    return { sections: mapGraphQlLibraryToSections(graphQlLibrary), taxonomyTruncated: Boolean(graphQlLibrary.taxonomyTruncated) };
   }
 
   try {
     const result = await listLearningResourceResources({ limit: 100 });
     const cards = result.data;
-    return groupCardsBySection(cards.map(mapCardToResource));
+    return { sections: groupCardsBySection(cards.map(mapCardToResource)), taxonomyTruncated: false };
   } catch (error) {
-    if (import.meta.env.DEV && runtimeFixturesEnabled()) return (await loadMockSections()).LEARNING_RESOURCE_LIBRARY_SECTIONS;
+    if (import.meta.env.DEV && runtimeFixturesEnabled()) return { sections: (await loadMockSections()).LEARNING_RESOURCE_LIBRARY_SECTIONS, taxonomyTruncated: false };
     throw error;
   }
 }

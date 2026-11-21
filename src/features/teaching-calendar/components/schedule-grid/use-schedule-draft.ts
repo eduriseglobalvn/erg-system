@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { createClientIdempotencyKey } from "@/features/teaching-calendar/api/teaching-calendar-transport-utils";
 import { teachingScheduleErrorCode } from "@/features/teaching-calendar/api/teaching-calendar-document";
 import type { TeachingScheduleDraftInput, TeachingScheduleDraftResult } from "@/features/teaching-calendar/api/teaching-calendar-schedule-api";
 import { applyRowIdMap, toDraftRowInputs, type GridRow, type ScheduleConflict } from "@/features/teaching-calendar/domain/schedule-grid-model";
@@ -44,6 +45,8 @@ export function useScheduleDraft({ debounceMs = 1500, save }: Options) {
   const saveRef = useRef(save);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const queued = useRef(false);
+  // Khoa cho lan luu DAU cua dot moi: gui lai/bam doi van ra mot dot; doi khi da co batchId.
+  const newDraftKey = useRef<string | null>(null);
   saveRef.current = save;
 
   const inFlightPromise = useRef<Promise<void> | null>(null);
@@ -58,12 +61,16 @@ export function useScheduleDraft({ debounceMs = 1500, save }: Options) {
       // BE tu choi luu tiet khi chua co mon (SUBJECT_REQUIRED): bao ro thay vi gui request hong.
       if (rowsRef.current.length && !current.subjectId) { setStatus("needsSubject"); return; }
       queued.current = false;
+      // Khoa cu = lan truoc co the da ghi o server: server tra lai dot cu va bo qua rows moi.
+      const replay = !current.batchId && newDraftKey.current !== null;
+      if (!current.batchId) newDraftKey.current ??= createClientIdempotencyKey();
       setStatus("saving");
       try {
         const result = await saveRef.current({
           applyFrom: current.applyFrom,
           batchId: current.batchId ?? null,
           expectedVersion: current.version ?? null,
+          ...(current.batchId ? {} : { idempotencyKey: newDraftKey.current }),
           levelId: current.levelId ?? null,
           periodTemplateId: current.periodTemplateId,
           repeatUntil: current.repeatUntil,
@@ -72,6 +79,7 @@ export function useScheduleDraft({ debounceMs = 1500, save }: Options) {
           subjectId: current.subjectId ?? null,
         });
         failed.current = false;
+        newDraftKey.current = null;
         metaRef.current = { ...metaRef.current, batchId: result.batch.id, version: result.version };
         rowsRef.current = applyRowIdMap(rowsRef.current, result.rowIdMap);
         setMetaState(metaRef.current);
@@ -80,6 +88,7 @@ export function useScheduleDraft({ debounceMs = 1500, save }: Options) {
         setAccessChanges(result.accessChanges);
         setBatchLabel(result.batch.label);
         setSavedAt(result.savedAt);
+        if (replay) queued.current = true; // gui lai noi dung day du, nay da co batchId
       } catch (error) {
         failed.current = true;
         setStatus(teachingScheduleErrorCode(error) === "STALE_VERSION" ? "stale" : "error");
@@ -118,6 +127,7 @@ export function useScheduleDraft({ debounceMs = 1500, save }: Options) {
   }, [schedule]);
 
   const setMeta = useCallback((patch: Partial<DraftMeta>) => {
+    if (patch.schoolId !== undefined && patch.schoolId !== metaRef.current.schoolId) newDraftKey.current = null;
     metaRef.current = { ...metaRef.current, ...patch };
     setMetaState(metaRef.current);
     schedule();
@@ -128,6 +138,7 @@ export function useScheduleDraft({ debounceMs = 1500, save }: Options) {
     if (timer.current) clearTimeout(timer.current);
     timer.current = undefined;
     failed.current = false;
+    newDraftKey.current = null;
     rowsRef.current = next.rows;
     metaRef.current = next.meta;
     setRowsState(next.rows);

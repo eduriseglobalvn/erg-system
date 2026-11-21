@@ -1,4 +1,5 @@
 import { apiRequest, hasApiBase } from "@/lib/api-client";
+import { ApiClientError } from "@/lib/api-client/errors";
 import { shouldUseLocalQuizRuntimeFallback } from "@/features/lcms/quiz/quiz-runtime/api/quiz-runtime-fallback";
 import { DEFAULT_QUIZ_RUNTIME_PORTAL } from "@/features/lcms/quiz/quiz-runtime/api/quiz-runtime-normalization-utils";
 import { gradeFinalAttemptLocally, isServerAttemptSnapshot, normalizeSubmitResponse } from "@/features/lcms/quiz/quiz-runtime/api/quiz-runtime-submit-model";
@@ -264,6 +265,8 @@ export async function replayOfflineQuizAttemptQueue(scope: OfflineOutboxScope, p
       }
       return { kind: "succeeded" as const };
     } catch (error) {
+      // Only FORBIDDEN (not the attempt owner) can never succeed. Other 403s (ACCESS_DENIED, ACCOUNT_LIFECYCLE_RESTRICTED) recover after a session refresh, and failed items are never retried.
+      if (error instanceof ApiClientError && error.status === 403 && error.code === "FORBIDDEN") return { kind: "failed" as const, reason: error.message };
       return { kind: "retry" as const, reason: error instanceof Error ? error.message : "Quiz sync failed." };
     }
   }, { isOnline: () => typeof navigator === "undefined" || navigator.onLine });

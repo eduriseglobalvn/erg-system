@@ -638,6 +638,22 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
+    readonly "/api/v1/calendar/catalog/search": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["catalogSearch"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
     readonly "/api/v1/calendar/events/{eventId}": {
         readonly parameters: {
             readonly query?: never;
@@ -3454,6 +3470,38 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
+    readonly "/api/v1/sessions/me": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["currentIdentity"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/sessions/scope": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["currentScope"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
     readonly "/api/v1/timekeeping/admin/holidays": {
         readonly parameters: {
             readonly query?: never;
@@ -5128,6 +5176,17 @@ export interface components {
             /** Format: date-time */
             readonly timestamp?: string;
         };
+        readonly ApiResponseCalendarCatalogSearchResponse: {
+            readonly data?: components["schemas"]["CalendarCatalogSearchResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
         readonly ApiResponseCalendarDeletePayload: {
             readonly data?: components["schemas"]["CalendarDeletePayload"];
             readonly errors?: unknown;
@@ -6707,8 +6766,30 @@ export interface components {
             /** Format: date-time */
             readonly timestamp?: string;
         };
+        readonly ApiResponseSessionIdentityResponse: {
+            readonly data?: components["schemas"]["SessionIdentityResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
         readonly ApiResponseSessionListResponse: {
             readonly data?: components["schemas"]["SessionListResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApiResponseSessionScopeResponse: {
+            readonly data?: components["schemas"]["SessionScopeResponse"];
             readonly errors?: unknown;
             readonly message?: string;
             readonly path?: string;
@@ -7413,6 +7494,7 @@ export interface components {
             readonly items?: readonly components["schemas"]["StudentResponse"][];
             /** Format: int32 */
             readonly replayed?: number;
+            readonly replayedStudentIds?: readonly string[];
             /** Format: int32 */
             readonly requested?: number;
         };
@@ -7515,12 +7597,22 @@ export interface components {
         };
         readonly CalendarCatalogResponse: {
             readonly assistantTeachers?: readonly components["schemas"]["CalendarTeacherOptionResponse"][];
+            readonly catalogTruncated?: boolean;
             readonly classes?: readonly components["schemas"]["CalendarClassOptionResponse"][];
             readonly levels?: readonly components["schemas"]["CalendarLevelOptionResponse"][];
             readonly rooms?: readonly components["schemas"]["CalendarRoomOptionResponse"][];
             readonly schools?: readonly components["schemas"]["CalendarFilterOptionResponse"][];
             readonly subjects?: readonly components["schemas"]["CalendarSubjectOptionResponse"][];
             readonly teachers?: readonly components["schemas"]["CalendarTeacherOptionResponse"][];
+        };
+        readonly CalendarCatalogSearchResponse: {
+            readonly hasMore?: boolean;
+            readonly items?: readonly components["schemas"]["Item"][];
+            readonly kind?: string;
+            /** Format: int32 */
+            readonly page?: number;
+            /** Format: int32 */
+            readonly size?: number;
         };
         readonly CalendarClassOptionResponse: {
             readonly academicYear?: string;
@@ -7750,6 +7842,11 @@ export interface components {
             readonly title?: string;
             /** Format: date-time */
             readonly updatedAt?: string;
+            /**
+             * Format: int32
+             * @description Size of audience.userIds, so a list can show it without reading the ids
+             */
+            readonly userIdCount?: number;
             /**
              * Format: int64
              * @description Recipients who opened the message
@@ -8195,7 +8292,7 @@ export interface components {
             readonly password?: string;
             readonly phone?: string;
             readonly status?: string;
-            readonly studentCode: string;
+            readonly studentCode?: string;
             readonly username?: string;
         };
         readonly CredentialDeliveryRequest: {
@@ -8852,6 +8949,13 @@ export interface components {
             readonly expiresAt?: string;
             readonly learnerId: string;
             readonly learningPathId: string;
+        };
+        readonly Item: {
+            readonly academicYear?: string;
+            readonly grade?: string;
+            readonly id?: string;
+            readonly label?: string;
+            readonly schoolId?: string;
         };
         readonly KpiDefinition: {
             readonly definition?: string;
@@ -10206,6 +10310,7 @@ export interface components {
             readonly roles?: readonly string[];
         };
         readonly SessionBootstrapResponse: {
+            readonly classesTruncated?: boolean;
             readonly currentScope?: components["schemas"]["SessionBootstrapScope"];
             readonly lifecycle?: components["schemas"]["AccountLifecycleResponse"];
             readonly manageableClasses?: readonly components["schemas"]["SessionBootstrapClass"][];
@@ -10259,6 +10364,14 @@ export interface components {
             readonly sessionId?: string;
             readonly userAgent?: string;
         };
+        readonly SessionIdentityResponse: {
+            readonly lifecycle?: components["schemas"]["AccountLifecycleResponse"];
+            readonly permissions?: components["schemas"]["SessionBootstrapPermissions"];
+            readonly portals?: readonly string[];
+            readonly tenantId?: string;
+            readonly user?: components["schemas"]["SessionBootstrapUser"];
+            readonly workspaces?: readonly string[];
+        };
         readonly SessionListResponse: {
             readonly items?: readonly components["schemas"]["SessionResponse"][];
         };
@@ -10276,6 +10389,26 @@ export interface components {
             readonly revokedReason?: string;
             readonly sessionId?: string;
             readonly userAgent?: string;
+        };
+        readonly SessionScopeClasses: {
+            readonly hasNext?: boolean;
+            readonly items?: readonly components["schemas"]["SessionBootstrapClass"][];
+        };
+        readonly SessionScopeResponse: {
+            readonly classes?: components["schemas"]["SessionScopeClasses"];
+            readonly currentScope?: components["schemas"]["SessionBootstrapScope"];
+            readonly truncated?: boolean;
+            readonly units?: components["schemas"]["SessionScopeUnits"];
+        };
+        readonly SessionScopeUnits: {
+            readonly hasNext?: boolean;
+            readonly items?: readonly components["schemas"]["SessionBootstrapUnit"][];
+            /** Format: int32 */
+            readonly page?: number;
+            /** Format: int32 */
+            readonly size?: number;
+            /** Format: int64 */
+            readonly totalItems?: number;
         };
         readonly ShiftCommand: {
             readonly active?: boolean;
@@ -12076,6 +12209,32 @@ export interface operations {
             };
         };
     };
+    readonly catalogSearch: {
+        readonly parameters: {
+            readonly query: {
+                readonly kind: string;
+                readonly page?: number;
+                readonly q?: string;
+                readonly schoolIds?: readonly string[];
+                readonly size?: number;
+            };
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseCalendarCatalogSearchResponse"];
+                };
+            };
+        };
+    };
     readonly eventDetail: {
         readonly parameters: {
             readonly query?: never;
@@ -12760,6 +12919,7 @@ export interface operations {
     readonly workspace: {
         readonly parameters: {
             readonly query?: {
+                readonly openFollowUpsOnly?: boolean;
                 readonly page?: number;
                 readonly size?: number;
             };
@@ -16050,6 +16210,7 @@ export interface operations {
                 readonly mine?: boolean;
                 readonly page?: number;
                 readonly size?: number;
+                readonly view?: string;
             };
             readonly header?: never;
             readonly path?: never;
@@ -16919,7 +17080,9 @@ export interface operations {
     };
     readonly status: {
         readonly parameters: {
-            readonly query?: never;
+            readonly query?: {
+                readonly include?: string;
+            };
             readonly header?: never;
             readonly path: {
                 readonly jobId: string;
@@ -17115,6 +17278,52 @@ export interface operations {
                 };
                 content: {
                     readonly "*/*": components["schemas"]["ApiResponseSessionBootstrapResponse"];
+                };
+            };
+        };
+    };
+    readonly currentIdentity: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseSessionIdentityResponse"];
+                };
+            };
+        };
+    };
+    readonly currentScope: {
+        readonly parameters: {
+            readonly query?: {
+                readonly classSize?: number;
+                readonly unitId?: string;
+                readonly unitPage?: number;
+                readonly unitQ?: string;
+                readonly unitSize?: number;
+            };
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseSessionScopeResponse"];
                 };
             };
         };
@@ -17742,6 +17951,8 @@ export interface operations {
     readonly teachingExport: {
         readonly parameters: {
             readonly query: {
+                readonly month?: number;
+                readonly schoolId?: string;
                 readonly year: number;
             };
             readonly header?: never;

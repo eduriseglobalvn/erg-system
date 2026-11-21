@@ -15,6 +15,7 @@ export type GraphQlLearningResourceLibrarySnapshot = {
   resources: LmsLearningResourceLibrary["resources"] & { items: LmsLearningResourceCard[] };
   progress: LmsLearningResourceProgress[];
   recentOpened: LmsLearningResourceLibrary["recentOpened"];
+  taxonomyTruncated?: boolean;
 };
 
 const GRAPHQL_LIBRARY_PAGE_SIZE = 50;
@@ -57,6 +58,7 @@ export async function loadGraphQlLearningResourceLibrary(
           tenantId: latest.tenantId,
           educationUnitId: latest.educationUnitId,
           taxonomyTree: latest.taxonomyTree ?? [],
+          taxonomyTruncated: latest.taxonomyTruncated,
           resources: {
             ...latest.resources,
             items: resources,
@@ -81,6 +83,7 @@ export async function loadGraphQlLearningResourceLibrary(
       tenantId: latest.tenantId,
       educationUnitId: latest.educationUnitId,
       taxonomyTree: latest.taxonomyTree ?? [],
+      taxonomyTruncated: latest.taxonomyTruncated,
       resources: {
         ...latest.resources,
         items: resources,

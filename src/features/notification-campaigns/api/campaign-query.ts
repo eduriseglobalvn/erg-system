@@ -56,11 +56,19 @@ export function isAudienceEmpty(audience: CampaignAudience) {
   );
 }
 
+const SENDING_POLL_MS = 3000;
+
+/** Poll while a campaign is still fanning out in the background (SENDING); stop once it is SENT/FAILED. */
+export function sendingPollInterval(campaigns: readonly { status?: string }[] | undefined) {
+  return campaigns?.some((campaign) => campaign.status === "SENDING") ? SENDING_POLL_MS : false;
+}
+
 export function useCampaigns(box: CampaignBox, mine: boolean, page = 0) {
   return useQuery({
     queryKey: [...campaignKeys.list(box, mine), page],
     queryFn: ({ signal }) => fetchCampaigns({ box, mine, page }, signal),
     placeholderData: keepPreviousData,
+    refetchInterval: (query) => sendingPollInterval(query.state.data?.items),
     ...realtime,
   });
 }
@@ -70,6 +78,7 @@ export function useCampaign(id: string | undefined) {
     queryKey: campaignKeys.detail(id ?? ""),
     queryFn: ({ signal }) => fetchCampaign(id as string, signal),
     enabled: Boolean(id),
+    refetchInterval: (query) => sendingPollInterval(query.state.data ? [query.state.data] : undefined),
     ...realtime,
   });
 }

@@ -77,7 +77,7 @@ export type TeachingScheduleEventDeleteInput = { eventId: string; tenantId?: str
 export type DeleteTeacherScheduleInput = {
   dateFrom?: string;
   dateTo?: string;
-  schoolIds?: string[];
+  schoolIds: string[];
   teacherUserId: string;
   tenantId?: string;
 };
