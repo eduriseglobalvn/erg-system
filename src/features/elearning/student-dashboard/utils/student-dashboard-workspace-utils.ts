@@ -3,7 +3,7 @@ import profanityWords from "@/features/elearning/student-dashboard/config/profan
 import type { StudentDiscussionFeedPost } from "@/features/elearning/student-dashboard/types/discussion-feed-types";
 import type { StudentAssignmentAttempt, StudentDiscussionThread } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
 import type { StudentDiscussionNotification } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
-import { createReactionSummary, getCommentCount, getFeedPostActivityMs } from "@/features/elearning/student-dashboard/utils/discussion-feed-state";
+import { createReactionSummary, getPostCommentCount, getFeedPostActivityMs } from "@/features/elearning/student-dashboard/utils/discussion-feed-state";
 import { getPersistedJsonValue, setPersistedJsonValue } from "@/stores/persisted-store";
 
 export const ANNOUNCEMENT_POPUP_SNOOZE_MS = 2 * 60 * 60 * 1000;
@@ -61,7 +61,7 @@ export function createInitialDiscussionNotifications(
     .sort((left, right) => getFeedPostActivityMs(right) - getFeedPostActivityMs(left))
     .slice(0, 3)
     .map((post) => {
-      const commentCount = getCommentCount(post.comments);
+      const commentCount = getPostCommentCount(post);
 
       return {
         id: `notification-${post.id}`,

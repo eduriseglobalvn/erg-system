@@ -119,3 +119,47 @@ it("does not send rows without a subject and asks for one, then saves once it is
   expect(save).toHaveBeenCalledTimes(1);
   expect(save.mock.calls[0][0]).toMatchObject({ levelId: "l1", subjectId: "math" });
 });
+
+it("reuses one idempotency key for a retried first save and sends none once a batch exists", async () => {
+  const save = vi.fn().mockRejectedValueOnce(new Error("network")).mockResolvedValue(result(1));
+  const { result: hook } = renderHook(() => useScheduleDraft({ save }));
+  act(() => hook.current.hydrate({ meta, rows: [] }));
+  act(() => hook.current.setRows(() => [row("r1")]));
+  await act(async () => { await vi.advanceTimersByTimeAsync(1500); });
+  await act(async () => { await hook.current.flush(); });
+  const [first, retry] = [save.mock.calls[0][0], save.mock.calls[1][0]];
+  expect(first.idempotencyKey).toBeTruthy();
+  expect(retry.idempotencyKey).toBe(first.idempotencyKey);
+
+  act(() => hook.current.setRows((rows) => [...rows, { ...row("r2"), periodNo: 2 }]));
+  await act(async () => { await vi.advanceTimersByTimeAsync(1500); });
+  expect(save.mock.calls[2][0].batchId).toBe("batch-1");
+  expect(save.mock.calls[2][0].idempotencyKey).toBeUndefined();
+});
+
+it("re-sends the full rows with the batchId after a replayed first save", async () => {
+  const save = vi.fn().mockRejectedValueOnce(new Error("timeout")).mockResolvedValue(result(1, [{ clientRowId: "r1", eventId: "e1" }]));
+  const { result: hook } = renderHook(() => useScheduleDraft({ save }));
+  act(() => hook.current.hydrate({ meta, rows: [] }));
+  act(() => hook.current.setRows(() => [row("r1")]));
+  await act(async () => { await vi.advanceTimersByTimeAsync(1500); });
+  act(() => hook.current.setRows((rows) => [...rows, { ...row("r2"), periodNo: 2 }]));
+  await act(async () => { await vi.advanceTimersByTimeAsync(1500); });
+  expect(save).toHaveBeenCalledTimes(3);
+  expect(save.mock.calls[1][0].idempotencyKey).toBe(save.mock.calls[0][0].idempotencyKey);
+  expect(save.mock.calls[2][0].batchId).toBe("batch-1");
+  expect(save.mock.calls[2][0].idempotencyKey).toBeUndefined();
+  expect(save.mock.calls[2][0].rows).toHaveLength(2);
+});
+
+it("uses a new idempotency key after the school changes", async () => {
+  const save = vi.fn().mockRejectedValueOnce(new Error("timeout")).mockResolvedValue(result(1));
+  const { result: hook } = renderHook(() => useScheduleDraft({ save }));
+  act(() => hook.current.hydrate({ meta, rows: [] }));
+  act(() => hook.current.setRows(() => [row("r1")]));
+  await act(async () => { await vi.advanceTimersByTimeAsync(1500); });
+  act(() => hook.current.setMeta({ schoolId: "school-b" }));
+  await act(async () => { await vi.advanceTimersByTimeAsync(1500); });
+  expect(save.mock.calls[1][0].schoolId).toBe("school-b");
+  expect(save.mock.calls[1][0].idempotencyKey).not.toBe(save.mock.calls[0][0].idempotencyKey);
+});

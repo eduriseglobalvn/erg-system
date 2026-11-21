@@ -1,5 +1,5 @@
 import type { StudentDiscussionComment, StudentDiscussionFeedPost } from "@/features/elearning/student-dashboard/types/discussion-feed-types";
-import { discussionReactionKeys, getCommentCount, getFeedPostActivityMs } from "@/features/elearning/student-dashboard/utils/discussion-feed-state";
+import { discussionReactionKeys, getPostCommentCount, getFeedPostActivityMs } from "@/features/elearning/student-dashboard/utils/discussion-feed-state";
 
 export type DiscussionListFilter = "latest" | "unanswered" | "mine";
 
@@ -8,7 +8,7 @@ export function getPostTitle(post: StudentDiscussionFeedPost) {
 }
 
 export function isUnanswered(post: StudentDiscussionFeedPost) {
-  return getCommentCount(post.comments) === 0;
+  return getPostCommentCount(post) === 0;
 }
 
 export function getDiscussionSubjects(posts: StudentDiscussionFeedPost[]) {

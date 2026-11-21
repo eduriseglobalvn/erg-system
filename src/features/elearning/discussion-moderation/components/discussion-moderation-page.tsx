@@ -89,7 +89,7 @@ export function DiscussionModerationPage({ portal }: { portal: GraphQlPortal }) 
         <ErgEmptyState icon={<ForumRoundedIcon />} title="Chưa có lớp nào" description="Bạn chưa phụ trách lớp nào có thảo luận của học viên." />
       ) : posts.length ? (
         <Stack spacing={2}>
-          {posts.map((post) => <ModerationPostCard key={post.id} post={post} onAction={handleAction} />)}
+          {posts.map((post) => <ModerationPostCard key={`${post.id}:${feed.dataUpdatedAt}`} portal={portal} post={post} onAction={handleAction} />)}
         </Stack>
       ) : (
         <ErgEmptyState icon={<ForumRoundedIcon />} title="Chưa có bài viết" description="Học viên lớp này chưa đăng bài thảo luận nào." />

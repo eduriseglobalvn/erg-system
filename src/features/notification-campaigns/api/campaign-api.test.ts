@@ -10,6 +10,7 @@ import {
   campaignKeys,
   isAudienceEmpty,
   normalizeAudience,
+  sendingPollInterval,
   useAckNotification,
   useCampaignEstimate,
   useCancelCampaign,
@@ -247,4 +248,10 @@ test("useAckNotification POSTs /notifications/{id}/ack and refreshes the inbox a
   await waitFor(() => expect(client.getQueryState(inbox)?.isInvalidated).toBe(true));
   expect(client.getQueryState(unread)?.isInvalidated).toBe(true);
   expect(client.getQueryState(otherPortal)?.isInvalidated).toBe(false);
+});
+
+test("sendingPollInterval polls only while a campaign is SENDING", () => {
+  expect(sendingPollInterval([{ status: "SENT" }, { status: "SENDING" }])).toBe(3000);
+  expect(sendingPollInterval([{ status: "SENT" }, { status: "FAILED" }])).toBe(false);
+  expect(sendingPollInterval(undefined)).toBe(false);
 });

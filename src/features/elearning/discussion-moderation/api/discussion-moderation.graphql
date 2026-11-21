@@ -19,6 +19,8 @@ query ElearningDiscussionModerationFeed($input: StudentDiscussionModerationFeedI
         content
         createdAt
         hidden
+        commentCount
+        hasMoreComments
         comments {
           id
           authorName
@@ -26,8 +28,29 @@ query ElearningDiscussionModerationFeed($input: StudentDiscussionModerationFeedI
           content
           createdAt
           hidden
+          replyCount
+          hasMoreReplies
           replies { id authorName authorInitials content createdAt hidden }
         }
+      }
+    }
+  }
+}
+
+query ElearningDiscussionModerationComments($postId: String!, $parentId: String, $page: Int, $size: Int) {
+  elearning {
+    discussionModerationComments(postId: $postId, parentId: $parentId, page: $page, size: $size) {
+      hasNext
+      items {
+        id
+        authorName
+        authorInitials
+        content
+        createdAt
+        hidden
+        replyCount
+        hasMoreReplies
+        replies { id authorName authorInitials content createdAt hidden }
       }
     }
   }

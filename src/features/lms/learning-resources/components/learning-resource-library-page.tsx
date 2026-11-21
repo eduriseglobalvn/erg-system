@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 
 import { AUTH_ACCOUNT_CHANGED_EVENT, getCurrentAccount } from "@/platform/auth";
@@ -31,6 +32,7 @@ export function LearningResourceLibraryPage() {
   const categories = useMemo(() => getLearningResourceExplorerCategories(), []);
   const subjects = useMemo(() => getLearningResourceExplorerSubjects(), []);
   const [librarySections, setLibrarySections] = useState<LearningResourceResourceSection[]>([]);
+  const [taxonomyTruncated, setTaxonomyTruncated] = useState(false);
   const [libraryError, setLibraryError] = useState<string | null>(null);
   const [viewerLoadingResourceId, setViewerLoadingResourceId] = useState<string | null>(null);
   const [activeResource, setActiveResource] = useState<LearningResourceResource | null>(null);
@@ -52,8 +54,8 @@ export function LearningResourceLibraryPage() {
     async function loadLibrary() {
       try {
         setLibraryError(null);
-        const sections = await loadLearningResourceLibrarySections();
-        if (!isCancelled) setLibrarySections(sections);
+        const { sections, taxonomyTruncated: truncated } = await loadLearningResourceLibrarySections();
+        if (!isCancelled) { setLibrarySections(sections); setTaxonomyTruncated(truncated); }
       } catch {
         if (!isCancelled) {
           setLibrarySections([]);
@@ -135,6 +137,7 @@ export function LearningResourceLibraryPage() {
         overflow: "hidden",
       }}
     >
+      {taxonomyTruncated ? <Alert severity="info" sx={{ borderRadius: 0 }}>Cây phân loại quá lớn nên chỉ hiển thị một phần.</Alert> : null}
       {/* flex column so the explorer shell (flex: 1) fills the remaining height */}
       <Box sx={{ display: "flex", flex: 1, flexDirection: "column", minHeight: 0 }}>
         <LearningResourceExplorer

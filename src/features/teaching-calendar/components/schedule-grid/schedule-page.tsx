@@ -147,6 +147,7 @@ export function SchedulePage() {
         savedAt={draft.savedAt} schoolName={school?.schoolName ?? ""} status={draft.status} templateName={template.name}
       />
       {draft.status === "stale" ? <Alert action={<ErgButton onClick={() => window.location.reload()} variant="text">Tải lại</ErgButton>} severity="error">{STALE_VERSION_MESSAGE}</Alert> : null}
+      {catalog?.catalogTruncated ? <Alert severity="info">Danh sách đang hiển thị tối đa 500 mục mỗi loại. Hãy lọc theo cơ sở để thu hẹp.</Alert> : null}
       {publishError ? <Alert onClose={() => setPublishError(null)} severity="error">{publishError}</Alert> : null}
       {overLimit.length ? <Alert severity="warning" variant="filled">{weeklyLimitMessage(overLimit)}</Alert> : null}
       <ScheduleInfoBar
