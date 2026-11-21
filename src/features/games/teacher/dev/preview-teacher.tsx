@@ -79,7 +79,7 @@ export default function PreviewTeacher() {
   const view = { ...room, status: state.phase ?? "RUNNING", rules: { ...room.rules, allowHack } };
   return (
     <HackThemeProvider>
-      <HostRoomView state={state} room={view} teacherLabel="admin@co_lan" joinUrl="lms.erg.edu.vn/student/games" send={() => true} onExit={() => undefined} />
+      <HostRoomView state={state} room={view} teacherLabel="admin@co_lan" joinUrl="lms.erg.edu.vn/student/games" send={() => true} onExit={() => undefined} onChangeQuestions={() => undefined} />
     </HackThemeProvider>
   );
 }

@@ -112,7 +112,7 @@ export function LiveView({ roomCode, teacherLabel, phase, getRemainingMs, getCou
             ))}
           </Box>
         </Panel>
-        <Box sx={{ width: "400px", display: "flex", flexDirection: "column", gap: "16px", flexShrink: 0 }}>
+        <Box sx={{ width: "430px", display: "flex", flexDirection: "column", gap: "16px", flexShrink: 0 }}>
           <Panel sx={{ flex: 1, display: "flex", flexDirection: "column", gap: "12px", padding: "16px 20px", borderColor: c.weakBorder, bgcolor: c.weakPanel }}>
             <Box sx={{ color: c.pink, fontSize: hk.fs[12], fontWeight: hk.font.weightBold }}>LỖ HỔNG CỦA LỚP · CÂU SAI NHIỀU NHẤT</Box>
             {worst.length === 0 ? <Box sx={{ color: c.dim, fontSize: hk.fs[13] }}>Chưa có câu nào bị sai nhiều.</Box> : null}

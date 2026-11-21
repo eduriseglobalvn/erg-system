@@ -17,11 +17,11 @@ type LobbyViewProps = {
   joinUrl: string;
   busy: boolean;
   onStart: () => void;
-  onCancel: () => void;
+  onChangeQuestions: () => void;
 };
 
 /** GV 2 · Phòng chờ (HTeacherLobby), while the room is LOBBY. */
-export function LobbyView({ room, lobby, teacherLabel, joinUrl, busy, onStart, onCancel }: LobbyViewProps) {
+export function LobbyView({ room, lobby, teacherLabel, joinUrl, busy, onStart, onChangeQuestions }: LobbyViewProps) {
   const players = lobby?.players ?? [];
   const count = lobby?.count ?? room?.playerCount ?? 0;
   const classSize = Math.max(lobby?.classSize ?? 0, count);
@@ -36,7 +36,7 @@ export function LobbyView({ room, lobby, teacherLabel, joinUrl, busy, onStart, o
     <HackScreen phone={false} label="Phòng chờ giáo viên">
       <HostBar cells={[teacherLabel, `${room?.quizTitle.toUpperCase() ?? ""}`, room ? `${room.questionCount} nhiệm vụ · ${room.durationMinutes} phút · lớp ${room.className}` : ""]} />
       <Box sx={{ position: "relative", flex: 1, display: "flex", gap: "20px", padding: "20px 24px 24px" }}>
-        <Panel sx={{ width: "440px", display: "flex", flexDirection: "column", alignItems: "center", gap: "18px", padding: "28px 24px", boxSizing: "border-box", textAlign: "center" }}>
+        <Panel sx={{ width: "470px", display: "flex", flexDirection: "column", alignItems: "center", gap: "18px", padding: "28px 24px", boxSizing: "border-box", textAlign: "center" }}>
           <Box sx={{ color: c.dim, fontSize: hk.fs[13], fontWeight: hk.font.weightBold }}>MÃ PHÒNG</Box>
           <Box aria-label={`Mã phòng ${room?.code ?? ""}`} sx={{ color: c.green, fontSize: hk.fs[120], fontWeight: hk.font.weightBold, lineHeight: 1, letterSpacing: "0.04em" }}>{room?.code ?? "----"}</Box>
           <Box sx={{ color: c.white, fontSize: hk.fs[18], fontWeight: hk.font.weightBold, overflowWrap: "anywhere" }}>{joinUrl}</Box>
@@ -61,8 +61,8 @@ export function LobbyView({ room, lobby, teacherLabel, joinUrl, busy, onStart, o
             <Box sx={{ flex: 1, color: c.dim, fontSize: hk.fs[13], lineHeight: 1.7 }}>
               {room?.rules.allowLateJoin ? "Học sinh vào muộn vẫn tham gia được, bắt đầu từ nhiệm vụ 1." : "Phòng khóa cửa sau khi bắt đầu."}
             </Box>
-            <HackButton outline disabled={busy} onClick={onCancel} fontSize={hk.fs[15]} paddingX={22}>HỦY PHÒNG</HackButton>
-            <HackButton disabled={busy || count === 0} onClick={onStart} fontSize={hk.fs[20]} minHeight={60}>&gt; PHÁT LỆNH BẮT ĐẦU</HackButton>
+            <HackButton outline disabled={busy} onClick={onChangeQuestions} fontSize={hk.fs[15]} minHeight={52} paddingX={20}>ĐỔI BỘ CÂU HỎI</HackButton>
+            <HackButton disabled={busy || count === 0} onClick={onStart} fontSize={hk.fs[22]} minHeight={64} paddingX={40}>&gt; PHÁT LỆNH BẮT ĐẦU</HackButton>
           </Box>
         </Box>
       </Box>

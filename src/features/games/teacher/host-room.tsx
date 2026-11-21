@@ -23,6 +23,8 @@ type HostRoomViewProps = {
   joinUrl: string;
   send: (message: ClientMessage) => boolean;
   onExit: () => void;
+  /** Lobby only: the room is cancelled first, then the teacher picks again. */
+  onChangeQuestions: (room: RoomSummary | undefined) => void;
 };
 
 /** Teacher control room: socket state in, lobby / projector / final ranking out. */
@@ -34,11 +36,15 @@ export function HostRoom({ roomId }: { roomId: string }) {
   const teacherLabel = account?.email ?? account?.fullName ?? HACK_GAME_DISPLAY_NAME;
   const joinUrl = `${window.location.host}/student/games`;
   const exit = useCallback(() => { void navigate({ href: teacherPath("/games") }); }, [navigate]);
-  return <HostRoomView state={state} room={room.data} teacherLabel={teacherLabel} joinUrl={joinUrl} send={send} onExit={exit} />;
+  const repick = useCallback((summary: RoomSummary | undefined) => {
+    const search = new URLSearchParams({ ...(summary?.classId ? { classId: summary.classId } : {}), ...(summary?.quizId ? { quizId: summary.quizId } : {}) }).toString();
+    void navigate({ href: teacherPath(`/games/new${search ? `?${search}` : ""}`) });
+  }, [navigate]);
+  return <HostRoomView state={state} room={room.data} teacherLabel={teacherLabel} joinUrl={joinUrl} send={send} onExit={exit} onChangeQuestions={repick} />;
 }
 
 /** Pure view of `state`; the dev preview feeds it fixed states instead of a socket. */
-export function HostRoomView({ state, room, teacherLabel, joinUrl, send, onExit }: HostRoomViewProps) {
+export function HostRoomView({ state, room, teacherLabel, joinUrl, send, onExit, onChangeQuestions }: HostRoomViewProps) {
   const [confirm, setConfirm] = useState<"end" | "cancel" | null>(null);
   const screen = selectHostScreen(state);
 
@@ -49,7 +55,11 @@ export function HostRoomView({ state, room, teacherLabel, joinUrl, send, onExit 
   const command = useCallback((type: "host.start" | "host.pause" | "host.resume" | "host.end") => {
     if (!send({ type, data: {} })) toast.error("Mất kết nối, thử lại sau ít giây.");
   }, [send]);
-  const confirmed = () => { if (confirm) command("host.end"); setConfirm(null); };
+  const confirmed = () => {
+    if (confirm) command("host.end");
+    if (confirm === "cancel") onChangeQuestions(room);
+    setConfirm(null);
+  };
   const feedClock = useCallback((at: string) => {
     const stamp = Date.parse(at);
     return state.endsAt === null || Number.isNaN(stamp) ? null : formatClock(state.endsAt - stamp);
@@ -59,7 +69,7 @@ export function HostRoomView({ state, room, teacherLabel, joinUrl, send, onExit 
   return (
     <>
       {screen === "LOBBY" ? (
-        <LobbyView room={room} lobby={state.lobby} teacherLabel={teacherLabel} joinUrl={joinUrl} busy={busy} onStart={() => command("host.start")} onCancel={() => setConfirm("cancel")} />
+        <LobbyView room={room} lobby={state.lobby} teacherLabel={teacherLabel} joinUrl={joinUrl} busy={busy} onStart={() => command("host.start")} onChangeQuestions={() => setConfirm("cancel")} />
       ) : screen === "LIVE" && state.phase ? (
         <LiveView
           roomCode={room?.code ?? ""}
@@ -84,9 +94,9 @@ export function HostRoomView({ state, room, teacherLabel, joinUrl, send, onExit 
       )}
       <ErgConfirmDialog
         open={confirm !== null}
-        title={confirm === "cancel" ? "Hủy phòng này?" : "Kết thúc trận sớm?"}
-        description={confirm === "cancel" ? "Học sinh đã vào phòng sẽ bị đưa ra ngoài." : "Trận dừng ngay và chốt bảng xếp hạng hiện tại. Không hoàn tác được."}
-        confirmLabel={confirm === "cancel" ? "Hủy phòng" : "Kết thúc"}
+        title={confirm === "cancel" ? "Đổi bộ câu hỏi?" : "Kết thúc trận sớm?"}
+        description={confirm === "cancel" ? "Phòng này bị hủy, học sinh đã vào sẽ bị đưa ra ngoài. Sau đó bạn chọn lại bộ câu hỏi và tạo phòng mới." : "Trận dừng ngay và chốt bảng xếp hạng hiện tại. Không hoàn tác được."}
+        confirmLabel={confirm === "cancel" ? "Hủy và chọn lại" : "Kết thúc"}
         cancelLabel="Quay lại"
         destructive
         onConfirm={confirmed}
