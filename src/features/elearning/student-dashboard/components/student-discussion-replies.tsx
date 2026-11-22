@@ -11,9 +11,20 @@ import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 const { color, statusTint } = ergEnterpriseTokens;
 
 export type ReplyActions = {
+  /** Id of the comment whose page is loading ("" for the top level), to show the busy state. */
+  loadingMoreId?: string;
+  onLoadMore?: (parentId?: string) => void;
   onHeart: (commentId: string, reaction: StudentDiscussionReactionKey) => void;
   onReplyTo: (target: { id: string; name: string }) => void;
 };
+
+function LoadMoreButton({ busy, label, onClick }: { busy: boolean; label: string; onClick: () => void }) {
+  return (
+    <Button disabled={busy} size="small" variant="text" onClick={onClick} sx={{ alignSelf: "flex-start", color: color.textMuted, minHeight: 0, minWidth: 0, p: 0, typography: "caption", fontWeight: "fontWeightMedium" }}>
+      {busy ? "Đang tải..." : label}
+    </Button>
+  );
+}
 
 function ReplyNode({ actions, comment, nestedUnder, teacherPick }: {
   actions: ReplyActions;
@@ -54,8 +65,9 @@ function ReplyNode({ actions, comment, nestedUnder, teacherPick }: {
           </Box>
         </Box>
       </Box>
-      {!nestedUnder && comment.replies.length ? (
+      {!nestedUnder && (comment.replies.length || comment.hasMoreReplies) ? (
         <Box sx={{ borderLeft: `2px solid ${color.divider}`, display: "flex", flexDirection: "column", gap: 1.5, ml: { xs: 1.25, md: 5 }, pl: 2 }}>
+          {comment.hasMoreReplies && actions.onLoadMore ? <LoadMoreButton busy={actions.loadingMoreId === comment.id} label="Xem thêm phản hồi" onClick={() => actions.onLoadMore?.(comment.id)} /> : null}
           {comment.replies.map((reply) => <ReplyNode key={reply.id} actions={actions} comment={reply} nestedUnder={comment} teacherPick={false} />)}
         </Box>
       ) : null}
@@ -66,9 +78,10 @@ function ReplyNode({ actions, comment, nestedUnder, teacherPick }: {
 /** Replies indented under the question with a left rule; the teacher's pick comes first, in the green box. */
 export function ThreadReplies({ actions, post }: { actions: ReplyActions; post: StudentDiscussionFeedPost }) {
   const replies = orderThreadReplies(post);
-  if (!replies.length) return null;
+  if (!replies.length && !post.hasMoreComments) return null;
   return (
     <Box sx={{ borderLeft: `2px solid ${color.divider}`, display: "flex", flexDirection: "column", gap: 2, ml: { xs: 1.5, md: 6.5 }, pl: { xs: 1, md: 2 } }}>
+      {post.hasMoreComments && actions.onLoadMore ? <LoadMoreButton busy={actions.loadingMoreId === ""} label="Xem thêm bình luận" onClick={() => actions.onLoadMore?.()} /> : null}
       {replies.map((comment) => <ReplyNode key={comment.id} actions={actions} comment={comment} teacherPick={comment.id === post.acceptedReplyId} />)}
     </Box>
   );

@@ -44,6 +44,7 @@ type ListResponse<T> = {
 };
 
 type SessionCurrentResponseDTO = {
+  classesTruncated?: boolean;
   user: {
     id: string;
     name: string;

@@ -133,6 +133,7 @@ export type LearningResourceLibraryGraphQl = {
   tenantId?: string | null;
   educationUnitId?: string | null;
   taxonomyTree: LearningResourceLibraryGraphQlNode[];
+  taxonomyTruncated?: boolean;
   resources: AuthoringGraphQlPage<LearningResourceLibraryGraphQlCard>;
 };
 

@@ -108,8 +108,8 @@ export function CampaignComposeForm({ campaignId, initial, portalKind }: Props) 
         await schedule.mutateAsync(id);
         toast.success(`Đã hẹn gửi lúc ${formatDateTimeVi(scheduleIso)}`);
       } else {
-        await send.mutateAsync(id);
-        toast.success(`Đã gửi thông báo đến ${formatCountVi(total ?? 0)} người`);
+        const sent = await send.mutateAsync(id);
+        toast.success(sent?.status === "SENDING" ? "Đang gửi thông báo…" : `Đã gửi thông báo đến ${formatCountVi(total ?? 0)} người`);
       }
       void navigate({ href: notificationsHomePath(portalKind) });
     } catch (error) {

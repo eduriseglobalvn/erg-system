@@ -36,6 +36,7 @@ export function DiscussionView({
   onCommentReaction,
   onCreatePost,
   onPostReaction,
+  onLoadMore,
   onToggleFollow,
 }: {
   copy: DashboardCopy;
@@ -46,6 +47,7 @@ export function DiscussionView({
   onCommentReaction: (postId: string, commentId: string, reaction: StudentDiscussionReactionKey) => void;
   onCreatePost: (content: string, attachments: StudentDiscussionImageAttachment[], subject?: string) => void;
   onPostReaction: (postId: string, reaction: StudentDiscussionReactionKey) => void;
+  onLoadMore?: (postId: string, parentId?: string) => Promise<void>;
   onToggleFollow?: (postId: string) => void;
 }) {
   const [filter, setFilter] = useState<DiscussionListFilter>("latest");
@@ -130,6 +132,7 @@ export function DiscussionView({
                 onCommentReaction={onCommentReaction}
                 onPostReaction={onPostReaction}
                 onReply={(postId, parentCommentId, content) => onAddComment(postId, parentCommentId, content, [])}
+                onLoadMore={onLoadMore}
                 onToggleFollow={onToggleFollow}
               />
             ) : null}

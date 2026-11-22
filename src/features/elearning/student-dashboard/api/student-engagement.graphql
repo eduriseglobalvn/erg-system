@@ -21,6 +21,8 @@ query ElearningStudentDiscussionFeed($input: StudentDiscussionFeedInput) {
         pinned
         acceptedReplyId
         following
+        commentCount
+        hasMoreComments
         viewerReaction
         reactions { reaction count }
         comments {
@@ -33,6 +35,8 @@ query ElearningStudentDiscussionFeed($input: StudentDiscussionFeedInput) {
           createdAt
           attachmentIds
           viewerReaction
+          replyCount
+          hasMoreReplies
           reactions { reaction count }
           replies {
             id
@@ -46,6 +50,40 @@ query ElearningStudentDiscussionFeed($input: StudentDiscussionFeedInput) {
             viewerReaction
             reactions { reaction count }
           }
+        }
+      }
+    }
+  }
+}
+
+query ElearningStudentDiscussionComments($postId: String!, $parentId: String, $page: Int, $size: Int, $tenantId: String) {
+  elearning {
+    discussionComments(postId: $postId, parentId: $parentId, page: $page, size: $size, tenantId: $tenantId) {
+      hasNext
+      items {
+        id
+        parentId
+        authorId
+        authorName
+        authorInitials
+        content
+        createdAt
+        attachmentIds
+        viewerReaction
+        replyCount
+        hasMoreReplies
+        reactions { reaction count }
+        replies {
+          id
+          parentId
+          authorId
+          authorName
+          authorInitials
+          content
+          createdAt
+          attachmentIds
+          viewerReaction
+          reactions { reaction count }
         }
       }
     }

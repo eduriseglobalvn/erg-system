@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { toast } from "sonner";
 import ArrowBackIcon from "@mui/icons-material/ArrowBackRounded";
 import ChatBubbleIcon from "@mui/icons-material/ChatBubbleOutlineRounded";
 import NotificationsIcon from "@mui/icons-material/NotificationsNoneRounded";
@@ -10,7 +11,7 @@ import IconButton from "@mui/material/IconButton";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import type { StudentDiscussionFeedPost, StudentDiscussionReactionKey } from "@/features/elearning/student-dashboard/types/discussion-feed-types";
-import { getCommentCount } from "@/features/elearning/student-dashboard/utils/discussion-feed-state";
+import { getPostCommentCount } from "@/features/elearning/student-dashboard/utils/discussion-feed-state";
 import { getPostTitle, getReactionTotal } from "@/features/elearning/student-dashboard/utils/discussion-thread-list";
 import { ThreadReplies } from "@/features/elearning/student-dashboard/components/student-discussion-replies";
 import { HeartButton, SubjectTag, ThreadAvatar, threadIconSx } from "@/features/elearning/student-dashboard/components/student-discussion-thread-parts";
@@ -23,6 +24,7 @@ type ReplyTarget = { id: string; name: string };
 export type ThreadDetailProps = {
   onBack: () => void;
   onCommentReaction: (postId: string, commentId: string, reaction: StudentDiscussionReactionKey) => void;
+  onLoadMore?: (postId: string, parentId?: string) => Promise<void>;
   onPostReaction: (postId: string, reaction: StudentDiscussionReactionKey) => void;
   onReply: (postId: string, parentCommentId: string | undefined, content: string) => void;
   onToggleFollow?: (postId: string) => void;
@@ -40,7 +42,7 @@ function ThreadHeader({ onBack, onToggleFollow, post }: Pick<ThreadDetailProps, 
       <Box sx={{ flex: 1, minWidth: 0 }}>
         <Typography variant="subtitle2" noWrap sx={{ display: { xs: "none", md: "block" } }}>{getPostTitle(post)}</Typography>
         <Typography variant="h5" sx={{ display: { md: "none" } }}>Chủ đề</Typography>
-        <Typography variant="caption" sx={{ color: color.textMuted, display: { md: "none" } }}>{[post.subject, `${getCommentCount(post.comments)} trả lời`].filter(Boolean).join(" · ")}</Typography>
+        <Typography variant="caption" sx={{ color: color.textMuted, display: { md: "none" } }}>{[post.subject, `${getPostCommentCount(post)} trả lời`].filter(Boolean).join(" · ")}</Typography>
       </Box>
       <Button
         aria-pressed={following}
@@ -98,13 +100,21 @@ function ReplyComposer({ onClearTarget, onSend, target, viewerInitials }: { onCl
   );
 }
 
-export function ThreadDetail({ onBack, onCommentReaction, onPostReaction, onReply, onToggleFollow, post, viewerInitials }: ThreadDetailProps) {
+export function ThreadDetail({ onBack, onCommentReaction, onLoadMore, onPostReaction, onReply, onToggleFollow, post, viewerInitials }: ThreadDetailProps) {
   const [target, setTarget] = useState<ReplyTarget | null>(null);
+  const [loadingMoreId, setLoadingMoreId] = useState<string | undefined>();
   const actions = {
+    loadingMoreId,
+    onLoadMore: onLoadMore ? (parentId?: string) => {
+      setLoadingMoreId(parentId ?? "");
+      onLoadMore(post.id, parentId)
+        .catch(() => toast.error("Không tải thêm được. Vui lòng thử lại."))
+        .finally(() => setLoadingMoreId(undefined));
+    } : undefined,
     onHeart: (commentId: string, reaction: StudentDiscussionReactionKey) => onCommentReaction(post.id, commentId, reaction),
     onReplyTo: setTarget,
   };
-  const replyCount = getCommentCount(post.comments);
+  const replyCount = getPostCommentCount(post);
   return (
     <Box sx={{ display: "flex", flex: 1, flexDirection: "column", minHeight: 0, minWidth: 0 }}>
       <ThreadHeader post={post} onBack={onBack} onToggleFollow={onToggleFollow} />

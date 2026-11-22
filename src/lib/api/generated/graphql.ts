@@ -115,6 +115,8 @@ export type SaveTeachingScheduleDraftInput = {
   readonly applyFrom: string;
   readonly batchId?: string | number | null | undefined;
   readonly expectedVersion?: number | null | undefined;
+  /** Optional (max 100 chars). Only for a NEW batch (batchId null): a retry with the same key returns the batch the first save created. */
+  readonly idempotencyKey?: string | null | undefined;
   readonly levelId?: string | number | null | undefined;
   readonly periodTemplateId: string | number;
   readonly repeatUntil: string;
@@ -439,7 +441,17 @@ export type ElearningDiscussionModerationFeedQueryVariables = Exact<{
 }>;
 
 
-export type ElearningDiscussionModerationFeedQuery = { readonly elearning: { readonly discussionModerationFeed: { readonly page: number, readonly size: number, readonly totalItems: number, readonly hasNext: boolean, readonly items: ReadonlyArray<{ readonly id: string, readonly authorName: string | null, readonly authorInitials: string | null, readonly title: string | null, readonly content: string | null, readonly createdAt: string | null, readonly hidden: boolean, readonly comments: ReadonlyArray<{ readonly id: string, readonly authorName: string | null, readonly authorInitials: string | null, readonly content: string | null, readonly createdAt: string | null, readonly hidden: boolean, readonly replies: ReadonlyArray<{ readonly id: string, readonly authorName: string | null, readonly authorInitials: string | null, readonly content: string | null, readonly createdAt: string | null, readonly hidden: boolean }> }> }> } } };
+export type ElearningDiscussionModerationFeedQuery = { readonly elearning: { readonly discussionModerationFeed: { readonly page: number, readonly size: number, readonly totalItems: number, readonly hasNext: boolean, readonly items: ReadonlyArray<{ readonly id: string, readonly authorName: string | null, readonly authorInitials: string | null, readonly title: string | null, readonly content: string | null, readonly createdAt: string | null, readonly hidden: boolean, readonly commentCount: number, readonly hasMoreComments: boolean, readonly comments: ReadonlyArray<{ readonly id: string, readonly authorName: string | null, readonly authorInitials: string | null, readonly content: string | null, readonly createdAt: string | null, readonly hidden: boolean, readonly replyCount: number, readonly hasMoreReplies: boolean, readonly replies: ReadonlyArray<{ readonly id: string, readonly authorName: string | null, readonly authorInitials: string | null, readonly content: string | null, readonly createdAt: string | null, readonly hidden: boolean }> }> }> } } };
+
+export type ElearningDiscussionModerationCommentsQueryVariables = Exact<{
+  postId: string;
+  parentId?: string | null | undefined;
+  page?: number | null | undefined;
+  size?: number | null | undefined;
+}>;
+
+
+export type ElearningDiscussionModerationCommentsQuery = { readonly elearning: { readonly discussionModerationComments: { readonly hasNext: boolean, readonly items: ReadonlyArray<{ readonly id: string, readonly authorName: string | null, readonly authorInitials: string | null, readonly content: string | null, readonly createdAt: string | null, readonly hidden: boolean, readonly replyCount: number, readonly hasMoreReplies: boolean, readonly replies: ReadonlyArray<{ readonly id: string, readonly authorName: string | null, readonly authorInitials: string | null, readonly content: string | null, readonly createdAt: string | null, readonly hidden: boolean }> }> } } };
 
 export type ElearningSetStudentDiscussionHiddenMutationVariables = Exact<{
   input: SetStudentDiscussionHiddenInput;
@@ -467,7 +479,18 @@ export type ElearningStudentDiscussionFeedQueryVariables = Exact<{
 }>;
 
 
-export type ElearningStudentDiscussionFeedQuery = { readonly elearning: { readonly discussionFeed: { readonly page: number, readonly size: number, readonly totalItems: number, readonly hasNext: boolean, readonly items: ReadonlyArray<{ readonly id: string, readonly authorId: string | null, readonly authorName: string | null, readonly authorInitials: string | null, readonly academicClassId: string | null, readonly className: string | null, readonly title: string | null, readonly content: string | null, readonly createdAt: string | null, readonly attachmentIds: ReadonlyArray<string>, readonly assignmentId: string | null, readonly subject: string | null, readonly pinned: boolean, readonly acceptedReplyId: string | null, readonly following: boolean, readonly viewerReaction: string | null, readonly reactions: ReadonlyArray<{ readonly reaction: string, readonly count: number }>, readonly comments: ReadonlyArray<{ readonly id: string, readonly parentId: string | null, readonly authorId: string | null, readonly authorName: string | null, readonly authorInitials: string | null, readonly content: string | null, readonly createdAt: string | null, readonly attachmentIds: ReadonlyArray<string>, readonly viewerReaction: string | null, readonly reactions: ReadonlyArray<{ readonly reaction: string, readonly count: number }>, readonly replies: ReadonlyArray<{ readonly id: string, readonly parentId: string | null, readonly authorId: string | null, readonly authorName: string | null, readonly authorInitials: string | null, readonly content: string | null, readonly createdAt: string | null, readonly attachmentIds: ReadonlyArray<string>, readonly viewerReaction: string | null, readonly reactions: ReadonlyArray<{ readonly reaction: string, readonly count: number }> }> }> }> } } };
+export type ElearningStudentDiscussionFeedQuery = { readonly elearning: { readonly discussionFeed: { readonly page: number, readonly size: number, readonly totalItems: number, readonly hasNext: boolean, readonly items: ReadonlyArray<{ readonly id: string, readonly authorId: string | null, readonly authorName: string | null, readonly authorInitials: string | null, readonly academicClassId: string | null, readonly className: string | null, readonly title: string | null, readonly content: string | null, readonly createdAt: string | null, readonly attachmentIds: ReadonlyArray<string>, readonly assignmentId: string | null, readonly subject: string | null, readonly pinned: boolean, readonly acceptedReplyId: string | null, readonly following: boolean, readonly commentCount: number, readonly hasMoreComments: boolean, readonly viewerReaction: string | null, readonly reactions: ReadonlyArray<{ readonly reaction: string, readonly count: number }>, readonly comments: ReadonlyArray<{ readonly id: string, readonly parentId: string | null, readonly authorId: string | null, readonly authorName: string | null, readonly authorInitials: string | null, readonly content: string | null, readonly createdAt: string | null, readonly attachmentIds: ReadonlyArray<string>, readonly viewerReaction: string | null, readonly replyCount: number, readonly hasMoreReplies: boolean, readonly reactions: ReadonlyArray<{ readonly reaction: string, readonly count: number }>, readonly replies: ReadonlyArray<{ readonly id: string, readonly parentId: string | null, readonly authorId: string | null, readonly authorName: string | null, readonly authorInitials: string | null, readonly content: string | null, readonly createdAt: string | null, readonly attachmentIds: ReadonlyArray<string>, readonly viewerReaction: string | null, readonly reactions: ReadonlyArray<{ readonly reaction: string, readonly count: number }> }> }> }> } } };
+
+export type ElearningStudentDiscussionCommentsQueryVariables = Exact<{
+  postId: string;
+  parentId?: string | null | undefined;
+  page?: number | null | undefined;
+  size?: number | null | undefined;
+  tenantId?: string | null | undefined;
+}>;
+
+
+export type ElearningStudentDiscussionCommentsQuery = { readonly elearning: { readonly discussionComments: { readonly hasNext: boolean, readonly items: ReadonlyArray<{ readonly id: string, readonly parentId: string | null, readonly authorId: string | null, readonly authorName: string | null, readonly authorInitials: string | null, readonly content: string | null, readonly createdAt: string | null, readonly attachmentIds: ReadonlyArray<string>, readonly viewerReaction: string | null, readonly replyCount: number, readonly hasMoreReplies: boolean, readonly reactions: ReadonlyArray<{ readonly reaction: string, readonly count: number }>, readonly replies: ReadonlyArray<{ readonly id: string, readonly parentId: string | null, readonly authorId: string | null, readonly authorName: string | null, readonly authorInitials: string | null, readonly content: string | null, readonly createdAt: string | null, readonly attachmentIds: ReadonlyArray<string>, readonly viewerReaction: string | null, readonly reactions: ReadonlyArray<{ readonly reaction: string, readonly count: number }> }> }> } } };
 
 export type ElearningCreateStudentDiscussionMutationVariables = Exact<{
   input: CreateStudentDiscussionInput;

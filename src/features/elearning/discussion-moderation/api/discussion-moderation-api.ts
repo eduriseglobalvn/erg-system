@@ -2,6 +2,8 @@ import type {
   ElearningDeleteStudentDiscussionItemMutation,
   ElearningDeleteStudentDiscussionItemMutationVariables,
   ElearningDiscussionModerationClassesQuery,
+  ElearningDiscussionModerationCommentsQuery,
+  ElearningDiscussionModerationCommentsQueryVariables,
   ElearningDiscussionModerationFeedQuery,
   ElearningDiscussionModerationFeedQueryVariables,
   ElearningSetStudentDiscussionHiddenMutation,
@@ -10,6 +12,8 @@ import type {
 import { graphQlRequest, type GraphQlPortal } from "@/lib/graphql-client";
 import { isObject, validateResponse } from "@/lib/validate-response";
 import DiscussionModerationDocument from "./discussion-moderation.graphql?raw";
+
+const MODERATION_COMMENTS_PAGE_SIZE = 20;
 
 export type ModerationTargetType = "POST" | "COMMENT";
 export type ModerationFeed = ElearningDiscussionModerationFeedQuery["elearning"]["discussionModerationFeed"];
@@ -47,6 +51,22 @@ export async function loadModerationFeed(portal: GraphQlPortal, classId: string,
     isObject(value) && isObject(value.elearning) && isObject(value.elearning.discussionModerationFeed)
       && Array.isArray(value.elearning.discussionModerationFeed.items),
   "elearning.discussion-moderation-feed").elearning.discussionModerationFeed;
+}
+
+/** Page 0 is the window the feed already embeds (newest 20), so "load more" starts at page 1. */
+export async function loadModerationComments(portal: GraphQlPortal, postId: string, parentId: string | undefined, page: number, signal?: AbortSignal) {
+  const response = await graphQlRequest<ElearningDiscussionModerationCommentsQuery, ElearningDiscussionModerationCommentsQueryVariables & Record<string, unknown>>({
+    operationName: "ElearningDiscussionModerationComments",
+    portal,
+    query: DiscussionModerationDocument,
+    signal,
+    variables: { page, parentId, postId, size: MODERATION_COMMENTS_PAGE_SIZE },
+  });
+  return validateResponse(response, (value): value is ElearningDiscussionModerationCommentsQuery =>
+    isObject(value) && isObject(value.elearning) && isObject(value.elearning.discussionModerationComments)
+      && Array.isArray(value.elearning.discussionModerationComments.items)
+      && typeof value.elearning.discussionModerationComments.hasNext === "boolean",
+  "elearning.discussion-moderation-comments").elearning.discussionModerationComments;
 }
 
 export async function setDiscussionItemHidden(portal: GraphQlPortal, targetType: ModerationTargetType, targetId: string, hidden: boolean) {

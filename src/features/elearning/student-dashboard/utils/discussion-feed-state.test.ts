@@ -2,6 +2,9 @@ import { expect, test } from "vitest";
 
 import {
   addFeedComment,
+  applyCommentPage,
+  getPostCommentCount,
+  mergeCommentPage,
   toggleFeedCommentReaction,
   toggleFeedPostReaction,
 } from "@/features/elearning/student-dashboard/utils/discussion-feed-state";
@@ -114,4 +117,36 @@ test("toggleFeedCommentReaction updates deeply nested comment reactions", () => 
 
   expect(comment?.viewerReaction).toBe("care");
   expect(comment?.reactions.care.count).toBe(1);
+});
+
+test("getPostCommentCount prefers the server total over the loaded tree", () => {
+  const post = { ...createPost(), comments: [createComment("c1")], commentCount: 130 };
+  expect(getPostCommentCount(post)).toBe(130);
+  expect(getPostCommentCount({ ...post, commentCount: undefined })).toBe(1);
+});
+
+test("addFeedComment raises the post total and the root comment's reply total by one", () => {
+  const post = { ...createPost(), commentCount: 30, comments: [{ ...createComment("root"), replyCount: 5 }] };
+  const common = { attachments: [], content: "x", viewer };
+  const comment = addFeedComment({ ...common, post });
+  expect(comment.commentCount).toBe(31);
+  const reply = addFeedComment({ ...common, parentCommentId: "root", post });
+  expect(reply.commentCount).toBe(31);
+  expect(reply.comments[0]?.replyCount).toBe(6);
+});
+
+test("mergeCommentPage puts an older page first and drops ids already loaded", () => {
+  const merged = mergeCommentPage([createComment("c3"), createComment("c4")], [createComment("c1"), createComment("c2"), createComment("c3")]);
+  expect(merged.map((item) => item.id)).toEqual(["c1", "c2", "c3", "c4"]);
+});
+
+test("applyCommentPage updates top-level comments or the replies of one comment, with the has-more flag", () => {
+  const post = { ...createPost(), hasMoreComments: true, comments: [{ ...createComment("c2", [createComment("r2")]), hasMoreReplies: true }] };
+  const top = applyCommentPage(post, undefined, { hasNext: false, items: [createComment("c1")] });
+  expect(top.comments.map((c) => c.id)).toEqual(["c1", "c2"]);
+  expect(top.hasMoreComments).toBe(false);
+  const replies = applyCommentPage(post, "c2", { hasNext: false, items: [createComment("r1"), createComment("r2")] });
+  expect(replies.comments[0]?.replies.map((r) => r.id)).toEqual(["r1", "r2"]);
+  expect(replies.comments[0]?.hasMoreReplies).toBe(false);
+  expect(replies.hasMoreComments).toBe(true);
 });

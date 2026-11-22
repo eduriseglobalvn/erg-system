@@ -19,6 +19,7 @@ export const workspaceFields = `
     subjects { id label }
     levels { id subjectId label sortOrder }
     rooms { id label schoolId }
+    catalogTruncated
   }
   fragment WorkspaceFields on TeachingCalendarWorkspace {
     tenantId from to viewMode events { ...CalendarEventFields }

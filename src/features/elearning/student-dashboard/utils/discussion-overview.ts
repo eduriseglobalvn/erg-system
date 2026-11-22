@@ -1,5 +1,5 @@
 import type { StudentDiscussionFeedPost } from "@/features/elearning/student-dashboard/types/discussion-feed-types";
-import { getCommentCount, getFeedPostActivityMs } from "@/features/elearning/student-dashboard/utils/discussion-feed-state";
+import { getPostCommentCount, getFeedPostActivityMs } from "@/features/elearning/student-dashboard/utils/discussion-feed-state";
 
 export type DiscussionOverviewPreviewItem = {
   id: string;
@@ -19,7 +19,7 @@ export function getDiscussionOverviewPreview(posts: StudentDiscussionFeedPost[],
       authorName: post.authorName,
       className: post.className,
       content: post.content,
-      commentCount: getCommentCount(post.comments),
+      commentCount: getPostCommentCount(post),
       createdAtLabel: post.createdAtLabel,
     }));
 }

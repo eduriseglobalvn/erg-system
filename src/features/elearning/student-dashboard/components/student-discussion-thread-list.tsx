@@ -5,7 +5,7 @@ import Chip from "@mui/material/Chip";
 import Typography from "@mui/material/Typography";
 import { alpha } from "@mui/material/styles";
 import type { StudentDiscussionFeedPost } from "@/features/elearning/student-dashboard/types/discussion-feed-types";
-import { getCommentCount } from "@/features/elearning/student-dashboard/utils/discussion-feed-state";
+import { getPostCommentCount } from "@/features/elearning/student-dashboard/utils/discussion-feed-state";
 import { getPostTitle, getReactionTotal, type DiscussionListFilter } from "@/features/elearning/student-dashboard/utils/discussion-thread-list";
 import { SubjectTag, ThreadAvatar, ThreadStats, threadIconSx } from "@/features/elearning/student-dashboard/components/student-discussion-thread-parts";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
@@ -94,7 +94,7 @@ function ThreadRow({ onOpen, post, selected }: { onOpen: () => void; post: Stude
           {post.subject ? <SubjectTag label={post.subject} /> : null}
           <Typography variant="caption" sx={{ color: "inherit" }}>{post.authorName} · {post.createdAtLabel.replace(/ \d{2}:\d{2}$/, "")}</Typography>
         </Box>
-        <ThreadStats hearts={getReactionTotal(post.reactions)} replies={getCommentCount(post.comments)} solved={Boolean(post.acceptedReplyId)} />
+        <ThreadStats hearts={getReactionTotal(post.reactions)} replies={getPostCommentCount(post)} solved={Boolean(post.acceptedReplyId)} />
       </Box>
     </ButtonBase>
   );

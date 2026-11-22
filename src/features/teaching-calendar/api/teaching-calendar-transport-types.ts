@@ -1,4 +1,5 @@
 export type SessionCurrentResponseDTO = {
+  classesTruncated?: boolean;
   availableScopeOptions?: Array<{ label: string; level: "system" | "center" | "school" | "class" | string; unitId: string }>;
   currentScope?: { classId?: string; level: "system" | "center" | "school" | "class" | string; unitId: string };
   manageableClasses?: Array<{ id: string; name: string; unitId: string }>;

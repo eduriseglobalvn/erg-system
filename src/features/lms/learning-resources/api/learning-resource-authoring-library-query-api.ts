@@ -20,6 +20,7 @@ query LmsLearningResourceAuthoringLibrary($input: LearningResourceLibraryInput) 
     learningResourceLibrary(input: $input) {
       tenantId
       educationUnitId
+      taxonomyTruncated
       taxonomyTree {
         id
         kind

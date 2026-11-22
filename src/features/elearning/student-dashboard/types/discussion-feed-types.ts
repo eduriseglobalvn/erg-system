@@ -22,6 +22,10 @@ export type StudentDiscussionComment = {
   moderationWarning?: boolean;
   reactions: StudentDiscussionReactionSummary;
   replies: StudentDiscussionComment[];
+  /** Server total of visible replies (the list holds only the first page); absent in fixtures. */
+  replyCount?: number;
+  /** More replies exist than `replies` holds. */
+  hasMoreReplies?: boolean;
   viewerReaction: StudentDiscussionReactionKey | null;
 };
 
@@ -49,5 +53,9 @@ export type StudentDiscussionFeedPost = {
   moderationWarning?: boolean;
   reactions: StudentDiscussionReactionSummary;
   comments: StudentDiscussionComment[];
+  /** Server total of visible comments and replies (the list holds only the first page); absent in fixtures. */
+  commentCount?: number;
+  /** More top-level comments exist than `comments` holds. */
+  hasMoreComments?: boolean;
   viewerReaction: StudentDiscussionReactionKey | null;
 };

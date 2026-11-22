@@ -11,6 +11,8 @@ import type {
   ElearningReplyStudentDiscussionMutationVariables,
   ElearningSetStudentDiscussionReactionMutation,
   ElearningSetStudentDiscussionReactionMutationVariables,
+  ElearningStudentDiscussionCommentsQuery,
+  ElearningStudentDiscussionCommentsQueryVariables,
   ElearningStudentDiscussionFeedQuery,
   ElearningStudentDiscussionFeedQueryVariables,
   FollowStudentDiscussionInput,
@@ -69,6 +71,38 @@ export async function loadStudentDiscussionFeed({
     size: feed.size,
     totalItems: feed.totalItems,
   };
+}
+
+/** Page 0 is the window the feed already embeds (newest 20), so "load more" starts at page 1. */
+export async function loadStudentDiscussionComments({
+  tenantId = getDefaultTenantId(),
+  postId,
+  parentId,
+  page,
+  size = 20,
+  signal,
+}: {
+  tenantId?: string;
+  postId: string;
+  parentId?: string;
+  page: number;
+  size?: number;
+  signal?: AbortSignal;
+}): Promise<{ hasNext: boolean; items: StudentDiscussionComment[] }> {
+  const response = await graphQlRequest<ElearningStudentDiscussionCommentsQuery, ElearningStudentDiscussionCommentsQueryVariables & Record<string, unknown>>({
+    operationName: "ElearningStudentDiscussionComments",
+    portal: "elearning",
+    query: StudentEngagementDocument,
+    signal,
+    tenantId,
+    variables: { page, parentId, postId, size, tenantId },
+  });
+  const valid = validateResponse(response, (value): value is ElearningStudentDiscussionCommentsQuery =>
+    isObject(value) && isObject(value.elearning) && isObject(value.elearning.discussionComments)
+      && Array.isArray(value.elearning.discussionComments.items) && typeof value.elearning.discussionComments.hasNext === "boolean",
+  "elearning.discussion-comments");
+  const comments = valid.elearning.discussionComments;
+  return { hasNext: comments.hasNext, items: comments.items.map(mapComment) };
 }
 
 export async function createStudentDiscussion(input: CreateStudentDiscussionInput, signal?: AbortSignal) {
@@ -156,7 +190,9 @@ function mapPost(post: ElearningStudentDiscussionFeedQuery["elearning"]["discuss
     content: post.content || post.title || "",
     createdAtLabel: formatRelativeDate(createdAtMs),
     createdAtMs,
+    commentCount: post.commentCount,
     following: post.following,
+    hasMoreComments: post.hasMoreComments,
     id: post.id,
     pinned: post.pinned,
     reactions: mapReactionSummary(post.reactions),
@@ -176,8 +212,10 @@ function mapComment(comment: ElearningStudentDiscussionFeedQuery["elearning"]["d
     content: comment.content || "",
     createdAtLabel: formatRelativeDate(createdAtMs),
     createdAtMs,
+    hasMoreReplies: comment.hasMoreReplies,
     id: comment.id,
     reactions: mapReactionSummary(comment.reactions),
+    replyCount: comment.replyCount,
     replies: comment.replies.map((reply) => ({
       attachments: mapAttachments(reply.attachmentIds),
       authorInitials: reply.authorInitials || initials(reply.authorName),
