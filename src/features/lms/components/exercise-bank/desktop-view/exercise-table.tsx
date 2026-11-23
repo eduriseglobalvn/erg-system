@@ -12,6 +12,8 @@ import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
 import { ErgButton, ErgIconButton } from "@/components/erg-mui/erg-actions";
 import { ErgTable } from "@/components/erg-mui/erg-table";
+import { OpenGameButton } from "@/features/games/teacher/open-game-button";
+import { useLastGames } from "@/features/games/teacher/use-last-games";
 import { typeLabels } from "../exercise-bank-model";
 import type { ExerciseBankController } from "../use-exercise-bank-controller";
 import { DifficultyBadge, StatusIndicator } from "./exercise-badges";
@@ -26,6 +28,7 @@ export function ExerciseTable({
   setDetailModalOpen: (open: boolean) => void;
 }) {
   const [menu, setMenu] = useState<{ anchor: HTMLElement; id: string } | null>(null);
+  const lastGames = useLastGames();
   const menuExercise = controller.filteredExercises.find((item) => item.id === menu?.id);
   return (
     <Box sx={{ minHeight: 0, flex: 1, overflow: "auto" }}>
@@ -38,6 +41,7 @@ export function ExerciseTable({
             <TableCell sx={{ px: 1.5 }}>Độ khó</TableCell>
             <TableCell sx={{ px: 1.5 }}>Thời lượng</TableCell>
             <TableCell sx={{ px: 1.5 }}>Trạng thái</TableCell>
+            {lastGames.allowed ? <TableCell sx={{ px: 1.5 }}>Trò chơi gần nhất</TableCell> : null}
             <TableCell sx={{ px: 2 }} align="right">Giao bài</TableCell>
           </TableRow>
         </TableHead>
@@ -120,6 +124,12 @@ export function ExerciseTable({
                   <StatusIndicator status={exercise.status} />
                 </TableCell>
 
+                {lastGames.allowed ? (
+                  <TableCell sx={{ px: 1.5, whiteSpace: "nowrap", color: "text.secondary" }}>
+                    {exercise.status === "published" ? lastGames.lastGameLabel(exercise.id) : ""}
+                  </TableCell>
+                ) : null}
+
                 {/* Nút hành động */}
                 <TableCell sx={{ px: 2, whiteSpace: "nowrap" }} align="right">
                   <Box sx={{ display: "inline-flex", alignItems: "center", gap: 0.5 }}>
@@ -134,6 +144,7 @@ export function ExerciseTable({
                     >
                       Giao
                     </ErgButton>
+                    {exercise.status === "published" ? <OpenGameButton quizId={exercise.id} /> : null}
                     <ErgIconButton
                       label="Thao tác khác"
                       onClick={(event) => {

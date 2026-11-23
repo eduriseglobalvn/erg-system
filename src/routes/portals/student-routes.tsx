@@ -8,6 +8,8 @@ import {
   LearningOutcomesPage,
   permissionStaticData,
   PortableExamPage,
+  StudentGameRoomPage,
+  StudentGamesPage,
   StudentPage,
 } from "@/routes/portals/route-shared";
 
@@ -59,6 +61,25 @@ const studentHelpRoute = createRoute({
   component: () => <HelpGuidePage workspace="STUDENT" />,
 });
 
+const studentGamesRoute = createRoute({
+  getParentRoute: () => authedRoute,
+  path: "/student/games",
+  staticData: permissionStaticData("/student/games", "STUDENT"),
+  component: StudentGamesPage,
+});
+
+function StudentGameRoom() {
+  const { roomId } = studentGameRoomRoute.useParams();
+  return <StudentGameRoomPage roomId={roomId} />;
+}
+
+const studentGameRoomRoute = createRoute({
+  getParentRoute: () => authedRoute,
+  path: "/student/games/$roomId",
+  staticData: permissionStaticData("/student/games", "STUDENT"),
+  component: StudentGameRoom,
+});
+
 /** Children of `_authed`. */
 export const studentRoutes = [
   studentHelpRoute,
@@ -67,4 +88,6 @@ export const studentRoutes = [
   studentPortableExamRoute,
   studentDesktopReleaseRoute,
   learningOutcomesStudentRoute,
+  studentGamesRoute,
+  studentGameRoomRoute,
 ];

@@ -45,6 +45,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/teacher/homework": "Bài tập",
   "/teacher/homework/assign": "Giao bài tập",
   "/teacher/homework/exercise-bank": "Ngân hàng bài tập",
+  "/teacher/games": "Trò chơi",
   "/teacher/homework/progress": "Tiến độ bài tập",
   "/teacher/homework/student-groups": "Nhóm học sinh",
   "/teacher/reports": "Báo cáo",

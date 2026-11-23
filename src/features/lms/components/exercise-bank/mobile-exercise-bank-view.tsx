@@ -10,6 +10,7 @@ import Typography from "@mui/material/Typography";
 import { ErgEmptyState } from "@/components/erg-mui/erg-feedback";
 import { ErgSearchField } from "@/components/erg-mui/erg-form";
 import { formatDateVi } from "@/domain/formatters/format-date";
+import { OpenGameButton } from "@/features/games/teacher/open-game-button";
 import {
   allExerciseFilter,
   chipPropsForTone,
@@ -109,6 +110,7 @@ export function MobileExerciseBankView({
               <Button variant="outlined" size="small" startIcon={<SendOutlinedIcon fontSize="small" />} onClick={() => onAssign(exercise.title)} sx={{ minHeight: 36 }}>
                 Giao
               </Button>
+              {exercise.status === "published" ? <OpenGameButton quizId={exercise.id} /> : null}
             </Box>
           </Paper>
         ))}

@@ -15,6 +15,9 @@ import {
   ProfileBody,
 } from "@/routes/portals/route-shared";
 
+const CreateRoomPage = lazy(() => import("@/features/games/teacher/create-room-page").then((module) => ({ default: module.CreateRoomPage })));
+const TeacherGameRoomPage = lazy(() => import("@/app/pages/teacher/teacher-game-room-page").then((module) => ({ default: module.TeacherGameRoomPage })));
+
 type LmsPath = (typeof lmsPaths)[number];
 
 const routePages = () => import("@/features/lms/components/lms-teacher-route-pages");
@@ -102,6 +105,42 @@ const teacherPageRoutes = lmsPaths.map((lPath) =>
   }),
 );
 
+// Classroom games (wayground/HOP_DONG_API.md). The list lives in the shell; creating and running a room are full-screen.
+const teacherGamesRoute = createRoute({
+  getParentRoute: () => teacherShellRoute,
+  path: "/teacher/games",
+  staticData: permissionStaticData("/teacher/games", "TEACHER"),
+  component: lazyRouteComponent(() => import("@/features/games/teacher/games-page"), "TeacherGamesPage"),
+});
+
+function TeacherGameCreate() {
+  const { quizId, classId } = teacherGameCreateRoute.useSearch();
+  return <Suspense fallback={null}><CreateRoomPage quizId={quizId} classId={classId} /></Suspense>;
+}
+
+const teacherGameCreateRoute = createRoute({
+  getParentRoute: () => authedRoute,
+  path: "/teacher/games/new",
+  staticData: permissionStaticData("/teacher/games", "TEACHER"),
+  validateSearch: (search: Record<string, unknown>): { quizId?: string; classId?: string } => ({
+    ...(typeof search.quizId === "string" && search.quizId ? { quizId: search.quizId } : {}),
+    ...(typeof search.classId === "string" && search.classId ? { classId: search.classId } : {}),
+  }),
+  component: TeacherGameCreate,
+});
+
+function TeacherGameRoom() {
+  const { roomId } = teacherGameRoomRoute.useParams();
+  return <Suspense fallback={null}><TeacherGameRoomPage roomId={roomId} /></Suspense>;
+}
+
+const teacherGameRoomRoute = createRoute({
+  getParentRoute: () => authedRoute,
+  path: "/teacher/games/$roomId",
+  staticData: permissionStaticData("/teacher/games", "TEACHER"),
+  component: TeacherGameRoom,
+});
+
 const teacherNotificationDetailRoute = createRoute({
   getParentRoute: () => teacherShellRoute,
   path: "/teacher/notifications/$notificationId",
@@ -161,9 +200,11 @@ const learningOutcomesTeacherRoute = createRoute({
 });
 
 export const teacherRoutes = [
-  teacherShellRoute.addChildren([teacherIndexRoute, ...teacherPageRoutes, teacherNotificationDetailRoute, teacherCampaignDetailRoute, teacherNotificationComposeEditRoute, teacherHelpRoute]),
+  teacherShellRoute.addChildren([teacherIndexRoute, ...teacherPageRoutes, teacherGamesRoute, teacherNotificationDetailRoute, teacherCampaignDetailRoute, teacherNotificationComposeEditRoute, teacherHelpRoute]),
   teacherProfileRoute,
   teacherPortableExamRoute,
   teacherDesktopReleaseRoute,
+  teacherGameCreateRoute,
+  teacherGameRoomRoute,
   learningOutcomesTeacherRoute,
 ];

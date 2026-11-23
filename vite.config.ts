@@ -209,6 +209,8 @@ export default defineConfig(({ command, mode }) => {
       ],
     },
     proxy: {
+      // Classroom games WebSocket (/ws/games/{roomId}).
+      "/ws": { target: backendUrl, ws: true, changeOrigin: true },
       "/api": {
         target: backendUrl,
         changeOrigin: true,
