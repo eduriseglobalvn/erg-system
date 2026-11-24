@@ -47,10 +47,10 @@ describe("TopicRail", () => {
     expect(onSelect).toHaveBeenCalledWith(null);
   });
 
-  it("guides to the question bank when the Level has no topics, with no add-topic button", () => {
+  it("guides to the course structure when the Level has no topics, with no add-topic button", () => {
     render(<TopicRail onSelect={vi.fn()} rows={[]} selectedTopicId="all" />);
     expect(screen.getByText(/Level này chưa có chủ đề\. Thêm chủ đề ở/)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Ngân hàng câu hỏi" })).toHaveAttribute("href", "/admin/content/questions");
+    expect(screen.getByRole("link", { name: "Cấu trúc môn học" })).toHaveAttribute("href", "/admin/content/structure");
     expect(screen.queryByRole("button", { name: /Thêm chủ đề/ })).toBeNull();
   });
 });

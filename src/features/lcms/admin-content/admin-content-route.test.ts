@@ -18,7 +18,6 @@ describe("Admin content route contract", () => {
       "/admin/content/structure",
       "/admin/content/resources",
       "/admin/content/quiz-bank",
-      "/admin/content/questions",
       "/admin/content/quiz-editor",
     ]);
     expect(isAdminContentPath("/admin/content/resources")).toBe(true);
@@ -29,7 +28,7 @@ describe("Admin content route contract", () => {
   it("maps legacy authoring deep links to canonical Admin content paths", () => {
     expect(canonicalAdminContentPath("/resources")).toBe("/admin/content/resources");
     expect(canonicalAdminContentPath("/structure")).toBe("/admin/content/structure");
-    expect(canonicalAdminContentPath("/questions/archived")).toBe("/admin/content/questions/archived");
+    expect(canonicalAdminContentPath("/quiz-bank/archived")).toBe("/admin/content/quiz-bank/archived");
     expect(canonicalAdminContentPath("/quiz-editor?quizId=quiz-a")).toBe("/admin/content/quiz-editor?quizId=quiz-a");
     expect(legacyAdminContentPath("/admin/content/quiz-editor")).toBe("/quiz-editor");
     expect(adminContentSectionForPath("/admin/content/quiz-bank")?.key).toBe("quiz-bank");

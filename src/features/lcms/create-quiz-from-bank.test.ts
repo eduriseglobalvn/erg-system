@@ -69,6 +69,7 @@ describe("createQuizFromBankQuestions", () => {
         levelId: "level-a",
         questionIds: ["qb-a"],
         subjectId: "subject-a",
+        subtitle: "Gói bài tập",
         title: "Subject A - Level A",
       }),
     );

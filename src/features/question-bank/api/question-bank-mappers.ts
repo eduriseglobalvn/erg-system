@@ -128,6 +128,8 @@ export type QuestionBankQuestionDTO = {
   rationale?: string | null;
   runtimeQuestion?: string | null;
   fromQuizEditor?: boolean | null;
+  sourceQuizId?: string | null;
+  sourceSlideId?: string | null;
   updatedAt?: string | null;
 };
 
@@ -280,6 +282,8 @@ function mapQuestion(question: QuestionBankQuestionDTO, subjects: QuestionBankSu
     runtimeQuestion: parseRuntimeQuestion(question.runtimeQuestion),
     topicId: question.topicId ?? null,
     fromQuizEditor: Boolean(question.fromQuizEditor),
+    sourceQuizId: question.sourceQuizId ?? undefined,
+    sourceSlideId: question.sourceSlideId ?? undefined,
     settings: template.settings,
     choices: question.choices?.length
       ? question.choices.map((choice, choiceIndex) => ({

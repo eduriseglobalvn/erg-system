@@ -41,9 +41,10 @@ describe("Admin pruned navigation contract", () => {
     const paths = items.flatMap((item) => item.path ? [item.path] : []);
 
     for (const label of removedLabels) expect(labels).not.toContain(label);
+    // "Ngân hàng câu hỏi" is the quiz editor now; the old question list is gone.
+    expect(paths).not.toContain("/questions");
     expect(paths).toEqual(expect.arrayContaining([
       "/quiz-bank",
-      "/questions",
       "/quiz-editor",
       "/resources",
       "/employees",
@@ -70,7 +71,6 @@ describe("Admin pruned navigation contract", () => {
       "schools/classes",
       "schools/students",
       "quiz-bank",
-      "questions",
       "quiz-editor",
       "settings/permissions",
       "settings/roles",

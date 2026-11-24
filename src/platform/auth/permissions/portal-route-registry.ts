@@ -15,7 +15,6 @@ export const lcmsWorkspacePaths = [
   "schools/scores",
   "schools/assessments",
   "schools/audit-log",
-  "questions",
   "quiz-bank",
   "quiz-editor",
   "settings/permissions",
@@ -55,7 +54,6 @@ export const ADMIN_CONTENT_ROUTE_PATHS = [
   `${ADMIN_CONTENT_ROUTE_PREFIX}/structure`,
   `${ADMIN_CONTENT_ROUTE_PREFIX}/resources`,
   `${ADMIN_CONTENT_ROUTE_PREFIX}/quiz-bank`,
-  `${ADMIN_CONTENT_ROUTE_PREFIX}/questions`,
   `${ADMIN_CONTENT_ROUTE_PREFIX}/quiz-editor`,
 ] as const;
 

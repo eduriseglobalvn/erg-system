@@ -59,6 +59,7 @@ const legacyWorkspaceSegments = Array.from(new Set([
 
 function canonicalLegacyWorkspacePath(segment: string) {
   const legacyPath = `/${stripPath(segment)}`;
+  if (segment === "questions") return canonicalAdminWorkspacePath("/quiz-editor");
   const activePortal = resolveActivePortal();
   const isAdminOnlySegment = lcmsWorkspacePaths.includes(segment as (typeof lcmsWorkspacePaths)[number])
     && !lmsPaths.includes(segment as (typeof lmsPaths)[number]);

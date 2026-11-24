@@ -62,18 +62,20 @@ function TopicPicker({ number, topics, onPick }: { number: number; topics: reado
   );
 }
 
-export function QuestionTableRow({ row, readiness, showTopic, onOpen, selected, onToggleSelect, highlighted, topics = [], onAssignTopic }: {
+export function QuestionTableRow({ row, readiness, showTopic, onOpen, selected, onToggleSelect, highlighted, topics = [], onAssignTopic, packages }: {
   row: QuestionListRow;
   readiness: QuestionReadiness;
   showTopic: boolean;
   onOpen: () => void;
-  /** Set only where rows can be moved (an open quiz): renders the selection checkbox. */
+  /** Set where rows can be checked: renders the selection checkbox. */
   selected?: boolean;
   onToggleSelect?: () => void;
   highlighted?: boolean;
   topics?: readonly TopicOption[];
   /** Set for a "Tất cả" question with no topic yet: renders the topic picker. */
   onAssignTopic?: (topic: TopicOption) => void;
+  /** "Đã dùng": how many packages hold the question; the column is left out when undefined. */
+  packages?: number;
 }) {
   const { slide } = row;
   const cloud = row.onServer ? "Đã lên máy chủ" : "Chưa lên máy chủ";
@@ -118,6 +120,9 @@ export function QuestionTableRow({ row, readiness, showTopic, onOpen, selected, 
           <Typography component="span" variant="body2">{readinessLabel(readiness)}</Typography>
         </Box>
       </TableCell>
+      {packages === undefined ? null : (
+        <TableCell sx={{ color: packages ? "text.primary" : "text.secondary", whiteSpace: "nowrap" }}>{packages ? `${packages} gói` : "—"}</TableCell>
+      )}
       <TableCell sx={{ width: 72 }}>
         {row.onServer ? (
           <CloudDoneOutlinedIcon sx={{ color: "success.main" }} titleAccess={cloud} />

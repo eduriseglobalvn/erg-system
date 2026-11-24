@@ -100,7 +100,7 @@ test("admin calendar, question bank, Google Sheets import, slide embeds, R2 uplo
   await watch(page);
   await seedAuthenticatedPortal(page, "lms");
   await visit(page, `${lms}/admin/calendar`);
-  await visit(page, `${lms}/admin/content/questions`);
+  await visit(page, `${lms}/admin/content/quiz-editor`);
 
   // Same requests as google-sheets-csv-adapter, the learning-resource embeds and upload-inline-images.
   await page.evaluate(async () => {

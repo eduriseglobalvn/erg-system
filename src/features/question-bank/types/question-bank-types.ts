@@ -70,6 +70,9 @@ export type QuestionBankQuestion = {
   topicId?: string | null;
   /** Mirrored by the quiz editor on publish; false for a question made in the bank itself. */
   fromQuizEditor?: boolean;
+  /** The quiz and slide a row the quiz editor mirrored comes from. */
+  sourceQuizId?: string;
+  sourceSlideId?: string;
   answer?: string;
   choices?: QuestionBankChoice[];
   settings?: Record<string, unknown>;

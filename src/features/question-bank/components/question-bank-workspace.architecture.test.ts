@@ -13,11 +13,7 @@ describe("QuestionBankWorkspace architecture", () => {
 
     const compositionSource = fs.readFileSync(compositionPath, "utf8");
     for (const owner of [
-      "./question-bank-questions-view",
-      "./question-form-dialog",
-      "./quiz-auto-pick-dialog",
       "./quiz-bank-panel",
-      "./question-quick-view-drawer",
       "./quiz-quick-view-drawer",
       "./question-bank-copy",
     ]) {

@@ -34,15 +34,8 @@ export const ADMIN_CONTENT_SECTIONS = [
     variant: "quiz-bank",
   },
   {
-    key: "questions",
-    label: "Ngân hàng câu hỏi",
-    canonicalPath: `${ADMIN_CONTENT_ROUTE_PREFIX}/questions`,
-    legacyPath: "/questions",
-    variant: "question-bank",
-  },
-  {
     key: "quiz-editor",
-    label: "Soạn câu hỏi",
+    label: "Ngân hàng câu hỏi",
     canonicalPath: `${ADMIN_CONTENT_ROUTE_PREFIX}/quiz-editor`,
     legacyPath: "/quiz-editor",
     variant: "quiz-editor",

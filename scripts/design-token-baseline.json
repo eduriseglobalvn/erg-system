@@ -891,10 +891,6 @@
     "hex": 7,
     "font": 7
   },
-  "src/features/question-bank/components/question-form-dialog.tsx": {
-    "hex": 1,
-    "font": 2
-  },
   "src/features/teaching-calendar/api/teaching-calendar-mappers.ts": {
     "hex": 24,
     "font": 0

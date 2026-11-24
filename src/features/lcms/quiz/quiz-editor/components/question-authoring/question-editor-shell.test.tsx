@@ -143,7 +143,7 @@ describe("QuestionEditorShell", () => {
 
   it("sends quiz-wide settings to the screen that has them: Cài đặt gói in the question bank", () => {
     renderShell();
-    expect(screen.getByText("Điểm, thời gian, trộn đáp án đặt ở “Cài đặt gói” trong Ngân hàng câu hỏi, không đặt ở từng câu.")).toBeInTheDocument();
+    expect(screen.getByText("Điểm, thời gian, trộn đáp án đặt ở “Cài đặt gói” trong Ngân hàng bài tập, không đặt ở từng câu.")).toBeInTheDocument();
   });
 
   it("reveals the correct-answer message box", () => {

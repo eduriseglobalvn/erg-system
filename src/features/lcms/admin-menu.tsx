@@ -98,21 +98,14 @@ export const ADMIN_BASE_MENU_GROUPS: MenuGroup[] = [
             description: "Quản lý quiz Train/Test đã đóng gói để giáo viên giao lại trong LMS.",
             variant: "quiz-bank",
           },
-          {
-            id: "question-bank",
-            label: "Ngân hàng câu hỏi",
-            path: "/questions",
-            description: "Quản lý câu hỏi nguồn dùng chung toàn ERG và theo phạm vi được cấp.",
-            variant: "question-bank",
-          },
         ],
       }),
       item({
         id: "course-modules",
-        label: "Soạn câu hỏi",
+        label: "Ngân hàng câu hỏi",
         icon: <ArticleRoundedIcon sx={{ fontSize: 24 }} />,
         path: "/quiz-editor",
-        description: "Tạo hoặc chỉnh sửa quiz nguồn từ câu hỏi, slide và cấu hình player.",
+        description: "Soạn, nhập và quản lý câu hỏi theo chủ đề; bốc ngẫu nhiên và tạo gói bài tập.",
         variant: "quiz-editor",
       }),
       item({

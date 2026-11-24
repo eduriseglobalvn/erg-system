@@ -25,11 +25,17 @@ function latestQuizByTopic(summaries: readonly QuizEditorSummary[]) {
   return latest;
 }
 
-/** The Level's quiz without a topic: questions added in "Tất cả" with no topic picked live there. */
+/** Subtitle of a package made from bank rows ("Tạo gói bài tập"): it has no topic either, but is not the Level's own quiz. */
+export const BANK_PACKAGE_SUBTITLE = "Gói bài tập";
+
+/**
+ * The Level's quiz without a topic: questions added in "Tất cả" with no topic picked live there.
+ * shortcut: packages made before BANK_PACKAGE_SUBTITLE existed carry no marker and can still be taken for it.
+ */
 export function unassignedQuizId(summaries: readonly QuizEditorSummary[]) {
   let latest: QuizEditorSummary | undefined;
   for (const summary of summaries) {
-    if (summary.categoryId || summary.status === "deleted") continue;
+    if (summary.categoryId || summary.subtitle === BANK_PACKAGE_SUBTITLE || summary.status === "deleted") continue;
     if (!latest || (summary.updatedAt ?? "") > (latest.updatedAt ?? "")) latest = summary;
   }
   return latest?.id ?? null;
