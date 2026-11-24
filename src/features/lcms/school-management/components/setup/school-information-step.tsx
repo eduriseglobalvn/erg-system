@@ -11,47 +11,61 @@ import MenuItem from "@mui/material/MenuItem";
 import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AcademicYearFields } from "@/features/lcms/school-management/components/academic-year-fields";
 import { useSchoolManagementContext } from "@/features/lcms/school-management/components/school-management-context";
 import { SchoolStepSurface } from "@/features/lcms/school-management/components/setup/school-step-surface";
 import { schoolTypeMeta, schoolTypeOrder } from "@/features/lcms/school-management/types/school-type-config";
 import type { PartnerSchool, SchoolDraft } from "@/features/lcms/school-management/types/school-management-types";
 
-export function SchoolInformationStep() {
+/** Called before the flow leaves this step; it runs `go` itself once the changes are saved or undone. */
+export type SchoolStepLeaveGuard = (go: () => void) => void;
+
+export function SchoolInformationStep({ onLeaveGuard }: { onLeaveGuard?: (guard: SchoolStepLeaveGuard | null) => void }) {
   const { saveSchool, selectedSchool } = useSchoolManagementContext();
   if (!selectedSchool) return null;
-  return <SchoolInformationForm key={`${selectedSchool.id}-${selectedSchool.version ?? 0}`} saveSchool={saveSchool} school={selectedSchool} />;
+  return <SchoolInformationForm key={`${selectedSchool.id}-${selectedSchool.version ?? 0}`} onLeaveGuard={onLeaveGuard} saveSchool={saveSchool} school={selectedSchool} />;
 }
 
-function SchoolInformationForm({ saveSchool, school }: { saveSchool: (draft: SchoolDraft, schoolId?: string) => Promise<string>; school: PartnerSchool }) {
+function SchoolInformationForm({ onLeaveGuard, saveSchool, school }: { onLeaveGuard?: (guard: SchoolStepLeaveGuard | null) => void; saveSchool: (draft: SchoolDraft, schoolId?: string) => Promise<string>; school: PartnerSchool }) {
   const [draft, setDraft] = useState<SchoolDraft>(() => toDraft(school));
-  const [saved, setSaved] = useState(false);
-  const [confirmTypeChange, setConfirmTypeChange] = useState(false);
+  const [pendingLeave, setPendingLeave] = useState<(() => void) | null>(null);
+  const [saving, setSaving] = useState(false);
   const hasOperationalData = school.classes.length > 0 || (school.studentCount ?? 0) > 0;
   const nameMissing = draft.name.trim() === "";
   const typeChanged = draft.schoolType !== school.schoolType;
+  const dirty = JSON.stringify(draft) !== JSON.stringify(toDraft(school));
+
+  useEffect(() => {
+    if (!onLeaveGuard) return;
+    onLeaveGuard(dirty ? (go) => setPendingLeave(() => go) : null);
+    return () => onLeaveGuard(null);
+  }, [dirty, onLeaveGuard]);
 
   function field<K extends keyof SchoolDraft>(key: K, value: SchoolDraft[K]) {
-    setSaved(false);
     setDraft((current) => ({ ...current, [key]: value }));
   }
 
-  async function commit() {
-    await saveSchool(draft, school.id);
-    setSaved(true);
-    setConfirmTypeChange(false);
+  async function confirmSave() {
+    if (nameMissing || !pendingLeave) return;
+    setSaving(true);
+    try {
+      await saveSchool(draft, school.id);
+      pendingLeave();
+    } finally {
+      setSaving(false);
+      setPendingLeave(null);
+    }
   }
 
-  function save() {
-    if (nameMissing) return;
-    if (typeChanged && hasOperationalData) setConfirmTypeChange(true);
-    else void commit();
+  function discard() {
+    setDraft(toDraft(school));
+    pendingLeave?.();
+    setPendingLeave(null);
   }
 
   return <>
     <SchoolStepSurface
-      action={<Button color={saved ? "success" : "primary"} onClick={save} startIcon={saved ? <CheckRoundedIcon /> : undefined} variant="contained">{saved ? "Đã lưu" : "Lưu thông tin"}</Button>}
       description="Loại hình trường là dữ liệu gốc, quyết định cấu trúc khối và cách nhập lớp ở bước sau."
       eyebrow="Bước 1"
       title="Thông tin & loại hình"
@@ -84,13 +98,17 @@ function SchoolInformationForm({ saveSchool, school }: { saveSchool: (draft: Sch
         <TextField label="Hiệu trưởng / đầu mối" value={draft.principal} onChange={(event) => field("principal", event.target.value)} />
         <TextField label="Điện thoại" value={draft.contactPhone} onChange={(event) => field("contactPhone", event.target.value)} />
         <TextField label="Email liên hệ" type="email" value={draft.contactEmail} onChange={(event) => field("contactEmail", event.target.value)} />
-        <TextField label="Trạng thái" select value={draft.status} onChange={(event) => field("status", event.target.value as SchoolDraft["status"])}><MenuItem value="onboarding">Đang triển khai</MenuItem><MenuItem value="active">Đang vận hành</MenuItem><MenuItem value="paused">Tạm dừng</MenuItem><MenuItem disabled value="archived">Đã lưu trữ</MenuItem></TextField>
+        <TextField label="Trạng thái" select value={draft.status} onChange={(event) => field("status", event.target.value as SchoolDraft["status"])}>{draft.status === "onboarding" ? <MenuItem disabled value="onboarding">Đang triển khai</MenuItem> : null}<MenuItem value="active">Đang vận hành</MenuItem><MenuItem value="paused">Tạm dừng</MenuItem><MenuItem disabled value="archived">Đã lưu trữ</MenuItem></TextField>
       </Paper>
     </SchoolStepSurface>
-    <Dialog maxWidth="sm" onClose={() => setConfirmTypeChange(false)} open={confirmTypeChange}>
-      <DialogTitle sx={{ alignItems: "center", display: "flex", gap: 1 }}><WarningAmberRoundedIcon color="warning" />Đổi loại hình trường?</DialogTitle>
-      <DialogContent><Typography color="text.secondary" variant="body2">Hệ thống sẽ tạo lại dải khối chuẩn. Lớp và người học vẫn được giữ, nhưng các liên kết khối không còn phù hợp sẽ chuyển về trạng thái chưa gán để bạn rà soát.</Typography></DialogContent>
-      <DialogActions><Button variant="contained" onClick={() => setConfirmTypeChange(false)}>Giữ loại hiện tại</Button><Button color="warning" onClick={commit} variant="contained">Đổi loại hình</Button></DialogActions>
+    <Dialog maxWidth="sm" onClose={() => { if (!saving) setPendingLeave(null); }} open={pendingLeave !== null}>
+      <DialogTitle sx={{ alignItems: "center", display: "flex", gap: 1 }}>{typeChanged && hasOperationalData ? <WarningAmberRoundedIcon color="warning" /> : null}Lưu thay đổi thông tin trường?</DialogTitle>
+      <DialogContent sx={{ display: "grid", gap: 1.5 }}>
+        <Typography color="text.secondary" variant="body2">Bạn đã sửa thông tin ở bước này. Xác nhận để lưu, hoặc hủy bỏ để trả lại thông tin cũ.</Typography>
+        {typeChanged && hasOperationalData ? <Alert severity="warning">Đổi loại hình sẽ tạo lại dải khối chuẩn. Lớp và người học vẫn được giữ, nhưng các liên kết khối không còn phù hợp sẽ chuyển về trạng thái chưa gán để bạn rà soát.</Alert> : null}
+        {nameMissing ? <Alert severity="error">Tên trường không được trống. Hủy bỏ hoặc đóng hộp này để nhập tên.</Alert> : null}
+      </DialogContent>
+      <DialogActions><Button disabled={saving} onClick={discard} variant="text">Hủy bỏ</Button><Button disabled={nameMissing || saving} onClick={() => void confirmSave()} variant="contained">Xác nhận lưu</Button></DialogActions>
     </Dialog>
   </>;
 }
