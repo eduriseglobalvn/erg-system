@@ -46,7 +46,7 @@ test("builds the exact canonical upload command after validation", () => {
 test("rejects missing placement/link and invalid PPTX slide counts", () => {
   expect(buildLearningResourceUploadCommand({ ...baseInput, resourceUrl: "" })).toEqual({
     ok: false,
-    message: "Vui lòng chọn môn, level/chủ đề và dán link Google Drive/Google Slides.",
+    message: "Vui lòng chọn môn, module/chủ đề và dán link Google Drive/Google Slides.",
   });
   expect(buildLearningResourceUploadCommand({ ...baseInput, totalSlides: "0" })).toEqual({
     ok: false,

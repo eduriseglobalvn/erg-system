@@ -150,10 +150,10 @@ export function SchoolSubjectAssignDialog({
 
         {/* Step 2: Chọn Level từ danh sách môn học */}
         <FormControl fullWidth size="small">
-          <InputLabel id="catalog-level-label">2. Cấp độ / Level *</InputLabel>
+          <InputLabel id="catalog-level-label">2. Module *</InputLabel>
           <Select
             disabled={availableLevels.length === 0}
-            label="2. Cấp độ / Level *"
+            label="2. Module *"
             labelId="catalog-level-label"
             onChange={(e) => setLevelId(e.target.value)}
             value={selectedLevel?.id ?? ""}

@@ -71,7 +71,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/admin/content": "Nội dung",
   "/admin/content/quiz-bank": "Ngân hàng bài tập",
   "/admin/content/questions": "Ngân hàng câu hỏi",
-  "/admin/content/quiz-editor": "Soạn bài tập",
+  "/admin/content/quiz-editor": "Soạn câu hỏi",
   "/admin/content/resources": "Tài nguyên",
   "/admin/training/lesson-reports": "Báo giảng",
   "/admin/employees": "Tài khoản nhân sự",

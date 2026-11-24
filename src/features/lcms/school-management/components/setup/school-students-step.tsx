@@ -19,23 +19,21 @@ import { useSchoolManagementContext } from "@/features/lcms/school-management/co
 import { useSchoolStudents } from "@/features/lcms/school-management/hooks/use-school-students";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { SchoolStepSurface } from "@/features/lcms/school-management/components/setup/school-step-surface";
-import { StudentCredentialsDialog, type StudentCredentialsResult } from "@/features/lcms/school-management/components/setup/student-credentials-dialog";
-import { buildStudentLogins } from "@/features/lcms/school-management/utils/student-account-credentials";
+import { useStudentImportWithAccounts } from "@/features/lcms/school-management/hooks/use-student-import-with-accounts";
 import {
   StudentPasswordResetFlow,
   type StudentPasswordResetTarget,
 } from "@/features/lms/student-credentials/student-password-reset-flow";
 import { StudentImportDialog } from "@/features/lcms/school-management/components/student-import-dialog";
 import { schoolTypeMeta, schoolTypeUsesGrades } from "@/features/lcms/school-management/types/school-type-config";
-import type { StudentImportRow } from "@/features/lcms/school-management/types/school-management-types";
 // Stable fallback so memo deps do not change every render.
 const NONE: never[] = [];
 const PAGE_SIZE = 50;
 
 export function SchoolStudentsStep() {
-  const { addStudents, selectedSchool } = useSchoolManagementContext();
+  const { selectedSchool } = useSchoolManagementContext();
+  const { credentialsDialog, importStudents } = useStudentImportWithAccounts();
   const [importOpen, setImportOpen] = useState(false);
-  const [credentials, setCredentials] = useState<StudentCredentialsResult | null>(null);
   const [selectedClass, setSelectedClass] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(0);
@@ -70,37 +68,6 @@ export function SchoolStudentsStep() {
   // The roster rows carry the class name only; the reset endpoint needs the class id.
   const classIdOf = (student: { academicClassId?: string | null; className: string }) =>
     student.academicClassId || selectedSchool!.classes.find((c) => c.name === student.className)?.id || "";
-
-  async function importStudents(rows: StudentImportRow[]) {
-    // Every imported student also gets a login (active, learner role, no onboarding) created by the backend.
-    const logins = buildStudentLogins(rows, selectedSchool!.name);
-    // A student already on the roster keeps the account it has: the backend returns it untouched (replayed), so no password is shown for it (BUG-X-004).
-    const saved = await addStudents(
-      rows.map((row, index) => ({
-        // Blank code: the backend issues one (HS-XXXXXX) and recognises a returning child by name + birthday.
-        code: row.code,
-        fullName: row.fullName,
-        birthDate: row.birthDate,
-        grade: row.grade,
-        className: row.className,
-        guardianPhone: row.guardianPhone,
-        subjectIds: [],
-        status: "studying" as const,
-        account: logins[index],
-      }))
-    );
-    // Only logins the backend confirms (same username, linked account) were created now; the rest already had one.
-    // saved is in row order; the backend may number a login that another school already uses (BUG-A-003), so its username is the one shown.
-    const sheetOrder = logins.map((login, index) => {
-      const item = saved[index];
-      return login && item?.authUserId && item.username && !item.replayed ? { ...login, username: item.username } : null;
-    });
-    const issued = rows.flatMap((row, index) => {
-      const login = sheetOrder[index];
-      return login ? [{ code: saved[index].studentCode, fullName: row.fullName, className: row.className, ...login }] : [];
-    });
-    if (issued.length) setCredentials({ rows: issued, sheetOrder, skipped: rows.length - issued.length });
-  }
 
   return (
     <>
@@ -346,11 +313,11 @@ export function SchoolStudentsStep() {
       </SchoolStepSurface>
 
       <StudentPasswordResetFlow onClose={() => setResetTarget(null)} portal="lcms" target={resetTarget} />
-      {credentials ? <StudentCredentialsDialog onClose={() => setCredentials(null)} result={credentials} /> : null}
+      {credentialsDialog}
       {importOpen ? (
         <StudentImportDialog
           onClose={() => setImportOpen(false)}
-          onImport={importStudents}
+          onImport={async (rows) => { await importStudents(rows); }}
           school={selectedSchool}
         />
       ) : null}

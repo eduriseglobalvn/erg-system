@@ -111,7 +111,7 @@ export function StudentProfileDetailDrawer<TValue extends string = StudentStatus
           <DetailSection title="Tài khoản học sinh">
             <Box sx={twoColumnGrid}>
               {/* Read-only: the real login name; passwords are never shown, use «Cấp lại mật khẩu». */}
-              <ReadOnlyField label="Tên đăng nhập" value={student.username ?? "Chưa có dữ liệu"} />
+              <ReadOnlyField label="Tên đăng nhập" value={student.username ?? "Chưa có tài khoản"} />
               <ReadOnlyField label="Lần đăng nhập gần nhất" value={student.lastActivity} />
               <ReadOnlyField label="Thiết bị thường dùng" value={profile.device} />
             </Box>

@@ -48,7 +48,7 @@ export async function executeCreateDialogSubmission(input: SubmissionInput) {
 async function submitTaxonomy(mode: TaxonomyRole, input: SubmissionInput) {
   const trimmedLabel = input.label.trim();
   if (!trimmedLabel) {
-    throw new Error(mode === "subject" ? "Vui lòng nhập tên môn học." : mode === "level" ? "Vui lòng nhập tên level." : "Vui lòng nhập tên chủ đề.");
+    throw new Error(mode === "subject" ? "Vui lòng nhập tên môn học." : mode === "level" ? "Vui lòng nhập tên module." : "Vui lòng nhập tên chủ đề.");
   }
   if ((mode === "level" || mode === "topic") && !input.draftSubjectId) throw new Error("Vui lòng chọn môn học.");
   let targetLevelId = input.draftLevelId;

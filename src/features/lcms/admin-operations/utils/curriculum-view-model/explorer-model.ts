@@ -58,7 +58,7 @@ function getSelectedKind(subject?: StudioSubject, node?: StudioNode): Curriculum
 
 function getSearchPlaceholder(selectedKind: CurriculumSelectionKind, subject?: StudioSubject) {
   if (selectedKind === "topic") return "Tìm trong chủ đề này";
-  if (selectedKind === "level") return "Tìm trong level này";
+  if (selectedKind === "level") return "Tìm trong module này";
   if (subject) return `Tìm trong ${subject.label}`;
-  return "Tìm môn học, level, chủ đề";
+  return "Tìm môn học, module, chủ đề";
 }

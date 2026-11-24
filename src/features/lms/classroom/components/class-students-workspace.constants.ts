@@ -119,7 +119,7 @@ const legacyAssignmentSubjects: AssignmentSubject[] = Array.from(
       {
         id: levelId,
         label: "Khác",
-        description: "Chưa phân level",
+        description: "Chưa phân module",
         topics: [
           {
             id: topicId,
@@ -149,7 +149,7 @@ export const assignmentSubjects: AssignmentSubject[] = [
   {
     id: "subject-ic3-gs6",
     label: IC3_PROGRAM_LABEL,
-    description: "3 level, mỗi level 7 chủ đề",
+    description: "3 module, mỗi module 7 chủ đề",
     levels: ic3Gs6Levels,
   },
   ...legacyAssignmentSubjects,

@@ -145,15 +145,15 @@ export function toEditTargetFromNode(node: StudioNode | null | undefined): Taxon
 export function getAddContentOptionMeta(optionId: ContentDialogOptionId) {
   if (optionId === "category") {
     return {
-      title: "Level",
-      description: "Level nằm dưới môn học và dùng để gom các chủ đề theo cấp độ học.",
+      title: "Module",
+      description: "Module nằm dưới môn học và dùng để gom các chủ đề (ví dụ Excel, Word hay Level 1).",
       icon: <Folder className="h-5 w-5" />,
     };
   }
   if (optionId === "section") {
     return {
       title: "Chủ đề",
-      description: "Chủ đề nằm trong một level và là nơi gắn slide, bài tập hoặc tài liệu.",
+      description: "Chủ đề nằm trong một module và là nơi gắn slide, bài tập hoặc tài liệu.",
       icon: <GraduationCap className="h-5 w-5" />,
     };
   }

@@ -42,7 +42,7 @@ export const ADMIN_CONTENT_SECTIONS = [
   },
   {
     key: "quiz-editor",
-    label: "Soạn bài tập",
+    label: "Soạn câu hỏi",
     canonicalPath: `${ADMIN_CONTENT_ROUTE_PREFIX}/quiz-editor`,
     legacyPath: "/quiz-editor",
     variant: "quiz-editor",

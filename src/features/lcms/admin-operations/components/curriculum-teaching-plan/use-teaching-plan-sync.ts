@@ -55,7 +55,7 @@ export function useTeachingPlanSync({
       setIsSyncing(true);
       setSyncStatusText("Đang lưu khung chương trình…");
       await saveProgramMutation.mutateAsync({
-        name: `Khung chương trình ${subject.label ?? "môn học"} · ${selectedStage?.level.title ?? "Level"}`,
+        name: `Khung chương trình ${subject.label ?? "môn học"} · ${selectedStage?.level.title ?? "Module"}`,
         status: "published",
         expectedVersion: programQuery.data?.recordVersion,
         rows: rows.map(({ isNew: _ignored, ...r }) => r),

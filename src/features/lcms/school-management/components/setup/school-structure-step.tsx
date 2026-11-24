@@ -18,13 +18,22 @@ import { useLocation, useNavigate } from "@tanstack/react-router";
 import { ClassImportDialog } from "@/features/lcms/school-management/components/class-import-dialog";
 import { useSchoolManagementContext } from "@/features/lcms/school-management/components/school-management-context";
 import { SchoolStepSurface } from "@/features/lcms/school-management/components/setup/school-step-surface";
+import { useStudentImportWithAccounts } from "@/features/lcms/school-management/hooks/use-student-import-with-accounts";
 import { schoolTypeMeta, schoolTypeUsesGrades } from "@/features/lcms/school-management/types/school-type-config";
 import type { SchoolClass, StudentImportRow } from "@/features/lcms/school-management/types/school-management-types";
 
 export function SchoolStructureStep() {
-  const { addClasses, addStudents, selectedSchool, updateClassGrade } = useSchoolManagementContext();
+  const { addClasses, selectedSchool, updateClassGrade } = useSchoolManagementContext();
   const location = useLocation();
   const navigate = useNavigate();
+  // Step 3 (Danh sách học sinh) opens only after the new logins were seen: leaving at once would close their dialog.
+  const goToStudents = () => {
+    const search = new URLSearchParams(location.searchStr);
+    search.set("schoolId", selectedSchool!.id);
+    search.set("step", "2");
+    void navigate({ href: `${location.pathname}?${search.toString()}` });
+  };
+  const { credentialsDialog, importStudents } = useStudentImportWithAccounts(goToStudents);
   const [dialogOpen, setDialogOpen] = useState(false);
   if (!selectedSchool) return null;
   const meta = schoolTypeMeta[selectedSchool.schoolType];
@@ -45,23 +54,7 @@ export function SchoolStructureStep() {
         if (c.name) classMap.set(c.name.trim().toLowerCase(), c.id);
       });
 
-      await addStudents(students.map((row) => ({
-        code: row.code,
-        fullName: row.fullName,
-        academicClassId: classMap.get(row.className.trim().toLowerCase()),
-        birthDate: row.birthDate,
-        grade: row.grade,
-        className: row.className,
-        guardianPhone: row.guardianPhone,
-        subjectIds: [],
-        status: "studying",
-      })));
-
-      // Auto-advance to Step 3 (Danh sách học sinh)
-      const search = new URLSearchParams(location.searchStr);
-      search.set("schoolId", selectedSchool!.id);
-      search.set("step", "2");
-      void navigate({ href: `${location.pathname}?${search.toString()}` });
+      if (!(await importStudents(students, (row) => classMap.get(row.className.trim().toLowerCase())))) goToStudents();
     }
   }
 
@@ -90,5 +83,6 @@ export function SchoolStructureStep() {
       </TableBody></Table></TableContainer>
     </SchoolStepSurface>
     {dialogOpen ? <ClassImportDialog classLabel={meta.classLabel} existingClassNames={selectedSchool.classes.map((classroom) => classroom.name)} grades={selectedSchool.grades} onClose={() => setDialogOpen(false)} onImport={handleImport} usesGrades={usesGrades} /> : null}
+    {credentialsDialog}
   </>;
 }

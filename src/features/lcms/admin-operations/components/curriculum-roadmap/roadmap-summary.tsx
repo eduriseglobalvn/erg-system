@@ -75,12 +75,12 @@ export function EmptyRoadmapState({
           <Layers sx={{ fontSize: 26 }} />
         </Box>
         <Typography sx={{ mt: 2.5, color: "#0F172A", fontSize: 16, fontWeight: 600 }}>
-          {query ? "Không tìm thấy kết quả" : `Chưa có chặng học nào trong ${subjectTitle}`}
+          {query ? "Không tìm thấy kết quả" : `Chưa có module nào trong ${subjectTitle}`}
         </Typography>
         <Typography sx={{ mt: 1, color: "#64748B", fontSize: 13, lineHeight: 1.6 }}>
           {query
-            ? `Không có level, chủ đề hoặc bài học nào khớp với từ khóa "${query}".`
-            : "Bắt đầu xây dựng lộ trình học tập theo chuẩn roadmap bằng cách tạo Level (Chặng học) đầu tiên."}
+            ? `Không có module, chủ đề hoặc bài học nào khớp với từ khóa "${query}".`
+            : "Bắt đầu xây dựng lộ trình học tập theo chuẩn roadmap bằng cách tạo module đầu tiên."}
         </Typography>
         {!query ? (
           <Button
@@ -101,7 +101,7 @@ export function EmptyRoadmapState({
               "&:hover": { bgcolor: "#0058B0" },
             }}
           >
-            Tạo Level đầu tiên cho {subjectTitle}
+            Tạo module đầu tiên cho {subjectTitle}
           </Button>
         ) : null}
       </Box>

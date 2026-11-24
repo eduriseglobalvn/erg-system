@@ -2,10 +2,12 @@ import * as XLSX from "xlsx";
 import { describe, expect, test } from "vitest";
 
 import {
+  matchSheetsToTopics,
   parseQuestionMatrix,
   QUESTION_TEMPLATE_EXAMPLES,
   QUESTION_TEMPLATE_HEADERS,
   QUESTION_TYPE_OPTIONS,
+  topicSheetNames,
   withTypeDropdown,
 } from "@/features/lcms/quiz/quiz-editor/components/quiz-list/question-excel-import";
 
@@ -121,5 +123,39 @@ describe("parseQuestionMatrix", () => {
     const titled = parseQuestionMatrix([["Đề kiểm tra"], [...QUESTION_TEMPLATE_HEADERS], row("", "Câu?", ["a", "b"], "B")], labels, () => "x");
     expect(titled.rows[0]?.rowNumber).toBe(3);
     expect(parseQuestionMatrix([["foo", "bar"]], labels, () => "x").error).toMatch(/Câu hỏi/);
+  });
+});
+
+describe("importing every topic from one workbook", () => {
+  const topics = [
+    { id: "t1", label: "Căn bản về công nghệ" },
+    { id: "t2", label: "An toàn và bảo mật: mật khẩu / mạng [nâng cao]" },
+    { id: "t3", label: "Công dân số" },
+  ];
+
+  test("names each sheet after its topic, within Excel's 31 characters and forbidden characters", () => {
+    const names = topicSheetNames(topics.map((topic) => topic.label));
+    expect(names[0]).toBe("Căn bản về công nghệ");
+    expect(names[1]!.length).toBeLessThanOrEqual(31);
+    expect(names[1]).not.toMatch(/[:\\/?*[\]]/);
+    expect(topicSheetNames(["Chủ đề", "chủ đề"])).toEqual(["Chủ đề", "chủ đề 2"]);
+  });
+
+  test("matches sheets to topics ignoring case, accents and the 31-character cut, and skips the guide", () => {
+    const sheets = ["CAN BAN VE CONG NGHE", topicSheetNames(topics.map((topic) => topic.label))[1]!, "Chủ đề lạ", "Ví dụ", "Hướng dẫn"];
+    expect(matchSheetsToTopics(sheets, topics).map((match) => [match.sheetName, match.topic?.id ?? null])).toEqual([
+      ["CAN BAN VE CONG NGHE", "t1"],
+      [sheets[1], "t2"],
+      ["Chủ đề lạ", null],
+    ]);
+  });
+
+  test("puts the type dropdown on every question sheet", () => {
+    const workbook = XLSX.utils.book_new();
+    for (const name of ["A", "B", "Hướng dẫn"]) XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet([[...QUESTION_TEMPLATE_HEADERS]]), name);
+    const file = withTypeDropdown(XLSX, XLSX.write(workbook, { type: "array", bookType: "xlsx" }) as ArrayBuffer, 2);
+    const zip = XLSX.CFB.read(new Uint8Array(file), { type: "array" });
+    const xml = (index: number) => new TextDecoder().decode(XLSX.CFB.find(zip, `/xl/worksheets/sheet${index}.xml`)!.content as Uint8Array);
+    expect([1, 2, 3].map((index) => xml(index).includes("<dataValidations"))).toEqual([true, true, false]);
   });
 });

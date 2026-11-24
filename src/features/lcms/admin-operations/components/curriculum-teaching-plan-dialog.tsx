@@ -167,7 +167,7 @@ export function CurriculumTeachingPlanDialog({
     try {
       setIsSaving(true);
       await saveProgramMutation.mutateAsync({
-        name: `Khung chương trình ${subject?.label ?? "môn học"} · ${selectedStage?.level.title ?? "Level"}`,
+        name: `Khung chương trình ${subject?.label ?? "môn học"} · ${selectedStage?.level.title ?? "Module"}`,
         status: "published",
         expectedVersion: programQuery.data?.recordVersion,
         rows: rows.map(({ isNew: _ignored, ...r }) => r),
@@ -226,8 +226,8 @@ export function CurriculumTeachingPlanDialog({
         <DialogContent dividers sx={{ display: "grid", gap: 2 }}>
           <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1.2fr 1fr 1.5fr" }, gap: 1.5, alignItems: "center" }}>
             <FormControl size="small">
-              <InputLabel>Level (Chặng học)</InputLabel>
-              <Select label="Level (Chặng học)" value={selectedStageTargetId} onChange={(event) => setSelectedStageTargetId(event.target.value)}>
+              <InputLabel>Module</InputLabel>
+              <Select label="Module" value={selectedStageTargetId} onChange={(event) => setSelectedStageTargetId(event.target.value)}>
                 {stages.map((stage) => (
                   <MenuItem key={stage.level.target.id} value={stage.level.target.id}>
                     {stage.level.title}

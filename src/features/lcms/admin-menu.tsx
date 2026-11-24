@@ -109,7 +109,7 @@ export const ADMIN_BASE_MENU_GROUPS: MenuGroup[] = [
       }),
       item({
         id: "course-modules",
-        label: "Soạn bài tập",
+        label: "Soạn câu hỏi",
         icon: <ArticleRoundedIcon sx={{ fontSize: 24 }} />,
         path: "/quiz-editor",
         description: "Tạo hoặc chỉnh sửa quiz nguồn từ câu hỏi, slide và cấu hình player.",

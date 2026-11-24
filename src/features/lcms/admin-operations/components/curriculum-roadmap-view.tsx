@@ -103,7 +103,7 @@ export function CurriculumRoadmapView({
                   "&:hover": { bgcolor: "#EFF6FF", borderColor: "#0071E3" },
                 }}
               >
-                Thêm chặng học (Level) tiếp theo cho {subjectTitle}
+                Thêm module tiếp theo cho {subjectTitle}
               </Button>
             </Box>
           </Box>

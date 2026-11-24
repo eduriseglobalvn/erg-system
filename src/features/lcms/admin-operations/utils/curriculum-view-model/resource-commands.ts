@@ -54,7 +54,7 @@ export function getResourceCommandSpecs({
     !hasSelectedSubject || selectedKind === "none"
       ? { id: "create-subject", label: "Tạo môn học", enabled: true, tone: "primary" }
       : selectedKind === "subject"
-        ? { id: "create-level", label: "Tạo level", enabled: true, tone: "primary" }
+        ? { id: "create-level", label: "Tạo module", enabled: true, tone: "primary" }
         : selectedKind === "level"
           ? { id: "create-topic", label: "Tạo chủ đề", enabled: true, tone: "primary" }
           : { id: "add-lecture", label: "Thêm bài giảng", enabled: true, tone: "primary" };

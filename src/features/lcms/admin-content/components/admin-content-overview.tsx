@@ -22,7 +22,7 @@ const ICONS: Record<AdminContentSectionKey, typeof FolderRoundedIcon> = {
 };
 
 const DESCRIPTIONS: Record<AdminContentSectionKey, string> = {
-  structure: "Quản lý môn học, level, chủ đề, phân phối chương trình và vị trí nội dung hiển thị trên LMS.",
+  structure: "Quản lý môn học, module, chủ đề, phân phối chương trình và vị trí nội dung hiển thị trên LMS.",
   resources: "Taxonomy, tài liệu, metadata và trạng thái xuất bản dùng chung cho các lớp học.",
   "quiz-bank": "Quản lý các gói bài tập để giáo viên giao và theo dõi trong Teacher Workspace.",
   questions: "Tạo, rà soát và phân loại câu hỏi theo phạm vi được cấp quyền.",

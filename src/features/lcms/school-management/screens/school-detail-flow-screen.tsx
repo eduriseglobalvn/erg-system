@@ -18,13 +18,14 @@ import { SchoolPageShell } from "@/features/lcms/school-management/components/sc
 import { useSchoolManagementContext } from "@/features/lcms/school-management/components/school-management-context";
 import { SchoolCurriculumStep } from "@/features/lcms/school-management/components/setup/school-curriculum-step";
 import { SchoolFlowStepIcon } from "@/features/lcms/school-management/components/setup/school-flow-step-icon";
-import { SchoolInformationStep } from "@/features/lcms/school-management/components/setup/school-information-step";
+import { SchoolInformationStep, type SchoolStepLeaveGuard } from "@/features/lcms/school-management/components/setup/school-information-step";
 import { SchoolReviewStep } from "@/features/lcms/school-management/components/setup/school-review-step";
 import { SchoolStructureStep } from "@/features/lcms/school-management/components/setup/school-structure-step";
 import { SchoolStudentsStep } from "@/features/lcms/school-management/components/setup/school-students-step";
 import { schoolTypeMeta, schoolTypeUsesGrades } from "@/features/lcms/school-management/types/school-type-config";
 import { adminPath } from "@/platform/workspaces/workspace-paths";
 import { useLocation, useNavigate } from "@tanstack/react-router";
+import { useCallback, useRef } from "react";
 
 const baseStepMeta = [
   { label: "Thông tin & loại hình", helper: "Định danh đơn vị" },
@@ -38,6 +39,8 @@ export default function SchoolDetailFlowScreen() {
   const { selectedSchool } = useSchoolManagementContext();
   const location = useLocation();
   const navigate = useNavigate();
+  const leaveGuard = useRef<SchoolStepLeaveGuard | null>(null);
+  const setLeaveGuard = useCallback((guard: SchoolStepLeaveGuard | null) => { leaveGuard.current = guard; }, []);
   const theme = useTheme();
   const compact = useMediaQuery(theme.breakpoints.down("md"));
   const parsedStep = Number(new URLSearchParams(location.searchStr).get("step") ?? 0);
@@ -64,13 +67,20 @@ export default function SchoolDetailFlowScreen() {
   const completion = [Boolean(selectedSchool.name && selectedSchool.id), structureReady, (selectedSchool.studentCount ?? 0) > 0, selectedSchool.subjects.length > 0, structureReady && (selectedSchool.studentCount ?? 0) > 0 && selectedSchool.subjects.length > 0];
   const completedCount = completion.filter(Boolean).length;
   const stepCount = completion.length;
-  const content = [<SchoolInformationStep key="information" />, <SchoolStructureStep key="structure" />, <SchoolStudentsStep key="students" />, <SchoolCurriculumStep key="curriculum" />, <SchoolReviewStep key="review" />][activeStep];
+  const content = [<SchoolInformationStep key="information" onLeaveGuard={setLeaveGuard} />, <SchoolStructureStep key="structure" />, <SchoolStudentsStep key="students" />, <SchoolCurriculumStep key="curriculum" />, <SchoolReviewStep key="review" />][activeStep];
 
   function goStep(step: number) {
+    if (step === activeStep) return;
+    const guard = leaveGuard.current;
+    if (guard) guard(() => openStep(step));
+    else openStep(step);
+  }
+
+  function openStep(step: number) {
     const search = new URLSearchParams(location.searchStr);
     search.set("schoolId", selectedSchool!.id);
     search.set("step", String(step));
-      void navigate({ href: `${adminPath("/schools/detail")}?${search.toString()}` });
+    void navigate({ href: `${adminPath("/schools/detail")}?${search.toString()}` });
   }
 
   return <SchoolPageShell

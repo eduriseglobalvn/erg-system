@@ -36,7 +36,7 @@ export function ResourceSelectionStep({ model }: { model: AssignHomeworkControll
           <Box>
             <Typography component="h2" variant="subtitle2" sx={{ fontWeight: "fontWeightMedium" }}>Chọn bài tập</Typography>
             <Typography variant="body2" sx={{ mt: 0.25, color: "text.secondary", fontWeight: "fontWeightMedium" }}>
-              {selectedSubject?.label ?? "Môn học"} · {selectedLevel?.label ?? "Cấp độ"} · {selectedResourceLabel}
+              {selectedSubject?.label ?? "Môn học"} · {selectedLevel?.label ?? "Module"} · {selectedResourceLabel}
             </Typography>
           </Box>
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>

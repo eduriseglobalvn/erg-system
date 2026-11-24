@@ -13,7 +13,7 @@ export function ResourceInspector({
 }) {
   const targetTone = content ? roleTone(content.kind) : folder ? roleTone(folder.role) : roleTone("subject");
   const title = content?.title ?? folder?.title ?? "Chưa chọn mục";
-  const description = content?.description ?? folder?.description ?? "Chọn một môn học, level, chủ đề hoặc học liệu để xem chi tiết.";
+  const description = content?.description ?? folder?.description ?? "Chọn một môn học, module, chủ đề hoặc học liệu để xem chi tiết.";
 
   return (
     <aside className="h-full min-h-0 overflow-y-auto border-l bg-[#FBFCFE] p-4 [scrollbar-gutter:stable]" style={{ borderColor: resourcePalette.border }}>
@@ -36,7 +36,7 @@ export function ResourceInspector({
           <>
             <InspectorRow label="Loại" value={folderRoleLabel(folder.role)} />
             <InspectorRow label="Đường dẫn" value={folder.pathLabels.join(" / ")} />
-            <InspectorRow label="Level" value={String(folder.summary.levels)} />
+            <InspectorRow label="Module" value={String(folder.summary.levels)} />
             <InspectorRow label="Chủ đề" value={String(folder.summary.topics)} />
             <InspectorRow label="Bài giảng" value={String(folder.summary.lectures)} />
             <InspectorRow label="Tài liệu" value={String(folder.summary.documents)} />

@@ -146,7 +146,7 @@ export function SetupForm({
           />
         </Box>
         <Box>
-          <FieldLabel>Cấp độ (Level)</FieldLabel>
+          <FieldLabel>Module</FieldLabel>
           <ErgSelect
             size="small"
             value={level}

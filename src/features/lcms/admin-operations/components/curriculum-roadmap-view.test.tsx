@@ -28,8 +28,8 @@ describe("CurriculumRoadmapView", () => {
       />,
     );
 
-    expect(screen.getByText("Chưa có chặng học nào trong Địa Lý")).toBeInTheDocument();
-    const createBtn = screen.getByRole("button", { name: /Tạo Level đầu tiên cho Địa Lý/i });
+    expect(screen.getByText("Chưa có module nào trong Địa Lý")).toBeInTheDocument();
+    const createBtn = screen.getByRole("button", { name: /Tạo module đầu tiên cho Địa Lý/i });
     expect(createBtn).toBeInTheDocument();
 
     fireEvent.click(createBtn);

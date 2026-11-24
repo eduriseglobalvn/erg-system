@@ -5,30 +5,16 @@ import { SchoolPageShell } from "@/features/lcms/school-management/components/sc
 import { SchoolStudentDirectoryWorkspace } from "@/features/lcms/school-management/components/students/school-student-directory-workspace";
 import { StudentImportDialog } from "@/features/lcms/school-management/components/student-import-dialog";
 import { useSchoolManagementContext } from "@/features/lcms/school-management/components/school-management-context";
-import type { StudentImportRow } from "@/features/lcms/school-management/types/school-management-types";
+import { useStudentImportWithAccounts } from "@/features/lcms/school-management/hooks/use-student-import-with-accounts";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 import { alpha } from "@mui/material/styles";
 
 export default function SchoolStudentsScreen() {
-  const { addStudents, selectedSchool } = useSchoolManagementContext();
+  const { selectedSchool } = useSchoolManagementContext();
+  const { credentialsDialog, importStudents } = useStudentImportWithAccounts();
   const [importOpen, setImportOpen] = useState(false);
 
   if (!selectedSchool) return null;
-
-  async function importStudents(rows: StudentImportRow[]) {
-    await addStudents(
-      rows.map((row) => ({
-        code: row.code,
-        fullName: row.fullName,
-        birthDate: row.birthDate,
-        grade: row.grade,
-        className: row.className,
-        guardianPhone: row.guardianPhone,
-        subjectIds: [],
-        status: "studying",
-      }))
-    );
-  }
 
   return (
     <SchoolPageShell
@@ -69,10 +55,11 @@ export default function SchoolStudentsScreen() {
       {importOpen ? (
         <StudentImportDialog
           onClose={() => setImportOpen(false)}
-          onImport={importStudents}
+          onImport={async (rows) => { await importStudents(rows); }}
           school={selectedSchool}
         />
       ) : null}
+      {credentialsDialog}
     </SchoolPageShell>
   );
 }

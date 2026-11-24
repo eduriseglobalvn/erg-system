@@ -157,7 +157,7 @@ export function TeachingScheduleDialog({
             </Box>
             <Box data-excel-schedule-table sx={excelTableShellSx}>
               <Box sx={excelGridHeaderSx}>
-                {["Thứ", "Ca", "Số tiết", "Tiết", "Giờ", "Môn", "Level", "Lớp", "Phòng", "GV chính", "Trợ giảng", "Ghi chú", ""].map((label, index, labels) => (
+                {["Thứ", "Ca", "Số tiết", "Tiết", "Giờ", "Môn", "Module", "Lớp", "Phòng", "GV chính", "Trợ giảng", "Ghi chú", ""].map((label, index, labels) => (
                   <Typography
                     key={label}
                     sx={index === labels.length - 1 ? { justifyContent: "center" } : undefined}

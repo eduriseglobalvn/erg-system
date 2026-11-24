@@ -265,7 +265,7 @@ function mapQuestion(question: QuestionBankQuestionDTO, subjects: QuestionBankSu
     difficulty: mapQuestionDifficulty(question.difficulty ?? template.difficulty),
     status: mapQuestionStatus(question.status ?? template.status),
     stem: question.title || `Câu hỏi ${index + 1}`,
-    objective: question.objective?.trim() || template.objective || `${subject.label} - ${level?.label ?? "Level"}`,
+    objective: question.objective?.trim() || template.objective || `${subject.label} - ${level?.label ?? "Module"}`,
     tags: question.tags?.length
       ? question.tags.filter((tag): tag is string => Boolean(tag?.trim()))
       : Array.from(new Set([subject.label, level?.label, category?.label, ...template.tags].filter(Boolean))) as string[],

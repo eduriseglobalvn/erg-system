@@ -107,7 +107,7 @@ export function ResourceExplorerTopBar({
         </label>
       </div>
       <div className="hidden">
-        <SummaryChip label="Level" value={summary.levels} tone="blue" />
+        <SummaryChip label="Module" value={summary.levels} tone="blue" />
         <SummaryChip label="Chủ đề" value={summary.topics} tone="blue" />
         <SummaryChip label="Bài giảng" value={summary.lectures} tone="blue" />
         <SummaryChip label="Tài liệu" value={summary.documents} tone="neutral" />

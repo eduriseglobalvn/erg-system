@@ -34,7 +34,7 @@ export function CurriculumFolderCanvas({
         <div className="max-w-sm">
           <Folder className="mx-auto h-12 w-12 text-[#C4CDD5]" />
           <div className="mt-3 text-sm font-bold text-[#1C252E]">Chưa có thư mục con</div>
-          <p className="mt-1 text-[13px] leading-5 text-[#637381]">Dùng thanh công cụ để tạo level hoặc chủ đề phù hợp với vị trí hiện tại.</p>
+          <p className="mt-1 text-[13px] leading-5 text-[#637381]">Dùng thanh công cụ để tạo module hoặc chủ đề phù hợp với vị trí hiện tại.</p>
         </div>
       </div>
     );
@@ -77,7 +77,7 @@ export function CurriculumFolderCanvas({
 export function FolderCanvasHeader({ childCount, folder }: { childCount: number; folder?: CurriculumFolder }) {
   const role = folder?.role ?? "subject";
   const tone = roleTone(role);
-  const childLabel = role === "subject" ? "level" : role === "level" ? "chủ đề" : "mục";
+  const childLabel = role === "subject" ? "module" : role === "level" ? "chủ đề" : "mục";
 
   return (
     <div className="flex min-h-[56px] shrink-0 items-center justify-between gap-3 border-b bg-white px-6" style={{ borderColor: resourcePalette.border }}>
@@ -144,7 +144,7 @@ export function FolderCard({
 }
 
 function simpleFolderCount(folder: CurriculumFolder) {
-  if (folder.role === "subject") return `${folder.summary.levels} level`;
+  if (folder.role === "subject") return `${folder.summary.levels} module`;
   if (folder.role === "level") return `${folder.summary.topics} chủ đề`;
   return `${folder.summary.totalContent} học liệu`;
 }

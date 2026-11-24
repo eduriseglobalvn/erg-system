@@ -178,7 +178,7 @@ export function SchoolCurriculumStep() {
             </Button>
           </Box>
         }
-        description="Chọn môn học và level từ danh mục chuẩn, sau đó phân bổ theo từng lớp."
+        description="Chọn môn học và module từ danh mục chuẩn, sau đó phân bổ theo từng lớp."
         eyebrow="Bước 4"
         title={`${meta.subjectLabel} & ghi danh`}
       >

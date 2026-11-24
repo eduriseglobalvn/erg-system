@@ -108,7 +108,16 @@ export function QuizEditorWorkspace({
     groups,
     removeSlides: editorState.removeSlides,
   });
-  const excel = useQuestionExcelImport({ topicLabel: list.topicLabel, labels: { subject: scope.selectedCourse.label, level: scope.selectedLevel?.label ?? "" }, createId, onImport: importQuestionBankQuestions });
+  const excel = useQuestionExcelImport({
+    topicLabel: list.topicLabel,
+    topics: list.topics,
+    subjectId: scope.selectedCourseId,
+    levelId: scope.selectedLevel?.id ?? null,
+    labels: { subject: scope.selectedCourse.label, level: scope.selectedLevel?.label ?? "" },
+    createId,
+    questionDefaults: quizProject.questionDefaults,
+    onImport: importQuestionBankQuestions,
+  });
   const importNoticeCount = useQuizEditorImportedQuestions({
     ready: sync.ready,
     pendingImportedQuestions,
@@ -129,7 +138,7 @@ export function QuizEditorWorkspace({
 
   return (
     <Box sx={{ display: "flex", flex: 1, flexDirection: "column", height: "100%", maxHeight: "100%", minHeight: 0, minWidth: 0, overflow: "hidden" }}>
-      <Box component="h1" sx={visuallyHidden}>{list.topicLabel ?? "Soạn bài kiểm tra"}</Box>
+      <Box component="h1" sx={visuallyHidden}>{list.topicLabel ?? "Soạn câu hỏi"}</Box>
       <QuizListTitlebar
         courseOptions={scope.courseOptions}
         selectedCourseId={scope.selectedCourse.id}
