@@ -64,7 +64,7 @@ const teacherGuide: HelpGuide = {
       title: "Giao bài tập",
       steps: [
         { text: "Vào «Hoạt động học tập» → «Giao bài tập»." },
-        { text: "Ở «Chọn bài tập», chọn môn, level và bài muốn giao." },
+        { text: "Ở «Chọn bài tập», chọn môn, module và bài muốn giao." },
         { text: "Ở «Đối tượng giao bài», chọn «Giao theo lớp», «Giao theo khối» hoặc «Giao theo nhóm học tập», rồi tick lớp/nhóm." },
         { text: "Đặt «Ngày bắt đầu», «Ngày kết thúc», «Số lần làm» và «Thời gian tối đa»." },
         { text: "Kiểm tra lại rồi nhấn «Giao bài».", note: "Học sinh chỉ thấy bài khi tới «Ngày bắt đầu»." },

@@ -196,7 +196,7 @@ export function RoadmapStage({
               Chủ đề
             </Button>
 
-            <Tooltip title="Chỉnh sửa level">
+            <Tooltip title="Chỉnh sửa module">
               <IconButton
                 size="small"
                 aria-label={`Chỉnh sửa ${stage.level.title}`}
@@ -207,7 +207,7 @@ export function RoadmapStage({
               </IconButton>
             </Tooltip>
 
-            <Tooltip title="Xóa level">
+            <Tooltip title="Xóa module">
               <IconButton
                 size="small"
                 aria-label={`Xóa ${stage.level.title}`}
@@ -273,10 +273,10 @@ export function RoadmapStage({
             }}
           >
             <Typography sx={{ color: "#1E293B", fontSize: 13, fontWeight: 600 }}>
-              Chặng này chưa có chủ đề học tập
+              Module này chưa có chủ đề học tập
             </Typography>
             <Typography sx={{ color: "#64748B", fontSize: 12, maxWidth: 360, lineHeight: 1.5 }}>
-              Tạo chủ đề đầu tiên để phân bổ bài học trong chặng {stage.level.title}.
+              Tạo chủ đề đầu tiên để phân bổ bài học trong module {stage.level.title}.
             </Typography>
             <Button
               variant="contained"

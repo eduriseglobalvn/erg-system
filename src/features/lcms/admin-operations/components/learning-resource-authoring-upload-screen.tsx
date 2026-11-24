@@ -143,7 +143,7 @@ export function UploadScreen({
           <InfoRow label="Môn" value={subject?.label ?? "Chưa chọn"} />
           <InfoRow label="Vị trí" value={pathLabel(subject?.label ?? "", path) || "Chưa chọn"} />
           <InfoRow label="Loại" value={node ? getNodeKindLabel(node.kind) : "Chưa chọn"} />
-          <ChecklistItem label={location.categoryId ? "Đã xác định level" : "Cần chọn một level"} />
+          <ChecklistItem label={location.categoryId ? "Đã xác định module" : "Cần chọn một module"} />
           <ChecklistItem label={resourceUrl.trim() ? "Đã nhập link tài liệu" : "Chưa nhập link tài liệu"} />
         </CardContent>
       </Card>

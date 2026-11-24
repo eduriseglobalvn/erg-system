@@ -29,7 +29,7 @@ describe("learning-resource-authoring-create-dialog-model", () => {
   });
 
   it("returns correct dialog titles for level, topic, and subject", () => {
-    expect(getDialogTitle("level", null)).toBe("Tạo chặng học (Level)");
+    expect(getDialogTitle("level", null)).toBe("Tạo module");
     expect(getDialogTitle("topic", null)).toBe("Tạo chủ đề");
     expect(getDialogTitle("subject", null)).toBe("Tạo môn học");
     expect(getDialogTitle(null, "lecture")).toBe("Thêm bài học");
@@ -38,7 +38,7 @@ describe("learning-resource-authoring-create-dialog-model", () => {
   });
 
   it("returns correct submit labels", () => {
-    expect(getSubmitLabel("level", null, false)).toBe("Tạo chặng học");
+    expect(getSubmitLabel("level", null, false)).toBe("Tạo module");
     expect(getSubmitLabel("topic", null, false)).toBe("Tạo chủ đề");
     expect(getSubmitLabel(null, "lecture", false)).toBe("Thêm bài học");
     expect(getSubmitLabel(null, "exercise", false)).toBe("Gắn bài tập");
@@ -47,7 +47,7 @@ describe("learning-resource-authoring-create-dialog-model", () => {
   });
 
   it("returns concise subtitles without redundant long explanations", () => {
-    expect(getDialogSubtitle("level", null)).toBe("Chặng học phân cấp theo trình độ.");
+    expect(getDialogSubtitle("level", null)).toBe("Nhóm các chủ đề trong môn học.");
     expect(getDialogSubtitle("topic", null)).toBe("Chủ đề học tập.");
   });
 

@@ -38,7 +38,7 @@ export function useQuizEditorScope(setActiveQuizId: (quizId: string | null) => v
         ? questionBankSubjects.map((subject) => ({
             id: subject.id,
             label: subject.label,
-            meta: `${subject.description || subject.label} · ${subject.levels.length} levels · ${subject.categories.length} chủ đề`,
+            meta: `${subject.description || subject.label} · ${subject.levels.length} module · ${subject.categories.length} chủ đề`,
           }))
         : courseScopeOptions,
     [apiBackedTaxonomy, questionBankSubjects],

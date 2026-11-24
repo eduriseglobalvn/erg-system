@@ -32,7 +32,7 @@ export function targetsEqual(left?: CurriculumTarget | null, right?: CurriculumT
 }
 
 export function simpleFolderCount(folder: CurriculumFolder) {
-  if (folder.role === "subject") return `${folder.summary.levels} level`;
+  if (folder.role === "subject") return `${folder.summary.levels} module`;
   if (folder.role === "level") return `${folder.summary.topics} chủ đề`;
   return `${folder.summary.totalContent} học liệu`;
 }
@@ -126,7 +126,7 @@ export function toneColors(tone: "blue" | "red" | "neutral") {
 
 export function folderRoleLabel(role: CurriculumFolderRole) {
   if (role === "subject") return "Môn học";
-  if (role === "level") return "Level";
+  if (role === "level") return "Module";
   return "Chủ đề";
 }
 

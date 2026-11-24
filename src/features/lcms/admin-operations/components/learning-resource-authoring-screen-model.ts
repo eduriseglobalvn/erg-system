@@ -22,7 +22,7 @@ export function buildLearningResourceUploadCommand(input: LearningResourceUpload
   if (!normalizedUrl || !input.subjectId || !input.location.categoryId) {
     return {
       ok: false as const,
-      message: "Vui lòng chọn môn, level/chủ đề và dán link Google Drive/Google Slides.",
+      message: "Vui lòng chọn môn, module/chủ đề và dán link Google Drive/Google Slides.",
     };
   }
 

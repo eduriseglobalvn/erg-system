@@ -76,7 +76,7 @@ export function TeachingPlanTable({
           </tr>
           <tr>
             <th colSpan={6}>
-              {subject?.label ?? "Chưa chọn môn"} · {selectedStage?.level.title ?? "Chưa chọn level"} · Năm học {academicYear}
+              {subject?.label ?? "Chưa chọn môn"} · {selectedStage?.level.title ?? "Chưa chọn module"} · Năm học {academicYear}
             </th>
           </tr>
           <tr>

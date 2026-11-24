@@ -138,10 +138,10 @@ function getNodeTaxonomyRole(node: StudioNode): TaxonomyRole | null {
 
 export function getNodeKindLabel(kind: StudioNodeKind) {
   const labels: Record<StudioNodeKind, string> = {
-    group: "Level",
+    group: "Module",
     lesson: "Chủ đề",
     bookSeries: "Bộ sách / Chương trình",
-    category: "Level",
+    category: "Module",
     folder: "Nhóm hệ thống",
     section: "Chủ đề",
     topic: "Chủ đề",

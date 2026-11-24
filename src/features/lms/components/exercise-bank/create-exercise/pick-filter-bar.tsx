@@ -106,7 +106,7 @@ export function PickFilterBar({
             isFiltered={selectedLevel !== "all"}
             sx={{ flex: { xs: 1, sm: "initial" }, minWidth: 130 }}
           >
-            <MenuItem value="all">Tất cả cấp độ ({subjectLevels.length})</MenuItem>
+            <MenuItem value="all">Tất cả module ({subjectLevels.length})</MenuItem>
             {subjectLevels.map((lvl) => (
               <MenuItem key={lvl.id} value={lvl.id}>
                 {lvl.label}

@@ -71,7 +71,7 @@ export function QuizListTitlebar({
     <>
       <Box sx={{ alignItems: "center", borderBottom: 1, borderColor: "divider", display: "flex", flexWrap: "wrap", gap: 1.5, px: 2, py: 1.5 }}>
         {select("Môn", selectedCourseId, courseOptions, onChangeCourse)}
-        {select("Level", selectedLevelId ?? "", levelOptions, onChangeLevel)}
+        {select("Module", selectedLevelId ?? "", levelOptions, onChangeLevel)}
         {syncChip}
         <Box sx={{ display: "flex", gap: 1, ml: "auto" }}>
           <Button disabled={themeDisabled} onClick={() => setThemeOpen(true)} variant="text">Giao diện bài</Button>

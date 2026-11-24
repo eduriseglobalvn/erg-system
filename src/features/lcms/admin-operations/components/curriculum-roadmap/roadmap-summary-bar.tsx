@@ -54,7 +54,7 @@ export function RoadmapSummaryBar({
             </Typography>
             <Box sx={{ width: 4, height: 4, borderRadius: "50%", bgcolor: "#CBD5E1" }} />
             <Typography sx={{ color: "#64748B", fontSize: 12, fontWeight: 500 }}>
-              Level (Chặng học) → Chủ đề → Bài học
+              Module → Chủ đề → Bài học
             </Typography>
           </Box>
           <Typography noWrap sx={{ mt: 0.25, color: "#0F172A", fontSize: 17, fontWeight: 600 }}>
@@ -65,7 +65,7 @@ export function RoadmapSummaryBar({
         <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
           {levelCount > 0 ? (
             <Stack direction="row" spacing={0.5} sx={{ mr: 0.5 }}>
-              <Tooltip title="Mở rộng tất cả chặng">
+              <Tooltip title="Mở rộng tất cả module">
                 <Button
                   size="small"
                   variant="text"
@@ -76,7 +76,7 @@ export function RoadmapSummaryBar({
                   Mở tất cả
                 </Button>
               </Tooltip>
-              <Tooltip title="Thu gọn tất cả chặng">
+              <Tooltip title="Thu gọn tất cả module">
                 <Button
                   size="small"
                   variant="text"
@@ -90,7 +90,7 @@ export function RoadmapSummaryBar({
             </Stack>
           ) : null}
   
-          <RoadmapMetric value={levelCount} label="Level" />
+          <RoadmapMetric value={levelCount} label="Module" />
           <RoadmapMetric value={totalTopics} label="Chủ đề" />
           <RoadmapMetric value={totalLessons} label="Bài học" />
         </Stack>

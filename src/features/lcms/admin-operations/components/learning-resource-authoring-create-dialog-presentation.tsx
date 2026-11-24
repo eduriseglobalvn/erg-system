@@ -22,7 +22,7 @@ export function TypeSelectorStrip({
   disabled?: boolean;
 }) {
   const items: Array<{ id: AuthoringItemType; title: string }> = [
-    { id: "level", title: "Chặng học (Level)" },
+    { id: "level", title: "Module" },
     { id: "topic", title: "Chủ đề" },
     { id: "lesson", title: "Bài học" },
   ];

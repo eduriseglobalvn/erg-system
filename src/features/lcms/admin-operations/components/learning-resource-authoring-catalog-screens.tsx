@@ -64,7 +64,7 @@ export function SubjectsScreen({
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
               <AuthoringCardTitle>Danh sách môn học</AuthoringCardTitle>
-              <AuthoringCardDescription>Mỗi môn có thể có nhiều level, chủ đề và học liệu khác nhau.</AuthoringCardDescription>
+              <AuthoringCardDescription>Mỗi môn có thể có nhiều module, chủ đề và học liệu khác nhau.</AuthoringCardDescription>
             </div>
             <div className="flex flex-wrap justify-end gap-2">
               <Button
@@ -86,7 +86,7 @@ export function SubjectsScreen({
         <CardContent className="flex min-h-0 flex-1 flex-col">
           <div className="min-h-0 flex-1 overflow-y-auto rounded-lg border border-[#e0e4ea] [scrollbar-gutter:stable]">
             <div className="sticky top-0 z-10 grid grid-cols-[minmax(0,1fr)_120px_120px_120px_120px] bg-[#f7f8fa] px-4 py-3 text-[11px] font-semibold text-slate-600">
-              <span>Môn học</span><span>Level</span><span>Tài liệu</span><span>Trạng thái</span><span className="text-right">Thao tác</span>
+              <span>Môn học</span><span>Module</span><span>Tài liệu</span><span>Trạng thái</span><span className="text-right">Thao tác</span>
             </div>
             {subjects.map((subject) => (
               <div
@@ -126,7 +126,7 @@ export function SubjectsScreen({
                 <div className="text-xl font-medium text-slate-950">{selectedSubject.label}</div>
                 <p className="mt-2 text-sm leading-6 text-slate-500">{selectedSubject.description || "Môn này chưa có mô tả."}</p>
               </div>
-              <InfoRow label="Level" value={`${selectedSubject.groupCount} level`} />
+              <InfoRow label="Module" value={`${selectedSubject.groupCount} module`} />
               <InfoRow label="Chủ đề" value={`${selectedSubject.lessonCount} chủ đề`} />
               <InfoRow label="Tài liệu" value={`${selectedSubject.resourceCount} tài liệu`} />
               <InfoRow label="Trạng thái" value={getPublishStatusLabel(selectedSubject.status)} />
@@ -196,7 +196,7 @@ export function ResourcesScreen({ subjects, resources, onLifecycleTransitioned }
                         <span className="max-w-52 truncate rounded bg-slate-100 px-2 py-1">{label}</span>
                       </span>
                     ))}
-                    {!location.isResolved ? <Chip size="small" color="warning" variant="outlined" label="Chưa gắn đủ Level/Chủ đề" /> : null}
+                    {!location.isResolved ? <Chip size="small" color="warning" variant="outlined" label="Chưa gắn đủ Module/Chủ đề" /> : null}
                   </div>
                 </div>
                 <ContentLifecycleControls compact target={{ resourceKind: "CONTENT_ITEM", resourceId: resource.id, currentState: lifecycleStateFromStatus(resource.status), label: resource.title }} onTransitioned={() => onLifecycleTransitioned?.()} />
@@ -204,7 +204,7 @@ export function ResourcesScreen({ subjects, resources, onLifecycleTransitioned }
               </div>
             ))}
           </div>
-        ) : <ErgEmptyState title={resources.length ? "Không tìm thấy tài liệu" : "Chưa có tài liệu"} description={resources.length ? "Thử đổi từ khóa hoặc bộ lọc môn học, định dạng." : "Tài liệu gắn trong Cấu trúc môn học sẽ tự động xuất hiện tại đây cùng đúng Level và Chủ đề."} />}
+        ) : <ErgEmptyState title={resources.length ? "Không tìm thấy tài liệu" : "Chưa có tài liệu"} description={resources.length ? "Thử đổi từ khóa hoặc bộ lọc môn học, định dạng." : "Tài liệu gắn trong Cấu trúc môn học sẽ tự động xuất hiện tại đây cùng đúng Module và Chủ đề."} />}
       </CardContent>
     </Card>
   );
@@ -221,7 +221,7 @@ export function PublishScreen({ subjects, resources, questions = [], quizBankIte
         <AuthoringCardHeader><AuthoringCardTitle>Luồng xuất bản đề xuất</AuthoringCardTitle><AuthoringCardDescription>Tách khỏi màn hình tạo cấu trúc để admin kiểm tra trước khi public.</AuthoringCardDescription></AuthoringCardHeader>
         <CardContent className="grid gap-4 md:grid-cols-4">
           <PublishStep icon={<BookOpen className="h-5 w-5" />} title="Môn học" description="Có tên, mô tả và trạng thái." />
-          <PublishStep icon={<ListTree className="h-5 w-5" />} title="Cấu trúc" description="Có môn học, level, chủ đề và học liệu." />
+          <PublishStep icon={<ListTree className="h-5 w-5" />} title="Cấu trúc" description="Có môn học, module, chủ đề và học liệu." />
           <PublishStep icon={<LinkIcon className="h-5 w-5" />} title="Tài liệu" description="Link tài liệu đã được gắn đúng vị trí." />
           <PublishStep icon={<Settings2 className="h-5 w-5" />} title="Public" description="Kiểm tra visibility trước khi lên web." />
         </CardContent>

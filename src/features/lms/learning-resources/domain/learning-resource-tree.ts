@@ -120,7 +120,7 @@ export function buildLearningResourceSubjects(
     if (orphanLessons.length) {
       groups.push({
         id: `group-folder-${subject.id}-uncategorized`,
-        label: categories.length ? "Chủ đề chưa phân chặng" : "Chủ đề học tập",
+        label: categories.length ? "Chủ đề chưa phân module" : "Chủ đề học tập",
         kind: "group",
         sourceKind: "folder",
         description: categories.length ? "Các bài học chưa nằm trong nhóm học liệu chuẩn." : "Các chủ đề và bài học trực tiếp của môn học.",

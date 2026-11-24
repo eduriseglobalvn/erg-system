@@ -48,7 +48,7 @@ export const viCopy = {
   },
   assignPanelTitle: "Giao bài",
   assignDialogTitle: "Chọn bài tập để giao",
-  assignDialogDescription: "Chọn môn, level, rồi chọn bài theo từng chủ đề. Chủ đề chưa phân loại sẽ nằm trong nhóm Khác.",
+  assignDialogDescription: "Chọn môn, module, rồi chọn bài theo từng chủ đề. Chủ đề chưa phân loại sẽ nằm trong nhóm Khác.",
   assignPanelDescription: (count: number): string =>
     count > 0 ? `Sẵn sàng giao bài cho ${count} học sinh đã chọn.` : "Tick học sinh trong bảng để bắt đầu giao bài.",
   closeDialog: "Đóng cửa sổ giao bài",
@@ -57,7 +57,7 @@ export const viCopy = {
   selectedRecipientsTitle: "Danh sách học sinh nhận bài",
   selectedRecipientsCount: (count: number): string => `${count} học sinh`,
   subjectPickerLabel: "Môn học",
-  levelPickerLabel: "Level",
+  levelPickerLabel: "Module",
   assignmentListTitle: "Danh sách bài theo chủ đề",
   assignmentListDescription: "Chọn một bài train hoặc test trong các chủ đề bên dưới.",
   assignmentLabel: "Bài tập",
@@ -153,7 +153,7 @@ export const enCopy = {
   },
   assignPanelTitle: "Assign work",
   assignDialogTitle: "Choose assignment",
-  assignDialogDescription: "Choose a subject and level, then pick an activity grouped by topic. Ungrouped work appears under Other.",
+  assignDialogDescription: "Choose a subject and module, then pick an activity grouped by topic. Ungrouped work appears under Other.",
   assignPanelDescription: (count: number): string =>
     count > 0
       ? `Ready to assign work to ${count} selected ${count === 1 ? "student" : "students"}.`
@@ -164,7 +164,7 @@ export const enCopy = {
   selectedRecipientsTitle: "Selected recipients",
   selectedRecipientsCount: (count: number): string => `${count} ${count === 1 ? "student" : "students"}`,
   subjectPickerLabel: "Subject",
-  levelPickerLabel: "Level",
+  levelPickerLabel: "Module",
   assignmentListTitle: "Activities by topic",
   assignmentListDescription: "Pick one train or test activity from the topic groups below.",
   assignmentLabel: "Assignment",

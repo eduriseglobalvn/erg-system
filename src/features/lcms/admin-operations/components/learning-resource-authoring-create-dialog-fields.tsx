@@ -37,8 +37,8 @@ export function TaxonomyFields({
   onLevelChange: (value: string) => void;
   onSubjectChange: (value: string) => void;
 }) {
-  const titleLabel = role === "subject" ? "Tên môn học" : role === "level" ? "Tên chặng học (Level)" : "Tên chủ đề";
-  const titlePlaceholder = role === "subject" ? "Ví dụ: IC3 GS6" : role === "level" ? "Ví dụ: Level 1" : "Ví dụ: Máy tính căn bản";
+  const titleLabel = role === "subject" ? "Tên môn học" : role === "level" ? "Tên module" : "Tên chủ đề";
+  const titlePlaceholder = role === "subject" ? "Ví dụ: IC3 GS6" : role === "level" ? "Ví dụ: Excel, Level 1" : "Ví dụ: Máy tính căn bản";
 
   return (
     <div className="grid gap-3">
@@ -56,9 +56,9 @@ export function TaxonomyFields({
       ) : null}
 
       {showLevelPicker ? (
-        <Field label="Level">
+        <Field label="Module">
           <AppSelect style={{ width: "100%" }} value={draftLevelId} onChange={(event) => onLevelChange(event.target.value)} disabled={!draftSubjectId}>
-            <option value="">Không phân level (trực tiếp dưới môn học)</option>
+            <option value="">Không phân module (trực tiếp dưới môn học)</option>
             {draftLevelOptions.map((level) => (
               <option key={level.optionId ?? level.id} value={level.optionId ?? ""}>
                 {level.label}
@@ -123,14 +123,14 @@ export function LessonContainerFields({
           </AppSelect>
         </Field>
 
-        <Field label="Level">
+        <Field label="Module">
           <AppSelect
             style={{ width: "100%" }}
             value={draftLevelId}
             onChange={(event) => onLevelChange(event.target.value)}
             disabled={!draftSubjectId}
           >
-            <option value="">Không phân level</option>
+            <option value="">Không phân module</option>
             {draftLevelOptions.map((level) => (
               <option key={level.optionId ?? level.id} value={level.optionId ?? level.id}>
                 {level.label}

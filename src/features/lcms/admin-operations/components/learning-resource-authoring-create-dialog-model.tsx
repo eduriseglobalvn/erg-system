@@ -85,8 +85,8 @@ export function getSubmitHint({
 }) {
   if (canSubmit) return "";
   if (taxonomyMode === "subject" && !label.trim()) return "Nhập tên môn học để bật nút tạo.";
-  if (taxonomyMode === "level" && !draftSubjectId) return "Chọn môn học trước khi tạo level.";
-  if (taxonomyMode === "level" && !label.trim()) return "Nhập tên level để bật nút tạo.";
+  if (taxonomyMode === "level" && !draftSubjectId) return "Chọn môn học trước khi tạo module.";
+  if (taxonomyMode === "level" && !label.trim()) return "Nhập tên module để bật nút tạo.";
   if (taxonomyMode === "topic" && !draftSubjectId) return "Chọn môn học trước khi tạo chủ đề.";
   // level is optional for topic
   if (taxonomyMode === "topic" && !label.trim()) return "Nhập tên chủ đề để bật nút tạo.";
@@ -99,7 +99,7 @@ export function getSubmitHint({
 
 export function getDialogTitle(mode: ResolvedTaxonomyMode, option: ContentDialogOptionId | null) {
   if (mode === "subject") return "Tạo môn học";
-  if (mode === "level") return "Tạo chặng học (Level)";
+  if (mode === "level") return "Tạo module";
   if (mode === "topic") return "Tạo chủ đề";
   if (option === "lecture") return "Thêm bài học";
   if (option === "exercise") return "Gắn bài tập từ Quiz bank";
@@ -109,7 +109,7 @@ export function getDialogTitle(mode: ResolvedTaxonomyMode, option: ContentDialog
 
 export function getDialogSubtitle(mode: ResolvedTaxonomyMode, option: ContentDialogOptionId | null) {
   if (mode === "subject") return "Môn học cấp cao nhất trong kho học liệu.";
-  if (mode === "level") return "Chặng học phân cấp theo trình độ.";
+  if (mode === "level") return "Nhóm các chủ đề trong môn học.";
   if (mode === "topic") return "Chủ đề học tập.";
   if (option === "lecture") return "Bài học kèm bài giảng Google Slides.";
   if (option === "exercise") return "Bài tập từ Quiz bank.";
@@ -120,7 +120,7 @@ export function getDialogSubtitle(mode: ResolvedTaxonomyMode, option: ContentDia
 export function getSubmitLabel(mode: ResolvedTaxonomyMode, option: ContentDialogOptionId | null, saving: boolean) {
   if (saving) return "Đang lưu...";
   if (mode === "subject") return "Tạo môn học";
-  if (mode === "level") return "Tạo chặng học";
+  if (mode === "level") return "Tạo module";
   if (mode === "topic") return "Tạo chủ đề";
   if (option === "lecture") return "Thêm bài học";
   if (option === "exercise") return "Gắn bài tập";
@@ -130,13 +130,13 @@ export function getSubmitLabel(mode: ResolvedTaxonomyMode, option: ContentDialog
 
 export function getTaxonomyMeta(mode: TaxonomyRole) {
   if (mode === "subject") return { title: "Môn học", icon: <BookOpen className="h-5 w-5" />, tone: "blue" as const };
-  if (mode === "level") return { title: "Level", icon: <Layers3 className="h-5 w-5" />, tone: "blue" as const };
+  if (mode === "level") return { title: "Module", icon: <Layers3 className="h-5 w-5" />, tone: "blue" as const };
   return { title: "Chủ đề", icon: <Folder className="h-5 w-5" />, tone: "red" as const };
 }
 
 export function getOptionMeta(option: ContentDialogOptionId) {
-  if (option === "category") return { title: "Level", description: "Tạo level dưới môn học.", icon: <Layers3 className="h-5 w-5" />, tone: "blue" as const };
-  if (option === "section") return { title: "Chủ đề", description: "Tạo chủ đề dưới level.", icon: <Folder className="h-5 w-5" />, tone: "red" as const };
+  if (option === "category") return { title: "Module", description: "Tạo module dưới môn học.", icon: <Layers3 className="h-5 w-5" />, tone: "blue" as const };
+  if (option === "section") return { title: "Chủ đề", description: "Tạo chủ đề dưới module.", icon: <Folder className="h-5 w-5" />, tone: "red" as const };
   if (option === "lecture") return { title: "Bài giảng", description: "Google Slides hoặc PPTX.", icon: <Presentation className="h-5 w-5" />, tone: "blue" as const };
   if (option === "resource") return { title: "Tài liệu", description: "PDF, Drive, Video, Audio.", icon: <FileText className="h-5 w-5" />, tone: "blue" as const };
   return { title: "Bài tập từ Quiz bank", description: "Train/Test quiz có sẵn.", icon: <FileQuestion className="h-5 w-5" />, tone: "red" as const };

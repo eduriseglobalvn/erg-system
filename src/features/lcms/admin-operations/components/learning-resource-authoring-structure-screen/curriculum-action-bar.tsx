@@ -34,7 +34,7 @@ export function CurriculumActionBar({
   onRefresh: () => void;
 }) {
   const createCommand = selectedKind === "none" ? "create-subject" : selectedKind === "subject" ? "create-level" : selectedKind === "level" ? "create-topic" : "create-lesson";
-  const createLabel = selectedKind === "none" ? "Tạo môn học" : selectedKind === "subject" ? "Thêm Level (Chặng học)" : selectedKind === "level" ? "Thêm chủ đề" : "Thêm bài học";
+  const createLabel = selectedKind === "none" ? "Tạo môn học" : selectedKind === "subject" ? "Thêm module" : selectedKind === "level" ? "Thêm chủ đề" : "Thêm bài học";
 
   return (
     <div className="flex min-h-14 shrink-0 flex-wrap items-center justify-between gap-3 border-b border-[#D9E2EF] bg-white px-4 py-2">
@@ -43,13 +43,13 @@ export function CurriculumActionBar({
         <div className="text-[11.5px] text-[#637381]">
           {selectedKind === "topic"
             ? "Danh sách bài học trong chủ đề"
-            : "Cấu trúc môn học: Level (tùy chọn) → Chủ đề (tùy chọn) → Bài học"}
+            : "Cấu trúc môn học: Module (tùy chọn) → Chủ đề (tùy chọn) → Bài học"}
         </div>
       </div>
       <div className="flex shrink-0 flex-wrap items-center gap-2">
         <TextField
           size="small"
-          placeholder="Tìm môn học, level, chủ đề…"
+          placeholder="Tìm môn học, module, chủ đề…"
           value={searchValue}
           onChange={(e) => onSearchChange(e.target.value)}
           slotProps={{

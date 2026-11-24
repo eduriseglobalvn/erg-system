@@ -48,12 +48,12 @@ export function MoveQuestionsDialog({ subject, currentLevelId, currentTopicId, c
       )}
     >
       <Stack spacing={2} sx={{ pt: 1 }}>
-        <ErgTextField label="Cấp độ (Level)" onChange={(event) => { setLevelId(event.target.value); setTopicId(""); }} select value={levelId}>
+        <ErgTextField label="Module" onChange={(event) => { setLevelId(event.target.value); setTopicId(""); }} select value={levelId}>
           {subject.levels.map((level) => <MenuItem key={level.id} value={level.id}>{level.label}</MenuItem>)}
         </ErgTextField>
         <ErgTextField
           disabled={!topics.length}
-          helperText={topics.length ? undefined : "Level này chưa có chủ đề khác."}
+          helperText={topics.length ? undefined : "Module này chưa có chủ đề khác."}
           label="Chủ đề"
           onChange={(event) => setTopicId(event.target.value)}
           select
