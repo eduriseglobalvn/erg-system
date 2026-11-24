@@ -12,6 +12,12 @@ describe("LMS permission-aware navigation", () => {
     expect(canNavigateToLmsPath("/score", ["lms.*"], ["lms.grade.*"])).toBe(false);
   });
 
+  test("shows the games entry to teachers who may host and hides it from the rest", () => {
+    expect(canNavigateToLmsPath("/teacher/games", ["lms.games.host"], [])).toBe(true);
+    expect(canNavigateToLmsPath("/teacher/games/new", ["lms.games.host"], [])).toBe(true);
+    expect(canNavigateToLmsPath("/teacher/games", ["lms.grade.read"], [])).toBe(false);
+  });
+
   test("removes denied children and empty groups", () => {
     const groups = [
       { label: "Giảng dạy", items: [{ label: "Điểm", path: "/score" }, { label: "Điểm danh", path: "/attendance" }] },

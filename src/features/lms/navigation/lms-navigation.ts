@@ -10,12 +10,16 @@ type NavigationGroup<Item extends NavigationItem> = {
   items: Item[];
 };
 
-export function permissionForLmsPath(path: string): LmsRoutePermission | null {
+/** Teacher pages routed outside the LMS shell (own row in ROUTE_PERMISSION_MATRIX) that still need a sidebar entry. */
+const STANDALONE_ROUTE_PERMISSIONS = { games: "lms.games.host" } as const;
+const NAVIGATION_PERMISSIONS: Record<string, LmsRoutePermission | "lms.games.host"> = { ...LMS_ROUTE_PERMISSIONS, ...STANDALONE_ROUTE_PERMISSIONS };
+
+export function permissionForLmsPath(path: string): LmsRoutePermission | "lms.games.host" | null {
   const normalized = normalizeLmsPath(path);
-  const route = Object.keys(LMS_ROUTE_PERMISSIONS)
+  const route = Object.keys(NAVIGATION_PERMISSIONS)
     .sort((left, right) => right.length - left.length)
     .find((candidate) => normalized === candidate || normalized.startsWith(`${candidate}/`));
-  return route ? LMS_ROUTE_PERMISSIONS[route as keyof typeof LMS_ROUTE_PERMISSIONS] : null;
+  return route ? NAVIGATION_PERMISSIONS[route] : null;
 }
 
 export function canNavigateToLmsPath(path: string, grantedPermissions: readonly string[] = [], deniedPermissions: readonly string[] = []) {
