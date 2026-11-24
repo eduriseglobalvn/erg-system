@@ -19,12 +19,14 @@ import { type ReactNode, useMemo, useState } from "react";
 import { ClassImportDialog } from "@/features/lcms/school-management/components/class-import-dialog";
 import { SchoolPageShell } from "@/features/lcms/school-management/components/school-page-shell";
 import { useSchoolManagementContext } from "@/features/lcms/school-management/components/school-management-context";
+import { useStudentImportWithAccounts } from "@/features/lcms/school-management/hooks/use-student-import-with-accounts";
 import type { SchoolClass, StudentImportRow } from "@/features/lcms/school-management/types/school-management-types";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 import { alpha } from "@mui/material/styles";
 
 export default function SchoolClassesScreen() {
-  const { addClasses, addStudents, selectedSchool } = useSchoolManagementContext();
+  const { addClasses, selectedSchool } = useSchoolManagementContext();
+  const { credentialsDialog, importStudents } = useStudentImportWithAccounts();
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -43,21 +45,7 @@ export default function SchoolClassesScreen() {
   async function handleImport(classList: Array<Omit<SchoolClass, "id">>, students?: StudentImportRow[]) {
     // The class list in memory is not refreshed yet, so the new classes are matched by the ids just returned.
     const created = new Map(((await addClasses(classList)) ?? []).map((c) => [c.name.trim().toLowerCase(), c.id]));
-    if (students && students.length > 0) {
-      await addStudents(
-        students.map((row) => ({
-          code: row.code,
-          fullName: row.fullName,
-          birthDate: row.birthDate,
-          grade: row.grade,
-          className: row.className,
-          academicClassId: created.get(row.className.trim().toLowerCase()),
-          guardianPhone: row.guardianPhone,
-          subjectIds: [],
-          status: "studying",
-        }))
-      );
-    }
+    if (students?.length) await importStudents(students, (row) => created.get(row.className.trim().toLowerCase()));
   }
 
   return (
@@ -337,6 +325,7 @@ export default function SchoolClassesScreen() {
           usesGrades={selectedSchool.schoolType !== "university" && selectedSchool.schoolType !== "training-center"}
         />
       ) : null}
+      {credentialsDialog}
     </SchoolPageShell>
   );
 }
