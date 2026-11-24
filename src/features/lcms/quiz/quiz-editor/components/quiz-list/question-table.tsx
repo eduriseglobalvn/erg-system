@@ -20,10 +20,15 @@ import { QuestionTableRow, type QuestionListRow } from "./question-table-row";
 
 type Filter = "all" | "missing";
 
-/** The questions of the open topic's quiz, or of every topic in "Tất cả" (`topicLabel` null: view only). */
-export function QuestionTable({ rows, topicLabel, onOpenRow, onAdd, onMove, onImportExcel }: {
+/** The questions of the open topic's quiz, or of every topic in "Tất cả" (`topicLabel` null). */
+export function QuestionTable({ rows, topicLabel, highlightSlideId, topics, onAssignTopic, onOpenRow, onAdd, onMove, onImportExcel }: {
   rows: QuestionListRow[];
   topicLabel: string | null;
+  /** The question just added: tinted so it is easy to spot at the top. */
+  highlightSlideId?: string | null;
+  /** "Tất cả": the topics a question without one can be put in. */
+  topics?: readonly { id: string; label: string }[];
+  onAssignTopic?: (slideId: string, topic: { id: string; label: string }) => void;
   onOpenRow: (row: QuestionListRow) => void;
   onAdd: () => void;
   /** Move the checked questions of the open quiz to another level/topic. */
@@ -79,13 +84,9 @@ export function QuestionTable({ rows, topicLabel, onOpenRow, onAdd, onMove, onIm
         {onImportExcel ? (
           <ErgButton onClick={onImportExcel} startIcon={<UploadFileOutlinedIcon />} variant="outlined">Nhập từ Excel</ErgButton>
         ) : null}
-        {showTopic ? (
-          <Typography color="text.secondary" variant="body2">Chọn một chủ đề để thêm câu hỏi</Typography>
-        ) : (
-          <ErgButton onClick={onAdd} startIcon={<AddIcon />} variant="outlined">
-            {`Thêm câu hỏi vào “${topicLabel}”`}
-          </ErgButton>
-        )}
+        <ErgButton onClick={onAdd} startIcon={<AddIcon />} variant="outlined">
+          {showTopic ? "Thêm câu hỏi" : `Thêm câu hỏi vào “${topicLabel}”`}
+        </ErgButton>
       </Box>
     </Box>
   );
@@ -111,13 +112,16 @@ export function QuestionTable({ rows, topicLabel, onOpenRow, onAdd, onMove, onIm
         <TableBody>
           {shown.map(({ row, readiness }) => (
             <QuestionTableRow
+              highlighted={row.groupId !== null && row.slide.id === highlightSlideId}
               key={`${row.topic?.quizId ?? ""}:${row.slide.id}`}
+              onAssignTopic={row.groupId && onAssignTopic && topics?.length ? (topic) => onAssignTopic(row.slide.id, topic) : undefined}
               onOpen={() => onOpenRow(row)}
               onToggleSelect={selectable ? () => toggle(row.slide.id) : undefined}
               readiness={readiness}
               row={row}
               selected={checked.has(row.slide.id)}
               showTopic={showTopic}
+              topics={topics}
             />
           ))}
         </TableBody>

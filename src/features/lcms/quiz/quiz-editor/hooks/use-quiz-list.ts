@@ -1,12 +1,12 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import type { QuizEditorDraftDocument } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-api";
 import { quizEditorDraftQueryOptions } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-query";
 import type { QuestionListRow } from "@/features/lcms/quiz/quiz-editor/components/quiz-list/question-table-row";
 import { useLevelTopicQuizzes } from "@/features/lcms/quiz/quiz-editor/hooks/use-level-topic-quizzes";
 import type { useQuizEditorScope } from "@/features/lcms/quiz/quiz-editor/hooks/use-quiz-editor-scope";
-import type { TopicRow } from "@/features/lcms/quiz/quiz-editor/model/topic-rail";
+import { unassignedQuizId, type TopicRow } from "@/features/lcms/quiz/quiz-editor/model/topic-rail";
 import { isQuestionType, type QuizEditorGroup, type QuizProjectSettings } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 
 /** In the open quiz a slide counts as on the server unless it is new since the last save, or the quiz itself was never saved. */
@@ -28,8 +28,8 @@ export function useQuizList({ scope, quizId, ready, groups, quizProject, selectS
 }) {
   const { selectedTopicId, handleTopicChange } = scope;
   const queryClient = useQueryClient();
-  // An open quiz no topic claims (opened by URL, or without a topic) is still listed as itself.
-  const viewAll = selectedTopicId === "all" && !quizId;
+  // "Tất cả" lists every topic; the open quiz there is the Level's topicless one (scope sync moves a topic quiz to its topic).
+  const viewAll = selectedTopicId === "all";
   const liveSlides = useMemo(() => groups.flatMap((group) => group.slides), [groups]);
   const { rows: topics, summaries, quizzesPending } = useLevelTopicQuizzes({
     subjectId: scope.selectedCourseId,
@@ -38,14 +38,24 @@ export function useQuizList({ scope, quizId, ready, groups, quizProject, selectS
     openQuiz: quizId && ready ? { quizId, topicId: selectedTopicId, settings: quizProject, slides: liveSlides } : null,
   });
   const selectedTopic = topics.find((topic) => topic.id === selectedTopicId) ?? null;
+  const looseQuizId = unassignedQuizId(summaries);
+
+  // Open the topicless quiz in "Tất cả", so a question added there joins it instead of starting another quiz.
+  useEffect(() => {
+    if (viewAll && !quizId && looseQuizId) openQuiz(looseQuizId);
+  }, [viewAll, quizId, looseQuizId, openQuiz]);
 
   const rows = useMemo<QuestionListRow[]>(() => {
-    if (viewAll) {
-      return topics.flatMap((topic) => topic.slides.map((slide, index) => ({ slide, number: index + 1, groupId: null, topic, onServer: true })));
-    }
-    const questions = groups.flatMap((group) => group.slides.filter((slide) => isQuestionType(slide.kind)).map((slide) => ({ slide, groupId: group.id })));
-    return questions.map(({ slide, groupId }, index) => ({ slide, number: index + 1, groupId, topic: null, onServer: isOnServer(slide.status, Boolean(quizId)) }));
-  }, [viewAll, topics, groups, quizId]);
+    // While the open quiz switches, `groups` still hold the previous one.
+    const live = quizId && !ready ? [] : groups.flatMap((group) =>
+      group.slides.filter((slide) => isQuestionType(slide.kind)).map((slide) => ({ slide, groupId: group.id, topic: null, onServer: isOnServer(slide.status, Boolean(quizId)) })),
+    );
+    // In "Tất cả" the open quiz's questions (no topic yet) come first, then every topic's.
+    const others = viewAll
+      ? topics.filter((topic) => topic.quizId !== quizId).flatMap((topic) => topic.slides.map((slide) => ({ slide, groupId: null, topic, onServer: true })))
+      : [];
+    return [...live, ...others].map((row, index) => ({ ...row, number: index + 1 }));
+  }, [viewAll, topics, groups, quizId, ready]);
 
   // A "Tất cả" row belongs to another quiz: open the editor once that quiz's draft has loaded (adjusted while rendering).
   // Slide ids are unique only within a quiz, so wait for that very quiz.

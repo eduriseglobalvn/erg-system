@@ -4,7 +4,7 @@ import type { QuizEditorDraftDocument, QuizEditorSummary } from "@/features/lcms
 import { createNewQuizProjectSettings } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-project-defaults";
 import type { QuizEditorSlide } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import { recordPublished } from "./quiz-publish-state";
-import { buildTopicRail } from "./topic-rail";
+import { buildTopicRail, unassignedQuizId } from "./topic-rail";
 
 const topics = [{ id: "t1", label: "Phân số" }, { id: "t2", label: "Hình học" }];
 const summary = (id: string, over: Partial<QuizEditorSummary> = {}): QuizEditorSummary => ({
@@ -63,5 +63,17 @@ describe("buildTopicRail", () => {
     const live = { quizId: "q9", topicId: "t1", settings: createNewQuizProjectSettings(), slides: [slide("a"), slide("b")] };
     const [row] = buildTopicRail(topics, [], {}, live);
     expect([row!.quizId, row!.questionCount, row!.lifecycle]).toEqual(["q9", 2, "draft"]);
+  });
+});
+
+describe("unassignedQuizId", () => {
+  it("picks the latest live quiz with no topic, and none when every quiz has one", () => {
+    expect(unassignedQuizId([summary("q1")])).toBeNull();
+    expect(unassignedQuizId([
+      summary("old", { categoryId: undefined, updatedAt: "2026-01-01T00:00:00Z" }),
+      summary("new", { categoryId: undefined, updatedAt: "2026-02-01T00:00:00Z" }),
+      summary("gone", { categoryId: undefined, updatedAt: "2026-03-01T00:00:00Z", status: "deleted" }),
+      summary("topic", { updatedAt: "2026-04-01T00:00:00Z" }),
+    ])).toBe("new");
   });
 });

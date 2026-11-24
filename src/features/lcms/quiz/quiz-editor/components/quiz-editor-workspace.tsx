@@ -18,6 +18,7 @@ import { useQuizEditorScope, useQuizEditorScopeSync } from "@/features/lcms/quiz
 import { useQuizEditorSlideViews } from "@/features/lcms/quiz/quiz-editor/hooks/use-quiz-editor-slide-views";
 import { useQuizEditorState } from "@/features/lcms/quiz/quiz-editor/hooks/use-quiz-editor-state";
 import { useQuizEditorSync } from "@/features/lcms/quiz/quiz-editor/hooks/use-quiz-editor-sync";
+import { useBankOnlyQuestions } from "@/features/lcms/quiz/quiz-editor/hooks/use-bank-only-questions";
 import { useMoveQuestions } from "@/features/lcms/quiz/quiz-editor/hooks/use-move-questions";
 import { useQuizList } from "@/features/lcms/quiz/quiz-editor/hooks/use-quiz-list";
 import { useI18n } from "@/platform/i18n";
@@ -71,8 +72,11 @@ export function QuizEditorWorkspace({
     duplicateSelected,
     deleteSelected,
     replaceSelectedSlide,
+    restoreSlide,
     updatePlayerTemplate,
   } = editorState;
+  // The question just added from the list: highlighted at the top until another one is added.
+  const [addedSlideId, setAddedSlideId] = useState<string | null>(null);
 
   const { questionManagerSlides } =
     useQuizEditorSlideViews({ groups });
@@ -116,7 +120,17 @@ export function QuizEditorWorkspace({
     labels: { subject: scope.selectedCourse.label, level: scope.selectedLevel?.label ?? "" },
     createId,
     questionDefaults: quizProject.questionDefaults,
-    onImport: importQuestionBankQuestions,
+    onImport: (questions) => importQuestionBankQuestions(questions, { fromBank: false }),
+  });
+  const bankOnly = useBankOnlyQuestions({
+    subjectId: scope.selectedCourseId,
+    levelId: scope.selectedLevel?.id ?? null,
+    enabled: scope.selectedTopicId === "all" && sync.ready && !list.topicsLoading,
+    topics: list.topics,
+    liveSlides: questionManagerSlides,
+    createId,
+    questionDefaults: quizProject.questionDefaults,
+    importLoose: importQuestionBankQuestions,
   });
   const importNoticeCount = useQuizEditorImportedQuestions({
     ready: sync.ready,
@@ -125,15 +139,16 @@ export function QuizEditorWorkspace({
     onImportedQuestionsHandled,
   });
 
-  const typeChange = useQuestionTypeChange({
+  const changeType = useQuestionTypeChange({
     selectedSlide,
+    selectedGroupId: selectedNode.groupId,
     quizProject,
     createId,
-    addQuestion,
     replaceSelectedSlide,
-    addTitle: list.topicLabel === null ? "Thêm câu hỏi" : `Thêm câu hỏi vào “${list.topicLabel}”`,
-    onAdded: openEditor,
+    restoreSlide,
   });
+  // A new question is always Một đáp án; its type changes in the editor.
+  const addBlankQuestion = () => addQuestion("multiple-choice");
   const syncChip = <QuizEditorSyncChip onRetry={() => void sync.flushNow()} persistent={sync.persistent} status={sync.status} />;
 
   return (
@@ -171,27 +186,32 @@ export function QuizEditorWorkspace({
                 {t("sidebar.questionBank")}: {importNoticeCount} {t("common.questions").toLowerCase()} đã được đưa vào đề nháp hiện tại.
               </Alert>
             ) : null}
+            {bankOnly.banner}
             {/* keyed by topic: slide ids repeat across quizzes, so a selection must not carry over */}
             <QuestionTable
               key={scope.selectedTopicId}
-              onAdd={() => typeChange.openPicker("add")}
+              highlightSlideId={addedSlideId}
+              onAssignTopic={(slideId, topic) =>
+                void move.moveTo([slideId], { subjectId: scope.selectedCourseId, levelId: scope.selectedLevel?.id ?? "", topicId: topic.id, topicLabel: topic.label })
+              }
+              onAdd={() => setAddedSlideId(addBlankQuestion())}
               onImportExcel={excel.openImport}
               onMove={move.openMove}
               onOpenRow={list.openRow}
               rows={list.rows}
               topicLabel={list.topicLabel}
+              topics={list.topics}
             />
             {move.dialog}
             {excel.dialog}
-            {typeChange.dialogs}
             {questionEditorOpen && selectedNode.type === "slide" && selectedSlide && isQuestionType(selectedSlide.kind) ? (
               <QuestionEditorShell
                 groups={groups}
                 selectedSlide={selectedSlide}
                 onSelectSlide={selectSlide}
                 onReplaceSlide={replaceSelectedSlide}
-                onAddQuestion={() => typeChange.openPicker("add")}
-                onChangeType={() => typeChange.openPicker("change")}
+                onAddQuestion={addBlankQuestion}
+                onChangeType={changeType}
                 onDuplicate={duplicateSelected}
                 onDelete={deleteSelected}
                 onClose={() => setQuestionEditorOpen(false)}

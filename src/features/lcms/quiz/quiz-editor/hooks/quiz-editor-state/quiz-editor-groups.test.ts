@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  appendSlideToGroups,
+  prependSlideToGroups,
   copySlideAs,
   getFirstNode,
   markSlidesPublished,
@@ -34,12 +34,11 @@ describe("getFirstNode", () => {
 });
 
 describe("insertion", () => {
-  it("appends to target, falls back to first group, creates group-1 when empty", () => {
-    const r1 = appendSlideToGroups(sample(), "g2", slide("n"));
-    expect(r1.groupId).toBe("g2");
-    expect(r1.groups[1]!.slides.map((s) => s.id)).toEqual(["c", "n"]);
-    expect(appendSlideToGroups(sample(), "missing", slide("n")).groupId).toBe("g1");
-    const r3 = appendSlideToGroups([], "x", slide("n"));
+  it("puts the new slide first in the first group, creates group-1 when empty", () => {
+    const r1 = prependSlideToGroups(sample(), slide("n"));
+    expect(r1.groupId).toBe("g1");
+    expect(r1.groups[0]!.slides.map((s) => s.id)[0]).toBe("n");
+    const r3 = prependSlideToGroups([], slide("n"));
     expect(r3.groupId).toBe("group-1");
     expect(r3.groups[0]!.slides).toHaveLength(1);
   });

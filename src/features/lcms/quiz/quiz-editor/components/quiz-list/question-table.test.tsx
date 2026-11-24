@@ -66,18 +66,29 @@ describe("QuestionTable", () => {
     expect(screen.getByRole("row", { name: "Mở câu 2: (Chưa có đề bài)" })).toHaveAttribute("tabindex", "0");
   });
 
-  it("in Tất cả shows each row's own topic and the hint instead of the add button", () => {
+  it("in Tất cả shows each row's own topic, and adding still works", () => {
     const rows: QuestionListRow[] = [
       { slide: ready, number: 1, groupId: null, topic: topic("t1", "Phân số"), onServer: true },
-      { slide: { ...ready, id: "s9", title: "Tam giác" }, number: 1, groupId: null, topic: topic("t2", "Hình học"), onServer: true },
+      { slide: { ...ready, id: "s9", title: "Tam giác" }, number: 2, groupId: null, topic: topic("t2", "Hình học"), onServer: true },
     ];
-    const { onOpenRow } = renderTable({ rows, topicLabel: null });
+    const { onOpenRow, onAdd } = renderTable({ rows, topicLabel: null });
     expect(screen.getAllByRole("columnheader").map((cell) => cell.textContent)).toEqual(["#", "Câu hỏi", "Chủ đề", "Dạng", "Mức sẵn sàng", "Máy chủ"]);
     expect(within(bodyRows()[1]!).getByText("Hình học")).toBeInTheDocument();
-    expect(screen.getByText("Chọn một chủ đề để thêm câu hỏi")).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /Thêm câu hỏi/ })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Thêm câu hỏi" }));
+    expect(onAdd).toHaveBeenCalledTimes(1);
     fireEvent.click(screen.getByText("Tam giác"));
     expect(onOpenRow).toHaveBeenCalledWith(rows[1]);
+  });
+
+  it("in Tất cả, a question with no topic yet picks one from its topic cell, without opening the editor", () => {
+    const onAssignTopic = vi.fn();
+    const rows: QuestionListRow[] = [{ slide: ready, number: 1, groupId: "g1", topic: null, onServer: false }];
+    const topics = [{ id: "t1", label: "Phân số" }, { id: "t2", label: "Hình học" }];
+    const { onOpenRow } = renderTable({ rows, topicLabel: null, topics, onAssignTopic, highlightSlideId: "s1" });
+    fireEvent.click(screen.getByRole("button", { name: "Chọn chủ đề cho câu 1" }));
+    fireEvent.click(screen.getByRole("menuitem", { name: "Hình học" }));
+    expect(onAssignTopic).toHaveBeenCalledWith("s1", topics[1]);
+    expect(onOpenRow).not.toHaveBeenCalled();
   });
 
   it("in Tất cả, two quizzes may hold the same slide id: both rows show, with no key clash", () => {

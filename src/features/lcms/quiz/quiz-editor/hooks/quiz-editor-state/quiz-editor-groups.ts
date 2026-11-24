@@ -1,4 +1,4 @@
-import type { QuizEditorGroup, QuizEditorSlide, SelectedEditorNode } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
+import { isQuestionType, type QuizEditorGroup, type QuizEditorSlide, type SelectedEditorNode } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 
 /** Node to select for a (re)loaded tree: first slide, else first group, else the default group. */
 export function getFirstNode(tree: QuizEditorGroup[] | null | undefined): SelectedEditorNode {
@@ -30,13 +30,15 @@ export function updateSlideInGroups(
   );
 }
 
-/** Appends a slide to the target group (or the first group; creates "group-1" when empty). */
-export function appendSlideToGroups(
+/**
+ * Puts a new question ahead of the quiz's first question, so it tops the list; intro and instruction slides before it
+ * stay first. Without questions it ends the first group (creates "group-1" when empty).
+ */
+export function prependSlideToGroups(
   groups: QuizEditorGroup[],
-  targetGroupId: string,
   slide: QuizEditorSlide,
 ): { groups: QuizEditorGroup[]; groupId: string } {
-  const targetGroup = groups.find((g) => g.id === targetGroupId) ?? groups[0];
+  const targetGroup = groups[0];
   if (!targetGroup) {
     return {
       groupId: "group-1",
@@ -51,11 +53,16 @@ export function appendSlideToGroups(
       ],
     };
   }
+  const firstQuestionGroup = groups.find((group) => group.slides.some((item) => isQuestionType(item.kind))) ?? targetGroup;
   return {
-    groupId: targetGroup.id,
-    groups: groups.map((group) =>
-      group.id === targetGroup.id ? { ...group, slides: [...group.slides, slide] } : group,
-    ),
+    groupId: firstQuestionGroup.id,
+    groups: groups.map((group) => {
+      if (group.id !== firstQuestionGroup.id) return group;
+      const at = group.slides.findIndex((item) => isQuestionType(item.kind));
+      const slides = [...group.slides];
+      slides.splice(at === -1 ? slides.length : at, 0, slide);
+      return { ...group, slides };
+    }),
   };
 }
 

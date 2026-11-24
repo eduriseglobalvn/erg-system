@@ -118,6 +118,7 @@ query QuestionBankWorkspace($input: QuestionBankWorkspaceInput) {
           recommendedCluster
           rationale
           runtimeQuestion
+          fromQuizEditor
           updatedAt
         }
         page

@@ -1,7 +1,12 @@
 import CloudDoneOutlinedIcon from "@mui/icons-material/CloudDoneOutlined";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import CloudOffOutlinedIcon from "@mui/icons-material/CloudOffOutlined";
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import { useState } from "react";
 import TableCell from "@mui/material/TableCell";
 import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
@@ -22,7 +27,42 @@ export type QuestionListRow = {
   onServer: boolean;
 };
 
-export function QuestionTableRow({ row, readiness, showTopic, onOpen, selected, onToggleSelect }: {
+type TopicOption = { id: string; label: string };
+
+/** "Chưa có chủ đề ▾" on a "Tất cả" question without a topic: picking one moves the question there. */
+function TopicPicker({ number, topics, onPick }: { number: number; topics: readonly TopicOption[]; onPick: (topic: TopicOption) => void }) {
+  const [anchor, setAnchor] = useState<HTMLElement | null>(null);
+  return (
+    <>
+      <Button
+        aria-haspopup="menu"
+        aria-label={`Chọn chủ đề cho câu ${number}`}
+        endIcon={<ArrowDropDownIcon />}
+        onClick={(event) => setAnchor(event.currentTarget)}
+        size="small"
+        sx={{ color: "text.secondary", whiteSpace: "nowrap" }}
+        variant="text"
+      >
+        Chưa có chủ đề
+      </Button>
+      <Menu anchorEl={anchor} onClose={() => setAnchor(null)} open={Boolean(anchor)}>
+        {topics.map((topic) => (
+          <MenuItem
+            key={topic.id}
+            onClick={() => {
+              setAnchor(null);
+              onPick(topic);
+            }}
+          >
+            {topic.label}
+          </MenuItem>
+        ))}
+      </Menu>
+    </>
+  );
+}
+
+export function QuestionTableRow({ row, readiness, showTopic, onOpen, selected, onToggleSelect, highlighted, topics = [], onAssignTopic }: {
   row: QuestionListRow;
   readiness: QuestionReadiness;
   showTopic: boolean;
@@ -30,6 +70,10 @@ export function QuestionTableRow({ row, readiness, showTopic, onOpen, selected, 
   /** Set only where rows can be moved (an open quiz): renders the selection checkbox. */
   selected?: boolean;
   onToggleSelect?: () => void;
+  highlighted?: boolean;
+  topics?: readonly TopicOption[];
+  /** Set for a "Tất cả" question with no topic yet: renders the topic picker. */
+  onAssignTopic?: (topic: TopicOption) => void;
 }) {
   const { slide } = row;
   const cloud = row.onServer ? "Đã lên máy chủ" : "Chưa lên máy chủ";
@@ -44,7 +88,11 @@ export function QuestionTableRow({ row, readiness, showTopic, onOpen, selected, 
           onOpen();
         }
       }}
-      sx={{ cursor: "pointer", "&:focus-visible": { boxShadow: tokens.shadow.focus } }}
+      sx={{
+        cursor: "pointer",
+        ...(highlighted ? { bgcolor: tokens.color.primarySofter } : {}),
+        "&:focus-visible": { boxShadow: tokens.shadow.focus },
+      }}
       tabIndex={0}
     >
       {onToggleSelect ? (
@@ -58,7 +106,11 @@ export function QuestionTableRow({ row, readiness, showTopic, onOpen, selected, 
           {questionTitleText(slide.title)}
         </Typography>
       </TableCell>
-      {showTopic ? <TableCell>{row.topic?.label}</TableCell> : null}
+      {showTopic ? (
+        <TableCell onClick={onAssignTopic ? (event) => event.stopPropagation() : undefined} onKeyDown={onAssignTopic ? (event) => event.stopPropagation() : undefined}>
+          {onAssignTopic ? <TopicPicker number={row.number} onPick={onAssignTopic} topics={topics} /> : row.topic?.label}
+        </TableCell>
+      ) : null}
       <TableCell>{isQuestionType(slide.kind) ? questionTypeLabel(slide.kind) : null}</TableCell>
       <TableCell>
         <Box sx={{ alignItems: "center", display: "flex", gap: 1 }}>

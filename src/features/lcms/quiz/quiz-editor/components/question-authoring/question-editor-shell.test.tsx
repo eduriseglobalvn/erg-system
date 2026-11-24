@@ -152,11 +152,16 @@ describe("QuestionEditorShell", () => {
     expect(screen.getByRole("textbox", { name: "Lời nhắn khi đúng" })).toBeInTheDocument();
   });
 
-  it("offers exactly three actions in the more menu", () => {
-    renderShell();
+  it("offers duplicate and delete in the more menu; the type changes from the Dạng button", () => {
+    const props = renderShell();
     fireEvent.click(screen.getByRole("button", { name: "Thêm thao tác" }));
     const menu = screen.getByRole("menu", { name: "Thao tác câu hỏi" });
-    expect(within(menu).getAllByRole("menuitem")).toHaveLength(3);
+    expect(within(menu).getAllByRole("menuitem")).toHaveLength(2);
+    fireEvent.keyDown(menu, { key: "Escape" });
+
+    fireEvent.click(screen.getByRole("button", { name: /^Dạng câu hỏi: / }));
+    fireEvent.click(within(screen.getByRole("dialog", { name: "Đổi dạng câu hỏi" })).getByRole("option", { name: /Đúng \/ Sai/ }));
+    expect(props.onChangeType).toHaveBeenCalledWith("true-false");
   });
 
   it("has exactly one contained button in author mode", () => {

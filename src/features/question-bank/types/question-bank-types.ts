@@ -66,6 +66,10 @@ export type QuestionBankQuestion = {
   rationale?: string;
   /** The question exactly as the quiz editor authored it; every kind carries its own fields here. */
   runtimeQuestion?: Question;
+  /** The row's own topic as stored; null when it has none (categoryId then falls back to the subject's first topic). */
+  topicId?: string | null;
+  /** Mirrored by the quiz editor on publish; false for a question made in the bank itself. */
+  fromQuizEditor?: boolean;
   answer?: string;
   choices?: QuestionBankChoice[];
   settings?: Record<string, unknown>;
