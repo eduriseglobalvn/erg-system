@@ -6,7 +6,7 @@ import { createGameRoom, fetchGameSources } from "@/features/games/game-api";
 import { PickerStep } from "@/features/games/teacher/picker-step";
 import { buildCreateRoomBody, DEFAULT_SETTINGS, pickSource, validateSettings, type RoomSettings } from "@/features/games/teacher/room-settings";
 import { SettingsStep } from "@/features/games/teacher/settings-step";
-import { useTeacherClasses } from "@/features/games/teacher/use-teacher-classes";
+import { shellSelectedClassId, useTeacherClasses } from "@/features/games/teacher/use-teacher-classes";
 import { ApiClientError } from "@/lib/api-client";
 import { teacherPath } from "@/platform/workspaces/workspace-paths";
 
@@ -22,8 +22,10 @@ export function CreateRoomPage({ quizId, classId: initialClassId }: { quizId?: s
   const { classes } = useTeacherClasses();
   const [step, setStep] = useState<"pick" | "settings">("pick");
   const [draft, setDraft] = useState<RoomSettings>({ ...DEFAULT_SETTINGS, classId: initialClassId ?? "" });
-  const classId = draft.classId || classes[0]?.id || "";
-  const sources = useQuery({ queryKey: ["games", "sources", classId], queryFn: () => fetchGameSources(classId), enabled: Boolean(classId), staleTime: 60_000 });
+  // Default: the class open in the shell switcher, when it is one of this teacher's classes.
+  const [shellClassId] = useState(shellSelectedClassId);
+  const classId = draft.classId || (classes.some((c) => c.id === shellClassId) ? shellClassId : classes[0]?.id) || "";
+  const sources = useQuery({ queryKey: ["games", "sources", classId], queryFn: () => fetchGameSources(classId || undefined), staleTime: 60_000 });
   const source = pickSource(sources.data ?? [], quizId);
   // A class with no wrong questions cannot play CLASS_WRONG: fall back to the whole quiz.
   const questionSet = source?.classWrongCount ? draft.questionSet : "ALL";
@@ -38,7 +40,7 @@ export function CreateRoomPage({ quizId, classId: initialClassId }: { quizId?: s
   const back = () => { void navigate({ href: teacherPath("/homework/exercise-bank") }); };
 
   return step === "pick" ? (
-    <PickerStep quizTitle={source?.title} source={source} loading={sources.isPending && Boolean(classId)} onBack={back} onNext={() => setStep("settings")} />
+    <PickerStep quizTitle={source?.title} source={source} loading={sources.isPending} onBack={back} onNext={() => setStep("settings")} />
   ) : (
     <SettingsStep
       settings={settings}
