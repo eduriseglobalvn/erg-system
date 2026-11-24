@@ -53,13 +53,13 @@ describe("useQuizEditorState - initial selection", () => {
 });
 
 describe("useQuizEditorState - insertion", () => {
-  it("addQuestion appends to the selected group and selects the new slide", () => {
+  it("addQuestion puts the new question first and selects it", () => {
     const { result } = setup();
     act(() => result.current.addQuestion("multiple-choice"));
 
     const slides = slidesOf(result, "g1");
     expect(slides).toHaveLength(4);
-    const added = slides[3]!;
+    const added = slides[0]!;
     expect(added.id).toMatch(/^slide-\d+$/);
     expect(added.status).toBe("unsaved");
     expect(slidesOf(result, "g2")).toHaveLength(1);
@@ -71,7 +71,7 @@ describe("useQuizEditorState - insertion", () => {
     act(() => result.current.addQuestion("multiple-choice"));
     act(() => result.current.addQuestion("true-false"));
 
-    const [first, second] = slidesOf(result, "g1").slice(3);
+    const [second, first] = slidesOf(result, "g1");
     const num = (id: string) => Number(id.split("-")[1]);
     expect(num(second!.id)).toBeGreaterThan(num(first!.id));
     expect(first!.id).not.toBe(second!.id);
@@ -79,12 +79,14 @@ describe("useQuizEditorState - insertion", () => {
     expect(second!.choiceControlType).toBe("radio");
   });
 
-  it("falls back to the first group when the target group is missing", () => {
-    const { result } = setup();
-    act(() => result.current.selectSlide("missing", "x"));
+  it("keeps intro slides ahead of the new question", () => {
+    const { result } = setup([group("g0", [slide("intro", { kind: "intro-slide" })]), group("g1", [slide("i2", { kind: "instruction-slide" }), slide("a")])]);
     act(() => result.current.addQuestion("multiple-choice"));
-    expect(slidesOf(result, "g1")).toHaveLength(4);
-    expect(result.current.selectedNode).toMatchObject({ type: "slide", slideId: slidesOf(result, "g1")[3]!.id });
+    expect(slidesOf(result, "g0").map((s) => s.id)).toEqual(["intro"]);
+    const ids = slidesOf(result, "g1").map((s) => s.id);
+    expect(ids[0]).toBe("i2");
+    expect(ids[2]).toBe("a");
+    expect(result.current.selectedNode).toEqual({ type: "slide", groupId: "g1", slideId: ids[1] });
   });
 
   it("creates group-1 inside the setGroups updater when there are no groups", () => {
@@ -173,7 +175,7 @@ describe("useQuizEditorState - statuses and loading", () => {
     const { result } = renderHook(() => useQuizEditorState());
     act(() => result.current.hydrateDraftDocument({ ...draft(savedTree), settings: day1.result.current.quizProject }));
     act(() => result.current.addQuestion("multiple-choice"));
-    const [old, added] = slidesOf(result, savedTree[0]!.id);
+    const [added, old] = slidesOf(result, savedTree[0]!.id);
     expect(added!.id).not.toBe(oldId);
     expect(JSON.stringify(savedTree)).not.toContain(`"${added!.id}"`);
 
@@ -188,7 +190,7 @@ describe("useQuizEditorState - statuses and loading", () => {
 
     const { result } = renderHook(() => useQuizEditorState(draft(savedTree)));
     act(() => result.current.addQuestion("multiple-choice"));
-    const added = slidesOf(result, savedTree[0]!.id)[1]!;
+    const added = slidesOf(result, savedTree[0]!.id)[0]!;
     expect(JSON.stringify(savedTree)).not.toContain(`"${added.id}"`);
   });
 

@@ -127,6 +127,7 @@ export type QuestionBankQuestionDTO = {
   recommendedCluster?: string | null;
   rationale?: string | null;
   runtimeQuestion?: string | null;
+  fromQuizEditor?: boolean | null;
   updatedAt?: string | null;
 };
 
@@ -277,6 +278,8 @@ function mapQuestion(question: QuestionBankQuestionDTO, subjects: QuestionBankSu
     rationale: question.rationale?.trim() || template.rationale,
     answer: question.answer ?? template.answer,
     runtimeQuestion: parseRuntimeQuestion(question.runtimeQuestion),
+    topicId: question.topicId ?? null,
+    fromQuizEditor: Boolean(question.fromQuizEditor),
     settings: template.settings,
     choices: question.choices?.length
       ? question.choices.map((choice, choiceIndex) => ({

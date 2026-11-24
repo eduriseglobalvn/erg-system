@@ -59,7 +59,7 @@ describe("useQuizList", () => {
     const { hook, handleTopicChange, openQuiz, selectSlide, openEditor } = setup("all", []);
     expect(hook.result.current.topicLabel).toBeNull();
     const row = hook.result.current.rows.find((item) => item.slide.id === "x")!;
-    expect([row.number, row.topic?.id, row.groupId]).toEqual([1, "t2", null]);
+    expect([row.number, row.topic?.id, row.groupId]).toEqual([2, "t2", null]);
 
     act(() => hook.result.current.openRow(row));
     expect(handleTopicChange).toHaveBeenLastCalledWith("t2");
@@ -92,11 +92,22 @@ describe("useQuizList", () => {
     topics.summaries = [];
   });
 
-  it("keeps the questions of an open quiz that no topic claims, labelled with its title", () => {
+  it("in Tất cả, the open topicless quiz's questions come first and stay editable, then every topic's", () => {
     topics.rows = [topic("t1", "q2", [slide("other")])];
     const { hook } = setup("all", [group("g1", [slide("a")])], "q1");
-    expect(hook.result.current.rows.map((row) => row.slide.id)).toEqual(["a"]);
-    expect(hook.result.current.topicLabel).toBe(createNewQuizProjectSettings().info.title);
+    expect(hook.result.current.rows.map((row) => [row.number, row.slide.id, row.groupId, row.topic?.id ?? null])).toEqual([
+      [1, "a", "g1", null],
+      [2, "other", null, "t1"],
+    ]);
+    expect(hook.result.current.topicLabel).toBeNull();
+  });
+
+  it("in Tất cả, opens the Level's topicless quiz so new questions join it", () => {
+    topics.rows = [topic("t1", "q2")];
+    topics.summaries = [{ id: "q2", categoryId: "t1" }, { id: "loose" }] as typeof topics.summaries;
+    const { openQuiz } = setup("all", []);
+    expect(openQuiz).toHaveBeenCalledWith("loose");
+    topics.summaries = [];
   });
 
   it("shows a question read from a server draft as on the server, even when still marked unsaved", () => {

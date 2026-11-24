@@ -5,7 +5,7 @@ import Typography from "@mui/material/Typography";
 
 import { ErgConfirmDialog } from "@/components/erg-mui/erg-confirm-dialog";
 import { useI18n } from "@/platform/i18n";
-import type { QuizEditorGroup, QuizEditorSlide, QuizEditorSlideUpdate, QuizProjectSettings } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
+import type { QuestionType, QuizEditorGroup, QuizEditorSlide, QuizEditorSlideUpdate, QuizProjectSettings } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import { isQuestionType } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import { getFeedbackText } from "@/features/lcms/quiz/quiz-editor/components/learner-question-authoring-preview/preview-answer-feedback";
 import { ergEnterpriseTokens as tokens } from "@/themes/erg-enterprise-tokens";
@@ -24,7 +24,7 @@ type Props = {
   onSelectSlide: (groupId: string, slideId: string) => void;
   onReplaceSlide: (update: QuizEditorSlideUpdate) => void;
   onAddQuestion: () => void;
-  onChangeType: () => void;
+  onChangeType: (type: QuestionType) => void;
   onDuplicate: () => void;
   onDelete: () => void;
   onClose: () => void;
@@ -89,7 +89,7 @@ export function QuestionEditorShell(props: Props) {
         readiness={readiness}
         position={`Câu ${index + 1} / ${entries.length}`}
         syncChip={props.syncChip}
-        typeLabel={typeLabel}
+        type={isQuestionType(slide.kind) ? slide.kind : null}
         view={view}
       />
       {props.banner}

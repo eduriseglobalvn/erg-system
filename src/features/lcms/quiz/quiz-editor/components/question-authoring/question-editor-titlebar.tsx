@@ -11,24 +11,26 @@ import MenuItem from "@mui/material/MenuItem";
 import Typography from "@mui/material/Typography";
 
 import { ErgStatusChip } from "@/components/erg-mui/erg-feedback";
+import type { QuestionType } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import { ergEnterpriseTokens as tokens } from "@/themes/erg-enterprise-tokens";
 import { readinessLabel, type QuestionReadiness } from "./question-readiness";
+import { QuestionTypeMenu } from "./question-type-menu";
 import { QuestionViewToggle, type QuestionView } from "./question-view-toggle";
 
 type Props = {
   position: string;
-  typeLabel: string;
+  type: QuestionType | null;
   readiness: QuestionReadiness;
   syncChip: ReactNode;
   view: QuestionView;
   onViewChange: (view: QuestionView) => void;
   onBack: () => void;
-  onChangeType: () => void;
+  onChangeType: (type: QuestionType) => void;
   onDuplicate: () => void;
   onDelete: () => void;
 };
 
-export function QuestionEditorTitlebar({ position, typeLabel, readiness, syncChip, view, onViewChange, onBack, onChangeType, onDuplicate, onDelete }: Props) {
+export function QuestionEditorTitlebar({ position, type, readiness, syncChip, view, onViewChange, onBack, onChangeType, onDuplicate, onDelete }: Props) {
   const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
   const run = (action: () => void) => () => {
     setMenuAnchor(null);
@@ -42,7 +44,7 @@ export function QuestionEditorTitlebar({ position, typeLabel, readiness, syncChi
       </Button>
       <Divider flexItem orientation="vertical" sx={{ my: 0.5 }} />
       <Typography component="h2" variant="subtitle2">{position}</Typography>
-      <ErgStatusChip dot={false} label={typeLabel} sx={{ border: 1, borderColor: tokens.color.border }} tone="neutral" />
+      {type ? <QuestionTypeMenu onChange={onChangeType} value={type} /> : null}
       {readiness.ready ? (
         <ErgStatusChip label={readinessLabel(readiness)} tone="success" />
       ) : (
@@ -64,7 +66,6 @@ export function QuestionEditorTitlebar({ position, typeLabel, readiness, syncChi
         slotProps={{ list: { "aria-label": "Thao tác câu hỏi" }, paper: { sx: { minWidth: 240 } } }}
         transformOrigin={{ horizontal: "right", vertical: "top" }}
       >
-        <MenuItem onClick={run(onChangeType)}>Đổi dạng câu hỏi…</MenuItem>
         <MenuItem onClick={run(onDuplicate)}>Nhân bản</MenuItem>
         <Divider />
         <MenuItem onClick={run(onDelete)} sx={{ color: "error.main" }}>Xoá câu hỏi</MenuItem>

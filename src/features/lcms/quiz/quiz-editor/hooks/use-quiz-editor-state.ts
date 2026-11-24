@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useRef, useState, type SetStateAction } from "react";
 
-import { createQuizSlideFromBankQuestion } from "@/features/question-bank/api/question-bank-to-quiz";
+import { createQuizSlideFromBankQuestion, unlinkFromBank } from "@/features/question-bank/api/question-bank-to-quiz";
 import type { QuestionBankQuestion } from "@/features/question-bank/types/question-bank-types";
 import type { QuizEditorDraftDocument } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-api";
 import {
@@ -9,7 +9,7 @@ import {
   createMockPlayerTemplate,
 } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-project-defaults";
 import {
-  appendSlideToGroups,
+  prependSlideToGroups,
   appendSlidesToGroup,
   copySlideAs,
   getFirstNode,
@@ -60,24 +60,21 @@ export function useQuizEditorState(initialDraftDocument?: QuizEditorDraftDocumen
   }
 
   function insertSlide(nextSlide: QuizEditorSlide) {
-    let resolvedGroupId = selectedNode.groupId;
     const slideToInsert: QuizEditorSlide = { ...nextSlide, status: nextSlide.status ?? "unsaved" };
-
-    setGroups((currentGroups) => {
-      const result = appendSlideToGroups(currentGroups, resolvedGroupId, slideToInsert);
-      resolvedGroupId = result.groupId;
-      return result.groups;
-    });
-    setSelectedNode({ type: "slide", groupId: resolvedGroupId, slideId: slideToInsert.id });
+    const groupId = prependSlideToGroups(groups, slideToInsert).groupId;
+    setGroups((currentGroups) => prependSlideToGroups(currentGroups, slideToInsert).groups);
+    setSelectedNode({ type: "slide", groupId, slideId: slideToInsert.id });
+    return slideToInsert.id;
   }
 
-  function importQuestionBankQuestions(questions: QuestionBankQuestion[]) {
+  /** `fromBank: false` for questions that are not bank rows (Excel): they keep no bank link. */
+  function importQuestionBankQuestions(questions: QuestionBankQuestion[], { fromBank = true }: { fromBank?: boolean } = {}) {
     if (!questions.length) return;
 
     const targetGroupId = selectedNode.groupId;
     const { questionDefaults } = quizProject;
-    const importedSlides = questions.map((question) =>
-      createQuizSlideFromBankQuestion(question, createId, {
+    const importedSlides = questions.map((question) => {
+      const slide = createQuizSlideFromBankQuestion(question, createId, {
         questionFont: questionDefaults.questionFont,
         answerFont: questionDefaults.answerFont,
         positivePoints: questionDefaults.positivePoints,
@@ -85,15 +82,21 @@ export function useQuizEditorState(initialDraftDocument?: QuizEditorDraftDocumen
         shuffleAnswers: questionDefaults.shuffleAnswers,
         correctFeedback: questionDefaults.correctFeedback,
         incorrectFeedback: questionDefaults.incorrectFeedback,
-      }),
-    );
+      });
+      return fromBank ? slide : unlinkFromBank(slide);
+    });
 
     setGroups((currentGroups) => appendSlidesToGroup(currentGroups, targetGroupId, importedSlides));
     setSelectedNode({ type: "slide", groupId: targetGroupId, slideId: importedSlides[0]!.id });
   }
 
   function addQuestion(type: QuestionType) {
-    insertSlide(buildQuestionSlide(type, quizProject, createId));
+    return insertSlide(buildQuestionSlide(type, quizProject, createId));
+  }
+
+  /** Puts a slide back as it was (undo of a type change), wherever the selection has moved since. */
+  function restoreSlide(groupId: string, slide: QuizEditorSlide) {
+    setGroups((currentGroups) => updateSlideInGroups(currentGroups, groupId, slide.id, () => slide));
   }
 
   function duplicateSelected() {
@@ -166,6 +169,7 @@ export function useQuizEditorState(initialDraftDocument?: QuizEditorDraftDocumen
     createId,
     selectSlide,
     addQuestion,
+    restoreSlide,
     importQuestionBankQuestions,
     duplicateSelected,
     deleteSelected,

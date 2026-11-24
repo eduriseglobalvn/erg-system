@@ -26,7 +26,7 @@ import {
 } from "@/features/lcms/quiz/quiz-editor/components/quiz-list/question-excel-import";
 import { moveQuestionsToTopic } from "@/features/lcms/quiz/quiz-editor/hooks/move-questions-to-topic";
 import type { QuizProjectSettings } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
-import { createQuizSlideFromBankQuestion } from "@/features/question-bank/api/question-bank-to-quiz";
+import { createQuizSlideFromBankQuestion, unlinkFromBank } from "@/features/question-bank/api/question-bank-to-quiz";
 import type { QuestionBankQuestion } from "@/features/question-bank/types/question-bank-types";
 
 type ImportTopic = { id: string; label: string };
@@ -36,7 +36,10 @@ type ImportBatch = { topic: ImportTopic | null; questions: QuestionBankQuestion[
 
 const COLUMN_WIDTHS = QUESTION_TEMPLATE_HEADERS.map((_, index) => ({ wch: index === 1 ? 44 : index === 8 ? 40 : index === 9 ? 30 : 18 }));
 
-/** One question sheet with the examples, or (all topics) one empty sheet per topic plus an example sheet. */
+/** A sheet of the all-topics template for questions that get no topic; they stay in "Tất cả". */
+const NO_TOPIC_SHEET = "Chưa có chủ đề";
+
+/** One question sheet with the examples, or (all topics) one empty sheet per topic, one for no topic, plus an example sheet. */
 async function downloadTemplate(topics: readonly ImportTopic[] | null) {
   const XLSX = await import("xlsx");
   const workbook = XLSX.utils.book_new();
@@ -45,7 +48,7 @@ async function downloadTemplate(topics: readonly ImportTopic[] | null) {
     sheet["!cols"] = COLUMN_WIDTHS;
     return sheet;
   };
-  const names = topics ? [...topicSheetNames(topics.map((topic) => topic.label)), "Ví dụ"] : ["Câu hỏi"];
+  const names = topics ? [...topicSheetNames(topics.map((topic) => topic.label)), NO_TOPIC_SHEET, "Ví dụ"] : ["Câu hỏi"];
   names.forEach((name, index) =>
     XLSX.utils.book_append_sheet(workbook, questionSheet(!topics || index === names.length - 1 ? QUESTION_TEMPLATE_EXAMPLES : []), name));
   const guide = XLSX.utils.aoa_to_sheet(QUESTION_TEMPLATE_GUIDE);
@@ -60,6 +63,7 @@ async function downloadTemplate(topics: readonly ImportTopic[] | null) {
   window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
+const normalizeSheet = (name: string) => name.trim().toLowerCase();
 const validQuestions = (rows: readonly QuestionImportRow[]) => rows.flatMap((row) => (row.question ? [row.question] : []));
 
 function ImportRowList({ sections, showTopic }: { sections: readonly ImportSection[]; showTopic: boolean }) {
@@ -69,7 +73,7 @@ function ImportRowList({ sections, showTopic }: { sections: readonly ImportSecti
         <Box component="li" key={section.sheetName}>
           {showTopic ? (
             <Typography sx={{ bgcolor: "action.hover", px: 2, py: 0.75 }} variant="subtitle2">
-              {`${section.topic?.label ?? section.sheetName} · ${validQuestions(section.rows).length} câu`}
+              {`${section.topic?.label ?? `${section.sheetName} → Tất cả (chưa có chủ đề)`} · ${validQuestions(section.rows).length} câu`}
             </Typography>
           ) : null}
           <Stack component="ol" divider={<Box sx={{ borderTop: 1, borderColor: "divider" }} />} sx={{ listStyle: "none", m: 0, p: 0 }}>
@@ -94,7 +98,7 @@ function ImportRowList({ sections, showTopic }: { sections: readonly ImportSecti
 }
 
 function QuestionExcelImportDialog({ topicLabel, topics, labels, createId, onClose, onImport }: {
-  /** The open topic; null in "Tất cả", where each sheet goes to the topic it is named after. */
+  /** The open topic; null in "Tất cả", where each sheet goes to the topic it is named after, or stays in "Tất cả". */
   topicLabel: string | null;
   topics: readonly ImportTopic[];
   labels: Omit<QuestionImportLabels, "topic">;
@@ -108,12 +112,13 @@ function QuestionExcelImportDialog({ topicLabel, topics, labels, createId, onClo
   const [sections, setSections] = useState<ImportSection[]>([]);
   const [fileError, setFileError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  // In "Tất cả" a sheet no topic is named after is left out (and listed in a warning).
-  const usable = sections.filter((section) => section.rows.length && (!allTopics || section.topic));
+  const usable = sections.filter((section) => section.rows.length);
   const valid = usable.flatMap((section) => validQuestions(section.rows));
   const invalidCount = usable.reduce((sum, section) => sum + section.rows.length, 0) - valid.length;
-  const unmatched = allTopics ? sections.filter((section) => !section.topic && section.rows.length) : [];
-  const usedTopics = usable.filter((section) => validQuestions(section.rows).length).length;
+  const unmatched = allTopics ? usable.filter((section) => !section.topic && normalizeSheet(section.sheetName) !== normalizeSheet(NO_TOPIC_SHEET)) : [];
+  const usedTopics = new Set(usable.filter((section) => section.topic && validQuestions(section.rows).length).map((section) => section.topic!.id)).size;
+  const looseCount = usable.filter((section) => !section.topic).reduce((sum, section) => sum + validQuestions(section.rows).length, 0);
+  const where = [usedTopics ? `${usedTopics} chủ đề` : "", looseCount ? `${looseCount} câu chưa có chủ đề ở Tất cả` : ""].filter(Boolean).join(", ");
   const questionOnly = usable.flatMap((section) => section.rows.filter((row) => row.question && row.warning));
   const questionOnlyTypes = [...new Set(questionOnly.map((row) => QUESTION_IMPORT_TYPE_LABEL[row.type!]))];
 
@@ -134,13 +139,11 @@ function QuestionExcelImportDialog({ topicLabel, topics, labels, createId, onClo
         return;
       }
       const next = matchSheetsToTopics(workbook.SheetNames, topics).map(({ sheetName, topic }) => {
-        const result = parseQuestionMatrix(matrixOf(sheetName), { ...labels, topic: topic?.label ?? sheetName }, createId);
+        const result = parseQuestionMatrix(matrixOf(sheetName), { ...labels, topic: topic?.label ?? "" }, createId);
         return { sheetName, topic, rows: result.rows, error: result.error };
       });
       setSections(next);
-      setFileError(next.some((section) => section.topic && section.rows.length)
-        ? null
-        : "Không có sheet nào trùng tên chủ đề và có câu hỏi. Mỗi chủ đề một sheet, tên sheet là tên chủ đề; hãy dùng file mẫu.");
+      setFileError(next.some((section) => section.rows.length) ? null : "File không có câu hỏi nào. Hãy dùng file mẫu: mỗi chủ đề một sheet, tên sheet là tên chủ đề.");
     } catch {
       setSections([]);
       setFileError("Không đọc được file. Hãy lưu lại dạng .xlsx rồi thử lại.");
@@ -151,7 +154,7 @@ function QuestionExcelImportDialog({ topicLabel, topics, labels, createId, onClo
     setSaving(true);
     try {
       await onImport(usable.map((section) => ({ topic: section.topic, questions: validQuestions(section.rows) })).filter((batch) => batch.questions.length));
-      toast.success(allTopics ? `Đã thêm ${valid.length} câu vào ${usedTopics} chủ đề.` : `Đã thêm ${valid.length} câu vào “${topicLabel}”.`);
+      toast.success(allTopics ? `Đã thêm ${valid.length} câu (${where}).` : `Đã thêm ${valid.length} câu vào “${topicLabel}”.`);
       onClose();
     } catch (error) {
       toast.error(error instanceof Error && error.message ? error.message : "Chưa nhập được câu hỏi.");
@@ -166,7 +169,7 @@ function QuestionExcelImportDialog({ topicLabel, topics, labels, createId, onClo
       maxWidth="md"
       title={allTopics ? "Nhập câu hỏi từ Excel theo chủ đề" : `Nhập câu hỏi từ Excel vào “${topicLabel}”`}
       description={allTopics
-        ? "File mẫu có sẵn mỗi chủ đề một sheet, tên sheet là tên chủ đề. Điền câu hỏi vào sheet của chủ đề đó (mỗi dòng một câu, chọn loại ở cột A) rồi chọn file. Sheet Ví dụ và Hướng dẫn không được nhập. Dòng lỗi được bỏ qua."
+        ? `File mẫu có sẵn mỗi chủ đề một sheet, tên sheet là tên chủ đề. Điền câu hỏi vào sheet của chủ đề đó (mỗi dòng một câu, chọn loại ở cột A) rồi chọn file. Câu ở sheet “${NO_TOPIC_SHEET}” hoặc sheet không trùng tên chủ đề nào vào Tất cả, chọn chủ đề sau. Sheet Ví dụ và Hướng dẫn không được nhập. Dòng lỗi được bỏ qua.`
         : "Tải file mẫu, chọn loại câu ở cột A (danh sách thả xuống), điền mỗi dòng một câu rồi chọn file. Cách điền từng loại có ở trang Hướng dẫn trong file mẫu. Dòng lỗi được bỏ qua; sửa trong file rồi nhập lại."}
       onClose={saving ? () => undefined : onClose}
       actions={(
@@ -200,12 +203,12 @@ function QuestionExcelImportDialog({ topicLabel, topics, labels, createId, onClo
         {fileError ? <Alert severity="error">{fileError}</Alert> : null}
         {usable.length ? (
           <Alert severity={invalidCount ? "warning" : "success"}>
-            {`${valid.length} câu hợp lệ${allTopics ? ` trong ${usedTopics} chủ đề` : ""}${invalidCount ? `, ${invalidCount} dòng lỗi sẽ bị bỏ qua` : ""}.`}
+            {`${valid.length} câu hợp lệ${allTopics && where ? ` (${where})` : ""}${invalidCount ? `, ${invalidCount} dòng lỗi sẽ bị bỏ qua` : ""}.`}
           </Alert>
         ) : null}
         {unmatched.length ? (
-          <Alert severity="warning">
-            {`Sheet ${unmatched.map((section) => `“${section.sheetName}”`).join(", ")} không trùng tên chủ đề nào của module này nên bị bỏ qua. Đổi tên sheet cho đúng tên chủ đề rồi chọn lại file.`}
+          <Alert severity="info">
+            {`Sheet ${unmatched.map((section) => `“${section.sheetName}”`).join(", ")} không trùng tên chủ đề nào nên câu ở đó vào Tất cả, chưa có chủ đề. Chọn chủ đề cho từng câu ở cột Chủ đề, hoặc đổi tên sheet cho đúng tên chủ đề rồi chọn lại file.`}
           </Alert>
         ) : null}
         {questionOnly.length ? (
@@ -222,7 +225,8 @@ function QuestionExcelImportDialog({ topicLabel, topics, labels, createId, onClo
 
 /**
  * "Nhập từ Excel": into the open topic's quiz (the editor state), or in "Tất cả" into each topic's own quiz,
- * saved on the server the way "Chuyển sang…" does, one topic after another.
+ * saved on the server the way "Chuyển sang…" does, one topic after another; questions with no topic go into
+ * the open topicless quiz (the editor state), last, so a failed topic leaves nothing half-added there.
  */
 export function useQuestionExcelImport({ topicLabel, topics, subjectId, levelId, labels, createId, questionDefaults, onImport }: {
   topicLabel: string | null;
@@ -236,14 +240,14 @@ export function useQuestionExcelImport({ topicLabel, topics, subjectId, levelId,
 }) {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
-  const available = topicLabel !== null || (Boolean(levelId) && topics.length > 0);
+  const available = topicLabel !== null || Boolean(levelId);
 
   async function importBatches(batches: ImportBatch[]) {
     if (topicLabel !== null) return onImport(batches.flatMap((batch) => batch.questions));
     const done: string[] = [];
     for (const { topic, questions } of batches) {
       if (!topic || !levelId) continue;
-      const slides = questions.map((question) => createQuizSlideFromBankQuestion(question, createId, questionDefaults));
+      const slides = questions.map((question) => unlinkFromBank(createQuizSlideFromBankQuestion(question, createId, questionDefaults)));
       try {
         await moveQuestionsToTopic(queryClient, { subjectId, levelId, topicId: topic.id, topicLabel: topic.label }, slides);
       } catch (error) {
@@ -253,6 +257,8 @@ export function useQuestionExcelImport({ topicLabel, topics, subjectId, levelId,
       }
       done.push(`“${topic.label}”`);
     }
+    const loose = batches.flatMap((batch) => (batch.topic ? [] : batch.questions));
+    if (loose.length) onImport(loose);
   }
 
   const dialog = open ? (

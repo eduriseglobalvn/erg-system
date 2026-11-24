@@ -205,6 +205,15 @@ export function createQuestionBankPlayerTemplate(): QuizPlayerTemplate {
   return applyQuizThemePreset(createMockPlayerTemplate(), defaultQuizThemePreset);
 }
 
+/**
+ * A slide made from a question that is not a bank row (e.g. read from Excel): drops the bank link, so publishing
+ * mirrors it into the bank instead of pointing quiz_version_questions.bank_question_id at an id that does not exist.
+ */
+export function unlinkFromBank(slide: QuizEditorSlide): QuizEditorSlide {
+  const { questionId: _questionId, bankQuestionId: _bankQuestionId, ...rest } = slide;
+  return rest;
+}
+
 export function createQuizSlideFromBankQuestion(
   question: QuestionBankQuestion,
   createId: (prefix: string) => string,

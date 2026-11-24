@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { I18nProvider } from "@/platform/i18n";
@@ -8,6 +8,8 @@ import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
 
 const syncState = vi.hoisted(() => ({ status: "idle" as unknown, ready: true, loadFailed: false }));
 const levelTopicQuizzes = vi.hoisted(() => vi.fn());
+const toastMock = vi.hoisted(() => Object.assign(vi.fn(), { error: vi.fn(), success: vi.fn(), info: vi.fn(), warning: vi.fn() }));
+vi.mock("sonner", async (importOriginal) => ({ ...(await importOriginal<typeof import("sonner")>()), toast: toastMock }));
 
 // Only the add-question wiring is under test: the data hooks and the heavy children are stubbed.
 vi.mock("@/features/lcms/quiz/quiz-editor/hooks/use-quiz-editor-scope", async (importOriginal) => ({
@@ -60,20 +62,24 @@ vi.mock("@/features/lcms/quiz/quiz-editor/components/sync/quiz-editor-sync-layer
 vi.mock("@/features/lcms/quiz/quiz-editor/components/sync/quiz-editor-sync-chip", () => ({ QuizEditorSyncChip: () => null }));
 vi.mock("@/features/lcms/quiz/quiz-editor/hooks/use-level-topic-quizzes", () => ({ useLevelTopicQuizzes: levelTopicQuizzes }));
 vi.mock("@/features/lcms/quiz/quiz-editor/components/quiz-list/question-table", () => ({
-  QuestionTable: ({ rows, onAdd }: { rows: unknown[]; onAdd: () => void }) => (
+  QuestionTable: ({ rows, onAdd, onOpenRow, highlightSlideId }: { rows: { slide: { id: string } }[]; onAdd: () => void; onOpenRow: (row: unknown) => void; highlightSlideId?: string | null }) => (
     <>
       <output data-testid="count">{rows.length}</output>
+      <output data-testid="first">{rows[0]?.slide.id}</output>
+      <output data-testid="highlight">{highlightSlideId}</output>
       <button type="button" onClick={onAdd}>table-add</button>
+      <button type="button" onClick={() => onOpenRow(rows[0])}>table-open-first</button>
     </>
   ),
 }));
 vi.mock("@/features/lcms/quiz/quiz-editor/components/question-authoring/question-editor-shell", () => ({
-  QuestionEditorShell: ({ banner, onChangeType, selectedSlide, quizKind }: { banner: React.ReactNode; onChangeType: () => void; selectedSlide: { kind: string }; quizKind?: string }) => (
+  QuestionEditorShell: ({ banner, onChangeType, selectedSlide, quizKind }: { banner: React.ReactNode; onChangeType: (type: string) => void; selectedSlide: { kind: string }; quizKind?: string }) => (
     <div role="dialog" aria-label="editor-open">
       {banner}
       <output data-testid="quiz-kind">{quizKind}</output>
       <output data-testid="kind">{selectedSlide.kind}</output>
-      <button type="button" onClick={onChangeType}>change-type</button>
+      <button type="button" onClick={() => onChangeType("matching")}>to-matching</button>
+      <button type="button" onClick={() => onChangeType(selectedSlide.kind)}>to-same</button>
     </div>
   ),
 }));
@@ -82,82 +88,58 @@ const leaf = {} as DashboardLeaf;
 const client = new QueryClient();
 levelTopicQuizzes.mockReturnValue({ rows: [{ id: "t1", label: "Phân số", quizId: "q1", questionCount: 0, lifecycle: "draft", slides: [] }], summaries: [{ id: "q1", kind: "test" }], quizzesPending: false });
 
-describe("QuizEditorWorkspace add-question picker", () => {
-  it("creates nothing when the picker is cancelled", () => {
-    render(
-      <QueryClientProvider client={client}><I18nProvider>
-        <QuizEditorWorkspace activeLeaf={leaf} />
-      </I18nProvider></QueryClientProvider>,
-    );
-    const before = screen.getByTestId("count").textContent;
+function renderWorkspace(quizId?: string) {
+  return render(
+    <QueryClientProvider client={client}><I18nProvider>
+      <QuizEditorWorkspace activeLeaf={leaf} quizId={quizId} />
+    </I18nProvider></QueryClientProvider>,
+  );
+}
 
-    fireEvent.click(screen.getByRole("button", { name: "table-add" }));
-    expect(screen.getByRole("dialog", { name: "Thêm câu hỏi vào “Phân số”" })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Hủy" }));
+/** Adds a question from the list, then opens it (it is the first row). */
+function openNew() {
+  renderWorkspace();
+  fireEvent.click(screen.getByRole("button", { name: "table-add" }));
+  fireEvent.click(screen.getByRole("button", { name: "table-open-first" }));
+}
 
-    expect(screen.getByTestId("count").textContent).toBe(before);
-    expect(screen.queryByRole("dialog", { name: "editor-open" })).toBeNull();
-  });
-
-  it("adds exactly one slide and opens the editor after picking", async () => {
-    render(
-      <QueryClientProvider client={client}><I18nProvider>
-        <QuizEditorWorkspace activeLeaf={leaf} />
-      </I18nProvider></QueryClientProvider>,
-    );
+describe("QuizEditorWorkspace adding and retyping questions", () => {
+  it("adds one Một đáp án question at the top at once, highlighted, and stays on the list", () => {
+    renderWorkspace();
     const before = Number(screen.getByTestId("count").textContent);
 
     fireEvent.click(screen.getByRole("button", { name: "table-add" }));
-    fireEvent.click(screen.getByRole("button", { name: "Tạo câu Một đáp án" }));
 
     expect(Number(screen.getByTestId("count").textContent)).toBe(before + 1);
-    // The closing picker still marks its siblings aria-hidden until its exit transition ends.
-    expect(await screen.findByRole("dialog", { name: "editor-open" })).toBeInTheDocument();
+    const added = screen.getByTestId("first").textContent;
+    expect(screen.getByTestId("highlight").textContent).toBe(added);
+    expect(screen.queryByRole("dialog")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "table-open-first" }));
+    expect(screen.getByTestId("kind").textContent).toBe("multiple-choice");
   });
 
-  it("confirms before a type change drops the answers, and keeps the slide count", async () => {
-    render(
-      <QueryClientProvider client={client}><I18nProvider>
-        <QuizEditorWorkspace activeLeaf={leaf} />
-      </I18nProvider></QueryClientProvider>,
-    );
-    fireEvent.click(screen.getByRole("button", { name: "table-add" }));
-    fireEvent.click(screen.getByRole("button", { name: "Tạo câu Một đáp án" }));
+  it("changes the type at once, keeps the slide count, and Hoàn tác brings the old question back", () => {
+    toastMock.mockClear();
+    openNew();
     const count = screen.getByTestId("count").textContent;
 
-    fireEvent.click(await screen.findByRole("button", { name: "change-type" }));
-    const picker = await screen.findByRole("dialog", { name: "Đổi dạng câu hỏi" });
-    fireEvent.click(within(picker).getByRole("option", { name: /Ghép cặp/ }));
-    fireEvent.click(within(picker).getByRole("button", { name: "Đổi sang Ghép cặp" }));
-
-    const confirm = await screen.findByRole("dialog", { name: "Đổi dạng sẽ bỏ phần đáp án hiện tại. Tiếp tục?" });
-    expect(screen.getByTestId("kind").textContent).toBe("multiple-choice");
-    fireEvent.click(within(confirm).getByRole("button", { name: "Đổi dạng" }));
-    expect(screen.getByTestId("count").textContent).toBe(count);
+    fireEvent.click(screen.getByRole("button", { name: "to-matching" }));
     expect(screen.getByTestId("kind").textContent).toBe("matching");
+    expect(screen.getByTestId("count").textContent).toBe(count);
+
+    const [message, options] = toastMock.mock.lastCall as [string, { action: { label: string; onClick: () => void } }];
+    expect(message).toMatch(/Ghép cặp/);
+    expect(options.action.label).toBe("Hoàn tác");
+    act(() => options.action.onClick());
+    expect(screen.getByTestId("kind").textContent).toBe("multiple-choice");
   });
 
-  function openNew(type: string) {
-    render(
-      <QueryClientProvider client={client}><I18nProvider>
-        <QuizEditorWorkspace activeLeaf={leaf} />
-      </I18nProvider></QueryClientProvider>,
-    );
-    fireEvent.click(screen.getByRole("button", { name: "table-add" }));
-    const picker = screen.getByRole("dialog", { name: "Thêm câu hỏi vào “Phân số”" });
-    fireEvent.click(within(picker).getByRole("option", { name: new RegExp(type) }));
-    fireEvent.click(within(picker).getByRole("button", { name: `Tạo câu ${type}` }));
-  }
-
-  it("changes nothing when the question's own type is picked again", async () => {
-    openNew("Ghép cặp");
-    fireEvent.click(await screen.findByRole("button", { name: "change-type" }));
-    const picker = await screen.findByRole("dialog", { name: "Đổi dạng câu hỏi" });
-    expect(within(picker).getByText("Chọn dạng mới cho câu này.")).toBeInTheDocument();
-    fireEvent.click(within(picker).getByRole("option", { name: /Ghép cặp/ }));
-    fireEvent.click(within(picker).getByRole("button", { name: "Đổi sang Ghép cặp" }));
-    expect(screen.queryByRole("dialog", { name: "Đổi dạng sẽ bỏ phần đáp án hiện tại. Tiếp tục?" })).toBeNull();
-    expect(screen.getByTestId("kind").textContent).toBe("matching");
+  it("changes nothing when the question's own type is picked again", () => {
+    toastMock.mockClear();
+    openNew();
+    fireEvent.click(screen.getByRole("button", { name: "to-same" }));
+    expect(screen.getByTestId("kind").textContent).toBe("multiple-choice");
+    expect(toastMock).not.toHaveBeenCalled();
   });
 
   it("shows one contained button, Xuất bản, and the topic rail", () => {
@@ -190,13 +172,9 @@ describe("QuizEditorWorkspace add-question picker", () => {
   });
 
   it("opens the try-run in the open quiz's own mode", async () => {
-    render(
-      <QueryClientProvider client={client}><I18nProvider>
-        <QuizEditorWorkspace activeLeaf={leaf} quizId="q1" />
-      </I18nProvider></QueryClientProvider>,
-    );
+    renderWorkspace("q1");
     fireEvent.click(screen.getByRole("button", { name: "table-add" }));
-    fireEvent.click(screen.getByRole("button", { name: "Tạo câu Một đáp án" }));
+    fireEvent.click(screen.getByRole("button", { name: "table-open-first" }));
     expect((await screen.findByTestId("quiz-kind")).textContent).toBe("test");
   });
 
@@ -207,7 +185,6 @@ describe("QuizEditorWorkspace add-question picker", () => {
       </I18nProvider></QueryClientProvider>,
     );
     fireEvent.click(screen.getByRole("button", { name: "table-add" }));
-    fireEvent.click(screen.getByRole("button", { name: "Tạo câu Một đáp án" }));
     const { openQuiz } = levelTopicQuizzes.mock.lastCall![0] as { openQuiz: { quizId: string; slides: { kind: string }[] } };
     expect(openQuiz.quizId).toBe("q1");
     expect(openQuiz.slides.filter((slide) => slide.kind === "multiple-choice").length).toBeGreaterThan(0);
@@ -255,7 +232,7 @@ describe("QuizEditorWorkspace add-question picker", () => {
   it("shows the offline banner inside the open editor", async () => {
     syncState.status = { kind: "offline" };
     try {
-      openNew("Một đáp án");
+      openNew();
       const editor = await screen.findByRole("dialog", { name: "editor-open" });
       expect(within(editor).getByText(/Mất kết nối/)).toBeInTheDocument();
     } finally {

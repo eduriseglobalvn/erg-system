@@ -25,6 +25,16 @@ function latestQuizByTopic(summaries: readonly QuizEditorSummary[]) {
   return latest;
 }
 
+/** The Level's quiz without a topic: questions added in "Tất cả" with no topic picked live there. */
+export function unassignedQuizId(summaries: readonly QuizEditorSummary[]) {
+  let latest: QuizEditorSummary | undefined;
+  for (const summary of summaries) {
+    if (summary.categoryId || summary.status === "deleted") continue;
+    if (!latest || (summary.updatedAt ?? "") > (latest.updatedAt ?? "")) latest = summary;
+  }
+  return latest?.id ?? null;
+}
+
 export function buildTopicRail(
   topics: readonly { id: string; label: string }[],
   summaries: readonly QuizEditorSummary[],
