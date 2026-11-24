@@ -34,7 +34,8 @@ export function QuestionSelectionBar({
         display: "flex",
         flexWrap: "wrap",
         gap: 1,
-        mx: "auto",
+        // Stack spacing resets child margins, so mx: "auto" would not centre it.
+        alignSelf: "center",
         px: 2,
         py: 1.25,
         position: "sticky",

@@ -76,17 +76,15 @@ export function QuestionTable({ rows, topicLabel, onOpenRow, onAdd, onMove, onIm
             {`Chuyển ${picked.length} câu sang…`}
           </ErgButton>
         ) : null}
+        {onImportExcel ? (
+          <ErgButton onClick={onImportExcel} startIcon={<UploadFileOutlinedIcon />} variant="outlined">Nhập từ Excel</ErgButton>
+        ) : null}
         {showTopic ? (
           <Typography color="text.secondary" variant="body2">Chọn một chủ đề để thêm câu hỏi</Typography>
         ) : (
-          <>
-          {onImportExcel ? (
-            <ErgButton onClick={onImportExcel} startIcon={<UploadFileOutlinedIcon />} variant="outlined">Nhập từ Excel</ErgButton>
-          ) : null}
           <ErgButton onClick={onAdd} startIcon={<AddIcon />} variant="outlined">
             {`Thêm câu hỏi vào “${topicLabel}”`}
           </ErgButton>
-          </>
         )}
       </Box>
     </Box>

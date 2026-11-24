@@ -91,19 +91,59 @@ export const QUESTION_TEMPLATE_GUIDE: string[][] = [
   ["Ghi chú", "Chọn loại ở cột A bằng danh sách thả xuống. Cột Giải thích không bắt buộc, hiện khi học viên trả lời đúng.", ""],
 ];
 
-/** SheetJS (community) cannot write data validation, so the dropdown is spliced into the sheet XML. */
-export function withTypeDropdown(XLSX: typeof import("xlsx"), file: ArrayBuffer) {
+/**
+ * SheetJS (community) cannot write data validation, so the dropdown is spliced into the sheet XML.
+ * Applies to the first `sheetCount` sheets (the question sheets, appended before the guide).
+ */
+export function withTypeDropdown(XLSX: typeof import("xlsx"), file: ArrayBuffer, sheetCount = 1) {
   const zip = XLSX.CFB.read(new Uint8Array(file), { type: "array" });
-  const entry = XLSX.CFB.find(zip, "/xl/worksheets/sheet1.xml");
-  if (!entry) return file;
   const list = QUESTION_TYPE_OPTIONS.join(",");
   const validation =
     `<dataValidations count="1"><dataValidation type="list" allowBlank="1" showErrorMessage="1" ` +
     `errorTitle="Loại câu hỏi" error="Chọn loại trong danh sách." sqref="A2:A2000"><formula1>"${list}"</formula1></dataValidation></dataValidations>`;
-  const xml = new TextDecoder().decode(entry.content as Uint8Array).replace("</sheetData>", `</sheetData>${validation}`);
-  entry.content = new TextEncoder().encode(xml);
-  entry.size = entry.content.length;
+  for (let index = 1; index <= sheetCount; index += 1) {
+    const entry = XLSX.CFB.find(zip, `/xl/worksheets/sheet${index}.xml`);
+    if (!entry) continue;
+    const xml = new TextDecoder().decode(entry.content as Uint8Array).replace("</sheetData>", `</sheetData>${validation}`);
+    entry.content = new TextEncoder().encode(xml);
+    entry.size = entry.content.length;
+  }
   return XLSX.CFB.write(zip, { fileType: "zip", type: "array" }) as ArrayBuffer;
+}
+
+/** Sheets of the template that never hold questions. */
+export const QUESTION_TEMPLATE_GUIDE_SHEET = "Hướng dẫn";
+const NON_QUESTION_SHEETS = new Set([normalize(QUESTION_TEMPLATE_GUIDE_SHEET), normalize("Ví dụ")]);
+/** Excel caps a sheet name at 31 characters and forbids : \ / ? * [ ]. */
+const SHEET_NAME_MAX = 31;
+
+/** The sheet name a topic gets in the all-topics template; unique within the workbook. */
+export function topicSheetNames(topicLabels: readonly string[]) {
+  const taken = new Set<string>();
+  return topicLabels.map((label) => {
+    const base = (label.replace(/[:\\/?*[\]]/g, " ").replace(/\s+/g, " ").trim() || "Chủ đề").slice(0, SHEET_NAME_MAX).trim();
+    let name = base;
+    for (let suffix = 2; taken.has(name.toLowerCase()); suffix += 1) name = `${base.slice(0, SHEET_NAME_MAX - String(suffix).length - 1)} ${suffix}`;
+    taken.add(name.toLowerCase());
+    return name;
+  });
+}
+
+export type SheetTopicMatch<T> = { sheetName: string; topic: T | null };
+
+/**
+ * Pairs each question sheet with the topic it is named after (case, accents and punctuation ignored).
+ * A sheet name cut at 31 characters still matches its topic; the guide sheet is left out.
+ */
+export function matchSheetsToTopics<T extends { label: string }>(sheetNames: readonly string[], topics: readonly T[]): SheetTopicMatch<T>[] {
+  const generated = topicSheetNames(topics.map((topic) => topic.label)).map(normalize);
+  return sheetNames
+    .filter((sheetName) => !NON_QUESTION_SHEETS.has(normalize(sheetName)))
+    .map((sheetName) => {
+      const key = normalize(sheetName);
+      const index = topics.findIndex((topic, at) => normalize(topic.label) === key || generated[at] === key);
+      return { sheetName, topic: index < 0 ? null : topics[index]! };
+    });
 }
 
 export type QuestionImportRow = {
