@@ -18,6 +18,7 @@ import {
   QUESTION_TEMPLATE_HEADERS,
   type QuestionImportLabels,
   type QuestionImportRow,
+  withTypeDropdown,
 } from "@/features/lcms/quiz/quiz-editor/components/quiz-list/question-excel-import";
 import type { QuestionBankQuestion } from "@/features/question-bank/types/question-bank-types";
 
@@ -25,10 +26,18 @@ async function downloadTemplate() {
   const XLSX = await import("xlsx");
   const workbook = XLSX.utils.book_new();
   const sheet = XLSX.utils.aoa_to_sheet([[...QUESTION_TEMPLATE_HEADERS], ...QUESTION_TEMPLATE_EXAMPLES]);
-  sheet["!cols"] = QUESTION_TEMPLATE_HEADERS.map((_, index) => ({ wch: index === 1 ? 48 : index === 9 ? 36 : 16 }));
+  sheet["!cols"] = QUESTION_TEMPLATE_HEADERS.map((_, index) => ({ wch: index === 1 ? 44 : index === 8 ? 40 : index === 9 ? 30 : 18 }));
+  const guide = XLSX.utils.aoa_to_sheet(QUESTION_TEMPLATE_GUIDE);
+  guide["!cols"] = [{ wch: 18 }, { wch: 48 }, { wch: 56 }];
   XLSX.utils.book_append_sheet(workbook, sheet, "Câu hỏi");
-  XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet(QUESTION_TEMPLATE_GUIDE), "Hướng dẫn");
-  XLSX.writeFile(workbook, "mau-nhap-cau-hoi.xlsx");
+  XLSX.utils.book_append_sheet(workbook, guide, "Hướng dẫn");
+  const file = withTypeDropdown(XLSX, XLSX.write(workbook, { type: "array", bookType: "xlsx" }) as ArrayBuffer);
+  const url = URL.createObjectURL(new Blob([file], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "mau-nhap-cau-hoi.xlsx";
+  link.click();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 function QuestionExcelImportDialog({ topicLabel, labels, createId, onClose, onImport }: {
@@ -44,6 +53,8 @@ function QuestionExcelImportDialog({ topicLabel, labels, createId, onClose, onIm
   const [fileError, setFileError] = useState<string | null>(null);
   const valid = rows.flatMap((row) => (row.question ? [row.question] : []));
   const invalidCount = rows.length - valid.length;
+  const questionOnly = rows.filter((row) => row.question && row.warning);
+  const questionOnlyTypes = [...new Set(questionOnly.map((row) => QUESTION_IMPORT_TYPE_LABEL[row.type!]))];
 
   async function readFile(file: File) {
     setFileName(file.name);
@@ -66,7 +77,7 @@ function QuestionExcelImportDialog({ topicLabel, labels, createId, onClose, onIm
       open
       maxWidth="md"
       title={`Nhập câu hỏi từ Excel vào “${topicLabel}”`}
-      description="Tải file mẫu, điền mỗi dòng một câu, rồi chọn file. Các dòng lỗi được bỏ qua; sửa trong file rồi nhập lại."
+      description="Tải file mẫu, chọn loại câu ở cột A (danh sách thả xuống), điền mỗi dòng một câu rồi chọn file. Cách điền từng loại có ở trang Hướng dẫn trong file mẫu. Dòng lỗi được bỏ qua; sửa trong file rồi nhập lại."
       onClose={onClose}
       actions={(
         <>
@@ -110,6 +121,12 @@ function QuestionExcelImportDialog({ topicLabel, labels, createId, onClose, onIm
             {`${valid.length} câu hợp lệ${invalidCount ? `, ${invalidCount} dòng lỗi sẽ bị bỏ qua` : ""}.`}
           </Alert>
         ) : null}
+        {questionOnly.length ? (
+          <Alert severity="info">
+            {`${questionOnly.length} câu loại ${questionOnlyTypes.join(", ")} chỉ nhập phần câu hỏi, đáp án trong file bị bỏ qua. ` +
+              "Sau khi nhập, mở từng câu trong trình soạn để thêm đáp án (vẽ vùng đúng, thêm danh sách lựa chọn hoặc chỉnh thang)."}
+          </Alert>
+        ) : null}
         {rows.length ? (
           <Stack component="ol" divider={<Box sx={{ borderTop: 1, borderColor: "divider" }} />} sx={{ border: 1, borderColor: "divider", borderRadius: 1, listStyle: "none", m: 0, maxHeight: 360, overflow: "auto", p: 0 }}>
             {rows.map((row) => (
@@ -119,8 +136,8 @@ function QuestionExcelImportDialog({ topicLabel, labels, createId, onClose, onIm
                   <Typography sx={{ overflowWrap: "anywhere" }} variant="body2">
                     {row.stem || "(trống)"}
                   </Typography>
-                  <Typography color={row.error ? "error" : "text.secondary"} variant="caption">
-                    {row.error ?? (row.type ? QUESTION_IMPORT_TYPE_LABEL[row.type] : "")}
+                  <Typography color={row.error ? "error" : row.warning ? "info.main" : "text.secondary"} sx={{ display: "block" }} variant="caption">
+                    {row.error ?? [row.type ? QUESTION_IMPORT_TYPE_LABEL[row.type] : "", row.warning].filter(Boolean).join(" · ")}
                   </Typography>
                 </Box>
               </Box>

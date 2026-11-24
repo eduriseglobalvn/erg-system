@@ -23,6 +23,7 @@ import type {
   TeacherAccount,
 } from "@/platform/auth/types/auth-types";
 import { useI18n } from "@/platform/i18n";
+import { passwordPolicyError } from "@/platform/auth/password-policy";
 
 export function AccountPanel({
   account,
@@ -176,7 +177,7 @@ export function AccountPanel({
                 <Button variant="contained"
                   disabled={
                     !passwordForm.currentPassword.trim() ||
-                    passwordForm.nextPassword.length < 6 ||
+                    passwordPolicyError(passwordForm.nextPassword) !== null ||
                     passwordForm.confirmPassword !== passwordForm.nextPassword
                   }
                   type="submit"

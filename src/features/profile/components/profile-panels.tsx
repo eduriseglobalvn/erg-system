@@ -18,6 +18,7 @@ import { Field, InfoTile, NoticeBox, PasswordInput, SectionHeader, StickyActionB
 import type { PasswordFormState, ProfileFormState, ProfileNotice as Notice } from "@/features/profile/types/profile-types";
 import { passwordScoreLabel } from "@/features/profile/utils/profile-utils";
 import type { TeacherAccount } from "@/platform/auth/types/auth-types";
+import { PASSWORD_RULE_TEXT } from "@/platform/auth/password-policy";
 import { alpha } from "@mui/material/styles";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
@@ -195,7 +196,7 @@ export function SecurityPanel({
           icon={<LockKeyhole sx={{ fontSize: 22 }} />}
           eyebrow="Bảo mật tài khoản"
           title="Đổi mật khẩu"
-          description="Mật khẩu mới yêu cầu tối thiểu 8 ký tự, gồm chữ hoa, chữ thường và chữ số để bảo đảm an toàn."
+          description={`Mật khẩu mới: ${PASSWORD_RULE_TEXT.toLowerCase()}`}
         />
 
         <NoticeBox notice={notice} />

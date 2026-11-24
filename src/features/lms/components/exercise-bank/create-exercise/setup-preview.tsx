@@ -103,19 +103,19 @@ export function SetupPreview({
         </Box>
 
         {selectedQuestionIds.length > 0 ? (
-          <Stack spacing={1} sx={{ maxHeight: 220, overflowY: "auto", pr: 0.5 }}>
+          <Stack spacing={1} sx={{ maxHeight: 220, overflowY: "auto", overflowX: "hidden", pr: 0.5 }}>
             {selectedQuestions.map((q, idx) => (
-              <Box key={q.id} sx={{ border: 1, borderColor: "divider", borderRadius: 1, bgcolor: "background.default", p: 1.25, display: "grid", gap: 0.5 }}>
-                <Box sx={{ display: "flex", alignItems: "baseline", gap: 0.75 }}>
+              <Box key={q.id} sx={{ border: 1, borderColor: "divider", borderRadius: 1, bgcolor: "background.default", p: 1.25, display: "grid", gap: 0.5, minWidth: 0 }}>
+                <Box sx={{ display: "flex", alignItems: "baseline", gap: 0.75, minWidth: 0 }}>
                   <Typography variant="caption" sx={{ flexShrink: 0, color: "text.secondary", fontWeight: "fontWeightBold" }}>#{idx + 1}</Typography>
-                  <Typography variant="caption" component="p" noWrap sx={{ fontWeight: "fontWeightMedium" }}>{q.stem}</Typography>
+                  <Typography variant="caption" component="p" noWrap title={q.stem} sx={{ minWidth: 0, fontWeight: "fontWeightMedium" }}>{q.stem}</Typography>
                 </Box>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <ErgStatusChip dot={false} label={q.categoryLabel} />
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1, minWidth: 0 }}>
+                  <ErgStatusChip dot={false} label={q.categoryLabel} sx={{ flexShrink: 0 }} />
                   {q.answer && (
                     <>
                       <Typography variant="caption" color="text.secondary">•</Typography>
-                      <Typography variant="caption" sx={{ color: "success.main", fontWeight: "fontWeightMedium" }}>
+                      <Typography variant="caption" noWrap title={q.answer} sx={{ minWidth: 0, color: "success.main", fontWeight: "fontWeightMedium" }}>
                         Đ/a: {q.answer}
                       </Typography>
                     </>

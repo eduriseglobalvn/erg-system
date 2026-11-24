@@ -17,10 +17,12 @@ export function passwordScoreLabel(score: number) {
 export function validatePasswordChange(form: PasswordFormState) {
   const nextPassword = form.nextPassword.trim();
   if (!form.currentPassword.trim()) return "Vui lòng nhập mật khẩu hiện tại.";
-  if (nextPassword.length < 8) return "Mật khẩu mới cần tối thiểu 8 ký tự.";
+  const policyError = passwordPolicyError(nextPassword);
+  if (policyError) return policyError;
   if (nextPassword !== form.confirmPassword.trim()) return "Mật khẩu xác nhận chưa khớp.";
   return null;
 }
 import type { PasswordFormState } from "@/features/profile/types/profile-types";
 import { nameInitials } from "@/domain/formatters/format-initials";
+import { passwordPolicyError } from "@/platform/auth/password-policy";
 

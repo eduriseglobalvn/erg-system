@@ -232,9 +232,6 @@ export function CreateExerciseDialog({
       }}
       maxWidth="lg"
       fullWidth
-      sx={{
-        zIndex: 1400,
-      }}
       slotProps={{
         backdrop: {
           sx: {

@@ -100,9 +100,6 @@ export function ExerciseQuestionDetailDialog({
       }}
       maxWidth="md"
       fullWidth
-      sx={{
-        zIndex: 1400,
-      }}
       slotProps={{
         backdrop: {
           sx: {

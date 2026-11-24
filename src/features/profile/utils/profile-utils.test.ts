@@ -16,7 +16,7 @@ describe("profile utilities", () => {
 
   test.each([
     [{ currentPassword: "", nextPassword: "Abcdef1!", confirmPassword: "Abcdef1!" }, "Vui lòng nhập mật khẩu hiện tại."],
-    [{ currentPassword: "old", nextPassword: "short", confirmPassword: "short" }, "Mật khẩu mới cần tối thiểu 8 ký tự."],
+    [{ currentPassword: "old", nextPassword: "short", confirmPassword: "short" }, "Mật khẩu cần có ít nhất 6 ký tự, chữ hoa, ký tự đặc biệt."],
     [{ currentPassword: "old", nextPassword: "Abcdef1!", confirmPassword: "different" }, "Mật khẩu xác nhận chưa khớp."],
     [{ currentPassword: "old", nextPassword: " Abcdef1! ", confirmPassword: "Abcdef1!" }, null],
   ])("validates password change %#", (form, expected) => {

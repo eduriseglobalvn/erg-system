@@ -17,7 +17,7 @@ import Typography from "@mui/material/Typography";
 import { useRef, useState, type ChangeEvent } from "react";
 import { fetchGoogleSheetCsv, fetchGoogleSheetTabs, parseGoogleSheetUrl, type GoogleSheetTab } from "@/features/lcms/imports/google-sheets-csv-adapter";
 import { StudentSpreadsheetGrid } from "@/features/lcms/school-management/components/student-spreadsheet-grid";
-import { createBlankImportRow, normalizeStudentMatrix } from "@/features/lcms/school-management/components/student-import-utils";
+import { createBlankImportRow, isBlankImportRow, normalizeStudentMatrix } from "@/features/lcms/school-management/components/student-import-utils";
 import { extractStudentsFromRosterMatrix, isSchoolRosterMatrix } from "@/features/lcms/school-management/utils/vietnamese-school-sheet-parser";
 import type { PartnerSchool, StudentImportRow } from "@/features/lcms/school-management/types/school-management-types";
 import { schoolTypeMeta, schoolTypeUsesGrades } from "@/features/lcms/school-management/types/school-type-config";
@@ -42,6 +42,10 @@ export function StudentImportDialog({ onClose, onImport, school }: {
   const usesGrades = schoolTypeUsesGrades(school.schoolType);
 
   const validRows = rows.filter((row) => row.valid);
+  const toCheck = rows.filter((row) => !row.valid && !isBlankImportRow(row)).length;
+  // Classes the sheet names that the school does not have yet: the import creates them (6A1–6A4 added mid-year, say).
+  const knownClasses = new Set(school.classes.map((item) => item.name.trim().toLowerCase()));
+  const newClasses = [...new Set(validRows.map((row) => row.className.trim()).filter((name) => !knownClasses.has(name.toLowerCase())))];
 
   async function readExcel(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -247,7 +251,7 @@ export function StudentImportDialog({ onClose, onImport, school }: {
 
         {source === 2 ? (
           <Typography color="text.secondary" variant="body2">
-            Nhập trực tiếp hoặc dán một vùng nhiều hàng/cột từ bảng tính. Hệ thống tự kiểm tra các trường bắt buộc.
+            Chỉ cần Họ tên và Lớp; khối tự lấy theo tên lớp (6A5 → khối 6), mã học sinh do hệ thống cấp.
           </Typography>
         ) : null}
 
@@ -257,11 +261,18 @@ export function StudentImportDialog({ onClose, onImport, school }: {
           </Alert>
         ) : null}
 
+        {validRows.length ? (
+          <Alert severity="info" sx={{ py: 0.5 }}>
+            {newClasses.length ? `Sẽ tạo thêm ${newClasses.length} lớp chưa có: ${newClasses.slice(0, 8).join(", ")}${newClasses.length > 8 ? "…" : ""}. ` : ""}
+            Học sinh đã có trong trường (trùng họ tên và lớp, hoặc họ tên và ngày sinh) được giữ nguyên, không tạo trùng, nên có thể đọc lại cả sheet cũ lẫn mới.
+          </Alert>
+        ) : null}
+
         <StudentSpreadsheetGrid onChange={setRows} rows={rows} usesGrades={usesGrades} />
       </DialogContent>
       <DialogActions sx={{ borderTop: "1px solid", borderColor: "divider", justifyContent: "space-between", px: 3, py: 1.5 }}>
         <Typography color="text.secondary" variant="body2" sx={{ fontWeight: 600 }}>
-          {validRows.length} hợp lệ · {rows.length - validRows.length} cần kiểm tra
+          {validRows.length} hợp lệ{toCheck ? ` · ${toCheck} cần kiểm tra` : ""}
         </Typography>
         <Box sx={{ display: "flex", gap: 1 }}>
           <Button disabled={importing} onClick={onClose} variant="outlined">

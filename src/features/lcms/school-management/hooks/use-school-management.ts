@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
+import { parseClassNameAndGrade } from "@/features/lcms/school-management/utils/vietnamese-school-sheet-parser";
 import { ApiClientError } from "@/lib/api-client";
 import {
   activateAcademicYear,
@@ -191,12 +191,17 @@ export function useSchoolManagement(initialSchoolId?: string | null) {
     if (!selectedSchoolId) return [];
     const items = rows.map((row) => toStudentInput(row, selectedSchool));
     // A row naming a class the school does not have used to be saved with no class, silently (BUG-B-005, BUG-B-009).
-    const missing = [...new Set(rows.filter((row, index) => row.className.trim() && !items[index].academicClassId).map((row) => row.className.trim()))];
-    if (missing.length) {
-      const message = `Chưa có lớp ${missing.slice(0, 5).join(", ")}${missing.length > 5 ? ` và ${missing.length - 5} lớp khác` : ""} trong trường. Tạo lớp trước rồi nhập lại; chưa học sinh nào được lưu.`;
-      toast.error(message);
-      throw new Error(message);
+    // Now the class is created first (the import dialog lists them before the user confirms), so a sheet with new classes imports in one go.
+    const missing = [...new Map(rows.filter((row, index) => row.className.trim() && !items[index].academicClassId).map((row) => [row.className.trim().toLowerCase(), row])).values()];
+    const createdIds = new Map<string, string>();
+    for (const row of missing) {
+      const created = await classCreateMutation.mutateAsync({
+        schoolId: selectedSchoolId,
+        input: { name: row.className.trim(), grade: row.grade || parseClassNameAndGrade(row.className).grade || undefined, academicYear: selectedSchool?.academicYear || undefined, status: "ACTIVE" },
+      });
+      createdIds.set(row.className.trim().toLowerCase(), created.id);
     }
+    items.forEach((item, index) => { item.academicClassId ||= createdIds.get(rows[index].className.trim().toLowerCase()); });
     // Returned in row order: callers match a row to its saved student (and login) by index, since a blank code is issued by the backend.
     const saved: Array<{ studentCode: string; username?: string | null; authUserId?: string | null; replayed?: boolean }> = new Array(items.length);
     // Rows that ask for a login go over REST (GraphQL variables must not carry passwords); the rest keep the old path.
@@ -212,7 +217,7 @@ export function useSchoolManagement(initialSchoolId?: string | null) {
     else if (plain[0]) saved[plainRows[0]] = await studentCreateMutation.mutateAsync({ schoolId: selectedSchoolId, input: plain[0] });
     await refreshSchoolData(selectedSchoolId);
     return saved;
-  }, [refreshSchoolData, selectedSchool, selectedSchoolId, studentCreateMutation, studentImportMutation]);
+  }, [classCreateMutation, refreshSchoolData, selectedSchool, selectedSchoolId, studentCreateMutation, studentImportMutation]);
 
   const updateClassGrade = useCallback(async (classId: string, grade: string) => {
     if (!selectedSchoolId) return;

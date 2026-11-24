@@ -1,5 +1,9 @@
 import { inputDateToVi } from "@/domain/formatters/format-date";
 
+let importRowSeq = 0;
+/** Row key for the import grid. Date.now() + index repeated across sheets read in the same millisecond, and duplicate React keys left stale rows on screen. */
+export const nextImportRowId = (prefix: string) => `${prefix}-${++importRowSeq}`;
+
 export type StudentColumnKind = "code" | "fullName" | "family" | "given" | "birth" | "gender" | "grade" | "className" | "phone";
 export type StudentColumns = Partial<Record<StudentColumnKind, number>>;
 
