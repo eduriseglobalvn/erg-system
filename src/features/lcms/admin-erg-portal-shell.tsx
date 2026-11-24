@@ -46,7 +46,7 @@ import {
 } from "@/features/lcms/admin-portal-shell-helpers";
 
 const BYPASS_PERMISSIONS = ["*"];
-const PRESERVED_WORKSPACE_VARIANTS = new Set(["question-bank", "quiz-bank", "quiz-editor", "admin-internal-docs"]);
+const PRESERVED_WORKSPACE_VARIANTS = new Set(["quiz-bank", "quiz-editor", "admin-internal-docs"]);
 
 export default function AdminErgPortalShell() {
   const location = useLocation();

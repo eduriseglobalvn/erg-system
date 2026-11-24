@@ -18,10 +18,13 @@ import { useQuizEditorScope, useQuizEditorScopeSync } from "@/features/lcms/quiz
 import { useQuizEditorSlideViews } from "@/features/lcms/quiz/quiz-editor/hooks/use-quiz-editor-slide-views";
 import { useQuizEditorState } from "@/features/lcms/quiz/quiz-editor/hooks/use-quiz-editor-state";
 import { useQuizEditorSync } from "@/features/lcms/quiz/quiz-editor/hooks/use-quiz-editor-sync";
+import { useCreatePackage } from "@/features/lcms/quiz/quiz-editor/hooks/use-create-package";
+import { useLevelBankQuestions } from "@/features/lcms/quiz/quiz-editor/hooks/use-level-bank-questions";
 import { useBankOnlyQuestions } from "@/features/lcms/quiz/quiz-editor/hooks/use-bank-only-questions";
 import { useMoveQuestions } from "@/features/lcms/quiz/quiz-editor/hooks/use-move-questions";
 import { useQuizList } from "@/features/lcms/quiz/quiz-editor/hooks/use-quiz-list";
 import { useI18n } from "@/platform/i18n";
+import type { CreateQuizFromBankOptions } from "@/features/lcms/create-quiz-from-bank";
 import type { QuestionBankQuestion } from "@/features/question-bank/types/question-bank-types";
 import { isQuestionType } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 
@@ -33,6 +36,7 @@ export function QuizEditorWorkspace({
   onImportedQuestionsHandled,
   themePanelRequested,
   onThemePanelHandled,
+  onCreateQuizFromBank,
 }: {
   activeLeaf: DashboardLeaf;
   quizId?: string | null;
@@ -42,6 +46,8 @@ export function QuizEditorWorkspace({
   /** `panel=theme` in the URL: open the theme dialog once the draft is ready. */
   themePanelRequested?: boolean;
   onThemePanelHandled?: () => void;
+  /** "Tạo gói bài tập" from the checked questions. */
+  onCreateQuizFromBank?: (questions: QuestionBankQuestion[], options?: CreateQuizFromBankOptions) => void;
 }) {
   void activeLeaf;
   const { t } = useI18n();
@@ -105,6 +111,9 @@ export function QuizEditorWorkspace({
     onQuizCreated: openQuiz,
   });
   const list = useQuizList({ scope, quizId: effectiveQuizId, ready: sync.ready, groups, quizProject, selectSlide, openQuiz, openEditor });
+  const levelId = scope.selectedLevel?.id ?? null;
+  const usage = useLevelBankQuestions({ subjectId: scope.selectedCourseId, levelId, openQuizId: effectiveQuizId, rows: list.rows });
+  const createPackage = useCreatePackage({ subjectId: scope.selectedCourseId, levelId, onCreate: onCreateQuizFromBank });
   const move = useMoveQuestions({
     subject: scope.questionBankSubjects.find((subject) => subject.id === scope.selectedCourseId),
     levelId: scope.selectedLevel?.id ?? null,
@@ -153,7 +162,7 @@ export function QuizEditorWorkspace({
 
   return (
     <Box sx={{ display: "flex", flex: 1, flexDirection: "column", height: "100%", maxHeight: "100%", minHeight: 0, minWidth: 0, overflow: "hidden" }}>
-      <Box component="h1" sx={visuallyHidden}>{list.topicLabel ?? "Soạn câu hỏi"}</Box>
+      <Box component="h1" sx={visuallyHidden}>{list.topicLabel ?? "Ngân hàng câu hỏi"}</Box>
       <QuizListTitlebar
         courseOptions={scope.courseOptions}
         selectedCourseId={scope.selectedCourse.id}
@@ -187,7 +196,7 @@ export function QuizEditorWorkspace({
               </Alert>
             ) : null}
             {bankOnly.banner}
-            {/* keyed by topic: slide ids repeat across quizzes, so a selection must not carry over */}
+            {/* keyed by topic: a selection must not carry over */}
             <QuestionTable
               key={scope.selectedTopicId}
               highlightSlideId={addedSlideId}
@@ -197,11 +206,14 @@ export function QuizEditorWorkspace({
               onAdd={() => setAddedSlideId(addBlankQuestion())}
               onImportExcel={excel.openImport}
               onMove={move.openMove}
+              onCreatePackage={createPackage.open && ((rows, onDone) => createPackage.open!(rows.map((row) => usage.get(row) ?? null), onDone))}
               onOpenRow={list.openRow}
               rows={list.rows}
               topicLabel={list.topicLabel}
               topics={list.topics}
+              usage={usage}
             />
+            {createPackage.dialog}
             {move.dialog}
             {excel.dialog}
             {questionEditorOpen && selectedNode.type === "slide" && selectedSlide && isQuestionType(selectedSlide.kind) ? (

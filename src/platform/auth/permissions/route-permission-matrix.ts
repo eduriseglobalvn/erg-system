@@ -79,7 +79,6 @@ const ADMIN_CONTENT_PERMISSIONS: Record<string, Pick<RoutePermissionEntry, "reso
   "/admin/content": { resource: "content", action: "manage", permission: "content.manage" },
   "/admin/content/structure": { resource: "content-structure", action: "manage", permission: "content.manage" },
   "/admin/content/resources": { resource: "resource", action: "read", permission: "lms.resource.read" },
-  "/admin/content/questions": { resource: "quiz", action: "read", permission: "lms.quiz.read" },
   "/admin/content/quiz-bank": { resource: "quiz", action: "read", permission: "lms.quiz.read" },
   "/admin/content/quiz-editor": { resource: "quiz", action: "create", permission: "lms.quiz.create" },
 };
@@ -129,7 +128,7 @@ function adminEntry(path: string): RoutePermissionEntry {
     const action = legacyPath.includes("imports") || legacyPath.includes("reviews") ? "update" : "read";
     return { path: normalizedPath, workspace: "ADMIN", resource: "school", action, permission: action === "update" ? "lms.school.update" : "lms.school.read" };
   }
-  if (legacyPath === "questions" || legacyPath === "quiz-bank" || legacyPath === "quiz-editor") {
+  if (legacyPath === "quiz-bank" || legacyPath === "quiz-editor") {
     return { path: normalizedPath, workspace: "ADMIN", resource: "quiz", action: legacyPath === "quiz-editor" ? "create" : "read", permission: legacyPath === "quiz-editor" ? "lms.quiz.create" : "lms.quiz.read" };
   }
   if (legacyPath.startsWith("setting/")) {
@@ -256,7 +255,7 @@ export function matrixCompletenessGaps() {
 function canonicalAdminRoutePath(pathname: string) {
   const normalized = normalizePath(pathname);
   if (normalized === "/admin" || normalized.startsWith("/admin/")) return normalized;
-  const contentSegment = ["resources", "questions", "quiz-bank", "quiz-editor"].find(
+  const contentSegment = ["resources", "quiz-bank", "quiz-editor"].find(
     (segment) => normalized === `/${segment}` || normalized.startsWith(`/${segment}/`),
   );
   if (contentSegment) return `/admin/content/${contentSegment}${normalized.slice(contentSegment.length + 1)}`;

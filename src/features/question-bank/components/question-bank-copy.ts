@@ -467,3 +467,15 @@ export const enCopy = {
   syncError: "Cannot load BE question-bank data",
   syncErrorDetail: "Check connection, session, or permissions. FE does not use mock data when the API is configured.",
 };
+
+/** The copy for the UI locale; Vietnamese layers the package wording over the base strings. */
+export function questionBankCopyFor(locale: string): QuestionBankCopy {
+  if (locale !== "vi") return enCopy;
+  return {
+    ...enCopy,
+    ...viCopy,
+    ...viPackageCopy,
+    table: { ...enCopy.table, ...viCopy.table, ...viPackageCopy.table },
+    quizTable: { ...enCopy.quizTable, ...viCopy.quizTable },
+  };
+}

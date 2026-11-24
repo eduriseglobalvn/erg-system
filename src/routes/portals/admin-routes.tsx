@@ -42,7 +42,7 @@ const lessonReportPage = lazyRouteComponent(
 const timekeepingPages = () => import("@/features/timekeeping/components/timekeeping-route-pages");
 const timekeepingPage = (name: keyof Awaited<ReturnType<typeof timekeepingPages>>) => lazyRouteComponent(timekeepingPages, name);
 
-const CONTENT_REDIRECTED_SEGMENTS = ["questions", "quiz-bank", "quiz-editor"];
+const CONTENT_REDIRECTED_SEGMENTS = ["quiz-bank", "quiz-editor"];
 // Redirect aliases of a renamed screen: they get no page of their own.
 const REDIRECT_ONLY_SEGMENTS = ["setting/setting-center-role", "employees/face-detection"];
 
@@ -193,12 +193,17 @@ const questionTypesRoute = createRoute({
 });
 
 // Old bookmarks and menu links used /admin/<segment>; content now lives under /admin/content/<segment>.
-const legacyAdminContentRoutes = ["resources", "questions", "quiz-bank", "quiz-editor"].map((segment) =>
+// The old question bank page was merged into the quiz editor (now named "Ngân hàng câu hỏi"): its links land there.
+const legacyAdminContentRoutes = [
+  ...["resources", "quiz-bank", "quiz-editor"].map((segment) => [adminPath(`/${segment}`), adminPath(`/content/${segment}`)] as const),
+  [adminPath("/questions"), adminPath("/content/quiz-editor")] as const,
+  [adminPath("/content/questions"), adminPath("/content/quiz-editor")] as const,
+].map(([path, target]) =>
   createRoute({
     getParentRoute: () => rootRoute,
-    path: adminPath(`/${segment}`),
+    path,
     beforeLoad: () => {
-      throw redirect({ href: adminPath(`/content/${segment}`), replace: true });
+      throw redirect({ href: target, replace: true });
     },
   }),
 );

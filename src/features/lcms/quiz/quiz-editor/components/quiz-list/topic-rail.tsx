@@ -5,6 +5,7 @@ import Typography from "@mui/material/Typography";
 import visuallyHidden from "@mui/utils/visuallyHidden";
 import { Link } from "@tanstack/react-router";
 
+import { COURSE_STRUCTURE_WORKSPACE_LABEL } from "@/components/learning-resources/learning-resource-workspace-labels";
 import { adminContentPathForSection } from "@/features/lcms/admin-content/admin-content-route";
 import { lifecycleLabel, type QuizLifecycle } from "@/features/lcms/quiz/quiz-editor/model/quiz-publish-state";
 import type { TopicRow } from "@/features/lcms/quiz/quiz-editor/model/topic-rail";
@@ -94,8 +95,8 @@ export function TopicRail({ rows, selectedTopicId, loading = false, onSelect }: 
       ) : (
         <Typography color="text.secondary" sx={{ p: 1 }} variant="body2">
           Level này chưa có chủ đề. Thêm chủ đề ở{" "}
-          <Button component={Link} size="small" sx={{ minWidth: 0, p: 0, verticalAlign: "baseline" }} to={adminContentPathForSection("questions")} variant="text">
-            Ngân hàng câu hỏi
+          <Button component={Link} size="small" sx={{ minWidth: 0, p: 0, verticalAlign: "baseline" }} to={adminContentPathForSection("structure")} variant="text">
+            {COURSE_STRUCTURE_WORKSPACE_LABEL}
           </Button>
           .
         </Typography>

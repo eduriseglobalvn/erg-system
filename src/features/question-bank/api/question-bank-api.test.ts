@@ -2,12 +2,7 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 
 import { apiRequest } from "@/lib/api-client";
 import { graphQlRequest } from "@/lib/graphql-client";
-import {
-  createQuestionBankQuestion,
-  deleteQuestionBankQuestion,
-  loadQuestionBankData,
-  updateQuestionBankQuestion,
-} from "@/features/question-bank/api/question-bank-api";
+import { loadQuestionBankData } from "@/features/question-bank/api/question-bank-api";
 
 vi.mock("@/lib/api-client", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/lib/api-client")>()),
@@ -304,42 +299,6 @@ describe("loadQuestionBankData", () => {
     expect(graphQlRequestMock).toHaveBeenCalledTimes(1);
     expect(data.questions).toHaveLength(1);
     expect(data.questionPage).toMatchObject({ page: 0, size: 1, totalItems: 3, totalPages: 3, hasNext: true });
-  });
-
-  test("creates, updates, and archives questions through LCMS REST authoring APIs", async () => {
-    apiRequestMock
-      .mockResolvedValueOnce({ questionId: "question-1", status: "ready" } as never)
-      .mockResolvedValueOnce({ questionId: "question-1", status: "reviewing" } as never)
-      .mockResolvedValueOnce({ questionId: "question-1", archived: true } as never);
-
-    const payload = {
-      subjectId: "ic3-gs6",
-      levelId: "ic3-l1",
-      topicId: "ic3-hardware",
-      type: "multiple-choice",
-      stem: "What is a CPU?",
-      difficulty: "core" as const,
-      status: "ready" as const,
-      tags: ["hardware"],
-      choices: [{ id: "a", label: "Processor", correct: true }],
-      answer: "a",
-      settings: { shuffleChoices: false },
-    };
-
-    await createQuestionBankQuestion(payload);
-    await updateQuestionBankQuestion({ ...payload, questionId: "question-1", status: "reviewing" });
-    await deleteQuestionBankQuestion("question-1");
-
-    expect(apiRequestMock).toHaveBeenNthCalledWith(1, "/api/v1/lcms/questions", expect.objectContaining({ method: "POST", portal: "lcms" }));
-    expect(apiRequestMock).toHaveBeenNthCalledWith(2, "/api/v1/lcms/questions/question-1", expect.objectContaining({ method: "PUT", portal: "lcms" }));
-    expect(apiRequestMock).toHaveBeenNthCalledWith(3, "/api/v1/lcms/questions/question-1", expect.objectContaining({ method: "DELETE", portal: "lcms" }));
-    expect(JSON.parse(String(apiRequestMock.mock.calls[0]?.[1]?.body))).toMatchObject({
-      subjectId: "ic3-gs6",
-      levelId: "ic3-l1",
-      topicId: "ic3-hardware",
-      stem: "What is a CPU?",
-      settings: { shuffleChoices: false },
-    });
   });
 });
 

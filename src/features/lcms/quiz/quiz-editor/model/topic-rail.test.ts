@@ -4,7 +4,7 @@ import type { QuizEditorDraftDocument, QuizEditorSummary } from "@/features/lcms
 import { createNewQuizProjectSettings } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-project-defaults";
 import type { QuizEditorSlide } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import { recordPublished } from "./quiz-publish-state";
-import { buildTopicRail, unassignedQuizId } from "./topic-rail";
+import { BANK_PACKAGE_SUBTITLE, buildTopicRail, unassignedQuizId } from "./topic-rail";
 
 const topics = [{ id: "t1", label: "Phân số" }, { id: "t2", label: "Hình học" }];
 const summary = (id: string, over: Partial<QuizEditorSummary> = {}): QuizEditorSummary => ({
@@ -75,5 +75,9 @@ describe("unassignedQuizId", () => {
       summary("gone", { categoryId: undefined, updatedAt: "2026-03-01T00:00:00Z", status: "deleted" }),
       summary("topic", { updatedAt: "2026-04-01T00:00:00Z" }),
     ])).toBe("new");
+    expect(unassignedQuizId([
+      summary("loose", { categoryId: undefined, updatedAt: "2026-01-01T00:00:00Z" }),
+      summary("package", { categoryId: undefined, subtitle: BANK_PACKAGE_SUBTITLE, updatedAt: "2026-02-01T00:00:00Z" }),
+    ])).toBe("loose");
   });
 });

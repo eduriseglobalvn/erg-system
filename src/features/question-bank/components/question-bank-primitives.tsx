@@ -81,8 +81,4 @@ export function SelectControl({
   );
 }
 
-export function normalizeAutoCount(value: number) {
-  if (!Number.isFinite(value)) return 1;
-  return Math.min(100, Math.max(1, Math.round(value)));
-}
 

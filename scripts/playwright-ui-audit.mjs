@@ -13,7 +13,7 @@ const portals = {
   lcms: {
     baseUrl: "https://lcms.erg.edu.local:3001",
     routes: [
-      "/admin", "/admin/schools", "/admin/users", "/admin/content/questions", "/admin/content/quiz-bank", "/admin/content/quiz-editor", "/admin/rubrics",
+      "/admin", "/admin/schools", "/admin/users", "/admin/content/quiz-bank", "/admin/content/quiz-editor", "/admin/rubrics",
       "/admin/session-templates", "/admin/report-templates", "/admin/legal", "/admin/settings", "/admin/courses", "/admin/classes", "/admin/sessions",
       "/admin/customers", "/admin/center-tasks", "/admin/students/list-center-student", "/admin/students/list-student-course",
       "/admin/students/list-class-enroll", "/admin/students/list-student-session", "/admin/students/list-student-assignment",

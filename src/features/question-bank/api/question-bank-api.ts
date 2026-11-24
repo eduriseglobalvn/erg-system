@@ -3,12 +3,10 @@ import { API_ENDPOINTS } from "@/lib/api/api-endpoints";
 import { mapWorkspace, type QuestionBankWorkspaceDTO } from "@/features/question-bank/api/question-bank-mappers";
 import type {
   QuestionBankQuestion,
-  QuestionBankStatus,
   QuestionBankSubject,
   QuizBankItem,
   QuizBankKind,
 } from "@/features/question-bank/types/question-bank-types";
-import type { QuestionType } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import { apiRequest } from "@/lib/api-client";
 import { getDefaultTenantId, graphQlRequest } from "@/lib/graphql-client";
 import { runtimeFixturesEnabled } from "@/lib/runtime-fixtures";
@@ -50,37 +48,6 @@ export type QuestionBankApiData = {
   subjects: QuestionBankSubject[];
 };
 
-export type QuestionBankSaveQuestionInput = {
-  questionId?: string;
-  scopeType?: "global" | "center" | "school";
-  scopeId?: string | null;
-  subjectId: string;
-  levelId: string;
-  topicId: string;
-  categoryId?: string | null;
-  type?: QuestionType | string;
-  stem: string;
-  objective?: string | null;
-  difficulty?: QuestionBankQuestion["difficulty"];
-  status?: QuestionBankStatus | "draft" | "archived";
-  tags?: string[];
-  choices?: QuestionBankQuestion["choices"];
-  answer?: unknown;
-  content?: Record<string, unknown>;
-  metadata?: Record<string, unknown>;
-  settings?: Record<string, unknown>;
-};
-
-export type QuestionBankSaveQuestionResult = {
-  questionId: string;
-  status: string;
-};
-
-export type QuestionBankDeleteQuestionResult = {
-  questionId: string;
-  archived: boolean;
-};
-
 const QuestionBankWorkspaceDocument = `
 query QuestionBankWorkspace($input: QuestionBankWorkspaceInput) {
   lcms {
@@ -119,6 +86,8 @@ query QuestionBankWorkspace($input: QuestionBankWorkspaceInput) {
           rationale
           runtimeQuestion
           fromQuizEditor
+          sourceQuizId
+          sourceSlideId
           updatedAt
         }
         page
@@ -190,24 +159,6 @@ export async function loadQuestionBankData(
   return mapWorkspace(raw);
 }
 
-export async function createQuestionBankQuestion(input: QuestionBankSaveQuestionInput): Promise<QuestionBankSaveQuestionResult> {
-  return saveQuestionBankQuestion(input, "POST", API_ENDPOINTS.lcms.questions);
-}
-
-export async function updateQuestionBankQuestion(input: QuestionBankSaveQuestionInput): Promise<QuestionBankSaveQuestionResult> {
-  if (!input.questionId) {
-    throw new Error("questionId is required to update a question.");
-  }
-  return saveQuestionBankQuestion(input, "PUT", API_ENDPOINTS.lcms.question(input.questionId));
-}
-
-export async function deleteQuestionBankQuestion(questionId: string): Promise<QuestionBankDeleteQuestionResult> {
-  return apiRequest<QuestionBankDeleteQuestionResult>(API_ENDPOINTS.lcms.question(questionId), {
-    method: "DELETE",
-    portal: bankPortal(),
-  });
-}
-
 export type QuizBankMetaInput = { quizId: string; title?: string; kind?: QuizBankKind };
 export type QuizBankMetaResult = { quizId: string; title: string; kind: QuizBankKind; updatedAt?: string | null };
 
@@ -216,36 +167,6 @@ export async function updateQuizBankMeta({ quizId, ...body }: QuizBankMetaInput)
   return apiRequest<QuizBankMetaResult>(API_ENDPOINTS.lcms.quiz(quizId), {
     body: JSON.stringify(body),
     method: "PATCH",
-    portal: bankPortal(),
-  });
-}
-
-async function saveQuestionBankQuestion(
-  input: QuestionBankSaveQuestionInput,
-  method: "POST" | "PUT",
-  path: string,
-): Promise<QuestionBankSaveQuestionResult> {
-  return apiRequest<QuestionBankSaveQuestionResult>(path, {
-    body: JSON.stringify({
-      scopeType: input.scopeType,
-      scopeId: input.scopeId,
-      subjectId: input.subjectId,
-      levelId: input.levelId,
-      topicId: input.topicId,
-      categoryId: input.categoryId,
-      type: input.type,
-      stem: input.stem,
-      objective: input.objective,
-      difficulty: input.difficulty,
-      status: input.status,
-      tags: input.tags,
-      choices: input.choices,
-      answer: input.answer,
-      content: input.content,
-      settings: input.settings,
-      metadata: input.metadata,
-    }),
-    method,
     portal: bankPortal(),
   });
 }

@@ -13,7 +13,6 @@ export type DashboardLeafVariant =
   | "seo-handover"
   | "overview"
   | "school-pulse"
-  | "question-bank"
   | "quiz-bank"
   | "quiz-editor"
   | "lcms-template"

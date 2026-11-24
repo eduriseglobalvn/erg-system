@@ -7,6 +7,7 @@ import type {
   QuizEditorCreateResult,
   QuizEditorSaveDraftResult,
 } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-api";
+import { BANK_PACKAGE_SUBTITLE } from "@/features/lcms/quiz/quiz-editor/model/topic-rail";
 import { adminPath } from "@/platform/workspaces/workspace-paths";
 
 type CreateQuizFromBankDependencies = {
@@ -57,8 +58,9 @@ export async function createQuizFromBankQuestions(
       kind: options.kind ?? "train",
       subjectId: firstQuestion.subjectId,
       levelId: firstQuestion.levelId,
-      // No categoryId/subtitle: a package mixes topics, and a topic would let it take that topic's slot in the
-      // quiz editor and hide the quiz authored there.
+      // No categoryId: a package mixes topics, and a topic would let it take that topic's slot in the quiz editor and
+      // hide the quiz authored there. The subtitle keeps it out of the Level's topicless slot too.
+      subtitle: BANK_PACKAGE_SUBTITLE,
       questionIds: questions.map((question) => question.id),
       idempotencyKey: dependencies.createIdempotencyKey("quiz-editor-create"),
     })

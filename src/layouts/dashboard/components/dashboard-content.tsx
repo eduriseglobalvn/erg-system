@@ -121,6 +121,7 @@ function DashboardContentInner({
           activeLeaf={activeLeaf}
           quizId={quizEditorQuizId}
           onQuizCreated={onOpenQuiz}
+          onCreateQuizFromBank={onCreateQuizFromBank}
           pendingImportedQuestions={pendingQuestionImports}
           onImportedQuestionsHandled={onQuestionImportsHandled}
           themePanelRequested={quizEditorThemeRequested}
@@ -158,12 +159,11 @@ function DashboardContentInner({
     );
   }
 
-  if (activeLeaf.variant === "question-bank" || activeLeaf.variant === "quiz-bank") {
+  if (activeLeaf.variant === "quiz-bank") {
     return (
       <QuestionBankWorkspace
         activeLeaf={activeLeaf}
         contentScope={contentScope}
-        onCreateQuiz={onCreateQuizFromBank}
         onOpenQuiz={onOpenQuiz}
       />
     );

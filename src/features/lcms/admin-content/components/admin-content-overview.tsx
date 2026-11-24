@@ -1,7 +1,6 @@
 import ArticleRoundedIcon from "@mui/icons-material/ArticleRounded";
 import AccountTreeRoundedIcon from "@mui/icons-material/AccountTreeRounded";
 import FolderRoundedIcon from "@mui/icons-material/FolderRounded";
-import HelpOutlineRoundedIcon from "@mui/icons-material/HelpOutlineRounded";
 import QuizRoundedIcon from "@mui/icons-material/QuizRounded";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -17,7 +16,6 @@ const ICONS: Record<AdminContentSectionKey, typeof FolderRoundedIcon> = {
   structure: AccountTreeRoundedIcon,
   resources: FolderRoundedIcon,
   "quiz-bank": QuizRoundedIcon,
-  questions: HelpOutlineRoundedIcon,
   "quiz-editor": ArticleRoundedIcon,
 };
 
@@ -25,8 +23,7 @@ const DESCRIPTIONS: Record<AdminContentSectionKey, string> = {
   structure: "Quản lý môn học, module, chủ đề, phân phối chương trình và vị trí nội dung hiển thị trên LMS.",
   resources: "Taxonomy, tài liệu, metadata và trạng thái xuất bản dùng chung cho các lớp học.",
   "quiz-bank": "Quản lý các gói bài tập để giáo viên giao và theo dõi trong Teacher Workspace.",
-  questions: "Tạo, rà soát và phân loại câu hỏi theo phạm vi được cấp quyền.",
-  "quiz-editor": "Biên soạn quiz, slide, đáp án và cấu hình trải nghiệm làm bài.",
+  "quiz-editor": "Soạn, nhập và quản lý câu hỏi theo chủ đề; bốc ngẫu nhiên và tạo gói bài tập.",
 };
 
 export function AdminContentOverview() {

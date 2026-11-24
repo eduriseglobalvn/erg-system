@@ -109,4 +109,44 @@ describe("QuestionTable", () => {
     expect(screen.getByText("Chưa có câu hỏi nào.")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Thêm câu hỏi vào “Hình học”" })).toBeInTheDocument();
   });
+
+  it("shows Đã dùng per row when usage is given: packages, or — when none", () => {
+    const usage = new Map([[topicRows[0]!, { question: {} as never, packages: 2 }], [topicRows[1]!, null]]);
+    renderTable({ usage });
+    expect(screen.getAllByRole("columnheader").map((cell) => cell.textContent)).toContain("Đã dùng");
+    const [first, second] = bodyRows();
+    expect(within(first!).getByText("2 gói")).toBeInTheDocument();
+    expect(within(second!).getByText("—")).toBeInTheDocument();
+  });
+
+  it("the selection bar counts the checked rows, moves them, makes a package and clears", () => {
+    const onMove = vi.fn();
+    const onCreatePackage = vi.fn();
+    renderTable({ onMove, onCreatePackage });
+    fireEvent.click(screen.getByRole("checkbox", { name: "Chọn câu 1" }));
+    expect(screen.getByText("Đã chọn 1 câu")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Chuyển chủ đề" }));
+    expect(onMove).toHaveBeenCalledWith(["s1"]);
+    fireEvent.click(screen.getByRole("button", { name: "Tạo gói bài tập" }));
+    expect(onCreatePackage.mock.calls[0]![0]).toEqual([topicRows[0]]);
+    fireEvent.click(screen.getByRole("button", { name: "Bỏ chọn" }));
+    expect(screen.queryByText(/Đã chọn/)).toBeNull();
+  });
+
+  it("in Tất cả, rows can be checked for a package but not moved", () => {
+    const rows: QuestionListRow[] = [{ slide: ready, number: 1, groupId: null, topic: topic("t1", "Phân số"), onServer: true }];
+    renderTable({ rows, topicLabel: null, onMove: vi.fn(), onCreatePackage: vi.fn() });
+    fireEvent.click(screen.getByRole("checkbox", { name: "Chọn câu 1" }));
+    expect(screen.getByRole("button", { name: "Tạo gói bài tập" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Chuyển chủ đề" })).toBeNull();
+  });
+
+  it("Bốc ngẫu nhiên ticks ready rows only by default", () => {
+    renderTable({ onCreatePackage: vi.fn() });
+    fireEvent.click(screen.getByRole("button", { name: "Bốc ngẫu nhiên…" }));
+    fireEvent.change(screen.getByLabelText("Số câu"), { target: { value: "1" } });
+    fireEvent.click(screen.getByRole("button", { name: "Bốc 1 câu" }));
+    expect(screen.getByText("Đã chọn 1 câu")).toBeInTheDocument();
+    expect(screen.getByRole("checkbox", { name: "Chọn câu 1" })).toBeChecked();
+  });
 });

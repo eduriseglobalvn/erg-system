@@ -20,7 +20,6 @@ describe("Admin information architecture", () => {
       "/admin/content/structure",
       "/admin/content/resources",
       "/admin/content/quiz-bank",
-      "/admin/content/questions",
       "/admin/content/quiz-editor",
     ]);
     expect(paths).toEqual(expect.arrayContaining([
@@ -28,7 +27,6 @@ describe("Admin information architecture", () => {
       "/admin/content/structure",
       "/admin/content/resources",
       "/admin/content/quiz-bank",
-      "/admin/content/questions",
       "/admin/content/quiz-editor",
     ]));
     expect(paths).not.toEqual(expect.arrayContaining(["/resources", "/quiz-bank", "/questions", "/quiz-editor"]));
