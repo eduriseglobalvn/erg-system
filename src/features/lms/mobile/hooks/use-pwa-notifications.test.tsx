@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => ({
   registerNotificationDevice: vi.fn(),
   getFcmRegistrationToken: vi.fn(),
   unregisterNotificationDevice: vi.fn(),
+  heartbeatNotificationDevice: vi.fn(),
 }));
 
 vi.mock("@/features/notifications/push/fcm-registration", async (importOriginal) => ({
@@ -26,7 +27,7 @@ vi.mock("@/platform/auth/api/auth-token-storage", () => ({
 
 vi.mock("@/features/notifications/api/notification-api", () => ({
   fetchWebPushConfig: mocks.fetchWebPushConfig,
-  heartbeatNotificationDevice: vi.fn(),
+  heartbeatNotificationDevice: mocks.heartbeatNotificationDevice,
   registerNotificationDevice: mocks.registerNotificationDevice,
   revokeNotificationDevice: vi.fn(async () => undefined),
   unregisterNotificationDevice: mocks.unregisterNotificationDevice,
@@ -45,6 +46,7 @@ beforeEach(() => {
   mocks.registerNotificationDevice.mockReset();
   mocks.getFcmRegistrationToken.mockReset();
   mocks.unregisterNotificationDevice.mockReset();
+  mocks.heartbeatNotificationDevice.mockReset().mockResolvedValue(undefined);
   installNotificationSupport("granted");
 });
 
@@ -192,6 +194,37 @@ test("on app open a browser that lost its subscription subscribes again when pus
 
   expect(result.current.state).toBe("enabled");
   expect(mocks.registerNotificationDevice).toHaveBeenCalledWith(expect.objectContaining({ transport: "FCM", registrationToken: "fcm-token-2" }));
+});
+
+test("on app open a rejected heartbeat registers this browser again for the signed-in account", async () => {
+  // Another teacher signed in on this browser and took its subscription; this account must claim it back.
+  mocks.fetchWebPushConfig.mockResolvedValue({ enabled: true, provider: "webpush" });
+  mocks.heartbeatNotificationDevice.mockRejectedValue(new Error("Notification device not found."));
+  mocks.registerNotificationDevice.mockResolvedValue({ id: "device-9", lastSeenAt: null });
+  const endpoint = "https://fcm.googleapis.com/wp/shared";
+  window.localStorage.setItem(getPwaNotificationDeviceStorageKey(), JSON.stringify({
+    channel: "webpush",
+    deviceRegistrationId: "device-1",
+    endpoint,
+    permissionState: "granted",
+    portal: "lms",
+    registrationToken: endpoint,
+    serviceWorkerScope: "/",
+    syncedAt: new Date(0).toISOString(),
+  }));
+  const subscription = { endpoint, toJSON: () => ({ endpoint, keys: { p256dh: "p", auth: "a" } }) };
+  Object.defineProperty(navigator, "serviceWorker", {
+    configurable: true,
+    value: { ready: Promise.resolve({ scope: "/", pushManager: { getSubscription: async () => subscription, subscribe: vi.fn() } }) },
+  });
+
+  const { result } = renderHook(() => usePwaNotifications());
+  await vi.waitFor(() => expect(mocks.registerNotificationDevice).toHaveBeenCalled());
+
+  expect(mocks.heartbeatNotificationDevice).toHaveBeenCalledWith(expect.objectContaining({ deviceRegistrationId: "device-1" }));
+  expect(mocks.registerNotificationDevice).toHaveBeenCalledWith(expect.objectContaining({ transport: "WEB_PUSH", endpoint }));
+  await vi.waitFor(() => expect(result.current.state).toBe("enabled"));
+  expect(JSON.parse(window.localStorage.getItem(getPwaNotificationDeviceStorageKey()) ?? "{}")).toMatchObject({ deviceRegistrationId: "device-9" });
 });
 
 function installPushRegistration() {

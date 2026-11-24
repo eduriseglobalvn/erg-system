@@ -1,5 +1,5 @@
 import type { StudentImportRow } from "@/features/lcms/school-management/types/school-management-types";
-import { classifyStudentHeader, normalizeGrade, toViDate } from "@/features/lcms/school-management/utils/student-import-columns";
+import { classifyStudentHeader, nextImportRowId, normalizeGrade, toViDate } from "@/features/lcms/school-management/utils/student-import-columns";
 import type { ClassImportPreviewRow } from "@/features/lcms/school-management/components/class-import-utils";
 
 export type RosterColumnMapping = {
@@ -271,7 +271,7 @@ export function extractStudentsFromRosterMatrix(
     const valid = missing.length === 0;
 
     students.push({
-      id: `roster-${Date.now()}-${rowIndex}-${students.length}`,
+      id: nextImportRowId("roster"),
       code,
       fullName,
       birthDate,

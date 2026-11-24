@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -17,6 +18,7 @@ import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 import { attendanceCopy, countLabel, markLabels } from "../attendance-copy";
 import { ATTENDANCE_MARKS, periodRangeLabel } from "../attendance-model";
 import { usePeriodAttendance } from "../use-period-attendance";
+import { AttendanceSheet } from "./attendance-sheet";
 import { LogSidePanel } from "./log-side-panel";
 import { PeriodRail } from "./period-rail";
 import { MARK_TINT, StudentAttendanceList } from "./student-attendance-list";
@@ -32,6 +34,7 @@ export function PeriodAttendancePage() {
   const midWidth = useMediaQuery(useTheme().breakpoints.down("xl"), { noSsr: true }) && !isMobile;
   const navigate = useNavigate();
   const openLog = () => void navigate({ href: teacherPath("/class-log") });
+  const [view, setView] = useState<"period" | "sheet">("period");
 
   const retry = (refetch: () => unknown) => (
     <ErgErrorState action={<ErgButton onClick={() => void refetch()} variant="outlined">Thử lại</ErgButton>} description={attendanceCopy.loadError} title="Lỗi tải" />
@@ -90,7 +93,26 @@ export function PeriodAttendancePage() {
   if (m.dayQuery.isPending) body = <Box aria-busy="true"><ErgLoadingSkeleton /></Box>;
   else if (m.dayQuery.isError) body = retry(m.dayQuery.refetch);
   else if (!m.group || !m.period) body = <ErgEmptyState description={attendanceCopy.empty} title="Không có tiết trong ngày này" />;
-  else {
+  else if (view === "sheet") {
+    body = (
+      <Box sx={cardSx}>
+        <Box sx={{ borderBottom: `1px solid ${color.divider}`, px: 2, py: 1.5 }}>
+          <Typography variant="subtitle1">Bảng điểm danh {m.group.className} · {m.group.subjectName} · tháng {m.date.slice(5, 7)}/{m.date.slice(0, 4)}</Typography>
+          <Typography color="text.secondary" variant="caption">Sĩ số {m.students.length} · đổi tháng bằng ô ngày phía trên</Typography>
+        </Box>
+        {m.rosterQuery.isError ? retry(m.rosterQuery.refetch) : m.rosterQuery.isPending ? <Box aria-busy="true" sx={{ p: 2 }}><ErgLoadingSkeleton rows={4} /></Box> : (
+          <AttendanceSheet
+            classId={m.group.classId}
+            date={m.date}
+            onOpenDate={(date) => { m.setDate(date); setView("period"); }}
+            students={m.students}
+            subjectId={m.period.subjectId}
+            subjectName={m.group.subjectName}
+          />
+        )}
+      </Box>
+    );
+  } else {
     const roster = m.rosterQuery.isError ? retry(m.rosterQuery.refetch) : m.rosterQuery.isPending ? <Box aria-busy="true" sx={{ p: 2 }}><ErgLoadingSkeleton rows={4} /></Box> : (
       <StudentAttendanceList
         activeStudentId={m.activeStudentId}
@@ -158,6 +180,10 @@ export function PeriodAttendancePage() {
           />
         </Box>
         {m.pendingCount > 0 ? <ErgStatusChip label={`${attendanceCopy.offlinePending} (${m.pendingCount})`} tone="warning" /> : null}
+        <Box sx={{ display: "flex", gap: 0.5 }}>
+          <ErgButton aria-pressed={view === "period"} onClick={() => setView("period")} variant={view === "period" ? "outlined" : "text"}>Theo tiết</ErgButton>
+          <ErgButton aria-pressed={view === "sheet"} onClick={() => setView("sheet")} variant={view === "sheet" ? "outlined" : "text"}>Bảng tổng</ErgButton>
+        </Box>
         <AttendanceDateField onChange={m.setDate} value={m.date} />
         <ErgButton onClick={openLog} sx={{ borderColor: ergEnterpriseTokens.color.border, color: "primary.main", display: { md: "inline-flex", xs: "none" }, px: "14px" }} variant="outlined">Xem cả tuần</ErgButton>
       </Box>

@@ -11,6 +11,7 @@ import { authApi } from "@/platform/auth/api/auth-api";
 import { clearTeacherSessionSnapshot, readStoredAuthSession, resolveCurrentPortal } from "@/platform/auth/api/auth-token-storage";
 import { logoutStudentSession } from "@/platform/auth/api/student-auth-storage";
 import { useI18n } from "@/platform/i18n";
+import { passwordPolicyError } from "@/platform/auth/password-policy";
 import { usePacedStateBatch } from "@/hooks/use-paced-state-batch";
 import {
   ACCOUNT_DISABLED_EVENT,
@@ -424,9 +425,8 @@ export function useAuthSession(portal: StoredAuthSession["portal"] = resolveCurr
   async function savePassword() {
     if (!account) return;
 
-    if (passwordForm.nextPassword.length < 8) {
-      throw new Error(t("auth.errorPasswordMin"));
-    }
+    const policyError = passwordPolicyError(passwordForm.nextPassword);
+    if (policyError) throw new Error(policyError);
 
     if (passwordForm.nextPassword !== passwordForm.confirmPassword) {
       throw new Error(t("auth.errorNewPasswordConfirmMismatch"));

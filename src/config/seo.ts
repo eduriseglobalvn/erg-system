@@ -10,10 +10,12 @@ export const ERG_ASSETS = {
 
 // Keep in step with the static copy in index.html, which is what link previews and non-JS crawlers read.
 export const SITE_SEO = {
-  title: `Hệ thống ôn luyện trực tuyến MOS & IC3 | ${ERG_BRAND_SUFFIX}`,
+  title: `ERG LMS - Hệ thống ôn luyện MOS & IC3 | ${ERG_BRAND_SUFFIX}`,
   shortName: "ERG LMS",
-  description: "Nền tảng học và thi thử trực tuyến chuẩn quốc tế MOS, IC3 GS6 và IC3 Spark dành cho học sinh.",
+  description: "Đăng nhập ERG LMS của Trung tâm Ngoại ngữ - Tin học ERG (Edurise Global): học và thi thử MOS, IC3 GS6, IC3 Spark bằng tài khoản do ERG hoặc nhà trường cấp.",
   keywords: [
+    "ERG LMS",
+    "đăng nhập LMS ERG",
     "ôn thi IC3 GS6 online",
     "luyện thi IC3 Spark",
     "kiểm tra tin học trực tuyến",

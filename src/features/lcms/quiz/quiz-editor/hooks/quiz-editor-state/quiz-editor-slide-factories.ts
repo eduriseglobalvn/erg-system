@@ -90,7 +90,7 @@ export function buildQuestionSlide(
 }
 
 // Only kinds that have an authoring surface get a runtime question up front.
-function buildRuntimeQuestion(
+export function buildRuntimeQuestion(
   type: QuestionType,
   id: string,
   choices: QuizEditorChoice[],

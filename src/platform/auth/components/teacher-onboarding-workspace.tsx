@@ -16,6 +16,7 @@ import { requiresTeacherOnboarding, type TeacherAccountLifecycle } from "@/platf
 import { describeOnboardingError } from "@/platform/auth/components/teacher-onboarding/onboarding-helpers";
 import { EmailStep, type EmailStepProps } from "@/platform/auth/components/teacher-onboarding/email-step";
 import { PasswordStep } from "@/platform/auth/components/teacher-onboarding/password-step";
+import { passwordPolicyError } from "@/platform/auth/password-policy";
 import { alpha } from "@mui/material/styles";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
@@ -51,7 +52,8 @@ export function TeacherOnboardingWorkspace(props: TeacherOnboardingWorkspaceProp
   function changePassword() {
     const errors: Record<string, string> = {};
     if (!currentPassword) errors.currentPassword = "Vui lòng nhập mật khẩu tạm thời.";
-    if (newPassword.length < 12) errors.newPassword = "Mật khẩu mới cần ít nhất 12 ký tự.";
+    const policyError = passwordPolicyError(newPassword);
+    if (policyError) errors.newPassword = policyError;
     if (newPassword === currentPassword) errors.newPassword = "Mật khẩu mới phải khác mật khẩu tạm thời.";
     if (confirmPassword !== newPassword) errors.confirmPassword = "Xác nhận mật khẩu chưa khớp.";
     setFieldErrors(errors);

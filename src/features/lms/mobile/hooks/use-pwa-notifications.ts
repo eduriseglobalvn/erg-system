@@ -221,14 +221,24 @@ async function syncRegistrationWithApi(current: BrowserPushRegistration, portal:
   const input = await buildDeviceRegistrationInput(current, portal);
   const storedDevice = readStoredDeviceRegistration(portal);
 
-  if (storedDevice && storedDevice.channel === current.channel && deviceIdentityMatches(input, storedDevice)) {
-    await heartbeatNotificationDevice({
+  // A rejected heartbeat means the server row was revoked or another account signed in on this browser took it:
+  // register again so this browser delivers to whoever is signed in now.
+  const heartbeatAccepted =
+    storedDevice &&
+    storedDevice.channel === current.channel &&
+    deviceIdentityMatches(input, storedDevice) &&
+    (await heartbeatNotificationDevice({
       portal,
       deviceRegistrationId: storedDevice.deviceRegistrationId,
       firebaseInstallationId: input.firebaseInstallationId,
       registrationToken: input.registrationToken,
       permissionState: input.permissionState,
-    });
+    }).then(
+      () => true,
+      () => false,
+    ));
+
+  if (storedDevice && heartbeatAccepted) {
     writeStoredDeviceRegistration({
       ...storedDevice,
       endpoint: input.endpoint,

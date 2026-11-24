@@ -6,6 +6,7 @@ import { ErgTextField } from "@/components/erg-mui";
 import { OnboardingSection } from "@/platform/auth/components/teacher-onboarding/onboarding-section";
 import { alpha } from "@mui/material/styles";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
+import { PASSWORD_RULE_TEXT } from "@/platform/auth/password-policy";
 
 export function PasswordStep({
   busy,
@@ -32,7 +33,7 @@ export function PasswordStep({
     <OnboardingSection
       icon={<LockResetRoundedIcon sx={{ fontSize: 20, color: "primary.main" }} />}
       title="Đổi mật khẩu lần đầu"
-      description="Mật khẩu mới cần tối thiểu 12 ký tự và khác mật khẩu tạm thời."
+      description={`Mật khẩu mới: ${PASSWORD_RULE_TEXT.toLowerCase()} Phải khác mật khẩu tạm thời.`}
     >
       <ErgTextField
         label="Mật khẩu tạm thời"
@@ -52,7 +53,7 @@ export function PasswordStep({
         error={Boolean(fieldErrors.newPassword)}
         helperText={fieldErrors.newPassword}
         onChange={(event) => setNewPassword(event.target.value)}
-        placeholder="Tối thiểu 12 ký tự"
+        placeholder="VD: Erg@2026"
       />
       <ErgTextField
         label="Xác nhận mật khẩu mới"

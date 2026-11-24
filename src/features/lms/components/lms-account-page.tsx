@@ -26,6 +26,7 @@ import {
 } from "@/platform/auth/api/account-security-api";
 import { saveCurrentAccount } from "@/platform/auth/api/auth-storage";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
+import { passwordPolicyError } from "@/platform/auth/password-policy";
 import { evaluatePermission } from "@/platform/auth/permissions/permission-evaluator";
 import { nameInitials } from "@/domain/formatters/format-initials";
 
@@ -150,8 +151,9 @@ export function LmsAccountPage({ onLoginLogs, onSignedOut }: { onLoginLogs: () =
   function savePassword() {
     if (!account) return;
     const currentAccount = account;
-    if (newPassword.length < 12) {
-      setError("Mật khẩu mới cần ít nhất 12 ký tự.");
+    const policyError = passwordPolicyError(newPassword);
+    if (policyError) {
+      setError(policyError);
       return;
     }
     if (newPassword !== confirmPassword) {
