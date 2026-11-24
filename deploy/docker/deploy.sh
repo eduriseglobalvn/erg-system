@@ -8,13 +8,6 @@
 # Steps: build the image, start it on 127.0.0.1:8081 (the Cloudflare tunnel's target), wait for /healthz,
 # and go back to the previous image when the new one does not become healthy.
 set -Eeuo pipefail
-# The build takes every core for minutes, so it runs outside school hours, like the backend's deploy.sh.
-in_school_hours() { local m=$((10#${1%:*} * 60 + 10#${1#*:})); [ "$m" -ge 390 ] && [ "$m" -lt 1290 ]; }
-NOW_VN=${DEPLOY_NOW_HHMM:-$(TZ=Asia/Ho_Chi_Minh date +%H:%M)}
-if in_school_hours "$NOW_VN" && [ "${FORCE:-0}" != 1 ]; then
-  echo "Từ chối deploy frontend lúc $NOW_VN giờ Việt Nam: trong giờ học 06:30-21:30. Deploy sau 21:30 hoặc đặt FORCE=1." >&2
-  exit 75
-fi
 SHA=${1:?usage: deploy.sh <git-sha>}
 SRC=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
 FE_DIR=${ERG_FE_DIR:-/opt/erg/fe}
