@@ -8,7 +8,9 @@ import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
 
 import { formatDateVi, formatTimeVi } from "@/domain/formatters/format-date";
+import { timekeepingApi } from "../../api/timekeeping-api";
 import type { ApprovalDetail } from "../../api/timekeeping-types";
+import { LeaveFormDownload } from "../../components/requests/leave-form-file";
 import { ApprovalTimeline } from "../../components/requests/approval-timeline";
 import { requestTimeText, requestTitle } from "../../components/requests/request-model";
 import { unitsVi } from "../../components/my-timesheet/timesheet-summary";
@@ -43,6 +45,11 @@ export function ApprovalDetailBody({ detail }: { detail: ApprovalDetail }) {
       <Line label="Thời gian" value={requestTimeText(request)} />
       {request.type === "LEAVE" ? <Line label="Trừ phép" value={request.leaveKind === "ANNUAL" ? `${unitsVi(request.days)} ngày phép năm` : "Không trừ phép năm"} /> : null}
       {request.note ? <Line label="Lý do" value={request.note} /> : null}
+      {request.id && request.formFileName ? (
+        <Section title="Đơn xin nghỉ phép">
+          <LeaveFormDownload load={() => timekeepingApi.approvalForm(request.id as string)} name={request.formFileName} />
+        </Section>
+      ) : null}
       {periods.length ? (
         <Section title="Tiết bị ảnh hưởng">
           <Table aria-label="Tiết bị ảnh hưởng" size="small">

@@ -1,11 +1,13 @@
 import { useForm, useStore } from "@tanstack/react-form";
 import Box from "@mui/material/Box";
+import { useState } from "react";
 
 import { todayInput } from "@/domain/formatters/format-date";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useLeavePreview } from "../../api/timekeeping-request-query";
 import type { RequestCommand, RequestView } from "../../api/timekeeping-types";
 import { ChipChoice } from "./chip-choice";
+import { LeaveFormFile } from "./leave-form-file";
 import { AffectedPeriods, ApproverList, LeaveBalanceLine } from "./leave-preview-summary";
 import { LEAVE_KIND_LABEL, PART_LABEL, requestErrorText } from "./request-model";
 import { RequestField } from "./request-field";
@@ -26,7 +28,12 @@ const toCommand = (v: LeaveFormValues): RequestCommand => ({
   note: v.reason.trim(),
 });
 
-/** G08: leave request. Days and balance come from preview-leave (debounced 300 ms); the form is also used to edit (`initial`). */
+const FORM_REQUIRED = "Tải lên đơn xin nghỉ phép đã điền (file Word) trước khi gửi";
+
+/**
+ * G08: leave request. Days and balance come from preview-leave (debounced 300 ms); the form is also used to edit (`initial`).
+ * Sending needs the filled-in Word form; a draft may be saved without it.
+ */
 export function LeaveRequestForm({ initial }: { initial?: RequestView }) {
   const nav = useRequestsNav();
   const submit = useRequestSubmit(initial);
@@ -43,12 +50,21 @@ export function LeaveRequestForm({ initial }: { initial?: RequestView }) {
   const values = useStore(form.store, (state) => state.values);
   const errors = validateLeave(values);
   const shown = submit.attempted ? errors : {};
+  const [formFile, setFormFile] = useState<{ file: File | null; error: string | null }>({ file: null, error: null });
+  // Editing a pending request makes a new draft, which has no form yet: only a draft keeps its stored one.
+  const storedForm = initial?.status === "DRAFT" ? initial.formFileName : undefined;
+  const [sendAttempted, setSendAttempted] = useState(false);
+  const formMissing = !formFile.file && !storedForm;
 
   const settled = useDebouncedValue(values, 300);
   const previewable = settled.from && settled.to >= settled.from && (settled.part === "FULL" || settled.from === settled.to);
   const preview = useLeavePreview(previewable ? { from: settled.from, to: settled.to, kind: settled.kind, part: settled.part } : null);
 
-  const send = (sendIt: boolean) => void submit.run(hasErrors(errors) ? null : toCommand(values), sendIt);
+  const send = (sendIt: boolean) => {
+    if (sendIt) setSendAttempted(true);
+    const blocked = hasErrors(errors) || (sendIt && formMissing);
+    void submit.run(blocked ? null : toCommand(values), sendIt, formFile.file);
+  };
   const single = (part: DayPart, from: string) => {
     form.setFieldValue("part", part);
     if (part !== "FULL") form.setFieldValue("to", from);
@@ -103,6 +119,12 @@ export function LeaveRequestForm({ initial }: { initial?: RequestView }) {
             <RequestField error={shown.reason} helper="Lý do chỉ người duyệt nhìn thấy" label="Lý do" multiline onChange={field.handleChange} value={field.state.value} />
           )}
         </form.Field>
+        <LeaveFormFile
+          error={formFile.error ?? (sendAttempted && formMissing ? FORM_REQUIRED : undefined)}
+          file={formFile.file}
+          onChange={(file, error) => setFormFile((current) => ({ file: file ?? current.file, error }))}
+          storedName={storedForm}
+        />
         <ApproverList approvers={preview.data?.approvers} />
       </Box>
     </RequestFormFrame>

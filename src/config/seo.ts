@@ -53,7 +53,6 @@ const PAGE_TITLES: Record<string, string> = {
   "/teacher/reports": "Báo cáo",
   "/teacher/resources": "Tài nguyên",
   "/teacher/timekeeping": "Chấm công",
-  "/teacher/timekeeping/approvals": "Duyệt đơn",
   "/teacher/timekeeping/requests": "Đơn từ",
   "/teacher/timekeeping/timesheet": "Bảng công",
   "/teacher/account": "Tài khoản",

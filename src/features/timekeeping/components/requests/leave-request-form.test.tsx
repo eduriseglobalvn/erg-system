@@ -7,7 +7,7 @@ import type { LeavePreview, RequestView } from "../../api/timekeeping-types";
 import { LeaveRequestForm } from "./leave-request-form";
 
 const h = vi.hoisted(() => ({
-  api: { previewLeave: vi.fn(), createRequest: vi.fn(), updateRequest: vi.fn(), submitRequest: vi.fn(), cancelRequest: vi.fn() },
+  api: { previewLeave: vi.fn(), createRequest: vi.fn(), updateRequest: vi.fn(), submitRequest: vi.fn(), cancelRequest: vi.fn(), attachRequestForm: vi.fn() },
   navigate: vi.fn(),
 }));
 vi.mock("../../api/timekeeping-api", () => ({ timekeepingApi: h.api }));
@@ -29,10 +29,13 @@ function renderForm(initial?: RequestView) {
   return render(<QueryClientProvider client={client}><LeaveRequestForm initial={initial} /></QueryClientProvider>);
 }
 
+const DOCX = new File(["PK"], "don-nghi-phep.docx");
+const pickForm = (file: File = DOCX) => fireEvent.change(screen.getByLabelText("File đơn xin nghỉ phép"), { target: { files: [file] } });
+
 afterEach(() => vi.clearAllMocks());
 
 describe("LeaveRequestForm (G08)", () => {
-  it("shows days and balance from preview-leave, the affected periods, and no attachment/invite/compensatory controls", async () => {
+  it("shows days and balance from preview-leave, the affected periods, the Word form controls, and no invite/compensatory controls", async () => {
     const { container } = renderForm();
     expect(await screen.findByText("2 ngày làm việc")).toBeInTheDocument();
     expect(screen.getByText("Phép năm còn 8,5 → 6,5 ngày sau khi duyệt")).toBeInTheDocument();
@@ -42,7 +45,9 @@ describe("LeaveRequestForm (G08)", () => {
     expect(screen.getByText("Lý do chỉ người duyệt nhìn thấy")).toBeInTheDocument();
     expect(screen.getByLabelText("Bước 1")).toBeInTheDocument();
     expect(screen.getByText("Trần Minh")).toBeInTheDocument();
-    expect(screen.queryByText(/Mời|Đính kèm|Nghỉ bù|Trao đổi/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Mời|Nghỉ bù|Trao đổi/)).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Tải mẫu đơn" })).toHaveAttribute("href", "/forms/don-xin-nghi-phep.docx");
+    expect(screen.getByRole("button", { name: "Chọn file đã điền" })).toBeInTheDocument();
     expect(screen.getAllByRole("radio", { name: /Phép năm|Nghỉ ốm|Việc riêng có lương|Không lương/ })).toHaveLength(4);
     expect(screen.getByRole("button", { name: "Lưu nháp" })).toBeInTheDocument();
     expect(container.querySelectorAll(".MuiButton-contained")).toHaveLength(1);
@@ -63,6 +68,7 @@ describe("LeaveRequestForm (G08)", () => {
     h.api.createRequest.mockResolvedValue({ id: "r1", status: "DRAFT" });
     h.api.submitRequest.mockRejectedValue(new ApiClientError("Phép năm còn 1,5 ngày, không đủ cho 2 ngày", "INSUFFICIENT_LEAVE", 422));
     fireEvent.change(screen.getByLabelText("Lý do"), { target: { value: "Việc gia đình" } });
+    pickForm();
     fireEvent.click(screen.getByRole("button", { name: "Gửi đơn" }));
     expect(await screen.findByText("Phép năm còn 1,5 ngày, không đủ cho 2 ngày")).toBeInTheDocument();
     expect(screen.getByLabelText("Từ ngày")).toBeInTheDocument();
@@ -78,6 +84,7 @@ describe("LeaveRequestForm (G08)", () => {
     h.api.updateRequest.mockResolvedValue({ id: "r1", status: "DRAFT" });
     h.api.submitRequest.mockRejectedValueOnce(new ApiClientError("Chưa có người duyệt cho đơn này", "NO_APPROVER", 422)).mockResolvedValueOnce({ id: "r1", status: "PENDING" });
     fireEvent.change(screen.getByLabelText("Lý do"), { target: { value: "Việc gia đình" } });
+    pickForm();
     fireEvent.click(screen.getByRole("button", { name: "Gửi đơn" }));
     expect(await screen.findByText("Chưa có người duyệt cho đơn này")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Gửi đơn" }));
@@ -90,19 +97,22 @@ describe("LeaveRequestForm (G08)", () => {
     renderForm(PENDING_LEAVE);
     expect(screen.getByText(/Sửa đơn đang chờ sẽ huỷ đơn hiện tại và gửi lại đơn mới/)).toBeInTheDocument();
     h.api.createRequest.mockResolvedValue({ id: "new1", status: "DRAFT" });
+    pickForm();
     h.api.cancelRequest.mockResolvedValue({ id: "old1", status: "CANCELLED" });
     h.api.submitRequest.mockResolvedValue({ id: "new1", status: "PENDING" });
     fireEvent.click(screen.getByRole("button", { name: "Gửi đơn" }));
     await waitFor(() => expect(h.api.submitRequest).toHaveBeenCalledWith("new1"));
     expect(h.api.cancelRequest).toHaveBeenCalledWith("old1");
     const order = (m: { mock: { invocationCallOrder: number[] } }) => m.mock.invocationCallOrder[0];
-    expect(order(h.api.createRequest)).toBeLessThan(order(h.api.cancelRequest));
+    expect(order(h.api.createRequest)).toBeLessThan(order(h.api.attachRequestForm));
+    expect(order(h.api.attachRequestForm)).toBeLessThan(order(h.api.cancelRequest));
     expect(order(h.api.cancelRequest)).toBeLessThan(order(h.api.submitRequest));
   });
 
   it("leaves the old pending request alone when saving the new one fails", async () => {
     renderForm(PENDING_LEAVE);
     h.api.createRequest.mockRejectedValue(new ApiClientError("Ngày kết thúc phải sau ngày bắt đầu", "INVALID_RANGE", 400));
+    pickForm();
     fireEvent.click(screen.getByRole("button", { name: "Gửi đơn" }));
     expect(await screen.findByText("Ngày kết thúc phải sau ngày bắt đầu")).toBeInTheDocument();
     expect(h.api.cancelRequest).not.toHaveBeenCalled();
@@ -113,6 +123,7 @@ describe("LeaveRequestForm (G08)", () => {
     renderForm();
     h.api.createRequest.mockRejectedValue(new ApiClientError("java.lang.NullPointerException at ...", "INTERNAL", 500));
     fireEvent.change(screen.getByLabelText("Lý do"), { target: { value: "Việc gia đình" } });
+    pickForm();
     fireEvent.click(screen.getByRole("button", { name: "Gửi đơn" }));
     expect(await screen.findByText("Có lỗi xảy ra, thử lại.")).toBeInTheDocument();
     expect(screen.queryByText(/NullPointer/)).not.toBeInTheDocument();
@@ -123,5 +134,34 @@ describe("LeaveRequestForm (G08)", () => {
     fireEvent.click(screen.getByRole("button", { name: "Gửi đơn" }));
     expect(await screen.findByText("Nhập lý do")).toBeInTheDocument();
     expect(h.api.createRequest).not.toHaveBeenCalled();
+  });
+
+  it("sends nothing without the filled-in Word form, refuses other file types, then uploads the form to the draft before sending", async () => {
+    renderForm();
+    h.api.createRequest.mockResolvedValue({ id: "r1", status: "DRAFT" });
+    h.api.submitRequest.mockResolvedValue({ id: "r1", status: "PENDING" });
+    fireEvent.change(screen.getByLabelText("Lý do"), { target: { value: "Việc gia đình" } });
+    fireEvent.click(screen.getByRole("button", { name: "Gửi đơn" }));
+    expect(await screen.findByText("Tải lên đơn xin nghỉ phép đã điền (file Word) trước khi gửi")).toBeInTheDocument();
+    expect(h.api.createRequest).not.toHaveBeenCalled();
+
+    pickForm(new File(["%PDF"], "don.pdf"));
+    expect(screen.getByText("Đơn phải là file Word (.docx hoặc .doc)")).toBeInTheDocument();
+    pickForm();
+    expect(screen.getByText("Đã chọn: don-nghi-phep.docx")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Gửi đơn" }));
+    await waitFor(() => expect(h.api.submitRequest).toHaveBeenCalledWith("r1"));
+    expect(h.api.attachRequestForm).toHaveBeenCalledWith("r1", DOCX);
+    expect(h.api.attachRequestForm.mock.invocationCallOrder[0]).toBeLessThan(h.api.submitRequest.mock.invocationCallOrder[0]);
+  });
+
+  it("a draft that already has its form can be sent without picking the file again", async () => {
+    renderForm({ id: "d1", status: "DRAFT", type: "LEAVE", leaveKind: "SICK", fromDate: "2026-11-10", toDate: "2026-11-10", note: "Ốm", formFileName: "don-cu.docx" });
+    expect(screen.getByText("Đã chọn: don-cu.docx")).toBeInTheDocument();
+    h.api.updateRequest.mockResolvedValue({ id: "d1", status: "DRAFT" });
+    h.api.submitRequest.mockResolvedValue({ id: "d1", status: "PENDING" });
+    fireEvent.click(screen.getByRole("button", { name: "Gửi đơn" }));
+    await waitFor(() => expect(h.api.submitRequest).toHaveBeenCalledWith("d1"));
+    expect(h.api.attachRequestForm).not.toHaveBeenCalled();
   });
 });

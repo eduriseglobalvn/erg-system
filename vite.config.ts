@@ -50,7 +50,7 @@ export default defineConfig(({ command, mode }) => {
         ],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         navigateFallback: "/index.html",
-        navigateFallbackDenylist: [/^\/api\//, /^\/auth\//, /^\/sso\//],
+        navigateFallbackDenylist: [/^\/api\//, /^\/auth\//, /^\/sso\//, /^\/forms\//],
         runtimeCaching: [
           {
             urlPattern: /\/api\/v1\/graphql(?:[/?#]|$)/i,
