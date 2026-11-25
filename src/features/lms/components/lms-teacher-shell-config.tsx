@@ -15,7 +15,6 @@ import InboxRoundedIcon from "@mui/icons-material/InboxRounded";
 import LeaderboardRoundedIcon from "@mui/icons-material/LeaderboardRounded";
 import SportsEsportsRoundedIcon from "@mui/icons-material/SportsEsportsRounded";
 import MenuBookRoundedIcon from "@mui/icons-material/MenuBookRounded";
-import PendingActionsRoundedIcon from "@mui/icons-material/PendingActionsRounded";
 import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
 import TodayRoundedIcon from "@mui/icons-material/TodayRounded";
 import FactCheckRoundedIcon from "@mui/icons-material/FactCheckRounded";
@@ -158,7 +157,6 @@ export const LMS_MENU_GROUPS: MenuGroup[] = [
           { id: "timekeeping-today", label: "Chấm công hôm nay", path: teacherPath("/timekeeping") },
           { id: "timekeeping-timesheet", label: "Công của tôi", path: teacherPath("/timekeeping/timesheet") },
           { id: "timekeeping-requests", label: "Đơn từ", path: teacherPath("/timekeeping/requests") },
-          { id: "timekeeping-approvals", label: "Duyệt đơn", path: teacherPath("/timekeeping/approvals") },
         ],
       },
     ],
@@ -193,7 +191,6 @@ export const lmsMobileMoreItems: LmsMobileMoreItem[] = [
   { group: "Giảng dạy", icon: <LeaderboardRoundedIcon />, label: "Thi đua", path: teacherPath("/leaderboard") },
   { group: "Chấm công", icon: <FileText />, label: "Đơn từ", path: teacherPath("/timekeeping/requests"), tone: "success" },
   { group: "Chấm công", icon: <CalendarViewMonthRoundedIcon />, label: "Công của tôi", path: teacherPath("/timekeeping/timesheet"), tone: "success" },
-  { group: "Chấm công", icon: <PendingActionsRoundedIcon />, label: "Duyệt đơn", path: teacherPath("/timekeeping/approvals"), tone: "success" },
   { group: "Trợ giúp", icon: <HelpOutlineRoundedIcon />, label: "Hướng dẫn", path: teacherPath("/help") },
 ];
 

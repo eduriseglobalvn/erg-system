@@ -93,5 +93,4 @@ export const LMS_ROUTE_PERMISSIONS = {
   "timekeeping/punch": "timekeeping.self",
   "timekeeping/timesheet": "timekeeping.self",
   "timekeeping/requests": "timekeeping.self",
-  "timekeeping/approvals": "timekeeping.approve",
 } as const satisfies Record<LmsProtectedRoute, LmsRoutePermission>;

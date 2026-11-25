@@ -10,7 +10,6 @@ const text = (value: unknown) => (typeof value === "string" && value.trim() ? va
 export function useApprovalsSearch(canSeeAll: boolean) {
   const raw = useSearch({ strict: false }) as Record<string, unknown>;
   const navigate = useNavigate();
-  // Stay on the route that rendered A03: /admin/employees/teacher-absence or /teacher/timekeeping/approvals.
   const { pathname } = useLocation();
   const tab: ApprovalTab = raw.tab === "done" ? "done" : raw.tab === "all" && canSeeAll ? "all" : "mine";
   const search: ApprovalsSearch = { tab, type: text(raw.type), schoolId: text(raw.schoolId), due: text(raw.due), id: text(raw.id) };

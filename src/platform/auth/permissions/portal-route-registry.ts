@@ -92,5 +92,4 @@ export const lmsPaths = [
   "timekeeping/punch",
   "timekeeping/timesheet",
   "timekeeping/requests",
-  "timekeeping/approvals",
 ] as const;

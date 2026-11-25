@@ -76,6 +76,14 @@ export const timekeepingApi = {
     client().request<RequestView>(endpoints.requests.root, { method: "POST", body: JSON.stringify(body) }),
   updateRequest: (id: string, body: RequestCommand) =>
     client().request<RequestView>(endpoints.requests.detail(id), { method: "PUT", body: JSON.stringify(body) }),
+  /** The filled-in leave form (Word) of a draft; a second upload replaces the first. */
+  attachRequestForm: (id: string, file: File) => {
+    const body = new FormData();
+    body.set("file", file, file.name);
+    return client().request<RequestView>(endpoints.requests.form(id), { method: "POST", body });
+  },
+  requestForm: (id: string) => client().request<Blob>(endpoints.requests.form(id), { responseType: "blob", cache: "no-store" }),
+  approvalForm: (requestId: string) => client().request<Blob>(endpoints.approvals.form(requestId), { responseType: "blob", cache: "no-store" }),
   submitRequest: (id: string) => client().request<RequestView>(endpoints.requests.submit(id), { method: "POST" }),
   cancelRequest: (id: string) => client().request<RequestView>(endpoints.requests.cancel(id), { method: "POST" }),
   remindRequest: (id: string) => client().request<RequestView>(endpoints.requests.remind(id), { method: "POST" }),

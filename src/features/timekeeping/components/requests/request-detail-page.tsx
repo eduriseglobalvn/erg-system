@@ -10,11 +10,13 @@ import { ErgButton, ErgIconButton } from "@/components/erg-mui/erg-actions";
 import { ErgConfirmDialog } from "@/components/erg-mui/erg-confirm-dialog";
 import { ErgErrorState, ErgSkeleton, ErgStatusChip } from "@/components/erg-mui/erg-feedback";
 import { formatDateTimeVi } from "@/domain/formatters/format-date";
+import { timekeepingApi } from "../../api/timekeeping-api";
 import { useCancelRequest, useRemindRequest, useRequest } from "../../api/timekeeping-request-query";
 import type { RequestView } from "../../api/timekeeping-types";
 import { unitsVi } from "../my-timesheet/timesheet-summary";
 import { IconTile, PunchCard } from "../punch/punch-card";
 import { ApprovalTimeline } from "./approval-timeline";
+import { LeaveFormDownload } from "./leave-form-file";
 import { stickyActionsSx } from "./request-form-frame";
 import { REQUEST_ICON } from "./request-list-item";
 import { requestErrorText, requestTimeText, requestTitle, STATUS_CHIP, timelineSteps } from "./request-model";
@@ -136,6 +138,12 @@ export function RequestDetailPage({ id }: { id: string }) {
           <Line label="Thời gian" value={requestTimeText(data)} />
           {deducts ? <Line label="Trừ quỹ phép" value={deducts} /> : null}
           {data.note ? <Box sx={{ gridColumn: "1 / -1" }}><Line label="Lý do" plain value={data.note} /></Box> : null}
+          {data.formFileName ? (
+            <Box sx={{ gridColumn: "1 / -1" }}>
+              <Typography color="text.secondary" component="div" variant="caption">Đơn xin nghỉ phép</Typography>
+              <LeaveFormDownload load={() => timekeepingApi.requestForm(id)} name={data.formFileName} />
+            </Box>
+          ) : null}
         </Box>
       </PunchCard>
       {data.status !== "DRAFT" ? (

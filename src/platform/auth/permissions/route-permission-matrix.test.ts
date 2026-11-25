@@ -29,7 +29,6 @@ describe("route/resource/action permission matrix", () => {
     ["/admin/employees/access-logs", "ADMIN", "users.activity.read"],
     ["/teacher/timekeeping", "TEACHER", "timekeeping.self"],
     ["/teacher/timekeeping/requests", "TEACHER", "timekeeping.self"],
-    ["/teacher/timekeeping/approvals", "TEACHER", "timekeeping.approve"],
     ["/admin/employees/timekeeping", "ADMIN", "timekeeping.manage"],
     ["/admin/employees/timesheet", "ADMIN", "timekeeping.manage"],
     ["/admin/employees/timekeeping-settings", "ADMIN", "timekeeping.manage"],

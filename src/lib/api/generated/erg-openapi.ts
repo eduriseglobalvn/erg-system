@@ -3918,6 +3918,22 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
+    readonly "/api/v1/timekeeping/approvals/{requestId}/form": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["form_1"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
     readonly "/api/v1/timekeeping/approvals/{requestId}/reject": {
         readonly parameters: {
             readonly query?: never;
@@ -4168,6 +4184,22 @@ export interface paths {
         readonly get?: never;
         readonly put?: never;
         readonly post: operations["cancel"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/timekeeping/requests/{id}/form": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["form"];
+        readonly put?: never;
+        readonly post: operations["attachForm"];
         readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
@@ -10019,6 +10051,7 @@ export interface components {
             readonly evidence?: readonly components["schemas"]["EvidenceView"][];
             /** @enum {string} */
             readonly explanationReason?: "FORGOT" | "DEVICE" | "OUTSIDE" | "BUSINESS_TRIP";
+            readonly formFileName?: string;
             /** Format: date */
             readonly fromDate?: string;
             readonly id?: string;
@@ -18172,6 +18205,28 @@ export interface operations {
             };
         };
     };
+    readonly form_1: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly requestId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": string;
+                };
+            };
+        };
+    };
     readonly reject: {
         readonly parameters: {
             readonly query?: never;
@@ -18567,6 +18622,57 @@ export interface operations {
             readonly cookie?: never;
         };
         readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseRequestView"];
+                };
+            };
+        };
+    };
+    readonly form: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly id: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": string;
+                };
+            };
+        };
+    };
+    readonly attachForm: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly id: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: {
+            readonly content: {
+                readonly "multipart/form-data": {
+                    /** Format: binary */
+                    readonly file: string;
+                };
+            };
+        };
         readonly responses: {
             /** @description OK */
             readonly 200: {

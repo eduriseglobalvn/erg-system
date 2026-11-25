@@ -275,6 +275,7 @@ export const API_ENDPOINTS = {
       submit: (id: string) => path(`${timekeepingRoot}/requests/${encodeApiPathSegment(id)}/submit`),
       cancel: (id: string) => path(`${timekeepingRoot}/requests/${encodeApiPathSegment(id)}/cancel`),
       remind: (id: string) => path(`${timekeepingRoot}/requests/${encodeApiPathSegment(id)}/remind`),
+      form: (id: string) => path(`${timekeepingRoot}/requests/${encodeApiPathSegment(id)}/form`),
     },
     approvals: {
       root: "/api/v1/timekeeping/approvals" satisfies ContractPath,
@@ -282,6 +283,7 @@ export const API_ENDPOINTS = {
       detail: (requestId: string) => path(`${timekeepingRoot}/approvals/${encodeApiPathSegment(requestId)}`),
       approve: (requestId: string) => path(`${timekeepingRoot}/approvals/${encodeApiPathSegment(requestId)}/approve`),
       reject: (requestId: string) => path(`${timekeepingRoot}/approvals/${encodeApiPathSegment(requestId)}/reject`),
+      form: (requestId: string) => path(`${timekeepingRoot}/approvals/${encodeApiPathSegment(requestId)}/form`),
     },
     admin: {
       today: "/api/v1/timekeeping/admin/today" satisfies ContractPath,
