@@ -33,7 +33,7 @@ export function rangeError(from: string, to: string) {
   return "";
 }
 
-/** «Xoá theo khoảng»: xoá mọi tiết (nháp + đã áp dụng, kể cả đã qua) của một giáo viên trong khoảng ngày; đếm trước khi xoá. */
+/** «Xoá theo khoảng»: xoá tiết nháp và tiết đã áp dụng chưa bắt đầu của một giáo viên trong khoảng ngày; tiết đã dạy giữ lại (BE). Đếm trước khi xoá. */
 export function RangeDeleteDialog({ defaultFrom, defaultTo, onClose, open, schools, teachers }: Props) {
   const queryClient = useQueryClient();
   const tenantId = getDefaultTenantId();
@@ -50,8 +50,12 @@ export function RangeDeleteDialog({ defaultFrom, defaultTo, onClose, open, schoo
     queryKey: [...teachingCalendarQueryKeys.portalRoot("lcms", tenantId), "range-delete-impact", teacherId, schoolIds.join(","), from, to],
     queryFn: async ({ signal }) => {
       const events = await loadEventsInRange({ from, schoolIds, teacherIds: [teacherId], tenantId, to }, signal);
+      const now = Date.now();
       const mine = events.filter((event) => event.teachers.some((teacher) => teacher.userId === teacherId));
-      return { ...deleteImpact(mine), published: mine.filter((event) => event.status === "PUBLISHED").length };
+      // BE deleteTeacherSchedule: tiet da ap dung da bat dau la lich su (cong, luong), khong bao gio bi xoa.
+      const taught = (event: (typeof mine)[number]) => event.status === "PUBLISHED" && Date.parse(event.startAt) < now;
+      const doomed = mine.filter((event) => !taught(event));
+      return { ...deleteImpact(doomed, now), kept: mine.length - doomed.length, published: doomed.filter((event) => event.status === "PUBLISHED").length };
     },
     staleTime: 0,
   });
@@ -86,7 +90,7 @@ export function RangeDeleteDialog({ defaultFrom, defaultTo, onClose, open, schoo
         <ErgTextField label="Đến ngày" onChange={(event) => setTo(event.target.value)} size="small" slotProps={{ inputLabel: { shrink: true } }} type="date" value={to} />
       </Box>
       <Typography aria-live="polite" sx={{ color: invalid && teacherId ? "error.main" : "text.primary", mt: 2, typography: "body2" }}>{summary}</Typography>
-      {data?.past ? <Typography sx={{ color: "error.main", mt: 0.5, typography: "body2" }}>Trong đó {data.past} tiết đã qua cũng bị xoá khỏi lịch sử.</Typography> : null}
+      {data?.kept ? <Typography sx={{ color: "text.secondary", mt: 0.5, typography: "body2" }}>{data.kept} tiết đã dạy được giữ lại để tính công.</Typography> : null}
       {data?.published ? <Typography sx={{ color: "text.secondary", mt: 0.5, typography: "body2" }}>{teacherName} sẽ nhận thông báo huỷ cho {data.published} tiết đã áp dụng.</Typography> : null}
       {data?.total ? <Typography sx={{ color: "error.main", mt: 0.5, typography: "body2" }}>Không hoàn tác được.</Typography> : null}
     </ErgConfirmDialog>
