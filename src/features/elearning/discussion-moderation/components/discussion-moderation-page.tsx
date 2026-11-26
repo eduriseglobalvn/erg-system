@@ -68,7 +68,7 @@ export function DiscussionModerationPage({ portal }: { portal: GraphQlPortal }) 
   const loading = classes.isPending || (Boolean(classId) && feed.isPending);
 
   return (
-    <Box sx={{ maxWidth: 880, mx: "auto", px: { xs: 2, md: 0 }, py: { xs: 2, md: 3 } }}>
+    <Box sx={{ pb: 3, pt: { md: 3, xs: 2 }, px: { md: 4, xs: 2 } }}>
       <ErgPageHeader title="Thảo luận" description="Bài viết và bình luận của học viên theo lớp. Nội dung đã ẩn chỉ giáo viên và quản trị thấy." />
       {classes.data?.length ? (
         <ErgSelect

@@ -353,7 +353,7 @@
   },
   "src/features/lcms/admin-menu.tsx": {
     "hex": 0,
-    "font": 10
+    "font": 9
   },
   "src/features/lcms/admin-operations/components/admin-operations-center-management.tsx": {
     "hex": 8,

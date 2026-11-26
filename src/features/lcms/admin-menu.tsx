@@ -1,6 +1,5 @@
 import type { MenuGroup, MenuItem } from "@/components/portal/ErgPortalLayout";
 import ArticleRoundedIcon from "@mui/icons-material/ArticleRounded";
-import FlagRoundedIcon from "@mui/icons-material/FlagRounded";
 import DashboardRoundedIcon from "@mui/icons-material/DashboardRounded";
 import EventAvailableRoundedIcon from "@mui/icons-material/EventAvailableRounded";
 import ExtensionRoundedIcon from "@mui/icons-material/ExtensionRounded";
@@ -117,17 +116,12 @@ export const ADMIN_BASE_MENU_GROUPS: MenuGroup[] = [
         variant: "admin-internal-docs",
       }),
       item({
-        label: "Chuẩn đầu ra",
-        icon: <FlagRoundedIcon sx={{ fontSize: 24 }} />,
-        path: "/learning-outcomes",
-        section: "Giảng dạy",
-      }),
-      item({
         id: "admin-lesson-reports",
         label: "Báo giảng",
         icon: <ArticleRoundedIcon />,
         path: "/training/lesson-reports",
         description: "Theo dõi giáo viên đã và chưa báo giảng theo tuần.",
+        section: "Giảng dạy",
       }),
       item({
         id: "admin-discussion",

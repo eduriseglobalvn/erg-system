@@ -75,7 +75,7 @@ export function ClassLeaderboardPage({ portal }: { portal: GraphQlPortal }) {
   const loading = allClasses.isPending || (Boolean(classId) && board.isPending);
 
   return (
-    <Box sx={{ maxWidth: 1040, mx: "auto", px: { xs: 2, md: 0 }, py: { xs: 2, md: 3 } }}>
+    <Box sx={{ pb: 3, pt: { md: 3, xs: 2 }, px: { md: 4, xs: 2 } }}>
       <ErgPageHeader
         title="Thi đua"
         description={(
