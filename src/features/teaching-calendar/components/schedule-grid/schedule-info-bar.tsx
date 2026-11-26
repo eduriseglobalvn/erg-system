@@ -3,6 +3,7 @@ import Box from "@mui/material/Box";
 import InputAdornment from "@mui/material/InputAdornment";
 
 import { ErgSelect, ErgTextField } from "@/components/erg-mui/erg-form";
+import { addDaysToDate, dayLabel } from "@/features/teaching-calendar/domain/schedule-copy";
 import type { TeachingPeriodTemplate } from "@/features/teaching-calendar/api/teaching-calendar-schedule-api";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 import type { DraftMeta } from "./use-schedule-draft";
@@ -24,6 +25,28 @@ export function weeksBetween(from: string, until: string) {
 }
 
 const { color, radius, type } = ergEnterpriseTokens;
+
+/** «Lặp 3 tuần: Thứ 2, 30/11 → Chủ nhật, 20/12/2026 · 12 tiết/tuần → 36 buổi»; "" khi chưa đủ ngày. */
+export function repeatSummary(applyFrom: string, repeatUntil: string, perWeek: number) {
+  const weeks = weeksBetween(applyFrom, repeatUntil);
+  if (!weeks) return "";
+  const end = addDaysToDate(applyFrom, weeks * 7 - 1);
+  return `Lặp ${weeks} tuần: ${dayLabel(applyFrom)} → ${dayLabel(end)}/${end.slice(0, 4)} · ${perWeek} tiết/tuần → ${perWeek * weeks} buổi`;
+}
+
+/** Dòng dưới thanh thông tin: nói rõ số tuần lặp; 1 tuần tô vàng vì hay là quên chỉnh «Lặp đến». */
+export function RepeatSummaryLine({ applyFrom, perWeek, repeatUntil }: { applyFrom: string; perWeek: number; repeatUntil: string }) {
+  const text = repeatSummary(applyFrom, repeatUntil, perWeek);
+  if (!text) return null;
+  const single = weeksBetween(applyFrom, repeatUntil) === 1;
+  const tone = ergEnterpriseTokens.schedule.warn;
+  return (
+    <Box aria-live="polite" sx={{ bgcolor: single ? tone.bg : "transparent", borderRadius: `${radius.control}px`, color: single ? tone.text : color.textMuted, px: single ? 1.5 : 0, py: single ? 0.75 : 0, ...type.note }}>
+      {text}{single ? " · Chỉ 1 tuần — kiểm tra lại «Lặp đến» nếu muốn lặp cả kỳ." : ""}
+    </Box>
+  );
+}
+
 
 /** O nhap cao 36px, bo 10, chu 14/400 (board AdminCreate); nhan nam tren o, 12px xam. */
 const controlSx = {

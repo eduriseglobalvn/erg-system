@@ -17,6 +17,7 @@ import { dayLabel } from "@/features/teaching-calendar/domain/schedule-copy";
 import { formatDateVi } from "@/domain/formatters/format-date";
 import type { ScheduleConflict } from "@/features/teaching-calendar/domain/schedule-grid-model";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
+import { BatchDeleteDialog } from "../bulk-delete/batch-delete-dialog";
 import { scheduleTokens } from "../shared/schedule-cell-sx";
 import { teacherTone } from "../shared/teacher-tone";
 
@@ -39,6 +40,7 @@ type DetailsProps = Omit<Props, "anchorEl" | "event"> & { event: TeachingCalenda
 /** Noi dung chi tiet tiet (6.1): dung chung cho popover desktop va bottom sheet mobile (6.8). */
 export function EventDetails({ canDelete, conflicts, event, onClose, onDelete, onOpenSchedule, repeatUntil, showClose = true }: DetailsProps) {
   const [confirm, setConfirm] = useState(false);
+  const [deleteBatch, setDeleteBatch] = useState(false);
   const main = event.teachers.find((teacher) => teacher.role === "MAIN")?.displayName;
   const assistant = event.teachers.find((teacher) => teacher.role === "ASSISTANT")?.displayName;
   const own = conflicts.filter((conflict) => conflict.mine.eventId === event.id && conflict.severity === "ERROR");
@@ -72,6 +74,7 @@ export function EventDetails({ canDelete, conflicts, event, onClose, onDelete, o
         <Box sx={{ alignItems: "center", borderTop: `1px solid ${color.divider}`, display: "flex", gap: 1, pt: 1 }}>
           <Link component="button" disabled={!canOpen} onClick={() => onOpenSchedule(event, "teacher")} sx={{ typography: "subtitle2", fontSize: "0.8125rem" }} type="button" underline="none">Đổi giáo viên</Link>
           <Link component="button" color="inherit" disabled={!canOpen} onClick={() => onOpenSchedule(event, "move")} sx={{ fontSize: "0.8125rem" }} type="button" underline="none">Dời tiết</Link>
+          {canDelete && event.batchId ? <Link color="error" component="button" onClick={() => setDeleteBatch(true)} sx={{ fontSize: "0.8125rem" }} type="button" underline="none">Xoá cả đợt…</Link> : null}
           {draft ? <Box component="span" sx={{ bgcolor: scheduleTokens.neutral.bg, borderRadius: "999px", color: scheduleTokens.neutral.text, fontSize: "0.75rem", ml: "auto", px: 1, py: "1px" }}>Nháp</Box> : null}
         </Box>
       </Box>
@@ -81,6 +84,7 @@ export function EventDetails({ canDelete, conflicts, event, onClose, onDelete, o
         onConfirm={() => { setConfirm(false); void onDelete(event).then(onClose).catch(() => undefined /* loi da co toast toan cuc (MutationCache) */); }}
         open={confirm} title="Xoá tiết này?"
       />
+      <BatchDeleteDialog batchId={deleteBatch ? event.batchId ?? null : null} onClose={() => setDeleteBatch(false)} onDone={onClose} />
     </>
   );
 }
