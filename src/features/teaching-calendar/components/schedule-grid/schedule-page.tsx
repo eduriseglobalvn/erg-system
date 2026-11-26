@@ -14,9 +14,11 @@ import { teachingCalendarQueryKeys } from "@/features/teaching-calendar/api/teac
 import { publishTeachingScheduleBatchV2 } from "@/features/teaching-calendar/api/teaching-calendar-schedule-api";
 import { addDaysToDate } from "@/features/teaching-calendar/domain/schedule-copy";
 import { applyConflictFix, cellKey, classesOverWeeklyLimit, conflictRow, dateOfCell, errorConflicts, moveOrSwap, weeklyLimitMessage, type GridRow, type ScheduleConflict } from "@/features/teaching-calendar/domain/schedule-grid-model";
+import { formatDateVi } from "@/domain/formatters/format-date";
 import { getDefaultTenantId } from "@/lib/graphql-client";
 import { adminPath } from "@/platform/workspaces/workspace-paths";
 import { ContentPendingSkeleton } from "@/routes/route-feedback";
+import { BatchDeleteDialog } from "../bulk-delete/batch-delete-dialog";
 import { AccessPanel } from "./access-panel";
 import { BatchRenamePopover } from "./batch-rename-popover";
 import { CellEditorPopover } from "./cell-editor-popover";
@@ -25,7 +27,7 @@ import { ReuseDialog } from "../reuse/reuse-dialog";
 import { exportSheets, overviewFileName, scheduleSheet } from "@/features/teaching-calendar/domain/schedule-excel";
 import { ScheduleGrid } from "./schedule-grid";
 import { ScheduleHeader } from "./schedule-header";
-import { ScheduleInfoBar, weeksBetween } from "./schedule-info-bar";
+import { RepeatSummaryLine, ScheduleInfoBar, weeksBetween } from "./schedule-info-bar";
 import { STALE_VERSION_MESSAGE, useRenameBatch } from "./use-rename-batch";
 import { useGridKeyboard } from "./use-grid-keyboard";
 import { parseGridPaste } from "./use-grid-paste";
@@ -47,6 +49,7 @@ export function SchedulePage() {
   const [confirmPublish, setConfirmPublish] = useState(false);
   const [pendingSchool, setPendingSchool] = useState<string | null>(null);
   const [reuseOpen, setReuseOpen] = useState(false);
+  const [deleteBatch, setDeleteBatch] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
   const clipboard = useRef<GridRow | null>(null);
@@ -142,6 +145,7 @@ export function SchedulePage() {
     <Stack spacing={1.75} sx={{ px: { xs: 2, md: 3 }, py: 2.5 }}>
       <ScheduleHeader
         batchLabel={draft.batchLabel} batchStatus={batchStatus} errorCount={errors}
+        onDeleteBatch={meta.batchId && batchStatus !== "CANCELLED" ? () => setDeleteBatch(true) : undefined}
         onExport={() => void exportSheets(() => [scheduleSheet({ rows, schoolName: school?.schoolName ?? "", template, weekStart })], overviewFileName(weekStart))} onPublish={() => setConfirmPublish(true)}
         onRename={setRenameAnchor} onReusePrevious={meta.schoolId ? () => setReuseOpen(true) : undefined} onRetry={() => void draft.flush().then((saved) => { if (saved) setPublishError(null); })} publishing={publishing} rowCount={rows.length}
         savedAt={draft.savedAt} schoolName={school?.schoolName ?? ""} status={draft.status} templateName={template.name}
@@ -155,6 +159,7 @@ export function SchedulePage() {
         onSchoolChange={(id) => (rows.length ? setPendingSchool(id) : draft.setMeta({ schoolId: id }))}
         programs={programs} schools={schools.map((item) => ({ id: item.schoolId, label: item.schoolName }))} templates={templates}
       />
+      <RepeatSummaryLine applyFrom={meta.applyFrom} perWeek={rows.length} repeatUntil={meta.repeatUntil} />
       <Box sx={{ alignItems: "flex-start", display: "grid", gap: 2, gridTemplateColumns: { lg: "minmax(0, 1fr) 360px", xs: "1fr" } }}>
         <Box onPaste={onPaste}>
           <ScheduleGrid
@@ -183,10 +188,11 @@ export function SchedulePage() {
         onChange={rename.clearError} onSave={(label) => rename.rename(label, () => setRenameAnchor(null))} pending={rename.pending}
       />
       <ErgConfirmDialog
-        confirmLabel="Áp dụng và gửi" description={`${draft.accessChanges.length} giáo viên · ${draft.accessChanges.reduce((sum, item) => sum + item.classes.filter((c) => c.state === "NEW").length, 0)} lớp mới · ${draft.accessChanges.reduce((sum, item) => sum + item.classes.filter((c) => c.state === "REVOKE").length, 0)} thu hồi`}
+        confirmLabel="Áp dụng và gửi" description={`Lặp ${Math.max(weeks, 1)} tuần, từ ${formatDateVi(meta.applyFrom)} đến ${formatDateVi(addDaysToDate(meta.applyFrom, Math.max(weeks, 1) * 7 - 1))}. Thông báo gửi cho ${draft.accessChanges.length} giáo viên · ${draft.accessChanges.reduce((sum, item) => sum + item.classes.filter((c) => c.state === "NEW").length, 0)} lớp mới · ${draft.accessChanges.reduce((sum, item) => sum + item.classes.filter((c) => c.state === "REVOKE").length, 0)} thu hồi`}
         onCancel={() => setConfirmPublish(false)} onConfirm={() => void publish()} open={confirmPublish}
         title={`Áp dụng ${rows.length * Math.max(weeks, 1)} tiết và thông báo cho giáo viên?`}
       />
+      <BatchDeleteDialog batchId={deleteBatch ? meta.batchId ?? null : null} onClose={() => setDeleteBatch(false)} onDone={() => void navigate({ href: adminPath("/calendar") })} />
       <ErgConfirmDialog
         confirmLabel="Đổi trường" description={`Đổi trường sẽ xoá ${rows.length} tiết nháp đang xếp.`} destructive
         onCancel={() => setPendingSchool(null)}

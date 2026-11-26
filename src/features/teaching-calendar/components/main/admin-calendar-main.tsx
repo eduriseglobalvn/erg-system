@@ -20,6 +20,7 @@ import { todayInput } from "@/domain/formatters/format-date";
 import { getDefaultTenantId } from "@/lib/graphql-client";
 import { adminPath } from "@/platform/workspaces/workspace-paths";
 import { ContentPendingSkeleton } from "@/routes/route-feedback";
+import { RangeDeleteDialog } from "../bulk-delete/range-delete-dialog";
 import { AdminMobileDay } from "../mobile/admin-mobile-day";
 import { scheduleTokens } from "../shared/schedule-cell-sx";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
@@ -64,6 +65,7 @@ function AdminCalendarDesktop() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [reuseOpen, setReuseOpen] = useState(false);
+  const [rangeOpen, setRangeOpen] = useState(false);
   const [reuseSchool, setReuseSchool] = useState("");
   const [selected, setSelected] = useState<{ anchor: HTMLElement; event: TeachingCalendarEvent } | null>(null);
   const deleteEvent = useMutation({
@@ -105,6 +107,7 @@ function AdminCalendarDesktop() {
             {MODES.map((mode) => <Tab key={mode.value} label={mode.label} value={mode.value} />)}
           </Tabs>
           <DaysOffLink />
+          {main.canDelete ? <ErgButton color="error" onClick={() => setRangeOpen(true)} sx={controlSx} variant="text">Xoá theo khoảng…</ErgButton> : null}
           <ErgButton disabled={!reuseSchoolId} onClick={() => setReuseOpen(true)} sx={controlSx} variant="outlined">Dùng lại tuần này…</ErgButton>
           <ErgButton onClick={() => go("/calendar/schedule")} sx={{ ...controlSx, px: 2, typography: "button" }} variant="contained">+ Xếp lịch</ErgButton>
         </Stack>
@@ -135,6 +138,12 @@ function AdminCalendarDesktop() {
       </Stack>
       <ReuseDialog onClose={() => setReuseOpen(false)} onSchoolChange={setReuseSchool} open={reuseOpen} schoolId={reuseSchoolId} schools={reuseSchools} weekStart={main.weekStart} />
       {slotDialogs.element}
+      {rangeOpen ? (
+        <RangeDeleteDialog
+          defaultFrom={main.weekStart} defaultTo={sundayDate} onClose={() => setRangeOpen(false)} open
+          schools={main.schoolOptions.map((school) => ({ id: school.schoolId, label: school.schoolName }))} teachers={main.teacherCounts.map((teacher) => ({ id: teacher.id, label: teacher.name }))}
+        />
+      ) : null}
       <EventPopover
         anchorEl={selected?.anchor ?? null} canDelete={main.canDelete} conflicts={main.conflicts} event={selected?.event ?? null}
         onClose={() => setSelected(null)} onDelete={(event) => deleteEvent.mutateAsync(event).then(() => undefined)} onOpenSchedule={openSchedule}

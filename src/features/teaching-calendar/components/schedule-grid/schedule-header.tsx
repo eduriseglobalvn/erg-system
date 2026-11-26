@@ -19,6 +19,8 @@ type Props = {
   errorCount: number;
   /** «Xuất Excel theo mẫu»: undefined = ẩn. */
   onExport?: () => void;
+  /** «Xoá cả đợt…»: undefined = ẩn. */
+  onDeleteBatch?: () => void;
   onPublish: () => void;
   /** «Dùng lại tuần trước»: mo dialog dung lai lich tuan truoc; undefined = an. */
   onReusePrevious?: () => void;
@@ -45,7 +47,7 @@ function saveText(status: DraftStatus, savedAt: string | null, onRetry: () => vo
 }
 
 /** Dau trang «Thời khóa biểu · <trường>»: ten dot (doi ten duoc), trang thai, trang thai luu, nut xuat ban (contained duy nhat). */
-export function ScheduleHeader({ batchLabel, batchStatus, errorCount, onExport, onPublish, onRename, onReusePrevious, onRetry, publishing, rowCount, savedAt, schoolName, status, templateName }: Props) {
+export function ScheduleHeader({ batchLabel, batchStatus, errorCount, onDeleteBatch, onExport, onPublish, onRename, onReusePrevious, onRetry, publishing, rowCount, savedAt, schoolName, status, templateName }: Props) {
   const blocked = errorCount > 0;
   const disabled = blocked || rowCount === 0 || batchStatus !== "DRAFT" || status !== "idle";
   const { color, type, radius } = ergEnterpriseTokens;
@@ -80,6 +82,7 @@ export function ScheduleHeader({ batchLabel, batchStatus, errorCount, onExport, 
       </Box>
       <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
         <Typography aria-live="polite" sx={{ color: status === "error" || status === "needsSubject" ? "error.main" : color.textMuted, mr: 0.75, ...type.note }}>{saveText(status, savedAt, onRetry, batchStatus === "DRAFT")}</Typography>
+        {onDeleteBatch ? <ErgButton color="error" onClick={onDeleteBatch} sx={{ ...buttonSx(radius.control), px: 1.25 }} variant="text">Xoá cả đợt…</ErgButton> : null}
         {onReusePrevious ? <ErgButton onClick={onReusePrevious} sx={buttonSx(radius.control)} variant="outlined">Dùng lại tuần trước</ErgButton> : null}
         {onExport ? <ErgButton onClick={onExport} sx={{ ...buttonSx(radius.control), px: 1.25 }} variant="text">Xuất Excel theo mẫu</ErgButton> : null}
         <Tooltip title={blocked ? `Còn ${errorCount} xung đột cần xử lý` : ""}>
